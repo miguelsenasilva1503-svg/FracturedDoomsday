@@ -2156,7 +2156,7 @@ Baixinho, barulhento e impossível de ignorar, Pow entra nas batalhas com energi
 Especialista em caos absoluto, Grenade dispara projéteis em todas as direções, transformando qualquer luta numa verdadeira zona de perigo. Ficar perto dele é basicamente aceitar o próprio destino.
 
 “Ops… acho que explodi coisa demais de novo!”` },
-    hunter: { id: 'hunter', class: 'Destruidor', name: 'Hunter', rarity: 'rare', cost: 79, hp: 100, speed: 3.2, dmg: 13, fireRate: 60, range: 300, color: '#8b4513', weapon: 'hunter_shotgun', desc: `“Hunter passa tanto tempo caçando que às vezes esquece que está num jogo e não numa floresta.”
+    hunter: { id: 'hunter', class: 'Destruidor', name: 'Hunter', rarity: 'rare', cost: 79, hp: 100, speed: 3.2, dmg: 11, fireRate: 60, range: 300, color: '#8b4513', weapon: 'hunter_shotgun', desc: `“Hunter passa tanto tempo caçando que às vezes esquece que está num jogo e não numa floresta.”
 
 Armado com uma poderosa espingarda, Hunter agora alcança inimigos muito mais longe e mantém a pressão mesmo fora do curto alcance. Ele ainda é paciente, preciso e assustadoramente silencioso… até errar um tiro e reclamar da mira por cinco minutos.
 
@@ -2166,6 +2166,11 @@ Armado com uma poderosa espingarda, Hunter agora alcança inimigos muito mais lo
 Uma arqueira elegante e mortal que elimina inimigos com flechas precisas. Vesper prefere distância, calma e precisão — porque chegar perto de explosões e malucos armados claramente não vale a pena.
 
 “Respire… mire… acabou.”` },
+    sparta: { id: 'sparta', class: 'Tanque', name: 'Sparta', rarity: 'epic', cost: 149, hp: 145, speed: 3.1, dmg: 19, fireRate: 50, range: 255, color: '#c0392b', weapon: 'sparta', sortLast: true, desc: `“Sparta acredita que um bom escudo vale mais do que cem espadas. Até hoje, ninguém conseguiu atravessar essa teoria.”
+
+Uma guerreira implacável que transformou seu escudo em uma arma tão poderosa quanto uma muralha. Sempre acompanhada por leões ferozes, Sparta avança sem medo para proteger seus aliados e esmagar qualquer um que ouse cruzar seu caminho. Para ela, a melhor defesa sempre foi um ataque bem calculado.
+
+“Fiquem atrás de mim... ou do meu escudo.”` },
     shiv: { id: 'shiv', class: 'Algoz', name: 'Shiv', rarity: 'rare', cost: 79, hp: 75, speed: 4.5, dmg: 18, fireRate: 35, range: 200, color: '#34495e', weapon: 'shiv', desc: `“Shiv é uma lontra ninja falante. Ninji ainda tenta fingir que isso é completamente normal.”
 
 Pequeno, rápido e absurdamente imprevisível, Shiv mistura técnicas ninjas com puro caos animal. Como aprendiz oficial de Ninji, ele tenta copiar os ataques do mestre… mas normalmente acaba improvisando no meio da luta. Às vezes surgem adagas velozes, às vezes estrelas cortantes atravessam tudo no caminho. Nem os inimigos conseguem prever o que ele vai fazer. Nem ele.
@@ -2176,6 +2181,16 @@ Pequeno, rápido e absurdamente imprevisível, Shiv mistura técnicas ninjas com
 Um robô extremamente danificado que continua funcionando apesar de todas as probabilidades. Com peças enferrujadas, circuitos expostos e uma quantidade preocupante de gambiarra, Critik dispara parafusos contra seus inimigos enquanto prova que sucata também pode ser perigosa. Cada barulho estranho vindo dele sugere uma falha iminente... mas ele nunca parece quebrar de vez.
 
 “...SISTEMA FUNCIONAL. PROVAVELMENTE.”` },
+    pit: { id: 'pit', class: 'Tiro preciso', name: 'Pit', rarity: 'rare', cost: 79, hp: 105, speed: 3.3, dmg: 14, fireRate: 50, range: 275, color: '#8b5a2b', emoji: '🏴‍☠️', weapon: 'pit_musket', desc: `“Pit entrou para a pirataria atrás de tesouros. Descobriu que causar confusão era muito mais divertido.”
+
+Um pirata aventureiro equipado com um velho mosquete que nunca sai do seu lado. Carismático, ousado e sempre pronto para uma briga, Pit encara qualquer batalha como se fosse mais uma história para contar na taverna. Dizem que ele nunca recusa um mapa do tesouro... mesmo quando foi desenhado em um guardanapo.
+
+“Rumo ao próximo saque, marujos!”` },
+    ruben: { id: 'ruben', class: 'Destruidor', name: 'Rüben', rarity: 'rare', cost: 79, hp: 100, speed: 3.2, dmg: 15, fireRate: 52, range: 235, color: '#f39c12', emoji: '🥖', weapon: 'ruben_baguette', desc: `“Rüben sonhava em ser o maior padeiro da França. Seus clientes sonham que ele feche a padaria.”
+
+Um padeiro francês incrivelmente desastrado que, por algum milagre, ainda insiste em cozinhar. Entre receitas queimadas, baguetes duras como concreto e doces de aparência duvidosa, Rüben já foi xingado por praticamente toda a vizinhança. Ainda assim, ele continua sorrindo, convencido de que a próxima fornada finalmente dará certo.
+
+“Não vá, por favor!! Essa ficou boa!”` },
     tenent: { id: 'tenent', class: 'Tiro preciso', name: 'Tenent', rarity: 'epic', cost: 149, hp: 110, speed: 3.5, dmg: 16, fireRate: 65, range: 420, color: '#192a56', weapon: 'triple', desc: `“Tenent leva disciplina militar muito a sério. O problema é que ele fica ainda mais perigoso quando perde a paciência.”
 
 Um soldado experiente que adapta seu equipamento durante o combate, aumentando a pressão sobre qualquer inimigo imprudente o suficiente pra enfrentá-lo. Tenent mantém postura calma e estratégica… até a batalha começar a sair do controle.
@@ -2272,11 +2287,16 @@ Um ninja extremamente ágil que domina o combate com velocidade, precisão e mov
 Um aventureiro lendário guiado por um espírito livre e um coração ardente. A chama que habita seu sangue lhe concede poderes extraordinários, permitindo que ele atravesse o mundo levando esperança aos oprimidos e caos aos tiranos. Por onde passa, correntes são quebradas, muralhas caem e histórias de liberdade surgem para inspirar a próxima geração.
 
 “Uma chama não pode ser aprisionada.”` },
-    elektro: { id: 'elektro', class: 'Controle', name: 'Elektro', rarity: 'legendary', cost: 349, hp: 100, speed: 3.5, dmg: 26, fireRate: 70, range: 200, color: '#0984e3', weapon: 'lightning', desc: `“Elektro criou um cajado elétrico genial. O pequeno detalhe é que ele explode às vezes.”
+    elektro: { id: 'elektro', class: 'Controle', name: 'Elektro', rarity: 'legendary', cost: 349, hp: 100, speed: 3.5, dmg: 26, fireRate: 70, range: 200, color: '#0984e3', weapon: 'lightning', desc: `“Elektro tem absoluta certeza de que nasceu para ser um poderoso mago elétrico. O fato de trabalhar como eletricista durante o dia não mudou essa ideia.”
 
-Um inventor brilhante que controla eletricidade através de uma arma tecnológica capaz de invocar raios devastadores. Elektro vive mexendo em suas próprias invenções sem nenhuma preocupação com segurança.
+Convencido de que vive em uma épica aventura medieval, Elektro empunha seu cajado como um verdadeiro arquimago, lançando raios sobre seus inimigos e anunciando feitiços com a maior seriedade do mundo. Fora dessa "aventura", ele exerce seu segundo emprego como eletricista... embora insista em chamar os reparos de "encantamentos elétricos".
 
-“Se isso funcionar, vai ser INCRÍVEL!”` },
+“Pela magia dos trovões!... Quer dizer, pela rede elétrica!”` },
+    ivy: { id: 'ivy', class: 'Controle', name: 'Ivy', rarity: 'legendary', cost: 349, hp: 95, speed: 3.45, dmg: 16, fireRate: 68, range: 245, color: '#2ecc71', weapon: 'ivy_seed', desc: `“Ivy ama plantas, natureza… e fazer inimigos descobrirem que raízes podem ser perigosas.”
+
+Uma guardiã da natureza que controla trepadeiras para prender e imobilizar seus adversários. Ivy transforma o campo de batalha em seu próprio jardim, usando seus poderes naturais para limitar os movimentos dos inimigos e controlar o ritmo da luta. Silenciosa e determinada, ela mostra que a natureza sempre encontra um jeito de dominar.
+
+“Você pode correr... mas as raízes chegam primeiro.”` },
     gladiator: { id: 'gladiator', class: 'Algoz', name: 'Gladiator', rarity: 'legendary', cost: 349, hp: 120, speed: 3.8, dmg: 20, fireRate: 60, range: 180, color: '#f39c12', weapon: 'wild', desc: `“Gladiator nunca consegue decidir entre duelo com espadas ou atacar à distância com lanças. Desde então, continua indeciso.”
 
 Um guerreiro versátil que alterna entre combate corpo a corpo e ataques à distância com facilidade impressionante. Seja com espada ou lança, Gladiator sempre luta como se estivesse numa arena lotada.
@@ -2363,11 +2383,26 @@ Um engenheiro eletricista brilhante que adora criar invenções tão úteis quan
 Curioso, inteligente e cheio de energia, Axel cresceu cercado por invenções malucas e acabou se acostumando com elas. Seu inseparável drone o acompanha para todo lado, monitorando seus movimentos e garantindo que ele esteja sempre seguro... ou pelo menos tentando. Afinal, com pais como Flex e Meekah, até um simples sistema de proteção acaba vindo equipado para combate.
 
 “Meu drone disse que eu tô ganhando!”` },
+    adam: { id: 'adam', class: 'Inventor', name: 'Adam', rarity: 'epic', cost: 149, hp: 118, speed: 3.3, dmg: 17, fireRate: 55, range: 260, color: '#95a5a6', emoji: '🤖', weapon: 'adam', desc: `“Adam é um daqueles nerds irritantes, sabe? O diferencial é que ele é mais ainda.”
+
+Um inventor brilhante que pilota seu próprio Mech, uma máquina de combate construída por ele mesmo. Enquanto dispara bolas de metal contra os inimigos, Adam mostra que inteligência e engenharia podem ser tão perigosas quanto qualquer arma. Se existe um jeito mais complicado de vencer uma batalha, ele certamente vai encontrá-lo.
+
+“Eu sabia que isso ia funcionar!”` },
     major_briggs: { id: 'major_briggs', class: 'Tiro preciso', name: 'Major Briggs', rarity: 'legendary', cost: 349, hp: 118, speed: 3.25, dmg: 18, fireRate: 62, range: 260, color: '#6a7d3b', weapon: 'major_briggs', desc: `“Major Briggs já sobreviveu a guerras, invasões, missões impossíveis e incontáveis relatórios. Os relatórios foram a pior parte.”
 
 Um veterano lendário da Frota 001, conhecido tanto por sua experiência em combate quanto por seu senso de humor questionável. Briggs encara situações perigosas com um sorriso sarcástico no rosto e uma piada pronta na ponta da língua. Fora das batalhas, sua maior obsessão é colecionar armas de todos os tipos, o que explica por que seus aposentos parecem mais um arsenal do que uma casa.
 
 “Tenho uma arma perfeita pra isso. Na verdade, tenho umas cinquenta.”` },
+    ignite: { id: 'ignite', class: 'Destruidor', name: 'Ignite', rarity: 'legendary', cost: 349, hp: 160, speed: 2.9, dmg: 18, fireRate: 92, range: 280, color: '#e67e22', emoji: '🌋', weapon: 'ignite', sortLast: true, desc: `“Ignite não sabe exatamente o que é calma. Afinal, magma nunca foi conhecido por isso.”
+
+Uma criatura colossal nascida das profundezas vulcânicas, formada por rochas incandescentes e rios de magma. Cada passo seu faz o chão tremer, enquanto seu corpo irradia um calor sufocante capaz de transformar qualquer batalha em um verdadeiro inferno. Mesmo sem dizer uma palavra, sua presença já é suficiente para intimidar qualquer adversário.
+
+“RRRAAAAGH!”` },
+    yuuto: { id: 'yuuto', class: 'Tiro preciso', name: 'Yuuto', rarity: 'legendary', cost: 349, hp: 100, speed: 3.4, dmg: 15, fireRate: 58, range: 310, color: '#ff6bb5', emoji: '🎤', weapon: 'yuuto_hearts', sortLast: true, desc: `“Yuuto tem milhões de fãs... e a maioria delas grita tão alto que ninguém consegue ouvir a música começar.”
+
+Um astro do J-pop conhecido por seu enorme carisma e apresentações impecáveis. Idolatrado por uma legião de garotas, Yuuto faz de cada show um espetáculo. Apesar da imagem sempre educada e elegante, existe um assunto que consegue tirar sua paciência: certos cantores de hip hop - coff coff... Ripper... coff coff... - embora ele jure que não é nada pessoal.
+
+“J-pop sempre vence... sem ofensas.”` },
 };
 const CHARACTER_SUMMARIES = {
     ripper: `Ripper: dispara MICROFONES que mudam de efeito conforme a cor.
@@ -2379,6 +2414,15 @@ ROXO: empurra inimigos.
 
 ESPECIAL: MICROFONES têm 15% de chance de, ao colidirem com inimigos, criarem uma onda sonora que empurra inimigos.
 ESPECIAL: começa as partidas com uma caixa de som exclusiva que dispara ondas sonoras e se reposiciona a cada 2 waves.`,
+    adam: `Adam: dispara uma bola de metal que pode empurrar inimigos.
+
+ESPECIAL: ao derrotar um inimigo, ele tem 25% de chance de gerar uma sucata. Ao coletar 8 sucatas, ele se transforma no Mech, ganha mais HP, fica maior e seu ataque vira bolas de energia perfurantes. O Mech dura 5 waves.`,
+    pit: `Pit: dispara uma bala com seu mosquete.
+
+ESPECIAL: seus projéteis têm 20% de chance de empurrar inimigos. Se isso acontecer, a bala também explode em área e ativa uma explosão curta em 45° à frente do Pit.`,
+    ruben: `Rüben: dispara uma baguette que PERFURA apenas 1 inimigo e, ao PERFURAR, se divide ao meio e segue para o próximo inimigo sem perfuração.
+
+ESPECIAL: tem 15% de chance de disparar uma baguette queimada que não perfura nem divide, mas ao atingir o inimigo o empurra e QUEIMA.`,
     major_briggs: `Major Briggs: dispara 1 projétil pra frente, mas evolui a arma conforme elimina inimigos no mesmo run.
 
 1: 1 tiro pra frente.
@@ -2387,6 +2431,14 @@ ESPECIAL: começa as partidas com uma caixa de som exclusiva que dispara ondas s
 4: 5 tiros com baixa dispersão.
 5: 1 tiro heavy no centro e 2 tiros nas laterais com baixa dispersão.
 6: 3 lasers com baixa dispersão.`,
+    ignite: `Ignite: causa três explosões em cadeia, uma maior que a outra, quanto maior, mais dano.
+
+ESPECIAL: sua última explosão cria rachaduras de magma, inimigos que pisam nela recebem dano.
+
+`,
+    yuuto: `Yuuto: dispara um coração que tem 15% de chance de PERFURAR e 15% de chance de HIPNOTIZAR inimigos.
+
+ESPECIAL: HIPNOTIZAR faz o inimigo atacar outros inimigos por 10s (não funciona em colossos, bosses e mega bosses).`,
     graffit: `Graffit: dispara uma lata de spray que, ao atingir um inimigo, dispersa spray de tinta em 360° e ENVENENANDO os inimigos atingidos pela fumaça.
 
 ESPECIAL: ao derrotar um inimigo, deixa uma marca de grafite no chão. Cada cor de marca dá um efeito diferente quando Graffit fica em cima dela.
@@ -2419,6 +2471,13 @@ ESPECIAL: quanto mais dano toma, mais rápido ele atira.`,
     grenade: `Grenade: dispara um grande projétil, que, ao atingir um inimigo, se dispersa em 8 menores.`,
     hunter: `Hunter: dispara vários projéteis em uma área cônica curta.`,
     vesper: `Vesper: dispara flechas com 10% de chance de causar DANO CRÍTICO e 10% de chance de PERFURAR.`,
+    sparta: `Sparta: alterna entre 2 ataques.
+
+Primeiro ataque: área reta, mais longa e em formato quadrado.
+Segundo ataque: área de 100°.
+
+ESPECIAL: se ficar 10s sem tomar dano, ganha um escudo que reduz 40% do dano recebido.
+ESPECIAL: ao fim de cada wave, invoca um leão temporário.`,
     shiv: `Shiv: é menor que os outros personagens em tamanho, é rápido, dispara facas improvisadas nos inimigos.
 
 ESPECIAL: nativamente tem 15% de chance de ESQUIVAR.`,
@@ -2483,6 +2542,13 @@ ESPECIAL: nativamente tem 15% de chance de ESQUIVAR.`,
     elektro: `Elektro: alterna entre 2 tipos de ataques.
 Ataque 1: invoca um RAIO que causa dano em área
 Ataque 2: dispara um projétil elétrico que tem 15% de chance de aplicar CHOCADO.`,
+    ivy: `Ivy: dispara uma semente que tem 20% de chance de criar uma TREPADEIRA menor.
+A trepadeira puxa inimigos para dentro dela, deixando-os MUITO lentos.
+Quando uma nova trepadeira surge, a anterior desaparece e causa dano igual a 60% do HP do inimigo mais forte preso.
+
+ESPECIAL: começa a partida com uma flor com área maior e visível.
+ESPECIAL: quando está perto da flor, Ivy se cura.
+ESPECIAL: a flor usa 3 ESPECIAIS ao invés de 1 só e é reposicionada a cada 3 waves.`,
     gladiator: { shooter: `Gladiator (lanceiro): dispara uma lança que perfura inimigos, a cada perfuração, o dano diminui`, cleave: `Gladiator (espadachim): ataca com uma espada em uma área de 180°` },
     booboo: `Boo Boo: dispara um bumerangue PERFURANTE que vai e volta pra Boo Boo.`,
     scythe: `Scythe: a cada 3 ataques, um é em 360° e os outros dois são em uma área de 180°.
@@ -3244,6 +3310,9 @@ const SUMMARY_NOTES = {
     "VAMPIRISMO": { color: "#8b0000", title: "VAMPIRISMO", msg: "Quer dizer que parte do dano vira cura." },
     "ENFRAQUECE": { color: "#f5b7b1", title: "ENFRAQUECER", msg: "Quer dizer que o alvo fica mais fraco." },
     "ENFRAQUECER": { color: "#f5b7b1", title: "ENFRAQUECER", msg: "Quer dizer que o alvo fica mais fraco." },
+    "HIPNOTIZAR": { color: "#ff6bb5", title: "HIPNOTIZAR", msg: "Quer dizer que o inimigo fica sob controle por 10s e passa a atacar outros inimigos. Não funciona em colossos, bosses e mega bosses." },
+    "HIPNOTIZADO": { color: "#ff6bb5", title: "HIPNOTIZAR", msg: "Quer dizer que o inimigo fica sob controle por 10s e passa a atacar outros inimigos. Não funciona em colossos, bosses e mega bosses." },
+    "HIPNOTIZADOS": { color: "#ff6bb5", title: "HIPNOTIZAR", msg: "Quer dizer que o inimigo fica sob controle por 10s e passa a atacar outros inimigos. Não funciona em colossos, bosses e mega bosses." },
     "QUEIMAR": { color: "#e67e22", title: "QUEIMAR", msg: "Quer dizer que o inimigo passa a tomar dano com o tempo." },
     "QUEIMAM": { color: "#e67e22", title: "QUEIMAR", msg: "Quer dizer que o inimigo passa a tomar dano com o tempo." },
     "CHOCADO": { color: "#3ec7ff", title: "CHOCADO", msg: "Quer dizer que o inimigo sofre micro-stuns elétricos repetidos e toma dano a cada pulso." },
@@ -3291,7 +3360,13 @@ const CHARACTER_TITLES = {
     tenent: 'General',
     healy: 'Hora da vacina',
     rex: 'Parei família, é máfia!',
+    adam: 'Irritante',
+    ivy: 'Cultivando um jardim',
+    ignite: 'Erupção Vulcância',
+    pit: 'Caça ao tesouro',
+    ruben: 'Desastre na cozinha',
     major_briggs: 'Colecionador nato',
+    yuuto: 'Cantor de J-Pop',
     graffit: 'Vândalo',
     necro: 'Necromancia',
     goo: 'Gosmento',
@@ -3312,6 +3387,7 @@ const CHARACTER_TITLES = {
     firey: 'Liberdade flamejante',
     elektro: 'Um raio não cai duas vezez',
     gladiator: 'Campeão da arena',
+    sparta: 'Duelo Justo',
     booboo: 'Vai e volta',
     scythe: 'Ceifador',
     buster: 'Foguetão',
@@ -3327,6 +3403,13 @@ const CHARACTER_TITLES = {
     yeti: 'Avalanche',
     echo: 'Abridor de fraturas'
 };
+
+function getCharacterRaritySortValue(c) {
+    const rarityOrder = { common: 1, rare: 2, epic: 3, legendary: 4, mythic: 5 };
+    const base = rarityOrder[c?.rarity] || 99;
+    return base + (c?.sortLast ? 0.9 : 0);
+}
+
 
 const CHARACTER_SPRITES = {
     strike: 'sprites/strike.png',
@@ -3395,7 +3478,7 @@ function drawCharacterSprite(cCtx, x, y, size, spriteId, opts = {}) {
     return true;
 }
 
-const CHARACTER_TITLE_THRESHOLD = 275;
+const CHARACTER_TITLE_THRESHOLD = 100;
 
 const _htmlDecodeEl = document.createElement('textarea');
 
@@ -3601,6 +3684,40 @@ function syncCharacterProgressState() {
     for (const id of Object.keys(pd.chars || {})) ensureCharacterProgress(id);
 }
 
+function activateAdamMech() {
+    if (pd.selectedChar !== 'adam' || !player || player.adamMechWavesLeft > 0) return;
+    player.adamMechActive = true;
+    player.adamMechWavesLeft = 5;
+    player.adamScrap = 0;
+    player.adamBaseHpBeforeMech = player.baseHp;
+    player.adamBaseRBeforeMech = player.r;
+    player.adamMechHpBonus = 70;
+    player.adamMechSizeBonus = 7;
+    player.baseHp += player.adamMechHpBonus;
+    player.hp = Math.min(player.baseHp * player.stats.maxHpMult, player.hp + player.adamMechHpBonus);
+    player.r += player.adamMechSizeBonus;
+    player.weapon = 'adam_mech';
+    notify('Adam ativou o Mech!');
+}
+
+function deactivateAdamMech() {
+    if (!player || !player.adamMechActive) return;
+    const hpBonus = Number(player.adamMechHpBonus) || 0;
+    const sizeBonus = Number(player.adamMechSizeBonus) || 0;
+    if (Number.isFinite(player.adamBaseHpBeforeMech)) player.baseHp = player.adamBaseHpBeforeMech;
+    else player.baseHp = Math.max(1, player.baseHp - hpBonus);
+    if (Number.isFinite(player.adamBaseRBeforeMech)) player.r = player.adamBaseRBeforeMech;
+    else player.r = Math.max(10, player.r - sizeBonus);
+    player.hp = Math.min(player.hp, player.baseHp * player.stats.maxHpMult);
+    player.adamMechActive = false;
+    player.adamMechWavesLeft = 0;
+    player.adamMechHpBonus = 0;
+    player.adamMechSizeBonus = 0;
+    player.adamBaseHpBeforeMech = null;
+    player.adamBaseRBeforeMech = null;
+    player.weapon = 'adam';
+}
+
 function getTitleLabel(charId) {
     return CHARACTER_TITLES[charId] || '';
 }
@@ -3652,7 +3769,7 @@ function renderTitlePicker() {
     if (!unlocked.length) {
         const empty = document.createElement('div');
         empty.style.cssText = 'color:#ccc; text-align:center; padding:16px; grid-column:1 / -1;';
-        empty.innerHTML = 'Você ainda não desbloqueou nenhum título. Cada um aparece ao chegar em 275 medalhas com o personagem correspondente.';
+        empty.innerHTML = 'Você ainda não desbloqueou nenhum título. Cada um aparece ao chegar em 100 medalhas com o personagem correspondente.';
         list.appendChild(empty);
         return;
     }
@@ -3846,7 +3963,7 @@ function renderProfile() {
     const profileScore = document.getElementById('profile-best-score');
     if (profileScore) profileScore.textContent = bestScore;
 
-    titleList.innerHTML = cards || '<div class="profile-empty">Nenhum título desbloqueado ainda. Cada título exige 275 medalhas no personagem correspondente.</div>';
+    titleList.innerHTML = cards || '<div class="profile-empty">Nenhum título desbloqueado ainda. Cada título exige 100 medalhas no personagem correspondente.</div>';
 }
 
 function openProfile() {
@@ -5102,8 +5219,8 @@ let sort = document.getElementById('char-filter-sort') ? document.getElementById
         const bLvl = bOwned ? Math.max(1, Math.min(8, pd.chars[b.id].level || 1)) : 0;
 
         if (sort === 'alpha') return a.name.localeCompare(b.name);
-        if (sort === 'rarity_asc') return rValue[a.rarity] - rValue[b.rarity];
-        if (sort === 'rarity_desc') return rValue[b.rarity] - rValue[a.rarity];
+        if (sort === 'rarity_asc') return getCharacterRaritySortValue(a) - getCharacterRaritySortValue(b);
+        if (sort === 'rarity_desc') return getCharacterRaritySortValue(b) - getCharacterRaritySortValue(a);
 
         const ownedDiff = Number(bOwned) - Number(aOwned);
         if (ownedDiff !== 0) return ownedDiff;
@@ -5656,7 +5773,7 @@ function renderShop() {
         const shopChars = Object.values(CHARACTERS)
             .filter(c => !pd.chars[c.id])
             .sort((a, b) => {
-                const rDiff = rarityOrder[a.rarity] - rarityOrder[b.rarity];
+                const rDiff = getCharacterRaritySortValue(a) - getCharacterRaritySortValue(b);
                 if (rDiff !== 0) return rDiff;
                 const specialA = (a.id === 'zippi' || a.id === 'eel') ? 1 : 0;
                 const specialB = (b.id === 'zippi' || b.id === 'eel') ? 1 : 0;
@@ -6293,9 +6410,9 @@ function getCharacterCardEmoji(char) {
         sword: '🗡️', power_shot: '👊', grenade_gun: '🧨', hunter_shotgun: '🎯', arrow: '🏹',
         shiv: '🗡️', screws: '🔩', triple: '🔫', syringe: '💉', sniper: '🔭', stones: '🪨',
         aura: '⛏️', slime: '🟢', chain_lightning: '⚡', wrench: '🔧', note: '🎵', energy_wave: '👻',
-        dark: '🌑', boomerang: '🪃', fan: '🌀', remote: '🎮', fire: '🔥', axe: '🪓',
+        dark: '🌑', boomerang: '🪃', fan: '🌀', remote: '🎮', fire: '🔥', axe: '🪓', pit_musket: '🔫', ruben_baguette: '🥖', ruben_baguette_burnt: '🥖',
         katana: '⚔️', flowers: '🌸', shield: '🛡️', drill: '🪛', cannon: '🛰️', shotgun: '💥',
-        garlic: '🧄', star: '⭐', orb: '🪐', radio: '📻', claws: '🦈', ghost: '👻', wind: '🌪️', flame_cone: '🔥', water_bubble: '💧', puddle: '💧', zippi_laser: '👽', eel_lash: '⚡', flex_hammer: '🔨', kaisen_tool: '🪨'
+        garlic: '🧄', star: '⭐', orb: '🪐', radio: '📻', claws: '🦈', ghost: '👻', wind: '🌪️', flame_cone: '🔥', water_bubble: '💧', puddle: '💧', zippi_laser: '👽', eel_lash: '⚡', flex_hammer: '🔨', ivy_seed: '🌿', kaisen_tool: '🪨'
     };
     return byWeapon[char.weapon] || '✨';
 }
@@ -6632,7 +6749,108 @@ function dealPlayerDamage(amount, opts = {}) {
         }
     }
 
-    if (dmg > 0) player.hp -= dmg;
+    if (isSpartaCharacter() && player.spartaShieldActive) {
+        // O escudo da Sparta reduz 40% de TODO dano que entrar por este helper.
+        // Isso garante que qualquer fonte de dano que use dealPlayerDamage
+        // respeite a mitigação antes de aplicar a vida.
+        dmg = Math.max(0, dmg * 0.6);
+    }
+
+    if (dmg > 0) {
+        player.hp -= dmg;
+        if (isSpartaCharacter()) {
+            player.spartaShieldActive = false;
+            player.spartaNoDamageTimer = 0;
+        }
+    }
+}
+
+function isSpartaCharacter() {
+    return pd && pd.selectedChar === 'sparta' && typeof player !== 'undefined' && player && !player.isDead;
+}
+
+function updateSpartaShieldState(dt) {
+    if (!isSpartaCharacter()) return;
+
+    const timer = Number.isFinite(player.spartaNoDamageTimer) ? player.spartaNoDamageTimer : 0;
+    if (player.spartaShieldActive) {
+        player.spartaNoDamageTimer = Math.max(10, timer);
+        return;
+    }
+
+    player.spartaNoDamageTimer = timer + dt;
+    if (player.spartaNoDamageTimer >= 10) {
+        player.spartaShieldActive = true;
+        player.spartaNoDamageTimer = 10;
+        addFloatingText(player.x, player.y - (player.r || 15) - 18, 'ESCUDO ATIVO', '#f1c40f', 18);
+    }
+}
+
+function spawnSpartaLion() {
+    if (!player) return;
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 78 + Math.random() * 30;
+    const lionDmg = Math.max(16, player.baseDmg * player.stats.dmgMult * 1.35);
+    allies.push({
+        x: player.x + Math.cos(angle) * distance,
+        y: player.y + Math.sin(angle) * distance,
+        r: 24,
+        size: 24,
+        speed: 2.2,
+        life: 10,
+        dmg: lionDmg,
+        cd: 0,
+        type: 'sparta_lion',
+        color: '#d4af37'
+    });
+    addFloatingText(player.x, player.y - 42, 'LEÃO INVOCADO!', '#f1c40f', 18);
+}
+
+function executeSpartaAttack(target) {
+    if (!target || !player) return;
+
+    const angle = Math.atan2(target.y - player.y, target.x - player.x);
+    player.lastAimAngle = angle;
+
+    const cycle = Number(player.spartaCycle) || 0;
+    const straight = cycle === 0;
+    const range = Math.max(85, player.baseRange * player.stats.rangeMult * (straight ? 0.52 : 0.44));
+    const damage = Math.max(1, player.baseDmg * player.stats.dmgMult * (straight ? 0.75 : 0.68) * (player.inTotem ? 1.15 : 1));
+    const attackCd = Math.max(34, Math.round((straight ? 56 : 62) * player.stats.fireRateMult));
+
+    player.cd = attackCd;
+    player.spartaCycle = straight ? 1 : 0;
+    player.spartaAttackTimer = straight ? 0.14 : 0.18;
+    player.spartaAttackMode = straight ? 'straight' : 'cone';
+    player.spartaAttackRange = range;
+    player.spartaAttackWidth = straight ? 24 : 0;
+    player.spartaAttackHalfAngle = straight ? 0 : (72 * Math.PI / 180) / 2;
+
+    for (const e of enemies) {
+        if (!e || e.hp <= 0) continue;
+        const dx = e.x - player.x;
+        const dy = e.y - player.y;
+        const forward = dx * Math.cos(angle) + dy * Math.sin(angle);
+        if (forward < -8 || forward > range) continue;
+
+        const soakMult = 1 + (e.soak || 0) * 0.05;
+        const hitDamage = Math.max(1, Math.round(damage * soakMult));
+
+        if (straight) {
+            const lateral = Math.abs(dx * -Math.sin(angle) + dy * Math.cos(angle));
+            const hitWidth = player.spartaAttackWidth + (e.size || 0) * 0.28;
+            if (lateral <= hitWidth) {
+                e.hp -= hitDamage;
+                addFloatingText(e.x, e.y, `${hitDamage}`, '#f1c40f');
+            }
+        } else {
+            const angleToEnemy = Math.atan2(dy, dx);
+            if (Math.abs(normalizeAngle(angleToEnemy - angle)) <= player.spartaAttackHalfAngle) {
+                e.hp -= hitDamage;
+                addFloatingText(e.x, e.y, `${hitDamage}`, '#ffb347');
+            }
+        }
+    }
 }
 
 function updatePauseSettingsUI(syncSlider = true) {
@@ -6762,6 +6980,8 @@ function startRunAfterShop() {
         baseFireRate: charDef.fireRate, baseRange: charDef.range, color: charDef.color, weapon: charDef.weapon, cd: 0, shieldTimer: 0,
         zombieTimer: 0, revived: false, elekCycle: false, dashTimer: 0, meleeCd: 0, boldShots: 0, boldReload: 0, specCd: 0, invisTimer: 0,
         lastMoveAngle: 0, lastAimAngle: 0, tenentCycle: 0, orbitalAngle: 0, boobooReturn: true, pickedCards: [], revivesUsed: 0, qbBar: 0, qbShield: false, isDead: false, flexCombo: 0, flexReload: 0, ninjiDashCd: 0, majorBriggsKills: 0, majorBriggsStage: 1,
+        adamScrap: 0, adamMechActive: false, adamMechWavesLeft: 0, adamMechHpBonus: 0, adamMechSizeBonus: 0, adamBaseHpBeforeMech: null, adamBaseRBeforeMech: null,
+        spartaCycle: 0, spartaNoDamageTimer: 0, spartaShieldActive: false, spartaAttackTimer: 0, spartaAttackMode: 'straight', spartaAttackRange: 0, spartaAttackWidth: 0, spartaAttackHalfAngle: 0,
         gooRevived: false, gooCloneSpawned: false, gooFullBaseHp: initialBaseHp, gooFullBaseDmg: initialBaseDmg, gooFullR: (pd.selectedChar === 'hank' || pd.selectedChar === 'yeti') ? 20 : ((pd.selectedChar === 'shiv' || pd.selectedChar === 'zippi') ? 10 : (pd.selectedChar === 'kaisen' ? 13 : (pd.selectedChar === 'eel' ? 15 : 15))),
         inTotem: false, landmineTimer: 0, flameTimer: 0, flameReload: 0, flameTickCd: 0, flexTimer: 0, flexAngle: 0, flexLowHp: false, seaePuddleCd: 0, zippiBubbleHp: pd.selectedChar === 'zippi' ? 80 : 0, zippiBubbleMaxHp: pd.selectedChar === 'zippi' ? 80 : 0, zippiBubbleBroken: false,
         stats: { dmgMult: 1, maxHpMult: 1, speedMult: 1, fireRateMult: 1, rangeMult: 1, extraProj: 0, regen: 0, critChance: 0, critDmg: 2, pierce: 0, projSpdMult: 1, defMult: 1, vamp: 0, coinMult: 1, xpMult: 1, explodeHit: false, waveBuff: false, doubleShotChance: 0, dynamicDef: 0, magnetMult: 1, poisonChance: 0, freezeChance: 0, bounce: 0, enemySpawnMult: 1, bossDmgMult: 1, orbitals: 0, dodgeChance: charDef.baseDodge || 0, landmine: 0, pushChance: 0 }
@@ -6774,6 +6994,7 @@ function startRunAfterShop() {
     if(pd.selectedChar === 'mrsaw') player.stats.orbitals += 2;
     if(pd.selectedChar === 'eel') { player.stats.orbitals += 1; player.eelOrbital = true; player.eelOrbitalLong = true; }
     if(pd.selectedChar === 'zippi') { player.zippiBubbleHp = 80; player.zippiBubbleMaxHp = 80; player.zippiBubbleBroken = false; }
+    if(pd.selectedChar === 'ivy') spawnIvyFlower();
     if(pd.selectedChar === 'kaisen') { allies.push({x: player.x, y: player.y, dmg: player.baseDmg * 0.75, speed: 3.0, life: Infinity, cd: 0, isTurret: false, type: 'drone', variant: 'kaisen', burstCd: 0}); }
     if(pd.selectedChar === 'tiki') allies.push({x: player.x, y: player.y, dmg: 0, speed: 0, life: Infinity, cd: 0, isTurret: false, isTotem: true, radius: 150});
     if(pd.selectedChar === 'frost') allies.push({x: player.x, y: player.y, dmg: player.baseDmg*0.5, speed: 2.8, life: Infinity, cd: 0, isTurret: false, type: 'penguin', followX: -28, followY: 14});
@@ -6943,6 +7164,10 @@ function spawnGooClone() {
 function update(dt) {
     if(player.isDead) return;
     updateGraffitMarks(dt);
+    if (isSpartaCharacter()) {
+        player.spartaAttackTimer = Math.max(0, (Number.isFinite(player.spartaAttackTimer) ? player.spartaAttackTimer : 0) - dt);
+        updateSpartaShieldState(dt);
+    }
     
     let isBossAlive = enemies.some(e => e.isBoss);
     if (!isBossAlive) {
@@ -6952,7 +7177,13 @@ function update(dt) {
 
     if(waveTimer >= 20) {
         wave++; waveTimer = 0; if(player.stats.waveBuff) player.hp = Math.min(player.hp + 20, player.baseHp * player.stats.maxHpMult); trackMissionProgress('waves', 1);
+        if (pd.selectedChar === 'sparta') spawnSpartaLion();
+        if(pd.selectedChar === 'adam' && player.adamMechWavesLeft > 0) {
+            player.adamMechWavesLeft--;
+            if(player.adamMechWavesLeft <= 0) deactivateAdamMech();
+        }
         addFloatingText(player.x, player.y - 30, "WAVE " + wave, '#f1c40f', 30);
+        if (pd.selectedChar === 'ivy' && wave > 1 && ((wave - 1) % 3 === 0)) spawnIvyFlower();
         if (wave % 2 === 0 && player.weapon === 'wrench') { let t = allies.find(a=>a.ref==='meekah_turret'); if(t) { t.x=player.x; t.y=player.y; createExplosion(t.x, t.y, 50, 0, '#cc8e35'); } }
         if (wave % 2 === 0 && player.weapon === 'darts') { let t = allies.find(a=>a.isTotem); if(t) { t.x=player.x; t.y=player.y; createExplosion(t.x, t.y, 60, 0, '#8e44ad'); } }
         if (wave % 2 === 0 && pd.selectedChar === 'ripper') { let s = allies.find(a => a.type === 'speaker' || a.ref === 'ripper_speaker'); if(s) { s.x = player.x; s.y = player.y; s.cd = 0; } }
@@ -7017,12 +7248,14 @@ function update(dt) {
     }
 
     player.inTotem = false;
-    allies.forEach(a => { if(a.isTotem && dist(player, a) < a.radius) player.inTotem = true; });
+    player.inIvyBloom = false;
+    allies.forEach(a => { if(a.isTotem && dist(player, a) < a.radius) player.inTotem = true; if(a.type === 'ivy_flower' && dist(player, a) < a.radius) player.inIvyBloom = true; });
 
     let dynHpRatio = player.hp / (player.baseHp * player.stats.maxHpMult);
     if(player.weapon === 'power_shot') player.stats.dynamicDef = (1 - dynHpRatio) * 0.6;
     
     if(player.stats.regen > 0) player.hp = Math.min(player.hp + player.stats.regen * dt * player.baseHp * player.stats.maxHpMult, player.baseHp * player.stats.maxHpMult);
+    if(player.inIvyBloom) player.hp = Math.min(player.hp + (player.baseHp * player.stats.maxHpMult * 0.012) * dt, player.baseHp * player.stats.maxHpMult);
     if(player.invisTimer > 0) { player.invisTimer -= dt; player.hp = Math.min(player.hp + (player.baseHp * player.stats.maxHpMult * 0.01) * dt, player.baseHp * player.stats.maxHpMult); }
     if(player.flexReload > 0) player.flexReload = Math.max(0, player.flexReload - dt);
     if(btnSpecial && btnSpecial.style.display !== 'none') {
@@ -7142,6 +7375,14 @@ function update(dt) {
                     let s = 15 + Math.floor(Math.random()*20); pd.sucatas += s; runScrap += s; addFloatingText(player.x, player.y, `+${s} Sucatas`, '#a5b1c2');
                 } else {
                     let cDrop = 20 + Math.floor(Math.random()*31); pd.coins += cDrop; addFloatingText(player.x, player.y, `+${cDrop} Moedas`, '#f1c40f'); runCoins += cDrop;
+                }
+            } else if(m.type === 'scrap') {
+                pd.sucatas += m.amount;
+                runScrap += m.amount;
+                addFloatingText(player.x, player.y, `+${m.amount} Sucatas`, '#a5b1c2');
+                if(pd.selectedChar === 'adam' && !player.adamMechActive) {
+                    player.adamScrap = Math.min(8, (Number(player.adamScrap) || 0) + m.amount);
+                    if(player.adamScrap >= 8) activateAdamMech();
                 }
             } else {
                 if(Math.random() < 0.5) { player.hp = Math.min(player.hp + 20, player.baseHp * player.stats.maxHpMult); addFloatingText(player.x, player.y, "+HP", '#2ecc71'); }
@@ -7415,6 +7656,58 @@ function fireWeapon(target) {
             return;
         }
         
+        if(w === 'pit_musket') {
+            const spawnOffset = player.r + 10;
+            const sx = player.x + Math.cos(angle) * spawnOffset;
+            const sy = player.y + Math.sin(angle) * spawnOffset;
+            createProj(sx, sy, Math.cos(angle) * pSpd * 1.06, Math.sin(angle) * pSpd * 1.06, finalDmg, 52, true, 'pit_bullet', {
+                size: 5,
+                sourceChar: 'pit',
+                pitPushChance: 0.20
+            });
+            return;
+        }
+        if(w === 'ruben_baguette') {
+            const spawnOffset = player.r + 9;
+            const sx = player.x + Math.cos(angle) * spawnOffset;
+            const sy = player.y + Math.sin(angle) * spawnOffset;
+            const isBurnt = Math.random() < 0.15;
+            createProj(sx, sy, Math.cos(angle) * pSpd * 1.02, Math.sin(angle) * pSpd * 1.02, finalDmg, 50, true, isBurnt ? 'ruben_baguette_burnt' : 'ruben_baguette', {
+                size: isBurnt ? 15 : 19,
+                sourceChar: 'ruben',
+                baguetteStage: 'full',
+                burnt: isBurnt,
+                splitOnce: true,
+                pierce: 1
+            });
+            return;
+        }
+        if(w === 'adam') {
+            const spawnOffset = player.r + 8;
+            const sx = player.x + Math.cos(angle) * spawnOffset;
+            const sy = player.y + Math.sin(angle) * spawnOffset;
+            createProj(sx, sy, Math.cos(angle) * pSpd * 1.05, Math.sin(angle) * pSpd * 1.05, finalDmg, 48, true, 'adam_ball', {
+                size: 9,
+                sourceChar: 'adam'
+            });
+            return;
+        }
+        if(w === 'adam_mech' || (pd.selectedChar === 'adam' && player.adamMechActive)) {
+            const spawnOffset = player.r + 10;
+            const sx = player.x + Math.cos(angle) * spawnOffset;
+            const sy = player.y + Math.sin(angle) * spawnOffset;
+            const mechDmg = Math.max(21, finalDmg * 1.25);
+            createProj(sx, sy, Math.cos(angle) * pSpd * 1.12, Math.sin(angle) * pSpd * 1.12, mechDmg, 70, true, 'adam_mech_ball', {
+                size: 16,
+                sourceChar: 'adam',
+                pierce: 4
+            });
+            return;
+        }
+        if(w === 'sparta') {
+            executeSpartaAttack(target);
+            return;
+        }
         if(w === 'major_briggs') {
             const stage = getMajorBriggsWeaponStage(enemiesKilled);
             const spawnOffset = player.r + 8;
@@ -7488,6 +7781,61 @@ function fireWeapon(target) {
             return;
         }
         if(w === 'aura') { createExplosion(player.x, player.y, 80 * player.stats.rangeMult, finalDmg, '#00cec9'); return; }
+        if(w === 'ignite') {
+            const spawnOffset = player.r + 8;
+            const sx = player.x + Math.cos(angle) * spawnOffset;
+            const sy = player.y + Math.sin(angle) * spawnOffset;
+            const chain = [
+                { dist: 48, radius: 28, mult: 0.72, color: '#ffb347' },
+                { dist: 102, radius: 48, mult: 1.00, color: '#ff8c42' },
+                { dist: 168, radius: 72, mult: 1.35, color: '#d35400' }
+            ];
+            const crackDmg = Math.max(1, Math.round(finalDmg * 0.42));
+            chain.forEach((step, idx) => {
+                const cx = sx + Math.cos(angle) * step.dist;
+                const cy = sy + Math.sin(angle) * step.dist;
+                createExplosion(cx, cy, step.radius * player.stats.rangeMult, Math.max(1, Math.round(finalDmg * step.mult)), step.color);
+                if (idx === 2) {
+                    const crackCount = 4;
+                    for (let i = 0; i < crackCount; i++) {
+                        const crackAngle = angle + (i - 1.5) * 0.16;
+                        const crackDist = 24 + i * 12;
+                        const px = cx + Math.cos(crackAngle) * crackDist;
+                        const py = cy + Math.sin(crackAngle) * crackDist;
+                        puddles.push({
+                            x: px,
+                            y: py,
+                            r: 26 + i * 2,
+                            life: 4.2,
+                            tick: 0,
+                            type: 'magma_crack',
+                            dmg: crackDmg
+                        });
+                    }
+                }
+            });
+            return;
+        }
+        if(w === 'yuuto_hearts') {
+            const aimAngle = getYuutoAimAngle(angle);
+            const spawnOffset = player.r + 8;
+            const sx = player.x + Math.cos(aimAngle) * spawnOffset;
+            const sy = player.y + Math.sin(aimAngle) * spawnOffset;
+            createProj(sx, sy, Math.cos(aimAngle) * pSpd * 1.02, Math.sin(aimAngle) * pSpd * 1.02, finalDmg, 55, true, 'yuuto_heart', {
+                size: 11,
+                sourceChar: 'yuuto',
+                hypnotizeChance: 0.15,
+                pierceChance: 0.15
+            });
+            return;
+        }
+        if(w === 'ivy_seed') {
+            const spawnOffset = player.r + 8;
+            const sx = player.x + Math.cos(angle) * spawnOffset;
+            const sy = player.y + Math.sin(angle) * spawnOffset;
+            createProj(sx, sy, Math.cos(angle) * pSpd * 1.15, Math.sin(angle) * pSpd * 1.15, finalDmg, 58, true, 'ivy_seed', { size: 7, sourceChar: 'ivy' });
+            return;
+        }
         if(w === 'dash_hit') { player.dashTimer = 0.3; player.dashAngle = angle; player.cd = 60; return; }
         if(w === 'screws') {
             let count = Math.floor(Math.random() * 5) + 1;
@@ -7614,7 +7962,7 @@ function fireWeapon(target) {
             }
             return; 
         }
-        if(w === 'hunter_shotgun') { let count = 6 + player.stats.extraProj; for(let j=0; j<count; j++) { let a = angle - 0.5 + (1.0/(count-1))*j; createProj(player.x, player.y, Math.cos(a)*pSpd, Math.sin(a)*pSpd, finalDmg, 95, true, 'hunter', { size: 4 }); } return; }
+        if(w === 'hunter_shotgun') { let count = 6 + player.stats.extraProj; const hunterLife = Math.max(18, Math.ceil((player.baseRange * player.stats.rangeMult) / Math.max(1, pSpd))); for(let j=0; j<count; j++) { let a = angle - 0.5 + (1.0/(count-1))*j; createProj(player.x, player.y, Math.cos(a)*pSpd, Math.sin(a)*pSpd, finalDmg, hunterLife, true, 'hunter', { size: 4 }); } return; }
         if(w === 'zippi_laser') {
             const burst = pd.selectedChar === 'zippi' && player.zippiBubbleHp <= 0;
             const extraShots = Math.max(0, Math.floor(player.stats.extraProj || 0));
@@ -7937,6 +8285,7 @@ function createProj(x, y, vx, vy, dmg, life, isPlayer, type, extra={}) {
     else if (type === 'bomb' || type === 'buster_rocket') size = 5;
     else if (type === 'lance') size = extra.size || 7;
     else if (type === 'microphone') size = extra.size || 12;
+    else if (type === 'yuuto_heart' || type === 'heart') size = extra.size || 11;
     else if (type === 'graffit_can') size = extra.size || 11;
     else if (type === 'axel_stone') size = extra.size || 12;
     else if (type === 'axel_shard') size = extra.size || 5;
@@ -7950,6 +8299,10 @@ function createProj(x, y, vx, vy, dmg, life, isPlayer, type, extra={}) {
     if(type==='chess_piece') {
         if(extra.chessType === 'bishop' || extra.chessType === 'queen') pierce += 99;
     }
+    if(type==='yuuto_heart' || type==='heart') {
+        const heartPierceChance = Number.isFinite(extra.pierceChance) ? extra.pierceChance : 0;
+        if (heartPierceChance > 0 && Math.random() < heartPierceChance) pierce = Math.max(pierce, 2);
+    }
     if(type==='echo_shot') pierce += 0;
     if(type==='wind_gust') pierce += 99;
     if(type==='tornado') pierce += 99;
@@ -7959,6 +8312,59 @@ function createProj(x, y, vx, vy, dmg, life, isPlayer, type, extra={}) {
     if(Number.isFinite(extra.bounces)) bounces = extra.bounces;
     if(type==='chess_piece' && extra.chessType === 'knight') bounces += 2;
     projectiles.push({ x, y, vx, vy, dmg, life, isPlayer, size, type, pierce, bounces, extra: { noHitFrames: 0, sourceChar: isPlayer ? (extra.sourceChar || pd.selectedChar) : extra.sourceChar, ...extra }, hitIds: new Set(), returnPhase: false, bounceCount: 0 });
+}
+
+
+function finalizeIvyVine(vine) {
+    if (!vine) return;
+    const trapped = Array.from(vine.trappedIds || []).filter(e => e && e.hp > 0);
+    if (trapped.length) {
+        const strongest = trapped.reduce((best, e) => (e.hp > best.hp ? e : best), trapped[0]);
+        const strongestHp = Math.max(1, strongest.hp || strongest.maxHp || 1);
+        const vineDamage = Math.max(1, Math.round(strongestHp * 0.60));
+        createExplosion(vine.x, vine.y, vine.radius || 160, vineDamage, '#2ecc71');
+    }
+    vine.life = 0;
+}
+
+function spawnIvyVine(x, y) {
+    const oldIndex = allies.findIndex(a => a && a.type === 'ivy_vine');
+    if (oldIndex >= 0) {
+        const oldVine = allies[oldIndex];
+        finalizeIvyVine(oldVine);
+        allies.splice(oldIndex, 1);
+    }
+    allies.push({
+        x,
+        y,
+        dmg: 0,
+        speed: 0,
+        life: Infinity,
+        cd: 0,
+        isTurret: false,
+        type: 'ivy_vine',
+        radius: 120,
+        trappedIds: new Set(),
+        pulse: 0
+    });
+}
+
+function spawnIvyFlower() {
+    const oldIndex = allies.findIndex(a => a && a.type === 'ivy_flower');
+    if (oldIndex >= 0) allies.splice(oldIndex, 1);
+    allies.push({
+        x: player.x,
+        y: player.y,
+        dmg: 0,
+        speed: 0,
+        life: Infinity,
+        cd: 0,
+        isTurret: false,
+        type: 'ivy_flower',
+        radius: 210,
+        pulse: 0,
+        healPerSec: 0.012
+    });
 }
 
 function isCyberBombProjectile(p) {
@@ -7981,6 +8387,46 @@ function applyCyberBombEffects(p) {
             e.burnDmg = Math.max(Number.isFinite(e.burnDmg) ? e.burnDmg : 0, Math.max(1, p.dmg * 0.35));
         }
     }
+}
+
+function isHypnotizableEnemy(enemy) {
+    return !!enemy && enemy.hp > 0 && enemy.type !== 'boss' && enemy.type !== 'megaboss' && enemy.type !== 'colosso' && !enemy.isBoss;
+}
+
+function isCurrentlyHypnotized(enemy) {
+    return !!enemy && Number.isFinite(enemy.hypnotizedTimer) && enemy.hypnotizedTimer > 0;
+}
+
+function getHypnosisTarget(sourceEnemy) {
+    let best = null;
+    let bestDist = Infinity;
+    for (const other of enemies) {
+        if (!isHypnotizableEnemy(other) || other === sourceEnemy || isCurrentlyHypnotized(other)) continue;
+        const d = dist(sourceEnemy, other);
+        if (d < bestDist) {
+            bestDist = d;
+            best = other;
+        }
+    }
+    return best;
+}
+
+function getYuutoAimAngle(baseAngle) {
+    let best = null;
+    let bestScore = Infinity;
+    for (const other of enemies) {
+        if (!isHypnotizableEnemy(other) || isCurrentlyHypnotized(other)) continue;
+        const ang = Math.atan2(other.y - player.y, other.x - player.x);
+        const diff = Math.abs(Math.atan2(Math.sin(ang - baseAngle), Math.cos(ang - baseAngle)));
+        if (diff > 0.9) continue;
+        const d = dist(player, other);
+        const score = diff * 1000 + d;
+        if (score < bestScore) {
+            bestScore = score;
+            best = ang;
+        }
+    }
+    return best !== null ? best : baseAngle;
 }
 
 const LUNCH_SAUCE_STATS = {
@@ -8387,6 +8833,7 @@ function updateEnemies(dt) {
         if(typeof e.shockSemiDmg !== 'number') e.shockSemiDmg = 0;
         if(typeof e.shockRate !== 'number') e.shockRate = 0.3;
         if(typeof e.semiShockRate !== 'number') e.semiShockRate = 0.4;
+        if(typeof e.hypnotizedTimer !== 'number') e.hypnotizedTimer = 0;
         if((e.type === 'boss' || e.type === 'megaboss') && !e.spawnSkillUsed) triggerBossSpawnSkill(e);
         if(e.weakenTimer > 0) { e.weakenTimer -= dt; e.dmg = e.baseDmg * 0.5; } else { e.dmg = e.baseDmg; }
         if(e.burnTimer > 0) { 
@@ -8418,6 +8865,10 @@ function updateEnemies(dt) {
                 createParticles(e.x, e.y, '#7adfff');
             }
         }
+        if(e.hypnotizedTimer > 0) e.hypnotizedTimer -= dt;
+        if (isCurrentlyHypnotized(e) && !e.hypnotizedSnapshot) {
+            e.hypnotizedSnapshot = { baseDmg: e.baseDmg, dmg: e.dmg, speed: e.speed, maxHp: e.maxHp, size: e.size, color: e.color };
+        }
         if(e.poison.timer > 0) {
             e.poison.timer -= dt;
             if(Number.isFinite(e.poison.tickCd)) {
@@ -8433,29 +8884,55 @@ function updateEnemies(dt) {
             }
         }
         
-        let currentSpeed = e.slowTimer > 0 ? e.speed * 0.5 : e.speed; if(e.slowTimer > 0) e.slowTimer -= dt;
+        let ivySlowMult = e.ivySlowTimer > 0 ? 0.18 : 1; if(e.ivySlowTimer > 0) e.ivySlowTimer -= dt;
+        let currentSpeed = (e.slowTimer > 0 ? e.speed * 0.5 : e.speed) * ivySlowMult; if(e.slowTimer > 0) e.slowTimer -= dt;
         if(e.speedBuffTimer > 0) { e.speedBuffTimer -= dt; currentSpeed *= 1.5; }
         let eSpeedMult = 1; obstacles.forEach(o => { if(o.type==='ice' && dist(e, o) < o.r + e.size) eSpeedMult = 1.5; if(o.type==='mud' && dist(e, o) < o.r + e.size) eSpeedMult = 0.5; if(o.type==='cacto') { let d2=dist(e,o); if(d2<o.r+e.size){ e.hp -= 30 * dt; } } });
         if(e.freezeTimer > 0) { e.freezeTimer -= dt; currentSpeed = 0; }
 
         let nx = e.x; let ny = e.y;
+        const isHypnotized = e.hypnotizedTimer > 0 && e.type !== 'boss' && e.type !== 'megaboss' && e.type !== 'colosso';
+        const hypSnapshot = isHypnotized ? (e.hypnotizedSnapshot || null) : null;
+        if (isHypnotized && hypSnapshot && Number.isFinite(hypSnapshot.dmg)) {
+            e.dmg = hypSnapshot.dmg;
+        }
         let targetX = player.invisTimer > 0 ? e.x : player.x; let targetY = player.invisTimer > 0 ? e.y : player.y;
+        const hypTarget = isHypnotized ? getHypnosisTarget(e) : null;
+        if (isHypnotized && hypTarget) {
+            targetX = hypTarget.x;
+            targetY = hypTarget.y;
+        }
 
         if(e.type === 'curandeiro') {
-            e.cd -= 60 * dt; if(e.cd <= 0) { createExplosion(e.x, e.y, 100, 0, 'rgba(46, 204, 113, 0.4)'); for(let e2 of enemies) { if(dist(e, e2) < 100) e2.hp = Math.min(e2.hp + 20, e2.maxHp); } e.cd = 120; }
+            e.cd -= 60 * dt;
+            if(e.cd <= 0) {
+                if(isHypnotized) {
+                    createExplosion(e.x, e.y, 100, Math.max(1, e.dmg), 'rgba(255, 107, 181, 0.35)');
+                    for(let e2 of enemies) {
+                        if(!e2 || e2 === e || !isHypnotizableEnemy(e2) || dist(e, e2) >= 100) continue;
+                        const healDmg = Math.max(1, e.dmg);
+                        e2.hp -= healDmg;
+                        addFloatingText(e2.x, e2.y, `${Math.floor(healDmg)}`, '#ff6bb5');
+                    }
+                } else {
+                    createExplosion(e.x, e.y, 100, 0, 'rgba(46, 204, 113, 0.4)');
+                    for(let e2 of enemies) { if(dist(e, e2) < 100) e2.hp = Math.min(e2.hp + 20, e2.maxHp); }
+                }
+                e.cd = 120;
+            }
             let a = Math.atan2(targetY - e.y, targetX - e.x); nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt; ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
         } else if((e.type === 'atirador' || e.type === 'elite' || e.type === 'elite_master') && d < (e.type === 'atirador' ? 175 : (e.type === 'elite' ? 390 : 620)) && player.invisTimer <= 0) {
             e.cd -= 60 * dt; if(e.cd <= 0 && e.freezeTimer<=0) { 
                 let a = Math.atan2(targetY - e.y, targetX - e.x); 
                 let bSpd = e.type === 'elite_master' ? 7 : (e.type === 'elite' ? 5 : 3);
                 let pLife = e.type === 'elite_master' ? 90 : (e.type === 'elite' ? 80 : 60);
-                createProj(e.x, e.y, Math.cos(a)*bSpd, Math.sin(a)*bSpd, e.dmg, pLife, false, 'enemy'); 
+                createProj(e.x, e.y, Math.cos(a)*bSpd, Math.sin(a)*bSpd, e.dmg, pLife, false, 'enemy', { hypnotized: isHypnotized, sourceEnemyType: e.type }); 
                 e.cd = e.type === 'elite_master' ? 40 : (e.type === 'elite' ? 80 : 100); 
             }
         } else if(e.type === 'tanque' && d < 200 && player.invisTimer <= 0) {
-            e.cd -= 60 * dt; if(e.cd <= 0 && e.freezeTimer<=0) { let a = Math.atan2(targetY - e.y, targetX - e.x); createProj(e.x, e.y, Math.cos(a)*2.5, Math.sin(a)*2.5, e.dmg*1.5, 70, false, 'heavy_enemy', { size: 18 }); e.cd = 150; }
+            e.cd -= 60 * dt; if(e.cd <= 0 && e.freezeTimer<=0) { let a = Math.atan2(targetY - e.y, targetX - e.x); createProj(e.x, e.y, Math.cos(a)*2.5, Math.sin(a)*2.5, e.dmg*1.5, 70, false, 'heavy_enemy', { size: 18, hypnotized: isHypnotized, sourceEnemyType: e.type }); e.cd = 150; }
             let a = Math.atan2(targetY - e.y, targetX - e.x); nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt; ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
-        } else if(e.type === 'lider' || e.type === 'lider_elite') {
+        } else if((e.type === 'lider' || e.type === 'lider_elite') && !isHypnotized) {
             e.spawnCd -= dt;
             if(e.spawnCd <= 0) {
                 e.spawnCd = 20;
@@ -8468,20 +8945,20 @@ function updateEnemies(dt) {
             }
             let a = Math.atan2(targetY - e.y, targetX - e.x); nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt; ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
         } else if(e.type === 'boss' && player.invisTimer <= 0) {
-            e.cd -= 60 * dt; if(e.cd <= 0) { for(let j=0; j<8; j++) { let a = (Math.PI / 4) * j; createProj(e.x, e.y, Math.cos(a)*3, Math.sin(a)*3, e.dmg, 80, false, 'enemy'); } e.cd = 150; }
+            e.cd -= 60 * dt; if(e.cd <= 0) { for(let j=0; j<8; j++) { let a = (Math.PI / 4) * j; createProj(e.x, e.y, Math.cos(a)*3, Math.sin(a)*3, e.dmg, 80, false, 'enemy', { hypnotized: isHypnotized, sourceEnemyType: e.type }); } e.cd = 150; }
             let a = Math.atan2(targetY - e.y, targetX - e.x); nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt; ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
         } else if(e.type === 'goblin' && player.invisTimer <= 0) {
             e.cd -= 60 * dt;
             if(e.cd <= 0 && e.freezeTimer<=0) {
                 let a = Math.atan2(targetY - e.y, targetX - e.x);
-                createProj(e.x, e.y, Math.cos(a)*4.2, Math.sin(a)*4.2, e.dmg * 0.75, 65, false, 'goblin_stone', { size: 7, spread: 1 });
+                createProj(e.x, e.y, Math.cos(a)*4.2, Math.sin(a)*4.2, e.dmg * 0.75, 65, false, 'goblin_stone', { size: 7, spread: 1, hypnotized: isHypnotized, sourceEnemyType: e.type });
                 e.cd = 90;
             }
             let a = Math.atan2(targetY - e.y, targetX - e.x); nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt; ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
         } else if(e.type === 'megaboss' && player.invisTimer <= 0) {
             e.cd -= 60 * dt; e.dashCd -= dt; e.orbitalCd = (e.orbitalCd || 0) - dt;
             if(e.cd <= 0) { 
-                for(let j=0; j<16; j++) { let a = (Math.PI / 8) * j + gameTime; createProj(e.x, e.y, Math.cos(a)*4, Math.sin(a)*4, e.dmg, 80, false, 'enemy'); } 
+                for(let j=0; j<16; j++) { let a = (Math.PI / 8) * j + gameTime; createProj(e.x, e.y, Math.cos(a)*4, Math.sin(a)*4, e.dmg, 80, false, 'enemy', { hypnotized: isHypnotized, sourceEnemyType: e.type }); } 
                 e.cd = 100; 
                 let ang = Math.random() * Math.PI * 2;
                 enemies.push({ x: e.x + Math.cos(ang)*100, y: e.y + Math.sin(ang)*100, type: 'velocista', hp: 50, maxHp: 50, speed: 2.2, baseDmg: e.dmg*0.5, dmg: e.dmg*0.5, size: 10, cd: 0, color: '#f39c12', poison: {timer:0,dmg:0}, slowTimer: 0, weakenTimer: 0, burnTimer: 0, freezeTimer: 0, soak: 0 });
@@ -8504,7 +8981,7 @@ function updateEnemies(dt) {
         if(e.type === 'kamikaze' && d < e.size + player.r + 5 && player.invisTimer <= 0) {
             if(Math.random() > (player.stats.dodgeChance || 0)) {
                 const kamikazeHit = e.dmg * Math.max(0.1, player.stats.defMult - player.stats.dynamicDef) * 0.35;
-                player.hp = Math.max(0, player.hp - kamikazeHit);
+                dealPlayerDamage(kamikazeHit);
                 createExplosion(e.x, e.y, 42, e.dmg * 0.08);
                 if(player.hp <= 0) {
                     triggerRevivePrompt();
@@ -8542,9 +9019,23 @@ function updateEnemies(dt) {
             if (Math.abs(normalizeAngle(aToE - player.lastMoveAngle)) < Math.PI/4) { const md = player.baseDmg * player.stats.dmgMult * 1.5 * player.stats.bossDmgMult; let soakMult = 1 + (e.soak||0)*0.05; e.hp -= md * soakMult; trackMissionDamage(md); player.meleeCd = 0.8; createExplosion(player.x, player.y, 60, 0, 'rgba(139,0,0,0.5)'); }
         }
 
-        if(d < e.size + player.r && player.shieldTimer <= 0 && e.type !== 'kamikaze' && !(pd.selectedChar === 'hank' && e.type === 'velocista')) {
+        if(isHypnotized && hypTarget && hypTarget.hp > 0) {
+            const hypDist = dist(e, hypTarget);
+            const hypHitRange = e.size + hypTarget.size + 4;
+            e.hypAttackCd = Math.max(0, (e.hypAttackCd || 0) - dt);
+            if(hypDist <= hypHitRange && e.hypAttackCd <= 0) {
+                const hypDmg = Math.max(1, e.dmg);
+                hypTarget.hp -= hypDmg;
+                addFloatingText(hypTarget.x, hypTarget.y, `-${Math.floor(hypDmg)}`, '#ff6bb5');
+                createParticles(hypTarget.x, hypTarget.y, '#ff6bb5');
+                e.hypAttackCd = 0.35;
+            }
+        }
+
+        if(!isHypnotized && d < e.size + player.r && player.shieldTimer <= 0 && e.type !== 'kamikaze' && !(pd.selectedChar === 'hank' && e.type === 'velocista')) {
             if(Math.random() > (player.stats.dodgeChance || 0)) {
-                const defMul = Math.max(0.1, player.stats.defMult - (pd.selectedChar === 'quarterback' && player.qbShield ? 0.4 : player.stats.dynamicDef) - (player.graffitDefFlat || 0));
+                const spartaShieldMult = (isSpartaCharacter() && player.spartaShieldActive) ? 0.6 : 1;
+                const defMul = Math.max(0.1, (player.stats.defMult - (pd.selectedChar === 'quarterback' && player.qbShield ? 0.4 : player.stats.dynamicDef) - (player.graffitDefFlat || 0)) * spartaShieldMult);
                 dealPlayerDamage(e.dmg * defMul); addFloatingText(player.x, player.y, `-${Math.floor(e.dmg * defMul)}`, '#e74c3c');
                 e.x -= Math.cos(Math.atan2(player.y - e.y, player.x - e.x)) * 20; e.x = Math.max(-1480, Math.min(1480, e.x));
                 if(player.hp <= 0) { triggerRevivePrompt(); return; }
@@ -8579,6 +9070,9 @@ function updateEnemies(dt) {
                     allies.push({x: e.x, y: e.y, dmg: player.baseDmg * 1.5, speed: 1.2, life: 12, cd: 0, isTurret: false, isZombie: true, radius: 25});
                 }
                 xpGems.push({ x: e.x, y: e.y, val: e.type==='megaboss' ? 1000 : (e.isBoss? 500 : e.type==='gigante'||e.type==='tanque'||e.type==='colosso'? 50 : 10) });
+                if (pd.selectedChar === 'adam' && !player.adamMechActive && Math.random() < 0.25) {
+                    itemsMap.push({ x: e.x, y: e.y, type: 'scrap', r: 10, amount: 1 });
+                }
                 if (pd.selectedChar === 'graffit') addGraffitMark(e.x, e.y);
                 if(player.stats.explodeHit) createExplosion(e.x, e.y, 60, player.baseDmg * 0.5);
                 createParticles(e.x, e.y, e.color); enemies.splice(i, 1);
@@ -8682,6 +9176,24 @@ function updateAllies(dt) {
                     createParticles(e.x, e.y, '#f1c40f'); 
                 }
             }
+        } else if (a.type === 'sparta_lion') {
+            if(!Number.isFinite(a.contactDmgCd)) a.contactDmgCd = 0;
+            const lionSpeed = Math.max(2.0, (a.speed || 2.2) * 60 * dt);
+            if(target && minD < 500) {
+                const ang = Math.atan2(target.y - a.y, target.x - a.x);
+                a.x += Math.cos(ang) * lionSpeed;
+                a.y += Math.sin(ang) * lionSpeed;
+                if(minD < (a.r || 24) + target.size + 12) {
+                    if(a.contactDmgCd <= 0) {
+                        const soakMult = 1 + (target.soak || 0) * 0.05;
+                        const lionHit = Math.max(1, Math.round((a.dmg || 12) * soakMult * (target.isBoss ? player.stats.bossDmgMult : 1)));
+                        target.hp -= lionHit;
+                        addFloatingText(target.x, target.y, lionHit, '#ffb347');
+                        a.contactDmgCd = 0.45;
+                    }
+                }
+            }
+            if(a.contactDmgCd > 0) a.contactDmgCd -= dt;
         } else if (a.gooClone) {
             if(a.hp <= 0) { a.life = 0; continue; }
             if(!a.wobbleAngle) a.wobbleAngle = Math.random() * Math.PI * 2;
@@ -8762,6 +9274,29 @@ function updateAllies(dt) {
                     createExplosion(a.x, a.y, 100, player.baseDmg * player.stats.dmgMult * 3);
                     a.life = 0; break;
                 }
+            }
+        } else if (a.type === 'ivy_flower') {
+            a.pulse = (a.pulse || 0) + dt * 2;
+        } else if (a.type === 'ivy_vine') {
+            if (!a.trappedIds) a.trappedIds = new Set();
+            const vineRadius = a.radius || 160;
+            for (const e of enemies) {
+                if (!e || e.hp <= 0) continue;
+                const dx = a.x - e.x;
+                const dy = a.y - e.y;
+                const d = Math.hypot(dx, dy);
+                const effectiveRange = vineRadius + (e.size || 0);
+                if (d > effectiveRange) continue;
+                a.trappedIds.add(e);
+                const pull = Math.max(0.35, (1 - (d / Math.max(1, effectiveRange))) * 2.35);
+                const nx = dx / Math.max(1, d);
+                const ny = dy / Math.max(1, d);
+                e.x += nx * pull * 60 * dt;
+                e.y += ny * pull * 60 * dt;
+                e.x = Math.max(-1480, Math.min(1480, e.x));
+                e.y = Math.max(-1480, Math.min(1480, e.y));
+                e.slowTimer = Math.max(Number.isFinite(e.slowTimer) ? e.slowTimer : 0, 1.25);
+                e.ivySlowTimer = Math.max(Number.isFinite(e.ivySlowTimer) ? e.ivySlowTimer : 0, 1.25);
             }
         } else if (a.isTotem) {
             a.angle = (a.angle || 0) + 2 * dt;
@@ -9054,6 +9589,7 @@ function updateProjectiles(dt) {
             for(let e of enemies) {
                 if(p.type === 'quarterback' && p.extra && p.extra.noHitFrames > 0) continue;
                 if(!p.hitIds.has(e) && dist(p, e) < p.size + e.size) {
+                    if((p.type === 'yuuto_heart' || p.type === 'heart') && isCurrentlyHypnotized(e)) continue;
                     if(e.dodgeChance && Math.random() < e.dodgeChance) continue;
 
                     if(p.type !== 'puddle' && p.type !== 'black_hole') { 
@@ -9108,6 +9644,77 @@ function updateProjectiles(dt) {
                             const a = Math.atan2(p.vy, p.vx);
                             e.x += Math.cos(a) * push; e.y += Math.sin(a) * push;
                             e.x = Math.max(-1480, Math.min(1480, e.x)); e.y = Math.max(-1480, Math.min(1480, e.y));
+                        }
+                        if(p.type === 'pit_bullet' && Math.random() < 0.20) {
+                            const a = Math.atan2(p.vy, p.vx);
+                            const push = e.isBoss ? 0 : (e.type==='gigante'||e.type==='tanque'||e.type==='colosso' ? 20 : 28);
+                            e.x += Math.cos(a) * push; e.y += Math.sin(a) * push;
+                            e.x = Math.max(-1480, Math.min(1480, e.x)); e.y = Math.max(-1480, Math.min(1480, e.y));
+                            const blastR = 42;
+                            createExplosion(e.x, e.y, blastR, Math.max(1, Math.round(p.dmg * 0.9)), '#f39c12');
+                            const pitAngle = Math.atan2(p.vy, p.vx);
+                            const pitCone = Math.PI / 8;
+                            const pitRange = 88;
+                            const frontX = player.x + Math.cos(pitAngle) * 44;
+                            const frontY = player.y + Math.sin(pitAngle) * 44;
+                            createExplosion(frontX, frontY, 22, 0, '#f39c12');
+                            for (const coneEnemy of enemies) {
+                                if (!coneEnemy || coneEnemy.hp <= 0) continue;
+                                const dx = coneEnemy.x - player.x;
+                                const dy = coneEnemy.y - player.y;
+                                const d = Math.sqrt(dx * dx + dy * dy);
+                                if (d > pitRange + (coneEnemy.size || 0)) continue;
+                                const ang = Math.atan2(dy, dx);
+                                const diff = Math.atan2(Math.sin(ang - pitAngle), Math.cos(ang - pitAngle));
+                                if (Math.abs(diff) > pitCone) continue;
+                                let coneDmg = Math.max(1, Math.round(p.dmg * 0.55));
+                                coneEnemy.hp -= coneDmg;
+                                addFloatingText(coneEnemy.x, coneEnemy.y, Math.floor(coneDmg), '#ffaa00');
+                            }
+                        }
+                        if(p.type === 'adam_ball' && Math.random() < 0.10) {
+                            let push = 18;
+                            if(e.type==='gigante'||e.type==='tanque'||e.type==='colosso') push = 8;
+                            if(e.isBoss) push = 0;
+                            const a = Math.atan2(p.vy, p.vx);
+                            e.x += Math.cos(a) * push; e.y += Math.sin(a) * push;
+                            e.x = Math.max(-1480, Math.min(1480, e.x)); e.y = Math.max(-1480, Math.min(1480, e.y));
+                        }
+                        if(p.type === 'ruben_baguette' || p.type === 'ruben_baguette_burnt') {
+                            p.extra._rubenHits = (p.extra._rubenHits || 0) + 1;
+                            if (p.extra._rubenHits >= 1) {
+                                if (p.extra.burnt) {
+                                    const rubPush = e.isBoss ? 0 : (e.type==='gigante'||e.type==='tanque'||e.type==='colosso' ? 9 : 15);
+                                    const a = Math.atan2(p.vy, p.vx);
+                                    e.x += Math.cos(a) * rubPush; e.y += Math.sin(a) * rubPush;
+                                    e.x = Math.max(-1480, Math.min(1480, e.x)); e.y = Math.max(-1480, Math.min(1480, e.y));
+                                    e.burnTimer = Math.max(e.burnTimer || 0, 3.5);
+                                    e.burnDmg = Math.max(e.burnDmg || 0, Math.max(2, p.dmg * 0.25));
+                                } else if (!p.extra._rubenSplitDone) {
+                                    p.extra._rubenSplitDone = true;
+                                    p.pierce = 0;
+                                    const baseAngle = Math.atan2(p.vy, p.vx);
+                                    const spd = Math.sqrt(p.vx * p.vx + p.vy * p.vy) * 0.92;
+                                    const splitAngle = baseAngle + (Math.random() < 0.5 ? -0.08 : 0.08);
+                                    createProj(p.x, p.y, Math.cos(splitAngle) * spd, Math.sin(splitAngle) * spd, p.dmg * 0.5, 42, true, 'ruben_baguette_half', {
+                                        size: 12,
+                                        sourceChar: 'ruben',
+                                        baguetteStage: 'half',
+                                        splitOnce: false,
+                                        pierce: 0
+                                    });
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                    if(p.type === 'yuuto_heart') {
+                        const hypChance = Number.isFinite(p.extra?.hypnotizeChance) ? p.extra.hypnotizeChance : 0.15;
+                        if (isHypnotizableEnemy(e) && !isCurrentlyHypnotized(e) && Math.random() < hypChance) {
+                            e.hypnotizedTimer = 10;
+                            e.hypnotizedTick = 0;
+                            e.hypnotizedSnapshot = { baseDmg: e.baseDmg, dmg: e.dmg, speed: e.speed, maxHp: e.maxHp, size: e.size, color: e.color };
+                            addFloatingText(e.x, e.y, 'HIPNOTIZAR!', '#ff6bb5');
                         }
                     }
                     if(player.stats.poisonChance > 0 && Math.random() < player.stats.poisonChance) { e.poison.timer = 4; e.poison.dmg = p.dmg * 0.3; }
@@ -9177,7 +9784,21 @@ function updateProjectiles(dt) {
                 }
             }
         } else {
-            if(p.type !== 'magma_meteor') {
+            if (p.extra?.hypnotized) {
+                for (let e2 of enemies) {
+                    if (!e2 || e2.hp <= 0 || !isHypnotizableEnemy(e2) || isCurrentlyHypnotized(e2) || p.hitIds.has(e2)) continue;
+                    if (dist(p, e2) < p.size + e2.size) {
+                        if (e2.dodgeChance && Math.random() < e2.dodgeChance) continue;
+                        const soakMult = 1 + (e2.soak || 0) * 0.05;
+                        const hypDmg = Math.max(1, p.dmg * soakMult);
+                        e2.hp -= hypDmg;
+                        addFloatingText(e2.x, e2.y, `${Math.floor(hypDmg)}`, '#ff6bb5');
+                        p.hitIds.add(e2);
+                        hit = true;
+                        hitTarget = e2;
+                    }
+                }
+            } else if(p.type !== 'magma_meteor') {
                 const gooClone = allies.find(a => a.gooClone && a.hp > 0);
                 if(gooClone && dist(p, gooClone) < p.size + gooClone.r && (gooClone.shieldTimer || 0) <= 0) {
                     const cloneDef = Math.max(0.1, (gooClone.stats?.defMult || 1) - (gooClone.stats?.dynamicDef || 0));
@@ -9195,6 +9816,16 @@ function updateProjectiles(dt) {
             }
         }
 
+        if(hit && p.type === 'ivy_seed') {
+            if (Math.random() < 0.20) {
+                const vineX = Number.isFinite(hitTarget?.x) ? hitTarget.x : p.x;
+                const vineY = Number.isFinite(hitTarget?.y) ? hitTarget.y : p.y;
+                spawnIvyVine(vineX, vineY);
+                addFloatingText(vineX, vineY, 'TREPADEIRA!', '#2ecc71', 12);
+            }
+            projectiles.splice(i, 1);
+            continue;
+        }
         if(hit && p.type === 'blood_ball' && (extra.size || 0) === 10) { for(let j=0; j<3; j++) { let a = Math.random()*Math.PI*2; createProj(p.x, p.y, Math.cos(a)*3, Math.sin(a)*3, p.dmg*0.4, 30, true, 'blood_ball', {size: 4}); } }
         if(hit && p.type === 'axel_stone') { disperseAxelStone(p.x, p.y, p.vx, p.vy, p.dmg); projectiles.splice(i, 1); continue; }
         if(hit && p.type === 'big_grenade') { const count = (p.extra?.sourceChar === 'grenade' && pd.fractured?.grenade) ? 16 : 8; const pSpd = 5 * player.stats.projSpdMult; createExplosion(p.x, p.y, 80 * player.stats.rangeMult, p.dmg); for(let j=0; j<count; j++) { let a = (Math.PI * 2 / count) * j; createProj(p.x, p.y, Math.cos(a)*pSpd, Math.sin(a)*pSpd, p.dmg*0.45, 40, true, 'grenade', { size: 3 }); } projectiles.splice(i, 1); continue; }
@@ -9367,15 +9998,26 @@ function updatePuddles(dt) {
         if(p.life <= 0) { puddles.splice(i, 1); continue; } 
         p.tick += dt; 
         let pTickLimit = p.type === 'nucleon_puddle' ? 0.5 : 0.5;
-        
+
         if(p.type === 'water_puddle') {
             for(let e of enemies) if(dist(p, e) < p.r + e.size) e.slowTimer = Math.max(e.slowTimer, 0.5);
         } else if(p.type === 'snowstorm') {
             if(dist(p, player) < p.r && player.shieldTimer <= 0) { dealPlayerDamage(2 * dt); player.dashTimer = 0; }
+        } else if (p.type === 'magma_crack') {
+            if (p.tick >= 0.35) {
+                p.tick = 0;
+                for (let e of enemies) {
+                    if (dist(p, e) < p.r + e.size) {
+                        const soakMult = 1 + (e.soak || 0) * 0.05;
+                        e.hp -= p.dmg * soakMult;
+                        addFloatingText(e.x, e.y, Math.floor(p.dmg), '#ff9f43');
+                    }
+                }
+            }
         } else if(p.tick >= pTickLimit) { 
             p.tick = 0; 
             if(p.type === 'magma' && dist(p, player) < p.r + player.r && player.shieldTimer <= 0) { dealPlayerDamage(p.dmg); addFloatingText(player.x, player.y, `-${Math.floor(p.dmg)}`, '#e74c3c'); if(player.hp<=0) triggerRevivePrompt(); }
-            
+
             for(let e of enemies) if(dist(p, e) < p.r + e.size) { 
                 let soakMult = 1 + (e.soak || 0) * 0.05;
                 e.hp -= p.dmg * soakMult; 
@@ -9696,12 +10338,86 @@ function draw() {
         else if(o.type === 'speaker') { ctx.fillStyle = '#2f3542'; ctx.fillRect(o.x-o.r, o.y-o.r, o.r*2, o.r*2); ctx.fillStyle = '#1e90ff'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r*0.6, 0, Math.PI*2); ctx.fill(); }
     });
     itemsMap.forEach(m => {
-        if(m.type === 'chest') { ctx.fillStyle = '#f39c12'; ctx.fillRect(m.x-10, m.y-8, 20, 16); ctx.fillStyle = '#8e44ad'; ctx.fillRect(m.x-10, m.y-2, 20, 4); }
-        else { ctx.fillStyle = '#e84118'; ctx.beginPath(); ctx.arc(m.x, m.y, m.r, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#fff'; ctx.fillRect(m.x-2, m.y-2, 4, 4); }
+        if(m.type === 'chest') {
+            ctx.fillStyle = '#f39c12';
+            ctx.fillRect(m.x-10, m.y-8, 20, 16);
+            ctx.fillStyle = '#8e44ad';
+            ctx.fillRect(m.x-10, m.y-2, 20, 4);
+        } else if (m.type === 'scrap') {
+            ctx.save();
+            ctx.translate(m.x, m.y);
+            const gearR = Math.max(8, m.r || 10);
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#8a8f98';
+            ctx.fillStyle = '#4f5b66';
+            ctx.beginPath();
+            for (let i = 0; i < 8; i++) {
+                const ang = (Math.PI * 2 * i) / 8 + Math.PI / 8;
+                const outer = gearR + 3;
+                const inner = gearR - 2;
+                const x1 = Math.cos(ang) * outer;
+                const y1 = Math.sin(ang) * outer;
+                const x2 = Math.cos(ang + 0.18) * inner;
+                const y2 = Math.sin(ang + 0.18) * inner;
+                if (i === 0) ctx.moveTo(x1, y1);
+                else ctx.lineTo(x1, y1);
+                ctx.lineTo(x2, y2);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = '#dfe6e9';
+            ctx.beginPath();
+            ctx.arc(0, 0, gearR - 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#2c3e50';
+            ctx.beginPath();
+            ctx.arc(0, 0, Math.max(2, gearR * 0.32), 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#20252b';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.fillStyle = '#f39c12';
+            ctx.beginPath();
+            ctx.arc(-gearR*0.18, -gearR*0.2, 1.4, 0, Math.PI*2);
+            ctx.fill();
+            ctx.restore();
+        } else {
+            ctx.fillStyle = '#e84118';
+            ctx.beginPath();
+            ctx.arc(m.x, m.y, m.r, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(m.x-2, m.y-2, 4, 4);
+        }
     });
 
     puddles.forEach(p => { 
         if(p.type === 'magma') { ctx.fillStyle = `rgba(230, 126, 34, ${0.7 * (p.life/6)})`; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill(); }
+        else if (p.type === 'magma_crack') {
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            const a = Math.max(0.18, Math.min(0.9, p.life / 4.2));
+            ctx.strokeStyle = `rgba(255, 159, 67, ${0.55 * a})`;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(-p.r * 0.9, -p.r * 0.15);
+            ctx.lineTo(-p.r * 0.35, 0);
+            ctx.lineTo(p.r * 0.05, -p.r * 0.1);
+            ctx.lineTo(p.r * 0.6, p.r * 0.2);
+            ctx.stroke();
+            ctx.strokeStyle = `rgba(211, 84, 0, ${0.8 * a})`;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(-p.r * 0.35, p.r * 0.28);
+            ctx.lineTo(0, -p.r * 0.22);
+            ctx.lineTo(p.r * 0.32, p.r * 0.15);
+            ctx.stroke();
+            ctx.fillStyle = `rgba(231, 76, 60, ${0.12 * a})`;
+            ctx.beginPath();
+            ctx.arc(0, 0, p.r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
         else if (p.type === 'snowstorm') { ctx.fillStyle = `rgba(255, 255, 255, 0.4)`; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill(); }
         else if (p.type === 'water_puddle') { ctx.fillStyle = `rgba(0, 206, 201, 0.4)`; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill(); }
         else if (p.type === 'nucleon_puddle') { ctx.fillStyle = `rgba(46, 204, 113, 0.5)`; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill(); }
@@ -9767,6 +10483,35 @@ function draw() {
         } else if (a.type === 'stationary_saw') { 
             ctx.save(); ctx.translate(a.x, a.y); ctx.rotate(a.angle || 0); ctx.fillStyle = '#7f8c8d'; ctx.beginPath(); ctx.arc(0, 0, 20, 0, Math.PI*2); ctx.fill(); 
             for(let k=0; k<8; k++){ ctx.beginPath(); ctx.moveTo(20, 0); ctx.lineTo(25, -5); ctx.lineTo(20, -10); ctx.fill(); ctx.rotate(Math.PI/4); } ctx.restore(); 
+        } else if (a.type === 'sparta_lion') {
+            const rr = a.r || 24;
+            ctx.save();
+            ctx.translate(a.x, a.y);
+            ctx.shadowColor = 'rgba(0,0,0,0.25)';
+            ctx.shadowBlur = 8;
+            ctx.fillStyle = '#d4af37';
+            ctx.beginPath();
+            ctx.ellipse(0, 2, rr * 1.25, rr * 0.88, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#9c6b1e';
+            ctx.beginPath();
+            ctx.arc(0, -2, rr * 0.95, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#3a2410';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(0, -2, rr * 1.18, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.fillStyle = '#111';
+            ctx.beginPath();
+            ctx.arc(-rr * 0.28, -rr * 0.12, 2.8, 0, Math.PI * 2);
+            ctx.arc(rr * 0.28, -rr * 0.12, 2.8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#f5c16c';
+            ctx.beginPath();
+            ctx.arc(rr * 0.12, rr * 0.08, 2.2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
         } else if (a.gooClone) {
             const hpRatio = Math.max(0, Math.min(1, (a.hp || 1) / (a.cloneMaxHp || a.maxHp || 1)));
             const rr = a.r || 14;
@@ -9777,6 +10522,63 @@ function draw() {
         } else if (a.type === 'landmine') {
             ctx.fillStyle = '#2c3e50'; ctx.beginPath(); ctx.arc(a.x, a.y, 15, 0, Math.PI*2); ctx.fill();
             ctx.fillStyle = '#e74c3c'; ctx.beginPath(); ctx.arc(a.x, a.y, 5, 0, Math.PI*2); ctx.fill();
+        } else if (a.type === 'ivy_vine') {
+            const rr = a.radius || 160;
+            ctx.save();
+            ctx.translate(a.x, a.y);
+            ctx.shadowColor = 'rgba(46, 204, 113, 0.45)';
+            ctx.shadowBlur = 14;
+            ctx.strokeStyle = 'rgba(39, 174, 96, 0.95)';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.arc(0, 0, rr, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.strokeStyle = 'rgba(46, 204, 113, 0.45)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(0, 0, rr * 0.7, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.fillStyle = 'rgba(39, 174, 96, 0.16)';
+            ctx.beginPath();
+            ctx.arc(0, 0, rr * 0.55, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        } else if (a.type === 'ivy_flower') {
+            const pulse = Math.sin((a.pulse || 0)) * 2;
+            const rr = 24 + pulse;
+            const bloomRadius = a.radius || 210;
+            ctx.save();
+            ctx.translate(a.x, a.y);
+            ctx.fillStyle = 'rgba(46, 204, 113, 0.14)';
+            ctx.beginPath();
+            ctx.arc(0, 0, bloomRadius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(39, 174, 96, 0.95)';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.arc(0, 0, bloomRadius, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.shadowColor = 'rgba(241, 196, 15, 0.3)';
+            ctx.shadowBlur = 12;
+            ctx.fillStyle = '#2ecc71';
+            ctx.fillRect(-2, 8, 4, 18);
+            ctx.strokeStyle = '#1e8449';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(0, 8);
+            ctx.lineTo(-8, 18);
+            ctx.stroke();
+            ctx.fillStyle = '#7bed9f';
+            for (let k = 0; k < 6; k++) {
+                ctx.beginPath();
+                ctx.ellipse(Math.cos(k * Math.PI / 3) * rr * 0.58, Math.sin(k * Math.PI / 3) * rr * 0.58, 8, 12, k * Math.PI / 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.fillStyle = '#f1c40f';
+            ctx.beginPath();
+            ctx.arc(0, 0, 7, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
         } else if (a.type === 'giant_zombie') {
             const zr = (a.size || 30) * 0.9;
             ctx.fillStyle = '#8e44ad'; ctx.beginPath(); ctx.arc(a.x, a.y, zr, 0, Math.PI*2); ctx.fill();
@@ -9845,6 +10647,16 @@ function draw() {
             ctx.stroke();
             ctx.restore();
         }
+        if(e.hypnotizedTimer > 0) {
+            ctx.strokeStyle = 'rgba(255,107,181,0.95)';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.arc(e.x, e.y, e.size + 8, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.fillStyle = 'rgba(255,107,181,0.95)';
+            ctx.font = '16px Arial';
+            ctx.fillText('❤', e.x - 8, e.y - e.size - 6);
+        }
         if(e.speedBuffTimer > 0) { ctx.strokeStyle = 'rgba(255, 255, 0, 0.8)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(e.x, e.y, e.size+6, 0, Math.PI*2); ctx.stroke(); }
         ctx.fillStyle = '#e74c3c'; ctx.fillRect(e.x - 10, e.y - e.size - 8, 20, 4); ctx.fillStyle = '#2ecc71'; ctx.fillRect(e.x - 10, e.y - e.size - 8, 20 * (e.hp/e.maxHp), 4); 
         if(e.type === 'curandeiro') { ctx.fillStyle = '#2ecc71'; ctx.fillRect(e.x-2, e.y-6, 4, 12); ctx.fillRect(e.x-6, e.y-2, 12, 4); }
@@ -9854,6 +10666,44 @@ function draw() {
     if(player.hp > 0 && player.invisTimer <= 0 && !player.isDead) { 
         drawShape(ctx, player.x, player.y, player.r, 'circle', player.color, false, pd.selectedChar); 
         if(player.shieldTimer > 0 || player.qbShield) { ctx.strokeStyle = player.qbShield ? '#8e44ad' : '#3498db'; ctx.lineWidth = player.qbShield ? 6 : 4; ctx.beginPath(); ctx.arc(player.x, player.y, player.r + 5, 0, Math.PI*2); ctx.stroke(); } 
+        if(pd.selectedChar === 'sparta' && player.spartaShieldActive) {
+            ctx.save();
+            ctx.strokeStyle = '#f1c40f';
+            ctx.lineWidth = 5;
+            ctx.setLineDash([9, 6]);
+            ctx.shadowColor = 'rgba(241,196,15,0.8)';
+            ctx.shadowBlur = 12;
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.r + 10, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.restore();
+        }
+        if(pd.selectedChar === 'sparta' && (player.spartaAttackTimer || 0) > 0) {
+            const attackMode = player.spartaAttackMode || 'straight';
+            const attackRange = Math.max(140, player.spartaAttackRange || 180);
+            ctx.save();
+            ctx.translate(player.x, player.y);
+            ctx.rotate(player.lastAimAngle || 0);
+            ctx.globalAlpha = Math.max(0.16, Math.min(0.55, player.spartaAttackTimer * 3));
+            ctx.fillStyle = attackMode === 'straight' ? 'rgba(241, 196, 15, 0.6)' : 'rgba(230, 126, 34, 0.6)';
+            if (attackMode === 'straight') {
+                ctx.fillRect(12, -21, attackRange, 42);
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(12, -21, attackRange, 42);
+            } else {
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.arc(0, 0, attackRange, -(player.spartaAttackHalfAngle || 0.87), player.spartaAttackHalfAngle || 0.87);
+                ctx.closePath();
+                ctx.fill();
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
         if(pd.selectedChar === 'zippi' && player.zippiBubbleHp > 0) {
             ctx.save();
             ctx.fillStyle = 'rgba(77, 163, 255, 0.18)';
@@ -9884,6 +10734,23 @@ function draw() {
                 ctx.strokeStyle = '#e056fd';
                 ctx.lineWidth = 2;
                 ctx.strokeRect(player.x - qbWidth / 2 - 1, player.y - player.r - 19, qbWidth + 2, qbHeight + 2);
+            }
+        }
+        if(pd.selectedChar === 'adam') {
+            const adamWidth = 58;
+            const adamHeight = 9;
+            const adamFill = player.adamMechActive ? 1 : Math.max(0, Math.min(1, (Number(player.adamScrap) || 0) / 8));
+            ctx.fillStyle = '#111';
+            ctx.fillRect(player.x - adamWidth / 2, player.y - player.r - 18, adamWidth, adamHeight);
+            ctx.fillStyle = player.adamMechActive ? '#34ff7a' : '#95a5a6';
+            ctx.fillRect(player.x - adamWidth / 2, player.y - player.r - 18, adamWidth * adamFill, adamHeight);
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(player.x - adamWidth / 2, player.y - player.r - 18, adamWidth, adamHeight);
+            if (player.adamMechActive) {
+                ctx.strokeStyle = '#34ff7a';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(player.x - adamWidth / 2 - 1, player.y - player.r - 19, adamWidth + 2, adamHeight + 2);
             }
         }
     }
@@ -9948,6 +10815,8 @@ function draw() {
     }
 
     projectiles.forEach(p => {
+        const px = p.x;
+        const py = p.y;
         if(p.type === 'dagger' || p.type === 'ice_dagger' || p.type === 'ice_stake') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx)); ctx.fillStyle = (p.type==='ice_dagger'||p.type==='ice_stake')?'#00ffff':'#bdc3c7'; ctx.beginPath(); ctx.moveTo(p.size, 0); ctx.lineTo(-p.size/2, -p.size/3); ctx.lineTo(-p.size/2, p.size/3); ctx.fill(); ctx.restore(); } 
         else if(p.type === 'bomb' || p.type === 'rocket' || p.type === 'buster_rocket' || p.type === 'cannon_ball') { ctx.fillStyle = '#2c3e50'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); if(p.type !== 'cannon_ball'){ctx.fillStyle = '#e67e22'; ctx.beginPath(); ctx.arc(p.x + p.size/2, p.y - p.size/2, 2, 0, Math.PI*2); ctx.fill();} }
         else if(p.type === 'grenade' || p.type === 'big_grenade') { ctx.fillStyle = '#27ae60'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); }
@@ -9962,6 +10831,17 @@ function draw() {
             if(p.type === 'treble_clef') ctx.fillText('𝄞', p.x-8, p.y+8);
             else if(p.type === 'double_note') ctx.fillText('♫', p.x-8, p.y+8);
             else ctx.fillText('♪', p.x-8, p.y+8); 
+        }
+        else if(p.type === 'yuuto_heart' || p.type === 'heart') {
+            ctx.save();
+            ctx.translate(px, py);
+            ctx.rotate(Math.atan2(p.vy, p.vx));
+            ctx.font = `${Math.max(18, (p.size || 11) * 1.9)}px Arial`;
+            ctx.fillStyle = '#ff6bb5';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = 'rgba(255,107,181,0.75)';
+            ctx.fillText('❤', -Math.max(8, (p.size || 11) * 0.9), Math.max(8, (p.size || 11) * 0.75));
+            ctx.restore();
         }
         else if(p.type === 'vinyl') {
             ctx.save();
@@ -9980,6 +10860,143 @@ function draw() {
             ctx.beginPath();
             ctx.arc(0, 0, (p.size || 8) - 1, 0, Math.PI * 2);
             ctx.stroke();
+            ctx.restore();
+        }
+        else if(p.type === 'pit_bullet') {
+            ctx.save();
+            ctx.translate(px, py);
+            ctx.rotate(Math.atan2(p.vy, p.vx));
+            const r = Math.max(4, p.size || 5);
+            ctx.shadowBlur = 6;
+            ctx.shadowColor = '#000';
+            ctx.fillStyle = '#2f3640';
+            ctx.beginPath();
+            ctx.arc(0, 0, r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#dfe6e9';
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(-r * 0.28, -r * 0.28, Math.max(1.2, r * 0.22), 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(255,255,255,0.18)';
+            ctx.beginPath();
+            ctx.arc(r * 0.18, r * 0.15, Math.max(0.9, r * 0.12), 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+        else if(p.type === 'ruben_baguette' || p.type === 'ruben_baguette_half' || p.type === 'ruben_baguette_burnt') {
+            ctx.save();
+            ctx.translate(px, py);
+            ctx.rotate(Math.atan2(p.vy, p.vx));
+            const burnt = p.type === 'ruben_baguette_burnt';
+            const half = p.type === 'ruben_baguette_half';
+            const len = half ? 22 : 40;
+            const thick = half ? 7 : 9;
+            const g = ctx.createLinearGradient(-len/2, 0, len/2, 0);
+            if (burnt) {
+                g.addColorStop(0, '#2a1b12');
+                g.addColorStop(0.5, '#563726');
+                g.addColorStop(1, '#1a100a');
+            } else {
+                g.addColorStop(0, '#fff1c7');
+                g.addColorStop(0.45, '#d9ad65');
+                g.addColorStop(1, '#8d5b20');
+            }
+            ctx.shadowBlur = burnt ? 4 : 7;
+            ctx.shadowColor = burnt ? '#1f130a' : '#d4a15e';
+            ctx.fillStyle = g;
+            ctx.beginPath();
+            if(ctx.roundRect) { ctx.roundRect(-len/2, -thick/2, len, thick, thick/2); ctx.fill(); }
+            else { ctx.fillRect(-len/2, -thick/2, len, thick); }
+            ctx.strokeStyle = burnt ? '#1b1b1b' : '#8d5b20';
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
+            ctx.fillStyle = burnt ? '#0e0b08' : '#fff7df';
+            ctx.beginPath(); ctx.arc(-len*0.22, -thick*0.12, 1.7, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(len*0.20, thick*0.10, 1.7, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = burnt ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.40)';
+            ctx.fillRect(-len*0.40, -thick*0.25, len*0.18, 1.2);
+            if (burnt) {
+                ctx.strokeStyle = '#0f0f0f';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(-len*0.34, 0);
+                ctx.lineTo(len*0.36, 0);
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
+        else if(p.type === 'adam_ball') {
+            ctx.save();
+            ctx.translate(px, py);
+            ctx.rotate(Math.atan2(p.vy, p.vx));
+            const r = Math.max(8, p.size || 10);
+            const g = ctx.createRadialGradient(-r*0.35, -r*0.35, r*0.2, 0, 0, r);
+            g.addColorStop(0, '#ffffff');
+            g.addColorStop(0.22, '#cfd8dc');
+            g.addColorStop(0.58, '#7f8c8d');
+            g.addColorStop(1, '#263238');
+            ctx.shadowBlur = 14;
+            ctx.shadowColor = '#9fb3bd';
+            ctx.fillStyle = 'rgba(91, 201, 255, 0.14)';
+            ctx.beginPath();
+            ctx.arc(0, 0, r + 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = g;
+            ctx.beginPath();
+            ctx.arc(0, 0, r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#ecf0f1';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.strokeStyle = 'rgba(52, 152, 219, 0.85)';
+            ctx.lineWidth = 1.6;
+            ctx.beginPath();
+            ctx.arc(0, 0, r*0.72, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.fillStyle = 'rgba(255,255,255,0.92)';
+            ctx.beginPath();
+            ctx.arc(-r*0.32, -r*0.32, 2.4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(255,255,255,0.18)';
+            ctx.beginPath();
+            ctx.arc(r*0.25, r*0.2, r*0.18, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+        else if(p.type === 'adam_mech_ball') {
+            ctx.save();
+            ctx.translate(px, py);
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = '#34ff7a';
+            const r = Math.max(11, p.size || 16);
+            const g = ctx.createRadialGradient(-r*0.28, -r*0.28, r*0.18, 0, 0, r);
+            g.addColorStop(0, '#f3fff6');
+            g.addColorStop(0.28, '#72ffb0');
+            g.addColorStop(0.62, '#1fce72');
+            g.addColorStop(1, '#0b5f35');
+            ctx.fillStyle = 'rgba(52, 255, 122, 0.18)';
+            ctx.beginPath();
+            ctx.arc(0, 0, r + 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = g;
+            ctx.beginPath();
+            ctx.arc(0, 0, r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#effff5';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.arc(0, 0, r*0.62, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.fillStyle = 'rgba(255,255,255,0.9)';
+            ctx.beginPath();
+            ctx.arc(-r*0.25, -r*0.25, 3, 0, Math.PI * 2);
+            ctx.fill();
             ctx.restore();
         }
         else if(p.type === 'microphone') {
