@@ -3411,6 +3411,7 @@ function getCharacterRaritySortValue(c) {
 }
 
 
+
 const CHARACTER_SPRITES = {
     strike: 'sprites/strike.png',
     fasty: 'sprites/fasty.png',
@@ -3430,38 +3431,91 @@ const CHARACTER_SPRITES = {
     goo: 'sprites/goo.png',
     plasma: 'sprites/plasma.png',
     meekah: 'sprites/meekah.png',
+    ari: 'sprites/owen.png',
     owen: 'sprites/owen.png',
-    robin: 'sprites/robin.png'
+    robin: 'sprites/robin.png',
+
+    hank: 'sprites/hank.png',
+    hunter: 'sprites/hunter.png',
+    pit: 'sprites/pit.png',
+    ruben: 'sprites/ruben.png',
+    djfesta: 'sprites/dj_party.png',
+    dj_festa: 'sprites/dj_party.png',
+    ripper: 'sprites/ripper.png',
+    ghoul: 'sprites/ghoul.png',
+    aresta: 'sprites/aresta.png',
+    chessy: 'sprites/chessy.png',
+    lunch: 'sprites/lunch.png',
+    adam: 'sprites/adam.png',
+    tiki: 'sprites/tiki.png',
+    sparta: 'sprites/sparta.png',
+    nucleon: 'sprites/nucleon.png',
+    zippi: 'sprites/zippi.png',
+    ninji: 'sprites/ninji.png',
+    firey: 'sprites/mestre_do_fogo.png',
+    mestre_do_fogo: 'sprites/mestre_do_fogo.png',
+    booboo: 'sprites/boo_boo.png',
+    boo_boo: 'sprites/boo_boo.png',
+    gladiator: 'sprites/gladiator_spear.png',
+    gladiator_spear: 'sprites/gladiator_spear.png',
+    gladiator_sword: 'sprites/gladiator_sword.png',
+    elektro: 'sprites/elektro.png',
+
+    necro_zombie: 'sprites/necro_zombie.png',
+    sparta_lion: 'sprites/sparta_lion.png',
+    adam_mech: 'sprites/adam_mech.png'
 };
 
 const CHARACTER_SPRITE_CACHE = new Map();
-function getCharacterSpritePath(id) {
-    return CHARACTER_SPRITES[id] || '';
+const CHARACTER_SPRITE_COMPACT_IDS = new Set([
+    'shiv',
+    'necro_zombie',
+    'sparta_lion',
+    'adam_mech',
+    'gladiator_spear',
+    'gladiator_sword'
+]);
+
+function getDynamicCharacterSpriteId(id) {
+    if (id === 'gladiator') {
+        return (pd?.chars?.gladiator?.mode === 'shooter') ? 'gladiator_spear' : 'gladiator_sword';
+    }
+    return id;
 }
+
+function getCharacterSpritePath(id) {
+    const resolvedId = getDynamicCharacterSpriteId(id);
+    return CHARACTER_SPRITES[resolvedId] || '';
+}
+
 function getCharacterSpriteMarkup(id, variant = 'menu') {
     const path = getCharacterSpritePath(id);
     if (!path) return '';
     const variantClass = variant === 'detail' ? 'detail' : (variant === 'hero' ? 'hero' : (variant === 'promo' ? 'promo' : 'menu'));
-    const smallClass = id === 'shiv' ? ' char-sprite--shiv' : '';
+    const smallClass = CHARACTER_SPRITE_COMPACT_IDS.has(getDynamicCharacterSpriteId(id)) ? ' char-sprite--shiv' : '';
     return `<img class="char-sprite char-sprite--${variantClass}${smallClass}" src="${path}" alt="" aria-hidden="true">`;
 }
+
 function getCharacterSpriteImage(id) {
     const path = getCharacterSpritePath(id);
     if (!path) return null;
-    if (!CHARACTER_SPRITE_CACHE.has(id)) {
+    const resolvedId = getDynamicCharacterSpriteId(id);
+    if (!CHARACTER_SPRITE_CACHE.has(resolvedId)) {
         const img = new Image();
         img.src = path;
-        CHARACTER_SPRITE_CACHE.set(id, img);
+        CHARACTER_SPRITE_CACHE.set(resolvedId, img);
     }
-    return CHARACTER_SPRITE_CACHE.get(id);
+    return CHARACTER_SPRITE_CACHE.get(resolvedId);
 }
+
+
 function drawCharacterSprite(cCtx, x, y, size, spriteId, opts = {}) {
     const img = getCharacterSpriteImage(spriteId);
     if (!img || !img.complete || !img.naturalWidth) return false;
     const ratio = img.naturalWidth / img.naturalHeight;
     const scale = Number.isFinite(opts.scale) ? opts.scale : 1;
-    const widthMult = Number.isFinite(opts.widthMult) ? opts.widthMult : 8.0;
-    const spriteScale = (spriteId === 'shiv' ? 0.82 : 1) * scale;
+    const widthMult = Number.isFinite(opts.widthMult) ? opts.widthMult : (CHARACTER_SPRITE_COMPACT_IDS.has(getDynamicCharacterSpriteId(spriteId)) ? 9.2 : 10.2);
+    const spriteScale = (CHARACTER_SPRITE_COMPACT_IDS.has(getDynamicCharacterSpriteId(spriteId)) ? 0.82 : 1) * scale;
     const w = Math.max(24, size * widthMult * spriteScale);
     const h = w / ratio;
     const flipX = Boolean(opts.flipX || (opts.autoFlip && playerFacingLeft));
@@ -3477,6 +3531,7 @@ function drawCharacterSprite(cCtx, x, y, size, spriteId, opts = {}) {
     cCtx.restore();
     return true;
 }
+
 
 const CHARACTER_TITLE_THRESHOLD = 100;
 
@@ -7292,10 +7347,10 @@ function update(dt) {
             const giantChance = Math.max(0, Math.min(1, Number(CHARACTERS.necro.necroGiantZombie || 0.1)));
             const spawnGiant = Math.random() < giantChance;
             if(spawnGiant) {
-                allies.push({x: player.x+22, y: player.y, dmg: player.baseDmg * 1.5, speed: 1.25, life: 8, cd: 0, isTurret: false, isZombie: true, type: 'giant_zombie', size: 30, color: '#8e44ad'});
+                allies.push({x: player.x+22, y: player.y, dmg: player.baseDmg * 1.5, speed: 1.25, life: 8, cd: 0, isTurret: false, isZombie: true, type: 'giant_zombie', size: 30, color: '#8e44ad', facingLeft: false});
             }
-            allies.push({x: player.x+20, y: player.y, dmg: player.baseDmg * 0.7, speed: 1.8, life: 8, cd: 0, isTurret: false, isZombie: true});
-            allies.push({x: player.x-20, y: player.y, dmg: player.baseDmg * 0.7, speed: 1.8, life: 8, cd: 0, isTurret: false, isZombie: true});
+            allies.push({x: player.x+20, y: player.y, dmg: player.baseDmg * 0.7, speed: 1.8, life: 8, cd: 0, isTurret: false, isZombie: true, type: 'necro_zombie', facingLeft: false});
+            allies.push({x: player.x-20, y: player.y, dmg: player.baseDmg * 0.7, speed: 1.8, life: 8, cd: 0, isTurret: false, isZombie: true, type: 'necro_zombie', facingLeft: true});
             player.zombieTimer = 10;
         }
     }
@@ -9067,7 +9122,7 @@ function updateEnemies(dt) {
                     }
                 }
                 if(CHARACTERS[pd.selectedChar] && CHARACTERS[pd.selectedChar].necroGiantZombie && Math.random() < CHARACTERS[pd.selectedChar].necroGiantZombie) {
-                    allies.push({x: e.x, y: e.y, dmg: player.baseDmg * 1.5, speed: 1.2, life: 12, cd: 0, isTurret: false, isZombie: true, radius: 25});
+                    allies.push({x: e.x, y: e.y, dmg: player.baseDmg * 1.5, speed: 1.2, life: 12, cd: 0, isTurret: false, isZombie: true, type: 'necro_zombie', radius: 25});
                 }
                 xpGems.push({ x: e.x, y: e.y, val: e.type==='megaboss' ? 1000 : (e.isBoss? 500 : e.type==='gigante'||e.type==='tanque'||e.type==='colosso'? 50 : 10) });
                 if (pd.selectedChar === 'adam' && !player.adamMechActive && Math.random() < 0.25) {
@@ -9181,6 +9236,7 @@ function updateAllies(dt) {
             const lionSpeed = Math.max(2.0, (a.speed || 2.2) * 60 * dt);
             if(target && minD < 500) {
                 const ang = Math.atan2(target.y - a.y, target.x - a.x);
+                a.facingLeft = Math.cos(ang) < 0;
                 a.x += Math.cos(ang) * lionSpeed;
                 a.y += Math.sin(ang) * lionSpeed;
                 if(minD < (a.r || 24) + target.size + 12) {
@@ -9302,20 +9358,21 @@ function updateAllies(dt) {
             a.angle = (a.angle || 0) + 2 * dt;
         } else { 
             if(target) {
-                let ang = Math.atan2(target.y - a.y, target.x - a.x); 
+                let ang = Math.atan2(target.y - a.y, target.x - a.x);
+                a.facingLeft = Math.cos(ang) < 0;
                 if(a.type === 'penguin') {
                     if(minD > 180) { a.x += Math.cos(ang) * a.speed * 60 * dt; a.y += Math.sin(ang) * a.speed * 60 * dt; }
                 } else {
                     a.x += Math.cos(ang) * a.speed * 60 * dt; a.y += Math.sin(ang) * a.speed * 60 * dt;
-                    if(minD < 15 + target.size) { 
-                        if (a.cd <= 0) { 
+                    if(minD < 15 + target.size) {
+                        if (a.cd <= 0) {
                             let soakMult = 1 + (target.soak || 0) * 0.05;
-                            target.hp -= a.dmg * soakMult * (target.isBoss ? player.stats.bossDmgMult : 1); 
-                            addFloatingText(target.x, target.y, Math.floor(a.dmg), '#fff'); 
-                            a.cd = 0.5; 
-                        } else { 
-                            a.cd -= dt; 
-                        } 
+                            target.hp -= a.dmg * soakMult * (target.isBoss ? player.stats.bossDmgMult : 1);
+                            addFloatingText(target.x, target.y, Math.floor(a.dmg), '#fff');
+                            a.cd = 0.5;
+                        } else {
+                            a.cd -= dt;
+                        }
                     }
                 }
             }
@@ -10286,6 +10343,15 @@ function updateGraffitMarks(dt) {
     }
 }
 
+
+function getPlayerSpriteId() {
+    if (pd?.selectedChar === 'adam' && player?.adamMechActive) return 'adam_mech';
+    if (pd?.selectedChar === 'gladiator') {
+        return (pd?.chars?.gladiator?.mode === 'shooter') ? 'gladiator_spear' : 'gladiator_sword';
+    }
+    return pd?.selectedChar || null;
+}
+
 function drawShape(cCtx, x, y, size, shape, color, isBoss=false, spriteId=null) {
     if (spriteId && getCharacterSpriteImage(spriteId) && getCharacterSpriteImage(spriteId).complete && getCharacterSpriteImage(spriteId).naturalWidth) {
         drawCharacterSprite(cCtx, x, y, size, spriteId, { widthMult: 10.2, autoFlip: true });
@@ -10485,33 +10551,16 @@ function draw() {
             for(let k=0; k<8; k++){ ctx.beginPath(); ctx.moveTo(20, 0); ctx.lineTo(25, -5); ctx.lineTo(20, -10); ctx.fill(); ctx.rotate(Math.PI/4); } ctx.restore(); 
         } else if (a.type === 'sparta_lion') {
             const rr = a.r || 24;
-            ctx.save();
-            ctx.translate(a.x, a.y);
-            ctx.shadowColor = 'rgba(0,0,0,0.25)';
-            ctx.shadowBlur = 8;
-            ctx.fillStyle = '#d4af37';
-            ctx.beginPath();
-            ctx.ellipse(0, 2, rr * 1.25, rr * 0.88, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#9c6b1e';
-            ctx.beginPath();
-            ctx.arc(0, -2, rr * 0.95, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = '#3a2410';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.arc(0, -2, rr * 1.18, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.fillStyle = '#111';
-            ctx.beginPath();
-            ctx.arc(-rr * 0.28, -rr * 0.12, 2.8, 0, Math.PI * 2);
-            ctx.arc(rr * 0.28, -rr * 0.12, 2.8, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#f5c16c';
-            ctx.beginPath();
-            ctx.arc(rr * 0.12, rr * 0.08, 2.2, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
+            drawCharacterSprite(ctx, a.x, a.y, rr, 'sparta_lion', {
+                widthMult: 10.8,
+                flipX: Boolean(a.facingLeft)
+            });
+        } else if (a.isZombie || a.type === 'giant_zombie') {
+            const rr = a.r || a.size || 18;
+            drawCharacterSprite(ctx, a.x, a.y, rr, 'necro_zombie', {
+                widthMult: a.type === 'giant_zombie' ? 10.8 : 9.6,
+                flipX: Boolean(a.facingLeft)
+            });
         } else if (a.gooClone) {
             const hpRatio = Math.max(0, Math.min(1, (a.hp || 1) / (a.cloneMaxHp || a.maxHp || 1)));
             const rr = a.r || 14;
@@ -10664,7 +10713,7 @@ function draw() {
     });
     
     if(player.hp > 0 && player.invisTimer <= 0 && !player.isDead) { 
-        drawShape(ctx, player.x, player.y, player.r, 'circle', player.color, false, pd.selectedChar); 
+        drawShape(ctx, player.x, player.y, player.r, 'circle', player.color, false, getPlayerSpriteId()); 
         if(player.shieldTimer > 0 || player.qbShield) { ctx.strokeStyle = player.qbShield ? '#8e44ad' : '#3498db'; ctx.lineWidth = player.qbShield ? 6 : 4; ctx.beginPath(); ctx.arc(player.x, player.y, player.r + 5, 0, Math.PI*2); ctx.stroke(); } 
         if(pd.selectedChar === 'sparta' && player.spartaShieldActive) {
             ctx.save();
@@ -10754,7 +10803,7 @@ function draw() {
             }
         }
     }
-    if(player.hp > 0 && player.invisTimer > 0 && !player.isDead) { ctx.globalAlpha = 0.3; drawShape(ctx, player.x, player.y, player.r, 'circle', player.color, false, pd.selectedChar); ctx.globalAlpha = 1; }
+    if(player.hp > 0 && player.invisTimer > 0 && !player.isDead) { ctx.globalAlpha = 0.3; drawShape(ctx, player.x, player.y, player.r, 'circle', player.color, false, getPlayerSpriteId()); ctx.globalAlpha = 1; }
 
     if (player.stats.orbitals > 0 && !player.isDead) {
         let count = player.stats.orbitals;
