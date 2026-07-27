@@ -3453,6 +3453,25 @@ const CHARACTER_SPRITES = {
     ari: 'sprites/owen.png',
     owen: 'sprites/owen.png',
     robin: 'sprites/robin.png',
+    buster: 'sprites/buster.png',
+    ivy: 'sprites/ivy.png',
+    scythe: 'sprites/scythe.png',
+    mr_saw: 'sprites/mr_saw.png',
+    seae: 'sprites/seae.png',
+    eel: 'sprites/eel.png',
+    flex: 'sprites/flex_hammer.png',
+    flex_hammer: 'sprites/flex_hammer.png',
+    flex_less_health: 'sprites/flex_less_health.png',
+    axel: 'sprites/axel.png',
+    major_briggs: 'sprites/major_briggs.png',
+    ignite: 'sprites/ignite.png',
+    yuuto: 'sprites/yuuto.png',
+    vampyrus: 'sprites/vampyrus.png',
+    cyber_tron: 'sprites/cyber_tron.png',
+    frost: 'sprites/frost.png',
+    yeti: 'sprites/yeti.png',
+    echo: 'sprites/echo.png',
+    graffit: 'sprites/graffit.png',
 
     hank: 'sprites/hank.png',
     hunter: 'sprites/hunter.png',
@@ -3499,6 +3518,10 @@ const CHARACTER_SPRITE_COMPACT_IDS = new Set([
 function getDynamicCharacterSpriteId(id) {
     if (id === 'gladiator') {
         return (pd?.chars?.gladiator?.mode === 'shooter') ? 'gladiator_spear' : 'gladiator_sword';
+    }
+    if (id === 'flex') {
+        if (typeof player !== 'undefined' && player && player.flexLowHp) return 'flex_less_health';
+        return 'flex_hammer';
     }
     return id;
 }
