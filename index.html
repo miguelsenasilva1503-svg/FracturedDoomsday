@@ -400,7 +400,8 @@
         text-align: left;
     }
     .gacha-drop-emoji,
-    .gacha-drop-ball {
+    .gacha-drop-ball,
+    .gacha-drop-sprite {
         width: 76px;
         height: 76px;
         border-radius: 24px;
@@ -419,6 +420,18 @@
         font-size: 36px;
     }
     .gacha-drop-body { flex: 1; min-width: 0; }
+    .gacha-drop-sprite {
+        overflow: hidden;
+        flex: 0 0 96px;
+        width: 96px;
+        height: 96px;
+        border-radius: 26px;
+    }
+    .gacha-drop-sprite .char-sprite {
+        width: 100px;
+        height: 100px;
+        margin: 0;
+    }
     .gacha-drop-title { font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: #b9c4d0; font-weight: 900; margin-bottom: 4px; }
     .gacha-drop-name { font-size: 28px; line-height: 1.05; font-weight: 900; color: #fff; text-shadow: 2px 2px 0 #000; word-break: break-word; }
     .gacha-drop-amount { margin-top: 8px; font-size: 20px; color: var(--btn-yellow); font-weight: 900; }
@@ -2838,6 +2851,7 @@ function getGachaRewardRenderData(rawText) {
             type: 'char',
             icon,
             name: char?.name || charName,
+            spriteId: char?.id || '',
             rarity,
             rarityLabel,
             ballColor: char?.color || '#8e44ad',
@@ -2867,9 +2881,12 @@ function getGachaRewardRenderData(rawText) {
 function renderGachaRevealHtml(rawText) {
     const data = getGachaRewardRenderData(rawText);
     if (data.type === 'char') {
-        const ballStyle = data.ballColor ? ` style="background: radial-gradient(circle at 30% 28%, rgba(255,255,255,0.42), rgba(255,255,255,0.08) 48%), ${data.ballColor};"` : '';
+        const spriteMarkup = data.spriteId ? getCharacterSpriteMarkup(data.spriteId, 'hero') : '';
+        const spriteHtml = spriteMarkup
+            ? `<div class="gacha-drop-sprite">${spriteMarkup}</div>`
+            : `<div class="gacha-drop-ball" style="background: radial-gradient(circle at 30% 28%, rgba(255,255,255,0.42), rgba(255,255,255,0.08) 48%), ${data.ballColor || '#8e44ad'};"></div>`;
         return `<div class="gacha-drop-card gacha-drop-card-char">
-            <div class="gacha-drop-ball"${ballStyle}></div>
+            ${spriteHtml}
             <div class="gacha-drop-body">
                 <div class="gacha-drop-title">${escapeHtmlText(data.title)}</div>
                 <div class="gacha-drop-name">${escapeHtmlText(decodeHtmlEntities(data.name))}</div>
@@ -3422,6 +3439,8 @@ const CHARACTER_SPRITES = {
     power: 'sprites/pow.png',
     grenade: 'sprites/grenade.png',
     vesper: 'sprites/vesper.png',
+    quarterback: 'sprites/quarterback.png',
+    pipi: 'sprites/pipi.png',
     shiv: 'sprites/shiv.png',
     critik: 'sprites/critik.png',
     tenent: 'sprites/tenent.png',
@@ -3461,30 +3480,6 @@ const CHARACTER_SPRITES = {
     gladiator_sword: 'sprites/gladiator_sword.png',
     elektro: 'sprites/elektro.png',
 
-    scythe: 'sprites/scythe.png',
-    buster: 'sprites/buster.png',
-    mrsaw: 'sprites/mr_saw.png',
-    mr_saw: 'sprites/mr_saw.png',
-    seae: 'sprites/seae.png',
-    eel: 'sprites/eel.png',
-    flex: 'sprites/flex_hammer.png',
-    flex_hammer: 'sprites/flex_hammer.png',
-    flex_less_health: 'sprites/flex_less_health.png',
-    kaisen: 'sprites/axel.png',
-    axel: 'sprites/axel.png',
-    major_briggs: 'sprites/major_briggs.png',
-    ivy: 'sprites/ivy.png',
-    ignite: 'sprites/ignite.png',
-    yuuto: 'sprites/yuuto.png',
-    vampyrus: 'sprites/vampyrus.png',
-    cybertron: 'sprites/cyber_tron.png',
-    cyber_tron: 'sprites/cyber_tron.png',
-    frost: 'sprites/frost.png',
-    pipi: 'sprites/pipi.png',
-    yeti: 'sprites/yeti.png',
-    echo: 'sprites/echo.png',
-    graffit: 'sprites/graffit.png',
-
     necro_zombie: 'sprites/necro_zombie.png',
     sparta_lion: 'sprites/sparta_lion.png',
     adam_mech: 'sprites/adam_mech.png'
@@ -3501,26 +3496,23 @@ const CHARACTER_SPRITE_COMPACT_IDS = new Set([
     'gladiator_sword'
 ]);
 
-function getDynamicCharacterSpriteId(id, displayOnly = false) {
-    if (id === 'flex' && !displayOnly && pd?.selectedChar === 'flex' && player?.flexLowHp) {
-        return 'flex_less_health';
-    }
+function getDynamicCharacterSpriteId(id) {
     if (id === 'gladiator') {
         return (pd?.chars?.gladiator?.mode === 'shooter') ? 'gladiator_spear' : 'gladiator_sword';
     }
     return id;
 }
 
-function getCharacterSpritePath(id, displayOnly = false) {
-    const resolvedId = getDynamicCharacterSpriteId(id, displayOnly);
+function getCharacterSpritePath(id) {
+    const resolvedId = getDynamicCharacterSpriteId(id);
     return CHARACTER_SPRITES[resolvedId] || '';
 }
 
 function getCharacterSpriteMarkup(id, variant = 'menu') {
-    const path = getCharacterSpritePath(id, true);
+    const path = getCharacterSpritePath(id);
     if (!path) return '';
     const variantClass = variant === 'detail' ? 'detail' : (variant === 'hero' ? 'hero' : (variant === 'promo' ? 'promo' : 'menu'));
-    const smallClass = CHARACTER_SPRITE_COMPACT_IDS.has(getDynamicCharacterSpriteId(id, true)) ? ' char-sprite--shiv' : '';
+    const smallClass = CHARACTER_SPRITE_COMPACT_IDS.has(getDynamicCharacterSpriteId(id)) ? ' char-sprite--shiv' : '';
     return `<img class="char-sprite char-sprite--${variantClass}${smallClass}" src="${path}" alt="" aria-hidden="true">`;
 }
 
@@ -7059,13 +7051,13 @@ function startRunAfterShop() {
     }
     
     player = {
-        x: 0, y: 0, r: getCharacterBodyRadius(pd.selectedChar), baseHp: initialBaseHp, hp: initialBaseHp, baseSpeed: charDef.speed, baseDmg: initialBaseDmg,
+        x: 0, y: 0, r: (pd.selectedChar === 'hank' || pd.selectedChar === 'yeti') ? 20 : ((pd.selectedChar === 'shiv' || pd.selectedChar === 'zippi') ? 10 : (pd.selectedChar === 'kaisen' ? 13 : (pd.selectedChar === 'booboo' ? 13 : (pd.selectedChar === 'eel' ? 15 : 15)))), baseHp: initialBaseHp, hp: initialBaseHp, baseSpeed: charDef.speed, baseDmg: initialBaseDmg,
         baseFireRate: charDef.fireRate, baseRange: charDef.range, color: charDef.color, weapon: charDef.weapon, cd: 0, shieldTimer: 0,
         zombieTimer: 0, revived: false, elekCycle: false, dashTimer: 0, meleeCd: 0, boldShots: 0, boldReload: 0, specCd: 0, invisTimer: 0,
         lastMoveAngle: 0, lastAimAngle: 0, tenentCycle: 0, orbitalAngle: 0, boobooReturn: true, pickedCards: [], revivesUsed: 0, qbBar: 0, qbShield: false, isDead: false, flexCombo: 0, flexReload: 0, ninjiDashCd: 0, majorBriggsKills: 0, majorBriggsStage: 1,
         adamScrap: 0, adamMechActive: false, adamMechWavesLeft: 0, adamMechHpBonus: 0, adamMechSizeBonus: 0, adamBaseHpBeforeMech: null, adamBaseRBeforeMech: null,
         spartaCycle: 0, spartaNoDamageTimer: 0, spartaShieldActive: false, spartaAttackTimer: 0, spartaAttackMode: 'straight', spartaAttackRange: 0, spartaAttackWidth: 0, spartaAttackHalfAngle: 0,
-        gooRevived: false, gooCloneSpawned: false, gooFullBaseHp: initialBaseHp, gooFullBaseDmg: initialBaseDmg, gooFullR: getCharacterBodyRadius(pd.selectedChar),
+        gooRevived: false, gooCloneSpawned: false, gooFullBaseHp: initialBaseHp, gooFullBaseDmg: initialBaseDmg, gooFullR: (pd.selectedChar === 'hank' || pd.selectedChar === 'yeti') ? 20 : ((pd.selectedChar === 'shiv' || pd.selectedChar === 'zippi') ? 10 : (pd.selectedChar === 'kaisen' ? 13 : (pd.selectedChar === 'eel' ? 15 : 15))),
         inTotem: false, landmineTimer: 0, flameTimer: 0, flameReload: 0, flameTickCd: 0, flexTimer: 0, flexAngle: 0, flexLowHp: false, seaePuddleCd: 0, zippiBubbleHp: pd.selectedChar === 'zippi' ? 80 : 0, zippiBubbleMaxHp: pd.selectedChar === 'zippi' ? 80 : 0, zippiBubbleBroken: false,
         stats: { dmgMult: 1, maxHpMult: 1, speedMult: 1, fireRateMult: 1, rangeMult: 1, extraProj: 0, regen: 0, critChance: 0, critDmg: 2, pierce: 0, projSpdMult: 1, defMult: 1, vamp: 0, coinMult: 1, xpMult: 1, explodeHit: false, waveBuff: false, doubleShotChance: 0, dynamicDef: 0, magnetMult: 1, poisonChance: 0, freezeChance: 0, bounce: 0, enemySpawnMult: 1, bossDmgMult: 1, orbitals: 0, dodgeChance: charDef.baseDodge || 0, landmine: 0, pushChance: 0 }
     };
@@ -9184,6 +9176,8 @@ function updateAllies(dt) {
                 const distFollow = Math.hypot(dx, dy);
                 const followSpeed = (a.speed || (isKaisenDrone ? 3.0 : 2.8)) * 75 * dt;
 
+                if (a.type === 'penguin' && distFollow > 0.1) a.facingLeft = dx < 0;
+
                 if(distFollow > 2) {
                     const step = Math.min(1, followSpeed / distFollow);
                     a.x += dx * step;
@@ -10372,17 +10366,8 @@ function updateGraffitMarks(dt) {
 }
 
 
-function getCharacterBodyRadius(charId) {
-    if (charId === 'hank' || charId === 'yeti' || charId === 'ignite') return 20;
-    if (charId === 'shiv' || charId === 'zippi' || charId === 'pipi') return 10;
-    if (charId === 'kaisen' || charId === 'booboo') return 13;
-    if (charId === 'eel') return 15;
-    return 15;
-}
-
 function getPlayerSpriteId() {
     if (pd?.selectedChar === 'adam' && player?.adamMechActive) return 'adam_mech';
-    if (pd?.selectedChar === 'flex' && player?.flexLowHp) return 'flex_less_health';
     if (pd?.selectedChar === 'gladiator') {
         return (pd?.chars?.gladiator?.mode === 'shooter') ? 'gladiator_spear' : 'gladiator_sword';
     }
@@ -10565,7 +10550,13 @@ function draw() {
         if(a.isTotem) { 
             ctx.fillStyle = 'rgba(142, 68, 173, 0.2)'; ctx.beginPath(); ctx.arc(a.x, a.y, a.radius, 0, Math.PI*2); ctx.fill(); 
             ctx.fillStyle = '#8e44ad'; ctx.fillRect(a.x-8, a.y-15, 16, 30); 
-        } else if(a.type === 'penguin' || a.type === 'drone') {
+        } else if(a.type === 'penguin') {
+            const rr = a.r || 18;
+            drawCharacterSprite(ctx, a.x, a.y, rr, 'pipi', {
+                widthMult: 8.9,
+                flipX: !Boolean(a.facingLeft)
+            });
+        } else if(a.type === 'drone') {
             ctx.fillStyle = a.type === 'drone' ? '#bdc3c7' : '#34495e'; ctx.beginPath(); ctx.arc(a.x, a.y, 10, 0, Math.PI*2); ctx.fill(); 
             ctx.fillStyle = a.type === 'drone' ? '#e74c3c' : '#fff'; ctx.beginPath(); ctx.arc(a.x, a.y+2, 6, 0, Math.PI*2); ctx.fill();
         } else if(a.isTurret) { 
