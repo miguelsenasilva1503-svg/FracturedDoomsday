@@ -3507,6 +3507,35 @@ const CHARACTER_SPRITES = {
     adam_mech: 'sprites/adam_mech.png'
 };
 
+const ENEMY_SPRITES = {
+    basico: 'enemies/basic.png',
+    basic: 'enemies/basic.png',
+    velocista: 'enemies/velocist.png',
+    atirador: 'enemies/shooter.png',
+    shooter: 'enemies/shooter.png',
+    gigante: 'enemies/giant.png',
+    boss: 'enemies/boss.png',
+    tanque: 'enemies/tank.png',
+    tank: 'enemies/tank.png',
+    kamikaze: 'enemies/kamikaze.png',
+    elite: 'enemies/elite_shooter.png',
+    elite_shooter: 'enemies/elite_shooter.png',
+    curandeiro: 'enemies/healer.png',
+    healer: 'enemies/healer.png',
+    megaboss: 'enemies/mega_boss.png',
+    mega_boss: 'enemies/mega_boss.png',
+    colosso: 'enemies/colossum.png',
+    colossum: 'enemies/colossum.png',
+    lider: 'enemies/leader.png',
+    leader: 'enemies/leader.png',
+    lider_elite: 'enemies/elite_leader.png',
+    elite_leader: 'enemies/elite_leader.png',
+    elite_master: 'enemies/master_elite_shooter.png',
+    master_elite_shooter: 'enemies/master_elite_shooter.png'
+};
+
+const ENEMY_SPRITE_CACHE = new Map();
+
 const CHARACTER_SPRITE_CACHE = new Map();
 const CHARACTER_SPRITE_COMPACT_IDS = new Set([
     'shiv',
@@ -3552,6 +3581,17 @@ function getCharacterSpriteImage(id) {
         CHARACTER_SPRITE_CACHE.set(resolvedId, img);
     }
     return CHARACTER_SPRITE_CACHE.get(resolvedId);
+}
+
+function getEnemySpriteImage(id) {
+    const path = ENEMY_SPRITES[id] || '';
+    if (!path) return null;
+    if (!ENEMY_SPRITE_CACHE.has(id)) {
+        const img = new Image();
+        img.src = path;
+        ENEMY_SPRITE_CACHE.set(id, img);
+    }
+    return ENEMY_SPRITE_CACHE.get(id);
 }
 
 
@@ -10401,12 +10441,20 @@ function getPlayerSpriteId() {
 }
 
 function drawShape(cCtx, x, y, size, shape, color, isBoss=false, spriteId=null) {
+    const enemyImg = spriteId ? getEnemySpriteImage(spriteId) : null;
+    if (enemyImg && enemyImg.complete && enemyImg.naturalWidth) {
+        const ratio = enemyImg.naturalWidth / enemyImg.naturalHeight;
+        const w = Math.max(24, size * 10.2);
+        const h = w / ratio;
+        cCtx.drawImage(enemyImg, x - w / 2, y - h / 2, w, h);
+        return;
+    }
     if (spriteId && getCharacterSpriteImage(spriteId) && getCharacterSpriteImage(spriteId).complete && getCharacterSpriteImage(spriteId).naturalWidth) {
         drawCharacterSprite(cCtx, x, y, size, spriteId, { widthMult: 10.2, autoFlip: true });
         return;
     }
     cCtx.fillStyle = color; cCtx.beginPath();
-    if(isBoss) { for(let i=0; i<8; i++){ let a = i * Math.PI / 4 + Math.PI/8; if(i===0) cCtx.moveTo(x+Math.cos(a)*size, y+Math.sin(a)*size); else cCtx.lineTo(x+Math.cos(a)*size, y+Math.sin(a)*size); } } 
+    if(isBoss) { for(let i=0; i<8; i++){ let a = i * Math.PI / 4 + Math.PI/8; if(i===0) cCtx.moveTo(x+Math.cos(a)*size, y+Math.sin(a)*size); else cCtx.lineTo(x+Math.cos(a)*size, y+Math.sin(a)*size); } }
     else { cCtx.arc(x, y, size, 0, Math.PI*2); }
     cCtx.closePath(); cCtx.fill(); cCtx.lineWidth = 2; cCtx.strokeStyle = '#000'; cCtx.stroke();
 }
