@@ -3618,6 +3618,82 @@ function drawCharacterSprite(cCtx, x, y, size, spriteId, opts = {}) {
     return true;
 }
 
+function getEnemySpritePath(type) {
+    return ENEMY_SPRITES[String(type || '').toLowerCase()] || '';
+}
+
+function getEnemySpriteImage(type) {
+    const key = String(type || '').toLowerCase();
+    const path = getEnemySpritePath(key);
+    if (!path) return null;
+    if (!ENEMY_SPRITE_CACHE.has(key)) {
+        const img = new Image();
+        img.src = path;
+        ENEMY_SPRITE_CACHE.set(key, img);
+    }
+    return ENEMY_SPRITE_CACHE.get(key);
+}
+
+function getEnemySpriteWidthMult(type) {
+    switch (String(type || '').toLowerCase()) {
+        case 'megaboss':
+        case 'mega_boss':
+            return 6.2;
+        case 'boss':
+            return 6.8;
+        case 'colosso':
+        case 'colossum':
+            return 6.6;
+        case 'gigante':
+        case 'giant':
+        case 'tanque':
+        case 'tank':
+            return 7.8;
+        case 'lider':
+        case 'leader':
+        case 'lider_elite':
+        case 'elite_leader':
+        case 'elite_master':
+        case 'master_elite_shooter':
+            return 8.0;
+        case 'curandeiro':
+        case 'healer':
+        case 'kamikaze':
+        case 'elite':
+        case 'elite_shooter':
+        case 'atirador':
+        case 'shooter':
+        case 'velocista':
+        case 'velocist':
+        case 'basico':
+        case 'basic':
+        default:
+            return 9.6;
+    }
+}
+
+function drawEnemySprite(cCtx, x, y, size, type, opts = {}) {
+    const img = getEnemySpriteImage(type);
+    if (!img || !img.complete || !img.naturalWidth) return false;
+    const ratio = img.naturalWidth / img.naturalHeight;
+    const scale = Number.isFinite(opts.scale) ? opts.scale : 1;
+    const widthMult = Number.isFinite(opts.widthMult) ? opts.widthMult : getEnemySpriteWidthMult(type);
+    const w = Math.max(22, size * widthMult * scale);
+    const h = w / ratio;
+    const flipX = Boolean(opts.flipX);
+    cCtx.save();
+    if (Number.isFinite(opts.opacity)) cCtx.globalAlpha = opts.opacity;
+    if (flipX) {
+        cCtx.translate(x, y);
+        cCtx.scale(-1, 1);
+        cCtx.drawImage(img, -w / 2, -h / 2, w, h);
+    } else {
+        cCtx.drawImage(img, x - w / 2, y - h / 2, w, h);
+    }
+    cCtx.restore();
+    return true;
+}
+
 
 const CHARACTER_TITLE_THRESHOLD = 100;
 
@@ -9029,9 +9105,12 @@ function updateEnemies(dt) {
         let currentSpeed = (e.slowTimer > 0 ? e.speed * 0.5 : e.speed) * ivySlowMult; if(e.slowTimer > 0) e.slowTimer -= dt;
         if(e.speedBuffTimer > 0) { e.speedBuffTimer -= dt; currentSpeed *= 1.5; }
         let eSpeedMult = 1; obstacles.forEach(o => { if(o.type==='ice' && dist(e, o) < o.r + e.size) eSpeedMult = 1.5; if(o.type==='mud' && dist(e, o) < o.r + e.size) eSpeedMult = 0.5; if(o.type==='cacto') { let d2=dist(e,o); if(d2<o.r+e.size){ e.hp -= 30 * dt; } } });
-        if(e.freezeTimer > 0) { e.freezeTimer -= dt; currentSpeed = 0; }
+        const isFrozen = Number.isFinite(e.freezeTimer) && e.freezeTimer > 0;
+        if(isFrozen) { e.freezeTimer -= dt; currentSpeed = 0; }
 
         let nx = e.x; let ny = e.y;
+        const prevX = e.x;
+        const prevY = e.y;
         const isHypnotized = e.hypnotizedTimer > 0 && e.type !== 'boss' && e.type !== 'megaboss' && e.type !== 'colosso';
         const hypSnapshot = isHypnotized ? (e.hypnotizedSnapshot || null) : null;
         if (isHypnotized && hypSnapshot && Number.isFinite(hypSnapshot.dmg)) {
@@ -9046,7 +9125,7 @@ function updateEnemies(dt) {
 
         if(e.type === 'curandeiro') {
             e.cd -= 60 * dt;
-            if(e.cd <= 0) {
+            if(e.cd <= 0 && !isFrozen) {
                 if(isHypnotized) {
                     createExplosion(e.x, e.y, 100, Math.max(1, e.dmg), 'rgba(255, 107, 181, 0.35)');
                     for(let e2 of enemies) {
@@ -9062,7 +9141,7 @@ function updateEnemies(dt) {
                 e.cd = 120;
             }
             let a = Math.atan2(targetY - e.y, targetX - e.x); nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt; ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
-        } else if((e.type === 'atirador' || e.type === 'elite' || e.type === 'elite_master') && d < (e.type === 'atirador' ? 175 : (e.type === 'elite' ? 390 : 620)) && player.invisTimer <= 0) {
+        } else if((e.type === 'atirador' || e.type === 'elite' || e.type === 'elite_master') && d < (e.type === 'atirador' ? 175 : (e.type === 'elite' ? 390 : 620)) && player.invisTimer <= 0 && !isFrozen) {
             e.cd -= 60 * dt; if(e.cd <= 0 && e.freezeTimer<=0) { 
                 let a = Math.atan2(targetY - e.y, targetX - e.x); 
                 let bSpd = e.type === 'elite_master' ? 7 : (e.type === 'elite' ? 5 : 3);
@@ -9070,10 +9149,10 @@ function updateEnemies(dt) {
                 createProj(e.x, e.y, Math.cos(a)*bSpd, Math.sin(a)*bSpd, e.dmg, pLife, false, 'enemy', { hypnotized: isHypnotized, sourceEnemyType: e.type }); 
                 e.cd = e.type === 'elite_master' ? 40 : (e.type === 'elite' ? 80 : 100); 
             }
-        } else if(e.type === 'tanque' && d < 200 && player.invisTimer <= 0) {
+        } else if(e.type === 'tanque' && d < 200 && player.invisTimer <= 0 && !isFrozen) {
             e.cd -= 60 * dt; if(e.cd <= 0 && e.freezeTimer<=0) { let a = Math.atan2(targetY - e.y, targetX - e.x); createProj(e.x, e.y, Math.cos(a)*2.5, Math.sin(a)*2.5, e.dmg*1.5, 70, false, 'heavy_enemy', { size: 18, hypnotized: isHypnotized, sourceEnemyType: e.type }); e.cd = 150; }
             let a = Math.atan2(targetY - e.y, targetX - e.x); nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt; ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
-        } else if((e.type === 'lider' || e.type === 'lider_elite') && !isHypnotized) {
+        } else if((e.type === 'lider' || e.type === 'lider_elite') && !isHypnotized && !isFrozen) {
             e.spawnCd -= dt;
             if(e.spawnCd <= 0) {
                 e.spawnCd = 20;
@@ -9085,7 +9164,7 @@ function updateEnemies(dt) {
                 }
             }
             let a = Math.atan2(targetY - e.y, targetX - e.x); nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt; ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
-        } else if(e.type === 'boss' && player.invisTimer <= 0) {
+        } else if(e.type === 'boss' && player.invisTimer <= 0 && !isFrozen) {
             e.cd -= 60 * dt; if(e.cd <= 0) { for(let j=0; j<8; j++) { let a = (Math.PI / 4) * j; createProj(e.x, e.y, Math.cos(a)*3, Math.sin(a)*3, e.dmg, 80, false, 'enemy', { hypnotized: isHypnotized, sourceEnemyType: e.type }); } e.cd = 150; }
             let a = Math.atan2(targetY - e.y, targetX - e.x); nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt; ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
         } else if(e.type === 'goblin' && player.invisTimer <= 0) {
@@ -9096,7 +9175,7 @@ function updateEnemies(dt) {
                 e.cd = 90;
             }
             let a = Math.atan2(targetY - e.y, targetX - e.x); nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt; ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
-        } else if(e.type === 'megaboss' && player.invisTimer <= 0) {
+        } else if(e.type === 'megaboss' && player.invisTimer <= 0 && !isFrozen) {
             e.cd -= 60 * dt; e.dashCd -= dt; e.orbitalCd = (e.orbitalCd || 0) - dt;
             if(e.cd <= 0) { 
                 for(let j=0; j<16; j++) { let a = (Math.PI / 8) * j + gameTime; createProj(e.x, e.y, Math.cos(a)*4, Math.sin(a)*4, e.dmg, 80, false, 'enemy', { hypnotized: isHypnotized, sourceEnemyType: e.type }); } 
@@ -9110,6 +9189,7 @@ function updateEnemies(dt) {
             let a = Math.atan2(targetY - e.y, targetX - e.x); nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt; ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
         }
 
+        if (Math.abs(nx - prevX) > 0.01) e.facingLeft = nx < prevX;
         obstacles.forEach(o => { if(o.type !== 'ice' && o.type !== 'mud' && o.type !== 'car' && o.type !== 'bamboo_spike' && o.type !== 'speaker' && dist({x:nx,y:ny}, o) < o.r + e.size) { nx = e.x; ny = e.y; } });
         e.x = Math.max(-1480, Math.min(1480, nx)); e.y = Math.max(-1480, Math.min(1480, ny));
 
@@ -9119,7 +9199,7 @@ function updateEnemies(dt) {
             if(distE < minDist && distE > 0) { let overlap = (minDist - distE) / 2; e.x += (e.x - e2.x) / distE * overlap; e.y += (e.y - e2.y) / distE * overlap; }
         }
 
-        if(e.type === 'kamikaze' && d < e.size + player.r + 5 && player.invisTimer <= 0) {
+        if(e.type === 'kamikaze' && !isFrozen && d < e.size + player.r + 5 && player.invisTimer <= 0) {
             if(Math.random() > (player.stats.dodgeChance || 0)) {
                 const kamikazeHit = e.dmg * Math.max(0.1, player.stats.defMult - player.stats.dynamicDef) * 0.35;
                 dealPlayerDamage(kamikazeHit);
@@ -10628,7 +10708,7 @@ function draw() {
             const rr = a.r || 18;
             drawCharacterSprite(ctx, a.x, a.y, rr, 'pipi', {
                 widthMult: 8.9,
-                flipX: !Boolean(a.facingLeft)
+                flipX: Boolean(a.facingLeft)
             });
         } else if(a.type === 'drone') {
             ctx.fillStyle = a.type === 'drone' ? '#bdc3c7' : '#34495e'; ctx.beginPath(); ctx.arc(a.x, a.y, 10, 0, Math.PI*2); ctx.fill(); 
@@ -10763,17 +10843,43 @@ function draw() {
     });
 
     enemies.forEach(e => { 
-        drawShape(ctx, e.x, e.y, e.size, 'circle', e.color, e.isBoss, e.type); 
-        if(e.soak > 0) {
-            let opacity = Math.min(e.soak * 0.1, 0.7);
-            ctx.fillStyle = `rgba(0, 255, 255, ${opacity})`;
-            ctx.beginPath(); ctx.arc(e.x, e.y, e.size, 0, Math.PI*2); ctx.fill();
+        const enemySpriteType = getEnemySpritePath(e.type) ? e.type : null;
+        const enemySprite = enemySpriteType ? getEnemySpriteImage(enemySpriteType) : null;
+        let drawW = Math.max(24, e.size * 2);
+        let drawH = drawW;
+
+        if (enemySprite && enemySprite.complete && enemySprite.naturalWidth) {
+            const ratio = enemySprite.naturalWidth / enemySprite.naturalHeight;
+            const widthMult = getEnemySpriteWidthMult(enemySpriteType);
+            drawW = Math.max(22, e.size * widthMult);
+            drawH = drawW / ratio;
+            drawEnemySprite(ctx, e.x, e.y, e.size, enemySpriteType, {
+                flipX: Boolean(e.facingLeft)
+            });
+        } else {
+            drawShape(ctx, e.x, e.y, e.size, 'circle', e.color, e.isBoss);
         }
-        if(e.weakenTimer > 0) { ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.beginPath(); ctx.arc(e.x, e.y, e.size, 0, Math.PI*2); ctx.fill(); }
-        if(e.burnTimer > 0) { ctx.strokeStyle = 'rgba(230, 126, 34, 0.8)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(e.x, e.y, e.size+3, 0, Math.PI*2); ctx.stroke(); }
-        if(e.poison.timer > 0) { ctx.strokeStyle = 'rgba(46, 204, 113, 0.8)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(e.x, e.y, e.size+3, 0, Math.PI*2); ctx.stroke(); }
-        if(e.slowTimer > 0) { ctx.strokeStyle = 'rgba(192, 57, 43, 0.8)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(e.x, e.y, e.size+3, 0, Math.PI*2); ctx.stroke(); }
-        if(e.freezeTimer > 0) { ctx.fillStyle = 'rgba(0, 255, 255, 0.5)'; ctx.beginPath(); ctx.arc(e.x, e.y, e.size, 0, Math.PI*2); ctx.fill(); }
+
+        const applyTint = (color, alpha = 0.28) => {
+            ctx.save();
+            ctx.globalCompositeOperation = 'source-atop';
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = color;
+            ctx.fillRect(e.x - drawW / 2, e.y - drawH / 2, drawW, drawH);
+            ctx.restore();
+        };
+
+        if (e.soak > 0) applyTint('#00e5ff', Math.min(0.32, 0.08 + e.soak * 0.035));
+        if (e.freezeTimer > 0) applyTint('#3498db', 0.34);
+        if (e.slowTimer > 0) applyTint('#e74c3c', 0.22);
+        if (e.burnTimer > 0) applyTint('#e67e22', 0.24);
+        if (e.poison.timer > 0) applyTint('#2ecc71', 0.24);
+        if (e.hypnotizedTimer > 0) applyTint('#ff6bb5', 0.24);
+        if (e.weakenTimer > 0) applyTint('#dfe6e9', 0.18);
+        if (e.speedBuffTimer > 0) applyTint('#f1c40f', 0.16);
+        if (e.shockTimer > 0) applyTint('#3ec7ff', 0.18);
+        if (e.shockSemiTimer > 0) applyTint('#7adfff', 0.14);
+
         if(e.shockTimer > 0 || e.shockSemiTimer > 0) {
             const strong = e.shockTimer > 0;
             const cx = e.x;
@@ -10808,9 +10914,7 @@ function draw() {
             ctx.font = '16px Arial';
             ctx.fillText('❤', e.x - 8, e.y - e.size - 6);
         }
-        if(e.speedBuffTimer > 0) { ctx.strokeStyle = 'rgba(255, 255, 0, 0.8)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(e.x, e.y, e.size+6, 0, Math.PI*2); ctx.stroke(); }
-        ctx.fillStyle = '#e74c3c'; ctx.fillRect(e.x - 10, e.y - e.size - 8, 20, 4); ctx.fillStyle = '#2ecc71'; ctx.fillRect(e.x - 10, e.y - e.size - 8, 20 * (e.hp/e.maxHp), 4); 
-        if(e.type === 'curandeiro') { ctx.fillStyle = '#2ecc71'; ctx.fillRect(e.x-2, e.y-6, 4, 12); ctx.fillRect(e.x-6, e.y-2, 12, 4); }
+        ctx.fillStyle = '#e74c3c'; ctx.fillRect(e.x - 10, e.y - e.size - 8, 20, 4); ctx.fillStyle = '#2ecc71'; ctx.fillRect(e.x - 10, e.y - e.size - 8, 20 * (e.hp/e.maxHp), 4);
         if(e.type === 'ninja') { ctx.fillStyle = '#000'; ctx.fillRect(e.x-4, e.y-2, 8, 4); }
     });
     
