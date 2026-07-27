@@ -360,7 +360,7 @@
     .achievement-progress-fill { height: 100%; background: linear-gradient(90deg, #5dade2, #f1c40f); width: 0%; transition: width .2s ease; }
     .achievement-progress-fill.done { background: linear-gradient(90deg, #f1c40f, #27ae60); }
     .achievement-badge { display:inline-flex; align-items:center; justify-content:center; padding:6px 10px; border-radius:999px; background: rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); font-size:12px; font-weight:900; }
-    .hud-hp-wrap { width: 180px; height: 16px; background: rgba(0,0,0,0.45); border: 2px solid #000; border-radius: 999px; overflow: hidden; margin-top: 4px; box-shadow: 0 0 8px rgba(0,0,0,0.4); pointer-events: none; }
+    .hud-hp-wrap { width: 140px; height: 12px; background: rgba(0,0,0,0.45); border: 2px solid #000; border-radius: 999px; overflow: hidden; margin-top: 2px; box-shadow: 0 0 8px rgba(0,0,0,0.4); pointer-events: none; }
     .hud-hp-fill { height: 100%; width: 100%; background: #2ecc71; transition: width 0.15s linear, background 0.15s linear; }
 
     
@@ -3717,11 +3717,11 @@ function getEnemyStatusIndicators(e) {
 function drawEnemyStatusHud(ctx, e, drawW, drawH) {
     const indicators = getEnemyStatusIndicators(e);
     const topY = e.y - drawH / 2;
-    const hpWidth = Math.max(24, Math.min(160, drawW * 0.9));
+    const hpWidth = Math.max(20, Math.min(120, drawW * 0.75));
     const hpX = e.x - hpWidth / 2;
-    const hpY = topY - 8;
-    const barY = topY - 17;
-    const iconY = topY - 30;
+    const hpY = topY - 5;
+    const barY = topY - 12;
+    const iconY = topY - 21;
 
     ctx.save();
     ctx.textAlign = 'center';
@@ -3730,21 +3730,21 @@ function drawEnemyStatusHud(ctx, e, drawW, drawH) {
     if (indicators.length > 0) {
         const iconStep = Math.max(12, Math.min(16, hpWidth / Math.max(1, indicators.length)));
         const iconStart = e.x - ((indicators.length - 1) * iconStep) / 2;
-        ctx.font = '15px Arial';
+        ctx.font = '12px Arial';
         indicators.forEach((fx, i) => {
             ctx.fillStyle = fx.color;
             ctx.fillText(fx.icon, iconStart + i * iconStep, iconY);
         });
 
-        const gap = indicators.length > 1 ? 2 : 0;
+        const gap = indicators.length > 1 ? 1 : 0;
         const totalGap = gap * (indicators.length - 1);
-        const segWidth = Math.max(4, (hpWidth - totalGap) / indicators.length);
+        const segWidth = Math.max(3, (hpWidth - totalGap) / indicators.length);
         let curX = hpX;
         ctx.fillStyle = 'rgba(0,0,0,0.40)';
-        ctx.fillRect(hpX, barY, hpWidth, 4);
+        ctx.fillRect(hpX, barY, hpWidth, 3);
         indicators.forEach((fx) => {
             ctx.fillStyle = fx.color;
-            ctx.fillRect(curX, barY, segWidth, 4);
+            ctx.fillRect(curX, barY, segWidth, 3);
             curX += segWidth + gap;
         });
     }
