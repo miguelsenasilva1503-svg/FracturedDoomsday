@@ -1733,7 +1733,6 @@
         <div class="settings-section">
             <div class="settings-section-title">Conta</div>
             <div class="settings-grid">
-                <button id="btn-dev-secret" class="btn-menu settings-option" style="font-size:28px; min-height:84px;" type="button" onclick="handleDevSecretClick()">⚔️</button>
                 <button id="btn-dev-tools-entry" class="btn-menu settings-option hidden" type="button" onclick="toggleDevToolsPanel()">Dev Tools</button>
             </div>
         </div>
@@ -2423,9 +2422,9 @@ Um vampiro sombrio e assustador que prefere caçar inimigos de perto. Silencioso
 “Só uma mordidinha…”` },
     miss_macaron: { id: 'miss_macaron', class: 'Sobremesa', name: 'Miss Macaron', rarity: 'seasonal', cost: 199, hp: 102, speed: 3.45, dmg: 16, fireRate: 42, range: 270, color: '#f39c12', emoji: '🍰', weapon: 'macaron', desc: `“Miss Macaron acredita que uma boa hora do chá melhora qualquer dia. Alguns convidados, infelizmente, estragam o clima.”
 
-Uma elegante francesa apaixonada por chás e pelos tradicionais macarons. Sempre educada e tranquila, ela dificilmente perde a compostura, até que alguém resolva interromper seu momento de paz. A mesa de chá dela fica fixa no mapa e, quando Miss Macaron entra na área, seus disparos viram chás quentes. Fora disso, seus macarons continuam doces... até acertarem o rosto de alguém.
+Uma elegante francesa apaixonada por chás e pelos tradicionais macarons. Sempre educada e tranquila, ela dificilmente perde a compostura, até que alguém resolva interromper seu momento de paz. É nessa hora que os inimigos descobrem que seus famosos macarons são "doces" demais... e definitivamente não foram feitos apenas para serem apreciados.
 
-“Espero que tenham guardado espaço para a sobremesa.”` },
+“Esero que tenham guardado espaço para sobremesa.”` },
     cybertron: { id: 'cybertron', class: 'Destruidor', name: 'Cyber-tron', rarity: 'mythic', cost: 569, hp: 120, speed: 3.5, dmg: 18, fireRate: 40, range: 260, color: '#00ffff', weapon: 'laser', desc: `“Metade máquina, metade destruição total.”
 
 Um ciborgue altamente armado que usa tecnologia pesada para dominar o campo com lasers e explosões devastadoras. Cyber-Tron foi criado como uma arma perfeita… e claramente levou isso a sério demais.
@@ -2441,11 +2440,11 @@ Uma rainha gelada elegante e imponente que domina o frio como ninguém. Armada c
 Uma criatura gigante e peluda que prefere resolver problemas do jeito mais simples possível: arremessando enormes bolas de neve em quem estiver por perto. Apesar da aparência intimidadora, Yeti costuma ser surpreendentemente calmo... até alguém invadir seu território ou mexer na sua reserva de neve.
 
 “Yeti! Yeti! YETI!”.` },
-    echo: { id: 'echo', class: 'Controle', name: 'Echo', rarity: 'mythic', cost: 569, hp: 110, speed: 3.5, dmg: 16, fireRate: 60, range: 250, color: '#2d3436', weapon: 'echo_pull', pullRadius: 150, desc: `“Echo passou tempo demais estudando a gravidade. Agora a gravidade parece obedecer ele.”
+    echo: { id: 'echo', class: 'Controle', name: 'Echo', rarity: 'mythic', cost: 569, hp: 110, speed: 3.5, dmg: 16, fireRate: 60, range: 250, color: '#2d3436', weapon: 'echo_pull', pullRadius: 150, desc: `Poucos sabem quem... ou o que... Echo realmente é. E talvez seja melhor continuar assim.
 
-Uma entidade enigmática capaz de manipular forças que ninguém deveria controlar. Echo distorce o espaço ao seu redor, atraindo tudo para o centro de seus ataques enquanto estranhas anomalias surgem pelo campo de batalha. Alguns cientistas acreditam que ele descobriu segredos do universo. Outros acreditam que o universo está tentando se livrar dele.
+Uma entidade envolta em sombras e mistério, cuja verdadeira origem permanece desconhecida. Muito antes dos heróis surgirem, foi Echo quem rasgou a realidade, abrindo as Fraturas que libertaram os Fraturados pelo mundo inteiro e mergulharam o planeta no caos. Seus motivos continuam um enigma, e sua presença faz até os mais corajosos questionarem se estão diante de um ser vivo... ou da própria escuridão.
 
-“Quanto mais você resiste... mais perto chega.”` },
+“Tudo começou... comigo.”` },
     graffit: { id: 'graffit', class: 'Controle', name: 'Graffit', rarity: 'mythic', cost: 569, hp: 102, speed: 3.45, dmg: 17, fireRate: 54, range: 255, color: '#ff7ad9', weapon: 'graffit', desc: `“Graffit enxerga qualquer muro em branco como um pedido educado para ser pintado.”
 
 Um artista de rua rebelde que transforma a cidade em sua tela. Armado com latas de spray e uma criatividade sem limites, Graffit deixa sua marca por onde passa, ignorando placas de “proibido”. Entre uma pintura e outra, ele prova que arte e confusão podem andar perfeitamente juntas.
@@ -2663,11 +2662,10 @@ ESPECIAL: tem 10% de chance de disparar uma bomba de fogo que QUEIMA inimigos ou
 
 ESPECIAL: é acompanhada de seu pinguim que a segue e dispara bolas de neve que podem LERDAR ou CONGELAR.`,
     yeti: `Yeti: dispara uma bola de neve que, quanto mais avança, mais lenta fica, maior fica e dá mais dano; essa bola de neve pode CONGELAR ou LERDAR.`,
-    echo: `Poucos sabem quem... ou o que... Echo realmente é. E talvez seja melhor continuar assim.
+    echo: `Echo: dispara projéteis que ACELERAM inimigos.
 
-Uma entidade envolta em sombras e mistério, cuja verdadeira origem permanece desconhecida. Muito antes dos heróis surgirem, foi Echo quem rasgou a realidade, abrindo as Fraturas que libertaram os Fraturados pelo mundo inteiro e mergulharam o planeta no caos. Seus motivos continuam um enigma, e sua presença faz até os mais corajosos questionarem se estão diante de um ser vivo... ou da própria escuridão.
-
-“Tudo começou... comigo.”`,
+ESPECIAL: quanto mais perto o inimigo é atingido, mais dano ele recebe.
+ESPECIAL: tem 15% de chance de disparar um buraco negro que puxa inimigos pro centro dele, causando dano.`,
     eel: `Eel: dispara uma enguia que tem 20% de chance de causar CHOCADO.
 
 ESPECIAL: começa as partidas com uma orbital longa.
@@ -4736,12 +4734,7 @@ function syncDevUnlocks() {
 }
 
 function handleDevSecretClick() {
-
-    devSecretClicks += 1;
-    if (devSecretClicks >= 10) {
-        devSecretClicks = 0;
-        openDevPasswordOverlay();
-    }
+    // acesso removido de propósito
 }
 
 function openDevPasswordOverlay() {
@@ -9324,6 +9317,7 @@ function createProj(x, y, vx, vy, dmg, life, isPlayer, type, extra={}) {
     else if (type === 'lance') size = extra.size || 7;
     else if (type === 'microphone') size = extra.size || 12;
     else if (type === 'yuuto_heart' || type === 'heart') size = extra.size || 11;
+    else if (type === 'pipisnowball') size = extra.size || 13;
     else if (type === 'graffit_can') size = extra.size || 11;
     else if (type === 'macaron') size = extra.size || 11;
     else if (type === 'macaron_big') size = extra.size || 18;
@@ -10184,7 +10178,7 @@ function updateAllies(dt) {
                         }
                         a.cd = 0.75;
                     } else {
-                        createProj(a.x, a.y, Math.cos(ang)*4, Math.sin(ang)*4, a.dmg, 60, true, 'normal', { size: 5 });
+                        createProj(a.x, a.y, Math.cos(ang)*4, Math.sin(ang)*4, a.dmg, 60, true, 'pipisnowball', { size: 13, sourceChar: 'pipi', sourceType: 'penguin' });
                         a.cd = 0.95;
                     }
                 } else {
@@ -10470,6 +10464,9 @@ function updateProjectiles(dt) {
                 p.vy = Math.sin(a) * returnSpd;
                 if(dist(p, player) < player.r + 14) { player.boobooReturn = true; projectiles.splice(i, 1); continue; }
             }
+            p.x += p.vx * 60 * dt; p.y += p.vy * 60 * dt;
+        }
+        else if (p.type === 'pipisnowball') {
             p.x += p.vx * 60 * dt; p.y += p.vy * 60 * dt;
         }
         else if (p.type === 'snowball') {
@@ -10861,6 +10858,7 @@ function updateProjectiles(dt) {
                     }
                     if(p.type === 'ice_dagger') { if(Math.random()<0.10) e.freezeTimer = 2; else if(Math.random()<0.10) e.slowTimer = 3; }
                     if(p.type === 'ice_stake') { if(Math.random()<0.10) e.freezeTimer = 2; if(Math.random()<0.10) e.slowTimer = 3; }
+                    if(p.type === 'pipisnowball') { if(Math.random()<0.25) e.slowTimer = 2.5; if(Math.random()<0.35) e.freezeTimer = 2.25; }
                     if(p.type === 'snowball' || p.type === 'yeti_punch' || p.type === 'penguin_snowball') { if(Math.random()<0.25) e.freezeTimer = 2; }
                     if(p.type === 'penguin_snowball') { if(Math.random()<0.25) e.slowTimer = 2.5; if(Math.random()<0.40) e.freezeTimer = 2.5; }
                     if(p.type === 'chess_piece' && p.extra.chessType === 'queen' && Math.random()<0.50) e.weakenTimer = 3;
@@ -12306,6 +12304,7 @@ function draw() {
         else if(p.type === 'lance') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx)); ctx.shadowColor = 'rgba(255, 215, 0, 0.35)'; ctx.shadowBlur = 8; ctx.fillStyle = '#f39c12'; ctx.strokeStyle = '#7f4f00'; ctx.lineWidth = 2; const len = Math.max(30, (p.size || 6) * 5); const shaft = Math.max(3, (p.size || 6) * 0.45); if(ctx.roundRect) { ctx.beginPath(); ctx.roundRect(-len * 0.45, -shaft * 0.5, len * 0.75, shaft, 2); ctx.fill(); ctx.stroke(); } else { ctx.fillRect(-len * 0.45, -shaft * 0.5, len * 0.75, shaft); ctx.strokeRect(-len * 0.45, -shaft * 0.5, len * 0.75, shaft); } ctx.beginPath(); ctx.moveTo(len * 0.30, 0); ctx.lineTo(len * 0.62, -shaft * 1.05); ctx.lineTo(len * 0.62, shaft * 1.05); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#fefae0'; ctx.beginPath(); ctx.arc(-len * 0.48, 0, Math.max(1.5, shaft * 0.45), 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
         else if(p.type === 'heavy_enemy') { ctx.fillStyle = '#7f8c8d'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); }
         else if(p.type === 'screw') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx)); const isKaisenTool = !!p.extra?.kaisenTool; const bodyW = isKaisenTool ? 16 : 10; const bodyH = isKaisenTool ? 6 : 5; ctx.fillStyle = '#7f8c8d'; if(ctx.roundRect) { ctx.beginPath(); ctx.roundRect(-bodyW * 0.5, -bodyH * 0.5, bodyW, bodyH, Math.max(2, bodyH * 0.35)); ctx.fill(); } else { ctx.fillRect(-bodyW * 0.5, -bodyH * 0.5, bodyW, bodyH); } ctx.fillStyle = '#bdc3c7'; ctx.beginPath(); ctx.arc(isKaisenTool ? 5.2 : 4, 0, isKaisenTool ? 4.2 : 3.5, 0, Math.PI*2); ctx.fill(); ctx.restore(); }
+        else if(p.type === 'pipisnowball') { ctx.save(); ctx.translate(p.x, p.y); ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#d9f2ff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, p.size, 0, Math.PI*2); ctx.fill(); ctx.stroke(); ctx.fillStyle = 'rgba(210, 240, 255, 0.9)'; ctx.beginPath(); ctx.arc(-p.size*0.28, -p.size*0.18, Math.max(1.4, p.size*0.16), 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(p.size*0.22, p.size*0.14, Math.max(1.2, p.size*0.12), 0, Math.PI*2); ctx.fill(); ctx.restore(); }
         else if(p.type === 'snowball' || p.type === 'penguin_snowball') { ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); }
         else if(p.type === 'yeti_punch') { ctx.fillStyle = 'rgba(223, 230, 233, 0.7)'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); }
         else if(p.type === 'eel_lash') {
