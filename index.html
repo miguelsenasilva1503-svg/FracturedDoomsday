@@ -2551,13 +2551,15 @@ ESPECIAL: quando KETCHUP, MAIONESE e MOSTARDA acertam o mesmo inimigo em até 0,
     bombman: `Bombeiro: dispara bombas que explodem em área.`,
     kayo: `Kayo: avança com um corte curto, mais largo e mais agressivo.
 
-ESPECIAL: seu ataque frontal cobre uma área maior, mas continua sendo uma investida corpo a corpo de curta distância.`,
+ESPECIAL: tem 10% de chance de socar flamejante.`,
     power: `Pow: dispara projéteis em um curto alcance.
 
 ESPECIAL: quanto mais dano toma, mais rápido ele atira.`,
     grenade: `Grenade: dispara um grande projétil, que, ao atingir um inimigo, se dispersa em 8 menores.`,
     hunter: `Hunter: dispara vários projéteis em uma área cônica curta.`,
-    vesper: `Vesper: dispara flechas. Fora do foco, cada flecha tem 35% de chance de causar DANO CRÍTICO e, se isso acontecer, PERFURA o alvo. Quando passa um tempo sem receber dano, entra em FOCO: ganha mais alcance e todas as flechas perfuram, mas sem chance de crítico.`,
+    vesper: `Vésper: dispara flechas com 35% de chance de causar DANO CRÍTICO, se isso acontecer a flecha também PERFURA
+
+ESPECIAL: depois de um tempo sem receber dano entra em foco, ganhando +15% de dano e PERFURAÇÃO, mas sem o dano crítico, ao tomar dano sai do modo foco.`,
     sparta: `Sparta: alterna entre 2 ataques.
 
 Primeiro ataque: área reta, mais longa e em formato quadrado.
@@ -3795,6 +3797,23 @@ const ENEMY_SPRITES = {
 
 const ENEMY_SPRITE_CACHE = new Map();
 
+const MAP_ELEMENT_SPRITES = {
+    treasure_chest: 'elements/treasure_chest.png',
+    stone: 'elements/stone.png',
+    tree: 'elements/tree.png',
+    cactus: 'elements/cactus.png',
+    side_car: 'elements/side_car.png',
+    front_car: 'elements/front_car.png',
+    behind_car: 'elements/behind_car.png',
+    soundbox: 'elements/soundbox.png',
+    shroom: 'elements/shroom.png',
+    volcano: 'elements/volcano.png',
+    bamboo: 'elements/bamboo.png',
+    spike_bamboo: 'elements/spike_bamboo.png'
+};
+
+const MAP_ELEMENT_SPRITE_CACHE = new Map();
+
 const CHARACTER_SPRITE_CACHE = new Map();
 const CHARACTER_SPRITE_COMPACT_IDS = new Set([
     'shiv',
@@ -3891,6 +3910,64 @@ function getEnemySpriteImage(type) {
         ENEMY_SPRITE_CACHE.set(key, img);
     }
     return ENEMY_SPRITE_CACHE.get(key);
+}
+
+function getMapElementSpriteKey(type, obj = {}) {
+    const key = String(type || '').toLowerCase();
+    switch (key) {
+        case 'chest':
+            return 'treasure_chest';
+        case 'rock':
+            return 'stone';
+        case 'tree':
+            return 'tree';
+        case 'cacto':
+            return 'cactus';
+        case 'volcano':
+            return 'volcano';
+        case 'bamboo':
+            return 'bamboo';
+        case 'bamboo_spike':
+            return 'spike_bamboo';
+        case 'speaker':
+            return 'soundbox';
+        case 'shroom':
+            return 'shroom';
+        case 'car':
+            return Math.abs(obj.vx || 0) >= Math.abs(obj.vy || 0)
+                ? 'side_car'
+                : ((obj.vy || 0) > 0 ? 'front_car' : 'behind_car');
+        default:
+            return '';
+    }
+}
+
+function getMapElementSpriteImage(key) {
+    const path = MAP_ELEMENT_SPRITES[key] || '';
+    if (!path) return null;
+    if (!MAP_ELEMENT_SPRITE_CACHE.has(key)) {
+        const img = new Image();
+        img.src = path;
+        MAP_ELEMENT_SPRITE_CACHE.set(key, img);
+    }
+    return MAP_ELEMENT_SPRITE_CACHE.get(key);
+}
+
+function drawMapElementSprite(cCtx, key, x, y, size, opts = {}) {
+    const img = getMapElementSpriteImage(key);
+    if (!img || !img.complete || !img.naturalWidth) return false;
+    const ratio = img.naturalWidth / img.naturalHeight;
+    const scale = Number.isFinite(opts.scale) ? opts.scale : 1;
+    const w = Math.max(18, size * scale);
+    const h = w / ratio;
+    cCtx.save();
+    if (Number.isFinite(opts.opacity)) cCtx.globalAlpha = opts.opacity;
+    cCtx.translate(x, y);
+    if (opts.rotate) cCtx.rotate(opts.rotate);
+    if (opts.flipX || opts.flipY) cCtx.scale(opts.flipX ? -1 : 1, opts.flipY ? -1 : 1);
+    cCtx.drawImage(img, -w / 2, -h / 2, w, h);
+    cCtx.restore();
+    return true;
 }
 
 function getEnemySpriteWidthMult(type) {
@@ -5539,21 +5616,24 @@ function executeVesperAttack(target, angle, finalDmg, pSpd) {
     const focusActive = !!player.vesperFocusActive;
     const range = Math.max(160, player.baseRange * player.stats.rangeMult * (focusActive ? 1.24 : 1));
     const attackCd = Math.max(30, Math.round(52 * player.stats.fireRateMult));
-    const baseDmg = Math.max(1, finalDmg * (focusActive ? 0.95 : 1));
+
+    const baseDmg = Math.max(1, finalDmg * (focusActive ? 1.15 : 1));
+    const critDmg = Math.max(1, Math.round(baseDmg * Math.max(1, player.stats.critDmg || 2)));
+    const isCrit = !focusActive && Math.random() < 0.35;
+    const damage = isCrit ? critDmg : baseDmg;
+    const pierce = focusActive
+        ? 9999
+        : (isCrit ? Math.max(1, 1 + Math.floor(player.stats.extraProj || 0)) : 0);
 
     player.cd = attackCd;
     player.lastAimAngle = angle;
-
-    const pierce = focusActive
-        ? Math.max(1, 1 + Math.floor(player.stats.extraProj || 0))
-        : (Math.random() < 0.35 ? Math.max(1, 1 + Math.floor(player.stats.extraProj || 0)) : 0);
 
     createProj(
         player.x,
         player.y,
         Math.cos(angle) * pSpd,
         Math.sin(angle) * pSpd,
-        baseDmg,
+        damage,
         Math.ceil(range / Math.max(1, pSpd)) + 12,
         true,
         'arrow',
@@ -5561,7 +5641,13 @@ function executeVesperAttack(target, angle, finalDmg, pSpd) {
             size: 8,
             pierce,
             sourceChar: 'vesper',
-            sourceStats: { ...player.stats, critChance: 0, pierce }
+            vesperFocusPierce: focusActive,
+            sourceStats: {
+                ...player.stats,
+                critChance: 0,
+                pierce,
+                critDmg: Math.max(1, player.stats.critDmg || 2)
+            }
         }
     );
 }
@@ -5572,9 +5658,21 @@ function executeKayoAttack(target, angle, finalDmg, pSpd) {
     const range = Math.max(55, player.baseRange * player.stats.rangeMult * 0.40);
     const damage = Math.max(1, finalDmg * 0.82);
     const attackCd = Math.max(24, Math.round(44 * player.stats.fireRateMult));
+    const flameChance = 0.10;
 
     player.cd = attackCd;
     player.lastAimAngle = angle;
+
+    createProj(
+        player.x + Math.cos(angle) * 30,
+        player.y + Math.sin(angle) * 30,
+        Math.cos(angle),
+        Math.sin(angle),
+        damage,
+        15,
+        true,
+        'sword'
+    );
 
     for (const e of enemies) {
         if (!e || e.hp <= 0) continue;
@@ -5588,6 +5686,10 @@ function executeKayoAttack(target, angle, finalDmg, pSpd) {
         if (lateral <= hitWidth) {
             e.hp -= Math.max(1, Math.round(damage));
             addFloatingText(e.x, e.y, `${Math.max(1, Math.round(damage))}`, '#f1c40f');
+            if (Math.random() < flameChance) {
+                e.burnTimer = 3;
+                e.burnDmg = Math.max(e.burnDmg || 0, Math.max(1, damage * 0.5));
+            }
         }
     }
 }
@@ -6423,6 +6525,9 @@ function selectChar(id) {
     pd.selectedChar = id;
     if (!pd.run || typeof pd.run !== 'object') pd.run = { charId: id, medals: 0 };
     pd.run.charId = id;
+    if (pd.debug && pd.debug.devBaseState && typeof pd.debug.devBaseState === 'object') {
+        pd.debug.devBaseState.selectedChar = id;
+    }
     save();
     renderChars();
     updateUI();
@@ -7554,7 +7659,7 @@ bindSpecialButton(btnSpecial);
 
 function getSpecialButtonLabel() {
     if (!player) return '';
-    if (pd.selectedChar === 'miss_macaron') return '';
+    if (pd.selectedChar === 'miss_macaron' || pd.selectedChar === 'vesper') return '';
     if (pd.selectedChar === 'ninji' && player.weapon === 'dagger') return '💨';
     if (player.weapon === 'energy_wave') return '👻';
     return '';
@@ -7702,6 +7807,7 @@ function dealPlayerDamage(amount, opts = {}) {
     }
 
     if (dmg > 0) {
+        if (pd.selectedChar === 'vesper') { player.vesperFocusTimer = 0; player.vesperFocusActive = false; }
         player.hp -= dmg;
         if (isSpartaCharacter()) {
             player.spartaShieldActive = false;
@@ -8128,7 +8234,7 @@ function update(dt) {
     if (player) {
         if (pd.selectedChar === 'vesper') {
             player.vesperFocusTimer = Math.max(0, (Number.isFinite(player.vesperFocusTimer) ? player.vesperFocusTimer : 0) + dt);
-            player.vesperFocusActive = player.vesperFocusTimer >= 4;
+            player.vesperFocusActive = player.vesperFocusTimer >= 10;
         } else {
             player.vesperFocusTimer = 0;
             player.vesperFocusActive = false;
@@ -8301,7 +8407,10 @@ function update(dt) {
     });
     
     let totemSpd = player.inTotem ? 1.2 : 1;
-    let pSpeed = player.baseSpeed * player.stats.speedMult * mapSpeedMult * totemSpd * 60 * dt;
+    const vesperMobilityMult = (pd.selectedChar === 'vesper')
+        ? (player.vesperFocusActive ? 1.12 : 1.04)
+        : 1;
+    let pSpeed = player.baseSpeed * player.stats.speedMult * mapSpeedMult * totemSpd * vesperMobilityMult * 60 * dt;
     
     if(player.dashTimer > 0) {
         player.dashTimer -= dt; dx = Math.cos(player.dashAngle); dy = Math.sin(player.dashAngle); pSpeed *= 3;
@@ -8544,9 +8653,16 @@ function fireWeapon(target) {
     let dynHpRatio = player.hp / (player.baseHp * player.stats.maxHpMult);
     player.cd = player.baseFireRate * player.stats.fireRateMult * (w==='power_shot'? (1 - (1 - dynHpRatio)*0.9) : 1) * ((pd.selectedChar === 'zippi' && player.zippiBubbleHp <= 0) ? 0.88 : 1);
     
-    if(w === 'arrow') { player.stats.critChance += 0.25; }
-    let isCrit = Math.random() < player.stats.critChance; let finalDmg = (isCrit ? baseDmg * player.stats.critDmg : baseDmg) * (player.graffitAtkMult || 1);
-    if(w === 'arrow') { player.stats.critChance -= 0.25; }
+    let isCrit = false;
+    let finalDmg = baseDmg * (player.graffitAtkMult || 1);
+    if (w === 'arrow' && pd.selectedChar !== 'vesper') {
+        player.stats.critChance += 0.25;
+        isCrit = Math.random() < player.stats.critChance;
+        finalDmg = (isCrit ? baseDmg * player.stats.critDmg : baseDmg) * (player.graffitAtkMult || 1);
+        player.stats.critChance -= 0.25;
+    } else {
+        finalDmg = baseDmg * (player.graffitAtkMult || 1);
+    }
 
     let pSpd = 5 * player.stats.projSpdMult;
     if(w === 'energy_wave' && player.invisTimer > 0) pSpd *= 1.5;
@@ -9305,7 +9421,7 @@ function createProj(x, y, vx, vy, dmg, life, isPlayer, type, extra={}) {
     let size = extra.size || 4;
     if (type === 'heavy' || type === 'tank') size = 8;
     else if (type === 'sniper') size = 3;
-    else if (type === 'sword' || type === 'scythe' || type === 'shiv' || type === 'saw_throw') size = 24;
+    else if (type === 'sword' || type === 'kayo_slash' || type === 'scythe' || type === 'shiv' || type === 'saw_throw') size = 24;
     else if (type === 'wind_gust') size = 34;
     else if (type === 'tornado') size = 26;
     else if (type === 'quarterback') size = 14;
@@ -10167,7 +10283,10 @@ function updateAllies(dt) {
             if(target && minD < 380) {
                 if(a.cd <= 0) {
                     let ang = Math.atan2(target.y - a.y, target.x - a.x);
-                    if (isKaisenDrone) {
+                    if (a.type === 'penguin') {
+                        createProj(a.x, a.y, Math.cos(ang)*4, Math.sin(ang)*4, a.dmg, 60, true, 'pipisnowball', { size: 13, sourceChar: 'pipi', sourceType: 'penguin' });
+                        a.cd = 0.95;
+                    } else if (isKaisenDrone) {
                         const roll = Math.random();
                         if (roll < 0.60) {
                             createProj(a.x, a.y, Math.cos(ang)*5.2, Math.sin(ang)*5.2, a.dmg, 60, true, 'normal', { size: 4 });
@@ -10178,7 +10297,7 @@ function updateAllies(dt) {
                         }
                         a.cd = 0.75;
                     } else {
-                        createProj(a.x, a.y, Math.cos(ang)*4, Math.sin(ang)*4, a.dmg, 60, true, 'pipisnowball', { size: 13, sourceChar: 'pipi', sourceType: 'penguin' });
+                        createProj(a.x, a.y, Math.cos(ang)*4, Math.sin(ang)*4, a.dmg, 60, true, 'normal', { size: 4, sourceChar: 'drone', sourceType: 'drone' });
                         a.cd = 0.95;
                     }
                 } else {
@@ -10448,7 +10567,7 @@ function updateProjectiles(dt) {
             if (!Number.isFinite(p.life) || p.life <= 0 || p.extra?.fxOnly) { projectiles.splice(i, 1); continue; }
             continue;
         }
-        if(p.type === 'sword' || p.type === 'scythe') { p.x = player.x + p.vx * 60; p.y = player.y + p.vy * 60; } 
+        else if(p.type === 'sword' || p.type === 'scythe') { p.x = player.x + p.vx * 60; p.y = player.y + p.vy * 60; } 
         else if (p.type === 'bomb') { const bombTarget = p.extra || {}; let d = dist(p, {x: Number.isFinite(bombTarget.tx) ? bombTarget.tx : p.x, y: Number.isFinite(bombTarget.ty) ? bombTarget.ty : p.y}); if(d < 5 || p.life < 10) { applyCyberBombEffects(p); projectiles.splice(i, 1); continue; } p.x += p.vx * 60 * dt; p.y += p.vy * 60 * dt; } 
         else if (p.type === 'magic') {
             let target = null; let minD = 200; for(let e of enemies) { let d = dist(p, e); if(d < minD) { minD = d; target = e; } }
@@ -10658,6 +10777,7 @@ function updateProjectiles(dt) {
 
         if(p.type === 'quarterback' && p.extra && p.extra.noHitFrames > 0) p.extra.noHitFrames--;
         const extra = p.extra || {};
+        if (extra.visualOnly) continue;
         let hitObstacle = false;
         obstacles.forEach(o => { if(o.type !== 'ice' && o.type !== 'mud' && o.type !== 'car' && o.type !== 'bamboo_spike' && o.type !== 'speaker' && dist(p, o) < o.r + p.size) hitObstacle = true; });
         if(hitObstacle && p.type !== 'sword' && p.type !== 'scythe' && p.type !== 'boomerang' && p.type !== 'wind_gust' && p.type !== 'tornado' && p.type !== 'energy_wave' && p.type !== 'water_wave') { 
@@ -11030,6 +11150,8 @@ function updateProjectiles(dt) {
                 console.warn('Graffit impact skipped:', err);
             }
 
+            const focusPierceArrow = p.type === 'arrow' && p.extra?.sourceChar === 'vesper' && p.extra?.vesperFocusPierce;
+            if (focusPierceArrow) p.pierce = Math.max(1, p.pierce || 0);
             const canBounce = (p.bounces || 0) > 0;
             const canPierce = (p.pierce || 0) > 0;
 
@@ -11476,18 +11598,31 @@ function draw() {
     ctx.strokeStyle = 'rgba(0,0,0,0.1)'; ctx.lineWidth = 5; ctx.strokeRect(-1500, -1500, 3000, 3000);
     
     obstacles.forEach(o => {
-        if(o.type === 'ice') { ctx.fillStyle = 'rgba(0, 206, 201, 0.4)'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI*2); ctx.fill(); }
-        else if(o.type === 'mud') { ctx.fillStyle = 'rgba(60, 42, 33, 0.6)'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI*2); ctx.fill(); }
-        else if(o.type === 'cacto') { ctx.fillStyle = '#27ae60'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI*2); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.stroke(); }
-        else if(o.type === 'rock') { ctx.fillStyle = '#2c3e50'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI*2); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.stroke(); }
-        else if(o.type === 'tree') { ctx.fillStyle = '#1e272e'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r*0.4, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#218c74'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI*2); ctx.fill(); }
-        else if(o.type === 'car') { ctx.fillStyle = '#f39c12'; ctx.fillRect(o.x-o.r, o.y-o.r, o.r*2, o.r*2); ctx.fillStyle = '#333'; ctx.fillRect(o.x-o.r+5, o.y-o.r+5, o.r*2-10, o.r*2-10); }
-        else if(o.type === 'volcano') { ctx.fillStyle = '#e74c3c'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#c0392b'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r*0.5, 0, Math.PI*2); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.stroke(); }
-        else if(o.type === 'bamboo') { ctx.fillStyle = '#2ed573'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI*2); ctx.fill(); ctx.strokeStyle = '#2f3542'; ctx.lineWidth=1; ctx.stroke(); }
-        else if(o.type === 'bamboo_spike') { ctx.fillStyle = '#7bed9f'; ctx.beginPath(); ctx.moveTo(o.x, o.y-o.r); ctx.lineTo(o.x+o.r, o.y+o.r); ctx.lineTo(o.x-o.r, o.y+o.r); ctx.fill(); }
-        else if(o.type === 'speaker') { ctx.fillStyle = '#2f3542'; ctx.fillRect(o.x-o.r, o.y-o.r, o.r*2, o.r*2); ctx.fillStyle = '#1e90ff'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r*0.6, 0, Math.PI*2); ctx.fill(); }
+        const elementKey = getMapElementSpriteKey(o.type, o);
+        const spriteDrawn = elementKey
+            ? drawMapElementSprite(ctx, elementKey, o.x, o.y, (o.type === 'car' ? o.r * 2.8 : o.r * 2.2), {
+                flipX: o.type === 'car' && (o.vx || 0) < 0
+            })
+            : false;
+        if (!spriteDrawn) {
+            if(o.type === 'ice') { ctx.fillStyle = 'rgba(0, 206, 201, 0.4)'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI*2); ctx.fill(); }
+            else if(o.type === 'mud') { ctx.fillStyle = 'rgba(60, 42, 33, 0.6)'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI*2); ctx.fill(); }
+            else if(o.type === 'cacto') { ctx.fillStyle = '#27ae60'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI*2); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.stroke(); }
+            else if(o.type === 'rock') { ctx.fillStyle = '#2c3e50'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI*2); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.stroke(); }
+            else if(o.type === 'tree') { ctx.fillStyle = '#1e272e'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r*0.4, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#218c74'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI*2); ctx.fill(); }
+            else if(o.type === 'car') { ctx.fillStyle = '#f39c12'; ctx.fillRect(o.x-o.r, o.y-o.r, o.r*2, o.r*2); ctx.fillStyle = '#333'; ctx.fillRect(o.x-o.r+5, o.y-o.r+5, o.r*2-10, o.r*2-10); }
+            else if(o.type === 'volcano') { ctx.fillStyle = '#e74c3c'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#c0392b'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r*0.5, 0, Math.PI*2); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.stroke(); }
+            else if(o.type === 'bamboo') { ctx.fillStyle = '#2ed573'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI*2); ctx.fill(); ctx.strokeStyle = '#2f3542'; ctx.lineWidth=1; ctx.stroke(); }
+            else if(o.type === 'bamboo_spike') { ctx.fillStyle = '#7bed9f'; ctx.beginPath(); ctx.moveTo(o.x, o.y-o.r); ctx.lineTo(o.x+o.r, o.y+o.r); ctx.lineTo(o.x-o.r, o.y+o.r); ctx.fill(); }
+            else if(o.type === 'speaker') { ctx.fillStyle = '#2f3542'; ctx.fillRect(o.x-o.r, o.y-o.r, o.r*2, o.r*2); ctx.fillStyle = '#1e90ff'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r*0.6, 0, Math.PI*2); ctx.fill(); }
+        }
     });
     itemsMap.forEach(m => {
+        const itemKey = getMapElementSpriteKey(m.type, m);
+        const itemSpriteDrawn = itemKey
+            ? drawMapElementSprite(ctx, itemKey, m.x, m.y, (m.type === 'chest' ? 34 : Math.max(18, m.r * 2.1)), {})
+            : false;
+        if (itemSpriteDrawn) return;
         if(m.type === 'chest') {
             ctx.fillStyle = '#f39c12';
             ctx.fillRect(m.x-10, m.y-8, 20, 16);
@@ -11863,6 +11998,30 @@ function draw() {
                 ctx.lineWidth = 2;
                 ctx.stroke();
             }
+            ctx.restore();
+        }
+        if(pd.selectedChar === 'vesper' && player.vesperFocusActive) {
+            ctx.save();
+            ctx.translate(player.x, player.y);
+            ctx.globalAlpha = 0.48;
+            ctx.shadowColor = 'rgba(155, 89, 182, 0.9)';
+            ctx.shadowBlur = 18;
+            ctx.strokeStyle = 'rgba(155, 89, 182, 0.9)';
+            ctx.fillStyle = 'rgba(155, 89, 182, 0.18)';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.arc(0, 0, Math.max(player.r + 16, 26), 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#fff';
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 3;
+            ctx.font = 'bold 18px Arial';
+            ctx.textAlign = 'center';
+            ctx.strokeText('FOCO', 0, -(player.r + 22));
+            ctx.fillText('FOCO', 0, -(player.r + 22));
             ctx.restore();
         }
         if(pd.selectedChar === 'zippi' && player.zippiBubbleHp > 0) {
@@ -12342,7 +12501,46 @@ function draw() {
         else if(p.type === 'axel_stone' || p.type === 'axel_shard') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx)); ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 4; ctx.fillStyle = p.type === 'axel_stone' ? '#9e7b5f' : '#b08d6a'; const stoneW = p.type === 'axel_stone' ? Math.max(14, p.size * 1.8) : Math.max(7, p.size * 1.5); const stoneH = p.type === 'axel_stone' ? Math.max(10, p.size * 1.15) : Math.max(5, p.size * 0.9); if(ctx.roundRect) { ctx.beginPath(); ctx.roundRect(-stoneW * 0.5, -stoneH * 0.5, stoneW, stoneH, stoneH * 0.45); ctx.fill(); } else { ctx.fillRect(-stoneW * 0.5, -stoneH * 0.5, stoneW, stoneH); } ctx.shadowBlur = 0; ctx.fillStyle = '#d7c0a8'; ctx.beginPath(); ctx.arc(-stoneW * 0.12, -stoneH * 0.1, Math.max(1.5, stoneH * 0.18), 0, Math.PI*2); ctx.fill(); ctx.restore(); }
         else {
             ctx.fillStyle = p.isPlayer ? '#f1c40f' : '#e74c3c';
-            if(p.type === 'sword') { ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); } 
+            if(p.type === 'sword') {
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(Math.atan2(p.vy, p.vx));
+                ctx.shadowColor = 'rgba(255, 195, 120, 0.95)';
+                ctx.shadowBlur = 16;
+                ctx.fillStyle = '#fff6e3';
+                ctx.strokeStyle = '#d35400';
+                ctx.lineWidth = 3;
+                const bladeLen = Math.max(52, p.size * 2.35);
+                const bladeH = Math.max(14, p.size * 0.72);
+                if (ctx.roundRect) {
+                    ctx.beginPath();
+                    ctx.roundRect(-bladeLen * 0.58, -bladeH * 0.5, bladeLen, bladeH, bladeH * 0.5);
+                    ctx.fill();
+                    ctx.stroke();
+                } else {
+                    ctx.beginPath();
+                    ctx.moveTo(-bladeLen * 0.58, -bladeH * 0.5);
+                    ctx.lineTo(bladeLen * 0.40, -bladeH * 0.5);
+                    ctx.lineTo(bladeLen * 0.62, 0);
+                    ctx.lineTo(bladeLen * 0.40, bladeH * 0.5);
+                    ctx.lineTo(-bladeLen * 0.58, bladeH * 0.5);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                }
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = '#ffd59e';
+                ctx.beginPath();
+                ctx.arc(-bladeLen * 0.18, 0, Math.max(2.8, bladeH * 0.28), 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(255, 184, 77, 0.70)';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(-bladeLen * 0.58, 0);
+                ctx.lineTo(bladeLen * 0.50, 0);
+                ctx.stroke();
+                ctx.restore();
+            } 
             else if (p.type === 'puddle') { ctx.fillStyle = '#e74c3c'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); }
             else if (p.type === 'syringe') { ctx.fillStyle = '#ff9ff3'; ctx.fillRect(p.x-2, p.y-6, 4, 12); }
             else if (p.type === 'slime') { ctx.fillStyle = '#00b894'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); }
@@ -12372,6 +12570,11 @@ function updateGameHud() {
     document.getElementById('hud-time').innerHTML = `${m}:${s}`;
     const mapEl = document.getElementById('map-text');
     if (mapEl) mapEl.innerHTML = `Mapa: ${MAPS[window.currentMap] || MAPS[0]}`;
+    const vesperFocusEl = document.getElementById('vesper-focus-text');
+    if (vesperFocusEl) {
+        const vesperFocus = pd.selectedChar === 'vesper' && !!player.vesperFocusActive;
+        vesperFocusEl.classList.toggle('hidden', !vesperFocus);
+    }
     let maxHP = Math.floor(player.baseHp * player.stats.maxHpMult);
     const hp = Math.max(0, Math.min(maxHP, Math.floor(player.hp)));
     const showBar = !!pd.settings.showHpBar;
