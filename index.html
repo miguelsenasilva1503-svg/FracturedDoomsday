@@ -3665,7 +3665,8 @@ function getSceneScale() {
 
 function drawTurretBase(ctx, x, y, type = 'turret') {
     const spriteType = String(type || 'turret').toLowerCase();
-    if (drawElementSprite(ctx, x, y, spriteType, spriteType === 'cannon' ? 24 : 20)) return;
+    const elementSpriteSize = spriteType === 'cannon' ? 38 : (spriteType === 'mortar' ? 36 : 34);
+    if (drawElementSprite(ctx, x, y, spriteType, elementSpriteSize)) return;
 
     ctx.save();
     if (spriteType === 'mortar') {
@@ -11559,7 +11560,7 @@ function updateProjectiles(dt) {
                         realDmg *= soakMult;
 
                         e.hp -= realDmg; addFloatingText(e.x, e.y, Math.floor(realDmg), '#fff'); if(p.isPlayer) trackMissionDamage(realDmg);
-                        if (p.type === 'shinobi' || p.type === 'shinobi_fireball' || p.type === 'scythe' || (p.type === 'sword' && pd.selectedChar === 'shinobi')) applyShinobiMark(e, realDmg);
+                        if (p.type === 'shinobi' || p.type === 'shinobi_fireball' || (p.type === 'sword' && pd.selectedChar === 'shinobi')) applyShinobiMark(e, realDmg);
                         if (p.type === 'glitch_bugshot') {
                             const stunDuration = Math.max(0.25, Number(p.extra?.glitchStunDuration) || 0.85);
                             const stunChance = Math.min(1, Math.max(0, Number(p.extra?.glitchStunChance) || 0.35));
@@ -11748,7 +11749,7 @@ function updateProjectiles(dt) {
                     if(p.type === 'lightning' && Math.random() < 0.15) applyEelShock(e, false, p.dmg, p.x, p.y, false);
                     if(p.type === 'screw' && pd.selectedChar === 'kaisen' && Math.random() < 0.10) applyEelShock(e, true, Math.max(1, p.dmg * 0.35), p.x, p.y, false);
                     if(p.type === 'sword' && pd.selectedChar === 'kayo' && Math.random() < 0.10) { e.burnTimer = 3; e.burnDmg = p.dmg*0.5; }
-                    if(p.type === 'scythe' && p.extra?.sourceChar !== 'shinobi' && Math.random() < 0.20) e.weakenTimer = 3;
+                    if(p.type === 'scythe' && Math.random() < 0.25) e.weakenTimer = 3;
                     if(p.type === 'saw_throw' && e.hp <= 0) { 
                         let saws = allies.filter(a => a.type === 'stationary_saw');
                         if (saws.length >= 3) { let oldest = saws[0]; oldest.life = 0; }
@@ -12297,13 +12298,21 @@ function updateGraffitMarks(dt) {
 
 
 function getPlayerSpriteId() {
-    if (player?.glitchTransformAnimating && player?.glitchTransformPreviewId) return player.glitchTransformPreviewId;
+    const shinobiDragonOn = !!(player && (player.shinobiDragonActive || player.shinobiDragonFormActive));
+    if (pd?.selectedChar === 'shinobi' && shinobiDragonOn) return 'dragon_shinobi';
+    if (pd?.selectedChar === 'glitch' && player?.glitchMorphActive && player?.glitchCurrentFormId) {
+        if (player.glitchCurrentFormId === 'shinobi' && shinobiDragonOn) return 'dragon_shinobi';
+        return player.glitchCurrentFormId;
+    }
+    if (player?.glitchTransformAnimating && player?.glitchTransformPreviewId) {
+        const previewId = player.glitchTransformPreviewId;
+        if (previewId === 'shinobi' && shinobiDragonOn) return 'dragon_shinobi';
+        return previewId;
+    }
     if (pd?.selectedChar === 'adam' && player?.adamMechActive) return 'adam_mech';
     if (pd?.selectedChar === 'gladiator') {
         return (pd?.chars?.gladiator?.mode === 'shooter') ? 'gladiator_spear' : 'gladiator_sword';
     }
-    if (pd?.selectedChar === 'shinobi' && (player?.shinobiDragonActive || player?.shinobiDragonFormActive)) return 'dragon_shinobi';
-    if (pd?.selectedChar === 'glitch' && player?.glitchMorphActive && player?.glitchCurrentFormId) return player.glitchCurrentFormId;
     if (pd?.selectedChar === 'miss_macaron') return 'miss_macaron';
     return pd?.selectedChar || null;
 }
