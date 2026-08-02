@@ -330,7 +330,45 @@
         background: rgba(52, 152, 219, 0.85);
     }
     
-    #btn-special { position: absolute; bottom: 50px; right: 50px; width: 80px; height: 80px; background: rgba(52, 152, 219, 0.5); border: 3px solid rgba(255,255,255,0.5); border-radius: 50%; font-size: 30px; color: white; display: none; justify-content: center; align-items: center; z-index: 5; touch-action: none; cursor: pointer; }
+    #btn-special { position: absolute; bottom: 50px; right: 50px; width: 80px; height: 80px; background: rgba(52, 152, 219, 0.5); border: 3px solid rgba(255,255,255,0.5); border-radius: 50%; font-size: 30px; color: white; display: none; justify-content: center; align-items: center; z-index: 5; touch-action: none; cursor: pointer; overflow: visible; }
+    #btn-special .btn-special-label { pointer-events: none; }
+    #btn-special .btn-cooldown-badge { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); min-width: 30px; height: 24px; padding: 0 7px; border-radius: 999px; background: rgba(0,0,0,0.82); color: #fff; font-size: 13px; font-weight: 900; line-height: 24px; border: 2px solid rgba(255,255,255,0.35); box-shadow: 0 4px 10px rgba(0,0,0,0.35); pointer-events: none; display: none; }
+    #btn-special.cooling { background: rgba(8,8,12,0.98) !important; border-color: rgba(255,255,255,0.16) !important; filter: brightness(0.34) saturate(0.45); }
+    #btn-special-hint {
+        position: absolute;
+        right: 142px;
+        bottom: 60px;
+        z-index: 5;
+        display: none;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: rgba(0,0,0,0.62);
+        color: #fff;
+        border: 1px solid rgba(255,255,255,0.12);
+        box-shadow: 0 8px 18px rgba(0,0,0,0.28);
+        font-size: 13px;
+        font-weight: 900;
+        text-shadow: 1px 1px 0 #000;
+        pointer-events: none;
+        max-width: min(42vw, 260px);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    #btn-special-hint .hotkey {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 28px;
+        height: 28px;
+        border-radius: 9px;
+        background: rgba(255,255,255,0.14);
+        border: 1px solid rgba(255,255,255,0.16);
+        font-size: 14px;
+        font-weight: 900;
+    }
     
     #game-hud { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; justify-content: space-between; align-items: flex-start; z-index: 5; pointer-events: none; }
     .hud-text { font-size: 20px; color: white; text-shadow: 2px 2px 0 #000; font-weight: bold; margin-bottom: 5px; }
@@ -822,6 +860,40 @@
     #screen-settings .settings-card--wide {
         grid-column: 1 / -1;
     }
+    #pause-settings-view {
+        width: 100%;
+        max-height: min(70vh, 560px);
+        overflow-y: auto;
+        padding-right: 6px;
+    }
+    #pause-settings-view > div {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px !important;
+        width: 100%;
+    }
+    #pause-settings-view > div > .settings-card {
+        min-height: 0;
+        padding: 12px;
+    }
+    #pause-settings-view > div > button {
+        min-height: 62px;
+        white-space: normal;
+        line-height: 1.1;
+    }
+    #pause-settings-view > div > .settings-card:first-child,
+    #pause-settings-view > div > button:nth-child(2) {
+        grid-column: 1 / -1;
+    }
+    @media (max-width: 720px) {
+        #pause-settings-view > div {
+            grid-template-columns: 1fr;
+        }
+        #pause-settings-view > div > .settings-card:first-child,
+        #pause-settings-view > div > button:nth-child(2) {
+            grid-column: auto;
+        }
+    }
     .zoom-control {
         width: 100%;
         margin: 0;
@@ -1038,16 +1110,19 @@
         background:
             radial-gradient(circle at top, rgba(255,255,255,0.05), transparent 32%),
             linear-gradient(180deg, #171721 0%, #0f1118 100%);
+        overflow-y: auto;
+        overflow-x: hidden;
     }
     #screen-main .main-menu-shell {
         width: min(1120px, 100%);
-        height: 100%;
+        min-height: 100%;
+        height: auto;
         margin: 0 auto;
         position: relative;
         display: flex;
         flex-direction: column;
         gap: 10px;
-        padding-bottom: 0;
+        padding-bottom: 24px;
     }
     #screen-main .main-top-row {
         position: relative;
@@ -1115,17 +1190,17 @@
         color: var(--btn-yellow);
     }
     #screen-main .main-actions {
-        position: absolute;
-        left: 4px;
-        right: 4px;
-        bottom: 18px;
+        position: relative;
+        left: auto;
+        right: auto;
+        bottom: auto;
         display: flex;
         justify-content: space-between;
         align-items: flex-end;
         gap: 14px;
-        width: auto;
-        margin-top: 0;
-        padding: 0;
+        width: 100%;
+        margin-top: auto;
+        padding: 12px 0 4px;
         z-index: 2;
     }
     #screen-main .main-left-actions,
@@ -2100,6 +2175,7 @@
     <button class="dpad-btn" data-dir="right" style="grid-column: 3; grid-row: 2;">▶</button>
 </div>
 <div id="btn-special"></div>
+<div id="btn-special-hint"><span class="hotkey">P</span><span class="hint-text">aperte para ativar</span></div>
 
 <div id="overlay-pause" class="overlay hidden">
     <div class="pause-panel">
@@ -2450,6 +2526,16 @@ Uma entidade envolta em sombras e mistério, cuja verdadeira origem permanece de
 Um artista de rua rebelde que transforma a cidade em sua tela. Armado com latas de spray e uma criatividade sem limites, Graffit deixa sua marca por onde passa, ignorando placas de “proibido”. Entre uma pintura e outra, ele prova que arte e confusão podem andar perfeitamente juntas.
 
 “Ei... essa parede tava sem graça.”` },
+    shinobi: { id: 'shinobi', class: 'Samurai', name: 'Shinobi', rarity: 'mythic', cost: 699, hp: 125, speed: 4.0, dmg: 17, fireRate:  28, range: 235, color: '#8e44ad', weapon: 'scythe', sortLast: true, desc: `“Shinobi acredita que a disciplina supera qualquer truque. Por isso, costuma olhar Ninji com certo desdém.”
+
+Um samurai extremamente habilidoso que dedicou a vida ao aperfeiçoamento da espada e da honra. Para ele, ninjas dependem demais de furtividade e artifícios, enquanto um verdadeiro guerreiro vence de frente. Quando a situação exige, Shinobi desperta seu poder ancestral e se transforma em um imponente dragão, fazendo até os inimigos mais destemidos recuarem.
+
+“Venha. Mostre que sua lâmina merece cruzar a minha... ou a de um dragão.”` },
+    glitch: { id: 'glitch', class: 'Controle', name: 'Glitch', rarity: 'mythic', cost: 799, hp: 108, speed: 3.55, dmg: 16, fireRate: 42, range: 250, color: '#9b59b6', weapon: 'glitch_bugshot', sortLast: true, desc: `“Glitch não nasceu. Ele aconteceu.”
+
+Uma anomalia viva criada pelas Fraturas, capaz de corromper a própria realidade. Aliado de Echo, Glitch não possui uma forma verdadeira e pode assumir a aparência e as habilidades de qualquer pessoa que encontrar, tornando impossível saber quem é aliado... e quem é apenas uma cópia. Onde ele surge, a realidade falha, o caos se espalha e nada parece funcionar como deveria.
+
+“Você tem certeza de que está lutando contra a pessoa certa?”` },
     eel: { id: 'eel', class: 'Controle', name: 'Eel', rarity: 'legendary', cost: 349, hp: 118, speed: 3.15, dmg: 18, fireRate: 52, range: 265, color: '#3ec7ff', weapon: 'eel_lash', desc: `“Eel jurou que surfar durante uma tempestade era uma boa ideia. Foi assim que começou sua... ligação chocante com enguias elétricas.”
 
 Um surfista destemido que vive em perfeita sintonia com o oceano e suas criaturas mais perigosas. Sempre acompanhado por misteriosas enguias elétricas, Eel desliza pelas batalhas com a mesma tranquilidade de quem está pegando a onda perfeita. Só não encoste nele... as enguias também não gostam de visitas.
@@ -2689,6 +2775,12 @@ ESPECIAL: é acompanhado por um drone monitor que dispara projéteis e tem 20% d
 
 ESPECIAL: a cada 5 macarons disparados, dispara um macaron grande que PERFURA inimigos e tem 50% de chance de deixar o alvo AÇUCARADO.
 ESPECIAL: começa as partidas com uma mesa de chá fixa. Ela fica parada e é recolocada a cada 3 waves. Dentro da área de efeito, Miss Macaron dispara chás quentes que podem LERDAR ou QUEIMAR inimigos.`,
+    shinobi: `Shinobi: ataca em uma área de 180° com sua katana. Quando atinge um inimigo, ele ganha uma marca. Depois de 1s, a marca explode causando dano. Um mesmo inimigo pode acumular até 5 marcas, e cada nova marca reseta o tempo.
+
+ESPECIAL: ao acionar o modo Dragão Guerreiro, Shinobi se transforma por 3 waves e entra em recarga de 40s. Nessa forma, ele dispara bolas de fogo ainda mais rápidas, de longo alcance e altíssima cadência, com explosão em área maior e dano pesado no impacto e na explosão. Ele também atravessa paredes e fica muito mais veloz.`,
+    glitch: `Glitch: dispara projéteis bugados que podem STUNAR inimigos.
+
+ESPECIAL: depois da wave 1, ele escolhe um personagem aleatório e o copia por 3 waves, incluindo sprite, habilidades e passivas conforme o nível do Glitch.`,
     jack: { id: 'jack', class: 'Secret', name: 'Jack', rarity: 'secret', cost: 0, hp: 999999999, speed: 9, dmg: 999999999, fireRate: 1, range: 999999999, color: '#000000', emoji: '🖤', weapon: 'laser', desc: `“Jack: GOD ADMIN D321”
 
 Um administrador secreto que aparece só quando o painel dev é liberado. Ele domina o campo com alcance absurdo, resistência brutal e poder total de perfuração.
@@ -3304,6 +3396,7 @@ function load() {
     if (!pd || typeof pd !== 'object') pd = JSON.parse(JSON.stringify(PD_TEMPLATE));
     if (!pd.chars || typeof pd.chars !== 'object') pd.chars = {};
     if (!pd.chars.strike) pd.chars.strike = { level: 1, slots: 2, chips: [null, null] };
+    if (!pd.chars.glitch) pd.chars.glitch = { level: 1, slots: 2, chips: [null, null] };
 
     if (!pd.profile || typeof pd.profile !== 'object') pd.profile = { title: null };
     if (typeof pd.profile.title === 'undefined') pd.profile.title = null;
@@ -3670,6 +3763,8 @@ const CHARACTER_TITLES = {
     yeti: 'Avalanche',
     echo: 'Tudo começou… comigo.',
     miss_macaron: 'Bon Appétit',
+    shinobi: 'Dragão Samurai',
+    glitch: 'Bugado',
     jack: 'GOD ADMIN D321'
 };
 
@@ -3728,6 +3823,9 @@ const CHARACTER_SPRITES = {
     yeti: 'sprites/yeti.png',
     echo: 'sprites/echo.png',
     graffit: 'sprites/graffit.png',
+    shinobi: 'sprites/shinobi.png',
+    dragon_shinobi: 'sprites/dragon_shinobi.png',
+    glitch: 'sprites/glitch.png',
 
     hank: 'sprites/hank.png',
     hunter: 'sprites/hunter.png',
@@ -3833,6 +3931,7 @@ function getDynamicCharacterSpriteId(id) {
         if (typeof player !== 'undefined' && player && player.flexLowHp) return 'flex_less_health';
         return 'flex_hammer';
     }
+    if (id === 'shinobi' && typeof player !== 'undefined' && player && player.shinobiDragonActive) return 'dragon_shinobi';
     return id;
 }
 
@@ -3861,6 +3960,7 @@ function getCharacterSpriteImage(id) {
     return CHARACTER_SPRITE_CACHE.get(resolvedId);
 }
 
+
 function getEnemySpriteImage(id) {
     const path = ENEMY_SPRITES[id] || '';
     if (!path) return null;
@@ -3872,6 +3972,207 @@ function getEnemySpriteImage(id) {
     return ENEMY_SPRITE_CACHE.get(id);
 }
 
+function getCharacterRadiusById(id) {
+    if (id === 'hank' || id === 'yeti') return 20;
+    if (id === 'shiv' || id === 'zippi') return 10;
+    if (id === 'kaisen' || id === 'booboo') return 13;
+    return 15;
+}
+
+function getGlitchMorphPool() {
+    return Object.keys(CHARACTERS || {}).filter(id => id && id !== 'glitch' && id !== 'jack');
+}
+
+function getRandomGlitchMorphId(excludeIds = []) {
+    const pool = getGlitchMorphPool().filter(id => !excludeIds.includes(id));
+    if (!pool.length) return 'strike';
+    return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function getCharacterLoadout(charId, levelOverride = null) {
+    const charDef = CHARACTERS?.[charId];
+    if (!charDef) return null;
+    const level = Math.max(1, Math.min(8, Number.isFinite(levelOverride) ? Math.floor(levelOverride) : (pd?.chars?.[charId]?.level || 1)));
+    const levelMult = 1 + Math.max(0, level - 1) * 0.15;
+    const speedMult = 1 + Math.max(0, level - 1) * 0.03;
+    const fireRateMult = Math.max(0.55, 1 - Math.max(0, level - 1) * 0.03);
+    return {
+        charDef,
+        level,
+        baseHp: Math.max(1, Math.round(charDef.hp * levelMult)),
+        baseDmg: Math.max(1, Math.round(charDef.dmg * levelMult)),
+        baseSpeed: Math.max(0.6, +(charDef.speed * speedMult).toFixed(2)),
+        baseFireRate: Math.max(1, Math.round(charDef.fireRate * fireRateMult)),
+        baseRange: Math.max(80, Math.round(charDef.range)),
+        color: charDef.color,
+        weapon: charDef.weapon,
+        r: getCharacterRadiusById(charId)
+    };
+}
+
+function resetMorphRuntimeState(charId) {
+    if (!player) return;
+    player.elekCycle = false;
+    player.dashTimer = 0;
+    player.meleeCd = 0;
+    player.boldShots = 0;
+    player.boldReload = 0;
+    player.specCd = 0;
+    player.invisTimer = 0;
+    player.ghoulPendingCd = 0;
+    player.ninjiPendingCd = 0;
+    player.ninjiDashCd = 0;
+    player.shinobiDragonActive = false;
+    player.shinobiDragonWavesLeft = 0;
+    player.shinobiDragonCooldown = 0;
+    player.shinobiDragonFireCd = 0;
+    player.shinobiScytheCycle = 0;
+    player.majorBriggsKills = 0;
+    player.majorBriggsStage = 1;
+    player.adamScrap = 0;
+    player.adamMechActive = false;
+    player.adamMechWavesLeft = 0;
+    player.adamMechHpBonus = 0;
+    player.adamMechSizeBonus = 0;
+    player.adamBaseHpBeforeMech = null;
+    player.adamBaseRBeforeMech = null;
+    player.spartaCycle = 0;
+    player.spartaNoDamageTimer = 0;
+    player.spartaShieldActive = false;
+    player.spartaAttackTimer = 0;
+    player.spartaAttackMode = 'straight';
+    player.spartaAttackRange = 0;
+    player.spartaAttackWidth = 0;
+    player.spartaAttackHalfAngle = 0;
+    player.vesperFocusTimer = 0;
+    player.vesperFocusActive = false;
+    player.gooRevived = false;
+    player.gooCloneSpawned = false;
+    player.gooFullBaseHp = player.gooFullBaseHp || player.baseHp || 1;
+    player.gooFullBaseDmg = player.gooFullBaseDmg || player.baseDmg || 1;
+    player.gooFullR = getCharacterRadiusById('goo');
+    player.inTotem = false;
+    player.landmineTimer = 0;
+    player.flameTimer = 0;
+    player.flameReload = 0;
+    player.flameTickCd = 0;
+    player.flexTimer = 0;
+    player.flexAngle = 0;
+    player.flexLowHp = false;
+    player.flexReload = 0;
+    player.seaePuddleCd = 0;
+    player.zippiBubbleHp = charId === 'zippi' ? 80 : 0;
+    player.zippiBubbleMaxHp = charId === 'zippi' ? 80 : 0;
+    player.zippiBubbleBroken = false;
+}
+
+function applyCharacterLoadout(charId, levelOverride = null, opts = {}) {
+    if (!player || !pd) return null;
+    const loadout = getCharacterLoadout(charId, levelOverride);
+    if (!loadout) return null;
+    const keepHpRatio = opts.keepHpRatio !== false;
+    const prevMaxHp = Math.max(1, (player.baseHp || 1) * (player.stats?.maxHpMult || 1));
+    const hpRatio = keepHpRatio ? Math.max(0, Math.min(1, (Number(player.hp) || prevMaxHp) / prevMaxHp)) : 1;
+
+    resetMorphRuntimeState(charId);
+
+    pd.selectedChar = charId;
+    if (pd.run && typeof pd.run === 'object') pd.run.charId = charId;
+
+    player.weapon = loadout.weapon;
+    player.baseHp = loadout.baseHp;
+    player.baseDmg = loadout.baseDmg;
+    player.baseSpeed = loadout.baseSpeed;
+    player.baseFireRate = loadout.baseFireRate;
+    player.baseRange = loadout.baseRange;
+    player.color = loadout.color;
+    player.r = loadout.r;
+    player.stats.dodgeChance = Number.isFinite(loadout.charDef?.baseDodge) ? loadout.charDef.baseDodge : (loadout.charDef?.baseDodge || 0);
+
+    const maxHp = Math.max(1, player.baseHp * (player.stats.maxHpMult || 1));
+    player.hp = keepHpRatio ? Math.max(1, Math.min(maxHp, Math.round(maxHp * hpRatio))) : maxHp;
+    updateSpecialButtonUI();
+    return loadout;
+}
+
+function startGlitchMorphSequence(reverting = false) {
+    if (!player || player.glitchTransformAnimating) return false;
+    const glitchLevel = Math.max(1, Math.min(8, Number(pd?.chars?.glitch?.level) || 1));
+    const finalId = reverting ? 'glitch' : getRandomGlitchMorphId(['glitch', 'jack']);
+    const pool = getGlitchMorphPool().filter(id => id !== finalId);
+    const shuffled = pool.slice().sort(() => Math.random() - 0.5);
+    const cycleIds = shuffled.slice(0, 3);
+    while (cycleIds.length < 3) cycleIds.push(finalId);
+
+    player.glitchMorphLevel = glitchLevel;
+    player.glitchTransformAnimating = true;
+    player.glitchTransformReverting = reverting;
+    player.glitchTransformElapsed = 0;
+    player.glitchTransformTimer = 0.72;
+    player.glitchTransformFinalId = finalId;
+    player.glitchTransformCycleIds = cycleIds;
+    player.glitchTransformPreviewId = cycleIds[0] || finalId;
+    return true;
+}
+
+function finishGlitchMorphSequence() {
+    if (!player) return;
+    const glitchLevel = Math.max(1, Math.min(8, Number(pd?.chars?.glitch?.level) || 1));
+    const finalId = player.glitchTransformFinalId || 'glitch';
+    player.glitchTransformAnimating = false;
+    player.glitchTransformElapsed = 0;
+    player.glitchTransformTimer = 0;
+    player.glitchTransformPreviewId = finalId;
+    player.glitchTransformCycleIds = [];
+    player.glitchTransformReverting = false;
+
+    if (finalId === 'glitch') {
+        applyCharacterLoadout('glitch', glitchLevel, { keepHpRatio: true });
+        player.glitchMorphActive = false;
+        player.glitchMorphWavesLeft = 0;
+        player.glitchCurrentFormId = 'glitch';
+        player.glitchOriginChar = 'glitch';
+    } else {
+        applyCharacterLoadout(finalId, glitchLevel, { keepHpRatio: true });
+        player.glitchMorphActive = true;
+        player.glitchMorphWavesLeft = 3;
+        player.glitchCurrentFormId = finalId;
+        player.glitchOriginChar = 'glitch';
+    }
+    updateSpecialButtonUI();
+}
+
+function updateGlitchMorphSequence(dt) {
+    if (!player || !player.glitchTransformAnimating) return;
+    player.glitchTransformElapsed = (player.glitchTransformElapsed || 0) + dt;
+    const total = player.glitchTransformTimer || 0.72;
+    const slot = total / 4;
+    const step = Math.min(3, Math.floor((player.glitchTransformElapsed || 0) / slot));
+    if (step < 3) {
+        player.glitchTransformPreviewId = (player.glitchTransformCycleIds && player.glitchTransformCycleIds[step]) || player.glitchTransformFinalId || 'glitch';
+    } else {
+        player.glitchTransformPreviewId = player.glitchTransformFinalId || 'glitch';
+    }
+    if (player.glitchTransformElapsed >= total) finishGlitchMorphSequence();
+}
+
+function restoreGlitchSelectionIfNeeded() {
+    if (!player || !pd || player.glitchOriginChar !== 'glitch') return;
+    const glitchLevel = Math.max(1, Math.min(8, Number(pd?.chars?.glitch?.level) || 1));
+    pd.selectedChar = 'glitch';
+    if (pd.run && typeof pd.run === 'object') pd.run.charId = 'glitch';
+    player.glitchMorphActive = false;
+    player.glitchMorphWavesLeft = 0;
+    player.glitchTransformAnimating = false;
+    player.glitchTransformReverting = false;
+    player.glitchTransformElapsed = 0;
+    player.glitchTransformTimer = 0;
+    player.glitchTransformPreviewId = 'glitch';
+    player.glitchTransformFinalId = 'glitch';
+    player.glitchTransformCycleIds = [];
+    applyCharacterLoadout('glitch', glitchLevel, { keepHpRatio: true });
+    updateSpecialButtonUI();
+}
 
 function drawCharacterSprite(cCtx, x, y, size, spriteId, opts = {}) {
     const img = getCharacterSpriteImage(spriteId);
@@ -4042,6 +4343,7 @@ function getEnemyStatusIndicators(e) {
 
     if (e.slowTimer > 0) indicators.push({ key: 'slow', icon: '↓', color: '#3498db' });
     if (e.freezeTimer > 0) indicators.push({ key: 'freeze', icon: '❄️', color: '#9ad6ff' });
+    if ((e.stunTimer || 0) > 0) indicators.push({ key: 'stun', icon: '💥', color: '#8e44ad' });
     if ((e.poison?.timer || 0) > 0) indicators.push({ key: 'poison', icon: '☠️', color: '#2ecc71' });
     if (e.burnTimer > 0) indicators.push({ key: 'burn', icon: '🔥', color: '#e67e22' });
     if (e.shockTimer > 0) indicators.push({ key: 'shock', icon: '⚡', color: '#3ec7ff' });
@@ -4051,6 +4353,8 @@ function getEnemyStatusIndicators(e) {
     if (e.weakenTimer > 0) indicators.push({ key: 'weaken', icon: '🛡️', color: '#dfe6e9' });
     if (e.speedBuffTimer > 0) indicators.push({ key: 'speed', icon: '⏩', color: '#f1c40f' });
     if (e.soak > 0) indicators.push({ key: 'soak', icon: '💧', color: '#00e5ff' });
+    const shinobiMarks = Math.max(0, Math.min(5, Number(e.shinobiMarks) || 0));
+    if (shinobiMarks > 0) indicators.push({ key: 'shinobi_mark', count: shinobiMarks, color: '#e056fd' });
 
     return indicators;
 }
@@ -4073,8 +4377,22 @@ function drawEnemyStatusHud(ctx, e, drawW, drawH) {
         const iconStart = e.x - ((indicators.length - 1) * iconStep) / 2;
         ctx.font = '12px Arial';
         indicators.forEach((fx, i) => {
-            ctx.fillStyle = fx.color;
-            ctx.fillText(fx.icon, iconStart + i * iconStep, iconY);
+            if (fx.key === 'shinobi_mark') {
+                const total = Math.max(1, Math.min(5, fx.count || 0));
+                const dotStart = e.x - ((total - 1) * 8) / 2;
+                for (let j = 0; j < total; j++) {
+                    ctx.beginPath();
+                    ctx.fillStyle = fx.color;
+                    ctx.shadowColor = 'rgba(224, 86, 253, 0.55)';
+                    ctx.shadowBlur = 8;
+                    ctx.arc(dotStart + j * 8, iconY, 2.8, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.shadowBlur = 0;
+            } else {
+                ctx.fillStyle = fx.color;
+                ctx.fillText(fx.icon, iconStart + i * iconStep, iconY);
+            }
         });
 
         const gap = indicators.length > 1 ? 1 : 0;
@@ -4772,15 +5090,12 @@ function syncDevUnlocks() {
         return;
     }
 
-    const base = captureDevBaseState();
     const maxValue = 999999999;
 
-    restoreDevBaseState();
-
-    if (pd.debug.infiniteCoins) pd.coins = maxValue;
-    if (pd.debug.infiniteGems) pd.gems = maxValue;
-    if (pd.debug.infiniteEvo) pd.evo = maxValue;
-    if (pd.debug.infiniteScrap) pd.sucatas = maxValue;
+    if (pd.debug.infiniteCoins) pd.coins = Math.max(Number(pd.coins) || 0, maxValue);
+    if (pd.debug.infiniteGems) pd.gems = Math.max(Number(pd.gems) || 0, maxValue);
+    if (pd.debug.infiniteEvo) pd.evo = Math.max(Number(pd.evo) || 0, maxValue);
+    if (pd.debug.infiniteScrap) pd.sucatas = Math.max(Number(pd.sucatas) || 0, maxValue);
 
     if (pd.debug.unlockAllChars) {
         Object.keys(CHARACTERS || {}).forEach(id => {
@@ -6480,8 +6795,6 @@ function showEquipChipOverlay(charId, slotIndex) {
 
 function equipChip(charId, chipId, slotIndex) {
     if (charId === 'plasma' && chipId === 'bounce') { showAlert("Plasma não pode equipar o chip de Ricochete!"); return; }
-    if (charId === 'rex' && chipId === 'pierce') { showAlert("Rex não pode equipar o chip de Perfuração!"); return; }
-    if (charId === 'zippi' && chipId === 'pierce') { showAlert("Zippi não pode equipar o chip de Perfuração!"); return; }
     if (charId === 'mrsaw' && chipId === 'orbital') { showAlert("Mr. Saw não pode equipar mais orbitais!"); return; }
 
     if(pd.chipsInventory[chipId] > 0) {
@@ -7642,6 +7955,23 @@ if (nickInputEl) {
     });
 }
 
+function getSelectedSpecialConfig() {
+    if (!player || !pd?.selectedChar) return null;
+    if (pd.selectedChar === 'ghoul') {
+        return { type: 'ghoul', label: '👻', title: 'Especial', ready: player.specCd <= 0 };
+    }
+    if (pd.selectedChar === 'ninji' && player.weapon === 'dagger') {
+        return { type: 'ninji', label: '💨', title: 'Dash', ready: player.ninjiDashCd <= 0 };
+    }
+    if (pd.selectedChar === 'shinobi') {
+        return { type: 'shinobi', label: '🐉', title: player.shinobiDragonActive ? 'Transformado' : 'Dragão Guerreiro', ready: player.shinobiDragonCooldown <= 0 && !player.shinobiDragonActive };
+    }
+    if (pd.selectedChar === 'glitch') {
+        return { type: 'glitch', label: '🎲', title: player.glitchTransformAnimating ? 'Corrompendo...' : 'Bugado', ready: !player.glitchTransformAnimating };
+    }
+    return null;
+}
+
 function bindSpecialButton(btn) {
     if (!btn) return;
     const fire = (e) => {
@@ -7649,7 +7979,7 @@ function bindSpecialButton(btn) {
             e.preventDefault();
             e.stopPropagation();
         }
-        if (isPlaying && !isPaused && player && (player.weapon === 'energy_wave' || pd.selectedChar === 'ninji')) triggerSpecial();
+        if (isPlaying && !isPaused && player && getSelectedSpecialConfig()) triggerSpecial();
     };
     btn.addEventListener('pointerdown', fire);
     btn.addEventListener('touchstart', fire, { passive: false });
@@ -7658,33 +7988,63 @@ function bindSpecialButton(btn) {
 bindSpecialButton(btnSpecial);
 
 function getSpecialButtonLabel() {
-    if (!player) return '';
-    if (pd.selectedChar === 'miss_macaron' || pd.selectedChar === 'vesper') return '';
-    if (pd.selectedChar === 'ninji' && player.weapon === 'dagger') return '💨';
-    if (player.weapon === 'energy_wave') return '👻';
-    return '';
+    const cfg = getSelectedSpecialConfig();
+    return cfg ? cfg.label : '';
 }
 
 function updateSpecialButtonUI() {
     if (!btnSpecial) return;
     const touch = isTouchDevice();
     const mobileControls = pd?.settings?.controlMode === 'mobile' || (pd?.settings?.controlMode === 'auto' && touch);
-    const label = mobileControls ? getSpecialButtonLabel() : '';
-    if (!label) {
+    const cfg = getSelectedSpecialConfig();
+
+    const hint = document.getElementById('btn-special-hint');
+    if (hint) {
+        const showHint = !!cfg && !mobileControls;
+        hint.style.display = showHint ? 'inline-flex' : 'none';
+        const hotkey = hint.querySelector('.hotkey');
+        const hintText = hint.querySelector('.hint-text');
+        if (hotkey) hotkey.textContent = 'P';
+        if (hintText) hintText.textContent = 'aperte para ativar';
+    }
+
+    const shouldHide = !cfg || !cfg.label;
+    if (shouldHide) {
         btnSpecial.style.display = 'none';
-        btnSpecial.textContent = '';
+        btnSpecial.innerHTML = '';
         btnSpecial.title = '';
+        btnSpecial.disabled = true;
+        btnSpecial.style.pointerEvents = 'none';
+        btnSpecial.classList.remove('cooling');
+        btnSpecial.style.opacity = '1';
+        if (hint) hint.style.display = 'none';
         return;
     }
+
+    const isGhoulActive = pd.selectedChar === 'ghoul' && (player.invisTimer || 0) > 0;
+    const isNinjiActive = pd.selectedChar === 'ninji' && player.weapon === 'dagger' && (player.dashTimer || 0) > 0;
+    const isShinobiActive = cfg.type === 'shinobi' && player.shinobiDragonActive;
+    const isGlitchActive = cfg.type === 'glitch' && !!player.glitchTransformAnimating;
+
+    const cooldownValue = cfg.type === 'ghoul'
+        ? Math.max(0, Math.ceil(player.specCd || 0))
+        : cfg.type === 'ninji'
+            ? Math.max(0, Math.ceil(player.ninjiDashCd || 0))
+            : cfg.type === 'shinobi'
+                ? Math.max(0, Math.ceil(player.shinobiDragonCooldown || 0))
+                : 0;
+
+    const activeState = cfg.type === 'ghoul' ? isGhoulActive : cfg.type === 'ninji' ? isNinjiActive : cfg.type === 'shinobi' ? isShinobiActive : isGlitchActive;
+    const shouldShowCooldown = !activeState && cooldownValue > 0;
+    const label = cfg.label || '';
+
     btnSpecial.style.display = 'flex';
-    btnSpecial.textContent = label;
-    if (pd.selectedChar === 'ninji') {
-        btnSpecial.title = 'Dash';
-    } else if (player.weapon === 'energy_wave') {
-        btnSpecial.title = 'Especial';
-    }
-    const ready = pd.selectedChar === 'ninji' ? (player.ninjiDashCd <= 0) : (player.specCd <= 0);
-    btnSpecial.style.opacity = ready ? '1' : '0.5';
+    btnSpecial.disabled = false;
+    btnSpecial.style.pointerEvents = 'auto';
+    btnSpecial.innerHTML = `<span class="btn-special-label">${label}</span><div class="btn-cooldown-badge" style="display:${shouldShowCooldown || activeState ? 'block' : 'none'}">${activeState ? '' : String(cooldownValue)}</div>`;
+    btnSpecial.title = cfg.title;
+    btnSpecial.classList.toggle('cooling', activeState || shouldShowCooldown);
+    btnSpecial.style.opacity = (activeState || shouldShowCooldown) ? '0.55' : '1';
 }
 
 function setActionState(action, pressed) {
@@ -7712,7 +8072,7 @@ window.addEventListener('keydown', e => {
         e.preventDefault();
         if (action === 'special') {
             setActionState('special', true);
-            if (isPlaying && !isPaused && player && (player.weapon === 'energy_wave' || pd.selectedChar === 'ninji')) triggerSpecial();
+            if (isPlaying && !isPaused && player && getSelectedSpecialConfig()) triggerSpecial();
         } else if (action === 'pause') {
             setActionState('pause', true);
             if (isPlaying) togglePause();
@@ -8030,12 +8390,13 @@ function startRunAfterShop() {
     player = {
         x: 0, y: 0, r: (pd.selectedChar === 'hank' || pd.selectedChar === 'yeti') ? 20 : ((pd.selectedChar === 'shiv' || pd.selectedChar === 'zippi') ? 10 : (pd.selectedChar === 'kaisen' ? 13 : (pd.selectedChar === 'booboo' ? 13 : (pd.selectedChar === 'eel' ? 15 : 15)))), baseHp: initialBaseHp, hp: initialBaseHp, baseSpeed: charDef.speed, baseDmg: initialBaseDmg,
         baseFireRate: charDef.fireRate, baseRange: charDef.range, color: charDef.color, weapon: charDef.weapon, cd: 0, shieldTimer: 0,
-        zombieTimer: 0, revived: false, elekCycle: false, dashTimer: 0, meleeCd: 0, boldShots: 0, boldReload: 0, specCd: 0, invisTimer: 0,
-        lastMoveAngle: 0, lastAimAngle: 0, tenentCycle: 0, orbitalAngle: 0, boobooReturn: true, pickedCards: [], revivesUsed: 0, qbBar: 0, qbShield: false, isDead: false, flexCombo: 0, flexReload: 0, ninjiDashCd: 0, majorBriggsKills: 0, majorBriggsStage: 1,
+        zombieTimer: 0, revived: false, elekCycle: false, dashTimer: 0, meleeCd: 0, boldShots: 0, boldReload: 0, specCd: 0, invisTimer: 0, ghoulPendingCd: 0, ninjiPendingCd: 0,
+        lastMoveAngle: 0, lastAimAngle: 0, tenentCycle: 0, orbitalAngle: 0, boobooReturn: true, pickedCards: [], revivesUsed: 0, qbBar: 0, qbShield: false, isDead: false, flexCombo: 0, flexReload: 0, ninjiDashCd: 0, shinobiDragonActive: false, shinobiDragonWavesLeft: 0, shinobiDragonCooldown: 0, shinobiDragonFireCd: 0, shinobiScytheCycle: 0, majorBriggsKills: 0, majorBriggsStage: 1,
         adamScrap: 0, adamMechActive: false, adamMechWavesLeft: 0, adamMechHpBonus: 0, adamMechSizeBonus: 0, adamBaseHpBeforeMech: null, adamBaseRBeforeMech: null,
         spartaCycle: 0, spartaNoDamageTimer: 0, spartaShieldActive: false, spartaAttackTimer: 0, spartaAttackMode: 'straight', spartaAttackRange: 0, spartaAttackWidth: 0, spartaAttackHalfAngle: 0, vesperFocusTimer: 0, vesperFocusActive: false, vesperFocusTimer: 0, vesperFocusActive: false,
         gooRevived: false, gooCloneSpawned: false, gooFullBaseHp: initialBaseHp, gooFullBaseDmg: initialBaseDmg, gooFullR: (pd.selectedChar === 'hank' || pd.selectedChar === 'yeti') ? 20 : ((pd.selectedChar === 'shiv' || pd.selectedChar === 'zippi') ? 10 : (pd.selectedChar === 'kaisen' ? 13 : (pd.selectedChar === 'eel' ? 15 : 15))),
         inTotem: false, landmineTimer: 0, flameTimer: 0, flameReload: 0, flameTickCd: 0, flexTimer: 0, flexAngle: 0, flexLowHp: false, seaePuddleCd: 0, zippiBubbleHp: pd.selectedChar === 'zippi' ? 80 : 0, zippiBubbleMaxHp: pd.selectedChar === 'zippi' ? 80 : 0, zippiBubbleBroken: false,
+        glitchMorphActive: false, glitchMorphWavesLeft: 0, glitchTransformAnimating: false, glitchTransformReverting: false, glitchTransformElapsed: 0, glitchTransformTimer: 0, glitchTransformPreviewId: 'glitch', glitchTransformFinalId: 'glitch', glitchTransformCycleIds: [], glitchMorphLevel: 1, glitchCurrentFormId: 'glitch', glitchOriginChar: pd.selectedChar === 'glitch' ? 'glitch' : null,
         stats: { dmgMult: 1, maxHpMult: 1, speedMult: 1, fireRateMult: 1, rangeMult: 1, extraProj: 0, regen: 0, critChance: 0, critDmg: 2, pierce: 0, projSpdMult: 1, defMult: 1, vamp: 0, coinMult: 1, xpMult: 1, explodeHit: false, waveBuff: false, doubleShotChance: 0, dynamicDef: 0, magnetMult: 1, poisonChance: 0, freezeChance: 0, bounce: 0, enemySpawnMult: 1, bossDmgMult: 1, orbitals: 0, dodgeChance: charDef.baseDodge || 0, landmine: 0, pushChance: 0 }
     };
 
@@ -8109,26 +8470,120 @@ function generateMapObstacles() {
     if(type === 6) { /* Metro - done in update loop */ }
     if(type === 7) { for(let i=0; i<6; i++) obstacles.push({ x: (Math.random()-0.5)*2800, y: (Math.random()-0.5)*2800, r: 45, type: 'volcano', timer: Math.random()*5 }); }
     if(type === 8) { 
-        for(let i=0; i<30; i++) obstacles.push({ x: (Math.random()-0.5)*2800, y: (Math.random()-0.5)*2800, r: 8, type: 'bamboo' }); 
-        if(pd.settings.ultraHardcore) { for(let i=0; i<15; i++) obstacles.push({ x: (Math.random()-0.5)*2800, y: (Math.random()-0.5)*2800, r: 12, type: 'bamboo_spike' }); }
+        for(let i=0; i<18; i++) {
+            const horizontal = Math.random() < 0.55;
+            const w = horizontal ? (160 + Math.random() * 110) : (34 + Math.random() * 12);
+            const h = horizontal ? (30 + Math.random() * 10) : (160 + Math.random() * 110);
+            const rot = horizontal ? (Math.random() < 0.5 ? 0 : Math.PI / 2) : (Math.random() < 0.5 ? 0 : Math.PI / 2);
+            obstacles.push({
+                x: (Math.random()-0.5)*2800,
+                y: (Math.random()-0.5)*2800,
+                r: Math.max(w, h) * 0.5,
+                w, h, rot,
+                type: 'bamboo'
+            }); 
+        }
+        if(pd.settings.ultraHardcore) {
+            for(let i=0; i<15; i++) obstacles.push({ x: (Math.random()-0.5)*2800, y: (Math.random()-0.5)*2800, r: 16, type: 'bamboo_spike' });
+        }
     }
     if(type === 9) { for(let i=0; i<8; i++) obstacles.push({ x: (Math.random()-0.5)*2800, y: (Math.random()-0.5)*2800, r: 40, type: 'speaker', cd: 0 }); }
 }
 
-function triggerSpecial() {
-    if(!player) return;
-    if(player.weapon === 'energy_wave' && player.specCd <= 0) {
-        player.invisTimer = 8;
-        player.specCd = 25;
-        if(document.getElementById('btn-special')) document.getElementById('btn-special').style.opacity = '0.5';
+function applyShinobiMark(enemy, dmg) {
+    if (!enemy || enemy.hp <= 0) return;
+    const currentMarks = Math.max(0, Math.min(5, enemy.shinobiMarks || 0));
+    if (currentMarks >= 5) {
+        explodeShinobiMarks(enemy);
         return;
     }
-    if(pd.selectedChar === 'ninji' && player.weapon === 'dagger' && player.ninjiDashCd <= 0) {
+    enemy.shinobiMarks = currentMarks + 1;
+    enemy.shinobiMarkTimer = 1.0;
+    enemy.shinobiMarkBaseDmg = Math.max(enemy.shinobiMarkBaseDmg || 0, Number(dmg) || 0);
+    createParticles(enemy.x, enemy.y, '#8e44ad');
+}
+
+function explodeShinobiMarks(enemy) {
+    if (!enemy || enemy.hp <= 0) return;
+    const marks = Math.max(0, Math.min(5, enemy.shinobiMarks || 0));
+    if (!marks) return;
+    const base = Math.max(1, enemy.shinobiMarkBaseDmg || enemy.baseDmg || enemy.dmg || 1);
+    const dmg = Math.max(1, Math.round(base * (0.10 + (marks - 1) * 0.045) * marks));
+    createExplosion(enemy.x, enemy.y, 24 + marks * 4, dmg, '#8e44ad');
+    addFloatingText(enemy.x, enemy.y - 10, `x${marks}`, '#e056fd', 14);
+    enemy.shinobiMarks = 0;
+    enemy.shinobiMarkTimer = 0;
+    enemy.shinobiMarkBaseDmg = 0;
+}
+
+function explodeShinobiFireball(x, y, dmg, radius = 42) {
+    createExplosion(x, y, radius, dmg, '#ff6b00');
+    for (const enemy of enemies) {
+        if (!enemy || enemy.hp <= 0) continue;
+        if (dist({ x, y }, enemy) <= radius + (enemy.size || 0)) {
+            applyShinobiMark(enemy, dmg);
+            enemy.shinobiMarks = Math.min(5, Math.max(enemy.shinobiMarks || 0, 1));
+        }
+    }
+}
+
+function activateShinobiDragon() {
+    if (!player || pd.selectedChar !== 'shinobi' || player.shinobiDragonActive || player.shinobiDragonCooldown > 0) return;
+    player.shinobiDragonActive = true;
+    player.shinobiDragonWavesLeft = 3;
+    player.shinobiDragonCooldown = 0;
+    player.shinobiDragonFireCd = 0;
+    notify('Shinobi se transformou em Dragão Guerreiro!');
+    updateSpecialButtonUI();
+}
+
+function deactivateShinobiDragon() {
+    if (!player || pd.selectedChar !== 'shinobi') return;
+    player.shinobiDragonActive = false;
+    player.shinobiDragonWavesLeft = 0;
+    player.shinobiDragonFireCd = 0;
+    player.shinobiDragonCooldown = 40;
+    updateSpecialButtonUI();
+}
+
+function triggerSpecial() {
+    if(!player) return;
+    const cfg = getSelectedSpecialConfig();
+    if (!cfg) return;
+    if (cfg.type === 'ghoul' && player.specCd <= 0 && player.invisTimer <= 0) {
+        player.invisTimer = 8;
+        player.ghoulPendingCd = 25;
+        updateSpecialButtonUI();
+        return;
+    }
+    if (cfg.type === 'ninji' && player.weapon === 'dagger' && player.ninjiDashCd <= 0 && player.dashTimer <= 0) {
         const dashAngle = Number.isFinite(player.lastMoveAngle) ? player.lastMoveAngle : (Number.isFinite(player.lastAimAngle) ? player.lastAimAngle : 0);
         player.dashTimer = 0.28;
         player.dashAngle = dashAngle;
-        player.ninjiDashCd = 5;
-        if(document.getElementById('btn-special')) document.getElementById('btn-special').style.opacity = '0.5';
+        player.ninjiPendingCd = 5;
+        updateSpecialButtonUI();
+        return;
+    }
+    if (cfg.type === 'shinobi' && player.shinobiDragonCooldown <= 0 && !player.shinobiDragonActive) {
+        activateShinobiDragon();
+        if (btnSpecial) {
+            btnSpecial.classList.add('cooling');
+            btnSpecial.style.opacity = '0.55';
+            const badge = btnSpecial.querySelector('.btn-cooldown-badge');
+            if (badge) {
+                badge.style.display = 'block';
+                badge.textContent = '';
+            }
+        }
+        return;
+    }
+    if (cfg.type === 'glitch' && !player.glitchTransformAnimating) {
+        startGlitchMorphSequence(false);
+        if (btnSpecial) {
+            btnSpecial.classList.add('cooling');
+            btnSpecial.style.opacity = '0.55';
+        }
+        return;
     }
 }
 
@@ -8258,6 +8713,16 @@ function update(dt) {
         addFloatingText(player.x, player.y - 30, "WAVE " + wave, '#f1c40f', 30);
         if (pd.selectedChar === 'ivy' && wave > 1 && ((wave - 1) % 3 === 0)) spawnIvyFlower();
         if (pd.selectedChar === 'miss_macaron' && wave > 1 && ((wave - 1) % 3 === 0)) spawnMissMacaronTeaTable();
+        if (player.glitchMorphActive && pd.selectedChar !== 'glitch' && !player.glitchTransformAnimating) {
+            player.glitchMorphWavesLeft = Math.max(0, (player.glitchMorphWavesLeft || 0) - 1);
+            if (player.glitchMorphWavesLeft <= 0) startGlitchMorphSequence(true);
+        } else if (pd.selectedChar === 'glitch' && !player.glitchTransformAnimating && !player.glitchMorphActive) {
+            startGlitchMorphSequence(false);
+        }
+        if (pd.selectedChar === 'shinobi' && player.shinobiDragonActive) {
+            player.shinobiDragonWavesLeft = Math.max(0, (player.shinobiDragonWavesLeft || 0) - 1);
+            if (player.shinobiDragonWavesLeft <= 0) deactivateShinobiDragon();
+        }
         if (wave % 2 === 0 && player.weapon === 'wrench') { let t = allies.find(a=>a.ref==='meekah_turret'); if(t) { t.x=player.x; t.y=player.y; createExplosion(t.x, t.y, 50, 0, '#cc8e35'); } }
         if (wave % 2 === 0 && player.weapon === 'darts') { let t = allies.find(a=>a.isTotem); if(t) { t.x=player.x; t.y=player.y; createExplosion(t.x, t.y, 60, 0, '#8e44ad'); } }
         if (wave % 2 === 0 && pd.selectedChar === 'ripper') { let s = allies.find(a => a.type === 'speaker' || a.ref === 'ripper_speaker'); if(s) { s.x = player.x; s.y = player.y; s.cd = 0; } }
@@ -8330,16 +8795,58 @@ function update(dt) {
     
     if(player.stats.regen > 0) player.hp = Math.min(player.hp + player.stats.regen * dt * player.baseHp * player.stats.maxHpMult, player.baseHp * player.stats.maxHpMult);
     if(player.inIvyBloom) player.hp = Math.min(player.hp + (player.baseHp * player.stats.maxHpMult * 0.012) * dt, player.baseHp * player.stats.maxHpMult);
-    if(player.invisTimer > 0) { player.invisTimer -= dt; player.hp = Math.min(player.hp + (player.baseHp * player.stats.maxHpMult * 0.01) * dt, player.baseHp * player.stats.maxHpMult); }
+    if(player.invisTimer > 0) {
+        player.invisTimer -= dt;
+        player.hp = Math.min(player.hp + (player.baseHp * player.stats.maxHpMult * 0.01) * dt, player.baseHp * player.stats.maxHpMult);
+        if (player.invisTimer <= 0) {
+            player.invisTimer = 0;
+            if (player.ghoulPendingCd > 0 && player.specCd <= 0) {
+                player.specCd = player.ghoulPendingCd;
+                player.ghoulPendingCd = 0;
+            }
+        }
+    }
     if(player.flexReload > 0) player.flexReload = Math.max(0, player.flexReload - dt);
+    updateGlitchMorphSequence(dt);
     if(btnSpecial && btnSpecial.style.display !== 'none') {
-        const specialReady = pd.selectedChar === 'ninji' ? (player.ninjiDashCd <= 0) : (player.specCd <= 0);
-        btnSpecial.style.opacity = specialReady ? '1' : '0.5';
+        const cfg = getSelectedSpecialConfig();
+        const activeState = cfg ? (cfg.type === 'ghoul' ? (player.invisTimer > 0) : (cfg.type === 'ninji' ? (player.dashTimer > 0) : (cfg.type === 'shinobi' ? player.shinobiDragonActive : !!player.glitchTransformAnimating))) : false;
+        const cdValue = cfg ? (cfg.type === 'ghoul' ? Math.max(0, player.specCd || 0) : (cfg.type === 'ninji' ? Math.max(0, player.ninjiDashCd || 0) : (cfg.type === 'shinobi' ? Math.max(0, player.shinobiDragonCooldown || 0) : 0))) : 0;
+        const shouldShowCooldown = !!cfg && !activeState && cdValue > 0;
+        btnSpecial.classList.toggle('cooling', activeState || shouldShowCooldown);
+        btnSpecial.style.opacity = (activeState || shouldShowCooldown) ? '0.55' : '1';
+        let badge = btnSpecial.querySelector('.btn-cooldown-badge');
+        if (activeState) {
+            if (!badge) {
+                badge = document.createElement('div');
+                badge.className = 'btn-cooldown-badge';
+                btnSpecial.appendChild(badge);
+            }
+            badge.style.display = 'block';
+            badge.textContent = '';
+        } else if (shouldShowCooldown) {
+            if (!badge) {
+                badge = document.createElement('div');
+                badge.className = 'btn-cooldown-badge';
+                btnSpecial.appendChild(badge);
+            }
+            badge.style.display = 'block';
+            badge.textContent = String(Math.ceil(cdValue));
+        } else if (badge) {
+            badge.style.display = 'none';
+            badge.textContent = '';
+        }
     }
     if(player.shieldTimer > 0) player.shieldTimer -= 60*dt;
     if(player.meleeCd > 0) player.meleeCd -= dt;
-    if(player.specCd > 0) { player.specCd -= dt; if(player.specCd <= 0 && document.getElementById('btn-special')) document.getElementById('btn-special').style.opacity = '1'; }
-    if(player.ninjiDashCd > 0) { player.ninjiDashCd = Math.max(0, player.ninjiDashCd - dt); }
+
+    if(player.specCd > 0) {
+        player.specCd = Math.max(0, player.specCd - dt);
+    }
+    if(player.ninjiDashCd > 0) {
+        player.ninjiDashCd = Math.max(0, player.ninjiDashCd - dt);
+    }
+    if(player.shinobiDragonCooldown > 0) player.shinobiDragonCooldown = Math.max(0, player.shinobiDragonCooldown - dt);
 
     if(pd.selectedChar === 'quarterback' && player.qbShield) {
         player.qbBar -= 180 * dt;
@@ -8390,10 +8897,10 @@ function update(dt) {
         if(o.type==='ice' && dist(player, o) < o.r + player.r) mapSpeedMult = 1.5; 
         if(o.type==='mud' && dist(player, o) < o.r + player.r) {
             mapSpeedMult = 0.5;
-            if(pd.settings.ultraHardcore) dealPlayerDamage(15 * dt);
+            if(!(pd.selectedChar === 'shinobi' && player.shinobiDragonActive) && pd.settings.ultraHardcore) dealPlayerDamage(15 * dt);
         }
-        if(o.type==='cacto') { let d = dist(player, o); if(d < o.r + player.r) { dealPlayerDamage(30 * dt); if(Math.random()<0.1) addFloatingText(player.x, player.y, '-HP', '#e74c3c', 10); } }
-        if(o.type==='bamboo_spike' && dist(player, o) < o.r + player.r) dealPlayerDamage(20 * dt);
+        if(o.type==='cacto') { let d = dist(player, o); if(d < o.r + player.r) { if(!(pd.selectedChar === 'shinobi' && player.shinobiDragonActive)) { dealPlayerDamage(30 * dt); if(Math.random()<0.1) addFloatingText(player.x, player.y, '-HP', '#e74c3c', 10); } } }
+        if(o.type==='bamboo_spike' && dist(player, o) < o.r + player.r && !(pd.selectedChar === 'shinobi' && player.shinobiDragonActive)) dealPlayerDamage(20 * dt);
         if(o.type==='speaker') {
             o.cd -= dt;
             if(o.cd <= 0) {
@@ -8413,12 +8920,20 @@ function update(dt) {
     let pSpeed = player.baseSpeed * player.stats.speedMult * mapSpeedMult * totemSpd * vesperMobilityMult * 60 * dt;
     
     if(player.dashTimer > 0) {
-        player.dashTimer -= dt; dx = Math.cos(player.dashAngle); dy = Math.sin(player.dashAngle); pSpeed *= 3;
+        player.dashTimer = Math.max(0, player.dashTimer - dt); dx = Math.cos(player.dashAngle); dy = Math.sin(player.dashAngle); pSpeed *= 3;
         if(player.weapon === 'dash_hit') player.stats.dynamicDef = Math.max(player.stats.dynamicDef, 0.3);
+        if (player.dashTimer <= 0 && player.ninjiPendingCd > 0 && player.ninjiDashCd <= 0) {
+            player.ninjiDashCd = player.ninjiPendingCd;
+            player.ninjiPendingCd = 0;
+        }
     } else if(player.weapon === 'dash_hit') player.stats.dynamicDef = 0;
 
+    if (pd.selectedChar === 'shinobi' && player.shinobiDragonActive) pSpeed *= 1.55;
+
     let nx = player.x + dx * pSpeed; let ny = player.y + dy * pSpeed;
-    obstacles.forEach(o => { if(o.type !== 'ice' && o.type !== 'mud' && o.type !== 'car' && o.type !== 'bamboo_spike' && o.type !== 'speaker' && dist({x:nx,y:ny}, o) < o.r + player.r) { nx = player.x; ny = player.y; } });
+    if (!(pd.selectedChar === 'shinobi' && player.shinobiDragonActive)) {
+        obstacles.forEach(o => { if(o.type !== 'ice' && o.type !== 'mud' && o.type !== 'car' && o.type !== 'bamboo_spike' && o.type !== 'speaker' && dist({x:nx,y:ny}, o) < o.r + player.r) { nx = player.x; ny = player.y; } });
+    }
     player.x = Math.max(-1500, Math.min(1500, nx)); player.y = Math.max(-1500, Math.min(1500, ny));
     camera.x += (player.x - cw/2 - camera.x) * 0.1; camera.y += (player.y - ch/2 - camera.y) * 0.1;
 
@@ -8426,7 +8941,7 @@ function update(dt) {
         let o = obstacles[i];
         if(o.type === 'car') {
             o.x += o.vx * 60 * dt; o.y += o.vy * 60 * dt; o.life -= dt;
-            if(dist(player, o) < player.r + o.r && player.shieldTimer <= 0) { dealPlayerDamage(40 * dt); }
+            if(dist(player, o) < player.r + o.r && player.shieldTimer <= 0 && !(pd.selectedChar === 'shinobi' && player.shinobiDragonActive)) { dealPlayerDamage(40 * dt); }
             for(let e of enemies) if(dist(e, o) < e.size + o.r) e.hp -= 100 * dt;
             if(o.life <= 0) obstacles.splice(i, 1);
         }
@@ -8680,6 +9195,27 @@ function fireWeapon(target) {
             return;
         }
 
+        if (pd.selectedChar === 'shinobi' && player.shinobiDragonActive) {
+            // Um único disparo de bola de fogo plasmática, com recarga alta mas jogável.
+            player.cd = Math.max(player.cd, 52);
+            createProj(
+                player.x,
+                player.y,
+                Math.cos(angle) * Math.max(11, pSpd * 1.8),
+                Math.sin(angle) * Math.max(11, pSpd * 1.8),
+                Math.max(1, finalDmg * 1.75),
+                85,
+                true,
+                'shinobi_fireball',
+                {
+                    size: 24,
+                    sourceChar: 'shinobi',
+                    explodeRadius: 72,
+                    explodeDelay: 0.10
+                }
+            );
+            return;
+        }
         if(w === 'flex_hammer') {
             if(player.flexReload > 0) return;
             const hpRatio = player.hp / Math.max(1, player.baseHp * player.stats.maxHpMult);
@@ -9058,6 +9594,28 @@ function fireWeapon(target) {
             else { for(let i=0; i<11; i++) { let a = angle - Math.PI/2 + (Math.PI/10)*i; createProj(player.x + Math.cos(a)*20, player.y + Math.sin(a)*20, Math.cos(a), Math.sin(a), finalDmg * 1.05, 10, true, 'sword'); } return; }
         }
         if(w === 'scythe') {
+            if (pd.selectedChar === 'shinobi') {
+                player.shinobiScytheCycle = (player.shinobiScytheCycle || 0) + 1;
+                const count = 11;
+                const start = angle - Math.PI / 2;
+                const end = angle + Math.PI / 2;
+                for(let i=0; i<count; i++) {
+                    const a = count === 1 ? angle : (start + ((end - start) / (count - 1)) * i);
+                    createProj(
+                        player.x + Math.cos(a) * 42,
+                        player.y + Math.sin(a) * 42,
+                        Math.cos(a),
+                        Math.sin(a),
+                        finalDmg,
+                        14,
+                        true,
+                        'scythe',
+                        { size: 10, sourceChar: 'shinobi', scytheSweep: 'half' }
+                    );
+                }
+                return;
+            }
+
             player.scytheCycle = (player.scytheCycle || 0) + 1;
             const fullSpin = player.scytheCycle % 3 === 0;
             const count = fullSpin ? 16 : 11;
@@ -9077,6 +9635,33 @@ function fireWeapon(target) {
                     { size: 9, scytheSweep: fullSpin ? 'full' : 'half' }
                 );
             }
+            return;
+        }
+        if (pd.selectedChar === 'shinobi') {
+            const count = 11;
+            const start = angle - Math.PI / 2;
+            const end = angle + Math.PI / 2;
+            for(let i=0; i<count; i++) {
+                const a = count === 1 ? angle : (start + ((end - start) / (count - 1)) * i);
+                createProj(
+                    player.x + Math.cos(a) * 42,
+                    player.y + Math.sin(a) * 42,
+                    Math.cos(a),
+                    Math.sin(a),
+                    finalDmg,
+                    14,
+                    true,
+                    'shinobi',
+                    { size: 10, sourceChar: 'shinobi' }
+                );
+            }
+            return;
+        }
+        if (w === 'glitch_bugshot') {
+            const glitchLevel = Math.max(1, Math.min(8, Number(pd?.chars?.glitch?.level) || 1));
+            const stunChance = Math.min(0.9, 0.36 + (glitchLevel - 1) * 0.04);
+            const stunDuration = 0.8 + (glitchLevel - 1) * 0.07;
+            createProj(player.x, player.y, Math.cos(angle)*pSpd*1.05, Math.sin(angle)*pSpd*1.05, finalDmg, 42, true, 'glitch_bugshot', { size: 8, sourceChar: 'glitch', glitchStunChance: stunChance, glitchStunDuration: stunDuration, glitchJitter: true });
             return;
         }
         if(w === 'lightning') { 
@@ -9409,7 +9994,7 @@ function fireWeapon(target) {
     };
 
     execFire(); 
-    let blockDouble = ['dagger','stones','grenade_gun','hunter_shotgun','wild','scythe','machinegun','ice_dagger','triple','boomerang','quarterback','saw_throw','chess','screws','snowball','echo_pull','flame_cone','puddle','flex_hammer','kaisen_tool','lunch_sauce'];
+    let blockDouble = ['dagger','stones','grenade_gun','hunter_shotgun','wild','scythe','machinegun','ice_dagger','triple','boomerang','quarterback','saw_throw','chess','screws','snowball','echo_pull','flame_cone','puddle','flex_hammer','kaisen_tool','lunch_sauce','shinobi'];
     if(!blockDouble.includes(w) && Math.random() < player.stats.doubleShotChance) {
         setTimeout(execFire, 100);
     } else if(['grenade_gun','hunter_shotgun','stones'].includes(w) && Math.random() < player.stats.doubleShotChance) {
@@ -9421,7 +10006,7 @@ function createProj(x, y, vx, vy, dmg, life, isPlayer, type, extra={}) {
     let size = extra.size || 4;
     if (type === 'heavy' || type === 'tank') size = 8;
     else if (type === 'sniper') size = 3;
-    else if (type === 'sword' || type === 'kayo_slash' || type === 'scythe' || type === 'shiv' || type === 'saw_throw') size = 24;
+    else if (type === 'sword' || type === 'kayo_slash' || type === 'scythe' || type === 'shiv' || type === 'saw_throw' || type === 'shinobi') size = 24;
     else if (type === 'wind_gust') size = 34;
     else if (type === 'tornado') size = 26;
     else if (type === 'quarterback') size = 14;
@@ -9439,10 +10024,11 @@ function createProj(x, y, vx, vy, dmg, life, isPlayer, type, extra={}) {
     else if (type === 'macaron_big') size = extra.size || 18;
     else if (type === 'tea_cup') size = extra.size || 10;
     else if (type === 'axel_stone') size = extra.size || 12;
+    else if (type === 'shinobi_fireball') size = extra.size || 14;
     else if (type === 'axel_shard') size = extra.size || 5;
     let sourceStats = extra.sourceStats || (isPlayer ? player.stats : null);
-    let pierce = sourceStats ? (sourceStats.pierce || 0) : 0;
-    if(Number.isFinite(extra.pierce)) pierce = extra.pierce;
+    let pierce = sourceStats ? Number(sourceStats.pierce || 0) : 0;
+    if (Number.isFinite(extra.pierce)) pierce += Number(extra.pierce || 0);
     if(type==='sniper') pierce += 99; if(type==='sword') pierce += 99; if(type==='scythe') pierce += 99; if(type==='chain_lightning') pierce += 99; if(type==='laser' || type==='zippi_laser') pierce += 99; if(type==='eel_lash') pierce += 1; if(type==='lance') pierce += 99;
     if(type==='arrow') pierce += Math.random() < 0.40 ? 1 : 0; if(type==='boomerang') pierce += 99; if(type==='energy_wave') pierce += 99; if(type==='microphone') pierce += 0;
     if(type==='shiv') size = extra.size || 10;
@@ -9462,7 +10048,7 @@ function createProj(x, y, vx, vy, dmg, life, isPlayer, type, extra={}) {
     let bounces = sourceStats ? (sourceStats.bounce || 0) : 0;
     if(Number.isFinite(extra.bounces)) bounces = extra.bounces;
     if(type==='chess_piece' && extra.chessType === 'knight') bounces += 2;
-    projectiles.push({ x, y, vx, vy, dmg, life, isPlayer, size, type, pierce, bounces, extra: { noHitFrames: 0, sourceChar: isPlayer ? (extra.sourceChar || pd.selectedChar) : extra.sourceChar, ...extra }, hitIds: new Set(), returnPhase: false, bounceCount: 0 });
+    projectiles.push({ x, y, vx, vy, dmg, life, isPlayer, size, type, pierce: Math.max(0, Math.floor(pierce || 0)), bounces, extra: { noHitFrames: 0, sourceChar: isPlayer ? (extra.sourceChar || pd.selectedChar) : extra.sourceChar, ...extra }, hitIds: new Set(), returnPhase: false, bounceCount: 0 });
 }
 
 
@@ -10016,6 +10602,12 @@ function updateEnemies(dt) {
                 createParticles(e.x, e.y, '#7adfff');
             }
         }
+        if(e.shinobiMarks > 0) {
+            e.shinobiMarkTimer = (Number.isFinite(e.shinobiMarkTimer) ? e.shinobiMarkTimer : 1.0) - dt;
+            if (e.shinobiMarkTimer <= 0) {
+                explodeShinobiMarks(e);
+            }
+        }
         if(e.hypnotizedTimer > 0) e.hypnotizedTimer -= dt;
         if (e.sugarTimer > 0) {
             e.sugarTimer -= dt;
@@ -10046,6 +10638,8 @@ function updateEnemies(dt) {
         let eSpeedMult = 1; obstacles.forEach(o => { if(o.type==='ice' && dist(e, o) < o.r + e.size) eSpeedMult = 1.5; if(o.type==='mud' && dist(e, o) < o.r + e.size) eSpeedMult = 0.5; if(o.type==='cacto') { let d2=dist(e,o); if(d2<o.r+e.size){ e.hp -= 30 * dt; } } });
         const isFrozen = Number.isFinite(e.freezeTimer) && e.freezeTimer > 0;
         if(isFrozen) { e.freezeTimer -= dt; currentSpeed = 0; }
+        const isStunned = Number.isFinite(e.stunTimer) && e.stunTimer > 0;
+        if(isStunned) { e.stunTimer -= dt; currentSpeed = 0; }
 
         let nx = e.x; let ny = e.y;
         const prevX = e.x;
@@ -10780,7 +11374,7 @@ function updateProjectiles(dt) {
         if (extra.visualOnly) continue;
         let hitObstacle = false;
         obstacles.forEach(o => { if(o.type !== 'ice' && o.type !== 'mud' && o.type !== 'car' && o.type !== 'bamboo_spike' && o.type !== 'speaker' && dist(p, o) < o.r + p.size) hitObstacle = true; });
-        if(hitObstacle && p.type !== 'sword' && p.type !== 'scythe' && p.type !== 'boomerang' && p.type !== 'wind_gust' && p.type !== 'tornado' && p.type !== 'energy_wave' && p.type !== 'water_wave') { 
+        if(hitObstacle && p.type !== 'sword' && p.type !== 'scythe' && p.type !== 'shinobi' && p.type !== 'shinobi_fireball' && p.type !== 'boomerang' && p.type !== 'wind_gust' && p.type !== 'tornado' && p.type !== 'energy_wave' && p.type !== 'water_wave') { 
             if(p.type === 'echo_bh_core') { spawnEchoBlackHole(p.x, p.y, p.extra); }
             if(p.type === 'blood_ball' && (extra.size || 0) === 10) { for(let j=0; j<3; j++) { let a = Math.PI*2/3 * j; createProj(p.x, p.y, Math.cos(a)*3, Math.sin(a)*3, p.dmg*0.4, 30, true, 'blood_ball', {size: 4}); } }
             if(p.type === 'rocket') { createExplosion(p.x, p.y, 80 * player.stats.rangeMult, p.dmg); projectiles.splice(i, 1); continue; }
@@ -10817,6 +11411,24 @@ function updateProjectiles(dt) {
                         realDmg *= soakMult;
 
                         e.hp -= realDmg; addFloatingText(e.x, e.y, Math.floor(realDmg), '#fff'); if(p.isPlayer) trackMissionDamage(realDmg);
+                        if (p.type === 'shinobi' || p.type === 'shinobi_fireball' || p.type === 'scythe' || (p.type === 'sword' && pd.selectedChar === 'shinobi')) applyShinobiMark(e, realDmg);
+                        if (p.type === 'glitch_bugshot') {
+                            const stunDuration = Math.max(0.25, Number(p.extra?.glitchStunDuration) || 0.85);
+                            const stunChance = Math.min(1, Math.max(0, Number(p.extra?.glitchStunChance) || 0.35));
+                            if (Math.random() < stunChance) {
+                                e.stunTimer = Math.max(Number.isFinite(e.stunTimer) ? e.stunTimer : 0, e.isBoss ? stunDuration * 0.45 : stunDuration);
+                                addFloatingText(e.x, e.y - 10, 'STUN!', '#8e44ad', 12);
+                                createParticles(e.x, e.y, '#8e44ad');
+                            }
+                        }
+                        if (p.type === 'shinobi_fireball') {
+                            const fx = e.x;
+                            const fy = e.y;
+                            const fDmg = Math.max(1, realDmg * 0.92);
+                            const fRadius = Number(p.extra?.explodeRadius) || 44;
+                            const fDelay = Math.max(60, Math.round((Number(p.extra?.explodeDelay) || 0.16) * 1000));
+                            setTimeout(() => explodeShinobiFireball(fx, fy, fDmg, fRadius), fDelay);
+                        }
                         if(p.type === 'echo_bh_core') { spawnEchoBlackHole(e.x, e.y, p.extra); }
                         
                         if(p.type === 'wind_gust') {
@@ -10988,7 +11600,7 @@ function updateProjectiles(dt) {
                     if(p.type === 'lightning' && Math.random() < 0.15) applyEelShock(e, false, p.dmg, p.x, p.y, false);
                     if(p.type === 'screw' && pd.selectedChar === 'kaisen' && Math.random() < 0.10) applyEelShock(e, true, Math.max(1, p.dmg * 0.35), p.x, p.y, false);
                     if(p.type === 'sword' && pd.selectedChar === 'kayo' && Math.random() < 0.10) { e.burnTimer = 3; e.burnDmg = p.dmg*0.5; }
-                    if(p.type === 'scythe' && Math.random() < 0.20) e.weakenTimer = 3;
+                    if(p.type === 'scythe' && p.extra?.sourceChar !== 'shinobi' && Math.random() < 0.20) e.weakenTimer = 3;
                     if(p.type === 'saw_throw' && e.hp <= 0) { 
                         let saws = allies.filter(a => a.type === 'stationary_saw');
                         if (saws.length >= 3) { let oldest = saws[0]; oldest.life = 0; }
@@ -11153,7 +11765,8 @@ function updateProjectiles(dt) {
             const focusPierceArrow = p.type === 'arrow' && p.extra?.sourceChar === 'vesper' && p.extra?.vesperFocusPierce;
             if (focusPierceArrow) p.pierce = Math.max(1, p.pierce || 0);
             const canBounce = (p.bounces || 0) > 0;
-            const canPierce = (p.pierce || 0) > 0;
+            const pierceLeft = Number.isFinite(p.pierce) ? Math.max(0, Math.floor(p.pierce)) : 0;
+            const canPierce = pierceLeft > 0;
 
             if (canBounce) {
                 let nextTarget = null;
@@ -11177,7 +11790,12 @@ function updateProjectiles(dt) {
             }
 
             if (canPierce) {
-                p.pierce--;
+                const travel = Math.max(3, p.size * 0.45);
+                const ang = Math.atan2(p.vy, p.vx);
+                p.pierce = Math.max(0, pierceLeft - 1);
+                p.x += Math.cos(ang) * travel;
+                p.y += Math.sin(ang) * travel;
+                if (hitTarget && !p.hitIds.has(hitTarget)) p.hitIds.add(hitTarget);
                 continue;
             }
 
@@ -11218,7 +11836,16 @@ function updateProjectiles(dt) {
         }
 
         if(p.life <= 0 && p.type !== 'boomerang' && p.type !== 'tornado' && p.type !== 'magma_meteor' && p.type !== 'big_grenade' && p.type !== 'nucleon_shot') { if(p.type === 'echo_bh_core') spawnEchoBlackHole(p.x, p.y, p.extra); if(p.type === 'goblin_stone') disperseGoblinStone(p.x, p.y, p.vx, p.vy, p.dmg); if(p.type === 'axel_stone') disperseAxelStone(p.x, p.y, p.vx, p.vy, p.dmg); projectiles.splice(i, 1); continue; }
-        if(hit && p.type !== 'bomb' && p.type !== 'rocket' && p.type !== 'buster_rocket' && p.type !== 'chain_lightning' && p.type !== 'big_grenade' && p.type !== 'nucleon_shot' && p.type !== 'microphone' && p.pierce > 0) p.pierce--; 
+        const genericPierceEligible = hit && p.isPlayer && Number.isFinite(p.pierce) && p.pierce > 0 && !['bomb', 'rocket', 'buster_rocket', 'chain_lightning', 'big_grenade', 'nucleon_shot', 'microphone', 'boomerang', 'tornado', 'magma_meteor', 'black_hole'].includes(p.type);
+        if (genericPierceEligible) {
+            const travel = Math.max(3, p.size * 0.65);
+            const ang = Math.atan2(p.vy, p.vx);
+            p.pierce = Math.max(0, Math.floor(p.pierce) - 1);
+            p.x += Math.cos(ang) * travel;
+            p.y += Math.sin(ang) * travel;
+            if (hitTarget && !p.hitIds.has(hitTarget)) p.hitIds.add(hitTarget);
+            continue;
+        }
         if(p.life <= 0 && (p.type === 'tornado' || p.type === 'magma_meteor' || p.type === 'big_grenade' || p.type === 'nucleon_shot')) { projectiles.splice(i, 1); continue; }
         else if(hit && p.type !== 'bomb' && p.type !== 'rocket' && p.type !== 'buster_rocket' && p.type !== 'chain_lightning' && p.type !== 'boomerang' && p.type !== 'tornado' && p.bounces <= 0 && p.type !== 'black_hole' && p.type !== 'big_grenade' && p.type !== 'nucleon_shot' && p.type !== 'microphone' && p.pierce <= 0) projectiles.splice(i, 1);
     }
@@ -11522,10 +12149,13 @@ function updateGraffitMarks(dt) {
 
 
 function getPlayerSpriteId() {
+    if (player?.glitchTransformAnimating && player?.glitchTransformPreviewId) return player.glitchTransformPreviewId;
     if (pd?.selectedChar === 'adam' && player?.adamMechActive) return 'adam_mech';
     if (pd?.selectedChar === 'gladiator') {
         return (pd?.chars?.gladiator?.mode === 'shooter') ? 'gladiator_spear' : 'gladiator_sword';
     }
+    if (pd?.selectedChar === 'shinobi' && player?.shinobiDragonActive) return 'dragon_shinobi';
+    if (pd?.selectedChar === 'glitch' && player?.glitchMorphActive && player?.glitchCurrentFormId) return player.glitchCurrentFormId;
     if (pd?.selectedChar === 'miss_macaron') return 'miss_macaron';
     return pd?.selectedChar || null;
 }
@@ -11612,7 +12242,22 @@ function draw() {
             else if(o.type === 'tree') { ctx.fillStyle = '#1e272e'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r*0.4, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#218c74'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI*2); ctx.fill(); }
             else if(o.type === 'car') { ctx.fillStyle = '#f39c12'; ctx.fillRect(o.x-o.r, o.y-o.r, o.r*2, o.r*2); ctx.fillStyle = '#333'; ctx.fillRect(o.x-o.r+5, o.y-o.r+5, o.r*2-10, o.r*2-10); }
             else if(o.type === 'volcano') { ctx.fillStyle = '#e74c3c'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#c0392b'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r*0.5, 0, Math.PI*2); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.stroke(); }
-            else if(o.type === 'bamboo') { ctx.fillStyle = '#2ed573'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI*2); ctx.fill(); ctx.strokeStyle = '#2f3542'; ctx.lineWidth=1; ctx.stroke(); }
+            else if(o.type === 'bamboo') {
+                ctx.save();
+                ctx.translate(o.x, o.y);
+                ctx.rotate(o.rot || 0);
+                const bw = o.w || Math.max(36, (o.r || 18) * 3.2);
+                const bh = o.h || Math.max(16, (o.r || 18) * 0.9);
+                ctx.fillStyle = '#2ed573';
+                ctx.fillRect(-bw / 2, -bh / 2, bw, bh);
+                ctx.strokeStyle = '#2f3542';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(-bw / 2, -bh / 2, bw, bh);
+                ctx.fillStyle = 'rgba(255,255,255,0.14)';
+                ctx.fillRect(-bw / 2 + bw * 0.12, -bh / 2 + 2, Math.max(3, bw * 0.08), bh - 4);
+                ctx.fillRect(-bw / 2 + bw * 0.48, -bh / 2 + 2, Math.max(2, bw * 0.04), bh - 4);
+                ctx.restore();
+            }
             else if(o.type === 'bamboo_spike') { ctx.fillStyle = '#7bed9f'; ctx.beginPath(); ctx.moveTo(o.x, o.y-o.r); ctx.lineTo(o.x+o.r, o.y+o.r); ctx.lineTo(o.x-o.r, o.y+o.r); ctx.fill(); }
             else if(o.type === 'speaker') { ctx.fillStyle = '#2f3542'; ctx.fillRect(o.x-o.r, o.y-o.r, o.r*2, o.r*2); ctx.fillStyle = '#1e90ff'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r*0.6, 0, Math.PI*2); ctx.fill(); }
         }
@@ -12003,25 +12648,37 @@ function draw() {
         if(pd.selectedChar === 'vesper' && player.vesperFocusActive) {
             ctx.save();
             ctx.translate(player.x, player.y);
-            ctx.globalAlpha = 0.48;
-            ctx.shadowColor = 'rgba(155, 89, 182, 0.9)';
-            ctx.shadowBlur = 18;
-            ctx.strokeStyle = 'rgba(155, 89, 182, 0.9)';
-            ctx.fillStyle = 'rgba(155, 89, 182, 0.18)';
-            ctx.lineWidth = 4;
-            ctx.beginPath();
-            ctx.arc(0, 0, Math.max(player.r + 16, 26), 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-            ctx.globalAlpha = 1;
-            ctx.shadowBlur = 0;
-            ctx.fillStyle = '#fff';
+            ctx.globalAlpha = 0.92;
+            ctx.shadowColor = 'rgba(155, 89, 182, 0.95)';
+            ctx.shadowBlur = 14;
+            ctx.fillStyle = 'rgba(155, 89, 182, 0.92)';
             ctx.strokeStyle = '#000';
             ctx.lineWidth = 3;
-            ctx.font = 'bold 18px Arial';
+            const badgeY = -(player.r + 28);
+            const badgeW = 56;
+            const badgeH = 22;
+            const badgeX = -badgeW / 2;
+            const radius = 10;
+            ctx.beginPath();
+            ctx.moveTo(badgeX + radius, badgeY);
+            ctx.arcTo(badgeX + badgeW, badgeY, badgeX + badgeW, badgeY + badgeH, radius);
+            ctx.arcTo(badgeX + badgeW, badgeY + badgeH, badgeX, badgeY + badgeH, radius);
+            ctx.arcTo(badgeX, badgeY + badgeH, badgeX, badgeY, radius);
+            ctx.arcTo(badgeX, badgeY, badgeX + badgeW, badgeY, radius);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 14px Arial';
             ctx.textAlign = 'center';
-            ctx.strokeText('FOCO', 0, -(player.r + 22));
-            ctx.fillText('FOCO', 0, -(player.r + 22));
+            ctx.textBaseline = 'middle';
+            ctx.fillText('FOCO', 0, badgeY + badgeH / 2 + 1);
+            ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(0, 0, Math.max(player.r + 16, 26), 0, Math.PI * 2);
+            ctx.stroke();
             ctx.restore();
         }
         if(pd.selectedChar === 'zippi' && player.zippiBubbleHp > 0) {
@@ -12140,6 +12797,8 @@ function draw() {
         if(p.type === 'dagger' || p.type === 'ice_dagger' || p.type === 'ice_stake') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx)); ctx.fillStyle = (p.type==='ice_dagger'||p.type==='ice_stake')?'#00ffff':'#bdc3c7'; ctx.beginPath(); ctx.moveTo(p.size, 0); ctx.lineTo(-p.size/2, -p.size/3); ctx.lineTo(-p.size/2, p.size/3); ctx.fill(); ctx.restore(); } 
         else if(p.type === 'bomb' || p.type === 'rocket' || p.type === 'buster_rocket' || p.type === 'cannon_ball') { ctx.fillStyle = '#2c3e50'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); if(p.type !== 'cannon_ball'){ctx.fillStyle = '#e67e22'; ctx.beginPath(); ctx.arc(p.x + p.size/2, p.y - p.size/2, 2, 0, Math.PI*2); ctx.fill();} }
         else if(p.type === 'grenade' || p.type === 'big_grenade') { ctx.fillStyle = '#27ae60'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); }
+        else if(p.type === 'shinobi_fireball') { ctx.fillStyle = '#ff6b00'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#ffd27a'; ctx.beginPath(); ctx.arc(p.x - 2, p.y - 2, Math.max(2, p.size * 0.28), 0, Math.PI*2); ctx.fill(); }
+        else if(p.type === 'shinobi') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx)); ctx.fillStyle = '#8e44ad'; ctx.beginPath(); ctx.moveTo(p.size, 0); ctx.lineTo(-p.size/2, -p.size/3); ctx.lineTo(-p.size/2, p.size/3); ctx.fill(); ctx.restore(); }
         else if(p.type === 'chain_lightning') { ctx.fillStyle = '#341f97'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#0984e3'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size-2, 0, Math.PI*2); ctx.fill(); }
         else if(p.type === 'macaron' || p.type === 'macaron_big') {
             const r = p.size || (p.type === 'macaron_big' ? 18 : 11);
@@ -12642,6 +13301,7 @@ function gameOver(isQuit) {
     }
     pd.missions.coins += runCoins || 0;
     pd.achievements.stats.bestWave = Math.max(Number(pd.achievements?.stats?.bestWave) || 0, Math.max(0, wave));
+    restoreGlitchSelectionIfNeeded();
     save();
 
     document.getElementById('go-wave').innerHTML = `Waves Sobrevividas: ${wave}`; 
@@ -12655,7 +13315,7 @@ function gameOver(isQuit) {
 }
 
 let runCoins = 0; let runGems = 0; let runScrap = 0; let runMedals = 0;
-function returnToMenu() { document.getElementById('overlay-gameover').classList.add('hidden'); showScreen('screen-main'); playMusic('menu'); ctx.clearRect(0, 0, cw, ch); joyZone.style.display='none'; const dpad = document.getElementById('dpad-zone'); if(dpad) dpad.style.display='none'; }
+function returnToMenu() { restoreGlitchSelectionIfNeeded(); document.getElementById('overlay-gameover').classList.add('hidden'); showScreen('screen-main'); playMusic('menu'); ctx.clearRect(0, 0, cw, ch); joyZone.style.display='none'; const dpad = document.getElementById('dpad-zone'); if(dpad) dpad.style.display='none'; }
 try {
     load();
     updateOrientationGate();
