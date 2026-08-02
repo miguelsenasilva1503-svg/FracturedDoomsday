@@ -3663,10 +3663,10 @@ function getSceneScale() {
 }
 
 
-function drawTurretBase(ctx, x, y, type = 'turret') {
+function drawTurretBase(ctx, x, y, type = 'turret', opts = {}) {
     const spriteType = String(type || 'turret').toLowerCase();
-    const elementSpriteSize = spriteType === 'cannon' ? 38 : (spriteType === 'mortar' ? 36 : 34);
-    if (drawElementSprite(ctx, x, y, spriteType, elementSpriteSize)) return;
+    const elementSpriteSize = spriteType === 'cannon' ? 66 : (spriteType === 'mortar' ? 62 : 60);
+    if (drawElementSprite(ctx, x, y, spriteType, elementSpriteSize, { rotate: Number.isFinite(opts.rotate) ? opts.rotate : 0, flipX: !!opts.flipX })) return;
 
     ctx.save();
     if (spriteType === 'mortar') {
@@ -4014,11 +4014,15 @@ function getElementSpriteImage(type) {
 function drawElementSprite(ctx, x, y, type, size = 18, opts = {}) {
     const img = getElementSpriteImage(type);
     if (!img || !img.complete || !img.naturalWidth) return false;
-    const w = Math.max(8, Number(size) || 18) * (opts.scaleX || 1);
-    const h = Math.max(8, Number(size) || 18) * (opts.scaleY || 1);
+    const baseSize = Math.max(10, Number(size) || 18);
+    const w = baseSize * (Number.isFinite(opts.scaleX) ? opts.scaleX : 1);
+    const h = baseSize * (Number.isFinite(opts.scaleY) ? opts.scaleY : 1);
     ctx.save();
-    if (opts.rotate) ctx.rotate(opts.rotate);
-    ctx.drawImage(img, x - w / 2, y - h / 2, w, h);
+    ctx.translate(x, y);
+    if (Number.isFinite(opts.rotate)) ctx.rotate(opts.rotate);
+    if (opts.flipX) ctx.scale(-1, 1);
+    if (opts.flipY) ctx.scale(1, -1);
+    ctx.drawImage(img, -w / 2, -h / 2, w, h);
     ctx.restore();
     return true;
 }
@@ -4067,6 +4071,7 @@ function spawnCharacterSupportAllies(charId, opts = {}) {
             type: def.type,
             ownerTag,
             glitchMorphTemp: temporary,
+            aimAngle: Number.isFinite(def.aimAngle) ? def.aimAngle : 0,
             ...def
         };
         allies.push(ally);
@@ -11026,19 +11031,24 @@ function updateAllies(dt) {
                 if(a.cd <= 0) {
                     let ang = Math.atan2(target.y - a.y, target.x - a.x);
                     if (a.type === 'penguin') {
+                        a.aimAngle = ang;
                         createProj(a.x, a.y, Math.cos(ang)*4, Math.sin(ang)*4, a.dmg, 60, true, 'pipisnowball', { size: 13, sourceChar: 'pipi', sourceType: 'penguin' });
                         a.cd = 0.95;
                     } else if (isKaisenDrone) {
                         const roll = Math.random();
                         if (roll < 0.60) {
+                            a.aimAngle = ang;
                             createProj(a.x, a.y, Math.cos(ang)*5.2, Math.sin(ang)*5.2, a.dmg, 60, true, 'normal', { size: 4 });
                         } else if (roll < 0.80) {
+                            a.aimAngle = ang;
                             createProj(a.x, a.y, Math.cos(ang)*4.8, Math.sin(ang)*4.8, a.dmg * 0.95, 60, true, 'normal', { size: 4, bounces: 2 });
                         } else {
+                            a.aimAngle = ang;
                             createProj(a.x, a.y, Math.cos(ang)*7, Math.sin(ang)*7, a.dmg * 0.9, 50, true, 'laser', { size: 3 });
                         }
                         a.cd = 0.75;
                     } else {
+                        a.aimAngle = ang;
                         createProj(a.x, a.y, Math.cos(ang)*4, Math.sin(ang)*4, a.dmg, 60, true, 'normal', { size: 4, sourceChar: 'drone', sourceType: 'drone' });
                         a.cd = 0.95;
                     }
@@ -11075,11 +11085,12 @@ function updateAllies(dt) {
                 ctx.beginPath(); ctx.arc(drawX + 14 * scale, drawY - 6 * scale, 4 * scale, 0, Math.PI * 2); ctx.fill();
                 ctx.restore();
             } else {
-                drawTurretBase(ctx, a.x, a.y, a.type);
+                drawTurretBase(ctx, a.x, a.y, a.type, { rotate: Number.isFinite(a.aimAngle) ? a.aimAngle : 0 });
             }
             if (a.type === 'speaker') {
                 if (target && minD < 420) {
                     if (a.cd <= 0) {
+                        a.aimAngle = Math.atan2(target.y - a.y, target.x - a.x);
                         triggerSoundWave(a.x, a.y, 150 * (player.stats?.rangeMult || 1), 24, '#feca57');
                         a.cd = 1.1;
                     } else {
@@ -11091,9 +11102,9 @@ function updateAllies(dt) {
             } else if(target && minD < 350) { 
                 if(a.cd <= 0) { 
                     let ang = Math.atan2(target.y - a.y, target.x - a.x); 
-                    if(a.type === 'mortar') { createProj(a.x, a.y, Math.cos(ang)*4, Math.sin(ang)*4, a.dmg, 60, true, 'bomb', { tx: target.x, ty: target.y }); a.cd = 2.0; }
-                    else if (a.type === 'cannon') { createProj(a.x, a.y, Math.cos(ang)*5, Math.sin(ang)*5, a.dmg, 60, true, 'cannon_ball', {size: 8}); a.cd = 1.5; }
-                    else { createProj(a.x, a.y, Math.cos(ang)*6, Math.sin(ang)*6, a.dmg, 60, true, 'normal', { sourceChar: 'meekah' }); a.cd = 0.8; }
+                    if(a.type === 'mortar') { a.aimAngle = ang; createProj(a.x, a.y, Math.cos(ang)*4, Math.sin(ang)*4, a.dmg, 60, true, 'bomb', { tx: target.x, ty: target.y }); a.cd = 2.0; }
+                    else if (a.type === 'cannon') { a.aimAngle = ang; createProj(a.x, a.y, Math.cos(ang)*5, Math.sin(ang)*5, a.dmg, 60, true, 'cannon_ball', {size: 8}); a.cd = 1.5; }
+                    else { a.aimAngle = ang; createProj(a.x, a.y, Math.cos(ang)*6, Math.sin(ang)*6, a.dmg, 60, true, 'normal', { sourceChar: 'meekah' }); a.cd = 0.8; }
                 } else { a.cd -= dt; } 
             }
         } else if (a.isNote) {
@@ -12557,11 +12568,16 @@ function draw() {
                 flipX: Boolean(a.facingLeft)
             });
         } else if(a.type === 'drone') {
-            if (a.variant === 'kaisen') {
-                drawTurretBase(ctx, a.x, a.y, 'turret');
-            } else {
-                ctx.fillStyle = '#bdc3c7'; ctx.beginPath(); ctx.arc(a.x, a.y, 10, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = '#e74c3c'; ctx.beginPath(); ctx.arc(a.x, a.y+2, 6, 0, Math.PI*2); ctx.fill();
+            const droneType = (a.variant === 'kaisen' || a.variant === 'axel_drone') ? 'axel_drone' : 'drone';
+            const droneSize = droneType === 'axel_drone' ? 72 : 62;
+            if (!drawElementSprite(ctx, a.x, a.y, droneType, droneSize, { rotate: Number.isFinite(a.aimAngle) ? a.aimAngle : 0, flipX: Boolean(a.facingLeft) })) {
+                if (droneType === 'axel_drone') {
+                    ctx.fillStyle = '#bdc3c7'; ctx.beginPath(); ctx.arc(a.x, a.y, 14, 0, Math.PI*2); ctx.fill();
+                    ctx.fillStyle = '#e74c3c'; ctx.beginPath(); ctx.arc(a.x, a.y+2, 8, 0, Math.PI*2); ctx.fill();
+                } else {
+                    ctx.fillStyle = '#bdc3c7'; ctx.beginPath(); ctx.arc(a.x, a.y, 12, 0, Math.PI*2); ctx.fill();
+                    ctx.fillStyle = '#e74c3c'; ctx.beginPath(); ctx.arc(a.x, a.y+2, 7, 0, Math.PI*2); ctx.fill();
+                }
             }
         } else if(a.isTurret) {
             if(a.type === 'tea_table') {
@@ -12649,8 +12665,10 @@ function draw() {
         } else if (a.type === 'heal_aura') { 
             ctx.fillStyle = 'rgba(46, 204, 113, 0.3)'; ctx.beginPath(); ctx.arc(a.x, a.y, 40, 0, Math.PI*2); ctx.fill(); 
         } else if (a.type === 'landmine') {
-            ctx.fillStyle = '#2c3e50'; ctx.beginPath(); ctx.arc(a.x, a.y, 15, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#e74c3c'; ctx.beginPath(); ctx.arc(a.x, a.y, 5, 0, Math.PI*2); ctx.fill();
+            if (!drawElementSprite(ctx, a.x, a.y, 'minesweeper', 64, { rotate: Number.isFinite(a.aimAngle) ? a.aimAngle : 0 })) {
+                ctx.fillStyle = '#2c3e50'; ctx.beginPath(); ctx.arc(a.x, a.y, 15, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#e74c3c'; ctx.beginPath(); ctx.arc(a.x, a.y, 5, 0, Math.PI*2); ctx.fill();
+            }
         } else if (a.type === 'ivy_vine') {
             const rr = a.radius || 160;
             ctx.save();
