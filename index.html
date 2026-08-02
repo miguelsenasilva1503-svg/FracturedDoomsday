@@ -3664,15 +3664,18 @@ function getSceneScale() {
 
 
 function drawTurretBase(ctx, x, y, type = 'turret') {
+    const spriteType = String(type || 'turret').toLowerCase();
+    if (drawElementSprite(ctx, x, y, spriteType, spriteType === 'cannon' ? 24 : 20)) return;
+
     ctx.save();
-    if (type === 'mortar') {
+    if (spriteType === 'mortar') {
         ctx.fillStyle = '#8e44ad';
         ctx.beginPath(); ctx.arc(x, y, 14, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#2c3e50';
         ctx.beginPath(); ctx.arc(x, y + 1, 7, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#bdc3c7';
         ctx.fillRect(x + 2, y - 14, 6, 18);
-    } else if (type === 'cannon') {
+    } else if (spriteType === 'cannon') {
         ctx.fillStyle = '#34495e';
         ctx.beginPath(); ctx.arc(x, y, 15, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#f39c12';
@@ -3909,6 +3912,17 @@ const MAP_ELEMENT_SPRITES = {
     bamboo: 'elements/bamboo.png',
     spike_bamboo: 'elements/spike_bamboo.png'
 };
+const ALLY_ELEMENT_SPRITES = {
+    turret: 'elements/turret.png',
+    mortar: 'elements/mortar.png',
+    cannon: 'elements/canon.png',
+    drone: 'elements/drone.png',
+    axel_drone: 'elements/axel_drone.png',
+    minesweeper: 'elements/minesweeper.png'
+};
+
+const ALLY_ELEMENT_SPRITE_CACHE = new Map();
+
 
 const MAP_ELEMENT_SPRITE_CACHE = new Map();
 
@@ -3931,7 +3945,7 @@ function getDynamicCharacterSpriteId(id) {
         if (typeof player !== 'undefined' && player && player.flexLowHp) return 'flex_less_health';
         return 'flex_hammer';
     }
-    if (id === 'shinobi' && typeof player !== 'undefined' && player && player.shinobiDragonActive) return 'dragon_shinobi';
+    if (id === 'shinobi' && typeof player !== 'undefined' && player && (player.shinobiDragonActive || player.shinobiDragonFormActive)) return 'dragon_shinobi';
     return id;
 }
 
@@ -3979,6 +3993,135 @@ function getCharacterRadiusById(id) {
     return 15;
 }
 
+
+function getElementSpritePath(type) {
+    return ALLY_ELEMENT_SPRITES[String(type || '').toLowerCase()] || '';
+}
+
+function getElementSpriteImage(type) {
+    const key = String(type || '').toLowerCase();
+    const path = getElementSpritePath(key);
+    if (!path) return null;
+    if (!ALLY_ELEMENT_SPRITE_CACHE.has(key)) {
+        const img = new Image();
+        img.src = path;
+        ALLY_ELEMENT_SPRITE_CACHE.set(key, img);
+    }
+    return ALLY_ELEMENT_SPRITE_CACHE.get(key);
+}
+
+function drawElementSprite(ctx, x, y, type, size = 18, opts = {}) {
+    const img = getElementSpriteImage(type);
+    if (!img || !img.complete || !img.naturalWidth) return false;
+    const w = Math.max(8, Number(size) || 18) * (opts.scaleX || 1);
+    const h = Math.max(8, Number(size) || 18) * (opts.scaleY || 1);
+    ctx.save();
+    if (opts.rotate) ctx.rotate(opts.rotate);
+    ctx.drawImage(img, x - w / 2, y - h / 2, w, h);
+    ctx.restore();
+    return true;
+}
+
+function tagGlitchMorphAllies(list = allies) {
+    (list || []).forEach(a => {
+        if (!a || a.ownerTag === 'glitch-morph') return;
+        if (a.glitchMorphTemp) {
+            a.ownerTag = 'glitch-morph';
+        }
+    });
+}
+
+function clearTaggedAllies(tag = 'glitch-morph') {
+    if (!Array.isArray(allies) || !allies.length) return;
+    allies = allies.filter(a => a && a.ownerTag !== tag);
+}
+
+function spawnCharacterSupportAllies(charId, opts = {}) {
+    const id = String(charId || '').toLowerCase();
+    const ownerTag = opts.ownerTag || 'glitch-morph';
+    const temporary = opts.temporary !== false;
+    const baseX = Number.isFinite(opts.x) ? opts.x : (player ? player.x : 0);
+    const baseY = Number.isFinite(opts.y) ? opts.y : (player ? player.y : 0);
+    const baseDmg = Number.isFinite(opts.baseDmg) ? opts.baseDmg : ((player && Number.isFinite(player.baseDmg)) ? player.baseDmg : 12);
+    const dmgMult = Number.isFinite(opts.dmgMult) ? opts.dmgMult : ((player && player.stats && Number.isFinite(player.stats.dmgMult)) ? player.stats.dmgMult : 1);
+
+    const markLast = (predicate) => {
+        for (let i = allies.length - 1; i >= 0; i--) {
+            const a = allies[i];
+            if (a && predicate(a)) {
+                a.ownerTag = ownerTag;
+                a.glitchMorphTemp = temporary;
+                return a;
+            }
+        }
+        return null;
+    };
+
+    const push = (def) => {
+        if (!def) return null;
+        const ally = {
+            x: def.x ?? baseX,
+            y: def.y ?? baseY,
+            life: def.life ?? 999999,
+            type: def.type,
+            ownerTag,
+            glitchMorphTemp: temporary,
+            ...def
+        };
+        allies.push(ally);
+        return ally;
+    };
+
+    if (id === 'kaisen' || id === 'axel') {
+        push({
+            type: 'drone',
+            variant: id === 'axel' ? 'axel_drone' : 'kaisen',
+            dmg: (baseDmg || 12) * dmgMult,
+            cd: 0.1,
+            speed: 2.9
+        });
+    }
+    if (id === 'meekah') {
+        push({
+            type: 'turret',
+            subType: 'turret',
+            dmg: (baseDmg || 12) * dmgMult * 0.75,
+            life: 999999,
+            cd: 0.15,
+            x: baseX + 24,
+            y: baseY - 18
+        });
+    }
+    if (id === 'tiki') {
+        push({
+            type: 'totem',
+            dmg: (baseDmg || 12) * dmgMult * 0.5,
+            life: 999999,
+            cd: 0.6,
+            x: baseX - 26,
+            y: baseY + 8
+        });
+    }
+    if (id === 'ivy') {
+        if (typeof spawnIvyFlower === 'function') spawnIvyFlower(baseX, baseY);
+        markLast(a => a.type === 'ivy_flower');
+    }
+    if (id === 'frost') {
+        push({ type: 'penguin', dmg: (baseDmg || 12) * dmgMult * 0.6, life: 999999, cd: 0.7, speed: 2.7 });
+    }
+    if (id === 'ripper') {
+        push({ type: 'speaker', dmg: (baseDmg || 12) * dmgMult * 0.55, life: 999999, cd: 0.65, x: baseX, y: baseY });
+    }
+    if (id === 'miss_macaron') {
+        if (typeof spawnMissMacaronTeaTable === 'function') spawnMissMacaronTeaTable(baseX, baseY);
+        markLast(a => a.type === 'tea_table');
+    }
+    if (id === 'goo') {
+        if (typeof spawnGooClone === 'function') spawnGooClone(baseX, baseY);
+        markLast(a => a.gooClone);
+    }
+}
+
 function getGlitchMorphPool() {
     return Object.keys(CHARACTERS || {}).filter(id => id && id !== 'glitch' && id !== 'jack');
 }
@@ -4023,6 +4166,7 @@ function resetMorphRuntimeState(charId) {
     player.ninjiPendingCd = 0;
     player.ninjiDashCd = 0;
     player.shinobiDragonActive = false;
+    player.shinobiDragonFormActive = false;
     player.shinobiDragonWavesLeft = 0;
     player.shinobiDragonCooldown = 0;
     player.shinobiDragonFireCd = 0;
@@ -4061,6 +4205,9 @@ function resetMorphRuntimeState(charId) {
     player.flexLowHp = false;
     player.flexReload = 0;
     player.seaePuddleCd = 0;
+    player.qbShield = false;
+    player.qbBar = 0;
+    player.stats.dynamicDef = 0;
     player.zippiBubbleHp = charId === 'zippi' ? 80 : 0;
     player.zippiBubbleMaxHp = charId === 'zippi' ? 80 : 0;
     player.zippiBubbleBroken = false;
@@ -4119,6 +4266,7 @@ function finishGlitchMorphSequence() {
     if (!player) return;
     const glitchLevel = Math.max(1, Math.min(8, Number(pd?.chars?.glitch?.level) || 1));
     const finalId = player.glitchTransformFinalId || 'glitch';
+    clearTaggedAllies('glitch-morph');
     player.glitchTransformAnimating = false;
     player.glitchTransformElapsed = 0;
     player.glitchTransformTimer = 0;
@@ -4134,6 +4282,7 @@ function finishGlitchMorphSequence() {
         player.glitchOriginChar = 'glitch';
     } else {
         applyCharacterLoadout(finalId, glitchLevel, { keepHpRatio: true });
+        spawnCharacterSupportAllies(finalId, { ownerTag: 'glitch-morph', temporary: true, x: player.x, y: player.y, baseDmg: player.baseDmg, dmgMult: player.stats.dmgMult });
         player.glitchMorphActive = true;
         player.glitchMorphWavesLeft = 3;
         player.glitchCurrentFormId = finalId;
@@ -4158,6 +4307,7 @@ function updateGlitchMorphSequence(dt) {
 
 function restoreGlitchSelectionIfNeeded() {
     if (!player || !pd || player.glitchOriginChar !== 'glitch') return;
+    clearTaggedAllies('glitch-morph');
     const glitchLevel = Math.max(1, Math.min(8, Number(pd?.chars?.glitch?.level) || 1));
     pd.selectedChar = 'glitch';
     if (pd.run && typeof pd.run === 'object') pd.run.charId = 'glitch';
@@ -7964,7 +8114,7 @@ function getSelectedSpecialConfig() {
         return { type: 'ninji', label: '💨', title: 'Dash', ready: player.ninjiDashCd <= 0 };
     }
     if (pd.selectedChar === 'shinobi') {
-        return { type: 'shinobi', label: '🐉', title: player.shinobiDragonActive ? 'Transformado' : 'Dragão Guerreiro', ready: player.shinobiDragonCooldown <= 0 && !player.shinobiDragonActive };
+        return { type: 'shinobi', label: '🐉', title: (player.shinobiDragonActive || player.shinobiDragonFormActive) ? 'Transformado' : 'Dragão Guerreiro', ready: player.shinobiDragonCooldown <= 0 && !(player.shinobiDragonActive || player.shinobiDragonFormActive) };
     }
     if (pd.selectedChar === 'glitch') {
         return { type: 'glitch', label: '🎲', title: player.glitchTransformAnimating ? 'Corrompendo...' : 'Bugado', ready: !player.glitchTransformAnimating };
@@ -8023,7 +8173,7 @@ function updateSpecialButtonUI() {
 
     const isGhoulActive = pd.selectedChar === 'ghoul' && (player.invisTimer || 0) > 0;
     const isNinjiActive = pd.selectedChar === 'ninji' && player.weapon === 'dagger' && (player.dashTimer || 0) > 0;
-    const isShinobiActive = cfg.type === 'shinobi' && player.shinobiDragonActive;
+    const isShinobiActive = cfg.type === 'shinobi' && (player.shinobiDragonActive || player.shinobiDragonFormActive);
     const isGlitchActive = cfg.type === 'glitch' && !!player.glitchTransformAnimating;
 
     const cooldownValue = cfg.type === 'ghoul'
@@ -8421,13 +8571,8 @@ function startRunAfterShop() {
     if(pd.selectedChar === 'mrsaw') player.stats.orbitals += 2;
     if(pd.selectedChar === 'eel') { player.stats.orbitals += 1; player.eelOrbital = true; player.eelOrbitalLong = true; }
     if(pd.selectedChar === 'zippi') { player.zippiBubbleHp = 80; player.zippiBubbleMaxHp = 80; player.zippiBubbleBroken = false; }
-    if(pd.selectedChar === 'ivy') spawnIvyFlower();
-    if(pd.selectedChar === 'kaisen') { allies.push({x: player.x, y: player.y, dmg: player.baseDmg * 0.75, speed: 3.0, life: Infinity, cd: 0, isTurret: false, type: 'drone', variant: 'kaisen', burstCd: 0}); }
-    if(pd.selectedChar === 'tiki') allies.push({x: player.x, y: player.y, dmg: 0, speed: 0, life: Infinity, cd: 0, isTurret: false, isTotem: true, radius: 150});
-    if(pd.selectedChar === 'frost') allies.push({x: player.x, y: player.y, dmg: player.baseDmg*0.5, speed: 2.8, life: Infinity, cd: 0, isTurret: false, type: 'penguin', followX: -28, followY: 14});
-    if(pd.selectedChar === 'ripper') allies.push({x: player.x, y: player.y, dmg: player.baseDmg * 0.6, speed: 0, life: Infinity, cd: 0, isTurret: true, type: 'speaker', ref: 'ripper_speaker'});
+    spawnCharacterSupportAllies(pd.selectedChar, { ownerTag: 'run-start', temporary: false, x: player.x, y: player.y, baseDmg: player.baseDmg, dmgMult: player.stats.dmgMult });
     if(pd.selectedChar === 'healy') player.stats.regen += 0.01;
-    if(pd.selectedChar === 'miss_macaron') spawnMissMacaronTeaTable();
 
     if(window.tempPregameCard) { window.tempPregameCard.apply(player.stats); player.pickedCards.push(window.tempPregameCard.name); window.tempPregameCard = null; }
     
@@ -8528,8 +8673,9 @@ function explodeShinobiFireball(x, y, dmg, radius = 42) {
 }
 
 function activateShinobiDragon() {
-    if (!player || pd.selectedChar !== 'shinobi' || player.shinobiDragonActive || player.shinobiDragonCooldown > 0) return;
+    if (!player || pd.selectedChar !== 'shinobi' || (player.shinobiDragonActive || player.shinobiDragonFormActive) || player.shinobiDragonCooldown > 0) return;
     player.shinobiDragonActive = true;
+    player.shinobiDragonFormActive = true;
     player.shinobiDragonWavesLeft = 3;
     player.shinobiDragonCooldown = 0;
     player.shinobiDragonFireCd = 0;
@@ -8540,6 +8686,7 @@ function activateShinobiDragon() {
 function deactivateShinobiDragon() {
     if (!player || pd.selectedChar !== 'shinobi') return;
     player.shinobiDragonActive = false;
+    player.shinobiDragonFormActive = false;
     player.shinobiDragonWavesLeft = 0;
     player.shinobiDragonFireCd = 0;
     player.shinobiDragonCooldown = 40;
@@ -8564,7 +8711,7 @@ function triggerSpecial() {
         updateSpecialButtonUI();
         return;
     }
-    if (cfg.type === 'shinobi' && player.shinobiDragonCooldown <= 0 && !player.shinobiDragonActive) {
+    if (cfg.type === 'shinobi' && player.shinobiDragonCooldown <= 0 && !(player.shinobiDragonActive || player.shinobiDragonFormActive)) {
         activateShinobiDragon();
         if (btnSpecial) {
             btnSpecial.classList.add('cooling');
@@ -8719,7 +8866,7 @@ function update(dt) {
         } else if (pd.selectedChar === 'glitch' && !player.glitchTransformAnimating && !player.glitchMorphActive) {
             startGlitchMorphSequence(false);
         }
-        if (pd.selectedChar === 'shinobi' && player.shinobiDragonActive) {
+        if (pd.selectedChar === 'shinobi' && (player.shinobiDragonActive || player.shinobiDragonFormActive)) {
             player.shinobiDragonWavesLeft = Math.max(0, (player.shinobiDragonWavesLeft || 0) - 1);
             if (player.shinobiDragonWavesLeft <= 0) deactivateShinobiDragon();
         }
@@ -8810,7 +8957,7 @@ function update(dt) {
     updateGlitchMorphSequence(dt);
     if(btnSpecial && btnSpecial.style.display !== 'none') {
         const cfg = getSelectedSpecialConfig();
-        const activeState = cfg ? (cfg.type === 'ghoul' ? (player.invisTimer > 0) : (cfg.type === 'ninji' ? (player.dashTimer > 0) : (cfg.type === 'shinobi' ? player.shinobiDragonActive : !!player.glitchTransformAnimating))) : false;
+        const activeState = cfg ? (cfg.type === 'ghoul' ? (player.invisTimer > 0) : (cfg.type === 'ninji' ? (player.dashTimer > 0) : (cfg.type === 'shinobi' ? (player.shinobiDragonActive || player.shinobiDragonFormActive) : !!player.glitchTransformAnimating))) : false;
         const cdValue = cfg ? (cfg.type === 'ghoul' ? Math.max(0, player.specCd || 0) : (cfg.type === 'ninji' ? Math.max(0, player.ninjiDashCd || 0) : (cfg.type === 'shinobi' ? Math.max(0, player.shinobiDragonCooldown || 0) : 0))) : 0;
         const shouldShowCooldown = !!cfg && !activeState && cdValue > 0;
         btnSpecial.classList.toggle('cooling', activeState || shouldShowCooldown);
@@ -8897,10 +9044,10 @@ function update(dt) {
         if(o.type==='ice' && dist(player, o) < o.r + player.r) mapSpeedMult = 1.5; 
         if(o.type==='mud' && dist(player, o) < o.r + player.r) {
             mapSpeedMult = 0.5;
-            if(!(pd.selectedChar === 'shinobi' && player.shinobiDragonActive) && pd.settings.ultraHardcore) dealPlayerDamage(15 * dt);
+            if(!(pd.selectedChar === 'shinobi' && (player.shinobiDragonActive || player.shinobiDragonFormActive)) && pd.settings.ultraHardcore) dealPlayerDamage(15 * dt);
         }
-        if(o.type==='cacto') { let d = dist(player, o); if(d < o.r + player.r) { if(!(pd.selectedChar === 'shinobi' && player.shinobiDragonActive)) { dealPlayerDamage(30 * dt); if(Math.random()<0.1) addFloatingText(player.x, player.y, '-HP', '#e74c3c', 10); } } }
-        if(o.type==='bamboo_spike' && dist(player, o) < o.r + player.r && !(pd.selectedChar === 'shinobi' && player.shinobiDragonActive)) dealPlayerDamage(20 * dt);
+        if(o.type==='cacto') { let d = dist(player, o); if(d < o.r + player.r) { if(!(pd.selectedChar === 'shinobi' && (player.shinobiDragonActive || player.shinobiDragonFormActive))) { dealPlayerDamage(30 * dt); if(Math.random()<0.1) addFloatingText(player.x, player.y, '-HP', '#e74c3c', 10); } } }
+        if(o.type==='bamboo_spike' && dist(player, o) < o.r + player.r && !(pd.selectedChar === 'shinobi' && (player.shinobiDragonActive || player.shinobiDragonFormActive))) dealPlayerDamage(20 * dt);
         if(o.type==='speaker') {
             o.cd -= dt;
             if(o.cd <= 0) {
@@ -8928,10 +9075,10 @@ function update(dt) {
         }
     } else if(player.weapon === 'dash_hit') player.stats.dynamicDef = 0;
 
-    if (pd.selectedChar === 'shinobi' && player.shinobiDragonActive) pSpeed *= 1.55;
+    if (pd.selectedChar === 'shinobi' && (player.shinobiDragonActive || player.shinobiDragonFormActive)) pSpeed *= 1.55;
 
     let nx = player.x + dx * pSpeed; let ny = player.y + dy * pSpeed;
-    if (!(pd.selectedChar === 'shinobi' && player.shinobiDragonActive)) {
+    if (!(pd.selectedChar === 'shinobi' && (player.shinobiDragonActive || player.shinobiDragonFormActive))) {
         obstacles.forEach(o => { if(o.type !== 'ice' && o.type !== 'mud' && o.type !== 'car' && o.type !== 'bamboo_spike' && o.type !== 'speaker' && dist({x:nx,y:ny}, o) < o.r + player.r) { nx = player.x; ny = player.y; } });
     }
     player.x = Math.max(-1500, Math.min(1500, nx)); player.y = Math.max(-1500, Math.min(1500, ny));
@@ -8941,7 +9088,7 @@ function update(dt) {
         let o = obstacles[i];
         if(o.type === 'car') {
             o.x += o.vx * 60 * dt; o.y += o.vy * 60 * dt; o.life -= dt;
-            if(dist(player, o) < player.r + o.r && player.shieldTimer <= 0 && !(pd.selectedChar === 'shinobi' && player.shinobiDragonActive)) { dealPlayerDamage(40 * dt); }
+            if(dist(player, o) < player.r + o.r && player.shieldTimer <= 0 && !(pd.selectedChar === 'shinobi' && (player.shinobiDragonActive || player.shinobiDragonFormActive))) { dealPlayerDamage(40 * dt); }
             for(let e of enemies) if(dist(e, o) < e.size + o.r) e.hp -= 100 * dt;
             if(o.life <= 0) obstacles.splice(i, 1);
         }
@@ -9195,7 +9342,7 @@ function fireWeapon(target) {
             return;
         }
 
-        if (pd.selectedChar === 'shinobi' && player.shinobiDragonActive) {
+        if (pd.selectedChar === 'shinobi' && (player.shinobiDragonActive || player.shinobiDragonFormActive)) {
             // Um único disparo de bola de fogo plasmática, com recarga alta mas jogável.
             player.cd = Math.max(player.cd, 52);
             createProj(
@@ -10844,7 +10991,7 @@ function updateEnemies(dt) {
 function updateAllies(dt) {
     for(let i=allies.length-1; i>=0; i--) {
         let a = allies[i]; a.life -= dt; let target = null; let minD = 500;
-        for(let e of enemies) { let d = dist(a, e); if(d < minD) { minD = d; target = e; } }
+        for(let e of enemies) { if (isCurrentlyHypnotized(e)) continue; let d = dist(a, e); if(d < minD) { minD = d; target = e; } }
 
         if(a.type === 'tea_table') {
             a.teaCd = Math.max(0, (a.teaCd || 0) - dt);
@@ -11287,6 +11434,7 @@ function updateProjectiles(dt) {
             if(p.extra.tickCd <= 0) {
                 p.extra.tickCd = 0.25;
                 for(let e of enemies) {
+                    if (isCurrentlyHypnotized(e)) continue;
                     if(dist(p, e) < p.size + pullRadius) {
                         let a = Math.atan2(p.y - e.y, p.x - e.x);
                         if(!e.isBoss) {
@@ -11388,10 +11536,10 @@ function updateProjectiles(dt) {
         let hit = false; let hitTarget = null;
         if(p.isPlayer) {
             for(let e of enemies) {
+                if (isCurrentlyHypnotized(e)) continue;
                 if(p.type === 'quarterback' && p.extra && p.extra.noHitFrames > 0) continue;
                 if(!p.hitIds.has(e) && dist(p, e) < p.size + e.size) {
-                    if(false && (p.type === 'yuuto_heart' || p.type === 'heart') && isCurrentlyHypnotized(e)) continue;
-                    if(e.dodgeChance && Math.random() < e.dodgeChance) continue;
+                                        if(e.dodgeChance && Math.random() < e.dodgeChance) continue;
 
                     if(p.type !== 'puddle' && p.type !== 'black_hole') { 
                         const projStats = p.extra?.sourceStats || player.stats; let realDmg = p.dmg * (e.isBoss ? projStats.bossDmgMult : 1); 
@@ -12154,7 +12302,7 @@ function getPlayerSpriteId() {
     if (pd?.selectedChar === 'gladiator') {
         return (pd?.chars?.gladiator?.mode === 'shooter') ? 'gladiator_spear' : 'gladiator_sword';
     }
-    if (pd?.selectedChar === 'shinobi' && player?.shinobiDragonActive) return 'dragon_shinobi';
+    if (pd?.selectedChar === 'shinobi' && (player?.shinobiDragonActive || player?.shinobiDragonFormActive)) return 'dragon_shinobi';
     if (pd?.selectedChar === 'glitch' && player?.glitchMorphActive && player?.glitchCurrentFormId) return player.glitchCurrentFormId;
     if (pd?.selectedChar === 'miss_macaron') return 'miss_macaron';
     return pd?.selectedChar || null;
