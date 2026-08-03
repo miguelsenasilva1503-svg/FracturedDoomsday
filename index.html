@@ -75,6 +75,23 @@
     .upgrade-card:hover { transform: translateY(-8px); border-color: rgba(241,196,15,0.7); box-shadow: 0 18px 30px rgba(0,0,0,0.52); }
     .upgrade-card h3 { color: #fff; font-size: 18px; margin: 0; line-height: 1.15; text-shadow: none; font-weight: 900; white-space: normal; word-break: normal; }
     .upgrade-card p { font-size: 14px; color: #d9e2ea; line-height: 1.45; margin: 0; white-space: normal; }
+    .upgrade-card-icon {
+        width: 54px;
+        height: 54px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 34px;
+        line-height: 1;
+        flex: 0 0 auto;
+    }
+    .upgrade-card--textonly {
+        justify-content: center;
+        gap: 10px;
+    }
+    .upgrade-card--textonly .upgrade-card-icon {
+        display: none;
+    }
 
     #cards-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; width: min(100%, 920px); margin: 20px auto 0; }
     #trail-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; width: min(100%, 920px); margin: 20px auto 0; }
@@ -2409,6 +2426,11 @@ Conhecido por sua atitude intimidadora e confiança inabalável, Ripper transfor
 Um cozinheiro de fast food completamente fora da casinha, convencido de que hambúrgueres, pães e condimentos fazem parte de uma conspiração para derrotá-lo. Armado com pistolas abastecidas por bisnagas de molhos, Lunch enfrenta seus "inimigos" com ketchup, mostarda e maionese em uma batalha que só existe na cabeça dele. O lado bom? Os monstros não parecem se importar com o motivo de estarem levando tiros de molho.
 
 “VOCÊS NÃO VÃO ROUBAR MEUS PICLES!”` },
+    bunniie: { id: 'bunniie', class: 'Controle', name: 'Bunniie', rarity: 'epic', sortLast: true, cost: 149, hp: 108, speed: 3.45, dmg: 15, fireRate: 54, range: 255, color: '#8bc34a', emoji: '🐰', weapon: 'carrot', desc: `“Bunniie foi criado para ser a coisa mais fofa do mundo. Ninguém avisou que ele também seria excelente em combate.”
+
+Um adorável coelho robô que espalha simpatia por onde passa. Com orelhas metálicas, movimentos ágeis e uma personalidade curiosa, Bunniie conquista a confiança de qualquer um... até começar a lutar. Por trás de sua aparência fofinha existe uma máquina surpreendentemente eficiente, pronta para proteger seus amigos a qualquer custo.
+
+“Bip! ...Isso foi um desafio.”` },
     ghoul: { id: 'ghoul', class: 'Algoz', name: 'Ghoul', rarity: 'epic', cost: 149, hp: 110, speed: 3.6, dmg: 19, fireRate: 50, range: 200, color: '#718093', weapon: 'energy_wave', desc: `“Ghoul aparece do nada, assusta todo mundo e desaparece antes de explicar qualquer coisa.”
 
 Um fantasma silencioso e misterioso que prefere atacar sem ser visto. Ghoul adora brincar com a mente dos inimigos… principalmente quando eles começam a achar que estão vendo coisas.
@@ -2629,7 +2651,11 @@ MOLHO ROSÊ: a mistura dos três molhos.
 ESPECIAL: se houver 3 inimigos no alcance, cada molho vai para um alvo diferente.
 ESPECIAL: se houver menos de 3 inimigos no alcance, os 3 molhos focam o mesmo alvo.
 ESPECIAL: quando KETCHUP, MAIONESE e MOSTARDA acertam o mesmo inimigo em até 0,8 s, os molhos se misturam, causando dano massivo, explosão, LERDEZA e QUEIMADURA.`,
+    bunniie: `Bunniie: dispara uma cenoura PERFURANTE, ao derrotar um inimigo, ele deixa uma cenoura no chão, caso Bunniie pegue, ele recupera hp
+
+ESPECIAL: pode cavar tocas, quando duas tocas estão interligadas, Bunniie pode se teletransportar por elas`,
     strike: `Strike: dispara projéteis pra frente.`,
+
     fasty: `Fasty: troca vida e dano por velocidade e cadência, dispara bolas energéticas.`,
     hank: `Hank: dispara projéteis pesados, tem mais vida mas é mais lento.`,
     cherry: `Cherry: dispara projéteis que empurram inimigos.`,
@@ -2799,7 +2825,7 @@ const CHIPS_DATA = {
     bounce: { id: 'bounce', name: '+1 Ricochete', emoji: '🪃', desc: 'Tiros quicam 1x', effect: (s) => s.bounce = (s.bounce || 0) + 1 },
     expl: { id: 'expl', name: 'Explosão Leve', emoji: '💥', desc: 'Tiros explodem', effect: (s) => s.explodeHit = true },
     xp: { id: 'xp', name: '+XP', emoji: '📚', desc: '+25% XP Ganho', effect: (s) => s.xpMult += 0.25 },
-    turret: { id: 'turret', name: 'Torreta Início', emoji: '🤖', desc: 'Inicia c/ Torreta', effect: (s, p, allies) => { allies.push({x: p.x, y: p.y, dmg: p.baseDmg * p.stats.dmgMult, speed: 0, life: Infinity, cd: 0, isTurret: true}); } },
+    turret: { id: 'turret', name: 'Torreta Início', emoji: '🤖', desc: 'Inicia c/ Torreta', effect: (s, p, allies) => { allies.push({x: p.x, y: p.y, dmg: p.baseDmg * p.stats.dmgMult, speed: 0, life: Infinity, cd: 0, isTurret: true}); }, iconHtml: '<img src="elements/turret.png" alt="" aria-hidden="true" style="width:28px;height:28px;object-fit:contain;">' },
     proj: { id: 'proj', name: '+1 Projétil', emoji: '🎇', desc: 'Dispara um tiro extra', effect: (s) => s.extraProj += 1 },
     magnet: { id: 'magnet', name: 'Magnetismo', emoji: '🧲', desc: '+50% Raio de Coleta', effect: (s) => s.magnetMult += 0.5 },
     white_flag: { id: 'white_flag', name: 'Bandeira Branca', emoji: '🏳️', desc: '-10% de Inimigos', effect: (s) => s.enemySpawnMult = 0.9 },
@@ -2809,7 +2835,7 @@ const CHIPS_DATA = {
     freeze_touch: { id: 'freeze_touch', name: 'Toque Congelante', emoji: '❄️', desc: '10% chance de congelar', effect: (s) => s.freezeChance += 0.1 },
     dodge: { id: 'dodge', name: 'Esquiva', emoji: '💨', desc: '+10% Chance de Esquiva', effect: (s) => s.dodgeChance = (s.dodgeChance || 0) + 0.1 },
     push_chip: { id: 'push_chip', name: 'Empurrão', emoji: '💨', desc: '10% de empurrar', effect: (s) => s.pushChance = (s.pushChance || 0) + 0.1 },
-    drone_chip: { id: 'drone_chip', name: 'Drone', emoji: '🛸', desc: 'Drone aliado', effect: (s, p, allies) => { allies.push({x: p.x, y: p.y, dmg: p.baseDmg * p.stats.dmgMult * 0.5, speed: 2.8, life: Infinity, cd: 0, isTurret: false, type: 'drone', followX: 20, followY: -20}); } }
+    drone_chip: { id: 'drone_chip', name: 'Drone', emoji: '🛸', desc: 'Drone aliado', effect: (s, p, allies) => { allies.push({x: p.x, y: p.y, dmg: p.baseDmg * p.stats.dmgMult * 0.5, speed: 2.8, life: Infinity, cd: 0, isTurret: false, type: 'drone', followX: 20, followY: -20}); }, iconHtml: '<img src="elements/drone.png" alt="" aria-hidden="true" style="width:28px;height:28px;object-fit:contain;">' }
 }
 ;
 
@@ -2899,7 +2925,7 @@ function renderChipCraftingPanel() {
         const canCraft = !crafting && (pd.sucatas || 0) >= recipe.scrap && (pd.evo || 0) >= recipe.evo;
         return `
             <div class="chip-card" style="min-height: 210px; cursor: default; opacity: ${crafting ? 0.65 : 1};">
-                <div class="chip-emoji">${c.emoji}</div>
+                <div class="chip-emoji">${c.iconHtml || c.emoji}</div>
                 <h4 style="margin: 8px 0 4px;">${c.name}</h4>
                 <p style="font-size:12px; margin: 0 0 6px; min-height: 42px;">${c.desc}</p>
                 <p style="font-size:12px; margin: 0 0 6px; color:#ffd27a;">🔩 ${recipe.scrap} | 🧬 ${recipe.evo}</p>
@@ -3665,8 +3691,8 @@ function getSceneScale() {
 
 function drawTurretBase(ctx, x, y, type = 'turret', opts = {}) {
     const spriteType = String(type || 'turret').toLowerCase();
-    const elementSpriteSize = spriteType === 'cannon' ? 66 : (spriteType === 'mortar' ? 62 : 60);
-    if (drawElementSprite(ctx, x, y, spriteType, elementSpriteSize, { rotate: Number.isFinite(opts.rotate) ? opts.rotate : 0, flipX: !!opts.flipX })) return;
+    const elementSpriteSize = spriteType === 'cannon' ? 38 : (spriteType === 'mortar' ? 36 : 34);
+    if (drawElementSprite(ctx, x, y, spriteType, elementSpriteSize, { flipX: !!opts.flipX })) return;
 
     ctx.save();
     if (spriteType === 'mortar') {
@@ -3690,6 +3716,54 @@ function drawTurretBase(ctx, x, y, type = 'turret', opts = {}) {
         ctx.fillRect(x - 8, y - 16, 16, 7);
         ctx.fillStyle = '#e74c3c';
         ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+}
+
+function drawBunniieHoles(ctx) {
+    if (!player || !Array.isArray(player.bunniieHoles) || !player.bunniieHoles.length) return;
+    ctx.save();
+    for (const hole of player.bunniieHoles) {
+        if (!hole) continue;
+        ctx.translate(hole.x, hole.y);
+        ctx.globalAlpha = 0.9;
+        ctx.fillStyle = '#1b1b1b';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, hole.r * 1.05, hole.r * 0.72, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#2ecc71';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.globalAlpha = 0.16;
+        ctx.fillStyle = '#7bed9f';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, hole.r * 1.65, hole.r * 1.15, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.translate(-hole.x, -hole.y);
+    }
+    ctx.restore();
+}
+
+function drawBunniieHoles(ctx) {
+    if (!player || !Array.isArray(player.bunniieHoles) || !player.bunniieHoles.length) return;
+    ctx.save();
+    for (const hole of player.bunniieHoles) {
+        if (!hole) continue;
+        ctx.translate(hole.x, hole.y);
+        ctx.globalAlpha = 0.9;
+        ctx.fillStyle = '#1b1b1b';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, hole.r * 1.05, hole.r * 0.72, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#2ecc71';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.globalAlpha = 0.16;
+        ctx.fillStyle = '#7bed9f';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, hole.r * 1.65, hole.r * 1.15, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.translate(-hole.x, -hole.y);
     }
     ctx.restore();
 }
@@ -3830,6 +3904,7 @@ const CHARACTER_SPRITES = {
     shinobi: 'sprites/shinobi.png',
     dragon_shinobi: 'sprites/dragon_shinobi.png',
     glitch: 'sprites/glitch.png',
+    bunniie: 'sprites/bunniie.png',
 
     hank: 'sprites/hank.png',
     hunter: 'sprites/hunter.png',
@@ -4014,15 +4089,11 @@ function getElementSpriteImage(type) {
 function drawElementSprite(ctx, x, y, type, size = 18, opts = {}) {
     const img = getElementSpriteImage(type);
     if (!img || !img.complete || !img.naturalWidth) return false;
-    const baseSize = Math.max(10, Number(size) || 18);
-    const w = baseSize * (Number.isFinite(opts.scaleX) ? opts.scaleX : 1);
-    const h = baseSize * (Number.isFinite(opts.scaleY) ? opts.scaleY : 1);
+    const w = Math.max(8, Number(size) || 18) * (opts.scaleX || 1);
+    const h = Math.max(8, Number(size) || 18) * (opts.scaleY || 1);
     ctx.save();
-    ctx.translate(x, y);
-    if (Number.isFinite(opts.rotate)) ctx.rotate(opts.rotate);
-    if (opts.flipX) ctx.scale(-1, 1);
-    if (opts.flipY) ctx.scale(1, -1);
-    ctx.drawImage(img, -w / 2, -h / 2, w, h);
+    if (opts.rotate) ctx.rotate(opts.rotate);
+    ctx.drawImage(img, x - w / 2, y - h / 2, w, h);
     ctx.restore();
     return true;
 }
@@ -4071,7 +4142,6 @@ function spawnCharacterSupportAllies(charId, opts = {}) {
             type: def.type,
             ownerTag,
             glitchMorphTemp: temporary,
-            aimAngle: Number.isFinite(def.aimAngle) ? def.aimAngle : 0,
             ...def
         };
         allies.push(ally);
@@ -4123,8 +4193,7 @@ function spawnCharacterSupportAllies(charId, opts = {}) {
         markLast(a => a.type === 'tea_table');
     }
     if (id === 'goo') {
-        if (typeof spawnGooClone === 'function') spawnGooClone(baseX, baseY);
-        markLast(a => a.gooClone);
+        // O clone do Goo nasce só na primeira morte, não na transformação.
     }
 }
 
@@ -6850,7 +6919,7 @@ function showCharDetail(id) {
                 if(chipId && CHIPS_DATA[chipId]) {
                     let d = CHIPS_DATA[chipId];
                     slot.className = 'chip-slot equipped';
-                    slot.innerHTML = `<div class="chip-emoji" style="width:30px;height:30px;font-size:18px;line-height:26px;box-shadow:none;">${d.emoji}</div><b>${d.name}</b>`;
+                    slot.innerHTML = `<div class="chip-emoji" style="width:30px;height:30px;font-size:18px;line-height:26px;box-shadow:none;">${d.iconHtml || d.emoji}</div><b>${d.name}</b>`;
                 } else {
                     slot.className = 'chip-slot';
                     slot.innerHTML = `<div style="font-size:24px; color:#aaa;">+</div><div style="margin-top:5px; color:#aaa;">Slot Vazio</div>`;
@@ -7871,7 +7940,7 @@ function getCardEmojiForUpgrade(id) {
         allStats: '🌟', double: '🎯', turret: '🤖', magnet: '🧲', freeze_hit: '❄️',
         bounce: '🪃', mortar: '🧨', cannon_turret: '🛰️', orbital: '🪐', dodge: '💨', push_card: '💨', drone_card: '🛸'
     };
-    return map[id] || '✨';
+    return map[id] || '';
 }
 
 function getCharacterCardEmoji(char) {
@@ -8125,6 +8194,9 @@ function getSelectedSpecialConfig() {
     if (pd.selectedChar === 'glitch') {
         return { type: 'glitch', label: '🎲', title: player.glitchTransformAnimating ? 'Corrompendo...' : 'Bugado', ready: !player.glitchTransformAnimating };
     }
+    if (pd.selectedChar === 'bunniie') {
+        return { type: 'bunniie', label: '🕳️', title: player.bunniieTunnelCd > 0 ? `Toca recarregando ${Math.ceil(player.bunniieTunnelCd)}s` : 'Cavar', ready: player.bunniieTunnelCd <= 0 };
+    }
     return null;
 }
 
@@ -8187,7 +8259,9 @@ function updateSpecialButtonUI() {
         : cfg.type === 'ninji'
             ? Math.max(0, Math.ceil(player.ninjiDashCd || 0))
             : cfg.type === 'shinobi'
-                ? Math.max(0, Math.ceil(player.shinobiDragonCooldown || 0))
+            ? Math.max(0, Math.ceil(player.shinobiDragonCooldown || 0))
+            : cfg.type === 'bunniie'
+                ? Math.max(0, Math.ceil(player.bunniieTunnelCd || 0))
                 : 0;
 
     const activeState = cfg.type === 'ghoul' ? isGhoulActive : cfg.type === 'ninji' ? isNinjiActive : cfg.type === 'shinobi' ? isShinobiActive : isGlitchActive;
@@ -8551,6 +8625,7 @@ function startRunAfterShop() {
         adamScrap: 0, adamMechActive: false, adamMechWavesLeft: 0, adamMechHpBonus: 0, adamMechSizeBonus: 0, adamBaseHpBeforeMech: null, adamBaseRBeforeMech: null,
         spartaCycle: 0, spartaNoDamageTimer: 0, spartaShieldActive: false, spartaAttackTimer: 0, spartaAttackMode: 'straight', spartaAttackRange: 0, spartaAttackWidth: 0, spartaAttackHalfAngle: 0, vesperFocusTimer: 0, vesperFocusActive: false, vesperFocusTimer: 0, vesperFocusActive: false,
         gooRevived: false, gooCloneSpawned: false, gooFullBaseHp: initialBaseHp, gooFullBaseDmg: initialBaseDmg, gooFullR: (pd.selectedChar === 'hank' || pd.selectedChar === 'yeti') ? 20 : ((pd.selectedChar === 'shiv' || pd.selectedChar === 'zippi') ? 10 : (pd.selectedChar === 'kaisen' ? 13 : (pd.selectedChar === 'eel' ? 15 : 15))),
+        bunniieHoles: [], bunniieTunnelCd: 0, bunniieTunnelGrace: 0, bunniieTunnelSeq: 0,
         inTotem: false, landmineTimer: 0, flameTimer: 0, flameReload: 0, flameTickCd: 0, flexTimer: 0, flexAngle: 0, flexLowHp: false, seaePuddleCd: 0, zippiBubbleHp: pd.selectedChar === 'zippi' ? 80 : 0, zippiBubbleMaxHp: pd.selectedChar === 'zippi' ? 80 : 0, zippiBubbleBroken: false,
         glitchMorphActive: false, glitchMorphWavesLeft: 0, glitchTransformAnimating: false, glitchTransformReverting: false, glitchTransformElapsed: 0, glitchTransformTimer: 0, glitchTransformPreviewId: 'glitch', glitchTransformFinalId: 'glitch', glitchTransformCycleIds: [], glitchMorphLevel: 1, glitchCurrentFormId: 'glitch', glitchOriginChar: pd.selectedChar === 'glitch' ? 'glitch' : null,
         stats: { dmgMult: 1, maxHpMult: 1, speedMult: 1, fireRateMult: 1, rangeMult: 1, extraProj: 0, regen: 0, critChance: 0, critDmg: 2, pierce: 0, projSpdMult: 1, defMult: 1, vamp: 0, coinMult: 1, xpMult: 1, explodeHit: false, waveBuff: false, doubleShotChance: 0, dynamicDef: 0, magnetMult: 1, poisonChance: 0, freezeChance: 0, bounce: 0, enemySpawnMult: 1, bossDmgMult: 1, orbitals: 0, dodgeChance: charDef.baseDodge || 0, landmine: 0, pushChance: 0 }
@@ -8577,6 +8652,7 @@ function startRunAfterShop() {
     if(pd.selectedChar === 'mrsaw') player.stats.orbitals += 2;
     if(pd.selectedChar === 'eel') { player.stats.orbitals += 1; player.eelOrbital = true; player.eelOrbitalLong = true; }
     if(pd.selectedChar === 'zippi') { player.zippiBubbleHp = 80; player.zippiBubbleMaxHp = 80; player.zippiBubbleBroken = false; }
+    if(pd.selectedChar === 'bunniie') { ensureBunniieRuntime(); player.bunniieHoles = []; player.bunniieTunnelCd = 0; player.bunniieTunnelWarpCd = 0; player.bunniieTunnelGrace = 0; player.bunniieTunnelSeq = 0; }
     spawnCharacterSupportAllies(pd.selectedChar, { ownerTag: 'run-start', temporary: false, x: player.x, y: player.y, baseDmg: player.baseDmg, dmgMult: player.stats.dmgMult });
     if(pd.selectedChar === 'healy') player.stats.regen += 0.01;
 
@@ -8592,7 +8668,7 @@ function startRunAfterShop() {
     
     player.hp = player.baseHp * player.stats.maxHpMult;
     
-    wave = 1; gameTime = 0; waveTimer = 0; enemySpawnTimer = 0; enemiesKilled = 0; inRunXp = 0; inRunLevel = 1; xpToNext = 100; runCoins = 0; runGems = 0; runScrap = 0; runMedals = 0;
+    wave = 1; gameTime = 0; waveTimer = 0; enemySpawnTimer = 0; enemiesKilled = 0; inRunXp = 0; inRunLevel = 1; xpToNext = 100; runCoins = 0; runGems = 0; runScrap = 0; runMedals = 0; runChestCoins = 0; runChestGems = 0; runChestScrap = 0;
     syncCharacterProgressState();
     pd.run = { charId: pd.selectedChar, medals: 0 };
     const runChar = ensureCharacterProgress(pd.selectedChar);
@@ -8699,6 +8775,88 @@ function deactivateShinobiDragon() {
     updateSpecialButtonUI();
 }
 
+
+function ensureBunniieRuntime() {
+    if (!player) return;
+    if (!Array.isArray(player.bunniieHoles)) player.bunniieHoles = [];
+    if (!Number.isFinite(player.bunniieTunnelCd)) player.bunniieTunnelCd = 0;
+    if (!Number.isFinite(player.bunniieTunnelWarpCd)) player.bunniieTunnelWarpCd = 0;
+    if (!Number.isFinite(player.bunniieTunnelGrace)) player.bunniieTunnelGrace = 0;
+    if (!Number.isFinite(player.bunniieTunnelSeq)) player.bunniieTunnelSeq = 0;
+}
+
+function clearBunniieHoleLinks() {
+    if (!player || !Array.isArray(player.bunniieHoles)) return;
+    for (const hole of player.bunniieHoles) {
+        if (hole) hole.linkId = null;
+    }
+}
+
+function linkBunniieHoles() {
+    if (!player || !Array.isArray(player.bunniieHoles)) return;
+    clearBunniieHoleLinks();
+    if (player.bunniieHoles.length >= 2) {
+        const a = player.bunniieHoles[player.bunniieHoles.length - 2];
+        const b = player.bunniieHoles[player.bunniieHoles.length - 1];
+        if (a && b) {
+            a.linkId = b.id;
+            b.linkId = a.id;
+        }
+    }
+}
+
+function digBunniieTunnel(x, y) {
+    ensureBunniieRuntime();
+    if (!player) return null;
+    const priorCount = Array.isArray(player.bunniieHoles) ? player.bunniieHoles.length : 0;
+    const hole = {
+        id: ++player.bunniieTunnelSeq,
+        x,
+        y,
+        r: 18,
+        life: Infinity,
+        linkId: null
+    };
+    player.bunniieHoles.push(hole);
+    while (player.bunniieHoles.length > 2) player.bunniieHoles.shift();
+    linkBunniieHoles();
+    player.bunniieTunnelGrace = 0.30;
+    player.bunniieTunnelCd = priorCount <= 0 ? 5 : 20;
+    player.bunniieTunnelWarpCd = 0;
+    return hole;
+}
+
+function getBunniieHoleById(id) {
+    if (!player || !Array.isArray(player.bunniieHoles)) return null;
+    return player.bunniieHoles.find(h => h && h.id === id) || null;
+}
+
+function tryBunniieTunnelTeleport() {
+    if (!player || !Array.isArray(player.bunniieHoles) || player.bunniieHoles.length < 2) return;
+    ensureBunniieRuntime();
+    if (player.bunniieTunnelWarpCd > 0) return;
+    if (player.bunniieTunnelGrace > 0) return;
+
+    for (const hole of player.bunniieHoles) {
+        if (!hole || !hole.linkId) continue;
+        const linked = getBunniieHoleById(hole.linkId);
+        if (!linked) continue;
+        if (dist(player, hole) <= (player.r || 15) + hole.r * 0.72) {
+            player.x = linked.x + 24;
+            player.y = linked.y + 10;
+            player.bunniieTunnelWarpCd = 5;
+            player.bunniieTunnelGrace = 0.35;
+            addFloatingText(player.x, player.y - 22, 'PLOFT!', '#8bc34a', 14);
+            createParticles(player.x, player.y, '#8bc34a');
+            break;
+        }
+    }
+}
+
+function spawnBunniieCarrot(x, y) {
+    itemsMap.push({ x, y, type: 'carrot', r: 11, healPct: 0.085 });
+}
+
 function triggerSpecial() {
     if(!player) return;
     const cfg = getSelectedSpecialConfig();
@@ -8736,6 +8894,23 @@ function triggerSpecial() {
             btnSpecial.classList.add('cooling');
             btnSpecial.style.opacity = '0.55';
         }
+        return;
+    }
+    if (cfg.type === 'bunniie' && player.bunniieTunnelCd <= 0) {
+        const hole = digBunniieTunnel(player.x, player.y);
+        if (hole && btnSpecial) {
+            btnSpecial.classList.add('cooling');
+            btnSpecial.style.opacity = '0.55';
+            let badge = btnSpecial.querySelector('.btn-cooldown-badge');
+            if (!badge) {
+                badge = document.createElement('div');
+                badge.className = 'btn-cooldown-badge';
+                btnSpecial.appendChild(badge);
+            }
+            badge.style.display = 'block';
+            badge.textContent = String(Math.ceil(player.bunniieTunnelCd || 0));
+        }
+        if (hole) updateSpecialButtonUI();
         return;
     }
 }
@@ -8834,6 +9009,12 @@ function spawnGooClone() {
 
 function update(dt) {
     if(player.isDead) return;
+    if (player && pd.selectedChar === 'bunniie') {
+        ensureBunniieRuntime();
+        player.bunniieTunnelCd = Math.max(0, player.bunniieTunnelCd - dt);
+        player.bunniieTunnelWarpCd = Math.max(0, player.bunniieTunnelWarpCd - dt);
+        player.bunniieTunnelGrace = Math.max(0, player.bunniieTunnelGrace - dt);
+    }
     updateGraffitMarks(dt);
     if (isSpartaCharacter()) {
         player.spartaAttackTimer = Math.max(0, (Number.isFinite(player.spartaAttackTimer) ? player.spartaAttackTimer : 0) - dt);
@@ -8964,7 +9145,7 @@ function update(dt) {
     if(btnSpecial && btnSpecial.style.display !== 'none') {
         const cfg = getSelectedSpecialConfig();
         const activeState = cfg ? (cfg.type === 'ghoul' ? (player.invisTimer > 0) : (cfg.type === 'ninji' ? (player.dashTimer > 0) : (cfg.type === 'shinobi' ? (player.shinobiDragonActive || player.shinobiDragonFormActive) : !!player.glitchTransformAnimating))) : false;
-        const cdValue = cfg ? (cfg.type === 'ghoul' ? Math.max(0, player.specCd || 0) : (cfg.type === 'ninji' ? Math.max(0, player.ninjiDashCd || 0) : (cfg.type === 'shinobi' ? Math.max(0, player.shinobiDragonCooldown || 0) : 0))) : 0;
+        const cdValue = cfg ? (cfg.type === 'ghoul' ? Math.max(0, player.specCd || 0) : (cfg.type === 'ninji' ? Math.max(0, player.ninjiDashCd || 0) : (cfg.type === 'shinobi' ? Math.max(0, player.shinobiDragonCooldown || 0) : (cfg.type === 'bunniie' ? Math.max(0, player.bunniieTunnelCd || 0) : 0)))) : 0;
         const shouldShowCooldown = !!cfg && !activeState && cdValue > 0;
         btnSpecial.classList.toggle('cooling', activeState || shouldShowCooldown);
         btnSpecial.style.opacity = (activeState || shouldShowCooldown) ? '0.55' : '1';
@@ -9088,6 +9269,7 @@ function update(dt) {
         obstacles.forEach(o => { if(o.type !== 'ice' && o.type !== 'mud' && o.type !== 'car' && o.type !== 'bamboo_spike' && o.type !== 'speaker' && dist({x:nx,y:ny}, o) < o.r + player.r) { nx = player.x; ny = player.y; } });
     }
     player.x = Math.max(-1500, Math.min(1500, nx)); player.y = Math.max(-1500, Math.min(1500, ny));
+    if (pd.selectedChar === 'bunniie') tryBunniieTunnelTeleport();
     camera.x += (player.x - cw/2 - camera.x) * 0.1; camera.y += (player.y - ch/2 - camera.y) * 0.1;
 
     for(let i=obstacles.length-1; i>=0; i--) {
@@ -9111,15 +9293,17 @@ function update(dt) {
     for(let i=itemsMap.length-1; i>=0; i--) {
         let m = itemsMap[i]; let picked = false;
         if(dist(player, m) < player.r + m.r) picked = true;
-        for(let e of enemies) if(dist(e, m) < e.size + m.r) picked = true;
+        if (m.type !== 'chest') {
+            for(let e of enemies) if(dist(e, m) < e.size + m.r) picked = true;
+        }
         if(picked) {
             if(m.type === 'chest') {
                 if(Math.random() < 0.4) {
-                    pd.gems += 2; runGems += 2; addFloatingText(player.x, player.y, `+2 Gemas`, '#2ecc71');
+                    runChestGems += 2; addFloatingText(player.x, player.y, `+2 Gemas`, '#2ecc71');
                 } else if(Math.random() < 0.6) {
-                    let s = 15 + Math.floor(Math.random()*20); pd.sucatas += s; runScrap += s; addFloatingText(player.x, player.y, `+${s} Sucatas`, '#a5b1c2');
+                    let s = 15 + Math.floor(Math.random()*20); runChestScrap += s; addFloatingText(player.x, player.y, `+${s} Sucatas`, '#a5b1c2');
                 } else {
-                    let cDrop = 20 + Math.floor(Math.random()*31); pd.coins += cDrop; addFloatingText(player.x, player.y, `+${cDrop} Moedas`, '#f1c40f'); runCoins += cDrop;
+                    let cDrop = 20 + Math.floor(Math.random()*31); runChestCoins += cDrop; addFloatingText(player.x, player.y, `+${cDrop} Moedas`, '#f1c40f');
                 }
             } else if(m.type === 'scrap') {
                 pd.sucatas += m.amount;
@@ -9128,6 +9312,13 @@ function update(dt) {
                 if(pd.selectedChar === 'adam' && !player.adamMechActive) {
                     player.adamScrap = Math.min(10, (Number(player.adamScrap) || 0) + m.amount);
                     if(player.adamScrap >= 10) activateAdamMech();
+                }
+            } else if(m.type === 'carrot') {
+                if (pd.selectedChar === 'bunniie') {
+                    const healPct = Number.isFinite(m.healPct) ? m.healPct : 0.08;
+                    const heal = Math.max(1, player.baseHp * player.stats.maxHpMult * healPct);
+                    player.hp = Math.min(player.baseHp * player.stats.maxHpMult, player.hp + heal);
+                    addFloatingText(player.x, player.y, `+${Math.floor(heal)} HP`, '#2ecc71');
                 }
             } else {
                 if(Math.random() < 0.5) { player.hp = Math.min(player.hp + 20, player.baseHp * player.stats.maxHpMult); addFloatingText(player.x, player.y, "+HP", '#2ecc71'); }
@@ -9608,6 +9799,18 @@ function fireWeapon(target) {
                     }
                 );
             }
+            return;
+        }
+        if(w === 'carrot') {
+            const spawnOffset = player.r + 8;
+            const sx = player.x + Math.cos(angle) * spawnOffset;
+            const sy = player.y + Math.sin(angle) * spawnOffset;
+            createProj(sx, sy, Math.cos(angle) * pSpd * 1.08, Math.sin(angle) * pSpd * 1.08, finalDmg, 54, true, 'bunniie_carrot', {
+                size: 10,
+                sourceChar: 'bunniie',
+                pierce: 2,
+                carrotShot: true
+            });
             return;
         }
         if(w === 'aura') { createExplosion(player.x, player.y, 80 * player.stats.rangeMult, finalDmg, '#00cec9'); return; }
@@ -10982,6 +11185,9 @@ function updateEnemies(dt) {
                 if(CHARACTERS[pd.selectedChar] && CHARACTERS[pd.selectedChar].necroGiantZombie && Math.random() < CHARACTERS[pd.selectedChar].necroGiantZombie) {
                     allies.push({x: e.x, y: e.y, dmg: player.baseDmg * 1.5, speed: 1.2, life: 12, cd: 0, isTurret: false, isZombie: true, type: 'necro_zombie', radius: 25});
                 }
+                if (e.lastHitSourceChar === 'bunniie') {
+                    spawnBunniieCarrot(e.x, e.y);
+                }
                 xpGems.push({ x: e.x, y: e.y, val: e.type==='megaboss' ? 1000 : (e.isBoss? 500 : e.type==='gigante'||e.type==='tanque'||e.type==='colosso'? 50 : 10) });
                 if (pd.selectedChar === 'adam' && !player.adamMechActive && Math.random() < 0.40) {
                     itemsMap.push({ x: e.x, y: e.y, type: 'scrap', r: 10, amount: 1 });
@@ -11031,24 +11237,19 @@ function updateAllies(dt) {
                 if(a.cd <= 0) {
                     let ang = Math.atan2(target.y - a.y, target.x - a.x);
                     if (a.type === 'penguin') {
-                        a.aimAngle = ang;
                         createProj(a.x, a.y, Math.cos(ang)*4, Math.sin(ang)*4, a.dmg, 60, true, 'pipisnowball', { size: 13, sourceChar: 'pipi', sourceType: 'penguin' });
                         a.cd = 0.95;
                     } else if (isKaisenDrone) {
                         const roll = Math.random();
                         if (roll < 0.60) {
-                            a.aimAngle = ang;
                             createProj(a.x, a.y, Math.cos(ang)*5.2, Math.sin(ang)*5.2, a.dmg, 60, true, 'normal', { size: 4 });
                         } else if (roll < 0.80) {
-                            a.aimAngle = ang;
                             createProj(a.x, a.y, Math.cos(ang)*4.8, Math.sin(ang)*4.8, a.dmg * 0.95, 60, true, 'normal', { size: 4, bounces: 2 });
                         } else {
-                            a.aimAngle = ang;
                             createProj(a.x, a.y, Math.cos(ang)*7, Math.sin(ang)*7, a.dmg * 0.9, 50, true, 'laser', { size: 3 });
                         }
                         a.cd = 0.75;
                     } else {
-                        a.aimAngle = ang;
                         createProj(a.x, a.y, Math.cos(ang)*4, Math.sin(ang)*4, a.dmg, 60, true, 'normal', { size: 4, sourceChar: 'drone', sourceType: 'drone' });
                         a.cd = 0.95;
                     }
@@ -11085,12 +11286,11 @@ function updateAllies(dt) {
                 ctx.beginPath(); ctx.arc(drawX + 14 * scale, drawY - 6 * scale, 4 * scale, 0, Math.PI * 2); ctx.fill();
                 ctx.restore();
             } else {
-                drawTurretBase(ctx, a.x, a.y, a.type, { rotate: Number.isFinite(a.aimAngle) ? a.aimAngle : 0 });
+                drawTurretBase(ctx, a.x, a.y, a.type, { flipX: !!a.facingLeft });
             }
             if (a.type === 'speaker') {
                 if (target && minD < 420) {
                     if (a.cd <= 0) {
-                        a.aimAngle = Math.atan2(target.y - a.y, target.x - a.x);
                         triggerSoundWave(a.x, a.y, 150 * (player.stats?.rangeMult || 1), 24, '#feca57');
                         a.cd = 1.1;
                     } else {
@@ -11100,11 +11300,12 @@ function updateAllies(dt) {
                     a.cd -= dt;
                 }
             } else if(target && minD < 350) { 
+                a.facingLeft = target.x < a.x;
                 if(a.cd <= 0) { 
                     let ang = Math.atan2(target.y - a.y, target.x - a.x); 
-                    if(a.type === 'mortar') { a.aimAngle = ang; createProj(a.x, a.y, Math.cos(ang)*4, Math.sin(ang)*4, a.dmg, 60, true, 'bomb', { tx: target.x, ty: target.y }); a.cd = 2.0; }
-                    else if (a.type === 'cannon') { a.aimAngle = ang; createProj(a.x, a.y, Math.cos(ang)*5, Math.sin(ang)*5, a.dmg, 60, true, 'cannon_ball', {size: 8}); a.cd = 1.5; }
-                    else { a.aimAngle = ang; createProj(a.x, a.y, Math.cos(ang)*6, Math.sin(ang)*6, a.dmg, 60, true, 'normal', { sourceChar: 'meekah' }); a.cd = 0.8; }
+                    if(a.type === 'mortar') { createProj(a.x, a.y, Math.cos(ang)*4, Math.sin(ang)*4, a.dmg, 60, true, 'bomb', { tx: target.x, ty: target.y }); a.cd = 2.0; }
+                    else if (a.type === 'cannon') { createProj(a.x, a.y, Math.cos(ang)*5, Math.sin(ang)*5, a.dmg, 60, true, 'cannon_ball', {size: 8}); a.cd = 1.5; }
+                    else { createProj(a.x, a.y, Math.cos(ang)*6, Math.sin(ang)*6, a.dmg, 60, true, 'normal', { sourceChar: 'meekah' }); a.cd = 0.8; }
                 } else { a.cd -= dt; } 
             }
         } else if (a.isNote) {
@@ -11570,8 +11771,8 @@ function updateProjectiles(dt) {
                         let soakMult = 1 + (e.soak || 0) * 0.05;
                         realDmg *= soakMult;
 
-                        e.hp -= realDmg; addFloatingText(e.x, e.y, Math.floor(realDmg), '#fff'); if(p.isPlayer) trackMissionDamage(realDmg);
-                        if (p.type === 'shinobi' || p.type === 'shinobi_fireball' || (p.type === 'sword' && pd.selectedChar === 'shinobi')) applyShinobiMark(e, realDmg);
+                        e.hp -= realDmg; e.lastHitSourceChar = p.extra?.sourceChar || (p.isPlayer ? pd.selectedChar : e.lastHitSourceChar || null); addFloatingText(e.x, e.y, Math.floor(realDmg), '#fff'); if(p.isPlayer) trackMissionDamage(realDmg);
+                        if (p.type === 'shinobi' || p.type === 'shinobi_fireball' || p.type === 'scythe' || (p.type === 'sword' && pd.selectedChar === 'shinobi')) applyShinobiMark(e, realDmg);
                         if (p.type === 'glitch_bugshot') {
                             const stunDuration = Math.max(0.25, Number(p.extra?.glitchStunDuration) || 0.85);
                             const stunChance = Math.min(1, Math.max(0, Number(p.extra?.glitchStunChance) || 0.35));
@@ -11760,7 +11961,7 @@ function updateProjectiles(dt) {
                     if(p.type === 'lightning' && Math.random() < 0.15) applyEelShock(e, false, p.dmg, p.x, p.y, false);
                     if(p.type === 'screw' && pd.selectedChar === 'kaisen' && Math.random() < 0.10) applyEelShock(e, true, Math.max(1, p.dmg * 0.35), p.x, p.y, false);
                     if(p.type === 'sword' && pd.selectedChar === 'kayo' && Math.random() < 0.10) { e.burnTimer = 3; e.burnDmg = p.dmg*0.5; }
-                    if(p.type === 'scythe' && Math.random() < 0.25) e.weakenTimer = 3;
+                    if(p.type === 'scythe' && p.extra?.sourceChar !== 'shinobi' && Math.random() < 0.20) e.weakenTimer = 3;
                     if(p.type === 'saw_throw' && e.hp <= 0) { 
                         let saws = allies.filter(a => a.type === 'stationary_saw');
                         if (saws.length >= 3) { let oldest = saws[0]; oldest.life = 0; }
@@ -12114,8 +12315,10 @@ function triggerLevelUp() {
     let deck = deckFiltered.sort(() => 0.5 - Math.random()).slice(0, drawCount); const cont = document.getElementById('cards-container'); cont.innerHTML = '';
     deck.forEach(c => {
         let div = document.createElement('div');
-        div.className = 'upgrade-card';
-        div.innerHTML = `<h3>${escapeHtmlText(decodeHtmlEntities(c.name))}</h3><p>${escapeHtmlText(decodeHtmlEntities(c.desc))}</p>`;
+        const emoji = getCardEmojiForUpgrade(c.id);
+        div.className = `upgrade-card${emoji ? '' : ' upgrade-card--textonly'}`;
+        const iconHtml = emoji ? `<div class="upgrade-card-icon">${emoji}</div>` : '';
+        div.innerHTML = `${iconHtml}<h3>${escapeHtmlText(decodeHtmlEntities(c.name))}</h3><p>${escapeHtmlText(decodeHtmlEntities(c.desc))}</p>`;
         div.onclick = (e) => { e.stopPropagation(); if(!isPaused) return; c.apply(player.stats); player.pickedCards.push(c.name); document.getElementById('overlay-levelup').classList.add('hidden'); isPaused = false; applyControlLayout(); lastTime = performance.now(); };
         cont.appendChild(div);
     });
@@ -12309,21 +12512,13 @@ function updateGraffitMarks(dt) {
 
 
 function getPlayerSpriteId() {
-    const shinobiDragonOn = !!(player && (player.shinobiDragonActive || player.shinobiDragonFormActive));
-    if (pd?.selectedChar === 'shinobi' && shinobiDragonOn) return 'dragon_shinobi';
-    if (pd?.selectedChar === 'glitch' && player?.glitchMorphActive && player?.glitchCurrentFormId) {
-        if (player.glitchCurrentFormId === 'shinobi' && shinobiDragonOn) return 'dragon_shinobi';
-        return player.glitchCurrentFormId;
-    }
-    if (player?.glitchTransformAnimating && player?.glitchTransformPreviewId) {
-        const previewId = player.glitchTransformPreviewId;
-        if (previewId === 'shinobi' && shinobiDragonOn) return 'dragon_shinobi';
-        return previewId;
-    }
+    if (player?.glitchTransformAnimating && player?.glitchTransformPreviewId) return player.glitchTransformPreviewId;
     if (pd?.selectedChar === 'adam' && player?.adamMechActive) return 'adam_mech';
     if (pd?.selectedChar === 'gladiator') {
         return (pd?.chars?.gladiator?.mode === 'shooter') ? 'gladiator_spear' : 'gladiator_sword';
     }
+    if (pd?.selectedChar === 'shinobi' && (player?.shinobiDragonActive || player?.shinobiDragonFormActive)) return 'dragon_shinobi';
+    if (pd?.selectedChar === 'glitch' && player?.glitchMorphActive && player?.glitchCurrentFormId) return player.glitchCurrentFormId;
     if (pd?.selectedChar === 'miss_macaron') return 'miss_macaron';
     return pd?.selectedChar || null;
 }
@@ -12430,6 +12625,9 @@ function draw() {
             else if(o.type === 'speaker') { ctx.fillStyle = '#2f3542'; ctx.fillRect(o.x-o.r, o.y-o.r, o.r*2, o.r*2); ctx.fillStyle = '#1e90ff'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r*0.6, 0, Math.PI*2); ctx.fill(); }
         }
     });
+    if (pd.selectedChar === 'bunniie') {
+        drawBunniieHoles(ctx);
+    }
     itemsMap.forEach(m => {
         const itemKey = getMapElementSpriteKey(m.type, m);
         const itemSpriteDrawn = itemKey
@@ -12477,6 +12675,29 @@ function draw() {
             ctx.fillStyle = '#f39c12';
             ctx.beginPath();
             ctx.arc(-gearR*0.18, -gearR*0.2, 1.4, 0, Math.PI*2);
+            ctx.fill();
+            ctx.restore();
+        } else if (m.type === 'carrot') {
+            const r = Math.max(8, m.r || 11);
+            ctx.save();
+            ctx.translate(m.x, m.y);
+            ctx.rotate(Math.sin(gameTime * 3 + m.x * 0.01) * 0.12);
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = '#b06d2a';
+            ctx.fillStyle = '#f39c12';
+            ctx.beginPath();
+            ctx.moveTo(-r * 0.6, -r * 0.28);
+            ctx.lineTo(r * 1.2, 0);
+            ctx.lineTo(-r * 0.6, r * 0.28);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = '#2ecc71';
+            ctx.beginPath();
+            ctx.moveTo(-r * 0.95, 0);
+            ctx.lineTo(-r * 1.35, -r * 0.2);
+            ctx.lineTo(-r * 1.1, 0);
+            ctx.lineTo(-r * 1.35, r * 0.2);
+            ctx.closePath();
             ctx.fill();
             ctx.restore();
         } else {
@@ -12568,16 +12789,11 @@ function draw() {
                 flipX: Boolean(a.facingLeft)
             });
         } else if(a.type === 'drone') {
-            const droneType = (a.variant === 'kaisen' || a.variant === 'axel_drone') ? 'axel_drone' : 'drone';
-            const droneSize = droneType === 'axel_drone' ? 72 : 62;
-            if (!drawElementSprite(ctx, a.x, a.y, droneType, droneSize, { rotate: Number.isFinite(a.aimAngle) ? a.aimAngle : 0, flipX: Boolean(a.facingLeft) })) {
-                if (droneType === 'axel_drone') {
-                    ctx.fillStyle = '#bdc3c7'; ctx.beginPath(); ctx.arc(a.x, a.y, 14, 0, Math.PI*2); ctx.fill();
-                    ctx.fillStyle = '#e74c3c'; ctx.beginPath(); ctx.arc(a.x, a.y+2, 8, 0, Math.PI*2); ctx.fill();
-                } else {
-                    ctx.fillStyle = '#bdc3c7'; ctx.beginPath(); ctx.arc(a.x, a.y, 12, 0, Math.PI*2); ctx.fill();
-                    ctx.fillStyle = '#e74c3c'; ctx.beginPath(); ctx.arc(a.x, a.y+2, 7, 0, Math.PI*2); ctx.fill();
-                }
+            if (a.variant === 'kaisen') {
+                drawTurretBase(ctx, a.x, a.y, 'turret');
+            } else {
+                ctx.fillStyle = '#bdc3c7'; ctx.beginPath(); ctx.arc(a.x, a.y, 10, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#e74c3c'; ctx.beginPath(); ctx.arc(a.x, a.y+2, 6, 0, Math.PI*2); ctx.fill();
             }
         } else if(a.isTurret) {
             if(a.type === 'tea_table') {
@@ -12665,10 +12881,8 @@ function draw() {
         } else if (a.type === 'heal_aura') { 
             ctx.fillStyle = 'rgba(46, 204, 113, 0.3)'; ctx.beginPath(); ctx.arc(a.x, a.y, 40, 0, Math.PI*2); ctx.fill(); 
         } else if (a.type === 'landmine') {
-            if (!drawElementSprite(ctx, a.x, a.y, 'minesweeper', 64, { rotate: Number.isFinite(a.aimAngle) ? a.aimAngle : 0 })) {
-                ctx.fillStyle = '#2c3e50'; ctx.beginPath(); ctx.arc(a.x, a.y, 15, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = '#e74c3c'; ctx.beginPath(); ctx.arc(a.x, a.y, 5, 0, Math.PI*2); ctx.fill();
-            }
+            ctx.fillStyle = '#2c3e50'; ctx.beginPath(); ctx.arc(a.x, a.y, 15, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#e74c3c'; ctx.beginPath(); ctx.arc(a.x, a.y, 5, 0, Math.PI*2); ctx.fill();
         } else if (a.type === 'ivy_vine') {
             const rr = a.radius || 160;
             ctx.save();
@@ -12975,6 +13189,30 @@ function draw() {
         else if(p.type === 'shinobi_fireball') { ctx.fillStyle = '#ff6b00'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#ffd27a'; ctx.beginPath(); ctx.arc(p.x - 2, p.y - 2, Math.max(2, p.size * 0.28), 0, Math.PI*2); ctx.fill(); }
         else if(p.type === 'shinobi') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx)); ctx.fillStyle = '#8e44ad'; ctx.beginPath(); ctx.moveTo(p.size, 0); ctx.lineTo(-p.size/2, -p.size/3); ctx.lineTo(-p.size/2, p.size/3); ctx.fill(); ctx.restore(); }
         else if(p.type === 'chain_lightning') { ctx.fillStyle = '#341f97'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#0984e3'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size-2, 0, Math.PI*2); ctx.fill(); }
+        else if(p.type === 'bunniie_carrot') {
+            const r = p.size || 10;
+            ctx.save();
+            ctx.translate(px, py);
+            ctx.rotate(Math.atan2(p.vy, p.vx));
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = '#b06d2a';
+            ctx.fillStyle = '#f39c12';
+            ctx.beginPath();
+            ctx.moveTo(-r * 0.6, -r * 0.28);
+            ctx.lineTo(r * 1.2, 0);
+            ctx.lineTo(-r * 0.6, r * 0.28);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = '#2ecc71';
+            ctx.beginPath();
+            ctx.moveTo(-r * 0.95, 0);
+            ctx.lineTo(-r * 1.35, -r * 0.2);
+            ctx.lineTo(-r * 1.1, 0);
+            ctx.lineTo(-r * 1.35, r * 0.2);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
         else if(p.type === 'macaron' || p.type === 'macaron_big') {
             const r = p.size || (p.type === 'macaron_big' ? 18 : 11);
             const tone = p.extra?.macaronTone || (p.type === 'macaron_big' ? '#f39c12' : '#f3a06f');
@@ -13456,6 +13694,10 @@ function gameOver(isQuit) {
         passXpGained = Math.floor(wave * (pd.settings.ultraHardcore ? 25 : (window.isHardcoreMode ? 20 : 10)) * player.stats.xpMult);
         addPassXp(passXpGained);
 
+        if (runChestCoins > 0) { pd.coins += runChestCoins; runCoins += runChestCoins; }
+        if (runChestGems > 0) { pd.gems += runChestGems; runGems += runChestGems; }
+        if (runChestScrap > 0) { pd.sucatas += runChestScrap; runScrap += runChestScrap; }
+
         let today = new Date().toDateString();
         if(pd.dailyWins.date !== today) { pd.dailyWins.date = today; pd.dailyWins.count = 0; }
         const maxWins = isVIPActive() ? 6 : 4;
@@ -13489,7 +13731,7 @@ function gameOver(isQuit) {
     document.getElementById('overlay-gameover').classList.remove('hidden'); document.getElementById('game-hud').classList.add('hidden'); document.getElementById('exp-bar-container').classList.add('hidden');
 }
 
-let runCoins = 0; let runGems = 0; let runScrap = 0; let runMedals = 0;
+let runCoins = 0; let runGems = 0; let runScrap = 0; let runMedals = 0; let runChestCoins = 0; let runChestGems = 0; let runChestScrap = 0;
 function returnToMenu() { restoreGlitchSelectionIfNeeded(); document.getElementById('overlay-gameover').classList.add('hidden'); showScreen('screen-main'); playMusic('menu'); ctx.clearRect(0, 0, cw, ch); joyZone.style.display='none'; const dpad = document.getElementById('dpad-zone'); if(dpad) dpad.style.display='none'; }
 try {
     load();
