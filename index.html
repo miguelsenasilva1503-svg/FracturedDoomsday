@@ -2920,7 +2920,6 @@ const CHIPS_DATA = {
     turret: { id: 'turret', name: 'Torreta Início', emoji: '🤖', desc: 'Inicia c/ Torreta', effect: (s, p, allies) => { allies.push({x: p.x, y: p.y, dmg: p.baseDmg * p.stats.dmgMult, speed: 0, life: Infinity, cd: 0, isTurret: true}); }, iconHtml: '<img src="elements/turret.png" alt="" aria-hidden="true" style="width:34px;height:34px;object-fit:contain;display:block;">' },
     mortar: { id: 'mortar', name: 'Morteiro Aliado', emoji: '🧨', desc: 'Torreta que atira bombas', effect: (s, p, allies) => { allies.push({x: p.x, y: p.y, dmg: p.baseDmg * 1.0, speed: 0, life: Infinity, cd: 0, isTurret: true, type: 'mortar'}); }, iconHtml: '<img src="elements/mortar.png" alt="" aria-hidden="true" style="width:34px;height:34px;object-fit:contain;display:block;">' },
     cannon_turret: { id: 'cannon_turret', name: 'Canhão Aliado', emoji: '🛰️', desc: 'Torreta que empurra', effect: (s, p, allies) => { allies.push({x: p.x, y: p.y, dmg: p.baseDmg * p.stats.dmgMult, speed: 0, life: Infinity, cd: 0, isTurret: true, type: 'cannon'}); }, iconHtml: '<img src="elements/canon.png" alt="" aria-hidden="true" style="width:34px;height:34px;object-fit:contain;display:block;">' },
-    drone_card: { id: 'drone_card', name: 'Drone', emoji: '🛸', desc: 'Drone aliado', effect: (s, p, allies) => { allies.push({x: p.x, y: p.y, dmg: p.baseDmg * p.stats.dmgMult * 0.5, speed: 2.8, life: Infinity, cd: 0, isTurret: false, type: 'drone', followX: 20, followY: -20}); }, iconHtml: '<img src="elements/drone.png" alt="" aria-hidden="true" style="width:34px;height:34px;object-fit:contain;display:block;">' },
     proj: { id: 'proj', name: '+1 Projétil', emoji: '🎇', desc: 'Dispara um tiro extra', effect: (s) => s.extraProj += 1 },
     magnet: { id: 'magnet', name: 'Magnetismo', emoji: '🧲', desc: '+50% Raio de Coleta', effect: (s) => s.magnetMult += 0.5 },
     white_flag: { id: 'white_flag', name: 'Bandeira Branca', emoji: '🏳️', desc: '-10% de Inimigos', effect: (s) => s.enemySpawnMult = 0.9 },
@@ -2930,7 +2929,7 @@ const CHIPS_DATA = {
     freeze_touch: { id: 'freeze_touch', name: 'Toque Congelante', emoji: '❄️', desc: '10% chance de congelar', effect: (s) => s.freezeChance += 0.1 },
     dodge: { id: 'dodge', name: 'Esquiva', emoji: '💨', desc: '+10% Chance de Esquiva', effect: (s) => s.dodgeChance = (s.dodgeChance || 0) + 0.1 },
     push_chip: { id: 'push_chip', name: 'Empurrão', emoji: '💨', desc: '10% de empurrar', effect: (s) => s.pushChance = (s.pushChance || 0) + 0.1 },
-    drone_chip: { id: 'drone_chip', name: 'Drone', emoji: '🛸', desc: 'Drone aliado', effect: (s, p, allies) => { allies.push({x: p.x, y: p.y, dmg: p.baseDmg * p.stats.dmgMult * 0.5, speed: 2.8, life: Infinity, cd: 0, isTurret: false, type: 'drone', followX: 20, followY: -20}); }, iconHtml: '<img src="elements/drone.png" alt="" aria-hidden="true" style="width:34px;height:34px;object-fit:contain;display:block;">' }
+    drone_chip: { id: 'drone_chip', name: 'Drone do Axel', emoji: '🛸', desc: 'Drone aliado', effect: (s, p, allies) => { allies.push({x: p.x, y: p.y, dmg: p.baseDmg * p.stats.dmgMult * 0.5, speed: 2.8, life: Infinity, cd: 0, isTurret: false, type: 'drone', variant: 'axel_drone', followX: 20, followY: -20}); }, iconHtml: '<img src="elements/axel_drone.png" alt="" aria-hidden="true" style="width:34px;height:34px;object-fit:contain;display:block;">' }
 }
 ;
 
@@ -8909,8 +8908,8 @@ function generateMapObstacles() {
     if(type === 8) { 
         for(let i=0; i<18; i++) {
             const horizontal = Math.random() < 0.55;
-            const w = horizontal ? (160 + Math.random() * 110) : (34 + Math.random() * 12);
-            const h = horizontal ? (30 + Math.random() * 10) : (160 + Math.random() * 110);
+            const w = horizontal ? (52 + Math.random() * 14) : (14 + Math.random() * 4);
+            const h = horizontal ? (14 + Math.random() * 4) : (52 + Math.random() * 14);
             const rot = horizontal ? (Math.random() < 0.5 ? 0 : Math.PI / 2) : (Math.random() < 0.5 ? 0 : Math.PI / 2);
             obstacles.push({
                 x: (Math.random()-0.5)*2800,
@@ -13121,7 +13120,7 @@ function draw() {
             });
         } else if(a.type === 'drone') {
             const droneSpriteType = a.variant === 'axel_drone' ? 'axel_drone' : 'drone';
-            if (!drawElementSprite(ctx, a.x, a.y, droneSpriteType, 72, { flipX: Boolean(a.facingLeft) })) {
+            if (!drawElementSprite(ctx, a.x, a.y, droneSpriteType, 46, { flipX: Boolean(a.facingLeft) })) {
                 ctx.fillStyle = '#bdc3c7'; ctx.beginPath(); ctx.arc(a.x, a.y, 14, 0, Math.PI*2); ctx.fill();
                 ctx.fillStyle = '#e74c3c'; ctx.beginPath(); ctx.arc(a.x, a.y+2, 9, 0, Math.PI*2); ctx.fill();
             }
