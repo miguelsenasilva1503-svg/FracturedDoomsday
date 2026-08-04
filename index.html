@@ -84,6 +84,13 @@
         font-size: 34px;
         line-height: 1;
         flex: 0 0 auto;
+        overflow: hidden;
+    }
+    .upgrade-card-icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
     }
     .upgrade-card--textonly {
         justify-content: center;
@@ -349,8 +356,67 @@
     
     #btn-special { position: absolute; bottom: 50px; right: 50px; width: 80px; height: 80px; background: rgba(52, 152, 219, 0.5); border: 3px solid rgba(255,255,255,0.5); border-radius: 50%; font-size: 30px; color: white; display: none; justify-content: center; align-items: center; z-index: 5; touch-action: none; cursor: pointer; overflow: visible; }
     #btn-special .btn-special-label { pointer-events: none; }
+    #btn-special .sterling-btn-title {
+        position: absolute;
+        bottom: -22px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        color: #fff;
+        text-shadow: 1px 1px 0 #000;
+        pointer-events: none;
+        white-space: nowrap;
+    }
+    #btn-special .sterling-charge-wrap {
+        position: absolute;
+        left: 50%;
+        top: -30px;
+        transform: translateX(-50%);
+        width: 108px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        pointer-events: none;
+    }
+    #btn-special .sterling-charge-percent {
+        font-size: 11px;
+        font-weight: 900;
+        color: #fff;
+        text-shadow: 1px 1px 0 #000;
+        line-height: 1;
+    }
+    #btn-special .sterling-charge-track {
+        width: 108px;
+        height: 10px;
+        background: rgba(0, 0, 0, 0.72);
+        border: 2px solid rgba(255,255,255,0.35);
+        border-radius: 999px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+    }
+    #btn-special .sterling-charge-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #f1c40f, #ffffff);
+        border-radius: inherit;
+        transition: width 0.12s linear;
+    }
     #btn-special .btn-cooldown-badge { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); min-width: 30px; height: 24px; padding: 0 7px; border-radius: 999px; background: rgba(0,0,0,0.82); color: #fff; font-size: 13px; font-weight: 900; line-height: 24px; border: 2px solid rgba(255,255,255,0.35); box-shadow: 0 4px 10px rgba(0,0,0,0.35); pointer-events: none; display: none; }
     #btn-special.cooling { background: rgba(8,8,12,0.98) !important; border-color: rgba(255,255,255,0.16) !important; filter: brightness(0.34) saturate(0.45); }
+    #btn-special.sterling-special {
+        width: 96px;
+        height: 96px;
+        padding-top: 6px;
+        flex-direction: column;
+        gap: 1px;
+    }
+    #btn-special.sterling-special .btn-special-label {
+        font-size: 28px;
+        line-height: 1;
+    }
     #btn-special-hint {
         position: absolute;
         right: 142px;
@@ -1104,6 +1170,16 @@
         box-shadow: inset 0 0 5px rgba(0,0,0,0.8);
         position: relative;
         z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+    .chip-emoji img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
     }
     .chip-qty { position: absolute; top: 4px; right: 4px; background: #c0392b; padding: 2px 6px; border-radius: 10px; font-size: 12px; font-weight: bold; border: 1px solid #fff; z-index: 2; }
     
@@ -2598,6 +2674,16 @@ Uma criatura colossal nascida das profundezas vulcânicas, formada por rochas in
 Um astro do J-pop conhecido por seu enorme carisma e apresentações impecáveis. Idolatrado por uma legião de garotas, Yuuto faz de cada show um espetáculo. Apesar da imagem sempre educada e elegante, existe um assunto que consegue tirar sua paciência: certos cantores de hip hop - coff coff... Ripper... coff coff... - embora ele jure que não é nada pessoal.
 
 “J-pop sempre vence... sem ofensas.”` },
+    sterling: { id: 'sterling', class: 'Tiro preciso', name: 'Sterling', rarity: 'legendary', cost: 349, hp: 108, speed: 3.35, dmg: 8, fireRate: 9999, range: 330, color: '#f1c40f', emoji: '⭐', weapon: 'sterling_star', sortLast: true, desc: `“Sterling passou tanto tempo observando as estrelas que acabou aprendendo a usar o brilho delas como arma.”
+
+Um astronauta experiente que canaliza energia estelar para enfrentar qualquer ameaça. Fascinado pelo cosmos, ele enxerga beleza até nos lugares mais vazios do universo e transforma o poder das estrelas em ataques devastadores. Para Sterling, o espaço nunca foi um vazio... e sim uma fonte infinita de poder.
+
+“Nos vemos entre as estrelas.”` },
+    lyron: { id: 'lyron', class: 'Tiro preciso', name: 'Lyron', rarity: 'legendary', cost: 349, hp: 104, speed: 3.45, dmg: 10, fireRate: 34, range: 305, color: '#2ecc71', emoji: '⚽', weapon: 'lyron_ball', sortLast: true, desc: `“Lyron nunca foi de fazer jogadas espalhafatosas. Para ele, uma partida é vencida com inteligência, precisão e o chute certo na hora certa.”
+
+Um jogador inglês de futebol que encara qualquer desafio como se estivesse disputando a final de um campeonato. Calmo, disciplinado e extremamente competitivo, ele mantém a cabeça fria mesmo sob pressão, sempre analisando o melhor momento para agir. Enquanto muitos confiam apenas no talento, Lyron acredita que treino, estratégia e determinação são o verdadeiro caminho para a vitória.
+
+“Futebol não é só habilidade... é saber quando fazer a jogada perfeita.”` },
 };
 const CHARACTER_SUMMARIES = {
     ripper: `Ripper: dispara MICROFONES que mudam de efeito conforme a cor.
@@ -2634,6 +2720,12 @@ ESPECIAL: sua última explosão cria rachaduras de magma, inimigos que pisam nel
     yuuto: `Yuuto: dispara um coração que tem 15% de chance de PERFURAR e 15% de chance de HIPNOTIZAR inimigos.
 
 ESPECIAL: HIPNOTIZAR faz o inimigo atacar outros inimigos por 10s (não funciona em colossos, bosses e mega bosses).`,
+    sterling: `Sterling: não possui auto attack. Ele usa um botão de ataque com carga.
+
+ESPECIAL: quanto mais tempo você segura o botão, maior o projétil, maior o dano e maior a explosão da estrela. Quando a carga chega no limite, o tiro totalmente carregado perfura inimigos também.`,
+    lyron: `Lyron: dispara uma bola de futebol rápida com 15% de chance de RICOCHETEAR.
+
+ESPECIAL: tem 15% de chance de disparar uma bola gigante que tem alto alcance e é PERFURANTE.`,
     graffit: `Graffit: dispara uma lata de spray que, ao atingir um inimigo, dispersa spray de tinta em 360° e ENVENENANDO os inimigos atingidos pela fumaça.
 
 ESPECIAL: ao derrotar um inimigo, deixa uma marca de grafite no chão. Cada cor de marca dá um efeito diferente quando Graffit fica em cima dela.
@@ -2825,7 +2917,10 @@ const CHIPS_DATA = {
     bounce: { id: 'bounce', name: '+1 Ricochete', emoji: '🪃', desc: 'Tiros quicam 1x', effect: (s) => s.bounce = (s.bounce || 0) + 1 },
     expl: { id: 'expl', name: 'Explosão Leve', emoji: '💥', desc: 'Tiros explodem', effect: (s) => s.explodeHit = true },
     xp: { id: 'xp', name: '+XP', emoji: '📚', desc: '+25% XP Ganho', effect: (s) => s.xpMult += 0.25 },
-    turret: { id: 'turret', name: 'Torreta Início', emoji: '🤖', desc: 'Inicia c/ Torreta', effect: (s, p, allies) => { allies.push({x: p.x, y: p.y, dmg: p.baseDmg * p.stats.dmgMult, speed: 0, life: Infinity, cd: 0, isTurret: true}); }, iconHtml: '<img src="elements/turret.png" alt="" aria-hidden="true" style="width:28px;height:28px;object-fit:contain;">' },
+    turret: { id: 'turret', name: 'Torreta Início', emoji: '🤖', desc: 'Inicia c/ Torreta', effect: (s, p, allies) => { allies.push({x: p.x, y: p.y, dmg: p.baseDmg * p.stats.dmgMult, speed: 0, life: Infinity, cd: 0, isTurret: true}); }, iconHtml: '<img src="elements/turret.png" alt="" aria-hidden="true" style="width:34px;height:34px;object-fit:contain;display:block;">' },
+    mortar: { id: 'mortar', name: 'Morteiro Aliado', emoji: '🧨', desc: 'Torreta que atira bombas', effect: (s, p, allies) => { allies.push({x: p.x, y: p.y, dmg: p.baseDmg * 1.0, speed: 0, life: Infinity, cd: 0, isTurret: true, type: 'mortar'}); }, iconHtml: '<img src="elements/mortar.png" alt="" aria-hidden="true" style="width:34px;height:34px;object-fit:contain;display:block;">' },
+    cannon_turret: { id: 'cannon_turret', name: 'Canhão Aliado', emoji: '🛰️', desc: 'Torreta que empurra', effect: (s, p, allies) => { allies.push({x: p.x, y: p.y, dmg: p.baseDmg * p.stats.dmgMult, speed: 0, life: Infinity, cd: 0, isTurret: true, type: 'cannon'}); }, iconHtml: '<img src="elements/canon.png" alt="" aria-hidden="true" style="width:34px;height:34px;object-fit:contain;display:block;">' },
+    drone_card: { id: 'drone_card', name: 'Drone', emoji: '🛸', desc: 'Drone aliado', effect: (s, p, allies) => { allies.push({x: p.x, y: p.y, dmg: p.baseDmg * p.stats.dmgMult * 0.5, speed: 2.8, life: Infinity, cd: 0, isTurret: false, type: 'drone', followX: 20, followY: -20}); }, iconHtml: '<img src="elements/drone.png" alt="" aria-hidden="true" style="width:34px;height:34px;object-fit:contain;display:block;">' },
     proj: { id: 'proj', name: '+1 Projétil', emoji: '🎇', desc: 'Dispara um tiro extra', effect: (s) => s.extraProj += 1 },
     magnet: { id: 'magnet', name: 'Magnetismo', emoji: '🧲', desc: '+50% Raio de Coleta', effect: (s) => s.magnetMult += 0.5 },
     white_flag: { id: 'white_flag', name: 'Bandeira Branca', emoji: '🏳️', desc: '-10% de Inimigos', effect: (s) => s.enemySpawnMult = 0.9 },
@@ -2835,7 +2930,7 @@ const CHIPS_DATA = {
     freeze_touch: { id: 'freeze_touch', name: 'Toque Congelante', emoji: '❄️', desc: '10% chance de congelar', effect: (s) => s.freezeChance += 0.1 },
     dodge: { id: 'dodge', name: 'Esquiva', emoji: '💨', desc: '+10% Chance de Esquiva', effect: (s) => s.dodgeChance = (s.dodgeChance || 0) + 0.1 },
     push_chip: { id: 'push_chip', name: 'Empurrão', emoji: '💨', desc: '10% de empurrar', effect: (s) => s.pushChance = (s.pushChance || 0) + 0.1 },
-    drone_chip: { id: 'drone_chip', name: 'Drone', emoji: '🛸', desc: 'Drone aliado', effect: (s, p, allies) => { allies.push({x: p.x, y: p.y, dmg: p.baseDmg * p.stats.dmgMult * 0.5, speed: 2.8, life: Infinity, cd: 0, isTurret: false, type: 'drone', followX: 20, followY: -20}); }, iconHtml: '<img src="elements/drone.png" alt="" aria-hidden="true" style="width:28px;height:28px;object-fit:contain;">' }
+    drone_chip: { id: 'drone_chip', name: 'Drone', emoji: '🛸', desc: 'Drone aliado', effect: (s, p, allies) => { allies.push({x: p.x, y: p.y, dmg: p.baseDmg * p.stats.dmgMult * 0.5, speed: 2.8, life: Infinity, cd: 0, isTurret: false, type: 'drone', followX: 20, followY: -20}); }, iconHtml: '<img src="elements/drone.png" alt="" aria-hidden="true" style="width:34px;height:34px;object-fit:contain;display:block;">' }
 }
 ;
 
@@ -3724,31 +3819,33 @@ function getSceneScale() {
 
 function drawTurretBase(ctx, x, y, type = 'turret', opts = {}) {
     const spriteType = String(type || 'turret').toLowerCase();
-    const elementSpriteSize = spriteType === 'cannon' ? 64 : (spriteType === 'mortar' ? 60 : 56);
+    const elementSpriteSize = spriteType === 'cannon' ? 96 : (spriteType === 'mortar' ? 92 : 86);
     if (drawElementSprite(ctx, x, y, spriteType, elementSpriteSize, { flipX: !!opts.flipX })) return;
 
     ctx.save();
+    ctx.translate(x, y);
+    if (opts.flipX) ctx.scale(-1, 1);
     if (spriteType === 'mortar') {
         ctx.fillStyle = '#8e44ad';
-        ctx.beginPath(); ctx.arc(x, y, 18, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(0, 0, 18, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#2c3e50';
-        ctx.beginPath(); ctx.arc(x, y + 1, 9, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(0, 1, 9, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#bdc3c7';
-        ctx.fillRect(x + 3, y - 18, 8, 24);
+        ctx.fillRect(3, -18, 8, 24);
     } else if (spriteType === 'cannon') {
         ctx.fillStyle = '#34495e';
-        ctx.beginPath(); ctx.arc(x, y, 19, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(0, 0, 19, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#f39c12';
-        ctx.beginPath(); ctx.arc(x, y + 1, 9, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(0, 1, 9, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#f1c40f';
-        ctx.fillRect(x + 4, y - 17, 14, 7);
+        ctx.fillRect(4, -17, 14, 7);
     } else {
         ctx.fillStyle = '#2c3e50';
-        ctx.beginPath(); ctx.arc(x, y, 17, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(0, 0, 17, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#7f8c8d';
-        ctx.fillRect(x - 10, y - 20, 20, 9);
+        ctx.fillRect(-10, -20, 20, 9);
         ctx.fillStyle = '#e74c3c';
-        ctx.beginPath(); ctx.arc(x, y, 7, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(0, 0, 7, 0, Math.PI * 2); ctx.fill();
     }
     ctx.restore();
 }
@@ -3837,7 +3934,10 @@ const CHARACTER_TITLES = {
     pit: 'Caça ao tesouro',
     ruben: 'Desastre na cozinha',
     major_briggs: 'Colecionador nato',
+    bunniie: 'Cenourinha',
     yuuto: 'Cantor de J-Pop',
+    sterling: 'Entre as estrelas',
+    lyron: 'Papo de undaiá',
     graffit: 'Vândalo',
     necro: 'Necromancia',
     goo: 'Gosmento',
@@ -3926,6 +4026,8 @@ const CHARACTER_SPRITES = {
     major_briggs: 'sprites/major_briggs.png',
     ignite: 'sprites/ignite.png',
     yuuto: 'sprites/yuuto.png',
+    sterling: 'sprites/sterling.png',
+    lyron: 'sprites/lyron.png',
     miss_macaron: 'sprites/miss_macaron.png',
     vampyrus: 'sprites/vampyrus.png',
     cybertron: 'sprites/cyber_tron.png',
@@ -4138,8 +4240,10 @@ function drawElementSprite(ctx, x, y, type, size = 18, opts = {}) {
     const w = Math.max(8, Number(size) || 18) * (opts.scaleX || 1);
     const h = Math.max(8, Number(size) || 18) * (opts.scaleY || 1);
     ctx.save();
+    ctx.translate(x, y);
     if (opts.rotate) ctx.rotate(opts.rotate);
-    ctx.drawImage(img, x - w / 2, y - h / 2, w, h);
+    if (opts.flipX) ctx.scale(-1, 1);
+    ctx.drawImage(img, -w / 2, -h / 2, w, h);
     ctx.restore();
     return true;
 }
@@ -4197,7 +4301,7 @@ function spawnCharacterSupportAllies(charId, opts = {}) {
     if (id === 'kaisen' || id === 'axel') {
         push({
             type: 'drone',
-            variant: id === 'axel' ? 'axel_drone' : 'kaisen',
+            variant: id === 'axel' ? 'axel_drone' : 'drone',
             dmg: (baseDmg || 12) * dmgMult,
             cd: 0.1,
             speed: 2.9
@@ -4292,6 +4396,9 @@ function resetMorphRuntimeState(charId) {
     player.shinobiDragonCooldown = 0;
     player.shinobiDragonFireCd = 0;
     player.shinobiScytheCycle = 0;
+    player.sterlingCharging = false;
+    player.sterlingCharge = 0;
+    player.sterlingAttackCd = 0;
     player.majorBriggsKills = 0;
     player.majorBriggsStage = 1;
     player.adamScrap = 0;
@@ -6965,7 +7072,7 @@ function showCharDetail(id) {
                 if(chipId && CHIPS_DATA[chipId]) {
                     let d = CHIPS_DATA[chipId];
                     slot.className = 'chip-slot equipped';
-                    slot.innerHTML = `<div class="chip-emoji" style="width:30px;height:30px;font-size:18px;line-height:26px;box-shadow:none;">${d.iconHtml || d.emoji}</div><b>${d.name}</b>`;
+                    slot.innerHTML = `<div class="chip-emoji" style="width:34px;height:34px;font-size:18px;line-height:34px;box-shadow:none;">${d.iconHtml || d.emoji}</div><b>${d.name}</b>`;
                 } else {
                     slot.className = 'chip-slot';
                     slot.innerHTML = `<div style="font-size:24px; color:#aaa;">+</div><div style="margin-top:5px; color:#aaa;">Slot Vazio</div>`;
@@ -7027,7 +7134,7 @@ function showChipsInventory() {
         if(pd.chipsInventory[id] > 0 && CHIPS_DATA[id]) {
             hasChips = true;
             let d = CHIPS_DATA[id];
-            grid.innerHTML += `<div class="chip-card"><div class="chip-qty">x${pd.chipsInventory[id]}</div><div class="chip-emoji">${d.emoji}</div><h4>${escapeHtmlText(decodeHtmlEntities(d.name))}</h4><p style="font-size:12px; margin:5px 0 0 0;">${escapeHtmlText(decodeHtmlEntities(d.desc)).replace(/\n/g, '<br>')}</p></div>`;
+            grid.innerHTML += `<div class="chip-card"><div class="chip-qty">x${pd.chipsInventory[id]}</div><div class="chip-emoji">${d.iconHtml || d.emoji}</div><h4>${escapeHtmlText(decodeHtmlEntities(d.name))}</h4><p style="font-size:12px; margin:5px 0 0 0;">${escapeHtmlText(decodeHtmlEntities(d.desc)).replace(/\n/g, '<br>')}</p></div>`;
         }
     }
     if(!hasChips) grid.innerHTML = `<p style="color:#aaa;">Você ainda não possui chips. Tente achar em caixas ou compre na loja!</p>`;
@@ -7057,7 +7164,7 @@ function showEquipChipOverlay(charId, slotIndex) {
         if(pd.chipsInventory[id] > 0 && CHIPS_DATA[id]) {
             hasAvailable = true;
             let d = CHIPS_DATA[id];
-            grid.innerHTML += `<div class="chip-card" onclick="equipChip('${charId}', '${id}', ${slotIndex})"><div class="chip-qty">x${pd.chipsInventory[id]}</div><div class="chip-emoji">${d.emoji}</div><h4>${escapeHtmlText(decodeHtmlEntities(d.name))}</h4><p style="font-size:12px; margin:5px 0 0 0;">${escapeHtmlText(decodeHtmlEntities(d.desc)).replace(/\n/g, '<br>')}</p><div style="margin-top:10px; color:var(--btn-green); font-weight:bold;">Tocar p/ Equipar</div></div>`;
+            grid.innerHTML += `<div class="chip-card" onclick="equipChip('${charId}', '${id}', ${slotIndex})"><div class="chip-qty">x${pd.chipsInventory[id]}</div><div class="chip-emoji">${d.iconHtml || d.emoji}</div><h4>${escapeHtmlText(decodeHtmlEntities(d.name))}</h4><p style="font-size:12px; margin:5px 0 0 0;">${escapeHtmlText(decodeHtmlEntities(d.desc)).replace(/\n/g, '<br>')}</p><div style="margin-top:10px; color:var(--btn-green); font-weight:bold;">Tocar p/ Equipar</div></div>`;
         }
     }
     if(!hasAvailable) grid.innerHTML = `<p style="color:#aaa;">Nenhum chip disponível no inventário.</p>`;
@@ -7253,7 +7360,7 @@ function renderShop() {
             const c = CHIPS_DATA[id];
             const div = document.createElement('div');
             div.className = `chip-card`;
-            div.innerHTML = `<div class="chip-emoji">${c.emoji}</div><h4>${escapeHtmlText(decodeHtmlEntities(c.name))}</h4><p style="font-size:12px;">${escapeHtmlText(decodeHtmlEntities(c.desc))}</p><button style="padding:5px;font-size:12px;background:var(--gem); width:100%; margin-top:5px;" onclick="buyChip('${id}', 30)">💎 30</button>`;
+            div.innerHTML = `<div class="chip-emoji">${c.iconHtml || c.emoji}</div><h4>${escapeHtmlText(decodeHtmlEntities(c.name))}</h4><p style="font-size:12px;">${escapeHtmlText(decodeHtmlEntities(c.desc))}</p><button style="padding:5px;font-size:12px;background:var(--gem); width:100%; margin-top:5px;" onclick="buyChip('${id}', 30)">💎 30</button>`;
             chipsList.appendChild(div);
         });
     }
@@ -7989,6 +8096,20 @@ function getCardEmojiForUpgrade(id) {
     return map[id] || '';
 }
 
+function getUpgradeCardIconMarkup(id) {
+    const spriteMap = {
+        turret: 'elements/turret.png',
+        mortar: 'elements/mortar.png',
+        cannon_turret: 'elements/canon.png',
+        drone_card: 'elements/drone.png',
+        landmine: 'elements/landmine.png'
+    };
+    const sprite = spriteMap[id];
+    if (sprite) return `<img src="${sprite}" alt="" aria-hidden="true">`;
+    const emoji = getCardEmojiForUpgrade(id);
+    return emoji ? `<span>${emoji}</span>` : '';
+}
+
 function getCharacterCardEmoji(char) {
     if(!char) return '✨';
     const byClass = {
@@ -8008,7 +8129,7 @@ function getCharacterCardEmoji(char) {
         aura: '⛏️', slime: '🟢', chain_lightning: '⚡', wrench: '🔧', note: '🎵', energy_wave: '👻',
         dark: '🌑', boomerang: '🪃', fan: '🌀', remote: '🎮', fire: '🔥', axe: '🪓', pit_musket: '🔫', ruben_baguette: '🥖', ruben_baguette_burnt: '🥖',
         katana: '⚔️', flowers: '🌸', shield: '🛡️', drill: '🪛', cannon: '🛰️', shotgun: '💥',
-        garlic: '🧄', star: '⭐', orb: '🪐', radio: '📻', claws: '🦈', ghost: '👻', wind: '🌪️', flame_cone: '🔥', water_bubble: '💧', puddle: '💧', zippi_laser: '👽', eel_lash: '⚡', flex_hammer: '🔨', ivy_seed: '🌿', kaisen_tool: '🪨'
+        garlic: '🧄', star: '⭐', sterling_star: '⭐', orb: '🪐', radio: '📻', claws: '🦈', ghost: '👻', wind: '🌪️', flame_cone: '🔥', water_bubble: '💧', puddle: '💧', zippi_laser: '👽', eel_lash: '⚡', flex_hammer: '🔨', ivy_seed: '🌿', kaisen_tool: '🪨'
     };
     return byWeapon[char.weapon] || '✨';
 }
@@ -8240,6 +8361,9 @@ function getSelectedSpecialConfig() {
     if (pd.selectedChar === 'glitch') {
         return { type: 'glitch', label: '🎲', title: player.glitchTransformAnimating ? 'Corrompendo...' : 'Bugado', ready: !player.glitchTransformAnimating };
     }
+    if (pd.selectedChar === 'sterling') {
+        return { type: 'sterling', label: '⭐', title: 'Entre as estrelas', ready: (player.sterlingAttackCd || 0) <= 0 && !player.sterlingCharging };
+    }
     if (pd.selectedChar === 'bunniie') {
         return { type: 'bunniie', label: '🕳️', title: player.bunniieTunnelCd > 0 ? `Toca recarregando ${Math.ceil(player.bunniieTunnelCd)}s` : 'Cavar', ready: player.bunniieTunnelCd <= 0 };
     }
@@ -8248,16 +8372,38 @@ function getSelectedSpecialConfig() {
 
 function bindSpecialButton(btn) {
     if (!btn) return;
-    const fire = (e) => {
+    const handlePress = (e) => {
         if (e) {
             e.preventDefault();
             e.stopPropagation();
         }
-        if (isPlaying && !isPaused && player && getSelectedSpecialConfig()) triggerSpecial();
+        const cfg = getSelectedSpecialConfig();
+        if (!isPlaying || !player || !cfg) return;
+        triggerSpecial();
     };
-    btn.addEventListener('pointerdown', fire);
-    btn.addEventListener('touchstart', fire, { passive: false });
-    btn.addEventListener('click', fire);
+    const handleRelease = (e) => {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        const cfg = getSelectedSpecialConfig();
+        if (!isPlaying || !player || !cfg || cfg.type !== 'sterling') return;
+        releaseSterlingCharge();
+    };
+    btn.addEventListener('pointerdown', handlePress);
+    btn.addEventListener('pointerup', handleRelease);
+    btn.addEventListener('pointercancel', handleRelease);
+    btn.addEventListener('touchstart', handlePress, { passive: false });
+    btn.addEventListener('touchend', handleRelease, { passive: false });
+    btn.addEventListener('click', (e) => {
+        const cfg = getSelectedSpecialConfig();
+        if (cfg && cfg.type === 'sterling') {
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+        }
+        handlePress(e);
+    });
 }
 bindSpecialButton(btnSpecial);
 
@@ -8290,7 +8436,7 @@ function updateSpecialButtonUI() {
         btnSpecial.title = '';
         btnSpecial.disabled = true;
         btnSpecial.style.pointerEvents = 'none';
-        btnSpecial.classList.remove('cooling');
+        btnSpecial.classList.remove('cooling', 'charging');
         btnSpecial.style.opacity = '1';
         if (hint) hint.style.display = 'none';
         return;
@@ -8300,26 +8446,35 @@ function updateSpecialButtonUI() {
     const isNinjiActive = pd.selectedChar === 'ninji' && player.weapon === 'dagger' && (player.dashTimer || 0) > 0;
     const isShinobiActive = cfg.type === 'shinobi' && (player.shinobiDragonActive || player.shinobiDragonFormActive);
     const isGlitchActive = cfg.type === 'glitch' && !!player.glitchTransformAnimating;
+    const isSterling = cfg.type === 'sterling';
+    const isSterlingCharging = isSterling && !!player.sterlingCharging;
 
     const cooldownValue = cfg.type === 'ghoul'
-        ? Math.max(0, Math.ceil(player.specCd || 0))
+        ? Math.max(0, Number(player.specCd || 0))
         : cfg.type === 'ninji'
-            ? Math.max(0, Math.ceil(player.ninjiDashCd || 0))
+            ? Math.max(0, Number(player.ninjiDashCd || 0))
             : cfg.type === 'shinobi'
-            ? Math.max(0, Math.ceil(player.shinobiDragonCooldown || 0))
+            ? Math.max(0, Number(player.shinobiDragonCooldown || 0))
             : cfg.type === 'bunniie'
-                ? Math.max(0, Math.ceil(player.bunniieTunnelCd || 0))
-                : 0;
+                ? Math.max(0, Number(player.bunniieTunnelCd || 0))
+                : isSterling
+                    ? Math.max(0, Number(player.sterlingAttackCd || 0))
+                    : 0;
 
     const activeState = cfg.type === 'ghoul' ? isGhoulActive : cfg.type === 'ninji' ? isNinjiActive : cfg.type === 'shinobi' ? isShinobiActive : isGlitchActive;
-    const shouldShowCooldown = !activeState && cooldownValue > 0;
+    const shouldShowCooldown = !activeState && !isSterlingCharging && cooldownValue > 0;
     const label = cfg.label || '';
+    const chargePct = isSterling ? Math.max(0, Math.min(1, Number(player.sterlingCharge || 0))) : 0;
 
     btnSpecial.hidden = false;
     btnSpecial.style.display = 'flex';
     btnSpecial.disabled = false;
     btnSpecial.style.pointerEvents = 'auto';
-    btnSpecial.innerHTML = `<span class="btn-special-label">${label}</span><div class="btn-cooldown-badge" style="display:${shouldShowCooldown || activeState ? 'block' : 'none'}">${activeState ? '' : String(cooldownValue)}</div>`;
+    btnSpecial.classList.toggle('charging', isSterlingCharging);
+    btnSpecial.classList.toggle('sterling-special', isSterling);
+    btnSpecial.innerHTML = isSterling
+        ? `<span class="btn-special-label">⭐</span><span class="sterling-btn-title">CARGA</span><div class="btn-cooldown-badge" style="display:${shouldShowCooldown || activeState ? 'block' : 'none'}">${activeState ? '' : cooldownValue.toFixed(1)}</div>`
+        : `<span class="btn-special-label">${label}</span><div class="btn-cooldown-badge" style="display:${shouldShowCooldown || activeState ? 'block' : 'none'}">${activeState ? '' : String(Math.ceil(cooldownValue))}</div>`;
     btnSpecial.title = cfg.title;
     btnSpecial.classList.toggle('cooling', activeState || shouldShowCooldown);
     btnSpecial.style.opacity = (activeState || shouldShowCooldown) ? '0.55' : '1';
@@ -8350,7 +8505,8 @@ window.addEventListener('keydown', e => {
         e.preventDefault();
         if (action === 'special') {
             setActionState('special', true);
-            if (isPlaying && !isPaused && player && getSelectedSpecialConfig()) triggerSpecial();
+            const cfg = getSelectedSpecialConfig();
+            if (isPlaying && !isPaused && player && cfg) triggerSpecial();
         } else if (action === 'pause') {
             setActionState('pause', true);
             if (isPlaying) togglePause();
@@ -8362,7 +8518,13 @@ window.addEventListener('keydown', e => {
 window.addEventListener('keyup', e => {
     if (isEditableTarget(e.target)) return;
     const action = getActionForKey(e.key);
-    if (action) setActionState(action, false);
+    if (action) {
+        setActionState(action, false);
+        if (action === 'special') {
+            const cfg = getSelectedSpecialConfig();
+            if (isPlaying && !isPaused && player && cfg && cfg.type === 'sterling') releaseSterlingCharge();
+        }
+    }
 });
 
 function bindDpadButton(btn) {
@@ -8669,7 +8831,7 @@ function startRunAfterShop() {
         x: 0, y: 0, r: (pd.selectedChar === 'hank' || pd.selectedChar === 'yeti') ? 20 : ((pd.selectedChar === 'shiv' || pd.selectedChar === 'zippi') ? 10 : (pd.selectedChar === 'kaisen' ? 13 : (pd.selectedChar === 'booboo' ? 13 : (pd.selectedChar === 'eel' ? 15 : 15)))), baseHp: initialBaseHp, hp: initialBaseHp, baseSpeed: charDef.speed, baseDmg: initialBaseDmg,
         baseFireRate: charDef.fireRate, baseRange: charDef.range, color: charDef.color, weapon: charDef.weapon, cd: 0, shieldTimer: 0,
         zombieTimer: 0, revived: false, elekCycle: false, dashTimer: 0, meleeCd: 0, boldShots: 0, boldReload: 0, specCd: 0, invisTimer: 0, ghoulPendingCd: 0, ninjiPendingCd: 0,
-        lastMoveAngle: 0, lastAimAngle: 0, tenentCycle: 0, orbitalAngle: 0, boobooReturn: true, pickedCards: [], revivesUsed: 0, qbBar: 0, qbShield: false, isDead: false, flexCombo: 0, flexReload: 0, ninjiDashCd: 0, shinobiDragonActive: false, shinobiDragonWavesLeft: 0, shinobiDragonCooldown: 0, shinobiDragonFireCd: 0, shinobiScytheCycle: 0, majorBriggsKills: 0, majorBriggsStage: 1,
+        lastMoveAngle: 0, lastAimAngle: 0, tenentCycle: 0, orbitalAngle: 0, boobooReturn: true, pickedCards: [], revivesUsed: 0, qbBar: 0, qbShield: false, isDead: false, flexCombo: 0, flexReload: 0, ninjiDashCd: 0, shinobiDragonActive: false, shinobiDragonWavesLeft: 0, shinobiDragonCooldown: 0, shinobiDragonFireCd: 0, shinobiScytheCycle: 0, sterlingCharging: false, sterlingCharge: 0, sterlingAttackCd: 0, majorBriggsKills: 0, majorBriggsStage: 1,
         adamScrap: 0, adamMechActive: false, adamMechWavesLeft: 0, adamMechHpBonus: 0, adamMechSizeBonus: 0, adamBaseHpBeforeMech: null, adamBaseRBeforeMech: null,
         spartaCycle: 0, spartaNoDamageTimer: 0, spartaShieldActive: false, spartaAttackTimer: 0, spartaAttackMode: 'straight', spartaAttackRange: 0, spartaAttackWidth: 0, spartaAttackHalfAngle: 0, vesperFocusTimer: 0, vesperFocusActive: false, vesperFocusTimer: 0, vesperFocusActive: false,
         gooRevived: false, gooCloneSpawned: false, gooFullBaseHp: initialBaseHp, gooFullBaseDmg: initialBaseDmg, gooFullR: (pd.selectedChar === 'hank' || pd.selectedChar === 'yeti') ? 20 : ((pd.selectedChar === 'shiv' || pd.selectedChar === 'zippi') ? 10 : (pd.selectedChar === 'kaisen' ? 13 : (pd.selectedChar === 'eel' ? 15 : 15))),
@@ -8905,10 +9067,73 @@ function spawnBunniieCarrot(x, y) {
     itemsMap.push({ x, y, type: 'carrot', r: 11, healPct: 0.085 });
 }
 
+function getSterlingAimAngle() {
+    if (!player) return 0;
+    let target = null;
+    let minDist = player.baseRange * player.stats.rangeMult;
+    for (const e of enemies) {
+        const d = dist(player, e);
+        if (d < minDist) {
+            minDist = d;
+            target = e;
+        }
+    }
+    if (target) return Math.atan2(target.y - player.y, target.x - player.x);
+    if (Number.isFinite(player.lastAimAngle)) return player.lastAimAngle;
+    if (Number.isFinite(player.lastMoveAngle)) return player.lastMoveAngle;
+    return playerFacingLeft ? Math.PI : 0;
+}
+
+function fireSterlingStar(chargeRatio = 0) {
+    if (!player) return;
+    const pct = Math.max(0, Math.min(1, Number(chargeRatio) || 0));
+    const ang = getSterlingAimAngle();
+    const spd = 8.2;
+    const sx = player.x + Math.cos(ang) * (player.r + 18);
+    const sy = player.y + Math.sin(ang) * (player.r + 18);
+    const dmgMult = 1 + pct * 2.2;
+    const size = 11 + pct * 15;
+    const burstRadius = 52 + pct * 78;
+    createProj(sx, sy, Math.cos(ang) * spd, Math.sin(ang) * spd, Math.max(1, player.baseDmg * player.stats.dmgMult * dmgMult), 70, true, 'sterling_star', {
+        size,
+        sourceChar: 'sterling',
+        sterlingCharge: pct,
+        sterlingBurstRadius: burstRadius,
+        sterlingFullCharge: pct >= 0.999,
+        pierce: pct >= 0.999 ? 99 : 0
+    });
+    player.sterlingAttackCd = 0.3;
+    updateSpecialButtonUI();
+}
+
+function startSterlingCharge() {
+    if (!player || player.sterlingAttackCd > 0) return;
+    player.sterlingCharging = true;
+    player.sterlingCharge = 0;
+    updateSpecialButtonUI();
+}
+
+function releaseSterlingCharge() {
+    if (!player || !player.sterlingCharging) return;
+    const charge = Math.max(0, Math.min(1, Number(player.sterlingCharge) || 0));
+    player.sterlingCharging = false;
+    player.sterlingCharge = 0;
+    if (player.sterlingAttackCd > 0) {
+        updateSpecialButtonUI();
+        return;
+    }
+    fireSterlingStar(charge);
+    updateSpecialButtonUI();
+}
+
 function triggerSpecial() {
     if(!player) return;
     const cfg = getSelectedSpecialConfig();
     if (!cfg) return;
+    if (cfg.type === 'sterling') {
+        startSterlingCharge();
+        return;
+    }
     if (cfg.type === 'ghoul' && player.specCd <= 0 && player.invisTimer <= 0) {
         player.invisTimer = 8;
         player.ghoulPendingCd = 25;
@@ -9076,11 +9301,23 @@ function update(dt) {
             player.vesperFocusTimer = 0;
             player.vesperFocusActive = false;
         }
+        if (pd.selectedChar === 'sterling') {
+            player.sterlingAttackCd = Math.max(0, Number(player.sterlingAttackCd || 0) - dt);
+            if (player.sterlingCharging) {
+                const chargeRate = 1 / 1.15;
+                player.sterlingCharge = Math.min(1, Number(player.sterlingCharge || 0) + dt * chargeRate);
+            }
+        } else {
+            player.sterlingCharging = false;
+            player.sterlingCharge = 0;
+            player.sterlingAttackCd = Math.max(0, Number(player.sterlingAttackCd || 0) - dt);
+        }
     }
 
-    
+
     let isBossAlive = enemies.some(e => e.isBoss);
-    if (!isBossAlive) {
+
+if (!isBossAlive) {
         waveTimer += dt;
     }
     gameTime += dt;
@@ -9378,7 +9615,9 @@ function update(dt) {
     if(player.poison && player.poison.timer > 0) { player.poison.timer -= dt; dealPlayerDamage(player.poison.dmg * dt); if(Math.random()<0.1) createParticles(player.x, player.y, '#9b59b6'); if(player.hp<=0) { triggerRevivePrompt(); return; } }
     if(player.flexTimer > 0) { player.flexTimer = Math.max(0, player.flexTimer - dt); }
 
-    if(player.weapon === 'flame_cone') {
+    if(player.weapon === 'sterling_star') {
+        player.cd = 0;
+    } else if(player.weapon === 'flame_cone') {
         if(player.flameReload > 0) {
             player.flameReload -= dt;
         } else {
@@ -10227,6 +10466,35 @@ function fireWeapon(target) {
             return;
         }
 
+        if(w === 'lyron_ball') {
+            const spawnOffset = player.r + 9;
+            const baseLife = Math.ceil((player.baseRange * player.stats.rangeMult * 1.45) / Math.max(1, pSpd)) + 18;
+            const bigRoll = Math.random() < 0.15;
+            const ricRoll = !bigRoll && Math.random() < 0.15;
+            const projType = bigRoll ? 'lyron_ball_big' : 'lyron_ball';
+            const projSize = bigRoll ? 18 : 9;
+            const projDmg = bigRoll ? finalDmg * 2.4 : finalDmg;
+            const sx = player.x + Math.cos(angle) * spawnOffset;
+            const sy = player.y + Math.sin(angle) * spawnOffset;
+            createProj(
+                sx, sy,
+                Math.cos(angle) * pSpd * (bigRoll ? 1.18 : 1.48),
+                Math.sin(angle) * pSpd * (bigRoll ? 1.18 : 1.48),
+                projDmg,
+                baseLife,
+                true,
+                projType,
+                {
+                    size: projSize,
+                    sourceChar: 'lyron',
+                    pierce: bigRoll ? 99 : 0,
+                    bounces: ricRoll ? 1 : 0,
+                    lyronBig: bigRoll
+                }
+            );
+            return;
+        }
+
         if(w === 'stones') { 
             let count = 2 + player.stats.extraProj;
             for(let i=0; i<count; i++) {
@@ -10427,6 +10695,9 @@ function createProj(x, y, vx, vy, dmg, life, isPlayer, type, extra={}) {
     else if (type === 'macaron') size = extra.size || 11;
     else if (type === 'macaron_big') size = extra.size || 18;
     else if (type === 'tea_cup') size = extra.size || 10;
+    else if (type === 'sterling_star') size = extra.size || 12;
+    else if (type === 'lyron_ball') size = extra.size || 9;
+    else if (type === 'lyron_ball_big') size = extra.size || 18;
     else if (type === 'axel_stone') size = extra.size || 12;
     else if (type === 'shinobi_fireball') size = extra.size || 14;
     else if (type === 'axel_shard') size = extra.size || 5;
@@ -10443,6 +10714,9 @@ function createProj(x, y, vx, vy, dmg, life, isPlayer, type, extra={}) {
     if(type==='yuuto_heart' || type==='heart') {
         const heartPierceChance = Number.isFinite(extra.pierceChance) ? extra.pierceChance : 0;
         if (heartPierceChance > 0 && Math.random() < heartPierceChance) pierce = Math.max(pierce, 2);
+    }
+    if(type === 'sterling_star') {
+        pierce = Math.max(pierce, Number.isFinite(extra.pierce) ? Number(extra.pierce) : 0);
     }
     if(type==='echo_shot') pierce += 0;
     if(type==='wind_gust') pierce += 99;
@@ -11273,6 +11547,7 @@ function updateAllies(dt) {
                 const followSpeed = (a.speed || (isKaisenDrone ? 3.0 : 2.8)) * 75 * dt;
 
                 if (a.type === 'penguin' && distFollow > 0.1) a.facingLeft = dx < 0;
+                if (a.type === 'drone' && distFollow > 0.1) a.facingLeft = (target ? target.x < a.x : dx < 0);
 
                 if(distFollow > 2) {
                     const step = Math.min(1, followSpeed / distFollow);
@@ -11282,6 +11557,7 @@ function updateAllies(dt) {
             }
 
             if(target && minD < 380) {
+                a.facingLeft = target.x < a.x;
                 if(a.cd <= 0) {
                     let ang = Math.atan2(target.y - a.y, target.x - a.x);
                     if (a.type === 'penguin') {
@@ -12077,6 +12353,11 @@ function updateProjectiles(dt) {
         }
         if(hit && p.type === 'blood_ball' && (extra.size || 0) === 10) { for(let j=0; j<3; j++) { let a = Math.random()*Math.PI*2; createProj(p.x, p.y, Math.cos(a)*3, Math.sin(a)*3, p.dmg*0.4, 30, true, 'blood_ball', {size: 4}); } }
         if(hit && p.type === 'axel_stone') { disperseAxelStone(p.x, p.y, p.vx, p.vy, p.dmg); projectiles.splice(i, 1); continue; }
+        if(hit && p.type === 'sterling_star') {
+            const burstRadius = Math.max(28, Number(p.extra?.sterlingBurstRadius) || 52) * (player.stats?.rangeMult || 1);
+            createExplosion(p.x, p.y, burstRadius, p.dmg, p.extra?.sterlingFullCharge ? '#fff4ab' : '#f1c40f');
+            if (!p.extra?.sterlingFullCharge) { projectiles.splice(i, 1); continue; }
+        }
         if(hit && p.type === 'big_grenade') { const count = (p.extra?.sourceChar === 'grenade' && pd.fractured?.grenade) ? 16 : 8; const pSpd = 5 * player.stats.projSpdMult; createExplosion(p.x, p.y, 80 * player.stats.rangeMult, p.dmg); for(let j=0; j<count; j++) { let a = (Math.PI * 2 / count) * j; createProj(p.x, p.y, Math.cos(a)*pSpd, Math.sin(a)*pSpd, p.dmg*0.45, 40, true, 'grenade', { size: 3 }); } projectiles.splice(i, 1); continue; }
         if(hit && p.type === 'bomb') { applyCyberBombEffects(p); if(p.pierce > 0) { p.pierce--; } else { projectiles.splice(i, 1); continue; } }
         if(hit && p.type === 'rocket') { createExplosion(p.x, p.y, 80 * player.stats.rangeMult, p.dmg); projectiles.splice(i, 1); continue; }
@@ -12363,10 +12644,9 @@ function triggerLevelUp() {
     let deck = deckFiltered.sort(() => 0.5 - Math.random()).slice(0, drawCount); const cont = document.getElementById('cards-container'); cont.innerHTML = '';
     deck.forEach(c => {
         let div = document.createElement('div');
-        const emoji = getCardEmojiForUpgrade(c.id);
-        div.className = `upgrade-card${emoji ? '' : ' upgrade-card--textonly'}`;
-        const iconHtml = emoji ? `<div class="upgrade-card-icon">${emoji}</div>` : '';
-        div.innerHTML = `${iconHtml}<h3>${escapeHtmlText(decodeHtmlEntities(c.name))}</h3><p>${escapeHtmlText(decodeHtmlEntities(c.desc))}</p>`;
+        const iconHtml = getUpgradeCardIconMarkup(c.id);
+        div.className = `upgrade-card${iconHtml ? '' : ' upgrade-card--textonly'}`;
+        div.innerHTML = `${iconHtml ? `<div class="upgrade-card-icon">${iconHtml}</div>` : ''}<h3>${escapeHtmlText(decodeHtmlEntities(c.name))}</h3><p>${escapeHtmlText(decodeHtmlEntities(c.desc))}</p>`;
         div.onclick = (e) => { e.stopPropagation(); if(!isPaused) return; c.apply(player.stats); player.pickedCards.push(c.name); document.getElementById('overlay-levelup').classList.add('hidden'); isPaused = false; applyControlLayout(); lastTime = performance.now(); };
         cont.appendChild(div);
     });
@@ -12840,17 +13120,13 @@ function draw() {
                 flipX: Boolean(a.facingLeft)
             });
         } else if(a.type === 'drone') {
-            if (a.variant === 'kaisen') {
-                drawTurretBase(ctx, a.x, a.y, 'turret');
-            } else {
-                const droneSpriteType = a.variant === 'axel_drone' ? 'axel_drone' : 'drone';
-                if (!drawElementSprite(ctx, a.x, a.y, droneSpriteType, 42, { flipX: Boolean(a.facingLeft) })) {
-                    ctx.fillStyle = '#bdc3c7'; ctx.beginPath(); ctx.arc(a.x, a.y, 14, 0, Math.PI*2); ctx.fill();
-                    ctx.fillStyle = '#e74c3c'; ctx.beginPath(); ctx.arc(a.x, a.y+2, 9, 0, Math.PI*2); ctx.fill();
-                }
+            const droneSpriteType = a.variant === 'axel_drone' ? 'axel_drone' : 'drone';
+            if (!drawElementSprite(ctx, a.x, a.y, droneSpriteType, 72, { flipX: Boolean(a.facingLeft) })) {
+                ctx.fillStyle = '#bdc3c7'; ctx.beginPath(); ctx.arc(a.x, a.y, 14, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#e74c3c'; ctx.beginPath(); ctx.arc(a.x, a.y+2, 9, 0, Math.PI*2); ctx.fill();
             }
         } else if(a.type === 'landmine') {
-            if (!drawElementSprite(ctx, a.x, a.y, 'landmine', 32)) {
+            if (!drawElementSprite(ctx, a.x, a.y, 'landmine', 42)) {
                 ctx.fillStyle = '#2c3e50'; ctx.beginPath(); ctx.arc(a.x, a.y, 11, 0, Math.PI*2); ctx.fill();
                 ctx.fillStyle = '#e74c3c'; ctx.beginPath(); ctx.arc(a.x, a.y, 5, 0, Math.PI*2); ctx.fill();
             }
@@ -12905,7 +13181,7 @@ function draw() {
                 ctx.globalAlpha = 0.98;
                 ctx.translate(a.x, a.y);
                 ctx.scale(scale, scale);
-                drawTurretBase(ctx, 0, 0, bodyType);
+                drawTurretBase(ctx, 0, 0, bodyType, { flipX: !!a.facingLeft });
                 ctx.restore();
             } else if (a.type === 'speaker') {
                 ctx.fillStyle = '#7f8c8d'; ctx.beginPath(); ctx.arc(a.x, a.y, 12, 0, Math.PI*2); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.stroke();
@@ -13161,6 +13437,22 @@ function draw() {
                 ctx.strokeRect(player.x - qbWidth / 2 - 1, player.y - player.r - 19, qbWidth + 2, qbHeight + 2);
             }
         }
+        if(pd.selectedChar === 'sterling') {
+            const stWidth = 58;
+            const stHeight = 9;
+            const stFill = Math.max(0, Math.min(1, Number(player.sterlingCharge || 0)));
+            ctx.fillStyle = '#111';
+            ctx.fillRect(player.x - stWidth / 2, player.y - player.r - 18, stWidth, stHeight);
+            ctx.fillStyle = '#f1c40f';
+            ctx.fillRect(player.x - stWidth / 2, player.y - player.r - 18, stWidth * stFill, stHeight);
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(player.x - stWidth / 2, player.y - player.r - 18, stWidth, stHeight);
+            if (stFill > 0) {
+                ctx.fillStyle = 'rgba(255,255,255,0.18)';
+                ctx.fillRect(player.x - stWidth / 2, player.y - player.r - 18, stWidth * stFill, stHeight);
+            }
+        }
         if(pd.selectedChar === 'adam') {
             const adamWidth = 58;
             const adamHeight = 9;
@@ -13342,6 +13634,29 @@ function draw() {
             ctx.shadowBlur = 10;
             ctx.shadowColor = 'rgba(255,107,181,0.75)';
             ctx.fillText('❤', -Math.max(8, (p.size || 11) * 0.9), Math.max(8, (p.size || 11) * 0.75));
+            ctx.restore();
+        }
+        else if(p.type === 'sterling_star') {
+            const r = Math.max(8, p.size || 12);
+            ctx.save();
+            ctx.translate(px, py);
+            ctx.rotate((Math.atan2(p.vy, p.vx) || 0) + gameTime * 0.65);
+            ctx.shadowBlur = p.extra?.sterlingFullCharge ? 18 : 12;
+            ctx.shadowColor = p.extra?.sterlingFullCharge ? 'rgba(255,244,171,0.95)' : 'rgba(241,196,15,0.7)';
+            ctx.fillStyle = p.extra?.sterlingFullCharge ? '#fff7cc' : '#f1c40f';
+            ctx.strokeStyle = '#8a6d00';
+            ctx.lineWidth = Math.max(1, r * 0.12);
+            ctx.beginPath();
+            for (let i = 0; i < 10; i++) {
+                const ang = -Math.PI / 2 + i * Math.PI / 5;
+                const rad = i % 2 === 0 ? r : r * 0.45;
+                const sx = Math.cos(ang) * rad;
+                const sy = Math.sin(ang) * rad;
+                if (i === 0) ctx.moveTo(sx, sy); else ctx.lineTo(sx, sy);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
             ctx.restore();
         }
         else if(p.type === 'vinyl') {
@@ -13590,6 +13905,7 @@ function draw() {
         else if(p.type === 'water_bubble') { ctx.fillStyle = 'rgba(0, 206, 209, 0.6)'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); ctx.strokeStyle = '#00cec9'; ctx.lineWidth = 2; ctx.stroke(); }
         else if(p.type === 'water_wave') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx)); ctx.fillStyle = 'rgba(0, 206, 209, 0.8)'; ctx.beginPath(); ctx.arc(0, 0, p.size, -Math.PI/2, Math.PI/2); ctx.fill(); ctx.restore(); }
         else if(p.type === 'nucleon_shot') { ctx.fillStyle = '#2ecc71'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); }
+        else if(p.type === 'lyron_ball' || p.type === 'lyron_ball_big') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx)); const isBig = p.type === 'lyron_ball_big'; const r = Math.max(isBig ? 14 : 8, p.size || (isBig ? 18 : 9)); ctx.shadowColor = isBig ? 'rgba(46, 204, 113, 0.8)' : 'rgba(255,255,255,0.45)'; ctx.shadowBlur = isBig ? 14 : 8; ctx.fillStyle = isBig ? '#fefefe' : '#ffffff'; ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0; ctx.strokeStyle = isBig ? '#27ae60' : '#2c3e50'; ctx.lineWidth = Math.max(1.5, r * 0.12); ctx.stroke(); ctx.strokeStyle = '#2c2c54'; ctx.lineWidth = Math.max(1.2, r * 0.08); ctx.beginPath(); ctx.moveTo(-r * 0.75, 0); ctx.lineTo(r * 0.75, 0); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0, -r * 0.72); ctx.lineTo(0, r * 0.72); ctx.stroke(); ctx.fillStyle = '#2c3e50'; ctx.beginPath(); ctx.arc(-r * 0.22, -r * 0.15, Math.max(1.6, r * 0.14), 0, Math.PI * 2); ctx.fill(); ctx.beginPath(); ctx.arc(r * 0.24, r * 0.18, Math.max(1.6, r * 0.14), 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
         else if(p.type === 'quarterback') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx)); ctx.shadowColor = '#8e44ad'; ctx.shadowBlur = 12; ctx.fillStyle = '#8e44ad'; ctx.beginPath(); if(ctx.ellipse) { ctx.ellipse(0, 0, p.size + 4, p.size * 0.55, 0, 0, Math.PI * 2); } else { ctx.scale(1.4, 0.75); ctx.arc(0, 0, p.size, 0, Math.PI * 2); } ctx.fill(); ctx.shadowBlur = 0; ctx.lineWidth = 2; ctx.strokeStyle = '#f5f6fa'; ctx.beginPath(); if(ctx.ellipse) { ctx.ellipse(0, 0, p.size + 4, p.size * 0.55, 0, 0, Math.PI * 2); } else { ctx.scale(1, 1); ctx.arc(0, 0, p.size, 0, Math.PI * 2); } ctx.stroke(); ctx.strokeStyle = '#2c2c54'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(-p.size + 2, 0); ctx.lineTo(p.size - 2, 0); ctx.stroke(); ctx.restore(); }
         else if(p.type === 'lance') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx)); ctx.shadowColor = 'rgba(255, 215, 0, 0.35)'; ctx.shadowBlur = 8; ctx.fillStyle = '#f39c12'; ctx.strokeStyle = '#7f4f00'; ctx.lineWidth = 2; const len = Math.max(30, (p.size || 6) * 5); const shaft = Math.max(3, (p.size || 6) * 0.45); if(ctx.roundRect) { ctx.beginPath(); ctx.roundRect(-len * 0.45, -shaft * 0.5, len * 0.75, shaft, 2); ctx.fill(); ctx.stroke(); } else { ctx.fillRect(-len * 0.45, -shaft * 0.5, len * 0.75, shaft); ctx.strokeRect(-len * 0.45, -shaft * 0.5, len * 0.75, shaft); } ctx.beginPath(); ctx.moveTo(len * 0.30, 0); ctx.lineTo(len * 0.62, -shaft * 1.05); ctx.lineTo(len * 0.62, shaft * 1.05); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#fefae0'; ctx.beginPath(); ctx.arc(-len * 0.48, 0, Math.max(1.5, shaft * 0.45), 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
         else if(p.type === 'heavy_enemy') { ctx.fillStyle = '#7f8c8d'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); }
