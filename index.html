@@ -2553,7 +2553,7 @@ Um artista de rua rebelde que transforma a cidade em sua tela. Armado com latas 
 Um samurai extremamente habilidoso que dedicou a vida ao aperfeiçoamento da espada e da honra. Para ele, ninjas dependem demais de furtividade e artifícios, enquanto um verdadeiro guerreiro vence de frente. Quando a situação exige, Shinobi desperta seu poder ancestral e se transforma em um imponente dragão, fazendo até os inimigos mais destemidos recuarem.
 
 “Venha. Mostre que sua lâmina merece cruzar a minha... ou a de um dragão.”` },
-    glitch: { id: 'glitch', class: 'Controle', name: 'Glitch', rarity: 'mythic', cost: 799, hp: 108, speed: 3.55, dmg: 16, fireRate: 42, range: 250, color: '#9b59b6', weapon: 'glitch_bugshot', sortLast: true, desc: `“Glitch não nasceu. Ele aconteceu.”
+    glitch: { id: 'glitch', class: 'Controle', name: 'Glitch', rarity: 'mythic', cost: 569, hp: 108, speed: 3.55, dmg: 16, fireRate: 42, range: 250, color: '#9b59b6', weapon: 'glitch_bugshot', sortLast: true, desc: `“Glitch não nasceu. Ele aconteceu.”
 
 Uma anomalia viva criada pelas Fraturas, capaz de corromper a própria realidade. Aliado de Echo, Glitch não possui uma forma verdadeira e pode assumir a aparência e as habilidades de qualquer pessoa que encontrar, tornando impossível saber quem é aliado... e quem é apenas uma cópia. Onde ele surge, a realidade falha, o caos se espalha e nada parece funcionar como deveria.
 
@@ -3263,6 +3263,39 @@ function accountBackupChecksum(value) {
     return (hash >>> 0).toString(36).padStart(7, '0');
 }
 
+const GLITCH_PURCHASE_COST = 569;
+
+function sanitizeGlitchOwnership(saveData) {
+    if (!saveData || typeof saveData !== 'object') return saveData;
+    if (!saveData.chars || typeof saveData.chars !== 'object') saveData.chars = {};
+
+    const glitch = saveData.chars.glitch;
+    const glitchWasBoughtInShop = !!(glitch && glitch.unlockSource === 'shop-gems');
+
+    if (glitchWasBoughtInShop) {
+        glitch.cost = GLITCH_PURCHASE_COST;
+        return saveData;
+    }
+
+    if (glitch) {
+        delete saveData.chars.glitch;
+
+        const fallbackChar = saveData.chars.strike ? 'strike' : (Object.keys(saveData.chars)[0] || 'strike');
+        if (saveData.selectedChar === 'glitch') saveData.selectedChar = fallbackChar;
+        if (saveData.run && typeof saveData.run === 'object' && saveData.run.charId === 'glitch') {
+            saveData.run.charId = fallbackChar;
+        }
+        if (saveData.debug && saveData.debug.devBaseState && typeof saveData.debug.devBaseState === 'object') {
+            if (saveData.debug.devBaseState.selectedChar === 'glitch') saveData.debug.devBaseState.selectedChar = fallbackChar;
+            if (saveData.debug.devBaseState.run && typeof saveData.debug.devBaseState.run === 'object' && saveData.debug.devBaseState.run.charId === 'glitch') {
+                saveData.debug.devBaseState.run.charId = fallbackChar;
+            }
+        }
+    }
+
+    return saveData;
+}
+
 function normalizeSaveData(rawSave) {
     const defaults = createDefaultSaveData();
     const source = rawSave && typeof rawSave === 'object' ? cloneAccountValue(rawSave) : {};
@@ -3346,6 +3379,7 @@ function normalizeSaveData(rawSave) {
     if (typeof next.passClaimed !== 'number' || !isFinite(next.passClaimed) || next.passClaimed < 0) next.passClaimed = 0;
     if (typeof next.passResetAt !== 'number' || !isFinite(next.passResetAt) || next.passResetAt < 0) next.passResetAt = 0;
 
+    next = sanitizeGlitchOwnership(next);
     return next;
 }
 
@@ -3422,7 +3456,6 @@ function load() {
     if (!pd || typeof pd !== 'object') pd = JSON.parse(JSON.stringify(PD_TEMPLATE));
     if (!pd.chars || typeof pd.chars !== 'object') pd.chars = {};
     if (!pd.chars.strike) pd.chars.strike = { level: 1, slots: 2, chips: [null, null] };
-    if (!pd.chars.glitch) pd.chars.glitch = { level: 1, slots: 2, chips: [null, null] };
 
     if (!pd.profile || typeof pd.profile !== 'object') pd.profile = { title: null };
     if (typeof pd.profile.title === 'undefined') pd.profile.title = null;
@@ -5682,7 +5715,7 @@ function getTrailOptionsForHour() {
     const rarities = ['common', 'rare', 'epic', 'legendary', 'mythic'];
     let picked = [];
     for (let r of rarities) {
-        const unowned = Object.values(CHARACTERS).filter(c => c.rarity === r && !pd.chars[c.id]);
+        const unowned = Object.values(CHARACTERS).filter(c => c.rarity === r && c.id !== 'glitch' && !pd.chars[c.id]);
         if (unowned.length > 0) {
             picked = shuffleWithSeed(unowned.map(c => c.id), `trail:${hourKey}:${r}`).slice(0, 3);
             break;
@@ -7047,7 +7080,7 @@ function buyChar(id) {
     showConfirm("Quer comprar essa oferta?", `Deseja comprar ${c.name} por ${c.cost} gemas?`, (res) => {
         if(!res) return;
         pd.gems -= c.cost;
-        pd.chars[id] = { level: 1, slots: 2, chips: [null, null] };
+        pd.chars[id] = { level: 1, slots: 2, chips: [null, null], unlockSource: id === 'glitch' ? 'shop-gems' : 'shop' };
         if(id === 'gladiator') pd.chars[id].mode = 'shooter';
         awardAchievementStat('charsUnlocked', 1);
         save();
@@ -8036,7 +8069,7 @@ function claimPass() {
 
 function rollChar(rarity) {
 
-    const pool = Object.values(CHARACTERS).filter(c => c.rarity === rarity);
+    const pool = Object.values(CHARACTERS).filter(c => c.rarity === rarity && c.id !== 'glitch');
     if(pool.length === 0) return `🪙 +100 Moedas (Repetido)`;
     const c = pool[Math.floor(Math.random() * pool.length)];
     if(pd.chars[c.id]) { let evoAdd = rarity==='common'?5 : rarity==='rare'?10 : rarity==='epic'?25 : rarity==='legendary'?50 : rarity==='seasonal'?200 : 100; pd.evo += evoAdd; return `🧬 +${evoAdd} Evo (Repetido: ${c.name})`; } 
