@@ -3724,31 +3724,31 @@ function getSceneScale() {
 
 function drawTurretBase(ctx, x, y, type = 'turret', opts = {}) {
     const spriteType = String(type || 'turret').toLowerCase();
-    const elementSpriteSize = spriteType === 'cannon' ? 38 : (spriteType === 'mortar' ? 36 : 34);
+    const elementSpriteSize = spriteType === 'cannon' ? 64 : (spriteType === 'mortar' ? 60 : 56);
     if (drawElementSprite(ctx, x, y, spriteType, elementSpriteSize, { flipX: !!opts.flipX })) return;
 
     ctx.save();
     if (spriteType === 'mortar') {
         ctx.fillStyle = '#8e44ad';
-        ctx.beginPath(); ctx.arc(x, y, 14, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x, y, 18, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#2c3e50';
-        ctx.beginPath(); ctx.arc(x, y + 1, 7, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x, y + 1, 9, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#bdc3c7';
-        ctx.fillRect(x + 2, y - 14, 6, 18);
+        ctx.fillRect(x + 3, y - 18, 8, 24);
     } else if (spriteType === 'cannon') {
         ctx.fillStyle = '#34495e';
-        ctx.beginPath(); ctx.arc(x, y, 15, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x, y, 19, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#f39c12';
-        ctx.beginPath(); ctx.arc(x, y + 1, 7, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x, y + 1, 9, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#f1c40f';
-        ctx.fillRect(x + 3, y - 13, 10, 5);
+        ctx.fillRect(x + 4, y - 17, 14, 7);
     } else {
         ctx.fillStyle = '#2c3e50';
-        ctx.beginPath(); ctx.arc(x, y, 13, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x, y, 17, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#7f8c8d';
-        ctx.fillRect(x - 8, y - 16, 16, 7);
+        ctx.fillRect(x - 10, y - 20, 20, 9);
         ctx.fillStyle = '#e74c3c';
-        ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x, y, 7, 0, Math.PI * 2); ctx.fill();
     }
     ctx.restore();
 }
@@ -4027,6 +4027,7 @@ const ALLY_ELEMENT_SPRITES = {
     cannon: 'elements/canon.png',
     drone: 'elements/drone.png',
     axel_drone: 'elements/axel_drone.png',
+    landmine: ['elements/landmine.png', 'elements/mine.png', 'elements/minesweeper.png'],
     minesweeper: 'elements/minesweeper.png'
 };
 
@@ -4104,19 +4105,31 @@ function getCharacterRadiusById(id) {
 
 
 function getElementSpritePath(type) {
-    return ALLY_ELEMENT_SPRITES[String(type || '').toLowerCase()] || '';
+    const entry = ALLY_ELEMENT_SPRITES[String(type || '').toLowerCase()];
+    if (Array.isArray(entry)) return entry.find(Boolean) || '';
+    return entry || '';
 }
 
 function getElementSpriteImage(type) {
     const key = String(type || '').toLowerCase();
-    const path = getElementSpritePath(key);
-    if (!path) return null;
-    if (!ALLY_ELEMENT_SPRITE_CACHE.has(key)) {
-        const img = new Image();
-        img.src = path;
-        ALLY_ELEMENT_SPRITE_CACHE.set(key, img);
-    }
-    return ALLY_ELEMENT_SPRITE_CACHE.get(key);
+    const entry = ALLY_ELEMENT_SPRITES[key];
+    const paths = Array.isArray(entry) ? entry.filter(Boolean) : (entry ? [entry] : []);
+    if (!paths.length) return null;
+    const cached = ALLY_ELEMENT_SPRITE_CACHE.get(key);
+    if (cached) return cached;
+    const img = new Image();
+    img.__spritePaths = paths;
+    img.__spriteIndex = 0;
+    img.onerror = () => {
+        const nextIndex = (img.__spriteIndex || 0) + 1;
+        if (nextIndex < (img.__spritePaths || []).length) {
+            img.__spriteIndex = nextIndex;
+            img.src = img.__spritePaths[nextIndex];
+        }
+    };
+    img.src = paths[0];
+    ALLY_ELEMENT_SPRITE_CACHE.set(key, img);
+    return img;
 }
 
 function drawElementSprite(ctx, x, y, type, size = 18, opts = {}) {
@@ -5585,7 +5598,7 @@ function applyControlLayout() {
         if (!pd.settings.mobileJoystickFollowTap || !joystickMode) resetJoystickPosition();
     }
     if (dpadZone) dpadZone.style.display = mobileControls && pd.settings.mobileControlLayout === 'dpad' ? 'grid' : 'none';
-    if (btnSpecial) btnSpecial.style.display = mobileControls ? 'flex' : 'none';
+    if (btnSpecial) btnSpecial.style.display = mobileControls && getSelectedSpecialConfig() ? 'flex' : 'none';
 }
 
 function updateSettingsUI(syncSlider = true) { 
@@ -8271,6 +8284,7 @@ function updateSpecialButtonUI() {
 
     const shouldHide = !cfg || !cfg.label;
     if (shouldHide) {
+        btnSpecial.hidden = true;
         btnSpecial.style.display = 'none';
         btnSpecial.innerHTML = '';
         btnSpecial.title = '';
@@ -8301,6 +8315,7 @@ function updateSpecialButtonUI() {
     const shouldShowCooldown = !activeState && cooldownValue > 0;
     const label = cfg.label || '';
 
+    btnSpecial.hidden = false;
     btnSpecial.style.display = 'flex';
     btnSpecial.disabled = false;
     btnSpecial.style.pointerEvents = 'auto';
@@ -12546,6 +12561,9 @@ function updateGraffitMarks(dt) {
 
 function getPlayerSpriteId() {
     if (player?.glitchTransformAnimating && player?.glitchTransformPreviewId) return player.glitchTransformPreviewId;
+    if (player?.glitchCurrentFormId && player.glitchCurrentFormId !== 'glitch' && (player?.glitchOriginChar === 'glitch' || player?.glitchMorphActive || pd?.selectedChar === 'glitch')) {
+        return player.glitchCurrentFormId;
+    }
     if (pd?.selectedChar === 'adam' && player?.adamMechActive) return 'adam_mech';
     if (pd?.selectedChar === 'gladiator') {
         return (pd?.chars?.gladiator?.mode === 'shooter') ? 'gladiator_spear' : 'gladiator_sword';
@@ -12825,8 +12843,16 @@ function draw() {
             if (a.variant === 'kaisen') {
                 drawTurretBase(ctx, a.x, a.y, 'turret');
             } else {
-                ctx.fillStyle = '#bdc3c7'; ctx.beginPath(); ctx.arc(a.x, a.y, 10, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = '#e74c3c'; ctx.beginPath(); ctx.arc(a.x, a.y+2, 6, 0, Math.PI*2); ctx.fill();
+                const droneSpriteType = a.variant === 'axel_drone' ? 'axel_drone' : 'drone';
+                if (!drawElementSprite(ctx, a.x, a.y, droneSpriteType, 42, { flipX: Boolean(a.facingLeft) })) {
+                    ctx.fillStyle = '#bdc3c7'; ctx.beginPath(); ctx.arc(a.x, a.y, 14, 0, Math.PI*2); ctx.fill();
+                    ctx.fillStyle = '#e74c3c'; ctx.beginPath(); ctx.arc(a.x, a.y+2, 9, 0, Math.PI*2); ctx.fill();
+                }
+            }
+        } else if(a.type === 'landmine') {
+            if (!drawElementSprite(ctx, a.x, a.y, 'landmine', 32)) {
+                ctx.fillStyle = '#2c3e50'; ctx.beginPath(); ctx.arc(a.x, a.y, 11, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#e74c3c'; ctx.beginPath(); ctx.arc(a.x, a.y, 5, 0, Math.PI*2); ctx.fill();
             }
         } else if(a.isTurret) {
             if(a.type === 'tea_table') {
