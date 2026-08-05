@@ -1336,6 +1336,14 @@
         .arena-ranking-panel { position: static; width: 100%; margin-top: 10px; }
     }
 
+    .arena-ban-toggle { position:absolute; inset:50% auto auto 50%; transform:translate(-50%,-50%); font-size:40px; z-index:4; filter: drop-shadow(0 6px 10px rgba(0,0,0,0.65)); }
+    .arena-banned-card { filter: grayscale(1) brightness(0.72) !important; }
+    .arena-room-code-pill.big { font-size: 34px; padding: 12px 22px; letter-spacing: 0.16em; box-shadow: 0 0 0 2px rgba(255,255,255,0.08), 0 14px 28px rgba(0,0,0,0.35); }
+    .arena-lobby-hero .arena-room-code-pill.big { min-width: min(520px, 100%); text-align:center; }
+    .arena-results-card .arena-results-step { font-size: 28px; font-weight: 900; padding: 14px 16px; border-radius: 18px; background: rgba(255,255,255,0.06); margin-top: 10px; opacity: 0; transform: translateY(14px) scale(0.98); transition: all .25s ease; }
+    .arena-results-card .arena-results-step.visible { opacity: 1; transform: translateY(0) scale(1); }
+    .arena-results-card .arena-results-step .pts { color: var(--btn-yellow); }
+
     #screen-settings {
         background:
             radial-gradient(circle at top, rgba(255,255,255,0.05), transparent 40%),
@@ -7432,8 +7440,10 @@ let sort = document.getElementById('char-filter-sort') ? document.getElementById
     filtered.forEach(c => {
         const owned = !!pd.chars[c.id]; const lvl = owned ? pd.chars[c.id].level : 0; const isSel = pd.selectedChar === c.id;
         const div = document.createElement('div'); div.className = `card-item rarity-${c.rarity}`; div.style.cursor = 'pointer'; if(isSel) div.style.borderColor = 'var(--btn-green)';
+        const arenaLocked = arenaBanSet.has(c.id);
         let banTag = bannedSet.has(c.id) ? `<div style="position:absolute;top:5px;right:5px;font-size:24px;">🔒</div>` : '';
-        if (window.arenaBanMode) banTag = `<div class="arena-ban-toggle">${arenaBanSet.has(c.id) ? '🔒' : '◻️'}</div>`;
+        if (window.arenaBanMode) banTag = `<div class="arena-ban-toggle">${arenaLocked ? '🔒' : '◻️'}</div>`;
+        else if (arenaLocked) banTag = `<div class="arena-ban-toggle">🔒</div>`;
         let hasSprite = getCharacterSpriteMarkup(c.id, 'menu') || `<div style="width:78px;height:78px;background:${c.color};border-radius:50%;margin:0 auto 10px;border:3px solid #fff;"></div>`;
         let html = `${banTag}${hasSprite}<h4>${c.name}</h4><div style="font-size:12px;color:#aaa">${c.class}</div>`;
         if(owned) {
@@ -7448,9 +7458,21 @@ let sort = document.getElementById('char-filter-sort') ? document.getElementById
                 arenaToggleBan(c.id);
                 return;
             }
+            if (window.arenaState?.settings?.bannedChars?.includes?.(c.id)) {
+                showAlert('Personagem bloqueado nessa sala.');
+                return;
+            }
             showCharDetail(c.id);
         };
         div.innerHTML = html;
+        div.dataset.charId = c.id;
+        if (window.arenaBanMode && arenaLocked) {
+            div.classList.add('arena-banned-card');
+            div.style.filter = 'grayscale(1) brightness(0.72)';
+            div.style.opacity = '0.92';
+        } else if (window.arenaBanMode) {
+            div.style.filter = 'saturate(0.95)';
+        }
         list.appendChild(div);
     });
 }
@@ -7717,6 +7739,10 @@ function buyChar(id) {
 
 function selectChar(id) {
     if(!pd.chars[id]) { showAlert("Personagem não obtido!"); return; }
+    if (window.arenaState?.settings?.bannedChars?.includes?.(id) && window.arenaReturnScreen === 'screen-arena') {
+        showAlert('Personagem bloqueado nessa sala.');
+        return;
+    }
     pd.selectedChar = id;
     if (!pd.run || typeof pd.run !== 'object') pd.run = { charId: id, medals: 0 };
     pd.run.charId = id;
@@ -16057,6 +16083,686 @@ applyMusicVolume();
         if (typeof arenaRenderLobby === 'function') arenaRenderLobby();
         else if (originalArenaRefreshLobby) originalArenaRefreshLobby.apply(this, arguments);
     };
+})();
+</script>
+
+
+<script>
+(function () {
+    const resultTimers = [];
+    const clearResultTimers = () => {
+        while (resultTimers.length) clearTimeout(resultTimers.pop());
+    };
+
+    function arenaMapIndex() {
+        return Math.max(0, Math.min((window.ARENA_MAPS?.length || 10) - 1, Number(window.arenaState?.settings?.mapChoice) || 0));
+    }
+
+    function arenaSelectedCharObj() {
+        const id = (typeof arenaSelectedCharId === 'function' ? arenaSelectedCharId() : 'strike');
+        return { id, name: (CHARACTERS?.[id]?.name || 'Personagem') };
+    }
+
+    const originalGetSelectedMapIndex = window.getSelectedMapIndex;
+    window.getSelectedMapIndex = function () {
+        if (window.isArenaMode && window.arenaState?.settings) return arenaMapIndex();
+        return typeof originalGetSelectedMapIndex === 'function' ? originalGetSelectedMapIndex.apply(this, arguments) : 0;
+    };
+
+    const originalArenaOpenJoinRoom = window.arenaOpenJoinRoom;
+    window.arenaOpenJoinRoom = function () {
+        arenaEnsureState();
+        arenaState.view = 'join';
+        arenaState.joinCode = '';
+        showScreen('screen-arena');
+        arenaRenderJoinForm();
+        const input = document.getElementById('arena-code-input');
+        if (input) setTimeout(() => input.focus(), 0);
+        if (typeof originalArenaOpenJoinRoom === 'function') return;
+    };
+
+    window.arenaRenderJoinForm = function () {
+        arenaEnsureState();
+        const root = document.getElementById('arena-root');
+        if (!root) return;
+        const meChar = arenaSelectedCharId();
+        const meName = arenaGetCurrentPlayerName();
+        const codeValue = String(arenaState.joinCode || '').trim().toUpperCase();
+        root.innerHTML = `
+            <div class="arena-shell">
+                <div class="arena-join-hero">
+                    <div class="arena-hero">
+                        <div class="arena-hub-copy">
+                            <div class="arena-kicker">🏛 Arena Legacy</div>
+                            <h1 class="arena-room-title">Entrar em uma sala</h1>
+                            <p>Digite o código da sala. Você entra na mesma sala, mas em partida separada.</p>
+                            <div class="arena-banner">BOTS só aparece no modo Jogar. Aqui entra código de sala mesmo.</div>
+                        </div>
+                        <div class="arena-preview">
+                            <div class="arena-preview-sprite">${arenaGetPlayerCardSprite({ id: 'me', name: meName, charId: meChar, me: true })}</div>
+                            <div class="arena-preview-name">${escapeHtmlText(meName)}</div>
+                            <div class="arena-badges" style="justify-content:center;">
+                                <span class="arena-badge">👤 ${escapeHtmlText(arenaSelectedCharDef().name)}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="arena-panel arena-join-panel" style="margin-top:14px;">
+                        <h3 class="arena-panel-title">Código da sala</h3>
+                        <div class="arena-grid">
+                            <div class="arena-field">
+                                <label>Seu nick</label>
+                                <input id="arena-name-input" maxlength="20" value="${escapeHtmlText(meName)}">
+                            </div>
+                            <div class="arena-field">
+                                <label>Código</label>
+                                <input id="arena-code-input" maxlength="10" placeholder="ABCDE1" value="${escapeHtmlText(codeValue)}" style="font-size:28px;letter-spacing:0.18em;text-align:center;font-weight:900;">
+                            </div>
+                        </div>
+                        <div class="arena-lobby-actions" style="margin-top:12px;">
+                            <button class="btn-action" type="button" onclick="arenaJoinRoom()">Entrar</button>
+                            <button class="btn-menu" type="button" onclick="openArenaHub()">Voltar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        arenaUpdateRankingPanel();
+        arenaUpdateCharBanner();
+    };
+
+    const originalArenaCreateRoom = window.arenaCreateRoom;
+    window.arenaCreateRoom = function () {
+        arenaEnsureState();
+        arenaConnect();
+        const nick = String(document.getElementById('arena-name-input')?.value || arenaGetCurrentPlayerName()).trim().slice(0, 20) || 'Jogador';
+        pd.nickname = nick;
+        save();
+        arenaState.joinCode = '';
+        arenaState.view = 'lobby';
+        if (arenaSocket?.connected) {
+            arenaSocket.emit('room:create', { name: nick }, (res) => {
+                if (!res?.ok) { showAlert(res?.error || 'Não foi possível criar a sala.'); return; }
+                arenaState.online = true;
+                arenaState.isHost = true;
+                arenaState.mode = 'online';
+                arenaState.roomCode = res.code || res.room?.code || '';
+                arenaState.players = Array.isArray(res.room?.players) ? res.room.players.map(p => ({
+                    id: p.id,
+                    name: p.name,
+                    score: p.score || 0,
+                    kills: p.kills || 0,
+                    ready: !!p.ready,
+                    me: p.id === arenaSocket.id,
+                    host: p.id === (res.room?.hostId || arenaSocket.id),
+                    charId: p.charId || arenaResolveLobbyCharId(p)
+                })) : [];
+                showScreen('screen-arena');
+                arenaRenderLobby();
+                notify(`Sala criada: ${arenaState.roomCode}`);
+            });
+        } else {
+            arenaState.online = false;
+            arenaState.isHost = true;
+            arenaState.mode = 'bots';
+            arenaState.roomCode = `LOCAL-${Math.floor(Math.random() * 9000) + 1000}`;
+            arenaState.players = [{ id: 'me', name: nick, score: 0, kills: 0, ready: false, me: true, host: true, charId: arenaSelectedCharId() }];
+            showScreen('screen-arena');
+            arenaRenderLobby();
+            notify('Sala local criada.');
+        }
+    };
+
+    window.arenaPlayBots = function () {
+        arenaEnsureState();
+        arenaStopBattleLoop();
+        clearResultTimers();
+        window.isArenaMode = true;
+        window.arenaIgnoreGameOver = false;
+        arenaState.online = false;
+        arenaState.isHost = true;
+        arenaState.mode = 'bots';
+        arenaState.view = 'playing';
+        arenaState.joinCode = '';
+        arenaState.roomCode = `BOTS-${Math.floor(Math.random() * 9000) + 1000}`;
+        arenaState.roomName = 'Partida com bots';
+        arenaState.botRoster = arenaGenerateBots(4);
+        arenaState.players = [];
+        arenaState.resultsShown = false;
+        arenaState.lastRanking = [];
+        arenaStartBattle();
+    };
+
+    window.arenaStartBattle = function () {
+        arenaEnsureState();
+        arenaStopBattleLoop();
+        clearResultTimers();
+        window.arenaIgnoreGameOver = false;
+        window.isArenaMode = true;
+        arenaState.view = 'playing';
+        arenaState.resultsShown = false;
+        arenaState.lastRanking = [];
+        arenaState.score = 0;
+        arenaState.kills = 0;
+        arenaState.penalty = 0;
+        arenaState.timeLeftMs = Math.max(1, Number(arenaState.settings?.duration) || 5) * 60000;
+        arenaState._botPulseAt = 0;
+        arenaState._nextHudSyncAt = 0;
+        arenaState._nextRankingAt = 0;
+        arenaState.currentMap = arenaMapIndex();
+        window.currentMap = arenaMapIndex();
+        if (arenaState.mode === 'bots' && (!Array.isArray(arenaState.botRoster) || !arenaState.botRoster.length)) {
+            arenaState.botRoster = arenaGenerateBots(4);
+        }
+        arenaPrepBattleUI();
+        if (typeof startRunAfterShop === 'function') startRunAfterShop();
+        const mapText = document.getElementById('map-text');
+        if (mapText && window.MAPS) mapText.textContent = `Mapa: ${MAPS[window.currentMap] || 'Planície'}`;
+        if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
+    };
+
+    window.arenaSetBattleContext = function () {
+        const idx = arenaMapIndex();
+        window.currentMap = idx;
+        arenaState.currentMap = idx;
+        window.isHardcoreMode = arenaState.settings?.difficulty === 'hardcore';
+        window.arenaUltraHardcore = arenaState.settings?.difficulty === 'ultra';
+        window.arenaNoRewards = true;
+        window.arenaIgnoreGameOver = false;
+        window.arenaMatchEndsAt = 0;
+        window.arenaScorePenalty = 0;
+        if (typeof syncMapSelectUI === 'function') syncMapSelectUI();
+    };
+
+    window.arenaRefreshLobby = function () {
+        if (window.arenaState?.view === 'playing') {
+            if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
+            return;
+        }
+        arenaRenderLobby();
+    };
+
+    window.arenaBuildPlayersForLobby = function () {
+        const me = {
+            id: 'me',
+            name: arenaGetCurrentPlayerName(),
+            charId: arenaSelectedCharId(),
+            score: arenaState.score || 0,
+            kills: arenaState.kills || 0,
+            ready: true,
+            host: !!arenaState.isHost,
+            me: true
+        };
+        const roomPlayers = Array.isArray(arenaState.players) && arenaState.players.length ? arenaState.players.map(p => ({ ...p })) : [];
+        if (!roomPlayers.some(p => p.me || p.id === 'me')) roomPlayers.unshift(me);
+        else {
+            const idx = roomPlayers.findIndex(p => p.me || p.id === 'me');
+            if (idx >= 0) roomPlayers[idx] = me;
+        }
+        return roomPlayers.map(p => ({ ...p, charId: arenaResolveLobbyCharId(p) }));
+    };
+
+    window.arenaRenderHub = function () {
+        arenaEnsureState();
+        const root = document.getElementById('arena-root');
+        if (!root) return;
+        const meChar = arenaSelectedCharId();
+        const meName = arenaGetCurrentPlayerName();
+        root.innerHTML = `
+            <div class="arena-shell">
+                <div class="arena-home-hero">
+                    <div class="arena-hero">
+                        <div class="arena-hub-copy">
+                            <div class="arena-kicker">🏛 Arena Legacy</div>
+                            <h1 class="arena-room-title">Entrada da Arena</h1>
+                            <p>Partidas separadas com bots ou salas online. No final, quem tiver mais pontos vence.</p>
+                            <div class="arena-banner">Sem recursos, sem baús e sem vitórias diárias. Aqui só conta ranking.</div>
+                        </div>
+                        <div class="arena-preview">
+                            <div class="arena-preview-sprite">${arenaGetPlayerCardSprite({ id: 'me', name: meName, charId: meChar, me: true })}</div>
+                            <div class="arena-preview-name">${escapeHtmlText(meName)}</div>
+                            <div class="arena-badges" style="justify-content:center;">
+                                <span class="arena-badge">👤 ${escapeHtmlText(arenaSelectedCharDef().name)}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="arena-home-buttons" style="margin-top:14px;">
+                        <button class="btn-menu" type="button" onclick="arenaOpenJoinRoom()">Entrar em sala</button>
+                        <button class="btn-play" type="button" onclick="arenaPlayBots()">Jogar</button>
+                        <button class="btn-menu" type="button" onclick="arenaCreateRoom()">Criar sala</button>
+                        <button class="btn-menu" type="button" onclick="arenaChooseCharacter()">Escolher personagem</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        arenaUpdateRankingPanel();
+        arenaUpdateCharBanner();
+    };
+
+    window.arenaRenderLobby = function () {
+        arenaEnsureState();
+        const root = document.getElementById('arena-root');
+        if (!root) return;
+        if (arenaState.view === 'playing') {
+            arenaUpdateRankingPanel();
+            return;
+        }
+        if (arenaState.view === 'join') {
+            arenaRenderJoinForm();
+            return;
+        }
+        if (arenaState.view === 'hub' && !arenaState.roomCode && arenaState.mode !== 'bots' && !arenaState.online) {
+            arenaRenderHub();
+            return;
+        }
+
+        const players = arenaBuildPlayersForLobby();
+        const me = players.find(p => p.me) || players[0] || { charId: arenaSelectedCharId(), name: arenaGetCurrentPlayerName() };
+        const isHost = !!arenaState.isHost;
+        const roomCodeValue = escapeHtmlText((arenaState.roomCode || (arenaState.mode === 'bots' ? 'LOCAL' : '---')).toString());
+        const roomLabel = arenaState.online
+            ? `<div class="arena-room-code-pill big">${roomCodeValue}</div>`
+            : (arenaState.mode === 'bots'
+                ? `<div class="arena-room-code-pill big">${roomCodeValue}</div>`
+                : `<div class="arena-room-code-pill big">LOCAL</div>`);
+
+        const hostControls = isHost ? `
+            <div class="arena-panel">
+                <h3 class="arena-panel-title">Configurações do servidor</h3>
+                <div class="arena-grid">
+                    <div class="arena-field">
+                        <label>Mapa</label>
+                        <select id="arena-map-select" onchange="arenaApplySetting('mapChoice', Number(this.value))">
+                            ${ARENA_MAPS.map((m, i) => `<option value="${i}" ${Number(arenaState.settings.mapChoice) === i ? 'selected' : ''}>${m}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="arena-field">
+                        <label>Tempo</label>
+                        <select id="arena-duration-select" onchange="arenaApplySetting('duration', Number(this.value))">
+                            ${ARENA_DURATION_OPTIONS.map(v => `<option value="${v}" ${Number(arenaState.settings.duration) === v ? 'selected' : ''}>${v} minutos</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="arena-field">
+                        <label>Power ups</label>
+                        <select id="arena-powerups-select" onchange="arenaApplySetting('powerUps', this.value === '1')">
+                            <option value="1" ${arenaState.settings.powerUps ? 'selected' : ''}>Ativado</option>
+                            <option value="0" ${!arenaState.settings.powerUps ? 'selected' : ''}>Desativado</option>
+                        </select>
+                    </div>
+                    <div class="arena-field">
+                        <label>Dificuldade</label>
+                        <select id="arena-difficulty-select" onchange="arenaApplySetting('difficulty', this.value)">
+                            <option value="classic" ${arenaState.settings.difficulty === 'classic' ? 'selected' : ''}>Clássico</option>
+                            <option value="hardcore" ${arenaState.settings.difficulty === 'hardcore' ? 'selected' : ''}>Hardcore</option>
+                            <option value="ultra" ${arenaState.settings.difficulty === 'ultra' ? 'selected' : ''}>Ultra Hardcore</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="arena-chip-list" style="margin-top:12px;">
+                    <button class="btn-menu" type="button" onclick="arenaOpenBanMode()">Bloquear personagens</button>
+                    <button class="btn-menu" type="button" onclick="arenaApplySetting('bannedChars', [])">Desbloquear tudo</button>
+                </div>
+            </div>
+        ` : `
+            <div class="arena-panel">
+                <h3 class="arena-panel-title">Configurações da sala</h3>
+                <div class="arena-badges">
+                    <span class="arena-badge">Mapa: ${escapeHtmlText(arenaMapLabel())}</span>
+                    <span class="arena-badge">Tempo: ${escapeHtmlText(arenaDurationLabel())}</span>
+                    <span class="arena-badge">Power ups: ${arenaState.settings.powerUps ? 'Ativados' : 'Desativados'}</span>
+                    <span class="arena-badge">Dificuldade: ${escapeHtmlText(arenaDifficultyLabel())}</span>
+                </div>
+            </div>
+        `;
+
+        const lobbyActions = `
+            <div class="arena-lobby-actions">
+                <button class="btn-menu" type="button" onclick="arenaChooseCharacter()">Trocar personagem</button>
+                <button class="btn-menu" type="button" onclick="arenaRefreshLobby()">Atualizar lobby</button>
+                ${isHost ? `<button class="btn-play full" type="button" onclick="arenaStartLobbyMatch()">Começar partida</button>` : `<button class="btn-menu full" type="button" onclick="arenaLeaveRoom()">Sair da sala</button>`}
+            </div>
+        `;
+
+        root.innerHTML = `
+            <div class="arena-shell">
+                <div class="arena-lobby-hero">
+                    <div class="arena-lobby-head">
+                        <div class="arena-lobby-meta">
+                            <div class="arena-kicker">🏛 Arena Legacy</div>
+                            <div class="arena-room-code">${roomLabel}</div>
+                            <h1 class="arena-room-title">${arenaState.online ? 'Sala online pronta' : (arenaState.mode === 'bots' ? 'Partida local com bots' : 'Lobby da Arena')}</h1>
+                            <div class="arena-badges">
+                                <span class="arena-badge">Modo: ${arenaState.mode === 'bots' ? 'Bots' : (arenaState.online ? 'Online' : 'Local')}</span>
+                                <span class="arena-badge">Tempo: ${arenaDurationLabel()}</span>
+                                <span class="arena-badge">Mapa: ${escapeHtmlText(arenaMapLabel())}</span>
+                                <span class="arena-badge">Dificuldade: ${escapeHtmlText(arenaDifficultyLabel())}</span>
+                            </div>
+                            ${lobbyActions}
+                        </div>
+                        <div class="arena-preview">
+                            <div class="arena-preview-sprite">${arenaGetPlayerCardSprite(me)}</div>
+                            <div class="arena-preview-name">${escapeHtmlText(me.name || arenaGetCurrentPlayerName())}</div>
+                            <div class="arena-badges" style="justify-content:center;">
+                                <span class="arena-badge">👤 ${escapeHtmlText(arenaSelectedCharDef().name)}</span>
+                                ${isHost ? '<span class="arena-badge">👑 Anfitrião</span>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="arena-panel">
+                    <h3 class="arena-panel-title">Jogadores</h3>
+                    <div id="arena-player-grid" class="arena-player-grid">
+                        ${players.map(p => `
+                            <div class="arena-player-card ${p.host ? 'host' : ''} ${p.me ? 'me' : ''}">
+                                <div class="player-sprite">${arenaGetPlayerCardSprite(p)}</div>
+                                <div class="nick">${escapeHtmlText(p.name || 'Jogador')}</div>
+                                <div class="meta">${p.host ? '👑 Anfitrião' : (p.bot ? '🤖 Bot' : 'Jogador')}</div>
+                                <div class="score">${Math.max(0, Math.floor(Number(p.score) || 0))} pts</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                ${hostControls}
+            </div>
+        `;
+        arenaUpdateRankingPanel();
+        arenaUpdateCharBanner();
+    };
+
+    window.arenaOpenBanMode = function () {
+        arenaEnsureState();
+        arenaBanMode = true;
+        arenaState.viewBeforeChars = arenaState.view || 'hub';
+        window.arenaReturnScreen = 'screen-arena';
+        showScreen('screen-chars');
+        renderChars();
+        arenaUpdateCharBanner();
+    };
+
+    window.arenaToggleBan = function (charId) {
+        arenaEnsureState();
+        const list = new Set(arenaState.settings.bannedChars || []);
+        if (list.has(charId)) list.delete(charId); else list.add(charId);
+        arenaState.settings.bannedChars = Array.from(list);
+        save();
+        renderChars();
+        arenaUpdateCharBanner();
+    };
+
+    window.arenaConfirmBanChanges = function () {
+        if (window.arenaReturnScreen === 'screen-arena') {
+            arenaBanMode = false;
+            window.arenaReturnScreen = null;
+            arenaState.view = arenaState.viewBeforeChars || 'hub';
+            showScreen('screen-arena');
+            arenaRenderLobby();
+        }
+    };
+
+    const originalShowCharDetail = window.showCharDetail;
+    window.showCharDetail = function (id) {
+        if (window.arenaBanMode) {
+            arenaToggleBan(id);
+            return;
+        }
+        return typeof originalShowCharDetail === 'function' ? originalShowCharDetail.apply(this, arguments) : undefined;
+    };
+
+    const originalSelectChar = window.selectChar;
+    window.selectChar = function (id) {
+        if (!pd.chars?.[id]) { showAlert("Personagem não obtido!"); return; }
+        if (window.arenaReturnScreen === 'screen-arena' && window.arenaState?.settings?.bannedChars?.includes?.(id)) {
+            showAlert('Personagem bloqueado nessa sala.');
+            return;
+        }
+        return typeof originalSelectChar === 'function' ? originalSelectChar.apply(this, arguments) : undefined;
+    };
+
+    window.arenaUpdateRankingPanel = function () {
+        const panel = document.getElementById('arena-ranking-panel');
+        if (!panel) return;
+        if (!window.isArenaMode || arenaState.view !== 'playing') {
+            panel.classList.add('hidden');
+            panel.innerHTML = '';
+            return;
+        }
+        panel.classList.remove('hidden');
+        const players = arenaGetLivePlayers();
+        const sorted = arenaSortedRanking(players).slice(0, 5);
+        panel.innerHTML = `<span class="title">Ranking</span>${sorted.length ? `<div class="arena-rank-list">${sorted.map((p, i) => `<div class="arena-rank-entry ${p.me ? 'me' : ''}"><span class="pos">#${i + 1}</span><span class="name">${escapeHtmlText(p.name || 'Jogador')}</span><span class="pts">${Math.max(0, Math.floor(Number(p.score) || 0))} pts</span></div>`).join('')}</div>` : `<div class="arena-banner">Sem jogadores ainda.</div>`}`;
+    };
+
+    function buildResultCardText(ranking, idx, label) {
+        const p = ranking[idx];
+        if (!p) return `${label}: —`;
+        return `${label}: ${escapeHtmlText(p.name || 'Jogador')} — ${Math.max(0, Math.floor(Number(p.score) || 0))} pts`;
+    }
+
+    window.arenaHandleResults = function (ranking) {
+        if (arenaState.resultsShown) return;
+        clearResultTimers();
+        arenaState.resultsShown = true;
+        window.arenaIgnoreGameOver = true;
+        arenaStopBattleLoop();
+        const ranked = arenaSortedRanking(Array.isArray(ranking) ? ranking : arenaGetLivePlayers());
+        arenaState.lastRanking = ranked;
+        const panel = document.getElementById('arena-root');
+        if (!panel) return;
+        panel.innerHTML = `
+            <div class="arena-results-card">
+                <h1>Fim da Partida</h1>
+                <div class="arena-banner">Ranking final em ordem.</div>
+                <div class="arena-results-list">
+                    <div class="arena-results-step" id="arena-res-step-3"></div>
+                    <div class="arena-results-step" id="arena-res-step-2"></div>
+                    <div class="arena-results-step" id="arena-res-step-1"></div>
+                </div>
+            </div>
+        `;
+        resultTimers.push(setTimeout(() => { const el = document.getElementById('arena-res-step-3'); if (el) { el.textContent = buildResultCardText(ranked, 2, 'Top 3'); el.classList.add('visible'); } }, 650));
+        resultTimers.push(setTimeout(() => { const el = document.getElementById('arena-res-step-2'); if (el) { el.textContent = buildResultCardText(ranked, 1, 'Top 2'); el.classList.add('visible'); } }, 1600));
+        resultTimers.push(setTimeout(() => { const el = document.getElementById('arena-res-step-1'); if (el) { el.textContent = buildResultCardText(ranked, 0, 'Top 1'); el.classList.add('visible'); } }, 2550));
+        resultTimers.push(setTimeout(() => {
+            if (arenaState.online && arenaState.isHost && arenaSocket?.connected) {
+                arenaSocket.emit('match:reset', {}, () => {});
+            }
+            arenaResetLobby();
+            showScreen('screen-arena');
+            arenaRenderLobby();
+        }, 4400));
+    };
+
+    window.arenaEndFromGame = function () {
+        if (!window.isArenaMode && !window.arenaIgnoreGameOver) return false;
+        const ranking = typeof arenaGetLivePlayers === 'function' ? arenaGetLivePlayers() : [];
+        arenaHandleResults(ranking);
+        return true;
+    };
+
+    const originalGameOver = window.gameOver;
+    window.gameOver = function (isQuit) {
+        if (window.isArenaMode || window.arenaIgnoreGameOver) {
+            isPlaying = false;
+            try { cancelAnimationFrame(gameLoopId); } catch (e) {}
+            if (joyZone) joyZone.style.display = 'none';
+            const sp = document.getElementById('btn-special');
+            if (sp) sp.style.display = 'none';
+            if (window.isArenaMode && !arenaState.resultsShown) arenaHandleResults(typeof arenaGetLivePlayers === 'function' ? arenaGetLivePlayers() : []);
+            return;
+        }
+        return typeof originalGameOver === 'function' ? originalGameOver.apply(this, arguments) : undefined;
+    };
+
+    const originalArenaResetLobby = window.arenaResetLobby;
+    window.arenaResetLobby = function () {
+        arenaStopBattleLoop();
+        clearResultTimers();
+        window.isArenaMode = false;
+        window.arenaIgnoreGameOver = true;
+        arenaState.view = arenaState.online ? 'lobby' : (arenaState.mode === 'bots' ? 'lobby' : 'hub');
+        if (arenaState.online) arenaState.mode = 'online';
+        arenaState.score = 0;
+        arenaState.kills = 0;
+        arenaState.penalty = 0;
+        arenaState.timeLeftMs = 0;
+        arenaState.resultsShown = false;
+        arenaState.lastRanking = [];
+        arenaState._nextRankingAt = 0;
+        if (Array.isArray(arenaState.players)) {
+            arenaState.players = arenaState.players.map(p => ({ ...p, score: 0, kills: 0, ready: false, charId: arenaResolveLobbyCharId(p) }));
+        }
+        if (Array.isArray(arenaState.botRoster)) {
+            arenaState.botRoster = arenaState.botRoster.map(b => ({ ...b, score: 0, kills: 0 }));
+        }
+        if (typeof originalArenaResetLobby === 'function') {
+            try { originalArenaResetLobby.apply(this, arguments); } catch (e) {}
+        }
+        arenaRenderLobby();
+    };
+
+    window.arenaMoveBackToLobby = function () {
+        arenaResetLobby();
+        showScreen('screen-arena');
+    };
+
+    window.arenaLeaveRoom = function () {
+        if (window.arenaSocket?.connected && window.arenaState?.online) {
+            arenaSocket.emit('room:leave', {}, () => {});
+        }
+        arenaStopBattleLoop();
+        window.isArenaMode = false;
+        window.arenaIgnoreGameOver = false;
+        arenaState.online = false;
+        arenaState.isHost = false;
+        arenaState.roomCode = '';
+        arenaState.joinCode = '';
+        arenaState.players = [];
+        arenaState.botRoster = [];
+        arenaState.playerCharMap = {};
+        arenaState.mode = 'hub';
+        arenaState.view = 'hub';
+        arenaState.resultsShown = false;
+        arenaState.lastRanking = [];
+        showScreen('screen-arena');
+        arenaRenderHub();
+    };
+
+    window.arenaJoinRoom = function () {
+        arenaEnsureState();
+        arenaConnect();
+        const nick = String(document.getElementById('arena-name-input')?.value || arenaGetCurrentPlayerName()).trim().slice(0, 20) || 'Jogador';
+        const code = String(document.getElementById('arena-code-input')?.value || '').trim().toUpperCase();
+        if (!code) { showAlert('Digite um código de sala.'); return; }
+        pd.nickname = nick;
+        save();
+        arenaState.joinCode = code;
+        arenaState.view = 'lobby';
+        if (arenaSocket) {
+            arenaSocket.emit('room:join', { code, name: nick }, (res) => {
+                if (!res?.ok) { showAlert(res?.error || 'Não foi possível entrar na sala.'); return; }
+                arenaState.online = true;
+                arenaState.mode = 'online';
+                arenaState.roomCode = res.code || code;
+                arenaState.isHost = arenaSocket.id === res.room?.hostId;
+                arenaState.players = Array.isArray(res.room?.players) ? res.room.players.map(p => ({
+                    id: p.id,
+                    name: p.name,
+                    score: p.score || 0,
+                    kills: p.kills || 0,
+                    ready: !!p.ready,
+                    me: p.id === arenaSocket.id,
+                    host: p.id === (res.room?.hostId || arenaSocket.id),
+                    charId: p.charId || arenaResolveLobbyCharId(p)
+                })) : [];
+                arenaState.joinCode = '';
+                showScreen('screen-arena');
+                arenaRenderLobby();
+                notify(`Entrou na sala ${arenaState.roomCode}`);
+            });
+        } else {
+            arenaState.online = false;
+            arenaState.isHost = false;
+            arenaState.roomCode = code;
+            arenaState.players = [];
+            arenaState.joinCode = '';
+            showScreen('screen-arena');
+            arenaRenderLobby();
+            notify('Modo offline: sala simulada.');
+        }
+    };
+
+    const originalArenaTick = window.arenaTick;
+    window.arenaTick = function (dt) {
+        if (!window.isArenaMode || arenaState.view !== 'playing') return;
+        const now = Date.now();
+        arenaState.timeLeftMs = Math.max(0, arenaState.timeLeftMs - (dt * 1000));
+        arenaState.score = Math.max(0, Math.floor((enemiesKilled || 0) * 10 - (arenaState.penalty || 0)));
+
+        if (arenaState.mode === 'bots') {
+            if (!arenaState._botPulseAt || now >= arenaState._botPulseAt) {
+                arenaState._botPulseAt = now + 700;
+                arenaState.botRoster.forEach((b, i) => {
+                    if (Math.random() < 0.26) b.score = Math.max(0, Math.floor((b.score || 0) + 1 + (i % 3)));
+                    if (Math.random() < 0.14) b.kills = Math.max(0, Math.floor((b.kills || 0) + 1));
+                });
+            }
+        }
+
+        if (arenaState.online && arenaSocket?.connected && (!arenaState._nextHudSyncAt || now >= arenaState._nextHudSyncAt)) {
+            arenaState._nextHudSyncAt = now + 320;
+            arenaSocket.emit('score:update', { score: arenaState.score, kills: enemiesKilled || 0 });
+        }
+
+        if (!arenaState._nextRankingAt || now >= arenaState._nextRankingAt) {
+            arenaState._nextRankingAt = now + 500;
+            arenaUpdateRankingPanel();
+        }
+
+        if (player && player.arenaTenisTimer > 0) {
+            player.arenaTenisTimer = Math.max(0, player.arenaTenisTimer - dt);
+            if (player.arenaTenisTimer <= 0) player.stats.speedMult = Math.max(1, (Number(player.stats.speedMult) || 1) / 1.35);
+        }
+
+        if (arenaState.timeLeftMs <= 0 && !arenaState.resultsShown) {
+            arenaEndFromGame();
+        }
+
+        if (typeof originalArenaTick === 'function' && originalArenaTick !== window.arenaTick) {
+            try { originalArenaTick.apply(this, arguments); } catch (e) {}
+        }
+    };
+
+    window.arenaStartLobbyMatch = function () {
+        if (arenaState.mode === 'bots' || !arenaState.online) {
+            arenaPlayBots();
+            return;
+        }
+        if (arenaState.online) {
+            if (!arenaState.isHost) { showAlert('Só o anfitrião começa a partida.'); return; }
+            const s = arenaConnect();
+            if (!s) { showAlert('Socket da Arena indisponível.'); return; }
+            s.emit('room:start', {}, (res) => {
+                if (!res?.ok) showAlert(res?.error || 'Não foi possível iniciar.');
+            });
+            return;
+        }
+        arenaPlayBots();
+    };
+
+    window.arenaApplySetting = function (key, value) {
+        arenaEnsureState();
+        if (key === 'bannedChars' && !Array.isArray(value)) value = [];
+        arenaState.settings[key] = value;
+        save();
+        arenaRenderLobby();
+        if (arenaState.online && arenaState.isHost && arenaSocket) {
+            arenaSocket.emit('room:settings', { settings: arenaState.settings });
+        }
+    };
+
+    window.arenaOpenJoinRoom = window.arenaOpenJoinRoom;
+    // show the join form from hub with cleared code
 })();
 </script>
 
