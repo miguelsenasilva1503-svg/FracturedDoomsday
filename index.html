@@ -17975,5 +17975,416 @@ applyMusicVolume();
 })();
 </script>
 
+<script>
+(function () {
+    if (window.__arenaFixV11Applied) return;
+    window.__arenaFixV11Applied = true;
+
+    function hasChar(id) {
+        return !!(typeof CHARACTERS === 'object' && CHARACTERS && CHARACTERS[id]);
+    }
+
+    function selectedArenaCharId() {
+        return typeof arenaSelectedCharId === 'function' ? arenaSelectedCharId() : 'strike';
+    }
+
+    function ensurePlayerCharMap() {
+        if (!window.arenaState || typeof window.arenaState !== 'object') window.arenaState = {};
+        if (!window.arenaState.playerCharMap || typeof window.arenaState.playerCharMap !== 'object') window.arenaState.playerCharMap = {};
+        return window.arenaState.playerCharMap;
+    }
+
+    function resolveKnownCharId(playerLike) {
+        const selected = selectedArenaCharId();
+        if (!playerLike) return selected;
+
+        if (typeof playerLike === 'string') {
+            return hasChar(playerLike) ? playerLike : selected;
+        }
+
+        if (playerLike.me || playerLike.id === 'me') return selected;
+
+        const explicit = String(playerLike.charId || '').trim();
+        if (explicit && hasChar(explicit)) return explicit;
+
+        const key = String(playerLike.id || playerLike.name || '').trim();
+        const map = ensurePlayerCharMap();
+        if (key && hasChar(map[key])) return map[key];
+
+        return 'strike';
+    }
+
+    function syncMyArenaChar(forceEmit = false) {
+        const map = ensurePlayerCharMap();
+        const myChar = selectedArenaCharId();
+        map.me = myChar;
+        if (window.arenaState && Array.isArray(window.arenaState.players)) {
+            const me = window.arenaState.players.find(p => p.me || p.id === 'me');
+            if (me) me.charId = myChar;
+        }
+        if (forceEmit && window.arenaSocket?.connected && window.arenaState?.online) {
+            try {
+                window.arenaSocket.emit('player:update', {
+                    charId: myChar,
+                    name: typeof arenaGetCurrentPlayerName === 'function' ? arenaGetCurrentPlayerName() : 'Jogador'
+                });
+            } catch (e) {}
+        }
+        return myChar;
+    }
+
+    function withArenaSocket(cb, failMsg) {
+        const s = typeof arenaConnect === 'function' ? arenaConnect() : null;
+        if (!s) {
+            showAlert(failMsg || 'Servidor da Arena indisponível.');
+            return null;
+        }
+        if (s.connected) {
+            cb(s);
+            return s;
+        }
+        const onConnect = () => {
+            s.off('connect_error', onError);
+            cb(s);
+        };
+        const onError = () => {
+            s.off('connect', onConnect);
+            showAlert(failMsg || 'Não foi possível conectar ao servidor da Arena.');
+        };
+        s.once('connect', onConnect);
+        s.once('connect_error', onError);
+        return s;
+    }
+
+    function applyRoomSettingsFromServer(room) {
+        if (!room || !window.arenaState) return;
+        const incoming = room.settings || room.roomSettings || room.meta?.settings;
+        if (incoming && typeof incoming === 'object') {
+            window.arenaState.settings = {
+                ...(window.arenaState.settings || {}),
+                ...incoming
+            };
+            if (Array.isArray(incoming.bannedChars)) {
+                window.arenaState.settings.bannedChars = incoming.bannedChars.slice();
+            }
+        }
+        if (!window.arenaState.playerCharMap || typeof window.arenaState.playerCharMap !== 'object') {
+            window.arenaState.playerCharMap = {};
+        }
+        if (Array.isArray(room.players)) {
+            room.players.forEach(p => {
+                const key = String(p?.id || p?.name || '').trim();
+                if (!key) return;
+                if (p.charId && hasChar(p.charId)) {
+                    window.arenaState.playerCharMap[key] = p.charId;
+                }
+            });
+        }
+        ensurePlayerCharMap();
+        syncMyArenaChar(false);
+    }
+
+    function patchArenaSocket(sock) {
+        if (!sock || sock.__arenaFixV11) return sock;
+        sock.__arenaFixV11 = true;
+        sock.on('room:update', (room) => {
+            applyRoomSettingsFromServer(room);
+        });
+        sock.on('match:start', (payload) => {
+            if (payload?.settings && typeof payload.settings === 'object') {
+                applyRoomSettingsFromServer({ settings: payload.settings, players: [] });
+            }
+            syncMyArenaChar(false);
+        });
+        return sock;
+    }
+
+    const originalArenaConnect = window.arenaConnect;
+    window.arenaConnect = function () {
+        const sock = originalArenaConnect ? originalArenaConnect.apply(this, arguments) : null;
+        return patchArenaSocket(sock);
+    };
+
+    // Patch any already-created socket immediately.
+    if (window.arenaSocket) patchArenaSocket(window.arenaSocket);
+
+    const originalGetPlayerCardSprite = window.arenaGetPlayerCardSprite;
+    window.arenaGetPlayerCardSprite = function (playerLike, variant = 'menu') {
+        const charId = resolveKnownCharId(playerLike);
+        if (typeof arenaGetCharSpriteMarkup === 'function') {
+            return arenaGetCharSpriteMarkup(charId, variant);
+        }
+        return originalGetPlayerCardSprite ? originalGetPlayerCardSprite.apply(this, arguments) : `<div style="width:100px;height:58px;border-radius:18px;background:rgba(255,255,255,0.08);"></div>`;
+    };
+
+    const originalBuildPlayersForLobby = window.arenaBuildPlayersForLobby;
+    window.arenaBuildPlayersForLobby = function () {
+        const base = originalBuildPlayersForLobby ? originalBuildPlayersForLobby.apply(this, arguments) : [];
+        const players = Array.isArray(base) ? base.map(p => ({ ...p, charId: resolveKnownCharId(p) })) : [];
+        const selected = syncMyArenaChar(false);
+        const me = {
+            id: 'me',
+            name: typeof arenaGetCurrentPlayerName === 'function' ? arenaGetCurrentPlayerName() : 'Jogador',
+            charId: selected,
+            score: Number(window.arenaState?.score) || 0,
+            kills: Number(window.arenaState?.kills) || 0,
+            ready: true,
+            host: !!window.arenaState?.isHost,
+            me: true
+        };
+        if (!players.some(p => p.me || p.id === 'me')) players.unshift(me);
+        else {
+            const idx = players.findIndex(p => p.me || p.id === 'me');
+            if (idx >= 0) players[idx] = me;
+        }
+        const map = ensurePlayerCharMap();
+        players.forEach(p => {
+            const key = String(p.id || p.name || '').trim();
+            if (key) map[key] = resolveKnownCharId(p);
+        });
+        return players;
+    };
+
+    const originalRenderHub = window.arenaRenderHub;
+    window.arenaRenderHub = function () {
+        if (typeof originalRenderHub === 'function') originalRenderHub.apply(this, arguments);
+        const root = document.getElementById('arena-root');
+        if (!root) return;
+        const buttons = root.querySelector('.arena-home-buttons');
+        if (buttons) {
+            buttons.style.gridTemplateColumns = 'repeat(3, minmax(0, 1fr))';
+            buttons.querySelectorAll('button').forEach(btn => {
+                const txt = (btn.textContent || '').trim().toLowerCase();
+                const onclick = String(btn.getAttribute('onclick') || '');
+                if (txt === 'jogar' || onclick.includes('arenaPlayBots')) btn.remove();
+            });
+        }
+        const previewSprite = root.querySelector('.arena-preview-sprite');
+        if (previewSprite) {
+            previewSprite.innerHTML = window.arenaGetPlayerCardSprite({ id: 'me', name: typeof arenaGetCurrentPlayerName === 'function' ? arenaGetCurrentPlayerName() : 'Jogador', charId: selectedArenaCharId(), me: true }, 'menu');
+        }
+        const previewName = root.querySelector('.arena-preview-name');
+        if (previewName) previewName.textContent = typeof arenaGetCurrentPlayerName === 'function' ? arenaGetCurrentPlayerName() : 'Jogador';
+        const previewBadges = root.querySelector('.arena-preview .arena-badges');
+        if (previewBadges) {
+            previewBadges.innerHTML = `<span class="arena-badge">👤 ${escapeHtmlText((CHARACTERS?.[selectedArenaCharId()]?.name || 'Strike'))}</span>`;
+        }
+    };
+
+    const originalRenderJoinForm = window.arenaRenderJoinForm;
+    window.arenaRenderJoinForm = function () {
+        if (typeof originalRenderJoinForm === 'function') originalRenderJoinForm.apply(this, arguments);
+        const root = document.getElementById('arena-root');
+        if (!root) return;
+        const previewSprite = root.querySelector('.arena-preview-sprite');
+        if (previewSprite) {
+            previewSprite.innerHTML = window.arenaGetPlayerCardSprite({ id: 'me', name: typeof arenaGetCurrentPlayerName === 'function' ? arenaGetCurrentPlayerName() : 'Jogador', charId: selectedArenaCharId(), me: true }, 'menu');
+        }
+    };
+
+    const originalRenderLobby = window.arenaRenderLobby;
+    window.arenaRenderLobby = function () {
+        if (typeof originalRenderLobby === 'function') originalRenderLobby.apply(this, arguments);
+        const root = document.getElementById('arena-root');
+        if (!root) return;
+
+        const players = typeof arenaBuildPlayersForLobby === 'function' ? arenaBuildPlayersForLobby() : [];
+        const previewSprite = root.querySelector('.arena-preview-sprite');
+        if (previewSprite) {
+            previewSprite.innerHTML = window.arenaGetPlayerCardSprite({ id: 'me', name: typeof arenaGetCurrentPlayerName === 'function' ? arenaGetCurrentPlayerName() : 'Jogador', charId: selectedArenaCharId(), me: true }, 'menu');
+        }
+        const previewName = root.querySelector('.arena-preview-name');
+        if (previewName) previewName.textContent = typeof arenaGetCurrentPlayerName === 'function' ? arenaGetCurrentPlayerName() : 'Jogador';
+
+        const previewBadge = root.querySelector('.arena-preview .arena-badges');
+        if (previewBadge) {
+            previewBadge.innerHTML = [
+                `<span class="arena-badge">👤 ${escapeHtmlText((CHARACTERS?.[selectedArenaCharId()]?.name || 'Strike'))}</span>`,
+                window.arenaState?.isHost ? '<span class="arena-badge">👑 Anfitrião</span>' : ''
+            ].join('');
+        }
+
+        const grid = root.querySelector('#arena-player-grid');
+        if (grid && players.length) {
+            const cards = Array.from(grid.querySelectorAll('.arena-player-card'));
+            cards.forEach((card, i) => {
+                const player = players[i];
+                if (!player) return;
+                const sprite = card.querySelector('.player-sprite');
+                if (sprite) sprite.innerHTML = window.arenaGetPlayerCardSprite(player, 'menu');
+            });
+        }
+    };
+
+    const originalOpenHub = window.arenaOpenHub;
+    window.arenaOpenHub = function () {
+        const result = originalOpenHub ? originalOpenHub.apply(this, arguments) : undefined;
+        syncMyArenaChar(false);
+        return result;
+    };
+
+    const originalOpenJoinRoom = window.arenaOpenJoinRoom;
+    window.arenaOpenJoinRoom = function () {
+        if (typeof arenaEnsureState === 'function') arenaEnsureState();
+        if (window.arenaState) {
+            window.arenaState.view = 'join';
+            window.arenaState.joinCode = '';
+            window.arenaState.roomCode = '';
+        }
+        if (typeof showScreen === 'function') showScreen('screen-arena');
+        if (typeof arenaRenderJoinForm === 'function') arenaRenderJoinForm();
+        const input = document.getElementById('arena-code-input');
+        if (input) setTimeout(() => input.focus(), 0);
+        return originalOpenJoinRoom ? originalOpenJoinRoom.apply(this, arguments) : undefined;
+    };
+
+    window.arenaCreateRoom = function () {
+        if (typeof arenaEnsureState === 'function') arenaEnsureState();
+        const nick = String(document.getElementById('arena-name-input')?.value || (typeof arenaGetCurrentPlayerName === 'function' ? arenaGetCurrentPlayerName() : 'Jogador')).trim().slice(0, 20) || 'Jogador';
+        pd.nickname = nick;
+        if (typeof save === 'function') save();
+        if (window.arenaState) {
+            window.arenaState.view = 'lobby';
+            window.arenaState.online = false;
+            window.arenaState.mode = 'hub';
+            window.arenaState.roomCode = '';
+            window.arenaState.players = [];
+        }
+        syncMyArenaChar(false);
+        withArenaSocket((s) => {
+            s.emit('room:create', {
+                name: nick,
+                charId: selectedArenaCharId(),
+                settings: window.arenaState?.settings || {}
+            }, (res) => {
+                if (!res?.ok) { showAlert(res?.error || 'Não foi possível criar a sala.'); return; }
+                window.arenaState.online = true;
+                window.arenaState.isHost = true;
+                window.arenaState.mode = 'online';
+                window.arenaState.roomCode = res.code || res.room?.code || '';
+                window.arenaState.players = Array.isArray(res.room?.players) ? res.room.players.map(p => ({
+                    id: p.id,
+                    name: p.name,
+                    score: p.score || 0,
+                    kills: p.kills || 0,
+                    ready: !!p.ready,
+                    me: p.id === s.id,
+                    host: p.id === (res.room?.hostId || s.id),
+                    charId: p.charId || (p.id === s.id ? selectedArenaCharId() : 'strike')
+                })) : [];
+                applyRoomSettingsFromServer(res.room || {});
+                if (typeof arenaRenderLobby === 'function') arenaRenderLobby();
+                notify(`Sala criada: ${window.arenaState.roomCode}`);
+            });
+        }, 'Sem conexão com o servidor da Arena.');
+    };
+
+    window.arenaJoinRoom = function () {
+        if (typeof arenaEnsureState === 'function') arenaEnsureState();
+        const nick = String(document.getElementById('arena-name-input')?.value || (typeof arenaGetCurrentPlayerName === 'function' ? arenaGetCurrentPlayerName() : 'Jogador')).trim().slice(0, 20) || 'Jogador';
+        const code = String(document.getElementById('arena-code-input')?.value || '').trim().toUpperCase();
+        if (!code) { showAlert('Digite um código de sala.'); return; }
+        pd.nickname = nick;
+        if (typeof save === 'function') save();
+        if (window.arenaState) {
+            window.arenaState.view = 'lobby';
+            window.arenaState.roomCode = code;
+            window.arenaState.online = false;
+            window.arenaState.mode = 'hub';
+            window.arenaState.players = [];
+        }
+        syncMyArenaChar(false);
+        withArenaSocket((s) => {
+            s.emit('room:join', {
+                code,
+                name: nick,
+                charId: selectedArenaCharId(),
+                settings: window.arenaState?.settings || {}
+            }, (res) => {
+                if (!res?.ok) { showAlert(res?.error || 'Não foi possível entrar na sala.'); return; }
+                window.arenaState.online = true;
+                window.arenaState.mode = 'online';
+                window.arenaState.roomCode = res.code || code;
+                window.arenaState.isHost = s.id === res.room?.hostId;
+                window.arenaState.players = Array.isArray(res.room?.players) ? res.room.players.map(p => ({
+                    id: p.id,
+                    name: p.name,
+                    score: p.score || 0,
+                    kills: p.kills || 0,
+                    ready: !!p.ready,
+                    me: p.id === s.id,
+                    host: p.id === (res.room?.hostId || s.id),
+                    charId: p.charId || (p.id === s.id ? selectedArenaCharId() : 'strike')
+                })) : [];
+                applyRoomSettingsFromServer(res.room || {});
+                if (typeof arenaRenderLobby === 'function') arenaRenderLobby();
+                notify(`Entrou na sala ${window.arenaState.roomCode}`);
+            });
+        }, 'Servidor da Arena indisponível.');
+    };
+
+    window.arenaApplySetting = function (key, value) {
+        if (typeof arenaEnsureState === 'function') arenaEnsureState();
+        if (key === 'bannedChars' && !Array.isArray(value)) value = [];
+        if (!window.arenaState.settings || typeof window.arenaState.settings !== 'object') window.arenaState.settings = {};
+        window.arenaState.settings[key] = value;
+        if (typeof save === 'function') save();
+        if (window.arenaState.online && window.arenaState.isHost && window.arenaSocket?.connected) {
+            try {
+                window.arenaSocket.emit('room:settings', { settings: window.arenaState.settings, roomCode: window.arenaState.roomCode });
+            } catch (e) {}
+        }
+        if (typeof arenaRenderLobby === 'function') arenaRenderLobby();
+    };
+
+    const originalSelectChar = window.selectChar;
+    window.selectChar = function (id) {
+        const arenaVisible = !!document.getElementById('screen-arena') && !document.getElementById('screen-arena').classList.contains('hidden');
+        const blocked = Array.isArray(window.arenaState?.settings?.bannedChars) && window.arenaState.settings.bannedChars.includes(id);
+        if ((window.arenaBanMode || window.isArenaMode || window.arenaReturnScreen === 'screen-arena' || arenaVisible) && blocked) {
+            showAlert('Personagem bloqueado nessa sala.');
+            return;
+        }
+        const result = originalSelectChar ? originalSelectChar.apply(this, arguments) : undefined;
+        syncMyArenaChar(true);
+        if (window.arenaReturnScreen === 'screen-arena') {
+            const prev = window.arenaState?.viewBeforeChars || window.arenaState?.view || 'hub';
+            window.arenaBanMode = false;
+            window.arenaReturnScreen = null;
+            window.arenaState.view = prev;
+            if (typeof showScreen === 'function') showScreen('screen-arena');
+            if (prev === 'join') {
+                if (typeof arenaRenderJoinForm === 'function') arenaRenderJoinForm();
+            } else if (prev === 'lobby') {
+                if (typeof arenaRenderLobby === 'function') arenaRenderLobby();
+            } else {
+                if (typeof arenaRenderHub === 'function') arenaRenderHub();
+            }
+        } else if (window.arenaState?.view === 'lobby') {
+            if (typeof arenaRenderLobby === 'function') arenaRenderLobby();
+        } else if (window.arenaState?.view === 'hub') {
+            if (typeof arenaRenderHub === 'function') arenaRenderHub();
+        }
+        return result;
+    };
+
+    const originalShowCharDetail = window.showCharDetail;
+    window.showCharDetail = function (id) {
+        if (window.arenaBanMode) {
+            if (typeof arenaToggleBan === 'function') arenaToggleBan(id);
+            if (typeof renderChars === 'function') renderChars();
+            if (typeof arenaUpdateCharBanner === 'function') arenaUpdateCharBanner();
+            return;
+        }
+        return originalShowCharDetail ? originalShowCharDetail.apply(this, arguments) : undefined;
+    };
+
+    if (window.arenaState && typeof window.arenaState === 'object') {
+        ensurePlayerCharMap();
+        syncMyArenaChar(false);
+    }
+})();
+</script>
+
 </body>
 </html>
