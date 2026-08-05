@@ -1077,15 +1077,16 @@
         position: absolute;
         top: 10px;
         right: 10px;
-        width: min(270px, 40vw);
+        width: min(320px, 42vw);
         z-index: 6;
-        background: rgba(0,0,0,0.62);
-        border: 1px solid rgba(255,255,255,0.10);
-        border-radius: 18px;
-        padding: 10px 12px;
-        box-shadow: 0 10px 22px rgba(0,0,0,0.28);
+        background: linear-gradient(180deg, rgba(6,7,12,0.78), rgba(18,20,30,0.68));
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 20px;
+        padding: 12px 14px;
+        box-shadow: 0 16px 28px rgba(0,0,0,0.34);
         color: #fff;
         pointer-events: none;
+        backdrop-filter: blur(10px);
     }
     .arena-ranking-panel .title {
         display: block;
@@ -1124,6 +1125,24 @@
     .arena-rank-entry .pts {
         font-weight: 900;
         color: #fff;
+    }
+
+    .arena-ban-toggle {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0,0,0,0.72);
+        border: 1px solid rgba(255,255,255,0.18);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.26);
+        font-size: 18px;
+        z-index: 2;
+        pointer-events: none;
     }
     .arena-banner {
         padding: 12px 14px;
@@ -1244,15 +1263,17 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        padding: 8px 12px;
-        border-radius: 14px;
-        background: linear-gradient(180deg, rgba(241,196,15,0.20), rgba(0,0,0,0.25));
-        border: 1px solid rgba(241,196,15,0.22);
-        color: var(--btn-yellow);
-        font-size: 20px;
-        letter-spacing: 0.18em;
-        box-shadow: 0 10px 18px rgba(0,0,0,0.24);
+        padding: 10px 16px;
+        border-radius: 18px;
+        background: linear-gradient(180deg, rgba(241,196,15,0.28), rgba(0,0,0,0.38));
+        border: 1px solid rgba(241,196,15,0.35);
+        color: #fff6bf;
+        font-size: 24px;
+        font-weight: 900;
+        letter-spacing: 0.32em;
+        box-shadow: 0 14px 24px rgba(0,0,0,0.30);
         white-space: nowrap;
+        text-shadow: 1px 1px 0 rgba(0,0,0,0.55);
     }
     .arena-room-title {
         margin: 4px 0 0;
@@ -7412,7 +7433,7 @@ let sort = document.getElementById('char-filter-sort') ? document.getElementById
         const owned = !!pd.chars[c.id]; const lvl = owned ? pd.chars[c.id].level : 0; const isSel = pd.selectedChar === c.id;
         const div = document.createElement('div'); div.className = `card-item rarity-${c.rarity}`; div.style.cursor = 'pointer'; if(isSel) div.style.borderColor = 'var(--btn-green)';
         let banTag = bannedSet.has(c.id) ? `<div style="position:absolute;top:5px;right:5px;font-size:24px;">🔒</div>` : '';
-        if (window.arenaBanMode && arenaBanSet.has(c.id)) banTag = `<div style="position:absolute;top:5px;right:5px;font-size:24px;">🔒</div>`;
+        if (window.arenaBanMode) banTag = `<div class="arena-ban-toggle">${arenaBanSet.has(c.id) ? '🔒' : '◻️'}</div>`;
         let hasSprite = getCharacterSpriteMarkup(c.id, 'menu') || `<div style="width:78px;height:78px;background:${c.color};border-radius:50%;margin:0 auto 10px;border:3px solid #fff;"></div>`;
         let html = `${banTag}${hasSprite}<h4>${c.name}</h4><div style="font-size:12px;color:#aaa">${c.class}</div>`;
         if(owned) {
@@ -9269,6 +9290,51 @@ window.arenaBanMode = false;
 window.arenaMatchEndsAt = 0;
 window.arenaScorePenalty = 0;
 
+window.arenaReturnScreen = null;
+window.arenaBanMode = false;
+window.arenaMatchEndsAt = 0;
+window.arenaScorePenalty = 0;
+window.arenaIgnoreGameOver = false;
+window.arenaBattleStartTs = 0;
+window.arenaNextHudSyncAt = 0;
+function arenaStopBattleLoop() {
+    isPlaying = false;
+    isPaused = false;
+    try { cancelAnimationFrame(gameLoopId); } catch (e) {}
+    if (joyZone) joyZone.style.display = 'none';
+    const pauseBtn = document.getElementById('btn-special');
+    if (pauseBtn) pauseBtn.style.display = 'none';
+}
+function arenaSetBattleContext() {
+    const mapIdx = Math.max(0, Number(arenaState.settings.mapChoice) || 0);
+    window.currentMap = mapIdx;
+    window.isHardcoreMode = arenaState.settings.difficulty === 'hardcore';
+    window.arenaUltraHardcore = arenaState.settings.difficulty === 'ultra';
+    window.arenaNoRewards = true;
+    window.arenaIgnoreGameOver = false;
+    window.arenaMatchEndsAt = 0;
+    window.arenaScorePenalty = 0;
+    if (typeof syncMapSelectUI === 'function') syncMapSelectUI();
+}
+function arenaPrepBattleUI() {
+    showScreen(null);
+    const gameHud = document.getElementById('game-hud');
+    if (gameHud) gameHud.classList.remove('hidden');
+    const expBar = document.getElementById('exp-bar-container');
+    if (expBar) expBar.classList.remove('hidden');
+    const overlayShop = document.getElementById('overlay-pregame-shop');
+    if (overlayShop) overlayShop.classList.add('hidden');
+    const overlayGameOver = document.getElementById('overlay-gameover');
+    if (overlayGameOver) overlayGameOver.classList.add('hidden');
+    const overlayLevelUp = document.getElementById('overlay-levelup');
+    if (overlayLevelUp) overlayLevelUp.classList.add('hidden');
+    const overlayPause = document.getElementById('overlay-pause');
+    if (overlayPause) overlayPause.classList.add('hidden');
+    if (typeof ctx !== 'undefined' && ctx && canvas) ctx.clearRect(0, 0, cw, ch);
+    if (joyZone) joyZone.style.display = 'none';
+    applyControlLayout();
+}
+
 const ARENA_MAPS = ['Planície', 'Deserto', 'Neve', 'Floresta', 'Caverna', 'Pântano', 'Metrópole', 'Ígneo', 'Bambu', 'Discoteca'];
 const ARENA_DURATION_OPTIONS = [2, 5, 10, 15];
 const ARENA_POWERUPS = ['ima', 'tenis', 'escudo'];
@@ -9487,6 +9553,11 @@ function arenaRenderLobby() {
     const root = document.getElementById('arena-root');
     if (!root) return;
 
+    if (arenaState.view === 'playing') {
+        arenaUpdateRankingPanel();
+        return;
+    }
+
     if (arenaState.view === 'join') {
         arenaRenderJoinForm();
         return;
@@ -9549,12 +9620,12 @@ function arenaRenderLobby() {
         </div>
     `;
 
-    const roomCodeValue = escapeHtmlText(arenaState.roomCode || (arenaState.mode === 'bots' ? 'LOCAL' : '---'));
+    const roomCodeValue = escapeHtmlText((arenaState.roomCode || (arenaState.mode === 'bots' ? 'LOCAL' : '---')).toString());
     const roomLabel = arenaState.online
-        ? `Sala online <span class="arena-room-code-pill">${roomCodeValue}</span>`
+        ? `<span class="arena-room-code-pill">${roomCodeValue}</span>`
         : (arenaState.mode === 'bots'
-            ? `Partida com bots <span class="arena-room-code-pill">${roomCodeValue}</span>`
-            : `Lobby da Arena <span class="arena-room-code-pill">LOCAL</span>`);
+            ? `<span class="arena-room-code-pill">${roomCodeValue}</span>`
+            : `<span class="arena-room-code-pill">LOCAL</span>`);
     const roomSub = arenaState.online
         ? 'Sala online pronta. O host controla a partida.'
         : (arenaState.mode === 'bots'
@@ -9627,7 +9698,7 @@ function arenaUpdateCharBanner() {
     }
     banner.classList.remove('hidden');
     const names = (arenaState.settings.bannedChars || []).map(id => CHARACTERS[id]?.name || id);
-    banner.innerHTML = `<strong>Bloqueio de personagens:</strong> toque nos cards para alternar 🔒/normal. <br>Banidos: ${names.length ? escapeHtmlText(names.join(', ')) : 'nenhum'}
+    banner.innerHTML = `<strong>Bloqueio de personagens:</strong> toque nos cards para alternar o cadeado. <br>Banidos: ${names.length ? escapeHtmlText(names.join(', ')) : 'nenhum'}
         <div style="margin-top:10px; display:flex; justify-content:center;">
             <button class="btn-action" type="button" onclick="arenaConfirmBanChanges()">Confirmar banimentos</button>
         </div>`;
@@ -9689,6 +9760,7 @@ function arenaApplyPlayerNick() {
 }
 
 function arenaOpenBanMode() {
+    arenaEnsureState();
     arenaBanMode = true;
     arenaState.viewBeforeChars = arenaState.view || 'hub';
     window.arenaReturnScreen = 'screen-arena';
@@ -9732,6 +9804,7 @@ function arenaBackFromChars() {
 function openArenaHub() {
     arenaEnsureState();
     window.isArenaMode = false;
+    window.arenaIgnoreGameOver = false;
     arenaState.mode = 'hub';
     arenaState.view = 'hub';
     arenaState.online = false;
@@ -9740,11 +9813,19 @@ function openArenaHub() {
     arenaState.roomName = '';
     arenaState.players = [];
     arenaState.botRoster = [];
+    arenaState.resultsShown = false;
+    arenaState.lastRanking = [];
+    arenaState.score = 0;
+    arenaState.kills = 0;
+    arenaState.penalty = 0;
+    arenaState.timeLeftMs = 0;
     window.arenaReturnScreen = null;
     window.arenaBanMode = false;
+    arenaStopBattleLoop();
     showScreen('screen-arena');
     arenaRenderLobby();
 }
+
 
 function arenaChooseCharacter() {
     arenaEnsureState();
@@ -9755,6 +9836,7 @@ function arenaChooseCharacter() {
     renderChars();
     arenaUpdateCharBanner();
 }
+
 
 function arenaConnect() {
     if (arenaSocket && arenaSocket.connected) return arenaSocket;
@@ -9784,10 +9866,14 @@ function arenaConnect() {
             host: p.id === room.hostId,
             charId: p.charId || arenaSelectedCharId()
         })) : [];
+        if (room.status === 'playing') {
+            if (window.isArenaMode) arenaUpdateRankingPanel();
+            return;
+        }
         arenaRenderLobby();
     });
     arenaSocket.on('match:start', (payload) => {
-        arenaState.mode = 'playing';
+        arenaState.mode = 'online';
         arenaState.timeLeftMs = Number(payload?.durationMs) || (arenaState.settings.duration * 60000);
         arenaState.score = 0;
         arenaState.kills = 0;
@@ -9800,6 +9886,7 @@ function arenaConnect() {
     });
     return arenaSocket;
 }
+
 
 function arenaCreateRoom() {
     arenaEnsureState();
@@ -9831,6 +9918,166 @@ function arenaCreateRoom() {
         notify('Sala local criada.');
     }
 }
+
+function arenaOpenJoinRoom() {
+    arenaEnsureState();
+    arenaState.view = 'join';
+    showScreen('screen-arena');
+    arenaRenderLobby();
+}
+
+function arenaJoinRoom() {
+    arenaEnsureState();
+    arenaConnect();
+    const nick = String(document.getElementById('arena-name-input')?.value || arenaGetCurrentPlayerName()).trim().slice(0, 20) || 'Jogador';
+    const code = String(document.getElementById('arena-code-input')?.value || '').trim().toUpperCase();
+    if (!code) { showAlert('Digite um código de sala.'); return; }
+    pd.nickname = nick;
+    save();
+    arenaState.view = 'lobby';
+    if (arenaSocket) {
+        arenaSocket.emit('room:join', { code, name: nick }, (res) => {
+            if (!res?.ok) { showAlert(res?.error || 'Não foi possível entrar na sala.'); return; }
+            arenaState.online = true;
+            arenaState.mode = 'online';
+            arenaState.roomCode = res.code || code;
+            arenaState.isHost = arenaSocket.id === res.room?.hostId;
+            arenaState.players = Array.isArray(res.room?.players) ? res.room.players.map(p => ({
+                id: p.id, name: p.name, score: p.score || 0, kills: p.kills || 0, ready: !!p.ready, me: p.id === arenaSocket.id, host: p.id === (res.room?.hostId || arenaSocket.id), charId: p.charId || arenaSelectedCharId()
+            })) : [];
+            arenaRenderLobby();
+            notify(`Entrou na sala ${arenaState.roomCode}`);
+        });
+    } else {
+        arenaState.online = false;
+        arenaState.isHost = false;
+        arenaState.roomCode = code;
+        arenaState.players = [];
+        arenaRenderLobby();
+        notify('Modo offline: sala simulada.');
+    }
+}
+
+function arenaPlayBots() {
+    arenaEnsureState();
+    arenaStopBattleLoop();
+    window.isArenaMode = true;
+    arenaState.view = 'playing';
+    arenaState.online = false;
+    arenaState.isHost = true;
+    arenaState.mode = 'bots';
+    arenaState.roomCode = `BOTS-${Math.floor(Math.random()*9000)+1000}`;
+    arenaState.roomName = 'Partida com bots';
+    arenaState.botRoster = arenaGenerateBots(4);
+    arenaState.players = [];
+    arenaState.resultsShown = false;
+    arenaState.lastRanking = [];
+    arenaStartBattle();
+}
+
+function arenaStartLobbyMatch() {
+    if (arenaState.mode === 'bots' || !arenaState.online) {
+        arenaPlayBots();
+        return;
+    }
+    if (arenaState.online) {
+        if (!arenaState.isHost) { showAlert('Só o anfitrião começa a partida.'); return; }
+        const s = arenaConnect();
+        if (!s) { showAlert('Socket da Arena indisponível.'); return; }
+        s.emit('room:start', {}, (res) => {
+            if (!res?.ok) showAlert(res?.error || 'Não foi possível iniciar.');
+        });
+        return;
+    }
+    arenaPlayBots();
+}
+
+function arenaStartBattle() {
+    arenaEnsureState();
+    arenaSetBattleContext();
+    arenaStopBattleLoop();
+    window.isArenaMode = true;
+    arenaState.view = 'playing';
+    arenaState.mode = arenaState.online ? 'online' : 'bots';
+    arenaState.score = 0;
+    arenaState.kills = 0;
+    arenaState.penalty = 0;
+    arenaState.timeLeftMs = Math.max(1, Number(arenaState.settings.duration) || 5) * 60000;
+    arenaState.resultsShown = false;
+    arenaState.lastRanking = [];
+    arenaState._botPulseAt = 0;
+    arenaState._nextHudSyncAt = 0;
+    arenaState.roomName = arenaState.roomName || (arenaState.online ? 'Sala online' : 'Partida com bots');
+    arenaPrepBattleUI();
+    startRunAfterShop();
+    arenaUpdateRankingPanel();
+}
+
+function showArenaMatch() {
+    arenaEnsureState();
+    arenaSetBattleContext();
+    arenaStopBattleLoop();
+    window.isArenaMode = true;
+    arenaState.view = 'playing';
+    arenaState.mode = arenaState.online ? 'online' : 'bots';
+    arenaState.resultsShown = false;
+    arenaState.lastRanking = [];
+    arenaState._botPulseAt = 0;
+    arenaState._nextHudSyncAt = 0;
+    arenaPrepBattleUI();
+    startRunAfterShop();
+    arenaUpdateRankingPanel();
+}
+
+function arenaResetLobby() {
+    arenaEnsureState();
+    arenaStopBattleLoop();
+    window.isArenaMode = false;
+    window.arenaIgnoreGameOver = true;
+    arenaState.view = arenaState.online ? 'lobby' : (arenaState.mode === 'bots' ? 'lobby' : 'hub');
+    if (arenaState.online) arenaState.mode = 'online';
+    arenaState.score = 0;
+    arenaState.kills = 0;
+    arenaState.penalty = 0;
+    arenaState.timeLeftMs = 0;
+    arenaState.resultsShown = false;
+    arenaState.lastRanking = [];
+    if (Array.isArray(arenaState.players)) {
+        arenaState.players = arenaState.players.map(p => ({ ...p, score: 0, kills: 0, ready: false }));
+    }
+    if (Array.isArray(arenaState.botRoster)) {
+        arenaState.botRoster = arenaState.botRoster.map(b => ({ ...b, score: 0, kills: 0 }));
+    }
+    arenaRenderLobby();
+}
+
+function arenaLeaveRoom() {
+    if (arenaSocket?.connected && arenaState.online) {
+        arenaSocket.emit('room:leave', {}, () => {});
+    }
+    arenaStopBattleLoop();
+    window.arenaIgnoreGameOver = false;
+    arenaState.online = false;
+    arenaState.isHost = false;
+    arenaState.roomCode = '';
+    arenaState.players = [];
+    arenaState.botRoster = [];
+    arenaState.mode = 'hub';
+    arenaState.view = 'hub';
+    arenaState.resultsShown = false;
+    arenaState.lastRanking = [];
+    window.isArenaMode = false;
+    arenaRenderLobby();
+}
+
+function arenaRefreshLobby() {
+    if (arenaState.view === 'playing') {
+        arenaUpdateRankingPanel();
+        return;
+    }
+    arenaRenderLobby();
+}
+
 
 function arenaOpenJoinRoom() {
     arenaEnsureState();
@@ -10013,17 +10260,22 @@ function applyArenaPowerUp(kind) {
 
 function arenaTick(dt) {
     if (!window.isArenaMode || arenaState.view !== 'playing') return;
+    const now = Date.now();
     arenaState.timeLeftMs = Math.max(0, arenaState.timeLeftMs - (dt * 1000));
     arenaState.score = Math.max(0, Math.floor((enemiesKilled || 0) * 10 - (arenaState.penalty || 0)));
 
     if (arenaState.mode === 'bots') {
-        arenaState.botRoster.forEach((b, i) => {
-            b.score = Math.max(0, Math.floor((b.score || 0) + (Math.random() < 0.25 ? 2 + (i % 3) : 0)));
-            b.kills = Math.max(0, Math.floor((b.kills || 0) + (Math.random() < 0.18 ? 1 : 0)));
-        });
+        if (!arenaState._botPulseAt || now >= arenaState._botPulseAt) {
+            arenaState._botPulseAt = now + 260;
+            arenaState.botRoster.forEach((b, i) => {
+                if (Math.random() < 0.35) b.score = Math.max(0, Math.floor((b.score || 0) + 2 + (i % 3)));
+                if (Math.random() < 0.22) b.kills = Math.max(0, Math.floor((b.kills || 0) + 1));
+            });
+        }
     }
 
-    if (arenaState.online && arenaSocket?.connected) {
+    if (arenaState.online && arenaSocket?.connected && (!arenaState._nextHudSyncAt || now >= arenaState._nextHudSyncAt)) {
+        arenaState._nextHudSyncAt = now + 220;
         arenaSocket.emit('score:update', { score: arenaState.score, kills: enemiesKilled || 0 });
     }
 
@@ -10034,12 +10286,16 @@ function arenaTick(dt) {
         }
     }
 
-    arenaUpdateRankingPanel();
+    if (!arenaState._nextRankingAt || now >= arenaState._nextRankingAt) {
+        arenaState._nextRankingAt = now + 140;
+        arenaUpdateRankingPanel();
+    }
 
     if (arenaState.timeLeftMs <= 0 && !arenaState.resultsShown) {
         gameOver(false);
     }
 }
+
 
 function arenaPenaltyOnDeath() {
     const loss = Math.max(10, Math.ceil(Math.max(60, arenaState.score) * 0.18));
@@ -10067,6 +10323,8 @@ function arenaHandleDeathAndRespawn() {
 function arenaHandleResults(ranking) {
     if (arenaState.resultsShown) return;
     arenaState.resultsShown = true;
+    window.arenaIgnoreGameOver = true;
+    arenaStopBattleLoop();
     const ranked = arenaSortedRanking(Array.isArray(ranking) ? ranking : arenaGetLivePlayers());
     arenaState.lastRanking = ranked;
     const panel = document.getElementById('arena-root');
@@ -10074,7 +10332,7 @@ function arenaHandleResults(ranking) {
     panel.innerHTML = `
         <div class="arena-results-card">
             <h1>Fim da Partida</h1>
-            <div class="arena-banner">O lobby vai voltar em instantes.</div>
+            <div class="arena-banner">Preparando retorno ao lobby...</div>
             <div class="arena-results-list">
                 <div class="arena-results-step" id="arena-res-step-3"></div>
                 <div class="arena-results-step" id="arena-res-step-2"></div>
@@ -10087,9 +10345,9 @@ function arenaHandleResults(ranking) {
         if (!p) return `${label}: —`;
         return `${label}: ${escapeHtmlText(p.name || 'Jogador')} — ${Math.max(0, Math.floor(Number(p.score) || 0))} pts`;
     };
-    setTimeout(() => { const el = document.getElementById('arena-res-step-3'); if (el) { el.textContent = makeLine(3, 'Top 3'); el.classList.add('visible'); } }, 500);
-    setTimeout(() => { const el = document.getElementById('arena-res-step-2'); if (el) { el.textContent = makeLine(2, 'Top 2'); el.classList.add('visible'); } }, 1400);
-    setTimeout(() => { const el = document.getElementById('arena-res-step-1'); if (el) { el.textContent = makeLine(1, 'Top 1'); el.classList.add('visible'); } }, 2300);
+    setTimeout(() => { const el = document.getElementById('arena-res-step-3'); if (el) { el.textContent = makeLine(3, 'Top 3'); el.classList.add('visible'); } }, 450);
+    setTimeout(() => { const el = document.getElementById('arena-res-step-2'); if (el) { el.textContent = makeLine(2, 'Top 2'); el.classList.add('visible'); } }, 1350);
+    setTimeout(() => { const el = document.getElementById('arena-res-step-1'); if (el) { el.textContent = makeLine(1, 'Top 1'); el.classList.add('visible'); } }, 2250);
     setTimeout(() => {
         if (arenaState.online && arenaState.isHost && arenaSocket?.connected) {
             arenaSocket.emit('match:reset', {}, () => {});
@@ -10098,12 +10356,51 @@ function arenaHandleResults(ranking) {
         arenaResetLobby();
         arenaRenderLobby();
         showScreen('screen-arena');
-    }, 4200);
+    }, 3600);
+}
+
+function arenaHandleResults(ranking) {
+    if (arenaState.resultsShown) return;
+    arenaState.resultsShown = true;
+    window.arenaIgnoreGameOver = true;
+    arenaStopBattleLoop();
+    const ranked = arenaSortedRanking(Array.isArray(ranking) ? ranking : arenaGetLivePlayers());
+    arenaState.lastRanking = ranked;
+    const panel = document.getElementById('arena-root');
+    if (!panel) return;
+    panel.innerHTML = `
+        <div class="arena-results-card">
+            <h1>Fim da Partida</h1>
+            <div class="arena-banner">Preparando retorno ao lobby...</div>
+            <div class="arena-results-list">
+                <div class="arena-results-step" id="arena-res-step-3"></div>
+                <div class="arena-results-step" id="arena-res-step-2"></div>
+                <div class="arena-results-step" id="arena-res-step-1"></div>
+            </div>
+        </div>
+    `;
+    const makeLine = (rank, label) => {
+        const p = ranked[rank - 1];
+        if (!p) return `${label}: —`;
+        return `${label}: ${escapeHtmlText(p.name || 'Jogador')} — ${Math.max(0, Math.floor(Number(p.score) || 0))} pts`;
+    };
+    setTimeout(() => { const el = document.getElementById('arena-res-step-3'); if (el) { el.textContent = makeLine(3, 'Top 3'); el.classList.add('visible'); } }, 450);
+    setTimeout(() => { const el = document.getElementById('arena-res-step-2'); if (el) { el.textContent = makeLine(2, 'Top 2'); el.classList.add('visible'); } }, 1350);
+    setTimeout(() => { const el = document.getElementById('arena-res-step-1'); if (el) { el.textContent = makeLine(1, 'Top 1'); el.classList.add('visible'); } }, 2250);
+    setTimeout(() => {
+        if (arenaState.online && arenaState.isHost && arenaSocket?.connected) {
+            arenaSocket.emit('match:reset', {}, () => {});
+        }
+        arenaState.view = 'lobby';
+        arenaResetLobby();
+        arenaRenderLobby();
+        showScreen('screen-arena');
+    }, 3600);
 }
 
 function arenaEndFromGame() {
-    if (!window.isArenaMode) return false;
-    const ranking = arenaState.mode === 'bots' ? arenaGetLivePlayers() : arenaGetLivePlayers();
+    if (!window.isArenaMode && !window.arenaIgnoreGameOver) return false;
+    const ranking = arenaGetLivePlayers();
     arenaHandleResults(ranking);
     return true;
 }
@@ -15443,9 +15740,13 @@ function updateGameHud() {
 }
 
 function gameOver(isQuit) {
-    if (window.isArenaMode) {
-        isPlaying = false; cancelAnimationFrame(gameLoopId); joyZone.style.display = 'none'; document.getElementById('btn-special').style.display = 'none';
-        arenaEndFromGame();
+    if (window.isArenaMode || window.arenaIgnoreGameOver) {
+        isPlaying = false;
+        try { cancelAnimationFrame(gameLoopId); } catch (e) {}
+        if (joyZone) joyZone.style.display = 'none';
+        const sp = document.getElementById('btn-special');
+        if (sp) sp.style.display = 'none';
+        if (window.isArenaMode && !arenaState.resultsShown) arenaEndFromGame();
         return;
     }
     isPlaying = false; cancelAnimationFrame(gameLoopId); joyZone.style.display = 'none'; document.getElementById('btn-special').style.display = 'none';
@@ -15470,21 +15771,18 @@ function gameOver(isQuit) {
         let today = new Date().toDateString();
         if(pd.dailyWins.date !== today) { pd.dailyWins.date = today; pd.dailyWins.count = 0; }
         const maxWins = isVIPActive() ? 6 : 4;
-        if(pd.dailyWins.count < maxWins) {
-            pd.dailyWins.count++; winText = `Vitória Diária: Recompensas Adquiridas (${pd.dailyWins.count}/${maxWins})`;
-
-            let q = [];
-            let cNorm = []; for(let i=0; i<3; i++) cNorm.push(buildBoxDropItem('normal'));
-            q.push({ type: 'box', boxType: 'normal', contents: cNorm });
-            let cPac = []; cPac.push(buildBoxDropItem('pacote'));
-            q.push({ type: 'box', boxType: 'pacote', contents: cPac });
-            if(isVIPActive() && Math.random() < 0.1) {
-                let cMega = []; for(let i=0; i<6; i++) cMega.push(buildBoxDropItem('mega'));
-                q.push({ type: 'box', boxType: 'mega', contents: cMega });
-            }
-            startGachaQueue(q);
-        } else { winText = `Vitória Diária: Limite Atingido (${maxWins}/${maxWins})`; }
+        if (pd.dailyWins.count < maxWins) {
+            pd.dailyWins.count += 1;
+            awardAchievementStat('dailyWins', 1);
+            winText = `Vitória Diária: ${pd.dailyWins.count}/${maxWins}`;
+        } else {
+            winText = `Vitória Diária: limite de ${maxWins} atingido`;
+        }
+        pd.missions.wins += 1;
+        if (window.isHardcoreMode) pd.missions.hardcoreWins += 1;
+        if (pd.settings.ultraHardcore) pd.missions.uhcWins += 1;
     }
+
     pd.missions.coins += runCoins || 0;
     pd.achievements.stats.bestWave = Math.max(Number(pd.achievements?.stats?.bestWave) || 0, Math.max(0, wave));
     restoreGlitchSelectionIfNeeded();
