@@ -1230,11 +1230,29 @@
         line-height: 1.05;
     }
     .arena-room-code {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
         font-size: 13px;
         font-weight: 900;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        color: #b9c4d0;
+        color: #d9e2ea;
+    }
+    .arena-room-code-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 12px;
+        border-radius: 14px;
+        background: linear-gradient(180deg, rgba(241,196,15,0.20), rgba(0,0,0,0.25));
+        border: 1px solid rgba(241,196,15,0.22);
+        color: var(--btn-yellow);
+        font-size: 20px;
+        letter-spacing: 0.18em;
+        box-shadow: 0 10px 18px rgba(0,0,0,0.24);
+        white-space: nowrap;
     }
     .arena-room-title {
         margin: 4px 0 0;
@@ -7393,8 +7411,8 @@ let sort = document.getElementById('char-filter-sort') ? document.getElementById
     filtered.forEach(c => {
         const owned = !!pd.chars[c.id]; const lvl = owned ? pd.chars[c.id].level : 0; const isSel = pd.selectedChar === c.id;
         const div = document.createElement('div'); div.className = `card-item rarity-${c.rarity}`; div.style.cursor = 'pointer'; if(isSel) div.style.borderColor = 'var(--btn-green)';
-        let banTag = bannedSet.has(c.id) ? `<div style="position:absolute;top:5px;right:5px;font-size:24px;">🚫</div>` : '';
-        if (window.arenaBanMode && arenaBanSet.has(c.id)) banTag = `<div style="position:absolute;top:5px;right:5px;font-size:24px;">🚫</div>`;
+        let banTag = bannedSet.has(c.id) ? `<div style="position:absolute;top:5px;right:5px;font-size:24px;">🔒</div>` : '';
+        if (window.arenaBanMode && arenaBanSet.has(c.id)) banTag = `<div style="position:absolute;top:5px;right:5px;font-size:24px;">🔒</div>`;
         let hasSprite = getCharacterSpriteMarkup(c.id, 'menu') || `<div style="width:78px;height:78px;background:${c.color};border-radius:50%;margin:0 auto 10px;border:3px solid #fff;"></div>`;
         let html = `${banTag}${hasSprite}<h4>${c.name}</h4><div style="font-size:12px;color:#aaa">${c.class}</div>`;
         if(owned) {
@@ -9531,7 +9549,12 @@ function arenaRenderLobby() {
         </div>
     `;
 
-    const roomLabel = arenaState.online ? `Sala ${escapeHtmlText(arenaState.roomCode || '')}` : (arenaState.mode === 'bots' ? 'Partida com bots' : 'Lobby da Arena');
+    const roomCodeValue = escapeHtmlText(arenaState.roomCode || (arenaState.mode === 'bots' ? 'LOCAL' : '---'));
+    const roomLabel = arenaState.online
+        ? `Sala online <span class="arena-room-code-pill">${roomCodeValue}</span>`
+        : (arenaState.mode === 'bots'
+            ? `Partida com bots <span class="arena-room-code-pill">${roomCodeValue}</span>`
+            : `Lobby da Arena <span class="arena-room-code-pill">LOCAL</span>`);
     const roomSub = arenaState.online
         ? 'Sala online pronta. O host controla a partida.'
         : (arenaState.mode === 'bots'
@@ -9541,8 +9564,7 @@ function arenaRenderLobby() {
         <div class="arena-lobby-actions">
             <button class="btn-menu" type="button" onclick="arenaChooseCharacter()">Trocar personagem</button>
             <button class="btn-menu" type="button" onclick="arenaRefreshLobby()">Atualizar lobby</button>
-            ${isHost ? `<button class="btn-menu full" type="button" onclick="arenaOpenBanMode()">Configurações da sala</button>` : `<button class="btn-menu" type="button" onclick="arenaLeaveRoom()">Sair da sala</button>`}
-            ${isHost ? `<button class="btn-play full" type="button" onclick="arenaStartLobbyMatch()">Começar partida</button>` : ``}
+            ${isHost ? `<button class="btn-play full" type="button" onclick="arenaStartLobbyMatch()">Começar partida</button>` : `<button class="btn-menu full" type="button" onclick="arenaLeaveRoom()">Sair da sala</button>`}
         </div>
     `;
 
@@ -9605,7 +9627,7 @@ function arenaUpdateCharBanner() {
     }
     banner.classList.remove('hidden');
     const names = (arenaState.settings.bannedChars || []).map(id => CHARACTERS[id]?.name || id);
-    banner.innerHTML = `<strong>Bloqueio de personagens:</strong> clique nos cards para banir/desbanir. <br>Banidos: ${names.length ? escapeHtmlText(names.join(', ')) : 'nenhum'}
+    banner.innerHTML = `<strong>Bloqueio de personagens:</strong> toque nos cards para alternar 🔒/normal. <br>Banidos: ${names.length ? escapeHtmlText(names.join(', ')) : 'nenhum'}
         <div style="margin-top:10px; display:flex; justify-content:center;">
             <button class="btn-action" type="button" onclick="arenaConfirmBanChanges()">Confirmar banimentos</button>
         </div>`;
@@ -9884,7 +9906,7 @@ function arenaStartLobbyMatch() {
 function arenaStartBattle() {
     window.isArenaMode = true;
     arenaState.view = 'playing';
-    arenaState.mode = arenaState.mode === 'bots' ? 'bots' : 'hub';
+    arenaState.mode = (arenaState.online ? 'online' : (arenaState.mode === 'bots' || String(arenaState.roomCode || '').startsWith('BOTS-') ? 'bots' : 'hub'));
     window.arenaScorePenalty = 0;
     arenaState.score = 0;
     arenaState.kills = 0;
@@ -9909,6 +9931,7 @@ function showArenaMatch() {
     document.getElementById('exp-bar-container').classList.remove('hidden');
     joyZone.style.display = 'none';
     applyControlLayout();
+    startRunAfterShop();
 }
 
 function arenaResetLobby() {
@@ -15373,7 +15396,8 @@ function updateGameHud() {
     }
     let maxHP = Math.floor(player.baseHp * player.stats.maxHpMult);
     const hp = Math.max(0, Math.min(maxHP, Math.floor(player.hp)));
-    const showBar = !!pd.settings.showHpBar;
+    const arenaMode = !!window.isArenaMode && arenaState?.view === 'playing';
+    const showBar = !!pd.settings.showHpBar && !arenaMode;
     const pauseBtn = document.getElementById('btn-pause');
     const arenaPanel = document.getElementById('arena-ranking-panel');
     if (pauseBtn && arenaPanel) {
@@ -15384,25 +15408,35 @@ function updateGameHud() {
     const hpBarWrap = document.getElementById('hud-hp-bar-wrap');
     const hpBar = document.getElementById('hud-hp-bar');
     if(hpText && hpBarWrap && hpBar) {
-        hpText.classList.toggle('hidden', showBar);
-        hpBarWrap.classList.toggle('hidden', !showBar);
         const zippiBubbleHp = pd.selectedChar === 'zippi' ? Math.max(0, Math.floor(player.zippiBubbleHp || 0)) : 0;
         const zippiBubbleMax = Math.max(1, Math.floor(player.zippiBubbleMaxHp || 80));
-        if(showBar) {
+        if (arenaMode) {
+            hpText.classList.remove('hidden');
+            hpBarWrap.classList.add('hidden');
             if(pd.selectedChar === 'zippi' && zippiBubbleHp > 0) {
-                const pct = (zippiBubbleHp / zippiBubbleMax) * 100;
-                hpBar.style.width = `${Math.max(0, Math.min(100, pct))}%`;
-                hpBar.style.background = 'linear-gradient(90deg, #4da3ff, #74b9ff)';
+                hpText.innerHTML = `<span style="color:#4da3ff">${zippiBubbleHp}</span> + ${hp}/${maxHP}`;
             } else {
-                const pct = maxHP > 0 ? (hp / maxHP) * 100 : 0;
-                hpBar.style.width = `${Math.max(0, Math.min(100, pct))}%`;
-                hpBar.style.background = pct > 60 ? '#2ecc71' : (pct > 30 ? '#f1c40f' : '#e74c3c');
+                hpText.innerHTML = `${hp}/${maxHP}`;
             }
         } else {
-            if(pd.selectedChar === 'zippi' && zippiBubbleHp > 0) {
-                document.getElementById('hud-hp').innerHTML = `<span style="color:#4da3ff">${zippiBubbleHp}</span> + ${hp}/${maxHP}`;
+            hpText.classList.toggle('hidden', showBar);
+            hpBarWrap.classList.toggle('hidden', !showBar);
+            if(showBar) {
+                if(pd.selectedChar === 'zippi' && zippiBubbleHp > 0) {
+                    const pct = (zippiBubbleHp / zippiBubbleMax) * 100;
+                    hpBar.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+                    hpBar.style.background = 'linear-gradient(90deg, #4da3ff, #74b9ff)';
+                } else {
+                    const pct = maxHP > 0 ? (hp / maxHP) * 100 : 0;
+                    hpBar.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+                    hpBar.style.background = pct > 60 ? '#2ecc71' : (pct > 30 ? '#f1c40f' : '#e74c3c');
+                }
             } else {
-                document.getElementById('hud-hp').innerHTML = `${hp}/${maxHP}`;
+                if(pd.selectedChar === 'zippi' && zippiBubbleHp > 0) {
+                    document.getElementById('hud-hp').innerHTML = `<span style="color:#4da3ff">${zippiBubbleHp}</span> + ${hp}/${maxHP}`;
+                } else {
+                    document.getElementById('hud-hp').innerHTML = `${hp}/${maxHP}`;
+                }
             }
         }
     }
