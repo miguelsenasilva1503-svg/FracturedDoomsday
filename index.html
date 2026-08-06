@@ -21414,4 +21414,200 @@ applyMusicVolume();
 })();
 </script>
 
+
+<script>
+(function () {
+    if (window.__arenaLobbyCleanupPatchApplied) return;
+    window.__arenaLobbyCleanupPatchApplied = true;
+
+    function safeArray(v) { return Array.isArray(v) ? v : []; }
+
+    function clearArenaLobbyState() {
+        try { if (typeof arenaStopBattleLoop === 'function') arenaStopBattleLoop(); } catch (e) {}
+        window.isArenaMode = false;
+        window.arenaIgnoreGameOver = false;
+        window.__arenaLeavingRoom = false;
+        const s = window.arenaState && typeof window.arenaState === 'object' ? window.arenaState : (window.arenaState = {});
+        s.online = false;
+        s.isHost = false;
+        s.hostId = '';
+        s.joinCode = '';
+        s.roomCode = '';
+        s.roomName = '';
+        s.players = [];
+        s.botRoster = [];
+        s.playerCharMap = {};
+        s.mode = 'hub';
+        s.view = 'hub';
+        s.resultsShown = false;
+        s.lastRanking = [];
+        s.score = 0;
+        s.kills = 0;
+        s.penalty = 0;
+        s.timeLeftMs = 0;
+        s.matchCountdown = 0;
+    }
+
+    function renderArenaScreenSafe() {
+        try {
+            if (typeof showScreen === 'function') showScreen('screen-arena');
+        } catch (e) {}
+        try {
+            if (typeof arenaRenderHub === 'function') arenaRenderHub();
+        } catch (e) {}
+    }
+
+    function buildPlayersFromState() {
+        if (typeof arenaSafeArenaState === 'function') arenaSafeArenaState();
+        const meId = window.arenaSocket?.id || 'me';
+        const online = !!window.arenaState?.online;
+        const base = online && safeArray(window.arenaState?.players).length
+            ? safeArray(window.arenaState.players).map(p => ({ ...p }))
+            : (window.arenaState?.mode === 'bots'
+                ? safeArray(window.arenaState.botRoster).map(b => ({
+                    id: b.id,
+                    name: b.name,
+                    charId: b.charId,
+                    score: Number(b.score) || 0,
+                    kills: Number(b.kills) || 0,
+                    ready: true,
+                    bot: true,
+                }))
+                : safeArray(window.arenaState?.players).map(p => ({ ...p })));
+
+        const normalized = base.map(p => ({
+            ...p,
+            id: String(p.id || '').trim(),
+            name: String(p.name || 'Jogador'),
+            score: Math.max(0, Math.floor(Number(p.score) || 0)),
+            kills: Math.max(0, Math.floor(Number(p.kills) || 0)),
+            ready: !!p.ready,
+            host: !!p.host,
+            me: !!(p.me || p.id === meId),
+            charId: String(p.charId || '').trim(),
+        }));
+
+        const byId = new Map();
+        const out = [];
+        for (const p of normalized) {
+            const key = p.id || p.name;
+            if (!key) continue;
+            if (byId.has(key)) continue;
+            byId.set(key, true);
+            out.push({
+                ...p,
+                charId: p.me
+                    ? (typeof arenaMyCharId === 'function' ? arenaMyCharId() : (typeof arenaSelectedCharId === 'function' ? arenaSelectedCharId() : 'strike'))
+                    : (p.charId || (typeof arenaResolveLobbyCharId === 'function' ? arenaResolveLobbyCharId(p) : 'strike')),
+            });
+        }
+
+        // Keep the local player only if the room snapshot still contains us.
+        if (online) {
+            const mePresent = out.some(p => p.me || p.id === meId);
+            if (!mePresent) {
+                return out.filter(p => !p.me && p.id !== meId);
+            }
+        }
+
+        const me = {
+            id: meId,
+            name: typeof arenaGetCurrentPlayerName === 'function' ? arenaGetCurrentPlayerName() : 'Jogador',
+            charId: typeof arenaMyCharId === 'function' ? arenaMyCharId() : (typeof arenaSelectedCharId === 'function' ? arenaSelectedCharId() : 'strike'),
+            score: Math.max(0, Math.floor(Number(window.arenaState?.score) || 0)),
+            kills: Math.max(0, Math.floor(Number(window.enemiesKilled) || 0)),
+            ready: true,
+            host: !!window.arenaState?.isHost,
+            me: true,
+        };
+
+        const meIdx = out.findIndex(p => p.id === meId || p.me);
+        if (meIdx >= 0) {
+            out[meIdx] = { ...out[meIdx], ...me, me: true, id: meId, host: !!window.arenaState?.isHost };
+        } else if (!online || safeArray(window.arenaState?.players).some(p => String(p.id || '').trim() === meId)) {
+            out.unshift(me);
+        }
+
+        return out;
+    }
+
+    const prevArenaBuildPlayersForLobby = window.arenaBuildPlayersForLobby;
+    window.arenaBuildPlayersForLobby = function () {
+        const players = buildPlayersFromState();
+        return players.map(p => ({
+            ...p,
+            score: Math.max(0, Math.floor(Number(p.score) || 0)),
+            kills: Math.max(0, Math.floor(Number(p.kills) || 0)),
+            charId: p.me
+                ? (typeof arenaMyCharId === 'function' ? arenaMyCharId() : (typeof arenaSelectedCharId === 'function' ? arenaSelectedCharId() : 'strike'))
+                : (p.charId || (typeof arenaResolveLobbyCharId === 'function' ? arenaResolveLobbyCharId(p) : 'strike')),
+        }));
+    };
+
+    function forceExitIfKicked(room) {
+        try {
+            if (!room || window.__arenaLeavingRoom) return false;
+            const meId = window.arenaSocket?.id || 'me';
+            const players = safeArray(room.players);
+            const meStillThere = players.some(p => String(p?.id || '').trim() === meId || p?.me);
+            if (window.arenaState?.online && !meStillThere && !room.started && !room.starting && room.status !== 'playing') {
+                clearArenaLobbyState();
+                renderArenaScreenSafe();
+                if (typeof arenaRenderJoinForm === 'function') arenaRenderJoinForm();
+                return true;
+            }
+        } catch (e) {}
+        return false;
+    }
+
+    const prevArenaApplySnapshot = window.arenaApplySnapshot;
+    window.arenaApplySnapshot = function (room) {
+        const res = typeof prevArenaApplySnapshot === 'function' ? prevArenaApplySnapshot.apply(this, arguments) : undefined;
+        try {
+            forceExitIfKicked(room || {});
+        } catch (e) {}
+        return res;
+    };
+
+    const prevArenaLeaveRoom = window.arenaLeaveRoom;
+    window.arenaLeaveRoom = function () {
+        window.__arenaLeavingRoom = true;
+        try {
+            const res = typeof prevArenaLeaveRoom === 'function' ? prevArenaLeaveRoom.apply(this, arguments) : undefined;
+            return res;
+        } finally {
+            window.__arenaLeavingRoom = false;
+        }
+    };
+
+    const prevArenaRenderLobby = window.arenaRenderLobby;
+    window.arenaRenderLobby = function () {
+        const out = typeof prevArenaRenderLobby === 'function' ? prevArenaRenderLobby.apply(this, arguments) : undefined;
+        try {
+            // Enforce visible scores for everyone, even if an older wrapper rendered stale data.
+            const players = buildPlayersFromState();
+            const cards = document.querySelectorAll('#arena-player-grid .arena-player-card');
+            cards.forEach((card, idx) => {
+                const p = players[idx];
+                if (!p) return;
+                const scoreEl = card.querySelector('.score');
+                if (scoreEl) scoreEl.textContent = `${Math.max(0, Math.floor(Number(p.score) || 0))} pts`;
+            });
+        } catch (e) {}
+        return out;
+    };
+
+    if (window.arenaState && typeof window.arenaState === 'object') {
+        try {
+            if (window.arenaState.online && safeArray(window.arenaState.players).length) {
+                const meId = window.arenaSocket?.id || 'me';
+                if (!safeArray(window.arenaState.players).some(p => String(p?.id || '').trim() === meId || p?.me)) {
+                    clearArenaLobbyState();
+                }
+            }
+        } catch (e) {}
+    }
+})();
+</script>
+
 </html>
