@@ -9629,10 +9629,6 @@ function arenaRenderLobby() {
                     </select>
                 </div>
             </div>
-            <div class="arena-chip-list" style="margin-top:12px;">
-                <button class="btn-menu" type="button" onclick="arenaOpenBanMode()">Bloquear personagens</button>
-                <button class="btn-menu" type="button" onclick="arenaApplySetting('bannedChars', [])">Desbloquear tudo</button>
-            </div>
         </div>
     ` : `
         <div class="arena-panel">
@@ -16106,7 +16102,7 @@ applyMusicVolume();
 
     const originalGetSelectedMapIndex = window.getSelectedMapIndex;
     window.getSelectedMapIndex = function () {
-        if (window.isArenaMode && window.arenaState?.settings) return arenaMapIndex();
+        if ((window.isArenaMode || window.arenaState?.online) && window.arenaState?.settings) return arenaMapIndex();
         return typeof originalGetSelectedMapIndex === 'function' ? originalGetSelectedMapIndex.apply(this, arguments) : 0;
     };
 
@@ -16397,10 +16393,6 @@ applyMusicVolume();
                             <option value="ultra" ${arenaState.settings.difficulty === 'ultra' ? 'selected' : ''}>Ultra Hardcore</option>
                         </select>
                     </div>
-                </div>
-                <div class="arena-chip-list" style="margin-top:12px;">
-                    <button class="btn-menu" type="button" onclick="arenaOpenBanMode()">Bloquear personagens</button>
-                    <button class="btn-menu" type="button" onclick="arenaApplySetting('bannedChars', [])">Desbloquear tudo</button>
                 </div>
             </div>
         ` : `
@@ -16958,7 +16950,7 @@ applyMusicVolume();
     };
 
     window.getSelectedMapIndex = function () {
-        if (window.isArenaMode && window.arenaState?.settings) {
+        if ((window.isArenaMode || window.arenaState?.online) && window.arenaState?.settings) {
             return Math.max(0, Number(window.arenaState.settings.mapChoice) || 0);
         }
         return original.getSelectedMapIndex ? original.getSelectedMapIndex.apply(this, arguments) : 0;
@@ -18424,7 +18416,7 @@ applyMusicVolume();
             duration: [2, 5, 10, 15].includes(Number(s.duration)) ? Number(s.duration) : 5,
             powerUps: s.powerUps !== false && s.powerUps !== '0',
             difficulty: ['classic', 'hardcore', 'ultra'].includes(String(s.difficulty)) ? String(s.difficulty) : 'classic',
-            bannedChars: Array.isArray(s.bannedChars) ? s.bannedChars.slice() : [],
+            bannedChars: [],
         };
     }
 
@@ -18456,7 +18448,7 @@ applyMusicVolume();
         window.arenaState.roomCode = roomCode || window.arenaState.roomCode || '';
         window.arenaState.isHost = !!(arenaSocket && room.hostId && arenaSocket.id === room.hostId);
         window.arenaState.mode = 'online';
-        window.arenaState.settings = { ...window.arenaState.settings, ...settings, bannedChars: settings.bannedChars.slice() };
+        window.arenaState.settings = { ...window.arenaState.settings, ...settings, bannedChars: [] };
         window.arenaState.players = players;
         window.arenaState.playerCharMap = window.arenaState.playerCharMap && typeof window.arenaState.playerCharMap === 'object' ? window.arenaState.playerCharMap : {};
         players.forEach(p => { if (p.id) window.arenaState.playerCharMap[p.id] = p.charId; });
@@ -18887,10 +18879,6 @@ applyMusicVolume();
                         </select>
                     </div>
                 </div>
-                <div class="arena-chip-list" style="margin-top:12px;">
-                    <button class="btn-menu" type="button" onclick="arenaOpenBanMode()">Bloquear personagens</button>
-                    <button class="btn-menu" type="button" onclick="arenaApplySetting('bannedChars', [])">Desbloquear tudo</button>
-                </div>
             </div>
         ` : '';
 
@@ -19126,7 +19114,7 @@ applyMusicVolume();
                 window.arenaState.settings = {
                     ...window.arenaState.settings,
                     ...settings,
-                    bannedChars: Array.isArray(settings.bannedChars) ? settings.bannedChars.slice() : (window.arenaState.settings?.bannedChars || [])
+                    bannedChars: []
                 };
             }
             if (Array.isArray(window.arenaState.players)) {
@@ -20419,7 +20407,7 @@ applyMusicVolume();
         window.arenaState.hostId = room.hostId || '';
         window.arenaState.isHost = !!(window.arenaSocket && room.hostId && window.arenaSocket.id === room.hostId);
         window.arenaState.mode = 'online';
-        window.arenaState.settings = { ...window.arenaState.settings, ...settings, bannedChars: settings.bannedChars.slice() };
+        window.arenaState.settings = { ...window.arenaState.settings, ...settings, bannedChars: [] };
         window.arenaState.currentMap = settings.mapChoice;
         if (Number.isFinite(Number(settings.mapChoice))) {
             try { window.currentMap = Number(settings.mapChoice); } catch (e) {}
@@ -20738,7 +20726,7 @@ applyMusicVolume();
 
     const prevGetSelectedMapIndex = window.getSelectedMapIndex;
     window.getSelectedMapIndex = function () {
-        if (window.isArenaMode && window.arenaState?.settings) {
+        if ((window.isArenaMode || window.arenaState?.online) && window.arenaState?.settings) {
             const idx = Math.max(0, Number(window.arenaState.settings.mapChoice) || 0);
             try { currentMap = idx; } catch (e) {}
             try { window.currentMap = idx; } catch (e) {}
@@ -21085,7 +21073,7 @@ applyMusicVolume();
         window.arenaState.hostId = room.hostId || '';
         window.arenaState.isHost = !!(window.arenaSocket && room.hostId && window.arenaSocket.id === room.hostId);
         window.arenaState.mode = 'online';
-        window.arenaState.settings = { ...window.arenaState.settings, ...settings, bannedChars: settings.bannedChars.slice() };
+        window.arenaState.settings = { ...window.arenaState.settings, ...settings, bannedChars: [] };
         window.arenaState.currentMap = settings.mapChoice;
         try { window.currentMap = Number(settings.mapChoice) || 0; } catch (e) {}
         window.arenaState.players = players;
@@ -21131,7 +21119,7 @@ applyMusicVolume();
         socket.on('match_start', (payload) => {
             safeState();
             if (payload?.settings && typeof payload.settings === 'object') {
-                window.arenaState.settings = { ...window.arenaState.settings, ...cloneSettings(payload.settings), bannedChars: cloneSettings(payload.settings).bannedChars.slice() };
+                window.arenaState.settings = { ...window.arenaState.settings, ...cloneSettings(payload.settings), bannedChars: [] };
             }
             if (typeof arenaSetBattleContext === 'function') arenaSetBattleContext();
             if (typeof showArenaMatch === 'function') showArenaMatch();
@@ -21140,7 +21128,7 @@ applyMusicVolume();
         socket.on('match:start', (payload) => {
             safeState();
             if (payload?.settings && typeof payload.settings === 'object') {
-                window.arenaState.settings = { ...window.arenaState.settings, ...cloneSettings(payload.settings), bannedChars: cloneSettings(payload.settings).bannedChars.slice() };
+                window.arenaState.settings = { ...window.arenaState.settings, ...cloneSettings(payload.settings), bannedChars: [] };
             }
             if (typeof arenaSetBattleContext === 'function') arenaSetBattleContext();
             if (typeof showArenaMatch === 'function') showArenaMatch();
