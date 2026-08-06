@@ -1,30 +1,104 @@
-const express = require("express");
-const http = require("http");
-const { Server } = require("socket.io");
+const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
 
 const app = express();
 const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
+    origin: '*',
+    methods: ['GET', 'POST'],
   },
 });
 
 const PORT = process.env.PORT || 3000;
-const MATCH_DURATION_MS = 5 * 60 * 1000;
+const COUNTDOWN_SECONDS = 3;
+const DEFAULT_DURATION_MINUTES = 5;
+const ROOM_CODE_LENGTH = 6;
+const MAX_PLAYERS_PER_ROOM = 8;
 
-app.get("/", (_req, res) => {
-  res.status(200).send("Roguelite Legacy Arena backend online.");
+const DEFAULT_SETTINGS = {
+  mapChoice: 0,
+  duration: DEFAULT_DURATION_MINUTES,
+  powerUps: true,
+  difficulty: 'classic',
+  bannedChars: [],
+};
+
+const rooms = new Map();
+
+app.use(express.json());
+
+app.get('/', (_req, res) => {
+  res.status(200).send('Roguelite Legacy Arena backend online.');
 });
 
-const rooms = new Map(); // roomCode -> room object
+app.get('/health', (_req, res) => {
+  res.json({
+    ok: true,
+    rooms: rooms.size,
+    uptime: process.uptime(),
+  });
+});
+
+app.get('/rooms', (_req, res) => {
+  const payload = [...rooms.values()].map((room) => roomSnapshot(room));
+  res.json(payload);
+});
+
+function safeName(name) {
+  const trimmed = String(name || '').trim();
+  if (!trimmed) return 'Jogador';
+  return trimmed.slice(0, 20);
+}
+
+function safeCharId(charId) {
+  const value = String(charId || '').trim();
+  return value || 'strike';
+}
+
+function toInt(value, fallback) {
+  const n = Number(value);
+  return Number.isFinite(n) ? Math.floor(n) : fallback;
+}
+
+function normalizeSettings(input) {
+  const src = input && typeof input === 'object' ? input : {};
+  const duration = [2, 5, 10, 15].includes(Number(src.duration))
+    ? Number(src.duration)
+    : DEFAULT_SETTINGS.duration;
+
+  const banned = Array.isArray(src.bannedChars)
+    ? [...new Set(src.bannedChars.map((v) => String(v || '').trim()).filter(Boolean))]
+    : [];
+
+  return {
+    mapChoice: Math.max(0, toInt(src.mapChoice, DEFAULT_SETTINGS.mapChoice)),
+    duration,
+    powerUps: src.powerUps === false || src.powerUps === 'false' || src.powerUps === 0 || src.powerUps === '0'
+      ? false
+      : true,
+    difficulty: ['classic', 'hardcore', 'ultra'].includes(String(src.difficulty))
+      ? String(src.difficulty)
+      : DEFAULT_SETTINGS.difficulty,
+    bannedChars: banned,
+  };
+}
+
+function durationMsFromSettings(settings) {
+  const minutes = [2, 5, 10, 15].includes(Number(settings?.duration))
+    ? Number(settings.duration)
+    : DEFAULT_DURATION_MINUTES;
+  return minutes * 60 * 1000;
+}
 
 function makeRoomCode() {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let code = "";
-  for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < ROOM_CODE_LENGTH; i += 1) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
   return code;
 }
 
@@ -34,430 +108,424 @@ function makeUniqueRoomCode() {
   return code;
 }
 
-function publicPlayer(player) {
-  return {
-    id: player.id,
-    name: player.name,
-    ready: player.ready,
-    score: player.score,
-    kills: player.kills,
-    connected: player.connected,
+function createRoom({ roomCode, hostId, hostName, hostCharId, settings }) {
+  const room = {
+    roomCode,
+    hostId,
+    players: [
+      {
+        id: hostId,
+        name: safeName(hostName),
+        charId: safeCharId(hostCharId),
+        ready: false,
+        score: 0,
+        kills: 0,
+        connected: true,
+      },
+    ],
+    started: false,
+    starting: false,
+    endsAt: null,
+    timer: null,
+    lastResult: null,
+    settings: normalizeSettings(settings),
   };
+
+  return room;
 }
 
-function getRoomSnapshot(room) {
+function roomSnapshot(room) {
   return {
-    code: room.code,
-    status: room.status, // lobby | playing | finished
+    code: room.roomCode,
+    roomCode: room.roomCode,
     hostId: room.hostId,
-    startedAt: room.startedAt,
+    status: room.started ? 'playing' : (room.starting ? 'starting' : 'lobby'),
+    started: room.started,
+    starting: room.starting,
     endsAt: room.endsAt,
-    timeLeftMs: room.endsAt ? Math.max(0, room.endsAt - Date.now()) : 0,
-    players: Array.from(room.players.values()).map(publicPlayer),
-    winner: room.winner || null,
+    settings: normalizeSettings(room.settings),
+    players: room.players
+      .slice()
+      .sort((a, b) => b.score - a.score || b.kills - a.kills || a.name.localeCompare(b.name))
+      .map((p) => ({
+        id: p.id,
+        name: p.name,
+        charId: safeCharId(p.charId),
+        ready: !!p.ready,
+        score: toInt(p.score, 0),
+        kills: toInt(p.kills, 0),
+        connected: !!p.connected,
+      })),
+    lastResult: room.lastResult || null,
   };
 }
 
-function emitRoomUpdate(room) {
-  io.to(room.code).emit("room:update", getRoomSnapshot(room));
+function emitRoomState(room) {
+  const snapshot = roomSnapshot(room);
+  io.to(room.roomCode).emit('room_state', snapshot);
+  io.to(room.roomCode).emit('room:update', snapshot);
 }
 
-function startMatch(room) {
-  if (room.status !== "lobby") return;
-  if (room.players.size < 1) return;
-
-  room.status = "playing";
-  room.startedAt = Date.now();
-  room.endsAt = room.startedAt + MATCH_DURATION_MS;
-  room.winner = null;
-
-  for (const player of room.players.values()) {
-    player.score = 0;
-    player.kills = 0;
+function findRoomBySocket(socketId) {
+  for (const room of rooms.values()) {
+    const player = room.players.find((p) => p.id === socketId);
+    if (player) return { room, player };
   }
-
-  io.to(room.code).emit("match:start", {
-    startedAt: room.startedAt,
-    endsAt: room.endsAt,
-    durationMs: MATCH_DURATION_MS,
-  });
-
-  emitRoomUpdate(room);
-
-  clearTimeout(room.matchTimeout);
-  room.matchTimeout = setTimeout(() => {
-    endMatch(room.code);
-  }, MATCH_DURATION_MS + 100);
+  return null;
 }
 
-function endMatch(roomCode) {
-  const room = rooms.get(roomCode);
-  if (!room || room.status !== "playing") return;
+function assignHost(room) {
+  const connected = room.players.filter((p) => p.connected);
+  if (!connected.length) {
+    room.hostId = null;
+    return;
+  }
+  if (!connected.some((p) => p.id === room.hostId)) {
+    room.hostId = connected[0].id;
+  }
+}
 
-  room.status = "finished";
+function stopTimer(room) {
+  if (room.timer) {
+    clearInterval(room.timer);
+    room.timer = null;
+  }
+}
 
-  const players = Array.from(room.players.values());
-  players.sort((a, b) => {
-    if (b.score !== a.score) return b.score - a.score;
-    if (b.kills !== a.kills) return b.kills - a.kills;
-    return a.name.localeCompare(b.name);
-  });
+function finishMatch(room, reason = 'finished') {
+  stopTimer(room);
+  room.started = false;
+  room.starting = false;
 
-  const top = players[0] || null;
-  room.winner = top
-    ? {
-        id: top.id,
-        name: top.name,
-        score: top.score,
-        kills: top.kills,
-      }
-    : null;
-
-  io.to(room.code).emit("match:end", {
-    winner: room.winner,
-    ranking: players.map((p, index) => ({
+  const ranking = room.players
+    .slice()
+    .sort((a, b) => b.score - a.score || b.kills - a.kills || a.name.localeCompare(b.name))
+    .map((p, index) => ({
       position: index + 1,
       id: p.id,
       name: p.name,
-      score: p.score,
-      kills: p.kills,
-    })),
+      charId: safeCharId(p.charId),
+      score: toInt(p.score, 0),
+      kills: toInt(p.kills, 0),
+    }));
+
+  room.lastResult = {
+    reason,
+    ranking,
+    winner: ranking[0] || null,
+    endedAt: Date.now(),
+  };
+
+  io.to(room.roomCode).emit('match_end', room.lastResult);
+  io.to(room.roomCode).emit('match:end', room.lastResult);
+  emitRoomState(room);
+}
+
+function startTimer(room) {
+  stopTimer(room);
+  const durationMs = durationMsFromSettings(room.settings);
+  room.endsAt = Date.now() + durationMs;
+
+  room.timer = setInterval(() => {
+    const remainingMs = Math.max(0, room.endsAt - Date.now());
+
+    io.to(room.roomCode).emit('match_tick', {
+      timeLeftMs: remainingMs,
+      remainingMs,
+      remainingSec: Math.ceil(remainingMs / 1000),
+      endsAt: room.endsAt,
+    });
+    io.to(room.roomCode).emit('match:tick', {
+      timeLeftMs: remainingMs,
+      remainingMs,
+      remainingSec: Math.ceil(remainingMs / 1000),
+      endsAt: room.endsAt,
+    });
+
+    if (remainingMs <= 0) {
+      finishMatch(room, 'time_up');
+      room.endsAt = null;
+    }
+  }, 1000);
+}
+
+function startMatch(room, cb = () => {}) {
+  if (room.started || room.starting) {
+    cb({ ok: false, error: 'already_started' });
+    return;
+  }
+
+  room.starting = true;
+  room.players.forEach((p) => {
+    p.ready = false;
+    p.score = 0;
+    p.kills = 0;
   });
 
-  emitRoomUpdate(room);
+  emitRoomState(room);
+
+  let countdown = COUNTDOWN_SECONDS;
+
+  io.to(room.roomCode).emit('match_starting', { countdownSec: countdown });
+  io.to(room.roomCode).emit('match:starting', { countdownSec: countdown });
+
+  const prepTimer = setInterval(() => {
+    countdown -= 1;
+
+    if (countdown > 0) {
+      io.to(room.roomCode).emit('match_starting', { countdownSec: countdown });
+      io.to(room.roomCode).emit('match:starting', { countdownSec: countdown });
+      return;
+    }
+
+    clearInterval(prepTimer);
+
+    room.starting = false;
+    room.started = true;
+    const durationMs = durationMsFromSettings(room.settings);
+    room.endsAt = Date.now() + durationMs;
+
+    const payload = {
+      roomCode: room.roomCode,
+      durationMs,
+      endsAt: room.endsAt,
+      settings: normalizeSettings(room.settings),
+    };
+
+    io.to(room.roomCode).emit('match_start', payload);
+    io.to(room.roomCode).emit('match:start', payload);
+
+    startTimer(room);
+    emitRoomState(room);
+    cb({ ok: true, room: roomSnapshot(room) });
+  }, 1000);
 }
 
-function ensureRoom(socket) {
-  const roomCode = socket.data.roomCode;
-  if (!roomCode) return null;
-  return rooms.get(roomCode) || null;
+function handleCreateRoom(socket, payload = {}, cb = () => {}) {
+  try {
+    const roomCode = makeUniqueRoomCode();
+    const nick = safeName(payload.name ?? payload.nickname ?? 'Jogador');
+    const charId = safeCharId(payload.charId ?? payload.selectedChar ?? 'strike');
+    const settings = normalizeSettings(payload.settings);
+
+    const room = createRoom({
+      roomCode,
+      hostId: socket.id,
+      hostName: nick,
+      hostCharId: charId,
+      settings,
+    });
+
+    rooms.set(roomCode, room);
+    socket.join(roomCode);
+    socket.data.roomCode = roomCode;
+    socket.data.playerName = nick;
+    socket.data.charId = charId;
+
+    const snapshot = roomSnapshot(room);
+    emitRoomState(room);
+
+    cb({
+      ok: true,
+      code: roomCode,
+      roomCode,
+      room: snapshot,
+    });
+  } catch (error) {
+    cb({ ok: false, error: 'failed_to_create_room' });
+  }
 }
 
-function maybeDeleteRoom(room) {
-  if (!room) return;
-  if (room.players.size > 0) return;
-  clearTimeout(room.matchTimeout);
-  rooms.delete(room.code);
-}
+function handleJoinRoom(socket, payload = {}, cb = () => {}) {
+  try {
+    const code = String(payload.code ?? payload.roomCode ?? '').trim().toUpperCase();
+    const nick = safeName(payload.name ?? payload.nickname ?? 'Jogador');
+    const charId = safeCharId(payload.charId ?? payload.selectedChar ?? 'strike');
 
-io.on("connection", (socket) => {
-  socket.data.playerId = socket.id;
-  socket.data.roomCode = null;
-  socket.data.playerName = null;
+    const room = rooms.get(code);
+    if (!room) return cb({ ok: false, error: 'room_not_found' });
+    if (room.started || room.starting) return cb({ ok: false, error: 'match_already_started' });
+    if (room.players.length >= MAX_PLAYERS_PER_ROOM) return cb({ ok: false, error: 'room_full' });
 
-  socket.emit("server:hello", {
-    ok: true,
-    socketId: socket.id,
-  });
-
-  socket.on("room:create", (payload, ack) => {
-    try {
-      const name = String(payload?.name || "Jogador").trim().slice(0, 20) || "Jogador";
-      const code = makeUniqueRoomCode();
-
-      const room = {
-        code,
-        hostId: socket.id,
-        status: "lobby",
-        createdAt: Date.now(),
-        startedAt: null,
-        endsAt: null,
-        winner: null,
-        matchTimeout: null,
-        players: new Map(),
-      };
-
-      room.players.set(socket.id, {
+    const existing = room.players.find((p) => p.id === socket.id);
+    if (existing) {
+      existing.name = nick;
+      existing.charId = charId;
+      existing.connected = true;
+      existing.ready = false;
+    } else {
+      room.players.push({
         id: socket.id,
-        name,
+        name: nick,
+        charId,
         ready: false,
         score: 0,
         kills: 0,
         connected: true,
       });
-
-      rooms.set(code, room);
-
-      socket.join(code);
-      socket.data.roomCode = code;
-      socket.data.playerName = name;
-
-      const snapshot = getRoomSnapshot(room);
-
-      if (typeof ack === "function") {
-        ack({ ok: true, room: snapshot, code });
-      }
-
-      io.to(code).emit("room:update", snapshot);
-    } catch (err) {
-      if (typeof ack === "function") {
-        ack({ ok: false, error: "Falha ao criar sala." });
-      }
     }
+
+    socket.join(room.roomCode);
+    socket.data.roomCode = room.roomCode;
+    socket.data.playerName = nick;
+    socket.data.charId = charId;
+
+    if (!room.hostId || !room.players.some((p) => p.id === room.hostId)) {
+      room.hostId = socket.id;
+    }
+
+    const snapshot = roomSnapshot(room);
+    emitRoomState(room);
+
+    cb({
+      ok: true,
+      code: room.roomCode,
+      roomCode: room.roomCode,
+      room: snapshot,
+    });
+  } catch (error) {
+    cb({ ok: false, error: 'failed_to_join_room' });
+  }
+}
+
+function handleLeaveRoom(socket, cb = () => {}) {
+  const found = findRoomBySocket(socket.id);
+  if (!found) return cb({ ok: true });
+
+  const { room } = found;
+  room.players = room.players.filter((p) => p.id !== socket.id);
+  socket.leave(room.roomCode);
+  assignHost(room);
+
+  if (room.players.length === 0) {
+    stopTimer(room);
+    rooms.delete(room.roomCode);
+    cb({ ok: true, removed: true });
+    return;
+  }
+
+  emitRoomState(room);
+  cb({ ok: true });
+}
+
+function handleSetReady(socket, payload = {}, cb = () => {}) {
+  const found = findRoomBySocket(socket.id);
+  if (!found) return cb({ ok: false, error: 'not_in_room' });
+
+  const { room, player } = found;
+  if (room.started || room.starting) return cb({ ok: false, error: 'match_already_started' });
+
+  player.ready = !!payload.ready;
+  emitRoomState(room);
+  cb({ ok: true });
+}
+
+function handleRoomSettings(socket, payload = {}, cb = () => {}) {
+  const found = findRoomBySocket(socket.id);
+  if (!found) return cb({ ok: false, error: 'not_in_room' });
+
+  const { room } = found;
+  if (room.hostId !== socket.id) return cb({ ok: false, error: 'not_host' });
+  if (room.started || room.starting) return cb({ ok: false, error: 'match_already_started' });
+
+  const nextSettings = payload.settings && typeof payload.settings === 'object'
+    ? payload.settings
+    : payload;
+
+  room.settings = normalizeSettings({
+    ...room.settings,
+    ...nextSettings,
   });
 
-  socket.on("room:join", (payload, ack) => {
-    try {
-      const code = String(payload?.code || "").trim().toUpperCase();
-      const name = String(payload?.name || "Jogador").trim().slice(0, 20) || "Jogador";
-      const room = rooms.get(code);
+  emitRoomState(room);
+  cb({ ok: true, settings: normalizeSettings(room.settings) });
+}
 
-      if (!room) {
-        if (typeof ack === "function") ack({ ok: false, error: "Sala não encontrada." });
-        return;
-      }
+function handleUpdateChar(socket, payload = {}, cb = () => {}) {
+  const found = findRoomBySocket(socket.id);
+  if (!found) return cb({ ok: false, error: 'not_in_room' });
 
-      if (room.status === "playing") {
-        if (typeof ack === "function") ack({ ok: false, error: "Partida em andamento." });
-        return;
-      }
+  const { room, player } = found;
+  const charId = safeCharId(payload.charId ?? payload.selectedChar ?? payload.id ?? player.charId);
 
-      const existing = room.players.get(socket.id);
-      if (existing) {
-        existing.name = name;
-        existing.connected = true;
-      } else {
-        room.players.set(socket.id, {
-          id: socket.id,
-          name,
-          ready: false,
-          score: 0,
-          kills: 0,
-          connected: true,
-        });
-      }
+  player.charId = charId;
+  socket.data.charId = charId;
 
-      socket.join(code);
-      socket.data.roomCode = code;
-      socket.data.playerName = name;
+  emitRoomState(room);
+  cb({ ok: true, charId });
+}
 
-      if (!room.hostId || !room.players.has(room.hostId)) {
-        room.hostId = socket.id;
-      }
+function handleStartMatch(socket, _payload = {}, cb = () => {}) {
+  const found = findRoomBySocket(socket.id);
+  if (!found) return cb({ ok: false, error: 'not_in_room' });
 
-      if (typeof ack === "function") {
-        ack({ ok: true, room: getRoomSnapshot(room), code });
-      }
+  const { room } = found;
+  if (room.hostId !== socket.id) return cb({ ok: false, error: 'not_host' });
+  if (room.started || room.starting) return cb({ ok: false, error: 'already_started' });
 
-      emitRoomUpdate(room);
-    } catch (err) {
-      if (typeof ack === "function") {
-        ack({ ok: false, error: "Falha ao entrar na sala." });
-      }
-    }
-  });
+  startMatch(room, cb);
+}
 
-  socket.on("room:leave", (_payload, ack) => {
-    const room = ensureRoom(socket);
-    if (!room) {
-      if (typeof ack === "function") ack({ ok: true });
+function handleUpdateScore(socket, payload = {}, cb = () => {}) {
+  const found = findRoomBySocket(socket.id);
+  if (!found) return cb({ ok: false, error: 'not_in_room' });
+
+  const { room, player } = found;
+  if (!room.started) return cb({ ok: false, error: 'match_not_started' });
+
+  const nextScore = Number(payload.score);
+  const nextKills = Number(payload.kills);
+
+  if (Number.isFinite(nextScore)) player.score = Math.max(0, Math.floor(nextScore));
+  if (Number.isFinite(nextKills)) player.kills = Math.max(0, Math.floor(nextKills));
+
+  emitRoomState(room);
+  cb({ ok: true });
+}
+
+function handleRequestRoomState(socket, cb = () => {}) {
+  const found = findRoomBySocket(socket.id);
+  if (!found) return cb({ ok: false, error: 'not_in_room' });
+  cb({ ok: true, room: roomSnapshot(found.room) });
+}
+
+function registerAlias(socket, names, handler) {
+  for (const name of names) {
+    socket.on(name, (payload, cb) => handler(socket, payload, cb));
+  }
+}
+
+io.on('connection', (socket) => {
+  socket.emit('server_ready', { ok: true, socketId: socket.id });
+
+  registerAlias(socket, ['create_room', 'room:create'], handleCreateRoom);
+  registerAlias(socket, ['join_room', 'room:join'], handleJoinRoom);
+  registerAlias(socket, ['leave_room', 'room:leave'], handleLeaveRoom);
+  registerAlias(socket, ['set_ready', 'player:ready'], handleSetReady);
+  registerAlias(socket, ['start_match', 'room:start'], handleStartMatch);
+  registerAlias(socket, ['update_score', 'score:update'], handleUpdateScore);
+  registerAlias(socket, ['request_room_state', 'room:get', 'room:state'], handleRequestRoomState);
+  registerAlias(socket, ['player:update_char', 'player:update-char'], handleUpdateChar);
+  registerAlias(socket, ['room:settings', 'room_settings'], handleRoomSettings);
+
+  socket.on('disconnect', () => {
+    const found = findRoomBySocket(socket.id);
+    if (!found) return;
+
+    const { room } = found;
+    room.players = room.players.filter((p) => p.id !== socket.id);
+    assignHost(room);
+
+    if (room.players.length === 0) {
+      stopTimer(room);
+      rooms.delete(room.roomCode);
       return;
     }
 
-    socket.leave(room.code);
-
-    room.players.delete(socket.id);
-
-    if (room.hostId === socket.id) {
-      const nextHost = room.players.values().next().value;
-      room.hostId = nextHost ? nextHost.id : null;
-    }
-
-    socket.data.roomCode = null;
-
-    if (typeof ack === "function") ack({ ok: true });
-
-    emitRoomUpdate(room);
-    maybeDeleteRoom(room);
-  });
-
-  socket.on("player:ready", (payload, ack) => {
-    const room = ensureRoom(socket);
-    if (!room) {
-      if (typeof ack === "function") ack({ ok: false, error: "Sem sala." });
-      return;
-    }
-
-    const player = room.players.get(socket.id);
-    if (!player) {
-      if (typeof ack === "function") ack({ ok: false, error: "Jogador não encontrado." });
-      return;
-    }
-
-    if (room.status !== "lobby") {
-      if (typeof ack === "function") ack({ ok: false, error: "Partida já começou." });
-      return;
-    }
-
-    player.ready = Boolean(payload?.ready);
-    if (typeof ack === "function") ack({ ok: true, ready: player.ready });
-
-    emitRoomUpdate(room);
-  });
-
-  socket.on("room:start", (_payload, ack) => {
-    const room = ensureRoom(socket);
-    if (!room) {
-      if (typeof ack === "function") ack({ ok: false, error: "Sem sala." });
-      return;
-    }
-
-    if (room.hostId !== socket.id) {
-      if (typeof ack === "function") ack({ ok: false, error: "Só o host inicia." });
-      return;
-    }
-
-    if (room.status !== "lobby") {
-      if (typeof ack === "function") ack({ ok: false, error: "Sala já iniciou." });
-      return;
-    }
-
-    const players = Array.from(room.players.values());
-    if (players.length < 1) {
-      if (typeof ack === "function") ack({ ok: false, error: "Sala vazia." });
-      return;
-    }
-
-    startMatch(room);
-
-    if (typeof ack === "function") ack({ ok: true });
-  });
-
-  socket.on("score:update", (payload, ack) => {
-    const room = ensureRoom(socket);
-    if (!room) {
-      if (typeof ack === "function") ack({ ok: false });
-      return;
-    }
-
-    if (room.status !== "playing") {
-      if (typeof ack === "function") ack({ ok: false, error: "Partida não está ativa." });
-      return;
-    }
-
-    const player = room.players.get(socket.id);
-    if (!player) {
-      if (typeof ack === "function") ack({ ok: false });
-      return;
-    }
-
-    const score = Number(payload?.score);
-    const kills = Number(payload?.kills);
-
-    if (Number.isFinite(score)) player.score = Math.max(0, Math.floor(score));
-    if (Number.isFinite(kills)) player.kills = Math.max(0, Math.floor(kills));
-
-    if (typeof ack === "function") ack({ ok: true });
-
-    emitRoomUpdate(room);
-  });
-
-  socket.on("score:add", (payload, ack) => {
-    const room = ensureRoom(socket);
-    if (!room) {
-      if (typeof ack === "function") ack({ ok: false });
-      return;
-    }
-
-    if (room.status !== "playing") {
-      if (typeof ack === "function") ack({ ok: false, error: "Partida não está ativa." });
-      return;
-    }
-
-    const player = room.players.get(socket.id);
-    if (!player) {
-      if (typeof ack === "function") ack({ ok: false });
-      return;
-    }
-
-    const points = Number(payload?.points || 0);
-    const kills = Number(payload?.kills || 0);
-
-    if (Number.isFinite(points)) player.score += Math.max(0, Math.floor(points));
-    if (Number.isFinite(kills)) player.kills += Math.max(0, Math.floor(kills));
-
-    if (typeof ack === "function") ack({ ok: true, score: player.score, kills: player.kills });
-
-    emitRoomUpdate(room);
-  });
-
-  socket.on("room:get", (_payload, ack) => {
-    const room = ensureRoom(socket);
-    if (!room) {
-      if (typeof ack === "function") ack({ ok: false, error: "Sem sala." });
-      return;
-    }
-
-    if (typeof ack === "function") {
-      ack({ ok: true, room: getRoomSnapshot(room) });
-    }
-  });
-
-  socket.on("match:reset", (_payload, ack) => {
-    const room = ensureRoom(socket);
-    if (!room) {
-      if (typeof ack === "function") ack({ ok: false });
-      return;
-    }
-
-    if (room.hostId !== socket.id) {
-      if (typeof ack === "function") ack({ ok: false, error: "Só o host reseta." });
-      return;
-    }
-
-    clearTimeout(room.matchTimeout);
-
-    room.status = "lobby";
-    room.startedAt = null;
-    room.endsAt = null;
-    room.winner = null;
-
-    for (const player of room.players.values()) {
-      player.ready = false;
-      player.score = 0;
-      player.kills = 0;
-    }
-
-    if (typeof ack === "function") ack({ ok: true });
-
-    emitRoomUpdate(room);
-  });
-
-  socket.on("disconnect", () => {
-    const roomCode = socket.data.roomCode;
-    if (!roomCode) return;
-
-    const room = rooms.get(roomCode);
-    if (!room) return;
-
-    room.players.delete(socket.id);
-
-    if (room.hostId === socket.id) {
-      const nextHost = room.players.values().next().value;
-      room.hostId = nextHost ? nextHost.id : null;
-    }
-
-    emitRoomUpdate(room);
-    maybeDeleteRoom(room);
+    emitRoomState(room);
   });
 });
 
-setInterval(() => {
-  for (const room of rooms.values()) {
-    if (room.status === "playing" && room.endsAt) {
-      const remaining = room.endsAt - Date.now();
-      if (remaining <= 0) {
-        endMatch(room.code);
-      } else {
-        io.to(room.code).emit("match:tick", {
-          endsAt: room.endsAt,
-          timeLeftMs: remaining,
-        });
-      }
-    }
-  }
-}, 1000);
-
 server.listen(PORT, () => {
-  console.log(`Arena backend online on port ${PORT}`);
+  console.log(`Arena server running on port ${PORT}`);
 });
