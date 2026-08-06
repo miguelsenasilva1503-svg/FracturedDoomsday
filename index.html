@@ -21251,6 +21251,14 @@ applyMusicVolume();
         window.arenaState.joinCode = code;
         sock.emit('room:join', { code, ...payload }, (res) => {
             if (!res?.ok) {
+                window.arenaState.online = false;
+                window.arenaState.isHost = false;
+                window.arenaState.roomCode = '';
+                window.arenaState.roomName = '';
+                window.arenaState.players = [];
+                window.arenaState.botRoster = [];
+                window.arenaState.lastRanking = [];
+                window.arenaState.resultsShown = false;
                 window.arenaState.view = 'join';
                 if (typeof showScreen === 'function') showScreen('screen-arena');
                 if (typeof arenaRenderJoinForm === 'function') arenaRenderJoinForm();
