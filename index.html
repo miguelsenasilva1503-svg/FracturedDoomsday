@@ -13178,7 +13178,8 @@ function updateEnemies(dt) {
             if(e.revives && e.revives > 0) {
                 e.revives--; e.hp = e.maxHp; e.freezeTimer = 1.0; e.color = '#7f8c8d';
             } else {
-                enemiesKilled++; 
+                enemiesKilled++;
+                if (typeof window.arenaRegisterEnemyKill === 'function') window.arenaRegisterEnemyKill(e);
                 trackMissionProgress('kills', 1);
                 awardAchievementStat('totalKills', 1);
                 if(e.isBoss) { trackMissionProgress('bosses', 1); awardAchievementStat('bossKills', 1); awardCharacterMedal(pd.selectedChar, e.type === 'megaboss' ? 2 : 1); }
@@ -18386,5 +18387,1844 @@ applyMusicVolume();
 })();
 </script>
 
+
+<script>
+(function () {
+    const prev = {
+        arenaConnect: window.arenaConnect,
+        arenaCreateRoom: window.arenaCreateRoom,
+        arenaJoinRoom: window.arenaJoinRoom,
+        arenaRenderHub: window.arenaRenderHub,
+        arenaRenderJoinForm: window.arenaRenderJoinForm,
+        arenaRenderLobby: window.arenaRenderLobby,
+        arenaGetPlayerCardSprite: window.arenaGetPlayerCardSprite,
+        arenaResolveLobbyCharId: window.arenaResolveLobbyCharId,
+        arenaBuildPlayersForLobby: window.arenaBuildPlayersForLobby,
+        arenaApplySetting: window.arenaApplySetting,
+        arenaToggleBan: window.arenaToggleBan,
+        arenaChooseCharacter: window.arenaChooseCharacter,
+        arenaOpenBanMode: window.arenaOpenBanMode,
+        arenaStartLobbyMatch: window.arenaStartLobbyMatch,
+        selectChar: window.selectChar,
+        showCharDetail: window.showCharDetail,
+        arenaRefreshLobby: window.arenaRefreshLobby,
+        arenaHandleResults: window.arenaHandleResults,
+        arenaPlayBots: window.arenaPlayBots,
+    };
+
+    function cloneSettings(settings) {
+        const s = settings && typeof settings === 'object' ? settings : {};
+        return {
+            mapChoice: Number(s.mapChoice) || 0,
+            duration: [2, 5, 10, 15].includes(Number(s.duration)) ? Number(s.duration) : 5,
+            powerUps: s.powerUps !== false && s.powerUps !== '0',
+            difficulty: ['classic', 'hardcore', 'ultra'].includes(String(s.difficulty)) ? String(s.difficulty) : 'classic',
+            bannedChars: Array.isArray(s.bannedChars) ? s.bannedChars.slice() : [],
+        };
+    }
+
+    function syncLocalCharMap() {
+        arenaEnsureState();
+        if (!window.arenaState.playerCharMap || typeof window.arenaState.playerCharMap !== 'object') window.arenaState.playerCharMap = {};
+        window.arenaState.playerCharMap.me = arenaSelectedCharId();
+    }
+
+    function applyRoomSnapshot(room) {
+        if (!room) return;
+        arenaEnsureState();
+        const roomCode = room.code || room.roomCode || '';
+        const isPlaying = !!(room.started || room.starting);
+        const settings = cloneSettings(room.settings);
+        const meId = arenaSocket?.id || 'me';
+        const players = Array.isArray(room.players) ? room.players.map(p => ({
+            id: p.id,
+            name: p.name,
+            score: Number(p.score) || 0,
+            kills: Number(p.kills) || 0,
+            ready: !!p.ready,
+            me: p.id === meId,
+            host: p.id === room.hostId,
+            charId: String(p.charId || (p.id === meId ? arenaSelectedCharId() : 'strike')),
+        })) : [];
+
+        window.arenaState.online = true;
+        window.arenaState.roomCode = roomCode || window.arenaState.roomCode || '';
+        window.arenaState.isHost = !!(arenaSocket && room.hostId && arenaSocket.id === room.hostId);
+        window.arenaState.mode = 'online';
+        window.arenaState.settings = { ...window.arenaState.settings, ...settings, bannedChars: settings.bannedChars.slice() };
+        window.arenaState.players = players;
+        window.arenaState.playerCharMap = window.arenaState.playerCharMap && typeof window.arenaState.playerCharMap === 'object' ? window.arenaState.playerCharMap : {};
+        players.forEach(p => { if (p.id) window.arenaState.playerCharMap[p.id] = p.charId; });
+        syncLocalCharMap();
+
+        if (isPlaying) {
+            window.arenaState.view = 'playing';
+            if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
+            return;
+        }
+
+        if (window.arenaState.resultsShown) return;
+        if (window.arenaState.view === 'join') {
+            if (typeof arenaRenderJoinForm === 'function') arenaRenderJoinForm();
+            return;
+        }
+        if (window.arenaState.view !== 'hub' && window.arenaState.view !== 'lobby') window.arenaState.view = 'lobby';
+        if (typeof arenaRenderLobby === 'function') arenaRenderLobby();
+    }
+
+    function ensureArenaSocketHandlers(socket) {
+        if (!socket) return socket;
+        socket.off('room_state');
+        socket.off('room:update');
+        socket.off('match_start');
+        socket.off('match:start');
+        socket.off('match_end');
+        socket.off('match:end');
+        socket.off('match_tick');
+        socket.off('match:tick');
+        socket.off('match_starting');
+        socket.off('match:starting');
+
+        socket.on('room_state', applyRoomSnapshot);
+        socket.on('room:update', applyRoomSnapshot);
+        socket.on('match_starting', (payload) => {
+            window.arenaState.matchCountdown = Number(payload?.countdownSec) || 0;
+            if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
+        });
+        socket.on('match:starting', (payload) => {
+            window.arenaState.matchCountdown = Number(payload?.countdownSec) || 0;
+            if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
+        });
+        socket.on('match_start', (payload) => {
+            window.arenaState.settings = { ...window.arenaState.settings, ...(payload?.settings || {}) };
+            if (typeof showArenaMatch === 'function') showArenaMatch();
+            if (typeof arenaSetBattleContext === 'function') arenaSetBattleContext();
+            window.arenaState.timeLeftMs = Number(payload?.durationMs) || Math.max(1, Number(window.arenaState.settings?.duration) || 5) * 60000;
+        });
+        socket.on('match:start', (payload) => {
+            window.arenaState.settings = { ...window.arenaState.settings, ...(payload?.settings || {}) };
+            if (typeof showArenaMatch === 'function') showArenaMatch();
+            if (typeof arenaSetBattleContext === 'function') arenaSetBattleContext();
+            window.arenaState.timeLeftMs = Number(payload?.durationMs) || Math.max(1, Number(window.arenaState.settings?.duration) || 5) * 60000;
+        });
+        socket.on('match_tick', (payload) => {
+            const remaining = Number(payload?.timeLeftMs ?? payload?.remainingMs);
+            if (Number.isFinite(remaining)) window.arenaState.timeLeftMs = remaining;
+        });
+        socket.on('match:tick', (payload) => {
+            const remaining = Number(payload?.timeLeftMs ?? payload?.remainingMs);
+            if (Number.isFinite(remaining)) window.arenaState.timeLeftMs = remaining;
+        });
+        socket.on('match_end', (payload) => {
+            if (typeof arenaHandleResults === 'function') arenaHandleResults(payload?.ranking || payload?.rank || payload?.results || []);
+        });
+        socket.on('match:end', (payload) => {
+            if (typeof arenaHandleResults === 'function') arenaHandleResults(payload?.ranking || payload?.rank || payload?.results || []);
+        });
+        socket.on('disconnect', () => {
+            if (window.arenaState.online) notify('Conexão da Arena perdida.');
+        });
+        return socket;
+    }
+
+    window.arenaConnect = function () {
+        if (arenaSocket && arenaSocket.connected) return arenaSocket;
+        if (typeof io !== 'function') return null;
+        arenaSocket = ensureArenaSocketHandlers(io(ARENA_SERVER_URL, { transports: ['websocket', 'polling'] }));
+        arenaSocket.on('connect', () => {
+            window.arenaState.online = true;
+            if (window.arenaState.view === 'playing') {
+                if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
+            } else {
+                if (typeof arenaRenderLobby === 'function') arenaRenderLobby();
+            }
+        });
+        return arenaSocket;
+    };
+
+    window.arenaResolveLobbyCharId = function (playerLike) {
+        const selected = arenaSelectedCharId();
+        if (!playerLike) return selected;
+        const rawId = String(playerLike.charId || '').trim();
+        if (playerLike.me || playerLike.id === 'me') return selected;
+        if (rawId && CHARACTERS?.[rawId]) return rawId;
+        const key = String(playerLike.id || playerLike.name || '').trim();
+        if (key && window.arenaState?.playerCharMap?.[key] && CHARACTERS?.[window.arenaState.playerCharMap[key]]) return window.arenaState.playerCharMap[key];
+        return 'strike';
+    };
+
+    window.arenaGetPlayerCardSprite = function (playerLike, variant = 'menu') {
+        const charId = typeof playerLike === 'string' ? playerLike : arenaResolveLobbyCharId(playerLike);
+        return arenaGetCharSpriteMarkup(charId, variant);
+    };
+
+    window.arenaBuildPlayersForLobby = function () {
+        const me = {
+            id: 'me',
+            name: arenaGetCurrentPlayerName(),
+            charId: arenaSelectedCharId(),
+            score: arenaState.score || 0,
+            kills: arenaState.kills || 0,
+            ready: true,
+            host: !!arenaState.isHost,
+            me: true,
+        };
+        const roomPlayers = Array.isArray(arenaState.players) && arenaState.players.length ? arenaState.players.map(p => ({ ...p })) : [];
+        if (!roomPlayers.some(p => p.me || p.id === 'me')) roomPlayers.unshift(me);
+        else {
+            const idx = roomPlayers.findIndex(p => p.me || p.id === 'me');
+            if (idx >= 0) roomPlayers[idx] = me;
+        }
+        return roomPlayers.map(p => ({ ...p, charId: arenaResolveLobbyCharId(p) }));
+    };
+
+    window.arenaCreateRoom = function () {
+        arenaEnsureState();
+        const nick = String(document.getElementById('arena-name-input')?.value || arenaGetCurrentPlayerName()).trim().slice(0, 20) || 'Jogador';
+        const s = arenaConnect();
+        if (!s) { showAlert('Servidor da Arena indisponível.'); return; }
+        pd.nickname = nick;
+        save();
+        s.emit('room:create', { name: nick, charId: arenaSelectedCharId(), settings: cloneSettings(arenaState.settings) }, (res) => {
+            if (!res?.ok) { showAlert(res?.error || 'Não foi possível criar a sala.'); return; }
+            applyRoomSnapshot(res.room || res);
+            arenaState.view = 'lobby';
+            showScreen('screen-arena');
+            arenaRenderLobby();
+            notify(`Sala criada: ${arenaState.roomCode}`);
+        });
+    };
+
+    window.arenaJoinRoom = function () {
+        arenaEnsureState();
+        const nick = String(document.getElementById('arena-name-input')?.value || arenaGetCurrentPlayerName()).trim().slice(0, 20) || 'Jogador';
+        const code = String(document.getElementById('arena-code-input')?.value || '').trim().toUpperCase();
+        if (!code) { showAlert('Digite um código de sala.'); return; }
+        const s = arenaConnect();
+        if (!s) { showAlert('Servidor da Arena indisponível.'); return; }
+        pd.nickname = nick;
+        save();
+        s.emit('room:join', { code, name: nick, charId: arenaSelectedCharId() }, (res) => {
+            if (!res?.ok) { showAlert(res?.error || 'Não foi possível entrar na sala.'); return; }
+            applyRoomSnapshot(res.room || res);
+            arenaState.roomCode = res.code || code;
+            arenaState.view = 'lobby';
+            showScreen('screen-arena');
+            arenaRenderLobby();
+            notify(`Entrou na sala ${arenaState.roomCode}`);
+        });
+    };
+
+    window.arenaApplySetting = function (key, value) {
+        arenaEnsureState();
+        if (key === 'bannedChars' && !Array.isArray(value)) value = [];
+        window.arenaState.settings[key] = value;
+        save();
+        arenaRenderLobby();
+        if (window.arenaState.online && window.arenaState.isHost && arenaSocket?.connected) {
+            arenaSocket.emit('room:settings', { settings: cloneSettings(window.arenaState.settings) });
+        }
+    };
+
+    window.arenaToggleBan = function (charId) {
+        arenaEnsureState();
+        const list = new Set(window.arenaState.settings.bannedChars || []);
+        if (list.has(charId)) list.delete(charId); else list.add(charId);
+        window.arenaState.settings.bannedChars = Array.from(list);
+        save();
+        renderChars();
+        arenaUpdateCharBanner();
+        arenaRenderLobby();
+        if (window.arenaState.online && window.arenaState.isHost && arenaSocket?.connected) {
+            arenaSocket.emit('room:settings', { settings: cloneSettings(window.arenaState.settings) });
+        }
+    };
+
+    window.arenaOpenBanMode = function () {
+        arenaEnsureState();
+        window.arenaBanMode = true;
+        window.arenaState.viewBeforeChars = window.arenaState.view || 'hub';
+        window.arenaReturnScreen = 'screen-arena';
+        showScreen('screen-chars');
+        renderChars();
+        arenaUpdateCharBanner();
+    };
+
+    window.arenaChooseCharacter = function () {
+        arenaEnsureState();
+        window.arenaState.viewBeforeChars = window.arenaState.view || 'hub';
+        window.arenaReturnScreen = 'screen-arena';
+        window.arenaBanMode = false;
+        showScreen('screen-chars');
+        renderChars();
+        arenaUpdateCharBanner();
+    };
+
+    window.showCharDetail = function (id) {
+        if (window.arenaBanMode) {
+            arenaToggleBan(id);
+            return;
+        }
+        if (window.arenaReturnScreen === 'screen-arena' && window.arenaState?.settings?.bannedChars?.includes?.(id)) {
+            showAlert('Personagem bloqueado nessa sala.');
+            return;
+        }
+        return prev.showCharDetail ? prev.showCharDetail.apply(this, arguments) : undefined;
+    };
+
+    window.selectChar = function (id) {
+        if (!pd.chars?.[id]) { showAlert('Personagem não obtido!'); return; }
+        if (window.arenaReturnScreen === 'screen-arena' && window.arenaState?.settings?.bannedChars?.includes?.(id)) {
+            showAlert('Personagem bloqueado nessa sala.');
+            return;
+        }
+        const result = prev.selectChar ? prev.selectChar.apply(this, arguments) : undefined;
+        syncLocalCharMap();
+        if (window.arenaState?.online && arenaSocket?.connected) {
+            arenaSocket.emit('player:update_char', { charId: arenaSelectedCharId() }, () => {});
+        }
+        if (window.arenaReturnScreen === 'screen-arena') {
+            window.arenaBanMode = false;
+            window.arenaReturnScreen = null;
+            showScreen('screen-arena');
+            if (window.arenaState.view === 'join') arenaRenderJoinForm();
+            else arenaRenderLobby();
+        }
+        return result;
+    };
+
+    window.arenaRefreshLobby = function () {
+        if (window.arenaState?.view === 'playing') {
+            if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
+            return;
+        }
+        arenaRenderLobby();
+    };
+
+    window.arenaHandleResults = function (ranking) {
+        if (window.arenaState.resultsShown) return;
+        window.arenaState.resultsShown = true;
+        window.arenaIgnoreGameOver = true;
+        if (typeof arenaStopBattleLoop === 'function') arenaStopBattleLoop();
+        const ranked = typeof arenaSortedRanking === 'function' ? arenaSortedRanking(Array.isArray(ranking) ? ranking : arenaGetLivePlayers()) : (Array.isArray(ranking) ? ranking : []);
+        window.arenaState.lastRanking = ranked;
+        const panel = document.getElementById('arena-root');
+        if (!panel) return;
+        panel.innerHTML = `
+            <div class="arena-results-card">
+                <h1>Fim da Partida</h1>
+                <div class="arena-banner">Preparando retorno ao lobby...</div>
+                <div class="arena-results-list">
+                    <div class="arena-results-step" id="arena-res-step-3"></div>
+                    <div class="arena-results-step" id="arena-res-step-2"></div>
+                    <div class="arena-results-step" id="arena-res-step-1"></div>
+                </div>
+            </div>
+        `;
+        const line = (rank, label) => {
+            const p = ranked[rank - 1];
+            if (!p) return `${label}: —`;
+            return `${label}: ${escapeHtmlText(p.name || 'Jogador')} — ${Math.max(0, Math.floor(Number(p.score) || 0))} pts`;
+        };
+        setTimeout(() => { const el = document.getElementById('arena-res-step-3'); if (el) { el.textContent = line(3, 'Top 3'); el.classList.add('visible'); } }, 450);
+        setTimeout(() => { const el = document.getElementById('arena-res-step-2'); if (el) { el.textContent = line(2, 'Top 2'); el.classList.add('visible'); } }, 1350);
+        setTimeout(() => { const el = document.getElementById('arena-res-step-1'); if (el) { el.textContent = line(1, 'Top 1'); el.classList.add('visible'); } }, 2250);
+        setTimeout(() => {
+            if (window.arenaState.online && window.arenaState.isHost && arenaSocket?.connected) {
+                arenaSocket.emit('room:settings', { settings: cloneSettings(window.arenaState.settings) }, () => {});
+            }
+            window.arenaState.view = 'lobby';
+            window.isArenaMode = false;
+            window.arenaIgnoreGameOver = true;
+            if (typeof arenaResetLobby === 'function') arenaResetLobby();
+            showScreen('screen-arena');
+            arenaRenderLobby();
+        }, 3600);
+    };
+
+    window.arenaRenderHub = function () {
+        arenaEnsureState();
+        const root = document.getElementById('arena-root');
+        if (!root) return;
+        const meChar = arenaSelectedCharId();
+        const meName = arenaGetCurrentPlayerName();
+        root.innerHTML = `
+            <div class="arena-shell">
+                <div class="arena-home-hero">
+                    <div class="arena-hero">
+                        <div class="arena-hub-copy">
+                            <div class="arena-kicker">🏛 Arena Legacy</div>
+                            <h1 class="arena-room-title">Entrada da Arena</h1>
+                            <p>Partidas separadas com ranking compartilhado. Aqui só contam pontos, tempo e vitória.</p>
+                            <div class="arena-banner">Sem recursos, sem baús e sem vitórias diárias.</div>
+                        </div>
+                        <div class="arena-preview">
+                            <div class="arena-preview-sprite">${arenaGetPlayerCardSprite({ id: 'me', name: meName, charId: meChar, me: true }, 'menu')}</div>
+                            <div class="arena-preview-name">${escapeHtmlText(meName)}</div>
+                            <div class="arena-badges" style="justify-content:center;">
+                                <span class="arena-badge">👤 ${escapeHtmlText(arenaSelectedCharDef().name)}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="arena-home-buttons" style="margin-top:14px;">
+                        <button class="btn-menu" type="button" onclick="arenaOpenJoinRoom()">Entrar em sala</button>
+                        <button class="btn-menu" type="button" onclick="arenaCreateRoom()">Criar sala</button>
+                        <button class="btn-menu" type="button" onclick="arenaChooseCharacter()">Escolher personagem</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        arenaUpdateRankingPanel();
+        arenaUpdateCharBanner();
+        syncLocalCharMap();
+    };
+
+    window.arenaRenderJoinForm = function () {
+        arenaEnsureState();
+        const root = document.getElementById('arena-root');
+        if (!root) return;
+        const meChar = arenaSelectedCharId();
+        const meName = arenaGetCurrentPlayerName();
+        const codeValue = String(arenaState.joinCode || arenaState.roomCode || '').trim().toUpperCase();
+        root.innerHTML = `
+            <div class="arena-shell">
+                <div class="arena-join-hero">
+                    <div class="arena-hero">
+                        <div class="arena-hub-copy">
+                            <div class="arena-kicker">🏛 Arena Legacy</div>
+                            <h1 class="arena-room-title">Entrar em uma sala</h1>
+                            <p>Digite o código da sala. Você entra na mesma sala, mas em partida separada.</p>
+                            <div class="arena-banner">Código e nick precisam ser reais. Nada de sala fantasma.</div>
+                        </div>
+                        <div class="arena-preview">
+                            <div class="arena-preview-sprite">${arenaGetPlayerCardSprite({ id: 'me', name: meName, charId: meChar, me: true }, 'menu')}</div>
+                            <div class="arena-preview-name">${escapeHtmlText(meName)}</div>
+                            <div class="arena-badges" style="justify-content:center;">
+                                <span class="arena-badge">👤 ${escapeHtmlText(arenaSelectedCharDef().name)}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="arena-panel arena-join-panel" style="margin-top:14px;">
+                        <h3 class="arena-panel-title">Código da sala</h3>
+                        <div class="arena-grid">
+                            <div class="arena-field">
+                                <label>Seu nick</label>
+                                <input id="arena-name-input" maxlength="20" value="${escapeHtmlText(meName)}">
+                            </div>
+                            <div class="arena-field">
+                                <label>Digite o código</label>
+                                <input id="arena-code-input" maxlength="10" placeholder="ABCDE1" value="${escapeHtmlText(codeValue)}">
+                            </div>
+                        </div>
+                        <div class="arena-lobby-actions" style="margin-top:12px;">
+                            <button class="btn-action" type="button" onclick="arenaJoinRoom()">Entrar</button>
+                            <button class="btn-menu" type="button" onclick="arenaRenderHub()">Voltar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        syncLocalCharMap();
+    };
+
+    window.arenaRenderLobby = function () {
+        arenaEnsureState();
+        const root = document.getElementById('arena-root');
+        if (!root) return;
+        if (arenaState.view === 'playing') {
+            if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
+            return;
+        }
+        if (arenaState.view === 'join') {
+            arenaRenderJoinForm();
+            return;
+        }
+        if (arenaState.view === 'hub' && !arenaState.roomCode && arenaState.mode !== 'bots' && !arenaState.online) {
+            arenaRenderHub();
+            return;
+        }
+
+        const players = arenaBuildPlayersForLobby();
+        const me = players.find(p => p.me) || players[0] || { charId: arenaSelectedCharId(), name: arenaGetCurrentPlayerName() };
+        const isHost = !!arenaState.isHost;
+        const roomCodeValue = escapeHtmlText((arenaState.roomCode || (arenaState.mode === 'bots' ? 'BOTS' : '—')).toString());
+        const roomLabel = `<div class="arena-room-code-pill big">${roomCodeValue}</div>`;
+
+        const hostControls = isHost ? `
+            <div class="arena-panel">
+                <h3 class="arena-panel-title">Configurações do servidor</h3>
+                <div class="arena-grid">
+                    <div class="arena-field">
+                        <label>Mapa</label>
+                        <select id="arena-map-select" onchange="arenaApplySetting('mapChoice', Number(this.value))">
+                            ${ARENA_MAPS.map((m, i) => `<option value="${i}" ${Number(arenaState.settings.mapChoice) === i ? 'selected' : ''}>${m}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="arena-field">
+                        <label>Tempo</label>
+                        <select id="arena-duration-select" onchange="arenaApplySetting('duration', Number(this.value))">
+                            ${ARENA_DURATION_OPTIONS.map(v => `<option value="${v}" ${Number(arenaState.settings.duration) === v ? 'selected' : ''}>${v} minutos</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="arena-field">
+                        <label>Power ups</label>
+                        <select id="arena-powerups-select" onchange="arenaApplySetting('powerUps', this.value === '1')">
+                            <option value="1" ${arenaState.settings.powerUps ? 'selected' : ''}>Ativado</option>
+                            <option value="0" ${!arenaState.settings.powerUps ? 'selected' : ''}>Desativado</option>
+                        </select>
+                    </div>
+                    <div class="arena-field">
+                        <label>Dificuldade</label>
+                        <select id="arena-difficulty-select" onchange="arenaApplySetting('difficulty', this.value)">
+                            <option value="classic" ${arenaState.settings.difficulty === 'classic' ? 'selected' : ''}>Clássico</option>
+                            <option value="hardcore" ${arenaState.settings.difficulty === 'hardcore' ? 'selected' : ''}>Hardcore</option>
+                            <option value="ultra" ${arenaState.settings.difficulty === 'ultra' ? 'selected' : ''}>Ultra Hardcore</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="arena-chip-list" style="margin-top:12px;">
+                    <button class="btn-menu" type="button" onclick="arenaOpenBanMode()">Bloquear personagens</button>
+                    <button class="btn-menu" type="button" onclick="arenaApplySetting('bannedChars', [])">Desbloquear tudo</button>
+                </div>
+            </div>
+        ` : '';
+
+        root.innerHTML = `
+            <div class="arena-shell">
+                <div class="arena-lobby-hero">
+                    <div class="arena-hero">
+                        <div class="arena-hub-copy">
+                            <div class="arena-kicker">🏛 Arena Legacy</div>
+                            <h1 class="arena-room-title">${arenaRoomTitle()}</h1>
+                            <p>Sala pronta. Cada jogador joga sua partida, mas o ranking fica interligado em tempo real.</p>
+                            <div class="arena-badges">
+                                <span class="arena-badge">🗺️ ${escapeHtmlText(arenaMapLabel())}</span>
+                                <span class="arena-badge">⏱️ ${escapeHtmlText(arenaDurationLabel())}</span>
+                                <span class="arena-badge">⚔️ ${escapeHtmlText(arenaDifficultyLabel())}</span>
+                                <span class="arena-badge">💥 ${arenaState.settings.powerUps ? 'Power ups on' : 'Power ups off'}</span>
+                            </div>
+                            ${roomLabel}
+                        </div>
+                        <div class="arena-preview">
+                            <div class="arena-preview-sprite">${arenaGetPlayerCardSprite(me, 'menu')}</div>
+                            <div class="arena-preview-name">${escapeHtmlText(me.name || arenaGetCurrentPlayerName())}</div>
+                            <div class="arena-badges" style="justify-content:center;">
+                                <span class="arena-badge">👤 ${escapeHtmlText(arenaSelectedCharDef().name)}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="arena-home-buttons" style="margin-top:14px;">
+                        ${isHost ? '<button class="btn-play" type="button" onclick="arenaStartLobbyMatch()">Começar partida</button>' : '<div class="arena-banner">Aguarde o anfitrião iniciar.</div>'}
+                    </div>
+                </div>
+                ${hostControls}
+                <div class="arena-panel">
+                    <h3 class="arena-panel-title">Jogadores na sala</h3>
+                    <div class="arena-player-grid">
+                        ${players.map(p => `
+                            <div class="arena-player-card ${p.host ? 'host' : ''} ${p.me ? 'me' : ''}">
+                                <div class="player-sprite">${arenaGetPlayerCardSprite(p, 'menu')}</div>
+                                <div class="nick">${escapeHtmlText(p.name || 'Jogador')}</div>
+                                <div class="meta">${p.host ? 'Host' : (p.ready ? 'Pronto' : 'Aguardando')}</div>
+                                <div class="score">${Math.max(0, Number(p.score) || 0)} pts</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        arenaUpdateRankingPanel();
+        arenaUpdateCharBanner();
+        syncLocalCharMap();
+    };
+
+    window.arenaStartLobbyMatch = function () {
+        arenaEnsureState();
+        if (window.arenaState.mode === 'bots') {
+            if (typeof prev.arenaPlayBots === 'function') return prev.arenaPlayBots.apply(this, arguments);
+            return;
+        }
+        if (!window.arenaState.online) {
+            if (typeof showAlert === 'function') showAlert('Crie ou entre em uma sala online primeiro.');
+            return;
+        }
+        if (!window.arenaState.isHost) { showAlert('Só o anfitrião começa a partida.'); return; }
+        const s = arenaConnect();
+        if (!s) { showAlert('Servidor da Arena indisponível.'); return; }
+        s.emit('room:start', {}, (res) => {
+            if (!res?.ok) showAlert(res?.error || 'Não foi possível iniciar.');
+        });
+    };
+
+    window.arenaPlayBots = function () {
+        arenaEnsureState();
+        if (typeof prev.arenaPlayBots === 'function') return prev.arenaPlayBots.apply(this, arguments);
+    };
+
+    window.arenaOpenJoinRoom = function () {
+        arenaEnsureState();
+        window.arenaState.view = 'join';
+        window.arenaState.joinCode = '';
+        showScreen('screen-arena');
+        arenaRenderJoinForm();
+        const input = document.getElementById('arena-code-input');
+        if (input) setTimeout(() => input.focus(), 0);
+    };
+
+    window.arenaSetBattleContext = function () {
+        arenaEnsureState();
+        const mapIdx = Math.max(0, Number(window.arenaState.settings?.mapChoice) || 0);
+        window.currentMap = mapIdx;
+        arenaState.currentMap = mapIdx;
+        window.isHardcoreMode = window.arenaState.settings?.difficulty === 'hardcore';
+        window.arenaUltraHardcore = window.arenaState.settings?.difficulty === 'ultra';
+        window.arenaNoRewards = true;
+        window.arenaIgnoreGameOver = false;
+        window.arenaMatchEndsAt = 0;
+        window.arenaScorePenalty = 0;
+        if (typeof syncMapSelectUI === 'function') syncMapSelectUI();
+    };
+
+    const originalArenaPlayBots = prev.arenaPlayBots;
+    if (typeof originalArenaPlayBots === 'function') {
+        window.arenaPlayBots = function () {
+            const result = originalArenaPlayBots.apply(this, arguments);
+            syncLocalCharMap();
+            return result;
+        };
+    }
+})();
+</script>
+
 </body>
+
+<script>
+(function () {
+    if (window.__arenaFinalV5Applied) return;
+    window.__arenaFinalV5Applied = true;
+
+    const POWERUP_SPRITES = {
+        arena_powerup_ima: 'elements/magnet.png',
+        arena_powerup_tenis: 'elements/tenis.png',
+        arena_powerup_escudo: 'elements/shield.png',
+        arena_powerup_double: 'elements/double.png',
+        arena_powerup_bomb: 'elements/bomb.png'
+    };
+
+    try {
+        if (typeof MAP_ELEMENT_SPRITES === 'object' && MAP_ELEMENT_SPRITES) {
+            Object.assign(MAP_ELEMENT_SPRITES, POWERUP_SPRITES);
+        }
+    } catch (e) {}
+
+    const originalGetMapElementSpriteKey = window.getMapElementSpriteKey;
+    window.getMapElementSpriteKey = function (type, obj = {}) {
+        const key = String(type || '').toLowerCase();
+        if (key === 'arena_powerup') {
+            const kind = String(obj.kind || '').toLowerCase();
+            return POWERUP_SPRITES[`arena_powerup_${kind}`] ? `arena_powerup_${kind}` : '';
+        }
+        return typeof originalGetMapElementSpriteKey === 'function'
+            ? originalGetMapElementSpriteKey.call(this, type, obj)
+            : '';
+    };
+
+    function currentArenaTimeMs() {
+        return Math.max(0, Number(window.arenaState?.timeLeftMs) || 0);
+    }
+
+    function setArenaTimeMs(ms) {
+        if (!window.arenaState) return;
+        window.arenaState.timeLeftMs = Math.max(0, Math.floor(ms));
+    }
+
+    function arenaPlayerKey(p) {
+        if (!p) return '';
+        return String(p.id || p.name || (p.me ? 'me' : '')).trim() || '';
+    }
+
+    function arenaNormalizePlayer(p, meId) {
+        if (!p) return null;
+        const isMe = !!(p.me || p.id === 'me' || p.id === meId);
+        const resolvedId = String(p.id || (isMe ? 'me' : p.name || '')).trim() || (isMe ? 'me' : '');
+        const resolvedChar = String(p.charId || (isMe ? (typeof arenaSelectedCharId === 'function' ? arenaSelectedCharId() : 'strike') : (window.arenaResolveLobbyCharId ? arenaResolveLobbyCharId(p) : 'strike')) || 'strike');
+        return {
+            ...p,
+            id: resolvedId,
+            name: String(p.name || 'Jogador'),
+            score: Math.max(0, Math.floor(Number(p.score) || 0)),
+            kills: Math.max(0, Math.floor(Number(p.kills) || 0)),
+            ready: !!p.ready,
+            host: !!p.host,
+            me: isMe,
+            charId: resolvedChar
+        };
+    }
+
+    function arenaDedupePlayers(list, meId) {
+        const out = [];
+        const seen = new Set();
+        for (const raw of Array.isArray(list) ? list : []) {
+            const p = arenaNormalizePlayer(raw, meId);
+            if (!p) continue;
+            const key = arenaPlayerKey(p);
+            if (key && seen.has(key)) continue;
+            if (key) seen.add(key);
+            out.push(p);
+        }
+        return out;
+    }
+
+    function arenaBuildSelfPlayer() {
+        return {
+            id: 'me',
+            name: typeof arenaGetCurrentPlayerName === 'function' ? arenaGetCurrentPlayerName() : 'Jogador',
+            charId: typeof arenaSelectedCharId === 'function' ? arenaSelectedCharId() : 'strike',
+            score: Math.max(0, Math.floor(Number(window.arenaState?.score) || 0)),
+            kills: Math.max(0, Math.floor(Number(window.enemiesKilled || 0) || 0)),
+            ready: true,
+            host: !!window.arenaState?.isHost,
+            me: true
+        };
+    }
+
+    const originalArenaGetLivePlayers = window.arenaGetLivePlayers;
+    window.arenaGetLivePlayers = function () {
+        const me = arenaBuildSelfPlayer();
+        const base = Array.isArray(window.arenaState?.players) ? window.arenaState.players.slice() : [];
+        if (!base.some(p => p && (p.me || p.id === 'me'))) base.unshift(me);
+        const deduped = arenaDedupePlayers(base, 'me');
+        return deduped.map(p => ({ ...p, charId: p.me ? me.charId : (p.charId || (window.arenaResolveLobbyCharId ? arenaResolveLobbyCharId(p) : 'strike')) }));
+    };
+
+    const originalArenaBuildPlayersForLobby = window.arenaBuildPlayersForLobby;
+    window.arenaBuildPlayersForLobby = function () {
+        const me = arenaBuildSelfPlayer();
+        const base = Array.isArray(window.arenaState?.players) ? window.arenaState.players.slice() : [];
+        if (!base.some(p => p && (p.me || p.id === 'me'))) base.unshift(me);
+        const deduped = arenaDedupePlayers(base, 'me');
+        return deduped.map(p => ({ ...p, charId: p.me ? me.charId : (p.charId || (window.arenaResolveLobbyCharId ? arenaResolveLobbyCharId(p) : 'strike')) }));
+    };
+
+    const originalApplyRoomSnapshot = window.applyRoomSnapshot;
+    window.applyRoomSnapshot = function (room) {
+        const result = typeof originalApplyRoomSnapshot === 'function'
+            ? originalApplyRoomSnapshot.apply(this, arguments)
+            : undefined;
+
+        try {
+            if (!room || !window.arenaState) return result;
+            const meId = window.arenaSocket?.id || 'me';
+            const settings = room.settings && typeof room.settings === 'object' ? room.settings : null;
+            if (settings) {
+                window.arenaState.settings = {
+                    ...window.arenaState.settings,
+                    ...settings,
+                    bannedChars: Array.isArray(settings.bannedChars) ? settings.bannedChars.slice() : (window.arenaState.settings?.bannedChars || [])
+                };
+            }
+            if (Array.isArray(window.arenaState.players)) {
+                window.arenaState.players = arenaDedupePlayers(window.arenaState.players, meId);
+            }
+            if (window.arenaState.playerCharMap && typeof window.arenaState.playerCharMap === 'object') {
+                for (const p of window.arenaState.players || []) {
+                    if (!p) continue;
+                    const key = String(p.id || p.name || '').trim();
+                    if (key) window.arenaState.playerCharMap[key] = p.charId || (p.me ? (typeof arenaSelectedCharId === 'function' ? arenaSelectedCharId() : 'strike') : 'strike');
+                }
+            }
+            if (room.code || room.roomCode) {
+                window.arenaState.roomCode = room.code || room.roomCode || window.arenaState.roomCode || '';
+            }
+            if (room.name) window.arenaState.roomName = room.name;
+            if (room.status === 'playing' || room.started || room.starting) {
+                startArenaClock();
+            } else {
+                stopArenaClock();
+            }
+            if (window.arenaState.view === 'playing' && typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
+        } catch (e) {
+            console.error('arena apply snapshot patch error', e);
+        }
+        return result;
+    };
+
+    function arenaEnemyScorePoints(enemy) {
+        const t = String(enemy?.type || '').toLowerCase();
+        if (['velocista', 'dancer', 'velocista_dancarino'].includes(t)) return 2;
+        if (['basico', 'basic', 'atirador', 'shooter', 'lider', 'leader', 'curandeiro', 'healer', 'kamikaze', 'ninja', 'goblin', 'mummy'].includes(t)) return 5;
+        if (['gigante', 'giant', 'tanque', 'tank', 'elite'].includes(t)) return 10;
+        if (['lider_elite', 'elite_leader', 'elite_master', 'master_elite_shooter', 'colosso', 'colossum', 'colossus'].includes(t)) return 12;
+        if (t === 'boss') return 20;
+        if (t === 'megaboss' || t === 'mega_boss') return 25;
+        return 5;
+    }
+
+    window.arenaRegisterEnemyKill = function (enemy) {
+        if (!window.isArenaMode || !window.arenaState) return 0;
+        const base = arenaEnemyScorePoints(enemy);
+        const mult = (window.player && Number(window.player.arenaDoublePointsTimer) > 0) ? 2 : 1;
+        const points = Math.max(0, Math.floor(base * mult));
+        window.arenaState.killPoints = Math.max(0, Math.floor((Number(window.arenaState.killPoints) || 0) + points));
+        window.arenaState.score = Math.max(0, Math.floor((Number(window.arenaState.killPoints) || 0) - (Number(window.arenaState.penalty) || 0)));
+        if (window.arenaState.online && window.arenaSocket?.connected) {
+            window.arenaSocket.emit('score:update', {
+                score: window.arenaState.score,
+                kills: Math.max(0, Math.floor(Number(window.enemiesKilled) || 0))
+            });
+        }
+        return points;
+    };
+
+    window.arenaGetPowerUpKind = function () {
+        const roll = Math.random();
+        if (roll < 0.2) return 'ima';
+        if (roll < 0.4) return 'tenis';
+        if (roll < 0.6) return 'escudo';
+        if (roll < 0.8) return 'double';
+        return 'bomb';
+    };
+
+    function closeArenaBombOverlay(apply = false) {
+        const overlay = document.getElementById('arena-bomb-overlay');
+        if (overlay) overlay.classList.add('hidden');
+        window.arenaBombActive = false;
+        if (window.isPaused) window.isPaused = false;
+        if (typeof applyControlLayout === 'function') applyControlLayout();
+        if (apply && typeof updateGameHud === 'function') updateGameHud();
+    }
+
+    function renderArenaBombOverlay() {
+        let overlay = document.getElementById('arena-bomb-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'arena-bomb-overlay';
+            overlay.className = 'overlay hidden';
+            overlay.style.zIndex = '1308';
+            overlay.innerHTML = `
+                <div class="popup-box" style="max-width: 760px; width: min(94vw, 760px); background: linear-gradient(180deg, rgba(22, 28, 44, 0.98), rgba(11, 16, 28, 0.98)); border-color: rgba(255,255,255,0.10);">
+                    <h1 style="color: var(--btn-red); margin-top: 0;">Bomba!</h1>
+                    <h3 style="margin-top: 0;">Escolha um jogador para perder 10 pontos</h3>
+                    <div id="arena-bomb-list" class="title-picker-list" style="max-height: 48vh;"></div>
+                    <button class="btn-menu" style="width: 100%; margin-top: 16px;" onclick="closeArenaBombOverlay(false)">Cancelar</button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+        }
+        const list = overlay.querySelector('#arena-bomb-list');
+        const players = (typeof arenaSortedRanking === 'function'
+            ? arenaSortedRanking(typeof arenaGetLivePlayers === 'function' ? arenaGetLivePlayers() : [])
+            : (typeof arenaGetLivePlayers === 'function' ? arenaGetLivePlayers() : [])).slice();
+
+        const sorted = players.length ? players : (Array.isArray(window.arenaState?.players) ? window.arenaState.players.slice() : []);
+        const items = sorted.map((p, idx) => {
+            const name = String(p?.name || 'Jogador');
+            const score = Math.max(0, Math.floor(Number(p?.score) || 0));
+            const me = !!(p?.me || p?.id === 'me');
+            return `
+                <button class="title-picker-card${me ? ' title-picker-current' : ''}" type="button" onclick="arenaChooseBombTarget(${JSON.stringify(String(p?.id || `idx-${idx}`))})">
+                    ${escapeHtmlText(name)}
+                    <small>${me ? 'Você' : 'Perde 10 pontos'} · ${score} pts</small>
+                </button>
+            `;
+        }).join('');
+
+        list.innerHTML = items || `<div class="arena-banner">Sem jogadores disponíveis.</div>`;
+        overlay.classList.remove('hidden');
+        window.arenaBombActive = true;
+        window.isPaused = true;
+        if (typeof applyControlLayout === 'function') applyControlLayout();
+    }
+
+    window.closeArenaBombOverlay = function (apply) {
+        closeArenaBombOverlay(!!apply);
+    };
+
+    window.arenaChooseBombTarget = function (targetId) {
+        const loss = 10;
+        const meId = window.arenaSocket?.id || 'me';
+        if (!window.arenaState) {
+            closeArenaBombOverlay(false);
+            return;
+        }
+        const targetKey = String(targetId || '').trim();
+        let target = null;
+
+        const pools = [window.arenaState.players, window.arenaState.botRoster];
+        for (const pool of pools) {
+            if (!Array.isArray(pool)) continue;
+            target = pool.find(p => String(p?.id || '').trim() === targetKey);
+            if (target) break;
+        }
+        if (!target && targetKey === 'me') {
+            target = { id: 'me', me: true, score: window.arenaState.score };
+        }
+
+        if (target) {
+            target.score = Math.max(0, Math.floor(Number(target.score) || 0) - loss);
+            if (target.me || target.id === 'me' || target.id === meId) {
+                window.arenaState.killPoints = Math.max(0, Math.floor((Number(window.arenaState.killPoints) || 0) - loss));
+                window.arenaState.score = Math.max(0, Math.floor((Number(window.arenaState.killPoints) || 0) - (Number(window.arenaState.penalty) || 0)));
+                if (typeof updateGameHud === 'function') updateGameHud();
+            }
+            if (window.arenaState.online && window.arenaSocket?.connected) {
+                window.arenaSocket.emit('score:update', {
+                    score: window.arenaState.score,
+                    kills: Math.max(0, Math.floor(Number(window.enemiesKilled) || 0))
+                });
+            }
+            if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
+            if (typeof arenaRenderLobby === 'function' && window.arenaState.view !== 'playing') arenaRenderLobby();
+        }
+        closeArenaBombOverlay(true);
+    };
+
+    window.applyArenaPowerUp = function (kind) {
+        if (!window.player) return;
+        const key = String(kind || '').toLowerCase();
+        if (key === 'ima') {
+            if (typeof collectAllArenaXpGems === 'function') collectAllArenaXpGems();
+            addFloatingText(player.x, player.y, 'ÍMA!', '#f1c40f', 18);
+            return;
+        }
+        if (key === 'tenis') {
+            player.arenaTenisTimer = 8;
+            player.stats.speedMult = Math.min(3, (Number(player.stats.speedMult) || 1) * 1.35);
+            addFloatingText(player.x, player.y, 'TÊNIS!', '#2ecc71', 18);
+            return;
+        }
+        if (key === 'escudo') {
+            player.shieldTimer = Math.max(player.shieldTimer || 0, 180);
+            addFloatingText(player.x, player.y, 'ESCUDO!', '#74b9ff', 18);
+            return;
+        }
+        if (key === 'double') {
+            player.arenaDoublePointsTimer = 10;
+            addFloatingText(player.x, player.y, 'POÇÃO x2!', '#e056fd', 18);
+            return;
+        }
+        if (key === 'bomb') {
+            addFloatingText(player.x, player.y, 'BOMBA!', '#e74c3c', 18);
+            renderArenaBombOverlay();
+            return;
+        }
+    };
+
+    function startArenaClock() {
+        if (window.__arenaClockTimer) return;
+        window.__arenaClockLast = performance.now();
+        window.__arenaClockTimer = setInterval(() => {
+            try {
+                if (!window.arenaState || window.arenaState.view !== 'playing' || !window.isArenaMode) return;
+                const now = performance.now();
+                const dt = Math.max(0, (now - (window.__arenaClockLast || now)) / 1000);
+                window.__arenaClockLast = now;
+
+                window.arenaState.timeLeftMs = Math.max(0, (Number(window.arenaState.timeLeftMs) || 0) - (dt * 1000));
+
+                if (window.player) {
+                    if (Number(window.player.arenaDoublePointsTimer) > 0) {
+                        window.player.arenaDoublePointsTimer = Math.max(0, Number(window.player.arenaDoublePointsTimer) - dt);
+                    }
+                    if (Number(window.player.arenaTenisTimer) > 0) {
+                        window.player.arenaTenisTimer = Math.max(0, Number(window.player.arenaTenisTimer) - dt);
+                        if (window.player.arenaTenisTimer <= 0) {
+                            window.player.stats.speedMult = Math.max(1, (Number(window.player.stats.speedMult) || 1) / 1.35);
+                        }
+                    }
+                }
+
+                if (!window.arenaState._nextRankingAt || now >= window.arenaState._nextRankingAt) {
+                    window.arenaState._nextRankingAt = now + 500;
+                    if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
+                }
+
+                if (window.arenaState.timeLeftMs <= 0 && !window.arenaState.resultsShown) {
+                    if (typeof arenaEndFromGame === 'function') arenaEndFromGame();
+                }
+
+                if (typeof updateGameHud === 'function') updateGameHud();
+            } catch (e) {
+                console.error('arena clock error', e);
+            }
+        }, 100);
+    }
+
+    function stopArenaClock() {
+        if (window.__arenaClockTimer) clearInterval(window.__arenaClockTimer);
+        window.__arenaClockTimer = null;
+        window.__arenaClockLast = 0;
+        const overlay = document.getElementById('arena-bomb-overlay');
+        if (overlay) overlay.classList.add('hidden');
+        window.arenaBombActive = false;
+    }
+
+    window.arenaTick = function (dt) {
+        if (!window.isArenaMode || window.arenaState.view !== 'playing') return;
+        const now = Date.now();
+
+        window.arenaState.score = Math.max(0, Math.floor((Number(window.arenaState.killPoints) || 0) - (Number(window.arenaState.penalty) || 0)));
+
+        if (window.arenaState.mode === 'bots') {
+            if (!window.arenaState._botPulseAt || now >= window.arenaState._botPulseAt) {
+                window.arenaState._botPulseAt = now + 260;
+                window.arenaState.botRoster.forEach((b, i) => {
+                    if (Math.random() < 0.35) b.score = Math.max(0, Math.floor((b.score || 0) + 1 + (i % 3)));
+                    if (Math.random() < 0.22) b.kills = Math.max(0, Math.floor((b.kills || 0) + 1));
+                });
+            }
+        }
+
+        if (window.arenaState.online && window.arenaSocket?.connected && (!window.arenaState._nextHudSyncAt || now >= window.arenaState._nextHudSyncAt)) {
+            window.arenaState._nextHudSyncAt = now + 220;
+            window.arenaSocket.emit('score:update', {
+                score: window.arenaState.score,
+                kills: Math.max(0, Math.floor(Number(window.enemiesKilled) || 0))
+            });
+        }
+
+        if (!window.arenaState._nextRankingAt || now >= window.arenaState._nextRankingAt) {
+            window.arenaState._nextRankingAt = now + 700;
+            if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
+        }
+
+        if (typeof updateGameHud === 'function') updateGameHud();
+    };
+
+    const originalArenaStartBattle = window.arenaStartBattle;
+    window.arenaStartBattle = function () {
+        if (window.arenaState) {
+            window.arenaState.killPoints = 0;
+            window.arenaState.score = 0;
+            window.arenaState.penalty = 0;
+            window.arenaState._nextRankingAt = 0;
+            window.arenaState._botPulseAt = 0;
+            window.arenaState._nextHudSyncAt = 0;
+        }
+        const result = typeof originalArenaStartBattle === 'function' ? originalArenaStartBattle.apply(this, arguments) : undefined;
+        startArenaClock();
+        return result;
+    };
+
+    const originalArenaPlayBots = window.arenaPlayBots;
+    window.arenaPlayBots = function () {
+        if (window.arenaState) {
+            window.arenaState.killPoints = 0;
+            window.arenaState.score = 0;
+            window.arenaState.penalty = 0;
+            window.arenaState._nextRankingAt = 0;
+            window.arenaState._botPulseAt = 0;
+            window.arenaState._nextHudSyncAt = 0;
+        }
+        const result = typeof originalArenaPlayBots === 'function' ? originalArenaPlayBots.apply(this, arguments) : undefined;
+        startArenaClock();
+        return result;
+    };
+
+    const originalArenaResetLobby = window.arenaResetLobby;
+    window.arenaResetLobby = function () {
+        stopArenaClock();
+        if (window.arenaState) {
+            window.arenaState.killPoints = 0;
+            window.arenaState.score = 0;
+            window.arenaState.penalty = 0;
+            window.arenaState.timeLeftMs = 0;
+            window.arenaState.resultsShown = false;
+            window.arenaState.lastRanking = [];
+            window.arenaState._nextRankingAt = 0;
+            window.arenaState._botPulseAt = 0;
+            window.arenaState._nextHudSyncAt = 0;
+            if (Array.isArray(window.arenaState.players)) {
+                window.arenaState.players = arenaDedupePlayers(window.arenaState.players, window.arenaSocket?.id || 'me');
+            }
+            if (Array.isArray(window.arenaState.botRoster)) {
+                window.arenaState.botRoster = window.arenaState.botRoster.map(b => ({ ...b, score: 0, kills: 0 }));
+            }
+        }
+        const result = typeof originalArenaResetLobby === 'function' ? originalArenaResetLobby.apply(this, arguments) : undefined;
+        if (typeof arenaRenderLobby === 'function') arenaRenderLobby();
+        return result;
+    };
+
+    const originalArenaLeaveRoom = window.arenaLeaveRoom;
+    window.arenaLeaveRoom = function () {
+        stopArenaClock();
+        if (window.arenaState) {
+            window.arenaState.killPoints = 0;
+            window.arenaState.score = 0;
+            window.arenaState.penalty = 0;
+            window.arenaState.timeLeftMs = 0;
+            window.arenaState.resultsShown = false;
+            window.arenaState.lastRanking = [];
+        }
+        const result = typeof originalArenaLeaveRoom === 'function' ? originalArenaLeaveRoom.apply(this, arguments) : undefined;
+        return result;
+    };
+
+    const originalArenaHandleResults = window.arenaHandleResults;
+    window.arenaHandleResults = function (ranking) {
+        stopArenaClock();
+        if (window.arenaState) {
+            window.arenaState.resultsShown = true;
+        }
+        const result = typeof originalArenaHandleResults === 'function' ? originalArenaHandleResults.apply(this, arguments) : undefined;
+        if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
+        return result;
+    };
+
+    const originalArenaRenderLobby = window.arenaRenderLobby;
+    window.arenaRenderLobby = function () {
+        if (window.arenaState && Array.isArray(window.arenaState.players)) {
+            window.arenaState.players = arenaDedupePlayers(window.arenaState.players, window.arenaSocket?.id || 'me');
+        }
+        if (typeof originalArenaRenderLobby === 'function') {
+            return originalArenaRenderLobby.apply(this, arguments);
+        }
+    };
+
+    const originalArenaGetPlayerCardSprite = window.arenaGetPlayerCardSprite;
+    window.arenaGetPlayerCardSprite = function (playerLike, variant = 'menu') {
+        const charId = typeof playerLike === 'string' ? playerLike : (playerLike?.me || playerLike?.id === 'me' ? (typeof arenaSelectedCharId === 'function' ? arenaSelectedCharId() : 'strike') : (window.arenaResolveLobbyCharId ? arenaResolveLobbyCharId(playerLike) : 'strike'));
+        return typeof originalArenaGetPlayerCardSprite === 'function'
+            ? originalArenaGetPlayerCardSprite.call(this, charId, variant)
+            : (typeof arenaGetCharSpriteMarkup === 'function' ? arenaGetCharSpriteMarkup(charId, variant) : '');
+    };
+
+    const originalUpdateGameHud = window.updateGameHud;
+    window.updateGameHud = function () {
+        const result = typeof originalUpdateGameHud === 'function' ? originalUpdateGameHud.apply(this, arguments) : undefined;
+        try {
+            if (window.player && window.isArenaMode && window.arenaState?.view === 'playing') {
+                const bonusTimer = Number(window.player.arenaDoublePointsTimer) || 0;
+                const bombOverlay = document.getElementById('arena-bomb-overlay');
+                if (bombOverlay && !bombOverlay.classList.contains('hidden')) {
+                    const t = document.getElementById('arena-bomb-list');
+                    if (t) t.dataset.timer = String(bonusTimer.toFixed(1));
+                }
+            }
+        } catch (e) {}
+        return result;
+    };
+
+    const originalTriggerLevelUp = window.triggerLevelUp;
+    window.triggerLevelUp = function () {
+        const result = typeof originalTriggerLevelUp === 'function' ? originalTriggerLevelUp.apply(this, arguments) : undefined;
+        startArenaClock();
+        return result;
+    };
+
+    window.arenaEndFromGame = function () {
+        if (!window.isArenaMode && !window.arenaIgnoreGameOver) return false;
+        const ranking = typeof arenaGetLivePlayers === 'function' ? arenaGetLivePlayers() : [];
+        if (typeof arenaHandleResults === 'function') arenaHandleResults(ranking);
+        return true;
+    };
+
+    if (window.arenaState && typeof window.arenaState === 'object') {
+        window.arenaState.killPoints = window.arenaState.killPoints || 0;
+        window.arenaState.playerCharMap = window.arenaState.playerCharMap || {};
+    }
+})();
+</script>
+
+
+<script>
+(function () {
+    if (window.__arenaFinalV6Applied) return;
+    window.__arenaFinalV6Applied = true;
+
+    const ARENA_DURATION_OPTIONS = [2, 5, 10, 15];
+
+    function arenaCloneSettings(settings) {
+        const s = settings && typeof settings === 'object' ? settings : {};
+        return {
+            mapChoice: Math.max(0, Number(s.mapChoice) || 0),
+            duration: ARENA_DURATION_OPTIONS.includes(Number(s.duration)) ? Number(s.duration) : 5,
+            powerUps: !(s.powerUps === false || s.powerUps === 'false' || s.powerUps === 0 || s.powerUps === '0'),
+            difficulty: ['classic', 'hardcore', 'ultra'].includes(String(s.difficulty)) ? String(s.difficulty) : 'classic',
+            bannedChars: Array.isArray(s.bannedChars) ? [...new Set(s.bannedChars.map(v => String(v || '').trim()).filter(Boolean))] : [],
+        };
+    }
+
+    function arenaEnsureCharMap() {
+        if (!window.arenaState || typeof window.arenaState !== 'object') window.arenaState = {};
+        if (!window.arenaState.playerCharMap || typeof window.arenaState.playerCharMap !== 'object') window.arenaState.playerCharMap = {};
+        return window.arenaState.playerCharMap;
+    }
+
+    function arenaMyCharId() {
+        return (typeof arenaSelectedCharId === 'function' ? arenaSelectedCharId() : 'strike');
+    }
+
+    function arenaResolveLobbyCharId(playerLike) {
+        const selected = arenaMyCharId();
+        if (!playerLike) return selected;
+        const rawId = String(playerLike.charId || '').trim();
+        if (playerLike.me || playerLike.id === 'me') return selected;
+        if (rawId && CHARACTERS?.[rawId]) return rawId;
+        const map = arenaEnsureCharMap();
+        const key = String(playerLike.id || playerLike.name || '').trim();
+        if (key && map[key] && CHARACTERS?.[map[key]]) return map[key];
+        return 'strike';
+    }
+
+    function arenaSpriteMarkup(playerLike, variant = 'menu') {
+        const charId = typeof playerLike === 'string' ? playerLike : arenaResolveLobbyCharId(playerLike);
+        if (typeof arenaGetCharSpriteMarkup === 'function') {
+            return arenaGetCharSpriteMarkup(charId, variant) || `<div style="width:100px;height:58px;border-radius:18px;background:rgba(255,255,255,0.08);"></div>`;
+        }
+        return `<div style="width:100px;height:58px;border-radius:18px;background:rgba(255,255,255,0.08);"></div>`;
+    }
+
+    function arenaDedupePlayers(list, meId) {
+        const out = [];
+        const seen = new Set();
+        for (const raw of Array.isArray(list) ? list : []) {
+            if (!raw) continue;
+            const isMe = !!(raw.me || raw.id === 'me' || raw.id === meId);
+            const charId = isMe ? arenaMyCharId() : arenaResolveLobbyCharId(raw);
+            const p = {
+                ...raw,
+                id: String(raw.id || (isMe ? 'me' : raw.name || '')).trim() || (isMe ? 'me' : ''),
+                name: String(raw.name || 'Jogador'),
+                score: Math.max(0, Math.floor(Number(raw.score) || 0)),
+                kills: Math.max(0, Math.floor(Number(raw.kills) || 0)),
+                ready: !!raw.ready,
+                host: !!raw.host,
+                me: isMe,
+                charId,
+            };
+            const key = String(p.id || p.name || '').trim();
+            if (key && seen.has(key)) continue;
+            if (key) seen.add(key);
+            out.push(p);
+            if (key) arenaEnsureCharMap()[key] = p.charId;
+        }
+        return out;
+    }
+
+    function arenaSelfPlayer() {
+        return {
+            id: 'me',
+            name: typeof arenaGetCurrentPlayerName === 'function' ? arenaGetCurrentPlayerName() : 'Jogador',
+            charId: arenaMyCharId(),
+            score: Math.max(0, Math.floor(Number(window.arenaState?.score) || 0)),
+            kills: Math.max(0, Math.floor(Number(window.enemiesKilled) || 0)),
+            ready: true,
+            host: !!window.arenaState?.isHost,
+            me: true
+        };
+    }
+
+    function arenaApplyRoom(room) {
+        if (!room || !window.arenaState) return;
+        const settings = arenaCloneSettings(room.settings);
+        window.arenaState.settings = { ...(window.arenaState.settings || {}), ...settings };
+        if (room.code || room.roomCode) window.arenaState.roomCode = room.code || room.roomCode;
+        if (room.name) window.arenaState.roomName = room.name;
+
+        const meId = window.arenaSocket?.id || 'me';
+        const players = Array.isArray(room.players) ? room.players.map(p => ({
+            id: String(p.id || '').trim(),
+            name: String(p.name || 'Jogador'),
+            score: Math.max(0, Math.floor(Number(p.score) || 0)),
+            kills: Math.max(0, Math.floor(Number(p.kills) || 0)),
+            ready: !!p.ready,
+            me: p.id === meId,
+            host: p.id === room.hostId,
+            charId: String(p.charId || (p.id === meId ? arenaMyCharId() : 'strike')),
+        })) : [];
+        window.arenaState.players = arenaDedupePlayers(players, meId);
+
+        if (Array.isArray(room.players)) {
+            for (const p of room.players) {
+                const key = String(p.id || p.name || '').trim();
+                if (key) arenaEnsureCharMap()[key] = String(p.charId || (p.id === meId ? arenaMyCharId() : 'strike'));
+            }
+        }
+
+        if (room.status === 'playing' || room.started || room.starting) {
+            window.arenaState.view = 'playing';
+            if (typeof startArenaClock === 'function') startArenaClock();
+        } else if (window.arenaState.view === 'playing') {
+            window.arenaState.view = 'lobby';
+            if (typeof stopArenaClock === 'function') stopArenaClock();
+        }
+
+        if (window.arenaState.view === 'playing') {
+            if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
+        } else if (window.arenaState.view === 'join') {
+            if (typeof arenaRenderJoinForm === 'function') arenaRenderJoinForm();
+        } else {
+            if (typeof arenaRenderLobby === 'function') arenaRenderLobby();
+        }
+    }
+
+    function arenaEnsureSocketHandlers(socket) {
+        if (!socket || socket.__arenaV6Handlers) return socket;
+        socket.__arenaV6Handlers = true;
+
+        socket.off('room_state');
+        socket.off('room:update');
+        socket.off('match_start');
+        socket.off('match:start');
+        socket.off('match_end');
+        socket.off('match:end');
+        socket.off('match_tick');
+        socket.off('match:tick');
+        socket.off('match_starting');
+        socket.off('match:starting');
+        socket.off('disconnect');
+
+        socket.on('room_state', arenaApplyRoom);
+        socket.on('room:update', arenaApplyRoom);
+
+        socket.on('match_starting', (payload) => {
+            window.arenaState.matchCountdown = Number(payload?.countdownSec) || 0;
+            if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
+        });
+        socket.on('match:starting', (payload) => {
+            window.arenaState.matchCountdown = Number(payload?.countdownSec) || 0;
+            if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
+        });
+
+        socket.on('match_start', (payload) => {
+            window.arenaState.settings = { ...arenaCloneSettings(window.arenaState.settings), ...(arenaCloneSettings(payload?.settings || {})) };
+            window.arenaState.timeLeftMs = Number(payload?.durationMs) || Math.max(1, Number(window.arenaState.settings?.duration) || 5) * 60000;
+            if (typeof showArenaMatch === 'function') showArenaMatch();
+            if (typeof arenaSetBattleContext === 'function') arenaSetBattleContext();
+        });
+        socket.on('match:start', (payload) => {
+            window.arenaState.settings = { ...arenaCloneSettings(window.arenaState.settings), ...(arenaCloneSettings(payload?.settings || {})) };
+            window.arenaState.timeLeftMs = Number(payload?.durationMs) || Math.max(1, Number(window.arenaState.settings?.duration) || 5) * 60000;
+            if (typeof showArenaMatch === 'function') showArenaMatch();
+            if (typeof arenaSetBattleContext === 'function') arenaSetBattleContext();
+        });
+
+        socket.on('match_tick', (payload) => {
+            const remaining = Number(payload?.timeLeftMs ?? payload?.remainingMs);
+            if (Number.isFinite(remaining)) window.arenaState.timeLeftMs = remaining;
+        });
+        socket.on('match:tick', (payload) => {
+            const remaining = Number(payload?.timeLeftMs ?? payload?.remainingMs);
+            if (Number.isFinite(remaining)) window.arenaState.timeLeftMs = remaining;
+        });
+
+        socket.on('match_end', (payload) => {
+            if (typeof arenaHandleResults === 'function') arenaHandleResults(payload?.ranking || payload?.rank || payload?.results || []);
+        });
+        socket.on('match:end', (payload) => {
+            if (typeof arenaHandleResults === 'function') arenaHandleResults(payload?.ranking || payload?.rank || payload?.results || []);
+        });
+
+        socket.on('disconnect', () => {
+            if (window.arenaState?.online) notify('Conexão da Arena perdida.');
+        });
+
+        return socket;
+    }
+
+    const originalArenaConnect = window.arenaConnect;
+    window.arenaConnect = function () {
+        if (window.arenaSocket && window.arenaSocket.connected) return window.arenaSocket;
+        if (typeof io !== 'function') return null;
+        const sock = originalArenaConnect ? originalArenaConnect.apply(this, arguments) : io(ARENA_SERVER_URL, { transports: ['websocket', 'polling'] });
+        window.arenaSocket = arenaEnsureSocketHandlers(sock);
+        return window.arenaSocket;
+    };
+
+    const originalArenaBuildPlayersForLobby = window.arenaBuildPlayersForLobby;
+    window.arenaBuildPlayersForLobby = function () {
+        const base = originalArenaBuildPlayersForLobby ? originalArenaBuildPlayersForLobby.apply(this, arguments) : [];
+        const players = arenaDedupePlayers(base, window.arenaSocket?.id || 'me');
+        if (!players.some(p => p.me || p.id === 'me')) players.unshift(arenaSelfPlayer());
+        return players.map(p => ({ ...p, charId: p.me ? arenaMyCharId() : arenaResolveLobbyCharId(p) }));
+    };
+
+    const originalArenaGetLivePlayers = window.arenaGetLivePlayers;
+    window.arenaGetLivePlayers = function () {
+        const base = originalArenaGetLivePlayers ? originalArenaGetLivePlayers.apply(this, arguments) : [];
+        const players = arenaDedupePlayers(base, window.arenaSocket?.id || 'me');
+        if (!players.some(p => p.me || p.id === 'me')) players.unshift(arenaSelfPlayer());
+        return players.map(p => ({ ...p, charId: p.me ? arenaMyCharId() : arenaResolveLobbyCharId(p) }));
+    };
+
+    window.arenaResolveLobbyCharId = arenaResolveLobbyCharId;
+    window.arenaGetPlayerCardSprite = function (playerLike, variant = 'menu') {
+        return arenaSpriteMarkup(playerLike, variant);
+    };
+
+    window.arenaOpenJoinRoom = function () {
+        arenaEnsureState();
+        window.arenaIgnoreGameOver = true;
+        window.isArenaMode = false;
+        if (window.arenaState) {
+            window.arenaState.view = 'join';
+            window.arenaState.mode = 'hub';
+            window.arenaState.roomCode = '';
+            window.arenaState.roomName = '';
+            window.arenaState.players = [];
+            window.arenaState.botRoster = [];
+        }
+        if (typeof showScreen === 'function') showScreen('screen-arena');
+        if (typeof arenaRenderJoinForm === 'function') arenaRenderJoinForm();
+    };
+
+    window.openArenaHub = function () {
+        arenaEnsureState();
+        window.isArenaMode = false;
+        window.arenaIgnoreGameOver = true;
+        if (window.arenaState) {
+            window.arenaState.mode = 'hub';
+            window.arenaState.view = 'hub';
+            window.arenaState.online = false;
+            window.arenaState.isHost = false;
+            window.arenaState.roomCode = '';
+            window.arenaState.roomName = '';
+            window.arenaState.players = [];
+            window.arenaState.botRoster = [];
+            window.arenaState.resultsShown = false;
+            window.arenaState.lastRanking = [];
+            window.arenaState.score = 0;
+            window.arenaState.kills = 0;
+            window.arenaState.penalty = 0;
+            window.arenaState.timeLeftMs = 0;
+        }
+        if (typeof arenaStopBattleLoop === 'function') arenaStopBattleLoop();
+        if (typeof showScreen === 'function') showScreen('screen-arena');
+        if (typeof arenaRenderLobby === 'function') arenaRenderLobby();
+    };
+
+    window.arenaRenderHub = function () {
+        arenaEnsureState();
+        const root = document.getElementById('arena-root');
+        if (!root) return;
+        const meChar = arenaMyCharId();
+        const meName = arenaGetCurrentPlayerName();
+        root.innerHTML = `
+            <div class="arena-shell">
+                <div class="arena-home-hero">
+                    <div class="arena-hero">
+                        <div class="arena-hub-copy">
+                            <div class="arena-kicker">🏛 Arena Legacy</div>
+                            <h1 class="arena-room-title">Entrada da Arena</h1>
+                            <p>Partidas separadas com ranking compartilhado. Aqui só contam pontos, tempo e vitória.</p>
+                            <div class="arena-banner">Sem recursos, sem baús e sem vitórias diárias.</div>
+                        </div>
+                        <div class="arena-preview">
+                            <div class="arena-preview-sprite">${arenaSpriteMarkup({ id: 'me', name: meName, charId: meChar, me: true }, 'menu')}</div>
+                            <div class="arena-preview-name">${escapeHtmlText(meName)}</div>
+                            <div class="arena-badges" style="justify-content:center;">
+                                <span class="arena-badge">👤 ${escapeHtmlText(arenaSelectedCharDef().name)}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="arena-home-buttons" style="margin-top:14px;">
+                        <button class="btn-menu" type="button" onclick="arenaOpenJoinRoom()">Entrar em sala</button>
+                        <button class="btn-menu" type="button" onclick="arenaCreateRoom()">Criar sala</button>
+                        <button class="btn-menu" type="button" onclick="arenaChooseCharacter()">Escolher personagem</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        arenaUpdateRankingPanel();
+        arenaUpdateCharBanner();
+    };
+
+    window.arenaRenderJoinForm = function () {
+        arenaEnsureState();
+        const root = document.getElementById('arena-root');
+        if (!root) return;
+        const meChar = arenaMyCharId();
+        const meName = arenaGetCurrentPlayerName();
+        const codeValue = String(arenaState.joinCode || arenaState.roomCode || '').trim().toUpperCase();
+        root.innerHTML = `
+            <div class="arena-shell">
+                <div class="arena-join-hero">
+                    <div class="arena-hero">
+                        <div class="arena-hub-copy">
+                            <div class="arena-kicker">🏛 Arena Legacy</div>
+                            <h1 class="arena-room-title">Entrar em uma sala</h1>
+                            <p>Digite o código da sala. Você entra na mesma sala, mas em partida separada.</p>
+                            <div class="arena-banner">BOTS só aparece no modo Jogar. Aqui entra código de sala mesmo.</div>
+                        </div>
+                        <div class="arena-preview">
+                            <div class="arena-preview-sprite">${arenaSpriteMarkup({ id: 'me', name: meName, charId: meChar, me: true }, 'menu')}</div>
+                            <div class="arena-preview-name">${escapeHtmlText(meName)}</div>
+                            <div class="arena-badges" style="justify-content:center;">
+                                <span class="arena-badge">👤 ${escapeHtmlText(arenaSelectedCharDef().name)}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="arena-panel arena-join-panel" style="margin-top:14px;">
+                        <h3 class="arena-panel-title">Código da sala</h3>
+                        <div class="arena-grid">
+                            <div class="arena-field">
+                                <label>Seu nick</label>
+                                <input id="arena-name-input" maxlength="20" value="${escapeHtmlText(meName)}">
+                            </div>
+                            <div class="arena-field">
+                                <label>Código</label>
+                                <input id="arena-code-input" maxlength="10" placeholder="ABCDE1" value="${escapeHtmlText(codeValue)}" style="font-size:28px;letter-spacing:0.18em;text-align:center;font-weight:900;">
+                            </div>
+                        </div>
+                        <div class="arena-lobby-actions" style="margin-top:12px;">
+                            <button class="btn-action" type="button" onclick="arenaJoinRoom()">Entrar</button>
+                            <button class="btn-menu" type="button" onclick="openArenaHub()">Voltar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        arenaUpdateRankingPanel();
+        arenaUpdateCharBanner();
+    };
+
+    window.arenaCreateRoom = function () {
+        arenaEnsureState();
+        const nick = String(document.getElementById('arena-name-input')?.value || arenaGetCurrentPlayerName()).trim().slice(0, 20) || 'Jogador';
+        const s = arenaConnect();
+        if (!s || !s.connected) { showAlert('Conecte ao servidor da Arena para criar sala.'); return; }
+        pd.nickname = nick;
+        save();
+        const payload = { name: nick, charId: arenaMyCharId(), settings: arenaCloneSettings(arenaState.settings) };
+        s.emit('room:create', payload, (res) => {
+            if (!res?.ok) { showAlert(res?.error || 'Não foi possível criar a sala.'); return; }
+            arenaApplyRoom(res.room || res);
+            arenaState.online = true;
+            arenaState.isHost = true;
+            arenaState.mode = 'online';
+            arenaState.view = 'lobby';
+            showScreen('screen-arena');
+            arenaRenderLobby();
+            notify(`Sala criada: ${arenaState.roomCode}`);
+        });
+    };
+
+    window.arenaJoinRoom = function () {
+        arenaEnsureState();
+        const nick = String(document.getElementById('arena-name-input')?.value || arenaGetCurrentPlayerName()).trim().slice(0, 20) || 'Jogador';
+        const code = String(document.getElementById('arena-code-input')?.value || '').trim().toUpperCase();
+        if (!code) { showAlert('Digite um código de sala.'); return; }
+        const s = arenaConnect();
+        if (!s || !s.connected) { showAlert('Conecte ao servidor da Arena para entrar na sala.'); return; }
+        pd.nickname = nick;
+        save();
+        const payload = { code, name: nick, charId: arenaMyCharId(), settings: arenaCloneSettings(arenaState.settings) };
+        s.emit('room:join', payload, (res) => {
+            if (!res?.ok) { showAlert(res?.error || 'Não foi possível entrar na sala.'); return; }
+            arenaApplyRoom(res.room || res);
+            arenaState.roomCode = res.code || code;
+            arenaState.online = true;
+            arenaState.mode = 'online';
+            arenaState.isHost = s.id === res.room?.hostId;
+            arenaState.view = 'lobby';
+            showScreen('screen-arena');
+            arenaRenderLobby();
+            notify(`Entrou na sala ${arenaState.roomCode}`);
+        });
+    };
+
+    window.arenaPlayBots = function () {
+        arenaEnsureState();
+        if (typeof arenaStopBattleLoop === 'function') arenaStopBattleLoop();
+        window.isArenaMode = true;
+        window.arenaIgnoreGameOver = false;
+        window.arenaState.online = false;
+        window.arenaState.isHost = true;
+        window.arenaState.mode = 'bots';
+        window.arenaState.view = 'playing';
+        window.arenaState.roomCode = `BOTS-${Math.floor(Math.random() * 9000) + 1000}`;
+        window.arenaState.roomName = 'Partida com bots';
+        window.arenaState.botRoster = typeof arenaGenerateBots === 'function' ? arenaGenerateBots(4) : [];
+        window.arenaState.players = [];
+        window.arenaState.resultsShown = false;
+        window.arenaState.lastRanking = [];
+        if (typeof arenaStartBattle === 'function') arenaStartBattle();
+    };
+
+    window.arenaStartLobbyMatch = function () {
+        arenaEnsureState();
+        if (window.arenaState.mode === 'bots') {
+            arenaPlayBots();
+            return;
+        }
+        if (!window.arenaState.online) {
+            showAlert('Crie ou entre em uma sala online primeiro.');
+            return;
+        }
+        if (!window.arenaState.isHost) {
+            showAlert('Só o anfitrião começa a partida.');
+            return;
+        }
+        const s = arenaConnect();
+        if (!s || !s.connected) { showAlert('Servidor da Arena indisponível.'); return; }
+        s.emit('room:start', {}, (res) => {
+            if (!res?.ok) showAlert(res?.error || 'Não foi possível iniciar.');
+        });
+    };
+
+    window.arenaApplySetting = function (key, value) {
+        arenaEnsureState();
+        if (key === 'bannedChars' && !Array.isArray(value)) value = [];
+        arenaState.settings[key] = value;
+        save();
+        if (window.arenaState.online && window.arenaState.isHost && arenaSocket?.connected) {
+            arenaSocket.emit('room:settings', { settings: arenaCloneSettings(window.arenaState.settings) });
+        }
+        arenaRenderLobby();
+    };
+
+    window.arenaToggleBan = function (charId) {
+        arenaEnsureState();
+        const list = new Set(window.arenaState.settings.bannedChars || []);
+        if (list.has(charId)) list.delete(charId); else list.add(charId);
+        window.arenaState.settings.bannedChars = Array.from(list);
+        save();
+        if (window.arenaState.online && window.arenaState.isHost && arenaSocket?.connected) {
+            arenaSocket.emit('room:settings', { settings: arenaCloneSettings(window.arenaState.settings) });
+        }
+        renderChars();
+        arenaUpdateCharBanner();
+        arenaRenderLobby();
+    };
+
+    window.arenaOpenBanMode = function () {
+        arenaEnsureState();
+        window.arenaBanMode = true;
+        window.arenaState.viewBeforeChars = window.arenaState.view || 'hub';
+        window.arenaReturnScreen = 'screen-arena';
+        showScreen('screen-chars');
+        renderChars();
+        arenaUpdateCharBanner();
+    };
+
+    window.arenaChooseCharacter = function () {
+        arenaEnsureState();
+        window.arenaState.viewBeforeChars = window.arenaState.view || 'hub';
+        window.arenaReturnScreen = 'screen-arena';
+        window.arenaBanMode = false;
+        showScreen('screen-chars');
+        renderChars();
+        arenaUpdateCharBanner();
+    };
+
+    window.arenaConfirmBanChanges = function () {
+        if (window.arenaReturnScreen === 'screen-arena') {
+            window.arenaBanMode = false;
+            window.arenaReturnScreen = null;
+            arenaState.view = arenaState.viewBeforeChars || 'hub';
+            showScreen('screen-arena');
+            arenaRenderLobby();
+        }
+    };
+
+    const originalShowCharDetail = window.showCharDetail;
+    window.showCharDetail = function (id) {
+        if (window.arenaBanMode) {
+            arenaToggleBan(id);
+            return;
+        }
+        if (window.arenaReturnScreen === 'screen-arena' && window.arenaState?.settings?.bannedChars?.includes?.(id)) {
+            showAlert('Personagem bloqueado nessa sala.');
+            return;
+        }
+        return typeof originalShowCharDetail === 'function' ? originalShowCharDetail.apply(this, arguments) : undefined;
+    };
+
+    const originalSelectChar = window.selectChar;
+    window.selectChar = function (id) {
+        if (!pd.chars?.[id]) { showAlert("Personagem não obtido!"); return; }
+        if ((window.arenaBanMode || window.arenaReturnScreen === 'screen-arena') && window.arenaState?.settings?.bannedChars?.includes?.(id)) {
+            showAlert('Personagem bloqueado nessa sala.');
+            return;
+        }
+        const result = typeof originalSelectChar === 'function' ? originalSelectChar.apply(this, arguments) : undefined;
+        if (!window.arenaState.playerCharMap || typeof window.arenaState.playerCharMap !== 'object') window.arenaState.playerCharMap = {};
+        window.arenaState.playerCharMap.me = arenaMyCharId();
+        if (window.arenaState?.online && arenaSocket?.connected) {
+            arenaSocket.emit('player:update_char', { charId: arenaMyCharId() }, () => {});
+        }
+        if (window.arenaReturnScreen === 'screen-arena') {
+            window.arenaBanMode = false;
+            window.arenaReturnScreen = null;
+            const prevView = window.arenaState.viewBeforeChars || window.arenaState.view || 'hub';
+            window.arenaState.view = prevView;
+            showScreen('screen-arena');
+            if (prevView === 'join') arenaRenderJoinForm();
+            else if (prevView === 'lobby') arenaRenderLobby();
+            else arenaRenderHub();
+        } else if (window.arenaState?.view === 'lobby') {
+            arenaRenderLobby();
+        } else if (window.arenaState?.view === 'hub') {
+            arenaRenderHub();
+        }
+        return result;
+    };
+
+    window.arenaUpdateCharBanner = function () {
+        const banner = document.getElementById('arena-char-banner');
+        if (!banner) return;
+        if (!window.arenaBanMode) {
+            banner.classList.add('hidden');
+            banner.innerHTML = '';
+            return;
+        }
+        banner.classList.remove('hidden');
+        const names = (arenaState.settings.bannedChars || []).map(id => CHARACTERS[id]?.name || id);
+        banner.innerHTML = `<strong>Bloqueio de personagens:</strong> toque nos cards para alternar o cadeado. <br>Banidos: ${names.length ? escapeHtmlText(names.join(', ')) : 'nenhum'}
+            <div style="margin-top:10px; display:flex; justify-content:center;">
+                <button class="btn-action" type="button" onclick="arenaConfirmBanChanges()">Confirmar banimentos</button>
+            </div>`;
+    };
+
+    window.arenaRefreshLobby = function () {
+        if (window.arenaState?.view === 'playing') {
+            if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
+            return;
+        }
+        arenaRenderLobby();
+    };
+
+    window.arenaHandleResults = function (ranking) {
+        if (window.arenaState.resultsShown) return;
+        window.arenaState.resultsShown = true;
+        window.arenaIgnoreGameOver = true;
+        if (typeof arenaStopBattleLoop === 'function') arenaStopBattleLoop();
+
+        const ranked = typeof arenaSortedRanking === 'function'
+            ? arenaSortedRanking(Array.isArray(ranking) ? ranking : arenaGetLivePlayers())
+            : (Array.isArray(ranking) ? ranking : []);
+        window.arenaState.lastRanking = ranked;
+
+        const panel = document.getElementById('arena-root');
+        if (!panel) return;
+        panel.innerHTML = `
+            <div class="arena-results-card">
+                <h1>Fim da Partida</h1>
+                <div class="arena-banner">Preparando retorno ao lobby...</div>
+                <div class="arena-results-list">
+                    <div class="arena-results-step" id="arena-res-step-3"></div>
+                    <div class="arena-results-step" id="arena-res-step-2"></div>
+                    <div class="arena-results-step" id="arena-res-step-1"></div>
+                </div>
+            </div>
+        `;
+
+        const line = (rank, label) => {
+            const p = ranked[rank - 1];
+            if (!p) return `${label}: —`;
+            return `${label}: ${escapeHtmlText(p.name || 'Jogador')} — ${Math.max(0, Math.floor(Number(p.score) || 0))} pts`;
+        };
+        setTimeout(() => { const el = document.getElementById('arena-res-step-3'); if (el) { el.textContent = line(3, 'Top 3'); el.classList.add('visible'); } }, 450);
+        setTimeout(() => { const el = document.getElementById('arena-res-step-2'); if (el) { el.textContent = line(2, 'Top 2'); el.classList.add('visible'); } }, 1350);
+        setTimeout(() => { const el = document.getElementById('arena-res-step-1'); if (el) { el.textContent = line(1, 'Top 1'); el.classList.add('visible'); } }, 2250);
+        setTimeout(() => {
+            window.arenaState.view = window.arenaState.online ? 'lobby' : (window.arenaState.mode === 'bots' ? 'lobby' : 'hub');
+            window.isArenaMode = false;
+            window.arenaIgnoreGameOver = true;
+            if (typeof arenaResetLobby === 'function') arenaResetLobby();
+            showScreen('screen-arena');
+            arenaRenderLobby();
+        }, 3600);
+    };
+
+    window.arenaResetLobby = function () {
+        arenaEnsureState();
+        if (typeof arenaStopBattleLoop === 'function') arenaStopBattleLoop();
+        window.isArenaMode = false;
+        window.arenaIgnoreGameOver = true;
+        arenaState.view = arenaState.online ? 'lobby' : (arenaState.mode === 'bots' ? 'lobby' : 'hub');
+        if (arenaState.online) arenaState.mode = 'online';
+        arenaState.score = 0;
+        arenaState.kills = 0;
+        arenaState.penalty = 0;
+        arenaState.timeLeftMs = 0;
+        arenaState.resultsShown = false;
+        arenaState.lastRanking = [];
+        if (Array.isArray(arenaState.players)) {
+            arenaState.players = arenaState.players.map(p => ({ ...p, score: 0, kills: 0, ready: false, charId: arenaResolveLobbyCharId(p) }));
+        }
+        if (Array.isArray(arenaState.botRoster)) {
+            arenaState.botRoster = arenaState.botRoster.map(b => ({ ...b, score: 0, kills: 0 }));
+        }
+        arenaRenderLobby();
+    };
+
+    window.arenaLeaveRoom = function () {
+        if (window.arenaSocket?.connected && window.arenaState?.online) {
+            window.arenaSocket.emit('room:leave', {}, () => {});
+        }
+        if (typeof arenaStopBattleLoop === 'function') arenaStopBattleLoop();
+        window.isArenaMode = false;
+        window.arenaIgnoreGameOver = false;
+        if (window.arenaState) {
+            arenaState.online = false;
+            arenaState.isHost = false;
+            arenaState.roomCode = '';
+            arenaState.players = [];
+            arenaState.botRoster = [];
+            arenaState.playerCharMap = {};
+            arenaState.mode = 'hub';
+            arenaState.view = 'hub';
+            arenaState.resultsShown = false;
+            arenaState.lastRanking = [];
+        }
+        showScreen('screen-arena');
+        arenaRenderLobby();
+    };
+
+    window.renderChars = (function (originalRenderChars) {
+        return function () {
+            const res = typeof originalRenderChars === 'function' ? originalRenderChars.apply(this, arguments) : undefined;
+            try {
+                const arenaLocked = new Set(window.arenaState?.settings?.bannedChars || []);
+                const cards = document.querySelectorAll('#chars-list .card-item');
+                cards.forEach(card => {
+                    const id = String(card.dataset?.charId || '').trim();
+                    if (!id) return;
+                    const locked = arenaLocked.has(id);
+                    if (window.arenaBanMode && locked) {
+                        card.classList.add('arena-banned-card');
+                        card.style.filter = 'grayscale(1) brightness(0.72)';
+                        card.style.opacity = '0.92';
+                        if (!card.querySelector('.arena-ban-toggle')) {
+                            const lock = document.createElement('div');
+                            lock.className = 'arena-ban-toggle';
+                            lock.textContent = '🔒';
+                            lock.style.position = 'absolute';
+                            lock.style.top = '50%';
+                            lock.style.left = '50%';
+                            lock.style.transform = 'translate(-50%, -50%)';
+                            lock.style.fontSize = '52px';
+                            lock.style.pointerEvents = 'none';
+                            lock.style.zIndex = '3';
+                            card.style.position = 'relative';
+                            card.appendChild(lock);
+                        }
+                    } else if (window.arenaBanMode) {
+                        card.style.filter = 'saturate(0.95)';
+                    }
+                });
+            } catch (e) {}
+            return res;
+        };
+    })(window.renderChars);
+
+    const originalArenaBuildPlayersForLobbyAgain = window.arenaBuildPlayersForLobby;
+    window.arenaBuildPlayersForLobby = function () {
+        const list = typeof originalArenaBuildPlayersForLobbyAgain === 'function' ? originalArenaBuildPlayersForLobbyAgain.apply(this, arguments) : [];
+        const players = arenaDedupePlayers(list, window.arenaSocket?.id || 'me');
+        if (!players.some(p => p.me || p.id === 'me')) players.unshift(arenaSelfPlayer());
+        return players.map(p => ({ ...p, charId: p.me ? arenaMyCharId() : arenaResolveLobbyCharId(p) }));
+    };
+
+    if (window.arenaState && typeof window.arenaState === 'object') {
+        arenaEnsureCharMap();
+        if (typeof syncMyArenaChar === 'function') syncMyArenaChar(false);
+    }
+})();
+</script>
+
 </html>
