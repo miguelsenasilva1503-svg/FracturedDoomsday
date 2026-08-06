@@ -17627,10 +17627,15 @@ applyMusicVolume();
                 const meId = window.arenaSocket.id;
                 window.arenaState.online = true;
                 window.arenaState.roomCode = room.code || window.arenaState.roomCode || '';
+                window.arenaState.hostId = room.hostId || window.arenaState.hostId || '';
                 window.arenaState.isHost = room.hostId === meId;
                 window.arenaState.mode = 'online';
                 window.arenaState.players = mapPlayers(room.players || [], meId);
                 window.arenaState.roomName = room.name || window.arenaState.roomName || '';
+                if (room.settings && typeof room.settings.mapChoice !== 'undefined') {
+                    window.arenaState.currentMap = Number(room.settings.mapChoice);
+                    try { window.currentMap = Number(room.settings.mapChoice); } catch (e) {}
+                }
                 if (room.status === 'playing') {
                     window.arenaState.view = 'playing';
                     if (window.isArenaMode && typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
@@ -20162,7 +20167,10 @@ applyMusicVolume();
         if (window.arenaState) {
             arenaState.online = false;
             arenaState.isHost = false;
+            arenaState.hostId = '';
+            arenaState.joinCode = '';
             arenaState.roomCode = '';
+            arenaState.roomName = '';
             arenaState.players = [];
             arenaState.botRoster = [];
             arenaState.playerCharMap = {};
@@ -20170,6 +20178,11 @@ applyMusicVolume();
             arenaState.view = 'hub';
             arenaState.resultsShown = false;
             arenaState.lastRanking = [];
+            arenaState.score = 0;
+            arenaState.kills = 0;
+            arenaState.penalty = 0;
+            arenaState.timeLeftMs = 0;
+            arenaState.matchCountdown = 0;
         }
         showScreen('screen-arena');
         arenaRenderLobby();
@@ -20319,8 +20332,9 @@ applyMusicVolume();
 
     function arenaBuildPlayersForLobby() {
         arenaSafeArenaState();
+        const meId = window.arenaSocket?.id || 'me';
         const me = {
-            id: 'me',
+            id: meId,
             name: typeof arenaGetCurrentPlayerName === 'function' ? arenaGetCurrentPlayerName() : 'Jogador',
             charId: arenaMyCharId(),
             score: Math.max(0, Math.floor(Number(window.arenaState.score) || 0)),
@@ -20347,17 +20361,16 @@ applyMusicVolume();
             players = Array.isArray(window.arenaState.players) ? window.arenaState.players.map(p => ({ ...p })) : [];
         }
 
-        players = arenaDedupePlayers(players, window.arenaSocket?.id || 'me');
+        players = arenaDedupePlayers(players, meId);
 
-        const meKey = window.arenaSocket?.id || 'me';
-        const meIdx = players.findIndex(p => p.me || p.id === 'me' || p.id === meKey);
+        const meIdx = players.findIndex(p => p.me || p.id === meId || String(p.name || '') === String(me.name || ''));
         if (meIdx >= 0) {
-            players[meIdx] = { ...players[meIdx], ...me, id: players[meIdx].id || me.id, me: true, host: !!window.arenaState.isHost, charId: arenaMyCharId() };
+            players[meIdx] = { ...players[meIdx], ...me, id: meId, me: true, host: !!window.arenaState.isHost, charId: arenaMyCharId() };
         } else {
             players.unshift(me);
         }
 
-        const out = arenaDedupePlayers(players, window.arenaSocket?.id || 'me').map(p => ({
+        const out = arenaDedupePlayers(players, meId).map(p => ({
             ...p,
             charId: p.me ? arenaMyCharId() : arenaResolveLobbyCharId(p)
         }));
@@ -20403,9 +20416,14 @@ applyMusicVolume();
 
         window.arenaState.online = true;
         window.arenaState.roomCode = roomCode || window.arenaState.roomCode || '';
+        window.arenaState.hostId = room.hostId || '';
         window.arenaState.isHost = !!(window.arenaSocket && room.hostId && window.arenaSocket.id === room.hostId);
         window.arenaState.mode = 'online';
         window.arenaState.settings = { ...window.arenaState.settings, ...settings, bannedChars: settings.bannedChars.slice() };
+        window.arenaState.currentMap = settings.mapChoice;
+        if (Number.isFinite(Number(settings.mapChoice))) {
+            try { window.currentMap = Number(settings.mapChoice); } catch (e) {}
+        }
         window.arenaState.players = players;
         window.arenaState.playerCharMap = window.arenaState.playerCharMap && typeof window.arenaState.playerCharMap === 'object' ? window.arenaState.playerCharMap : {};
         players.forEach(p => {
@@ -20554,7 +20572,6 @@ applyMusicVolume();
         const { sock, nick, code, payload } = ctx;
         if (!code) { showAlert('Digite um código de sala.'); return; }
         window.arenaState.joinCode = code;
-        window.arenaState.view = 'lobby';
         sock.emit('room:join', { code, ...payload }, (res) => {
             if (!res?.ok) { showAlert(res?.error || 'Não foi possível entrar na sala.'); return; }
             arenaApplySnapshot(res.room || res);
@@ -20777,6 +20794,7 @@ applyMusicVolume();
                     <div class="arena-results-step" id="arena-res-step-3"></div>
                     <div class="arena-results-step" id="arena-res-step-2"></div>
                     <div class="arena-results-step" id="arena-res-step-1"></div>
+                    <div class="arena-results-step" id="arena-res-mvp"></div>
                 </div>
             </div>
         `;
@@ -20785,9 +20803,15 @@ applyMusicVolume();
             if (!p) return `${label}: —`;
             return `${label}: ${escapeHtmlText(p.name || 'Jogador')} — ${Math.max(0, Math.floor(Number(p.score) || 0))} pts`;
         };
+        const makeMvpLine = () => {
+            const p = ranked[0];
+            if (!p) return 'MVP: —';
+            return `MVP: ${escapeHtmlText(p.name || 'Jogador')} — ${Math.max(0, Math.floor(Number(p.score) || 0))} pts`;
+        };
         setTimeout(() => { const el = document.getElementById('arena-res-step-3'); if (el) { el.textContent = makeLine(3, 'Top 3'); el.classList.add('visible'); } }, 450);
         setTimeout(() => { const el = document.getElementById('arena-res-step-2'); if (el) { el.textContent = makeLine(2, 'Top 2'); el.classList.add('visible'); } }, 1350);
         setTimeout(() => { const el = document.getElementById('arena-res-step-1'); if (el) { el.textContent = makeLine(1, 'Top 1'); el.classList.add('visible'); } }, 2250);
+        setTimeout(() => { const el = document.getElementById('arena-res-mvp'); if (el) { el.textContent = makeMvpLine(); el.classList.add('visible'); } }, 2850);
         setTimeout(() => {
             window.arenaIgnoreGameOver = true;
             window.isArenaMode = false;
@@ -20804,7 +20828,8 @@ applyMusicVolume();
             if (typeof arenaPlayBots === 'function') arenaPlayBots();
             return;
         }
-        if (!window.arenaState.isHost) { showAlert('Só o anfitrião começa a partida.'); return; }
+        const isHost = !!(window.arenaState.isHost || (window.arenaSocket?.id && window.arenaState.hostId && window.arenaSocket.id === window.arenaState.hostId));
+        if (!isHost) { showAlert('Só o anfitrião começa a partida.'); return; }
         const s = window.arenaConnect();
         if (!s) { showAlert('Servidor da Arena indisponível.'); return; }
         s.emit('room:start', {}, (res) => {
