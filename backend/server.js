@@ -196,6 +196,7 @@ function finishMatch(room, reason = 'finished') {
   stopTimer(room);
   room.started = false;
   room.starting = false;
+  room.endsAt = null;
 
   const ranking = room.players
     .slice()
@@ -213,11 +214,25 @@ function finishMatch(room, reason = 'finished') {
     reason,
     ranking,
     winner: ranking[0] || null,
+    mvp: ranking[0] || null,
+    top3: ranking.slice(0, 3),
     endedAt: Date.now(),
   };
 
   io.to(room.roomCode).emit('match_end', room.lastResult);
   io.to(room.roomCode).emit('match:end', room.lastResult);
+  emitRoomState(room);
+}
+
+function resetMatch(room) {
+  if (!room) return;
+  stopTimer(room);
+  room.started = false;
+  room.starting = false;
+  room.endsAt = null;
+  room.players.forEach((p) => {
+    p.ready = false;
+  });
   emitRoomState(room);
 }
 
@@ -347,23 +362,16 @@ function handleJoinRoom(socket, payload = {}, cb = () => {}) {
     if (room.started || room.starting) return cb({ ok: false, error: 'match_already_started' });
     if (room.players.length >= MAX_PLAYERS_PER_ROOM) return cb({ ok: false, error: 'room_full' });
 
-    const existing = room.players.find((p) => p.id === socket.id);
-    if (existing) {
-      existing.name = nick;
-      existing.charId = charId;
-      existing.connected = true;
-      existing.ready = false;
-    } else {
-      room.players.push({
-        id: socket.id,
-        name: nick,
-        charId,
-        ready: false,
-        score: 0,
-        kills: 0,
-        connected: true,
-      });
-    }
+    room.players = room.players.filter((p) => p.id !== socket.id);
+    room.players.push({
+      id: socket.id,
+      name: nick,
+      charId,
+      ready: false,
+      score: 0,
+      kills: 0,
+      connected: true,
+    });
 
     socket.join(room.roomCode);
     socket.data.roomCode = room.roomCode;
@@ -395,6 +403,9 @@ function handleLeaveRoom(socket, cb = () => {}) {
   const { room } = found;
   room.players = room.players.filter((p) => p.id !== socket.id);
   socket.leave(room.roomCode);
+  socket.data.roomCode = null;
+  socket.data.playerName = null;
+  socket.data.charId = null;
   assignHost(room);
 
   if (room.players.length === 0) {
@@ -523,6 +534,15 @@ io.on('connection', (socket) => {
     }
 
     emitRoomState(room);
+  });
+
+  socket.on('match:reset', (_payload, cb = () => {}) => {
+    const foundReset = findRoomBySocket(socket.id);
+    if (!foundReset) return cb({ ok: false, error: 'not_in_room' });
+    const { room } = foundReset;
+    if (room.hostId !== socket.id) return cb({ ok: false, error: 'not_host' });
+    resetMatch(room);
+    cb({ ok: true });
   });
 });
 
