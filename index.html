@@ -21250,7 +21250,13 @@ applyMusicVolume();
         if (!code) { showAlert('Digite um código de sala.'); return; }
         window.arenaState.joinCode = code;
         sock.emit('room:join', { code, ...payload }, (res) => {
-            if (!res?.ok) { showAlert(res?.error || 'Não foi possível entrar na sala.'); return; }
+            if (!res?.ok) {
+                window.arenaState.view = 'join';
+                if (typeof showScreen === 'function') showScreen('screen-arena');
+                if (typeof arenaRenderJoinForm === 'function') arenaRenderJoinForm();
+                showAlert(res?.error || 'Não foi possível entrar na sala.');
+                return;
+            }
             applySnapshot(res.room || res);
             window.arenaState.roomCode = res.code || code;
             window.arenaState.view = 'lobby';
