@@ -174,29 +174,6 @@ function findRoomBySocket(socketId) {
   return null;
 }
 
-function detachSocketFromAnyRoom(socket) {
-  const found = findRoomBySocket(socket.id);
-  if (!found) return null;
-
-  const { room } = found;
-  room.players = room.players.filter((p) => p.id !== socket.id);
-  try { socket.leave(room.roomCode); } catch (e) {}
-  if (socket.data) {
-    socket.data.roomCode = null;
-    socket.data.playerName = null;
-    socket.data.charId = null;
-  }
-  assignHost(room);
-
-  if (room.players.length === 0) {
-    stopTimer(room);
-    rooms.delete(room.roomCode);
-  } else {
-    emitRoomState(room);
-  }
-  return room;
-}
-
 function assignHost(room) {
   const connected = room.players.filter((p) => p.connected);
   if (!connected.length) {
@@ -346,8 +323,6 @@ function handleCreateRoom(socket, payload = {}, cb = () => {}) {
     const charId = safeCharId(payload.charId ?? payload.selectedChar ?? 'strike');
     const settings = normalizeSettings(payload.settings);
 
-    detachSocketFromAnyRoom(socket);
-
     const room = createRoom({
       roomCode,
       hostId: socket.id,
@@ -386,8 +361,6 @@ function handleJoinRoom(socket, payload = {}, cb = () => {}) {
     if (!room) return cb({ ok: false, error: 'room_not_found' });
     if (room.started || room.starting) return cb({ ok: false, error: 'match_already_started' });
     if (room.players.length >= MAX_PLAYERS_PER_ROOM) return cb({ ok: false, error: 'room_full' });
-
-    detachSocketFromAnyRoom(socket);
 
     room.players = room.players.filter((p) => p.id !== socket.id);
     room.players.push({
