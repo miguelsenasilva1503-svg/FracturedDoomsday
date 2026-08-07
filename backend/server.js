@@ -396,9 +396,9 @@ function handleJoinRoom(socket, payload = {}, cb = () => {}) {
   }
 }
 
-function handleLeaveRoom(socket, cb = () => {}) {
+function removePlayerFromRoom(socket) {
   const found = findRoomBySocket(socket.id);
-  if (!found) return cb({ ok: true });
+  if (!found) return null;
 
   const { room } = found;
   room.players = room.players.filter((p) => p.id !== socket.id);
@@ -411,12 +411,17 @@ function handleLeaveRoom(socket, cb = () => {}) {
   if (room.players.length === 0) {
     stopTimer(room);
     rooms.delete(room.roomCode);
-    cb({ ok: true, removed: true });
-    return;
+    return { room, removed: true };
   }
 
   emitRoomState(room);
-  cb({ ok: true });
+  return { room, removed: true };
+}
+
+function handleLeaveRoom(socket, cb = () => {}) {
+  const result = removePlayerFromRoom(socket);
+  if (!result) return cb({ ok: true });
+  cb({ ok: true, removed: true });
 }
 
 function handleSetReady(socket, payload = {}, cb = () => {}) {
@@ -520,20 +525,7 @@ io.on('connection', (socket) => {
   registerAlias(socket, ['room:settings', 'room_settings'], handleRoomSettings);
 
   socket.on('disconnect', () => {
-    const found = findRoomBySocket(socket.id);
-    if (!found) return;
-
-    const { room } = found;
-    room.players = room.players.filter((p) => p.id !== socket.id);
-    assignHost(room);
-
-    if (room.players.length === 0) {
-      stopTimer(room);
-      rooms.delete(room.roomCode);
-      return;
-    }
-
-    emitRoomState(room);
+    removePlayerFromRoom(socket);
   });
 
   socket.on('match:reset', (_payload, cb = () => {}) => {
