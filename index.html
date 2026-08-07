@@ -20500,6 +20500,7 @@ applyMusicVolume();
 
         if (isPlaying) {
             window.arenaState.view = 'playing';
+            forceHideArenaLobbyShell();
             if (typeof arenaSetBattleContext === 'function') arenaSetBattleContext();
             if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
             return;
@@ -21165,6 +21166,7 @@ applyMusicVolume();
 
         if (isPlaying) {
             window.arenaState.view = 'playing';
+            forceHideArenaLobbyShell();
             if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
             return;
         }
@@ -21846,6 +21848,27 @@ applyMusicVolume();
         else if (typeof showArenaMatch === 'function') showArenaMatch();
     }
 
+    function forceHideArenaLobbyShell() {
+        const hideEl = (el) => {
+            if (!el) return;
+            el.classList.add('hidden');
+            el.style.display = 'none';
+            el.style.pointerEvents = 'none';
+        };
+
+        hideEl(document.getElementById('screen-arena'));
+        hideEl(document.getElementById('overlay-mode-select'));
+        hideEl(document.getElementById('overlay-pregame-shop'));
+        hideEl(document.getElementById('overlay-book'));
+        hideEl(document.getElementById('overlay-title-picker'));
+        hideEl(document.getElementById('overlay-profile'));
+
+        const hud = document.getElementById('game-hud');
+        if (hud) hud.classList.remove('hidden');
+        const exp = document.getElementById('exp-bar-container');
+        if (exp) exp.classList.remove('hidden');
+    }
+
     function roomStillContainsMe(room) {
         const meId = window.arenaSocket?.id || 'me';
         return safeArray(room?.players).some(p => String(p?.id || '').trim() === meId || p?.me);
@@ -22008,6 +22031,7 @@ applyMusicVolume();
             return;
         }        if (room.started || room.starting || room.status === 'playing') {
             s.view = 'playing';
+            forceHideArenaLobbyShell();
             try {
                 const endsAt = Number(room.endsAt);
                 const durationMs = Number.isFinite(endsAt)
@@ -22038,6 +22062,7 @@ applyMusicVolume();
         const s = safeState();
         s.view = 'playing';
         window.isArenaMode = true;
+        forceHideArenaLobbyShell();
         if (typeof showScreen === 'function') showScreen(null);
         const hud = document.getElementById('game-hud');
         if (hud) hud.classList.remove('hidden');
