@@ -9332,7 +9332,7 @@ function arenaStopBattleLoop() {
     if (pauseBtn) pauseBtn.style.display = 'none';
 }
 function arenaSetBattleContext() {
-    const mapIdx = Math.max(0, Number(arenaState.settings.mapChoice) || 0);
+    const mapIdx = arenaResolveBattleMapIndex(arenaState.settings.mapChoice);
     window.currentMap = mapIdx;
     window.isHardcoreMode = arenaState.settings.difficulty === 'hardcore';
     window.arenaUltraHardcore = arenaState.settings.difficulty === 'ultra';
@@ -9657,7 +9657,7 @@ function arenaRenderLobby() {
         <div class="arena-lobby-actions">
             <button class="btn-menu" type="button" onclick="arenaChooseCharacter()">Trocar personagem</button>
             <button class="btn-menu" type="button" onclick="arenaRefreshLobby()">Atualizar lobby</button>
-            ${isHost ? `<button class="btn-play full" type="button" onclick="arenaStartLobbyMatch()">Começar partida</button>` : `<button class="btn-menu full" type="button" onclick="arenaLeaveRoom()">Sair da sala</button>`}
+            ${isHost ? `<button class="btn-play full" type="button" onclick="arenaStartLobbyMatch()">Começar partida</button>` : `<button class="btn-menu full" type="button" onclick="arenaPromptLeaveRoom()">Sair da sala</button>`}
         </div>
     `;
 
@@ -10074,11 +10074,58 @@ function arenaResetLobby() {
     arenaRenderLobby();
 }
 
+
+function arenaHideLeaveConfirm() {
+    const existing = document.getElementById('arena-leave-confirm-overlay');
+    if (existing) existing.remove();
+}
+
+function arenaLeaveSocketAndDisconnect(socket) {
+    if (!socket?.connected) return;
+    let finished = false;
+    const finish = () => {
+        if (finished) return;
+        finished = true;
+        try { socket.disconnect(); } catch (e) {}
+    };
+    try {
+        socket.emit('room:leave', {}, () => {
+            finish();
+        });
+        setTimeout(finish, 350);
+    } catch (e) {
+        finish();
+    }
+}
+
+window.arenaPromptLeaveRoom = function () {
+    arenaHideLeaveConfirm();
+    const overlay = document.createElement('div');
+    overlay.id = 'arena-leave-confirm-overlay';
+    overlay.className = 'overlay';
+    overlay.style.zIndex = '10010';
+    overlay.innerHTML = `
+        <div class="popup-box" style="max-width: 440px; width: min(92vw, 440px); text-align: center;">
+            <h2 style="color: var(--btn-yellow); margin-bottom: 8px;">Sair da sala?</h2>
+            <p style="color: #ddd; font-size: 15px; line-height: 1.45; margin: 0 0 18px 0;">
+                Tem certeza que deseja sair da sala? Você vai perder sua vaga no lobby.
+            </p>
+            <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+                <button class="btn-menu" type="button" style="min-width: 150px;" onclick="arenaHideLeaveConfirm()">Cancelar</button>
+                <button class="btn-red" type="button" style="min-width: 150px;" onclick="arenaHideLeaveConfirm(); window.arenaLeaveRoom();">Sair</button>
+            </div>
+        </div>
+    `;
+    overlay.addEventListener('click', (event) => {
+        if (event.target === overlay) arenaHideLeaveConfirm();
+    });
+    document.body.appendChild(overlay);
+};
+
 function arenaLeaveRoom() {
     const socket = arenaSocket;
     if (socket?.connected && arenaState.online) {
-        socket.emit('room:leave', {}, () => {});
-        socket.disconnect();
+        arenaLeaveSocketAndDisconnect(socket);
     }
     arenaSocket = null;
     arenaStopBattleLoop();
@@ -10228,8 +10275,7 @@ function arenaResetLobby() {
 function arenaLeaveRoom() {
     const socket = arenaSocket;
     if (socket?.connected && arenaState.online) {
-        socket.emit('room:leave', {}, () => {});
-        socket.disconnect();
+        arenaLeaveSocketAndDisconnect(socket);
     }
     arenaSocket = null;
     arenaState.online = false;
@@ -16015,7 +16061,7 @@ applyMusicVolume();
     const originalArenaLeaveRoom = window.arenaLeaveRoom;
     window.arenaLeaveRoom = function () {
         if (window.arenaSocket?.connected && window.arenaState?.online) {
-            arenaSocket.emit('room:leave', {}, () => {});
+            arenaLeaveSocketAndDisconnect(arenaSocket);
         }
         if (typeof arenaStopBattleLoop === 'function') arenaStopBattleLoop();
         window.isArenaMode = false;
@@ -16098,8 +16144,15 @@ applyMusicVolume();
         while (resultTimers.length) clearTimeout(resultTimers.pop());
     };
 
+    function arenaResolveBattleMapIndex(rawIndex) {
+        const idx = Math.max(0, Math.min((window.ARENA_MAPS?.length || 10) - 1, Number(rawIndex) || 0));
+        if (idx === 3) return 4;
+        if (idx === 4) return 3;
+        return idx;
+    }
+
     function arenaMapIndex() {
-        return Math.max(0, Math.min((window.ARENA_MAPS?.length || 10) - 1, Number(window.arenaState?.settings?.mapChoice) || 0));
+        return arenaResolveBattleMapIndex(Number(window.arenaState?.settings?.mapChoice) || 0);
     }
 
     function arenaSelectedCharObj() {
@@ -16418,7 +16471,7 @@ applyMusicVolume();
             <div class="arena-lobby-actions">
                 <button class="btn-menu" type="button" onclick="arenaChooseCharacter()">Trocar personagem</button>
                 <button class="btn-menu" type="button" onclick="arenaRefreshLobby()">Atualizar lobby</button>
-                ${isHost ? `<button class="btn-play full" type="button" onclick="arenaStartLobbyMatch()">Começar partida</button>` : `<button class="btn-menu full" type="button" onclick="arenaLeaveRoom()">Sair da sala</button>`}
+                ${isHost ? `<button class="btn-play full" type="button" onclick="arenaStartLobbyMatch()">Começar partida</button>` : `<button class="btn-menu full" type="button" onclick="arenaPromptLeaveRoom()">Sair da sala</button>`}
             </div>
         `;
 
@@ -16628,7 +16681,7 @@ applyMusicVolume();
 
     window.arenaLeaveRoom = function () {
         if (window.arenaSocket?.connected && window.arenaState?.online) {
-            arenaSocket.emit('room:leave', {}, () => {});
+            arenaLeaveSocketAndDisconnect(arenaSocket);
         }
         arenaStopBattleLoop();
         window.isArenaMode = false;
@@ -17076,7 +17129,7 @@ applyMusicVolume();
 
     window.arenaSetBattleContext = function () {
         window.arenaEnsureState();
-        const mapIdx = Math.max(0, Number(window.arenaState.settings?.mapChoice) || 0);
+        const mapIdx = arenaResolveBattleMapIndex(window.arenaState.settings?.mapChoice);
         window.currentMap = mapIdx;
         window.isHardcoreMode = window.arenaState.settings?.difficulty === 'hardcore';
         window.arenaUltraHardcore = window.arenaState.settings?.difficulty === 'ultra';
@@ -17381,7 +17434,7 @@ applyMusicVolume();
     window.arenaLeaveRoom = function () {
         try {
             if (window.arenaSocket?.connected && window.arenaState?.online) {
-                window.arenaSocket.emit('room:leave', {}, () => {});
+                arenaLeaveSocketAndDisconnect(window.arenaSocket);
             }
         } catch (e) {}
         stopArenaBattle();
@@ -18975,7 +19028,7 @@ applyMusicVolume();
 
     window.arenaSetBattleContext = function () {
         arenaEnsureState();
-        const mapIdx = Math.max(0, Number(window.arenaState.settings?.mapChoice) || 0);
+        const mapIdx = arenaResolveBattleMapIndex(window.arenaState.settings?.mapChoice);
         window.currentMap = mapIdx;
         arenaState.currentMap = mapIdx;
         window.isHardcoreMode = window.arenaState.settings?.difficulty === 'hardcore';
@@ -20155,7 +20208,7 @@ applyMusicVolume();
 
     window.arenaLeaveRoom = function () {
         if (window.arenaSocket?.connected && window.arenaState?.online) {
-            window.arenaSocket.emit('room:leave', {}, () => {});
+            arenaLeaveSocketAndDisconnect(window.arenaSocket);
         }
         if (typeof arenaStopBattleLoop === 'function') arenaStopBattleLoop();
         window.isArenaMode = false;
@@ -20745,7 +20798,7 @@ applyMusicVolume();
 
     window.arenaSetBattleContext = function () {
         arenaSafeArenaState();
-        const mapIdx = Math.max(0, Number(window.arenaState.settings?.mapChoice) || 0);
+        const mapIdx = arenaResolveBattleMapIndex(window.arenaState.settings?.mapChoice);
         try { currentMap = mapIdx; } catch (e) {}
         try { window.currentMap = mapIdx; } catch (e) {}
         try { window.isHardcoreMode = window.arenaState.settings?.difficulty === 'hardcore'; } catch (e) {}
@@ -21273,7 +21326,7 @@ applyMusicVolume();
     window.arenaLeaveRoom = function () {
         try {
             if (window.arenaSocket?.connected && window.arenaState?.online) {
-                window.arenaSocket.emit('room:leave', {}, () => {});
+                arenaLeaveSocketAndDisconnect(window.arenaSocket);
             }
         } catch (e) {}
         if (typeof arenaStopBattleLoop === 'function') arenaStopBattleLoop();
@@ -21319,7 +21372,7 @@ applyMusicVolume();
 
     window.arenaSetBattleContext = function () {
         safeState();
-        const mapIdx = Math.max(0, Number(window.arenaState.settings?.mapChoice) || 0);
+        const mapIdx = arenaResolveBattleMapIndex(window.arenaState.settings?.mapChoice);
         window.arenaState.currentMap = mapIdx;
         try { currentMap = mapIdx; } catch (e) {}
         try { window.currentMap = mapIdx; } catch (e) {}
