@@ -18512,10 +18512,25 @@ applyMusicVolume();
         window.arenaState.players = players;
         window.arenaState.playerCharMap = window.arenaState.playerCharMap && typeof window.arenaState.playerCharMap === 'object' ? window.arenaState.playerCharMap : {};
         players.forEach(p => { if (p.id) window.arenaState.playerCharMap[p.id] = p.charId; });
-        syncLocalCharMap();
-
-        if (isPlaying) {
+        syncLocalCharMap();        if (isPlaying) {
             window.arenaState.view = 'playing';
+            try {
+                const endsAt = Number(room.endsAt);
+                const durationMs = Number.isFinite(endsAt)
+                    ? Math.max(1000, endsAt - Date.now())
+                    : (Math.max(1, Number(settings.duration) || 5) * 60000);
+                if (typeof enterBattleFromPayload === 'function') {
+                    enterBattleFromPayload({
+                        settings,
+                        durationMs,
+                        endsAt: endsAt || (Date.now() + durationMs),
+                    });
+                } else if (typeof showBattleScreen === 'function') {
+                    showBattleScreen();
+                } else if (typeof arenaStartBattle === 'function') {
+                    arenaStartBattle();
+                }
+            } catch (e) {}
             if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
             return;
         }
@@ -21991,16 +22006,26 @@ applyMusicVolume();
             if (typeof showScreen === 'function') showScreen('screen-arena');
             if (typeof arenaRenderJoinForm === 'function') arenaRenderJoinForm();
             return;
-        }
-        if (room.started || room.starting || room.status === 'playing') {
+        }        if (room.started || room.starting || room.status === 'playing') {
             s.view = 'playing';
-            if (room.started || room.status === 'playing') {
-                try {
-                    if (typeof arenaSetBattleContext === 'function') arenaSetBattleContext();
-                    if (typeof showBattleScreen === 'function') showBattleScreen();
-                    else if (typeof arenaStartBattle === 'function') arenaStartBattle();
-                } catch (e) {}
-            } else if (typeof arenaUpdateRankingPanel === 'function') {
+            try {
+                const endsAt = Number(room.endsAt);
+                const durationMs = Number.isFinite(endsAt)
+                    ? Math.max(1000, endsAt - Date.now())
+                    : (Math.max(1, Number(room?.settings?.duration) || 5) * 60000);
+                if (typeof enterBattleFromPayload === 'function') {
+                    enterBattleFromPayload({
+                        settings: room.settings || s.settings,
+                        durationMs,
+                        endsAt: endsAt || (Date.now() + durationMs),
+                    });
+                } else if (typeof showBattleScreen === 'function') {
+                    showBattleScreen();
+                } else if (typeof arenaStartBattle === 'function') {
+                    arenaStartBattle();
+                }
+            } catch (e) {}
+            if (typeof arenaUpdateRankingPanel === 'function') {
                 arenaUpdateRankingPanel();
             }
             return;
