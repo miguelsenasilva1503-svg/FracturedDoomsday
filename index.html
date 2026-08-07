@@ -21969,7 +21969,15 @@ applyMusicVolume();
         }
         if (room.started || room.starting || room.status === 'playing') {
             s.view = 'playing';
-            if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
+            if (room.started || room.status === 'playing') {
+                try {
+                    if (typeof arenaSetBattleContext === 'function') arenaSetBattleContext();
+                    if (typeof showBattleScreen === 'function') showBattleScreen();
+                    else if (typeof arenaStartBattle === 'function') arenaStartBattle();
+                } catch (e) {}
+            } else if (typeof arenaUpdateRankingPanel === 'function') {
+                arenaUpdateRankingPanel();
+            }
             return;
         }
         if (s.view !== 'join' && s.view !== 'hub' && s.view !== 'lobby') s.view = 'lobby';
@@ -22001,7 +22009,16 @@ applyMusicVolume();
         const sock = ensureSocketConnection();
         if (!sock) { showAlert('Socket da Arena indisponível.'); return; }
         sock.emit('room:start', {}, (res) => {
-            if (!res?.ok) showAlert(res?.error || 'Não foi possível iniciar.');
+            if (!res?.ok) {
+                showAlert(res?.error || 'Não foi possível iniciar.');
+                return;
+            }
+            try {
+                const room = res.room || {};
+                const endsAt = Number(room.endsAt);
+                const durationMs = Number.isFinite(endsAt) ? Math.max(1000, endsAt - Date.now()) : (Math.max(1, Number(room?.settings?.duration) || 5) * 60000);
+                enterBattleFromPayload({ settings: room.settings || safeState().settings, durationMs, endsAt: endsAt || (Date.now() + durationMs) });
+            } catch (e) {}
         });
     }
 
