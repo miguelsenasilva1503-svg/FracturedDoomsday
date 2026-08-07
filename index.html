@@ -2293,7 +2293,7 @@
 
 
 <div id="screen-arena" class="screen scrollable hidden">
-    <button class="btn-top-corner btn-back" onclick="arenaBackFromChars()">⬅️ Voltar</button>
+    <button id="arena-screen-back-btn" class="btn-top-corner btn-back" onclick="arenaHandleScreenBack()">⬅️ Voltar</button>
     <div id="arena-root"></div>
 </div>
 
@@ -10082,20 +10082,10 @@ function arenaHideLeaveConfirm() {
 
 function arenaLeaveSocketAndDisconnect(socket) {
     if (!socket?.connected) return;
-    let finished = false;
-    const finish = () => {
-        if (finished) return;
-        finished = true;
-        try { socket.disconnect(); } catch (e) {}
-    };
     try {
-        socket.emit('room:leave', {}, () => {
-            finish();
-        });
-        setTimeout(finish, 350);
-    } catch (e) {
-        finish();
-    }
+        socket.emit('room:leave', {}, () => {});
+    } catch (e) {}
+    try { socket.disconnect(); } catch (e) {}
 }
 
 window.arenaPromptLeaveRoom = function () {
@@ -16145,10 +16135,7 @@ applyMusicVolume();
     };
 
     function arenaResolveBattleMapIndex(rawIndex) {
-        const idx = Math.max(0, Math.min((window.ARENA_MAPS?.length || 10) - 1, Number(rawIndex) || 0));
-        if (idx === 3) return 4;
-        if (idx === 4) return 3;
-        return idx;
+        return Math.max(0, Math.min((window.ARENA_MAPS?.length || 10) - 1, Number(rawIndex) || 0));
     }
 
     function arenaMapIndex() {
@@ -21507,6 +21494,7 @@ applyMusicVolume();
         s.penalty = 0;
         s.timeLeftMs = 0;
         s.matchCountdown = 0;
+        s.leavingRoom = false;
     }
 
     function renderArenaScreenSafe() {
@@ -21592,6 +21580,25 @@ applyMusicVolume();
         return out;
     }
 
+    function updateArenaScreenBackButton() {
+        const btn = document.getElementById('arena-screen-back-btn');
+        if (!btn) return;
+        const leaveMode = !!(window.arenaState?.online && window.arenaState?.view === 'lobby');
+        btn.textContent = leaveMode ? '🚪 Sair da sala' : '⬅️ Voltar';
+    }
+
+    window.arenaHandleScreenBack = function () {
+        if (window.arenaState?.online && window.arenaState?.view === 'lobby') {
+            if (typeof arenaPromptLeaveRoom === 'function') arenaPromptLeaveRoom();
+            return;
+        }
+        if (typeof arenaBackFromChars === 'function') {
+            arenaBackFromChars();
+            return;
+        }
+        if (typeof showScreen === 'function') showScreen('screen-main');
+    };
+
     const prevArenaBuildPlayersForLobby = window.arenaBuildPlayersForLobby;
     window.arenaBuildPlayersForLobby = function () {
         const players = buildPlayersFromState();
@@ -21614,6 +21621,7 @@ applyMusicVolume();
             if (window.arenaState?.online && !meStillThere && !room.started && !room.starting && room.status !== 'playing') {
                 clearArenaLobbyState();
                 renderArenaScreenSafe();
+                updateArenaScreenBackButton();
                 if (typeof arenaRenderJoinForm === 'function') arenaRenderJoinForm();
                 return true;
             }
@@ -21634,10 +21642,9 @@ applyMusicVolume();
     window.arenaLeaveRoom = function () {
         window.__arenaLeavingRoom = true;
         try {
-            const res = typeof prevArenaLeaveRoom === 'function' ? prevArenaLeaveRoom.apply(this, arguments) : undefined;
-            return res;
+            return typeof prevArenaLeaveRoom === 'function' ? prevArenaLeaveRoom.apply(this, arguments) : undefined;
         } finally {
-            window.__arenaLeavingRoom = false;
+            setTimeout(() => { window.__arenaLeavingRoom = false; }, 650);
         }
     };
 
@@ -21654,6 +21661,7 @@ applyMusicVolume();
                 const scoreEl = card.querySelector('.score');
                 if (scoreEl) scoreEl.textContent = `${Math.max(0, Math.floor(Number(p.score) || 0))} pts`;
             });
+            updateArenaScreenBackButton();
         } catch (e) {}
         return out;
     };
