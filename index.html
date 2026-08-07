@@ -9870,7 +9870,7 @@ function arenaConnect() {
     });
     arenaSocket.on('disconnect', () => {
         if (arenaSocket && !arenaSocket.connected) arenaSocket = null;
-        if (arenaState.online) notify('Conexão da Arena perdida.');
+        if (arenaState.online) if (!(window.__arenaIntentionalLeave || (window.arenaState && window.arenaState.leavingRoom) || (typeof safeState === 'function' && safeState()?.leavingRoom))) notify('Conexão da Arena perdida.');
     });
     arenaSocket.on('room:update', (room) => {
         if (!room) return;
@@ -9960,14 +9960,17 @@ function arenaJoinRoom() {
     arenaState.view = 'lobby';
     if (arenaSocket) {
         arenaSocket.emit('room:join', { code, name: nick }, (res) => {
-            if (!res?.ok) { showAlert(res?.error || 'Não foi possível entrar na sala.'); return; }
+            if (!res?.ok) { showAlert(res?.error || 'Não foi possível entrar na sala.'); safeState().leavingRoom = false; window.__arenaIntentionalLeave = false; return; }
             arenaState.online = true;
             arenaState.mode = 'online';
             arenaState.roomCode = res.code || code;
+            arenaState.roomSessionId = res.sessionId || arenaState.roomSessionId || '';
+            arenaState.roomSessionId = res.sessionId || res.room?.players?.find?.(p => p.id === arenaSocket.id)?.sessionId || '';
             arenaState.isHost = arenaSocket.id === res.room?.hostId;
             arenaState.players = Array.isArray(res.room?.players) ? res.room.players.map(p => ({
                 id: p.id, name: p.name, score: p.score || 0, kills: p.kills || 0, ready: !!p.ready, me: p.id === arenaSocket.id, host: p.id === (res.room?.hostId || arenaSocket.id), charId: p.charId || arenaSelectedCharId()
             })) : [];
+            safeState().leavingRoom = false; window.__arenaIntentionalLeave = false;
             arenaRenderLobby();
             notify(`Entrou na sala ${arenaState.roomCode}`);
         });
@@ -10083,7 +10086,7 @@ function arenaHideLeaveConfirm() {
 function arenaLeaveSocketAndDisconnect(socket) {
     if (!socket?.connected) return;
     try {
-        socket.emit('room:leave', {}, () => {});
+        socket.emit('room:leave', { sessionId: String((window.arenaState && window.arenaState.roomSessionId) || '') }, () => {});
     } catch (e) {}
     try { socket.disconnect(); } catch (e) {}
 }
@@ -10164,6 +10167,8 @@ function arenaJoinRoom() {
             arenaState.online = true;
             arenaState.mode = 'online';
             arenaState.roomCode = res.code || code;
+            arenaState.roomSessionId = res.sessionId || arenaState.roomSessionId || '';
+            arenaState.roomSessionId = res.sessionId || res.room?.players?.find?.(p => p.id === arenaSocket.id)?.sessionId || '';
             arenaState.isHost = arenaSocket.id === res.room?.hostId;
             arenaState.players = Array.isArray(res.room?.players) ? res.room.players.map(p => ({
                 id: p.id, name: p.name, score: p.score || 0, kills: p.kills || 0, ready: !!p.ready, me: p.id === arenaSocket.id, host: p.id === (res.room?.hostId || arenaSocket.id), charId: p.charId || arenaSelectedCharId()
@@ -16704,6 +16709,7 @@ applyMusicVolume();
                 arenaState.online = true;
                 arenaState.mode = 'online';
                 arenaState.roomCode = res.code || code;
+            arenaState.roomSessionId = res.sessionId || arenaState.roomSessionId || '';
                 arenaState.isHost = arenaSocket.id === res.room?.hostId;
                 arenaState.players = Array.isArray(res.room?.players) ? res.room.players.map(p => ({
                     id: p.id,
@@ -17278,6 +17284,8 @@ applyMusicVolume();
                 window.arenaState.online = true;
                 window.arenaState.mode = 'online';
                 window.arenaState.roomCode = res.code || code;
+                window.arenaState.roomSessionId = res.sessionId || window.arenaState.roomSessionId || '';
+            arenaState.roomSessionId = res.sessionId || arenaState.roomSessionId || '';
                 window.arenaState.isHost = window.arenaSocket.id === res.room?.hostId;
                 window.arenaState.players = Array.isArray(res.room?.players) ? res.room.players.map(p => ({
                     id: p.id,
@@ -17659,7 +17667,7 @@ applyMusicVolume();
             window.arenaSocket.on('disconnect', () => {
                 if (window.arenaState) window.arenaState.online = false;
                 if (window.arenaSocket && !window.arenaSocket.connected) window.arenaSocket = null;
-                if (window.arenaState?.online) notify('Conexão da Arena perdida.');
+                if (!window.arenaState?.leavingRoom && window.arenaState?.online) if (!(window.__arenaIntentionalLeave || (window.arenaState && window.arenaState.leavingRoom) || (typeof safeState === 'function' && safeState()?.leavingRoom))) notify('Conexão da Arena perdida.');
             });
 
             window.arenaSocket.on('room:update', (room) => {
@@ -17788,6 +17796,8 @@ applyMusicVolume();
                 window.arenaState.online = true;
                 window.arenaState.mode = 'online';
                 window.arenaState.roomCode = res.code || code;
+                window.arenaState.roomSessionId = res.sessionId || window.arenaState.roomSessionId || '';
+            arenaState.roomSessionId = res.sessionId || arenaState.roomSessionId || '';
                 window.arenaState.isHost = s.id === res.room?.hostId;
                 window.arenaState.players = mapPlayers(res.room?.players || [], s.id);
                 window.arenaState.view = 'lobby';
@@ -18351,6 +18361,8 @@ applyMusicVolume();
                 window.arenaState.online = true;
                 window.arenaState.mode = 'online';
                 window.arenaState.roomCode = res.code || code;
+                window.arenaState.roomSessionId = res.sessionId || window.arenaState.roomSessionId || '';
+            arenaState.roomSessionId = res.sessionId || arenaState.roomSessionId || '';
                 window.arenaState.isHost = s.id === res.room?.hostId;
                 window.arenaState.players = Array.isArray(res.room?.players) ? res.room.players.map(p => ({
                     id: p.id,
@@ -18567,7 +18579,7 @@ applyMusicVolume();
             if (typeof arenaHandleResults === 'function') arenaHandleResults(payload?.ranking || payload?.rank || payload?.results || []);
         });
         socket.on('disconnect', () => {
-            if (window.arenaState.online) notify('Conexão da Arena perdida.');
+            if (window.arenaState.online) if (!(window.__arenaIntentionalLeave || (window.arenaState && window.arenaState.leavingRoom) || (typeof safeState === 'function' && safeState()?.leavingRoom))) notify('Conexão da Arena perdida.');
         });
         return socket;
     }
@@ -18653,6 +18665,7 @@ applyMusicVolume();
             if (!res?.ok) { showAlert(res?.error || 'Não foi possível entrar na sala.'); return; }
             applyRoomSnapshot(res.room || res);
             arenaState.roomCode = res.code || code;
+            arenaState.roomSessionId = res.sessionId || arenaState.roomSessionId || '';
             arenaState.view = 'lobby';
             showScreen('screen-arena');
             arenaRenderLobby();
@@ -19760,7 +19773,7 @@ applyMusicVolume();
         });
 
         socket.on('disconnect', () => {
-            if (window.arenaState?.online) notify('Conexão da Arena perdida.');
+            if (!window.arenaState?.leavingRoom && window.arenaState?.online) if (!(window.__arenaIntentionalLeave || (window.arenaState && window.arenaState.leavingRoom) || (typeof safeState === 'function' && safeState()?.leavingRoom))) notify('Conexão da Arena perdida.');
         });
 
         return socket;
@@ -19957,6 +19970,7 @@ applyMusicVolume();
             if (!res?.ok) { showAlert(res?.error || 'Não foi possível entrar na sala.'); return; }
             arenaApplyRoom(res.room || res);
             arenaState.roomCode = res.code || code;
+            arenaState.roomSessionId = res.sessionId || arenaState.roomSessionId || '';
             arenaState.online = true;
             arenaState.mode = 'online';
             arenaState.isHost = s.id === res.room?.hostId;
@@ -20531,7 +20545,7 @@ applyMusicVolume();
             if (typeof arenaHandleResults === 'function') arenaHandleResults(payload?.ranking || payload?.rank || payload?.results || []);
         });
         socket.on('disconnect', () => {
-            if (window.arenaState?.online) notify('Conexão da Arena perdida.');
+            if (!window.arenaState?.leavingRoom && window.arenaState?.online) if (!(window.__arenaIntentionalLeave || (window.arenaState && window.arenaState.leavingRoom) || (typeof safeState === 'function' && safeState()?.leavingRoom))) notify('Conexão da Arena perdida.');
         });
         return socket;
     }
@@ -20612,6 +20626,8 @@ applyMusicVolume();
             if (!res?.ok) { showAlert(res?.error || 'Não foi possível entrar na sala.'); return; }
             arenaApplySnapshot(res.room || res);
             window.arenaState.roomCode = res.code || code;
+                window.arenaState.roomSessionId = res.sessionId || window.arenaState.roomSessionId || '';
+            arenaState.roomSessionId = res.sessionId || arenaState.roomSessionId || '';
             window.arenaState.view = 'lobby';
             showScreen('screen-arena');
             arenaRenderLobby();
@@ -21205,7 +21221,7 @@ applyMusicVolume();
             }
         });
         socket.on('disconnect', () => {
-            if (window.arenaState?.online) notify('Conexão da Arena perdida.');
+            if (!window.arenaState?.leavingRoom && window.arenaState?.online) if (!(window.__arenaIntentionalLeave || (window.arenaState && window.arenaState.leavingRoom) || (typeof safeState === 'function' && safeState()?.leavingRoom))) notify('Conexão da Arena perdida.');
         });
         return socket;
     }
@@ -21303,6 +21319,8 @@ applyMusicVolume();
             }
             applySnapshot(res.room || res);
             window.arenaState.roomCode = res.code || code;
+                window.arenaState.roomSessionId = res.sessionId || window.arenaState.roomSessionId || '';
+            arenaState.roomSessionId = res.sessionId || arenaState.roomSessionId || '';
             window.arenaState.view = 'lobby';
             showScreen('screen-arena');
             arenaRenderLobby();
@@ -21481,6 +21499,7 @@ applyMusicVolume();
         s.hostId = '';
         s.joinCode = '';
         s.roomCode = '';
+        s.roomSessionId = '';
         s.roomName = '';
         s.players = [];
         s.botRoster = [];
@@ -21842,8 +21861,11 @@ applyMusicVolume();
 
     function leaveRoomImmediate() {
         const sock = window.arenaSocket;
-        if (sock?.connected && safeState().online) {
-            try { sock.emit('room:leave', {}, () => {}); } catch (e) {}
+        const s = safeState();
+        const sessionId = String(s.roomSessionId || '').trim();
+        window.__arenaIntentionalLeave = true;
+        if (sock?.connected && s.online) {
+            try { sock.emit('room:leave', sessionId ? { sessionId } : {}, () => { s.leavingRoom = false; window.__arenaIntentionalLeave = false; }); } catch (e) {}
         }
         try {
             if (typeof arenaStopBattleLoop === 'function') arenaStopBattleLoop();
@@ -21931,7 +21953,7 @@ applyMusicVolume();
             sock.on('match:start', (payload) => { if (!safeState().resultsShown) enterBattleFromPayload(payload); });
             sock.on('match_end', (payload) => { renderFinalResults(payload?.ranking || payload?.rank || payload?.results || []); });
             sock.on('match:end', (payload) => { renderFinalResults(payload?.ranking || payload?.rank || payload?.results || []); });
-            sock.on('disconnect', () => { if (safeState().online) notify('Conexão da Arena perdida.'); });
+            sock.on('disconnect', () => { if (!safeState().leavingRoom && safeState().online) if (!(window.__arenaIntentionalLeave || (window.arenaState && window.arenaState.leavingRoom) || (typeof safeState === 'function' && safeState()?.leavingRoom))) notify('Conexão da Arena perdida.'); });
         }
         return sock;
     }
@@ -21958,8 +21980,11 @@ applyMusicVolume();
             me: p.id === meId,
             host: p.id === room.hostId,
             charId: String(p.charId || '').trim(),
+            sessionId: String(p.sessionId || '').trim(),
         }));
         s.players = players;
+        const myPlayer = players.find(p => p.me || p.id === meId);
+        if (myPlayer?.sessionId) s.roomSessionId = myPlayer.sessionId;
         const inRoom = roomStillContainsMe(room);
         if (!inRoom && !room.started && !room.starting && room.status !== 'playing') {
             clearLocalLobbyState();
@@ -22047,7 +22072,7 @@ applyMusicVolume();
     window.arenaLeaveRoom = function () {
         safeState().leavingRoom = true;
         try { leaveRoomImmediate(); } finally {
-            setTimeout(() => { if (window.arenaState) window.arenaState.leavingRoom = false; }, 150);
+            setTimeout(() => { if (window.arenaState) window.arenaState.leavingRoom = false; window.__arenaIntentionalLeave = false; }, 500);
         }
     };
 
