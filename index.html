@@ -9361,7 +9361,7 @@ function arenaPrepBattleUI() {
     applyControlLayout();
 }
 
-const ARENA_MAPS = ['Planície', 'Deserto', 'Neve', 'Floresta', 'Caverna', 'Pântano', 'Metrópole', 'Ígneo', 'Bambu', 'Discoteca'];
+const ARENA_MAPS = ['Planície', 'Deserto', 'Nevasca', 'Caverna', 'Floresta', 'Pântano', 'Metrópole', 'Ígneo', 'Floresta de Bambu', 'Discoteca'];
 const ARENA_DURATION_OPTIONS = [2, 5, 10, 15];
 const ARENA_POWERUPS = ['ima', 'tenis', 'escudo'];
 
@@ -9869,6 +9869,7 @@ function arenaConnect() {
         if (arenaState.roomCode) arenaRenderLobby();
     });
     arenaSocket.on('disconnect', () => {
+        if (arenaSocket && !arenaSocket.connected) arenaSocket = null;
         if (arenaState.online) notify('Conexão da Arena perdida.');
     });
     arenaSocket.on('room:update', (room) => {
@@ -10074,9 +10075,12 @@ function arenaResetLobby() {
 }
 
 function arenaLeaveRoom() {
-    if (arenaSocket?.connected && arenaState.online) {
-        arenaSocket.emit('room:leave', {}, () => {});
+    const socket = arenaSocket;
+    if (socket?.connected && arenaState.online) {
+        socket.emit('room:leave', {}, () => {});
+        socket.disconnect();
     }
+    arenaSocket = null;
     arenaStopBattleLoop();
     window.arenaIgnoreGameOver = false;
     arenaState.online = false;
@@ -10222,9 +10226,12 @@ function arenaResetLobby() {
 }
 
 function arenaLeaveRoom() {
-    if (arenaSocket?.connected && arenaState.online) {
-        arenaSocket.emit('room:leave', {}, () => {});
+    const socket = arenaSocket;
+    if (socket?.connected && arenaState.online) {
+        socket.emit('room:leave', {}, () => {});
+        socket.disconnect();
     }
+    arenaSocket = null;
     arenaState.online = false;
     arenaState.isHost = false;
     arenaState.roomCode = '';
@@ -17611,6 +17618,7 @@ applyMusicVolume();
 
             window.arenaSocket.on('disconnect', () => {
                 if (window.arenaState) window.arenaState.online = false;
+                if (window.arenaSocket && !window.arenaSocket.connected) window.arenaSocket = null;
                 if (window.arenaState?.online) notify('Conexão da Arena perdida.');
             });
 
