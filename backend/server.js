@@ -58,6 +58,10 @@ function safeCharId(charId) {
   return value || 'strike';
 }
 
+function makeSessionId() {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
 function toInt(value, fallback) {
   const n = Number(value);
   return Number.isFinite(n) ? Math.floor(n) : fallback;
@@ -121,6 +125,7 @@ function createRoom({ roomCode, hostId, hostName, hostCharId, settings }) {
         score: 0,
         kills: 0,
         connected: true,
+        sessionId: makeSessionId(),
       },
     ],
     started: false,
@@ -155,6 +160,7 @@ function roomSnapshot(room) {
         score: toInt(p.score, 0),
         kills: toInt(p.kills, 0),
         connected: !!p.connected,
+        sessionId: p.sessionId || null,
       })),
     lastResult: room.lastResult || null,
   };
@@ -344,6 +350,7 @@ function handleCreateRoom(socket, payload = {}, cb = () => {}) {
       ok: true,
       code: roomCode,
       roomCode,
+      sessionId: room.players[0]?.sessionId || null,
       room: snapshot,
     });
   } catch (error) {
@@ -363,6 +370,7 @@ function handleJoinRoom(socket, payload = {}, cb = () => {}) {
     if (room.players.length >= MAX_PLAYERS_PER_ROOM) return cb({ ok: false, error: 'room_full' });
 
     room.players = room.players.filter((p) => p.id !== socket.id);
+    const sessionId = makeSessionId();
     room.players.push({
       id: socket.id,
       name: nick,
@@ -371,10 +379,12 @@ function handleJoinRoom(socket, payload = {}, cb = () => {}) {
       score: 0,
       kills: 0,
       connected: true,
+      sessionId,
     });
 
     socket.join(room.roomCode);
     socket.data.roomCode = room.roomCode;
+    socket.data.roomSessionId = sessionId;
     socket.data.playerName = nick;
     socket.data.charId = charId;
 
@@ -389,6 +399,7 @@ function handleJoinRoom(socket, payload = {}, cb = () => {}) {
       ok: true,
       code: room.roomCode,
       roomCode: room.roomCode,
+      sessionId,
       room: snapshot,
     });
   } catch (error) {
@@ -396,7 +407,13 @@ function handleJoinRoom(socket, payload = {}, cb = () => {}) {
   }
 }
 
-function handleLeaveRoom(socket, cb = () => {}) {
+function handleLeaveRoom(socket, payload = {}, cb = () => {}) {
+  const currentSessionId = socket.data?.roomSessionId || null;
+  const requestedSessionId = String(payload?.sessionId || '').trim() || null;
+  if (requestedSessionId && currentSessionId && requestedSessionId !== currentSessionId) {
+    return cb({ ok: true, ignored: true });
+  }
+
   const found = findRoomBySocket(socket.id);
   if (!found) return cb({ ok: true });
 
@@ -404,6 +421,7 @@ function handleLeaveRoom(socket, cb = () => {}) {
   room.players = room.players.filter((p) => p.id !== socket.id);
   socket.leave(room.roomCode);
   socket.data.roomCode = null;
+  socket.data.roomSessionId = null;
   socket.data.playerName = null;
   socket.data.charId = null;
   assignHost(room);
@@ -416,7 +434,7 @@ function handleLeaveRoom(socket, cb = () => {}) {
   }
 
   emitRoomState(room);
-  cb({ ok: true });
+  cb({ ok: true, removed: true });
 }
 
 function handleSetReady(socket, payload = {}, cb = () => {}) {
@@ -525,6 +543,7 @@ io.on('connection', (socket) => {
 
     const { room } = found;
     room.players = room.players.filter((p) => p.id !== socket.id);
+    socket.data.roomSessionId = null;
     assignHost(room);
 
     if (room.players.length === 0) {
