@@ -277,7 +277,7 @@ function startMatch(room, cb = () => {}) {
   }
 
   room.starting = true;
-  room.started = true;
+  room.started = false;
   room.players.forEach((p) => {
     p.ready = false;
     p.score = 0;
@@ -303,6 +303,7 @@ function startMatch(room, cb = () => {}) {
     clearInterval(prepTimer);
 
     room.starting = false;
+    room.started = true;
     const durationMs = durationMsFromSettings(room.settings);
     room.endsAt = Date.now() + durationMs;
 
