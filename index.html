@@ -18563,10 +18563,24 @@ applyMusicVolume();
         socket.on('room:update', applyRoomSnapshot);
         socket.on('match_starting', (payload) => {
             window.arenaState.matchCountdown = Number(payload?.countdownSec) || 0;
+            if (typeof openArenaBattleShell === 'function') {
+                openArenaBattleShell({
+                    mode: 'online',
+                    settings: window.arenaState.settings,
+                    durationMs: Math.max(1, Number(window.arenaState.settings?.duration) || 5) * 60000,
+                });
+            }
             if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
         });
         socket.on('match:starting', (payload) => {
             window.arenaState.matchCountdown = Number(payload?.countdownSec) || 0;
+            if (typeof openArenaBattleShell === 'function') {
+                openArenaBattleShell({
+                    mode: 'online',
+                    settings: window.arenaState.settings,
+                    durationMs: Math.max(1, Number(window.arenaState.settings?.duration) || 5) * 60000,
+                });
+            }
             if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
         });
         socket.on('match_start', (payload) => {
@@ -19715,11 +19729,7 @@ applyMusicVolume();
             }
         }
 
-        if (room.starting || room.status === 'starting') {
-            window.arenaState.view = 'lobby';
-            if (typeof arenaRenderLobby === 'function') arenaRenderLobby();
-            if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
-        } else if (room.status === 'playing' || room.started) {
+        if (room.status === 'playing' || room.started || room.starting) {
             window.arenaState.view = 'playing';
             if (typeof openArenaBattleShell === 'function') {
                 openArenaBattleShell({
@@ -19768,10 +19778,24 @@ applyMusicVolume();
 
         socket.on('match_starting', (payload) => {
             window.arenaState.matchCountdown = Number(payload?.countdownSec) || 0;
+            if (typeof openArenaBattleShell === 'function') {
+                openArenaBattleShell({
+                    mode: 'online',
+                    settings: window.arenaState.settings,
+                    durationMs: Math.max(1, Number(window.arenaState.settings?.duration) || 5) * 60000,
+                });
+            }
             if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
         });
         socket.on('match:starting', (payload) => {
             window.arenaState.matchCountdown = Number(payload?.countdownSec) || 0;
+            if (typeof openArenaBattleShell === 'function') {
+                openArenaBattleShell({
+                    mode: 'online',
+                    settings: window.arenaState.settings,
+                    durationMs: Math.max(1, Number(window.arenaState.settings?.duration) || 5) * 60000,
+                });
+            }
             if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
         });
 
@@ -20519,6 +20543,34 @@ applyMusicVolume();
             window.arenaState.view = 'playing';
             forceHideArenaLobbyShell();
             if (typeof arenaSetBattleContext === 'function') arenaSetBattleContext();
+
+            // A room_state can arrive after match_start (or the client can miss
+            // match_start). In that case the snapshot itself must be enough to
+            // reconstruct the battle for every player, not only the host.
+            const bootKey = `${roomCode}|${Number(room.endsAt) || 0}`;
+            if (window.arenaState._battleBootKey !== bootKey) {
+                window.arenaState._battleBootKey = bootKey;
+                const endsAt = Number(room.endsAt);
+                const durationMs = Number.isFinite(endsAt)
+                    ? Math.max(1000, endsAt - Date.now())
+                    : Math.max(1, Number(settings.duration) || 5) * 60000;
+                try {
+                    if (typeof beginArenaBattle === 'function') {
+                        beginArenaBattle({
+                            mode: 'online',
+                            settings: room.settings || window.arenaState.settings,
+                            durationMs,
+                            endsAt: endsAt || (Date.now() + durationMs),
+                            roomCode,
+                        });
+                    } else if (typeof arenaStartBattle === 'function') {
+                        arenaStartBattle();
+                    }
+                } catch (e) {
+                    console.error('[Arena] Falha ao reconstruir partida pelo snapshot:', e);
+                }
+            }
+
             if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
             return;
         }
@@ -20547,20 +20599,29 @@ applyMusicVolume();
             window.arenaState.matchCountdown = Number(payload?.countdownSec) || 0;
             if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
         });
-        socket.on('match_start', (payload) => {
+        const handleArenaMatchStart = (payload) => {
             arenaSafeArenaState();
+            window.arenaState._startRequestInFlight = false;
             window.arenaState.settings = { ...window.arenaState.settings, ...(payload?.settings || {}) };
+            const roomCode = String(payload?.roomCode || window.arenaState.roomCode || '');
+            const endsAt = Number(payload?.endsAt);
+            const bootKey = `${roomCode}|${endsAt || 0}`;
+            window.arenaState._battleBootKey = bootKey;
             if (typeof arenaSetBattleContext === 'function') arenaSetBattleContext();
-            if (typeof enterBattleFromPayload === 'function') enterBattleFromPayload(payload); else if (typeof showArenaMatch === 'function') showArenaMatch();
+            try {
+                if (typeof enterBattleFromPayload === 'function') {
+                    enterBattleFromPayload(payload);
+                } else if (typeof showArenaMatch === 'function') {
+                    showArenaMatch();
+                }
+            } catch (e) {
+                console.error('[Arena] Falha ao iniciar batalha:', e);
+            }
             window.arenaState.timeLeftMs = Number(payload?.durationMs) || Math.max(1, Number(window.arenaState.settings?.duration) || 5) * 60000;
-        });
-        socket.on('match:start', (payload) => {
-            arenaSafeArenaState();
-            window.arenaState.settings = { ...window.arenaState.settings, ...(payload?.settings || {}) };
-            if (typeof arenaSetBattleContext === 'function') arenaSetBattleContext();
-            if (typeof enterBattleFromPayload === 'function') enterBattleFromPayload(payload); else if (typeof showArenaMatch === 'function') showArenaMatch();
-            window.arenaState.timeLeftMs = Number(payload?.durationMs) || Math.max(1, Number(window.arenaState.settings?.duration) || 5) * 60000;
-        });
+            if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
+        };
+        socket.on('match_start', handleArenaMatchStart);
+        socket.on('match:start', handleArenaMatchStart);
         socket.on('match_tick', (payload) => {
             arenaSafeArenaState();
             const remaining = Number(payload?.timeLeftMs ?? payload?.remainingMs);
@@ -21932,6 +21993,8 @@ function openArenaBattleShell(payload = {}) {
         s.penalty = 0;
         s.timeLeftMs = 0;
         s.matchCountdown = 0;
+        s._startRequestInFlight = false;
+        s._battleBootKey = '';
         window.isArenaMode = false;
     }
 
@@ -22109,7 +22172,6 @@ function openArenaBattleShell(payload = {}) {
         if (joy) joy.style.display = 'none';
         if (typeof applyControlLayout === 'function') applyControlLayout();
         if (typeof startRunAfterShop === 'function') startRunAfterShop();
-        if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
     }
 
     function finalStartLobbyMatch() {
@@ -22119,15 +22181,69 @@ function openArenaBattleShell(payload = {}) {
             return;
         }
         if (!s.isHost) { showAlert('Só o anfitrião começa a partida.'); return; }
+
+        // Prevent double-clicks from sending two room:start requests.
+        if (s._startRequestInFlight) return;
+        s._startRequestInFlight = true;
+
         const sock = ensureSocketConnection();
-        if (!sock) { showAlert('Socket da Arena indisponível.'); return; }
-        const shellPayload = {
-            mode: 'online',
-            settings: s.settings,
-            durationMs: Math.max(1, Number(s.settings?.duration) || 5) * 60000,
+        if (!sock) {
+            s._startRequestInFlight = false;
+            showAlert('Socket da Arena indisponível.');
+            return;
+        }
+
+        const recoverFromRoom = (room) => {
+            if (!room) return;
+            const roomCode = room.code || room.roomCode || s.roomCode || '';
+            const isPlaying = !!(room.started || room.status === 'playing');
+            const isStarting = !!(room.starting || room.status === 'starting');
+
+            if (isPlaying) {
+                const endsAt = Number(room.endsAt);
+                const durationMs = Number.isFinite(endsAt)
+                    ? Math.max(1000, endsAt - Date.now())
+                    : Math.max(1, Number(room?.settings?.duration) || 5) * 60000;
+                const payload = {
+                    mode: 'online',
+                    settings: room.settings || s.settings,
+                    durationMs,
+                    endsAt: endsAt || (Date.now() + durationMs),
+                    roomCode,
+                };
+                s._battleBootKey = `${roomCode}|${endsAt || 0}`;
+                try {
+                    if (typeof beginArenaBattle === 'function') beginArenaBattle(payload);
+                    else if (typeof arenaStartBattle === 'function') arenaStartBattle();
+                } catch (e) {
+                    console.error('[Arena] Falha na recuperação da partida:', e);
+                }
+                if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
+                return;
+            }
+
+            // If the server is already counting down, do not send another start.
+            // The existing match_start event will start the battle for everyone.
+            if (isStarting) {
+                s.view = 'lobby';
+                s._startRequestInFlight = false;
+                if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
+            }
         };
+
         sock.emit('room:start', {}, (res) => {
+            s._startRequestInFlight = false;
+
+            if (res?.room) recoverFromRoom(res.room);
+
             if (!res?.ok) {
+                if (res?.error === 'already_started') {
+                    // Recover instead of leaving the user with a dead lobby.
+                    sock.emit('room:get', (stateRes) => {
+                        if (stateRes?.room) recoverFromRoom(stateRes.room);
+                    });
+                    return;
+                }
                 showAlert(res?.error || 'Não foi possível iniciar.');
             }
         });
