@@ -491,7 +491,32 @@ function handleStartMatch(socket, _payload = {}, cb = () => {}) {
 
   const { room } = found;
   if (room.hostId !== socket.id) return cb({ ok: false, error: 'not_host' });
-  if (room.started || room.starting) return cb({ ok: false, error: 'already_started' });
+
+  // Starting an already-started match must be idempotent. The old behavior
+  // returned "already_started", which left the client in the lobby even though
+  // the room had already begun. Recover the current match instead.
+  if (room.started) {
+    const durationMs = room.endsAt
+      ? Math.max(1000, Number(room.endsAt) - Date.now())
+      : durationMsFromSettings(room.settings);
+
+    const payload = {
+      roomCode: room.roomCode,
+      durationMs,
+      endsAt: room.endsAt || (Date.now() + durationMs),
+      settings: normalizeSettings(room.settings),
+    };
+
+    socket.emit('match_start', payload);
+    socket.emit('match:start', payload);
+    return cb({ ok: true, alreadyRunning: true, room: roomSnapshot(room) });
+  }
+
+  if (room.starting) {
+    // The countdown is already running. Do not create a second countdown.
+    // Return the current state; the existing broadcast will reach everyone.
+    return cb({ ok: true, alreadyStarting: true, room: roomSnapshot(room) });
+  }
 
   startMatch(room, cb);
 }
