@@ -9890,7 +9890,18 @@ function arenaConnect() {
             charId: p.charId || arenaSelectedCharId()
         })) : [];
         if (room.status === 'playing') {
-            if (window.isArenaMode) arenaUpdateRankingPanel();
+            if (!window.isArenaMode && typeof enterBattleFromPayload === 'function') {
+                const durationMs = Math.max(1, Number(room?.settings?.duration) || 5) * 60000;
+                enterBattleFromPayload({
+                    mode: 'online',
+                    settings: room.settings || arenaState.settings,
+                    durationMs,
+                    endsAt: room.endsAt || (Date.now() + durationMs),
+                    roomCode: room.code || room.roomCode || arenaState.roomCode || '',
+                });
+            } else if (window.isArenaMode && typeof arenaUpdateRankingPanel === 'function') {
+                arenaUpdateRankingPanel();
+            }
             return;
         }
         arenaRenderLobby();
@@ -22064,11 +22075,21 @@ function openArenaBattleShell(payload = {}) {
         }
         if (room.starting || room.status === 'starting') {
             s.view = 'playing';
-            openArenaBattleShell({
+            const battlePayload = {
                 mode: 'online',
                 settings: room.settings || s.settings,
                 durationMs: Math.max(1, Number(room?.settings?.duration) || 5) * 60000,
-            });
+                endsAt: Number(room.endsAt) || undefined,
+                roomCode: room.code || room.roomCode || s.roomCode || '',
+            };
+            openArenaBattleShell(battlePayload);
+            if (room.started || room.status === 'playing') {
+                beginArenaBattle(battlePayload);
+                if (typeof arenaUpdateRankingPanel === 'function') {
+                    arenaUpdateRankingPanel();
+                }
+                return;
+            }
             if (typeof arenaUpdateRankingPanel === 'function') {
                 arenaUpdateRankingPanel();
             }
@@ -22152,8 +22173,8 @@ function openArenaBattleShell(payload = {}) {
     };
 
     window.arenaStartBattle = function () {
-        showBattleScreen();
         if (typeof arenaSetBattleContext === 'function') arenaSetBattleContext();
+        showBattleScreen();
     };
 
     window.arenaStartLobbyMatch = finalStartLobbyMatch;
