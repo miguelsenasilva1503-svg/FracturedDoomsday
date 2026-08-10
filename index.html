@@ -22247,55 +22247,12 @@ function openArenaBattleShell(payload = {}) {
         const sock = ensureSocketConnection();
         if (!sock) { showAlert('Socket da Arena indisponível.'); return; }
 
-        const startPayload = {
-            mode: 'online',
-            settings: { ...(s.settings || {}) },
-            durationMs: Math.max(1, Number(s.settings?.duration) || 5) * 60000,
-            roomCode: s.roomCode || '',
-        };
-
-        const enterLocalBattle = (payload = startPayload) => {
-            const live = safeState();
-            live.online = true;
-            live.mode = 'online';
-            live.view = 'playing';
-
-            const mergedSettings = payload?.settings && typeof payload.settings === 'object'
-                ? payload.settings
-                : live.settings;
-            const durationMs = Number(payload?.durationMs) > 0
-                ? Number(payload.durationMs)
-                : Math.max(1, Number(live.settings?.duration) || 5) * 60000;
-
-            live.timeLeftMs = durationMs;
-            if (mergedSettings && typeof mergedSettings === 'object') {
-                live.settings = { ...(live.settings || {}), ...mergedSettings };
-                if (typeof setCurrentMapFromSettings === 'function') setCurrentMapFromSettings(live.settings);
-            }
-
-            if (typeof enterBattleFromPayload === 'function') {
-                enterBattleFromPayload({
-                    mode: 'online',
-                    settings: mergedSettings,
-                    durationMs,
-                    roomCode: payload?.roomCode || live.roomCode || '',
-                });
-            } else if (typeof showArenaMatch === 'function') {
-                showArenaMatch();
-            }
-        };
-
+        // O servidor é o único responsável por disparar o início para todos.
+        // O host não entra localmente aqui; ele espera o evento 'match_start'.
         sock.emit('room:start', {}, (res) => {
             if (!res?.ok) {
                 showAlert(res?.error || 'Não foi possível iniciar.');
-                if (safeState().view === 'playing' && typeof arenaRenderLobby === 'function') {
-                    safeState().view = 'lobby';
-                    arenaRenderLobby();
-                }
-                return;
-            }
-            if (safeState().view !== 'playing') {
-                enterLocalBattle(startPayload);
+                if (typeof arenaRenderLobby === 'function') arenaRenderLobby();
             }
         });
     }
