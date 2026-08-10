@@ -18532,12 +18532,8 @@ applyMusicVolume();
                     ? Math.max(1000, endsAt - Date.now())
                     : (Math.max(1, Number(settings.duration) || 5) * 60000);
                 if (room.starting || room.status === 'starting') {
-                    openArenaBattleShell({
-                        mode: 'online',
-                        settings,
-                        durationMs,
-                        endsAt: endsAt || (Date.now() + durationMs),
-                    });
+                    // Countdown stays in the lobby. Battle only begins on match_start.
+                    if (typeof arenaRenderLobby === 'function') arenaRenderLobby();
                 } else {
                     beginArenaBattle({
                         mode: 'online',
@@ -22072,8 +22068,8 @@ function openArenaBattleShell(payload = {}) {
             const s = safeState();
             s.online = true;
             s.matchCountdown = Number(payload?.countdownSec) || 0;
-            // Keep the lobby visible during the 3-second countdown.
-            if (s.view !== 'playing' && typeof arenaRenderLobby === 'function') arenaRenderLobby();
+            s.view = 'lobby';
+            if (typeof arenaRenderLobby === 'function') arenaRenderLobby();
         };
         sock.on('match_starting', onStarting);
         sock.on('match:starting', onStarting);
@@ -22081,7 +22077,6 @@ function openArenaBattleShell(payload = {}) {
         const onStart = (payload) => {
             const s = safeState();
             if (s.resultsShown) return;
-            const wasAlreadyPlaying = s.view === 'playing' && s.online && s.mode === 'online';
             s.online = true;
             s.mode = 'online';
             s.view = 'playing';
@@ -22093,7 +22088,6 @@ function openArenaBattleShell(payload = {}) {
                 ? Number(payload.durationMs)
                 : Math.max(1, Number(s.settings?.duration) || 5) * 60000;
             s.timeLeftMs = durationMs;
-            if (wasAlreadyPlaying) return;
             enterBattleFromPayload({
                 ...payload,
                 mode: 'online',
@@ -22180,25 +22174,10 @@ function openArenaBattleShell(payload = {}) {
             return;
         }
         if (room.starting || room.status === 'starting') {
-            s.view = 'playing';
-            const battlePayload = {
-                mode: 'online',
-                settings: room.settings || s.settings,
-                durationMs: Math.max(1, Number(room?.settings?.duration) || 5) * 60000,
-                endsAt: Number(room.endsAt) || undefined,
-                roomCode: room.code || room.roomCode || s.roomCode || '',
-            };
-            openArenaBattleShell(battlePayload);
-            if (room.started || room.status === 'playing') {
-                beginArenaBattle(battlePayload);
-                if (typeof arenaUpdateRankingPanel === 'function') {
-                    arenaUpdateRankingPanel();
-                }
-                return;
-            }
-            if (typeof arenaUpdateRankingPanel === 'function') {
-                arenaUpdateRankingPanel();
-            }
+            // Stay in the lobby during the countdown; the real battle begins on match_start.
+            s.view = 'lobby';
+            s.matchCountdown = Number(room?.matchCountdown || room?.countdownSec || 0) || 0;
+            if (typeof arenaRenderLobby === 'function') arenaRenderLobby();
             return;
         }
         if (room.started || room.status === 'playing') {
