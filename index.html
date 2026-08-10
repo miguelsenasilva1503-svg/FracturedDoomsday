@@ -10022,7 +10022,7 @@ function arenaStartLobbyMatch() {
         if (!arenaState.isHost) { showAlert('Só o anfitrião começa a partida.'); return; }
         const s = arenaConnect();
         if (!s) { showAlert('Socket da Arena indisponível.'); return; }
-        s.emit('room:start', {}, (res) => {
+        s.emit('match:start', {}, (res) => {
             if (!res?.ok) showAlert(res?.error || 'Não foi possível iniciar.');
         });
         return;
@@ -10222,7 +10222,7 @@ function arenaStartLobbyMatch() {
         if (!arenaState.isHost) { showAlert('Só o anfitrião começa a partida.'); return; }
         const s = arenaConnect();
         if (!s) { showAlert('Socket da Arena indisponível.'); return; }
-        s.emit('room:start', {}, (res) => {
+        s.emit('match:start', {}, (res) => {
             if (!res?.ok) showAlert(res?.error || 'Não foi possível iniciar.');
         });
         return;
@@ -16800,7 +16800,7 @@ applyMusicVolume();
             if (!arenaState.isHost) { showAlert('Só o anfitrião começa a partida.'); return; }
             const s = arenaConnect();
             if (!s) { showAlert('Socket da Arena indisponível.'); return; }
-            s.emit('room:start', {}, (res) => {
+            s.emit('match:start', {}, (res) => {
                 if (!res?.ok) showAlert(res?.error || 'Não foi possível iniciar.');
             });
             return;
@@ -17208,7 +17208,7 @@ applyMusicVolume();
             if (!window.arenaState.isHost) { showAlert('Só o anfitrião começa a partida.'); return; }
             const s = typeof arenaConnect === 'function' ? arenaConnect() : null;
             if (!s) { showAlert('Socket da Arena indisponível.'); return; }
-            s.emit('room:start', {}, (res) => {
+            s.emit('match:start', {}, (res) => {
                 if (!res?.ok) showAlert(res?.error || 'Não foi possível iniciar.');
             });
             return;
@@ -17851,7 +17851,7 @@ applyMusicVolume();
         if (!window.arenaState?.isHost) { showAlert('Só o anfitrião começa a partida.'); return; }
         const s = ensureSocketConnected(() => {}, 'Servidor da Arena indisponível.');
         if (!s) return;
-        const emitStart = () => s.emit('room:start', {}, (res) => {
+        const emitStart = () => s.emit('match:start', {}, (res) => {
             if (!res?.ok) showAlert(res?.error || 'Não foi possível iniciar.');
         });
         if (s.connected) emitStart();
@@ -18532,7 +18532,21 @@ applyMusicVolume();
                     ? Math.max(1000, endsAt - Date.now())
                     : (Math.max(1, Number(settings.duration) || 5) * 60000);
                 if (room.starting || room.status === 'starting') {
-            s.view = 'lobby';
+                    openArenaBattleShell({
+                        mode: 'online',
+                        settings,
+                        durationMs,
+                        endsAt: endsAt || (Date.now() + durationMs),
+                    });
+                } else {
+                    beginArenaBattle({
+                        mode: 'online',
+                        settings,
+                        durationMs,
+                        endsAt: endsAt || (Date.now() + durationMs),
+                    });
+                }
+            } catch (e) {}
             if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
             return;
         }
@@ -18563,24 +18577,12 @@ applyMusicVolume();
         socket.on('room:update', applyRoomSnapshot);
         socket.on('match_starting', (payload) => {
             window.arenaState.matchCountdown = Number(payload?.countdownSec) || 0;
-            if (typeof openArenaBattleShell === 'function') {
-                openArenaBattleShell({
-                    mode: 'online',
-                    settings: window.arenaState.settings,
-                    durationMs: Math.max(1, Number(window.arenaState.settings?.duration) || 5) * 60000,
-                });
-            }
+            openArenaBattleShell();
             if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
         });
         socket.on('match:starting', (payload) => {
             window.arenaState.matchCountdown = Number(payload?.countdownSec) || 0;
-            if (typeof openArenaBattleShell === 'function') {
-                openArenaBattleShell({
-                    mode: 'online',
-                    settings: window.arenaState.settings,
-                    durationMs: Math.max(1, Number(window.arenaState.settings?.duration) || 5) * 60000,
-                });
-            }
+            openArenaBattleShell();
             if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
         });
         socket.on('match_start', (payload) => {
@@ -19037,7 +19039,7 @@ applyMusicVolume();
         if (!window.arenaState.isHost) { showAlert('Só o anfitrião começa a partida.'); return; }
         const s = arenaConnect();
         if (!s) { showAlert('Servidor da Arena indisponível.'); return; }
-        s.emit('room:start', {}, (res) => {
+        s.emit('match:start', {}, (res) => {
             if (!res?.ok) showAlert(res?.error || 'Não foi possível iniciar.');
         });
     };
@@ -19731,17 +19733,6 @@ applyMusicVolume();
 
         if (room.status === 'playing' || room.started || room.starting) {
             window.arenaState.view = 'playing';
-            if (typeof openArenaBattleShell === 'function') {
-                openArenaBattleShell({
-                    mode: 'online',
-                    settings,
-                    durationMs: Number.isFinite(Number(room.endsAt))
-                        ? Math.max(1000, Number(room.endsAt) - Date.now())
-                        : Math.max(1, Number(settings.duration) || 5) * 60000,
-                    endsAt: Number(room.endsAt) || undefined,
-                    roomCode: room.code || room.roomCode || window.arenaState.roomCode || '',
-                });
-            }
             if (typeof startArenaClock === 'function') startArenaClock();
         } else if (window.arenaState.view === 'playing') {
             window.arenaState.view = 'lobby';
@@ -19778,24 +19769,12 @@ applyMusicVolume();
 
         socket.on('match_starting', (payload) => {
             window.arenaState.matchCountdown = Number(payload?.countdownSec) || 0;
-            if (typeof openArenaBattleShell === 'function') {
-                openArenaBattleShell({
-                    mode: 'online',
-                    settings: window.arenaState.settings,
-                    durationMs: Math.max(1, Number(window.arenaState.settings?.duration) || 5) * 60000,
-                });
-            }
+            openArenaBattleShell();
             if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
         });
         socket.on('match:starting', (payload) => {
             window.arenaState.matchCountdown = Number(payload?.countdownSec) || 0;
-            if (typeof openArenaBattleShell === 'function') {
-                openArenaBattleShell({
-                    mode: 'online',
-                    settings: window.arenaState.settings,
-                    durationMs: Math.max(1, Number(window.arenaState.settings?.duration) || 5) * 60000,
-                });
-            }
+            openArenaBattleShell();
             if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
         });
 
@@ -20071,7 +20050,7 @@ applyMusicVolume();
         }
         const s = arenaConnect();
         if (!s || !s.connected) { showAlert('Servidor da Arena indisponível.'); return; }
-        s.emit('room:start', {}, (res) => {
+        s.emit('match:start', {}, (res) => {
             if (!res?.ok) showAlert(res?.error || 'Não foi possível iniciar.');
         });
     };
@@ -20502,7 +20481,7 @@ applyMusicVolume();
         arenaSafeArenaState();
 
         const roomCode = room.code || room.roomCode || '';
-        const isPlaying = !!(room.started || room.status === 'playing');
+        const isPlaying = !!(room.started || room.starting || room.status === 'playing');
         const settings = cloneArenaSettings(room.settings);
         const meId = window.arenaSocket?.id || 'me';
 
@@ -20543,34 +20522,6 @@ applyMusicVolume();
             window.arenaState.view = 'playing';
             forceHideArenaLobbyShell();
             if (typeof arenaSetBattleContext === 'function') arenaSetBattleContext();
-
-            // A room_state can arrive after match_start (or the client can miss
-            // match_start). In that case the snapshot itself must be enough to
-            // reconstruct the battle for every player, not only the host.
-            const bootKey = `${roomCode}|${Number(room.endsAt) || 0}`;
-            if (window.arenaState._battleBootKey !== bootKey) {
-                window.arenaState._battleBootKey = bootKey;
-                const endsAt = Number(room.endsAt);
-                const durationMs = Number.isFinite(endsAt)
-                    ? Math.max(1000, endsAt - Date.now())
-                    : Math.max(1, Number(settings.duration) || 5) * 60000;
-                try {
-                    if (typeof beginArenaBattle === 'function') {
-                        beginArenaBattle({
-                            mode: 'online',
-                            settings: room.settings || window.arenaState.settings,
-                            durationMs,
-                            endsAt: endsAt || (Date.now() + durationMs),
-                            roomCode,
-                        });
-                    } else if (typeof arenaStartBattle === 'function') {
-                        arenaStartBattle();
-                    }
-                } catch (e) {
-                    console.error('[Arena] Falha ao reconstruir partida pelo snapshot:', e);
-                }
-            }
-
             if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
             return;
         }
@@ -20599,29 +20550,20 @@ applyMusicVolume();
             window.arenaState.matchCountdown = Number(payload?.countdownSec) || 0;
             if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
         });
-        const handleArenaMatchStart = (payload) => {
+        socket.on('match_start', (payload) => {
             arenaSafeArenaState();
-            window.arenaState._startRequestInFlight = false;
             window.arenaState.settings = { ...window.arenaState.settings, ...(payload?.settings || {}) };
-            const roomCode = String(payload?.roomCode || window.arenaState.roomCode || '');
-            const endsAt = Number(payload?.endsAt);
-            const bootKey = `${roomCode}|${endsAt || 0}`;
-            window.arenaState._battleBootKey = bootKey;
             if (typeof arenaSetBattleContext === 'function') arenaSetBattleContext();
-            try {
-                if (typeof enterBattleFromPayload === 'function') {
-                    enterBattleFromPayload(payload);
-                } else if (typeof showArenaMatch === 'function') {
-                    showArenaMatch();
-                }
-            } catch (e) {
-                console.error('[Arena] Falha ao iniciar batalha:', e);
-            }
+            if (typeof enterBattleFromPayload === 'function') enterBattleFromPayload(payload); else if (typeof showArenaMatch === 'function') showArenaMatch();
             window.arenaState.timeLeftMs = Number(payload?.durationMs) || Math.max(1, Number(window.arenaState.settings?.duration) || 5) * 60000;
-            if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
-        };
-        socket.on('match_start', handleArenaMatchStart);
-        socket.on('match:start', handleArenaMatchStart);
+        });
+        socket.on('match:start', (payload) => {
+            arenaSafeArenaState();
+            window.arenaState.settings = { ...window.arenaState.settings, ...(payload?.settings || {}) };
+            if (typeof arenaSetBattleContext === 'function') arenaSetBattleContext();
+            if (typeof enterBattleFromPayload === 'function') enterBattleFromPayload(payload); else if (typeof showArenaMatch === 'function') showArenaMatch();
+            window.arenaState.timeLeftMs = Number(payload?.durationMs) || Math.max(1, Number(window.arenaState.settings?.duration) || 5) * 60000;
+        });
         socket.on('match_tick', (payload) => {
             arenaSafeArenaState();
             const remaining = Number(payload?.timeLeftMs ?? payload?.remainingMs);
@@ -20978,7 +20920,7 @@ applyMusicVolume();
         if (!isHost) { showAlert('Só o anfitrião começa a partida.'); return; }
         const s = window.arenaConnect();
         if (!s) { showAlert('Servidor da Arena indisponível.'); return; }
-        s.emit('room:start', {}, (res) => {
+        s.emit('match:start', {}, (res) => {
             if (!res?.ok) showAlert(res?.error || 'Não foi possível iniciar.');
         });
     };
@@ -21208,7 +21150,7 @@ applyMusicVolume();
         safeState();
 
         const roomCode = room.code || room.roomCode || '';
-        const isPlaying = !!(room.started || room.status === 'playing');
+        const isPlaying = !!(room.started || room.starting || room.status === 'playing');
         const settings = cloneSettings(room.settings);
         const meId = getMeId();
 
@@ -21465,7 +21407,7 @@ applyMusicVolume();
         if (!isHost) { showAlert('Só o anfitrião começa a partida.'); return; }
         const s = ensureSocket();
         if (!s) { showAlert('Servidor da Arena indisponível.'); return; }
-        s.emit('room:start', {}, (res) => {
+        s.emit('match:start', {}, (res) => {
             if (!res?.ok) showAlert(res?.error || 'Não foi possível iniciar.');
         });
     };
@@ -21993,8 +21935,6 @@ function openArenaBattleShell(payload = {}) {
         s.penalty = 0;
         s.timeLeftMs = 0;
         s.matchCountdown = 0;
-        s._startRequestInFlight = false;
-        s._battleBootKey = '';
         window.isArenaMode = false;
     }
 
@@ -22055,8 +21995,141 @@ function openArenaBattleShell(payload = {}) {
         } catch (e) {}
     }
 
+    function installCanonicalArenaSocketHandlers(sock) {
+        if (!sock || sock.__canonicalArenaHandlersV1) return sock;
+        sock.__canonicalArenaHandlersV1 = true;
+
+        const events = [
+            'room_state', 'room:update',
+            'match_starting', 'match:starting',
+            'match_start', 'match:start',
+            'match_tick', 'match:tick',
+            'match_end', 'match:end',
+            'disconnect'
+        ];
+        events.forEach(ev => { try { sock.off(ev); } catch (e) {} });
+
+        const syncRoomState = (room) => {
+            const s = safeState();
+            if (!room || s.leavingRoom) return;
+
+            const meId = window.arenaSocket?.id || sock.id || 'me';
+            s.online = true;
+            s.roomCode = room.code || room.roomCode || s.roomCode || '';
+            s.hostId = room.hostId || s.hostId || '';
+            s.isHost = !!(room.hostId && meId && room.hostId === meId);
+            s.mode = 'online';
+
+            if (room.settings && typeof room.settings === 'object') {
+                s.settings = { ...(s.settings || {}), ...room.settings };
+                if (typeof setCurrentMapFromSettings === 'function') setCurrentMapFromSettings(s.settings);
+            }
+
+            const players = safeArray(room.players).map(p => ({
+                id: String(p.id || '').trim(),
+                name: String(p.name || 'Jogador'),
+                score: Math.max(0, Math.floor(Number(p.score) || 0)),
+                kills: Math.max(0, Math.floor(Number(p.kills) || 0)),
+                ready: !!p.ready,
+                me: p.id === meId,
+                host: p.id === room.hostId,
+                charId: String(p.charId || '').trim(),
+                sessionId: String(p.sessionId || '').trim(),
+            }));
+            s.players = players;
+            const me = players.find(p => p.me || p.id === meId);
+            if (me?.sessionId) s.roomSessionId = me.sessionId;
+
+            const playing = !!room.started || room.status === 'playing';
+            if (playing) {
+                const endsAt = Number(room.endsAt);
+                const durationMs = Number.isFinite(endsAt)
+                    ? Math.max(1000, endsAt - Date.now())
+                    : Math.max(1, Number(room?.settings?.duration) || 5) * 60000;
+                const payload = {
+                    mode: 'online',
+                    settings: room.settings || s.settings,
+                    durationMs,
+                    endsAt: Number.isFinite(endsAt) && endsAt > 0 ? endsAt : Date.now() + durationMs,
+                    roomCode: room.code || room.roomCode || s.roomCode || '',
+                };
+                s.view = 'playing';
+                s.timeLeftMs = durationMs;
+                beginArenaBattle(payload);
+                if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
+                return;
+            }
+
+            // A countdown is a lobby state; do not open the battle shell yet.
+            s.view = 'lobby';
+            if (typeof arenaRenderLobby === 'function') arenaRenderLobby();
+        };
+
+        sock.on('room_state', syncRoomState);
+        sock.on('room:update', syncRoomState);
+
+        const onStarting = (payload) => {
+            const s = safeState();
+            s.online = true;
+            s.matchCountdown = Number(payload?.countdownSec) || 0;
+            // Keep the lobby visible during the 3-second countdown.
+            if (s.view !== 'playing' && typeof arenaRenderLobby === 'function') arenaRenderLobby();
+        };
+        sock.on('match_starting', onStarting);
+        sock.on('match:starting', onStarting);
+
+        const onStart = (payload) => {
+            const s = safeState();
+            if (s.resultsShown) return;
+            s.online = true;
+            s.mode = 'online';
+            s.view = 'playing';
+            if (payload?.settings && typeof payload.settings === 'object') {
+                s.settings = { ...(s.settings || {}), ...payload.settings };
+                if (typeof setCurrentMapFromSettings === 'function') setCurrentMapFromSettings(s.settings);
+            }
+            const durationMs = Number(payload?.durationMs) > 0
+                ? Number(payload.durationMs)
+                : Math.max(1, Number(s.settings?.duration) || 5) * 60000;
+            s.timeLeftMs = durationMs;
+            enterBattleFromPayload({
+                ...payload,
+                mode: 'online',
+                settings: payload?.settings || s.settings,
+                durationMs,
+                roomCode: payload?.roomCode || s.roomCode || '',
+            });
+        };
+        sock.on('match_start', onStart);
+        sock.on('match:start', onStart);
+
+        const onTick = (payload) => {
+            const remaining = Number(payload?.timeLeftMs ?? payload?.remainingMs);
+            if (Number.isFinite(remaining)) safeState().timeLeftMs = Math.max(0, remaining);
+        };
+        sock.on('match_tick', onTick);
+        sock.on('match:tick', onTick);
+
+        const onEnd = (payload) => {
+            renderFinalResults(payload?.ranking || payload?.rank || payload?.results || []);
+        };
+        sock.on('match_end', onEnd);
+        sock.on('match:end', onEnd);
+
+        sock.on('disconnect', () => {
+            const s = safeState();
+            if (!s.leavingRoom && s.online && !window.__arenaIntentionalLeave) {
+                notify('Conexão da Arena perdida.');
+            }
+        });
+
+        return sock;
+    }
+
     function ensureSocketConnection() {
-        if (window.arenaSocket && window.arenaSocket.connected) return window.arenaSocket;
+        if (window.arenaSocket && window.arenaSocket.connected) {
+            return installCanonicalArenaSocketHandlers(window.arenaSocket);
+        }
         if (window.arenaSocket && !window.arenaSocket.connected) {
             try { window.arenaSocket.disconnect(); } catch (e) {}
             window.arenaSocket = null;
@@ -22067,36 +22140,7 @@ function openArenaBattleShell(payload = {}) {
             : (typeof ARENA_SERVER_URL !== 'undefined' ? ARENA_SERVER_URL : 'https://roguelitelegacy.onrender.com');
         const sock = window.arenaSocket || io(url, { transports: ['websocket', 'polling'] });
         window.arenaSocket = sock;
-        if (!sock.__arenaRecoveryPatchAttached) {
-            sock.__arenaRecoveryPatchAttached = true;
-            sock.off('room_state');
-            sock.off('room:update');
-            sock.off('match_starting');
-            sock.off('match:starting');
-            sock.off('match_start');
-            sock.off('match:start');
-            sock.off('match_end');
-            sock.off('match:end');
-            sock.off('disconnect');
-            sock.on('room_state', onRoomSnapshot);
-            sock.on('room:update', onRoomSnapshot);
-            sock.on('match_starting', (payload) => {
-                safeState().matchCountdown = Number(payload?.countdownSec) || 0;
-                openArenaBattleShell();
-                if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
-            });
-            sock.on('match:starting', (payload) => {
-                safeState().matchCountdown = Number(payload?.countdownSec) || 0;
-                openArenaBattleShell();
-                if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
-            });
-            sock.on('match_start', (payload) => { if (!safeState().resultsShown) enterBattleFromPayload(payload); });
-            sock.on('match:start', (payload) => { if (!safeState().resultsShown) enterBattleFromPayload(payload); });
-            sock.on('match_end', (payload) => { renderFinalResults(payload?.ranking || payload?.rank || payload?.results || []); });
-            sock.on('match:end', (payload) => { renderFinalResults(payload?.ranking || payload?.rank || payload?.results || []); });
-            sock.on('disconnect', () => { if (!safeState().leavingRoom && safeState().online) if (!(window.__arenaIntentionalLeave || (window.arenaState && window.arenaState.leavingRoom) || (typeof safeState === 'function' && safeState()?.leavingRoom))) notify('Conexão da Arena perdida.'); });
-        }
-        return sock;
+        return installCanonicalArenaSocketHandlers(sock);
     }
 
     function onRoomSnapshot(room) {
@@ -22134,8 +22178,25 @@ function openArenaBattleShell(payload = {}) {
             return;
         }
         if (room.starting || room.status === 'starting') {
-            s.view = 'lobby';
-            if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
+            s.view = 'playing';
+            const battlePayload = {
+                mode: 'online',
+                settings: room.settings || s.settings,
+                durationMs: Math.max(1, Number(room?.settings?.duration) || 5) * 60000,
+                endsAt: Number(room.endsAt) || undefined,
+                roomCode: room.code || room.roomCode || s.roomCode || '',
+            };
+            openArenaBattleShell(battlePayload);
+            if (room.started || room.status === 'playing') {
+                beginArenaBattle(battlePayload);
+                if (typeof arenaUpdateRankingPanel === 'function') {
+                    arenaUpdateRankingPanel();
+                }
+                return;
+            }
+            if (typeof arenaUpdateRankingPanel === 'function') {
+                arenaUpdateRankingPanel();
+            }
             return;
         }
         if (room.started || room.status === 'playing') {
@@ -22181,70 +22242,17 @@ function openArenaBattleShell(payload = {}) {
             return;
         }
         if (!s.isHost) { showAlert('Só o anfitrião começa a partida.'); return; }
-
-        // Prevent double-clicks from sending two room:start requests.
-        if (s._startRequestInFlight) return;
-        s._startRequestInFlight = true;
-
         const sock = ensureSocketConnection();
-        if (!sock) {
-            s._startRequestInFlight = false;
-            showAlert('Socket da Arena indisponível.');
-            return;
-        }
-
-        const recoverFromRoom = (room) => {
-            if (!room) return;
-            const roomCode = room.code || room.roomCode || s.roomCode || '';
-            const isPlaying = !!(room.started || room.status === 'playing');
-            const isStarting = !!(room.starting || room.status === 'starting');
-
-            if (isPlaying) {
-                const endsAt = Number(room.endsAt);
-                const durationMs = Number.isFinite(endsAt)
-                    ? Math.max(1000, endsAt - Date.now())
-                    : Math.max(1, Number(room?.settings?.duration) || 5) * 60000;
-                const payload = {
-                    mode: 'online',
-                    settings: room.settings || s.settings,
-                    durationMs,
-                    endsAt: endsAt || (Date.now() + durationMs),
-                    roomCode,
-                };
-                s._battleBootKey = `${roomCode}|${endsAt || 0}`;
-                try {
-                    if (typeof beginArenaBattle === 'function') beginArenaBattle(payload);
-                    else if (typeof arenaStartBattle === 'function') arenaStartBattle();
-                } catch (e) {
-                    console.error('[Arena] Falha na recuperação da partida:', e);
-                }
-                if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
-                return;
-            }
-
-            // If the server is already counting down, do not send another start.
-            // The existing match_start event will start the battle for everyone.
-            if (isStarting) {
-                s.view = 'lobby';
-                s._startRequestInFlight = false;
-                if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
-            }
-        };
-
-        sock.emit('room:start', {}, (res) => {
-            s._startRequestInFlight = false;
-
-            if (res?.room) recoverFromRoom(res.room);
-
+        if (!sock) { showAlert('Socket da Arena indisponível.'); return; }
+        // Do not enter the battle shell locally. The authoritative server start event
+        // is the single trigger for every client, including the host.
+        sock.emit('match:start', {}, (res) => {
             if (!res?.ok) {
-                if (res?.error === 'already_started') {
-                    // Recover instead of leaving the user with a dead lobby.
-                    sock.emit('room:get', (stateRes) => {
-                        if (stateRes?.room) recoverFromRoom(stateRes.room);
-                    });
-                    return;
-                }
                 showAlert(res?.error || 'Não foi possível iniciar.');
+                if (safeState().view === 'playing' && typeof arenaRenderLobby === 'function') {
+                    safeState().view = 'lobby';
+                    arenaRenderLobby();
+                }
             }
         });
     }
@@ -22269,8 +22277,32 @@ function openArenaBattleShell(payload = {}) {
     };
 
     window.arenaStartBattle = function () {
+        if (typeof arenaEnsureState === 'function') arenaEnsureState();
+        if (typeof arenaStopBattleLoop === 'function') arenaStopBattleLoop();
+        const s = safeState();
+        s.view = 'playing';
+        s.mode = s.online ? 'online' : (s.mode === 'bots' ? 'bots' : 'hub');
+        s.resultsShown = false;
+        s.score = 0;
+        s.kills = 0;
+        s.penalty = 0;
+        if (!(Number(s.timeLeftMs) > 0)) s.timeLeftMs = Math.max(1, Number(s.settings?.duration) || 5) * 60000;
         if (typeof arenaSetBattleContext === 'function') arenaSetBattleContext();
-        showBattleScreen();
+        if (typeof forceHideArenaLobbyShell === 'function') forceHideArenaLobbyShell();
+        if (typeof showScreen === 'function') showScreen(null);
+        const shop = document.getElementById('overlay-pregame-shop');
+        if (shop) shop.classList.add('hidden');
+        const hud = document.getElementById('game-hud');
+        if (hud) hud.classList.remove('hidden');
+        const exp = document.getElementById('exp-bar-container');
+        if (exp) exp.classList.remove('hidden');
+        if (typeof joyZone !== 'undefined' && joyZone) joyZone.style.display = 'none';
+        if (typeof applyControlLayout === 'function') applyControlLayout();
+        if (typeof arenaPrepBattleUI === 'function') arenaPrepBattleUI();
+        if (typeof startRunAfterShop === 'function') startRunAfterShop();
+        if (typeof startArenaLoopIfNeeded === 'function') startArenaLoopIfNeeded();
+        if (typeof updateGameHud === 'function') updateGameHud();
+        if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
     };
 
     window.arenaStartLobbyMatch = finalStartLobbyMatch;
@@ -22282,6 +22314,7 @@ function openArenaBattleShell(payload = {}) {
         }
     };
 
+    try { if (window.arenaSocket) installCanonicalArenaSocketHandlers(window.arenaSocket); } catch (e) {}
     if (window.arenaState && typeof window.arenaState === 'object' && window.arenaState.online) {
         try { ensureSocketConnection(); } catch (e) {}
     }
