@@ -2134,48 +2134,48 @@
 <div id="screen-event" class="screen scrollable hidden">
     <button class="btn-top-corner btn-back" onclick="showScreen('screen-main')">⬅️ Voltar</button>
     <h2 style="margin-top: 40px;">Evento ⭐</h2>
-    <p style="text-align:center; color:#ddd; margin: 0 0 12px 0;">Complete desafios especiais para liberar Rüben, Adam e ofertas da loja.</p>
+    <p style="text-align:center; color:#ddd; margin: 0 0 12px 0;">Complete desafios especiais para liberar Sparta, Lyron e ofertas da loja temática.</p>
 
     <div class="shop-tabs event-tabs">
-        <button class="btn-menu shop-tab active" data-section="ruben" onclick="showEventSection('ruben')"><span class="tab-emoji">🥖</span><span class="tab-label">Rüben</span></button>
-        <button class="btn-menu shop-tab" data-section="adam" onclick="showEventSection('adam')"><span class="tab-emoji">🤖</span><span class="tab-label">Adam</span></button>
-        <button class="btn-menu shop-tab" data-section="store" onclick="showEventSection('store')"><span class="tab-emoji">🛍</span><span class="tab-label">Loja</span></button>
+        <button class="btn-menu shop-tab active" data-section="sparta" onclick="showEventSection('sparta')"><span class="tab-emoji">🛡️</span><span class="tab-label">Sparta</span></button>
+        <button class="btn-menu shop-tab" data-section="lyron" onclick="showEventSection('lyron')"><span class="tab-emoji">⚽</span><span class="tab-label">Lyron</span></button>
+        <button class="btn-menu shop-tab" data-section="store" onclick="showEventSection('store')"><span class="tab-emoji">🛍</span><span class="tab-label">Loja temática</span></button>
     </div>
 
-    <div id="event-section-ruben" class="shop-section shop-panel">
-        <h3>Rüben</h3>
+    <div id="event-section-sparta" class="shop-section shop-panel">
+        <h3>Sparta</h3>
         <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:14px;">
             <div class="event-hero-card">
-                <img class="char-sprite char-sprite--hero" src="sprites/ruben.png" alt="" aria-hidden="true">
+                <img class="char-sprite char-sprite--hero" src="sprites/sparta.png" alt="" aria-hidden="true">
                 <div>
-                    <h4 style="margin:0; font-size:22px; color:var(--btn-yellow);">Rüben</h4>
-                    <p style="margin:6px 0 0; color:#d9e2ea;">10 missões especiais. A imagem dele entra aqui mesmo.</p>
+                    <h4 style="margin:0; font-size:22px; color:var(--btn-yellow);">Sparta</h4>
+                    <p style="margin:6px 0 0; color:#d9e2ea;">15 missões especiais. O progresso é salvo separadamente.</p>
                 </div>
             </div>
-            <div class="event-progress-pill"><span id="event-ruben-count">0</span>/10 concluídas</div>
-            <button id="event-ruben-claim" class="btn-action" onclick="claimEventCharacter('ruben')">🎁 Resgatar Rüben</button>
+            <div class="event-progress-pill"><span id="event-sparta-count">0</span>/15 concluídas</div>
+            <button id="event-sparta-claim" class="btn-action" onclick="claimEventCharacter('sparta')">🎁 Resgatar Sparta</button>
         </div>
-        <div id="event-ruben-list" class="menu-grid shop-grid"></div>
+        <div id="event-sparta-list" class="menu-grid shop-grid"></div>
     </div>
 
-    <div id="event-section-adam" class="shop-section shop-panel hidden">
-        <h3>Adam</h3>
+    <div id="event-section-lyron" class="shop-section shop-panel hidden">
+        <h3>Lyron</h3>
         <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:14px;">
             <div class="event-hero-card">
-                <img class="char-sprite char-sprite--hero" src="sprites/adam.png" alt="" aria-hidden="true">
+                <img class="char-sprite char-sprite--hero" src="sprites/lyron.png" alt="" aria-hidden="true">
                 <div>
-                    <h4 style="margin:0; font-size:22px; color:var(--btn-yellow);">Adam</h4>
-                    <p style="margin:6px 0 0; color:#d9e2ea;">15 missões especiais. A imagem dele entra aqui mesmo.</p>
+                    <h4 style="margin:0; font-size:22px; color:var(--btn-yellow);">Lyron</h4>
+                    <p style="margin:6px 0 0; color:#d9e2ea;">20 missões especiais. O progresso é salvo separadamente.</p>
                 </div>
             </div>
-            <div class="event-progress-pill"><span id="event-adam-count">0</span>/15 concluídas</div>
-            <button id="event-adam-claim" class="btn-action" onclick="claimEventCharacter('adam')">🎁 Resgatar Adam</button>
+            <div class="event-progress-pill"><span id="event-lyron-count">0</span>/20 concluídas</div>
+            <button id="event-lyron-claim" class="btn-action" onclick="claimEventCharacter('lyron')">🎁 Resgatar Lyron</button>
         </div>
-        <div id="event-adam-list" class="menu-grid shop-grid"></div>
+        <div id="event-lyron-list" class="menu-grid shop-grid"></div>
     </div>
 
     <div id="event-section-store" class="shop-section shop-panel hidden">
-        <h3>Loja do Evento</h3>
+        <h3>Loja temática</h3>
         <div class="shop-section" style="margin-top:0;">
             <h3>Personagens em promoção</h3>
             <div id="event-promo-list" class="menu-grid shop-grid"></div>
@@ -3211,9 +3211,9 @@ const DEFAULT_KEYBINDS = { up: 'w', down: 's', left: 'a', right: 'd', special: '
 const DEFAULT_SETTINGS = { skipGacha: false, controlMode: 'auto', mobileControlLayout: 'joystick', mobileJoystickFollowTap: false, ultraHardcore: false, uhcDark: false, noParticles: false, showCombatText: true, showHpBar: false, screenZoom: 1, musicVolume: 0.7, mapChoice: -1, keybinds: { ...DEFAULT_KEYBINDS } };
 
 const MUSIC_TRACKS = {
-    menu: 'soundtracks/france_awaits.mp3',
-    classic: 'soundtracks/parisian_journey.mp3',
-    hardcore: 'soundtracks/parisian_journey.mp3',
+    menu: 'soundtracks/battle_awaits.mp3',
+    classic: 'soundtracks/gladiator_journey.mp3',
+    hardcore: 'soundtracks/gladiator_journey.mp3',
     ultraHardcore: 'soundtracks/fatal_finale.mp3'
 };
 
@@ -3415,22 +3415,15 @@ function normalizeSaveData(rawSave) {
 
     if (!next.profile || typeof next.profile !== 'object') next.profile = { title: null };
     if (typeof next.profile.title === 'undefined') next.profile.title = null;
-    if (!next.events || typeof next.events !== 'object') next.events = { ruben: { claimed: false, baseStats: null }, adam: { claimed: false, baseStats: null } };
-    if (next.events.major || next.events.graffit) {
-        delete next.events.major;
-        delete next.events.graffit;
+    if (!next.events || typeof next.events !== 'object') next.events = {};
+    if (!next.events.sparta) next.events.sparta = { claimed: false, baseStats: null, missionSaveKey: EVENT_MISSION_SAVE_KEYS.sparta };
+    if (!next.events.lyron) next.events.lyron = { claimed: false, baseStats: null, missionSaveKey: EVENT_MISSION_SAVE_KEYS.lyron };
+    for (const id of ['sparta','lyron']) {
+        if (typeof next.events[id].claimed === 'undefined') next.events[id].claimed = false;
+        if (typeof next.events[id].baseStats === 'undefined') next.events[id].baseStats = null;
+        next.events[id].missionSaveKey = EVENT_MISSION_SAVE_KEYS[id];
     }
-    if (!next.events.ruben) next.events.ruben = { claimed: false, baseStats: null };
-    if (!next.events.adam) next.events.adam = { claimed: false, baseStats: null };
-    if (typeof next.events.ruben.claimed === 'undefined') next.events.ruben.claimed = false;
-    if (typeof next.events.adam.claimed === 'undefined') next.events.adam.claimed = false;
-    if (typeof next.events.ruben.baseStats === 'undefined') next.events.ruben.baseStats = null;
-    if (typeof next.events.adam.baseStats === 'undefined') next.events.adam.baseStats = null;
-    if (typeof next.eventProgressVersion !== 'number' || next.eventProgressVersion < 3) {
-        next.events.ruben.baseStats = null;
-        next.events.adam.baseStats = null;
-        next.eventProgressVersion = 3;
-    }
+    if (typeof next.eventProgressVersion !== 'number' || next.eventProgressVersion < 4) next.eventProgressVersion = 4;
 
     if (!next.run || typeof next.run !== 'object') next.run = { charId: next.selectedChar || 'strike', medals: 0 };
     if (typeof next.run.charId !== 'string' || !next.run.charId) next.run.charId = next.selectedChar || 'strike';
@@ -3558,22 +3551,15 @@ function load() {
 
     if (!pd.profile || typeof pd.profile !== 'object') pd.profile = { title: null };
     if (typeof pd.profile.title === 'undefined') pd.profile.title = null;
-    if (!pd.events || typeof pd.events !== 'object') pd.events = { ruben: { claimed: false, baseStats: null }, adam: { claimed: false, baseStats: null } };
-    if (pd.events.major || pd.events.graffit) {
-        delete pd.events.major;
-        delete pd.events.graffit;
+    if (!pd.events || typeof pd.events !== 'object') pd.events = {};
+    if (!pd.events.sparta) pd.events.sparta = { claimed: false, baseStats: null, missionSaveKey: EVENT_MISSION_SAVE_KEYS.sparta };
+    if (!pd.events.lyron) pd.events.lyron = { claimed: false, baseStats: null, missionSaveKey: EVENT_MISSION_SAVE_KEYS.lyron };
+    for (const id of ['sparta','lyron']) {
+        if (typeof pd.events[id].claimed === 'undefined') pd.events[id].claimed = false;
+        if (typeof pd.events[id].baseStats === 'undefined') pd.events[id].baseStats = null;
+        pd.events[id].missionSaveKey = EVENT_MISSION_SAVE_KEYS[id];
     }
-    if (!pd.events.ruben) pd.events.ruben = { claimed: false, baseStats: null };
-    if (!pd.events.adam) pd.events.adam = { claimed: false, baseStats: null };
-    if (typeof pd.events.ruben.claimed === 'undefined') pd.events.ruben.claimed = false;
-    if (typeof pd.events.adam.claimed === 'undefined') pd.events.adam.claimed = false;
-    if (typeof pd.events.ruben.baseStats === 'undefined') pd.events.ruben.baseStats = null;
-    if (typeof pd.events.adam.baseStats === 'undefined') pd.events.adam.baseStats = null;
-    if (typeof pd.eventProgressVersion !== 'number' || pd.eventProgressVersion < 3) {
-        pd.events.ruben.baseStats = null;
-        pd.events.adam.baseStats = null;
-        pd.eventProgressVersion = 3;
-    }
+    if (typeof pd.eventProgressVersion !== 'number' || pd.eventProgressVersion < 4) pd.eventProgressVersion = 4;
     if (!pd.run || typeof pd.run !== 'object') pd.run = { charId: pd.selectedChar || 'strike', medals: 0 };
     if (typeof pd.run.charId !== 'string' || !pd.run.charId) pd.run.charId = pd.selectedChar || 'strike';
     if (typeof pd.run.medals !== 'number' || !isFinite(pd.run.medals) || pd.run.medals < 0) pd.run.medals = 0;
@@ -4011,6 +3997,8 @@ const CHARACTER_TITLES = {
     glitch: 'Bugado',
     jack: 'GOD ADMIN D321'
 };
+
+function isCharacterHiddenForUnownedView(id) { return id === 'miss_macaron' && !pd?.chars?.[id]; }
 
 function getCharacterRaritySortValue(c) {
     const rarityOrder = { common: 1, rare: 2, epic: 3, legendary: 4, mythic: 5, seasonal: 6, secret: 7 };
@@ -6061,53 +6049,64 @@ function updateUI() {
 }
 checkChipCrafting();
 
-let currentEventSection = 'ruben';
+let currentEventSection = 'sparta';
 
-const EVENT_MISSION_SAVE_KEYS = { ruben: 'ruben_missions_v1', adam: 'adam_missions_v2' };
+const EVENT_MISSION_SAVE_KEYS = { sparta: 'sparta_missions_v1', lyron: 'lyron_missions_v1' };
 
 const EVENT_CHARACTER_PROGRESS = {
-    ruben: { id: 'ruben', label: 'Rüben', sprite: 'ruben', goal: 10, missions: [
-        { id: 'r1', title: 'Abertura bagueteira', desc: 'Complete 1 partida.', stat: 'gamesStarted', goal: 1 },
-        { id: 'r2', title: 'Primeira fornada', desc: 'Complete 3 partidas.', stat: 'gamesStarted', goal: 3 },
-        { id: 'r3', title: 'Receita simples', desc: 'Derrote 100 inimigos.', stat: 'totalKills', goal: 100 },
-        { id: 'r4', title: 'Receita grande', desc: 'Derrote 500 inimigos.', stat: 'totalKills', goal: 500 },
-        { id: 'r5', title: 'Mesa montada', desc: 'Alcance wave 5.', stat: 'bestWave', goal: 5 },
-        { id: 'r6', title: 'Pedido reforçado', desc: 'Alcance wave 10.', stat: 'bestWave', goal: 10 },
-        { id: 'r7', title: 'Caçada principal', desc: 'Derrote 1 Boss.', stat: 'bossKills', goal: 1 },
-        { id: 'r8', title: 'Estoque abastecido', desc: 'Abra 8 caixas.', stat: 'boxesOpened', goal: 8 },
-        { id: 'r9', title: 'Ferramenta afiada', desc: 'Evolua 3 personagens.', stat: 'charsUpgraded', goal: 3 },
-        { id: 'r10', title: 'Receita lendária', desc: 'Derrote 5 Bosses no total.', stat: 'bossKills', goal: 5 }
+    sparta: { id: 'sparta', label: 'Sparta', sprite: 'sparta', goal: 15, missions: [
+        { id: 's1', title: 'Primeiro duelo', desc: 'Inicie 1 partida.', stat: 'gamesStarted', goal: 1 },
+        { id: 's2', title: 'Treino de campo', desc: 'Inicie 3 partidas.', stat: 'gamesStarted', goal: 3 },
+        { id: 's3', title: 'Linha de frente', desc: 'Derrote 100 inimigos.', stat: 'totalKills', goal: 100 },
+        { id: 's4', title: 'Escudo erguido', desc: 'Derrote 300 inimigos.', stat: 'totalKills', goal: 300 },
+        { id: 's5', title: 'Primeira vitória', desc: 'Vença 1 partida.', stat: 'wins', goal: 1 },
+        { id: 's6', title: 'Resistência', desc: 'Alcance wave 8.', stat: 'bestWave', goal: 8 },
+        { id: 's7', title: 'Muralha viva', desc: 'Alcance wave 12.', stat: 'bestWave', goal: 12 },
+        { id: 's8', title: 'Duelo de elite', desc: 'Derrote 2 Bosses.', stat: 'bossKills', goal: 2 },
+        { id: 's9', title: 'Arena limpa', desc: 'Derrote 500 inimigos.', stat: 'totalKills', goal: 500 },
+        { id: 's10', title: 'Veterano', desc: 'Vença 3 partidas.', stat: 'wins', goal: 3 },
+        { id: 's11', title: 'Pressão máxima', desc: 'Alcance wave 18.', stat: 'bestWave', goal: 18 },
+        { id: 's12', title: 'Quebra-chefes', desc: 'Derrote 5 Bosses.', stat: 'bossKills', goal: 5 },
+        { id: 's13', title: 'Lenda de Sparta', desc: 'Derrote 1.000 inimigos.', stat: 'totalKills', goal: 1000 },
+        { id: 's14', title: 'Último teste', desc: 'Vença 5 partidas.', stat: 'wins', goal: 5 },
+        { id: 's15', title: 'Honra do guerreiro', desc: 'Alcance wave 25.', stat: 'bestWave', goal: 25 }
     ]},
-    adam: { id: 'adam', label: 'Adam', sprite: 'adam', goal: 15, missions: [
-        { id: 'a1', title: 'Projeto inicial', desc: 'Complete 2 partidas.', stat: 'gamesStarted', goal: 2 },
-        { id: 'a2', title: 'Projeto avançado', desc: 'Complete 5 partidas.', stat: 'gamesStarted', goal: 5 },
-        { id: 'a3', title: 'Teste de combate', desc: 'Derrote 150 inimigos.', stat: 'totalKills', goal: 150 },
-        { id: 'a4', title: 'Protótipo forte', desc: 'Derrote 500 inimigos.', stat: 'totalKills', goal: 500 },
-        { id: 'a5', title: 'Primeiro contrato', desc: 'Vença 3 partidas.', stat: 'wins', goal: 3 },
-        { id: 'a6', title: 'Reator estável', desc: 'Alcance wave 8.', stat: 'bestWave', goal: 8 },
-        { id: 'a7', title: 'Reator turbo', desc: 'Alcance wave 12.', stat: 'bestWave', goal: 12 },
-        { id: 'a8', title: 'Contra-ataque mecânico', desc: 'Derrote 2 Bosses.', stat: 'bossKills', goal: 2 },
-        { id: 'a9', title: 'Laboratório cheio', desc: 'Desbloqueie 4 personagens.', stat: 'charsUnlocked', goal: 4 },
-        { id: 'a10', title: 'Peças calibradas', desc: 'Evolua 4 personagens.', stat: 'charsUpgraded', goal: 4 },
-        { id: 'a11', title: 'Slots montados', desc: 'Equipe 4 chips.', stat: 'chipsEquipped', goal: 4 },
-        { id: 'a12', title: 'Caixas de teste', desc: 'Abra 10 caixas.', stat: 'boxesOpened', goal: 10 },
-        { id: 'a13', title: 'Estoque maior', desc: 'Abra 20 caixas.', stat: 'boxesOpened', goal: 20 },
-        { id: 'a14', title: 'Carga pesada', desc: 'Abra 25 caixas.', stat: 'boxesOpened', goal: 25 },
-        { id: 'a15', title: 'Monstro final', desc: 'Derrote 10 Bosses no total.', stat: 'bossKills', goal: 10 }
+    lyron: { id: 'lyron', label: 'Lyron', sprite: 'lyron', goal: 20, missions: [
+        { id: 'l1', title: 'Primeiro toque', desc: 'Inicie 2 partidas.', stat: 'gamesStarted', goal: 2 },
+        { id: 'l2', title: 'Passe preciso', desc: 'Inicie 5 partidas.', stat: 'gamesStarted', goal: 5 },
+        { id: 'l3', title: 'Chute certeiro', desc: 'Derrote 150 inimigos.', stat: 'totalKills', goal: 150 },
+        { id: 'l4', title: 'Finalização', desc: 'Derrote 400 inimigos.', stat: 'totalKills', goal: 400 },
+        { id: 'l5', title: 'Primeira vitória', desc: 'Vença 2 partidas.', stat: 'wins', goal: 2 },
+        { id: 'l6', title: 'Jogada ensaiada', desc: 'Alcance wave 8.', stat: 'bestWave', goal: 8 },
+        { id: 'l7', title: 'Contra-ataque', desc: 'Alcance wave 14.', stat: 'bestWave', goal: 14 },
+        { id: 'l8', title: 'Craque dos chefes', desc: 'Derrote 3 Bosses.', stat: 'bossKills', goal: 3 },
+        { id: 'l9', title: 'Bola na rede', desc: 'Derrote 650 inimigos.', stat: 'totalKills', goal: 650 },
+        { id: 'l10', title: 'Jogo coletivo', desc: 'Vença 4 partidas.', stat: 'wins', goal: 4 },
+        { id: 'l11', title: 'Tempo extra', desc: 'Alcance wave 18.', stat: 'bestWave', goal: 18 },
+        { id: 'l12', title: 'Precisão absoluta', desc: 'Derrote 1.000 inimigos.', stat: 'totalKills', goal: 1000 },
+        { id: 'l13', title: 'Artilheiro', desc: 'Derrote 5 Bosses.', stat: 'bossKills', goal: 5 },
+        { id: 'l14', title: 'Grande campanha', desc: 'Vença 6 partidas.', stat: 'wins', goal: 6 },
+        { id: 'l15', title: 'Jogo difícil', desc: 'Alcance wave 22.', stat: 'bestWave', goal: 22 },
+        { id: 'l16', title: 'Craque completo', desc: 'Derrote 1.500 inimigos.', stat: 'totalKills', goal: 1500 },
+        { id: 'l17', title: 'Sem perder o ritmo', desc: 'Inicie 10 partidas.', stat: 'gamesStarted', goal: 10 },
+        { id: 'l18', title: 'Decisão', desc: 'Derrote 8 Bosses.', stat: 'bossKills', goal: 8 },
+        { id: 'l19', title: 'Final de campeonato', desc: 'Alcance wave 28.', stat: 'bestWave', goal: 28 },
+        { id: 'l20', title: 'Lenda do campo', desc: 'Vença 10 partidas.', stat: 'wins', goal: 10 }
     ]}
 };
 
 const EVENT_PROMOS = [
-    { id: 'ruben', label: 'Rüben', oldCost: 79, promoCost: 29, level8Cost: 309, rarity: 'epic' },
-    { id: 'adam', label: 'Adam', oldCost: 149, promoCost: 79, level8Cost: 639, rarity: 'epic' },
-    { id: 'pit', label: 'Pit', oldCost: 79, promoCost: 29, rarity: 'epic' },
-    { id: 'lunch', label: 'Lunch', oldCost: 149, promoCost: 79, rarity: 'epic' },
-    { id: 'sparta', label: 'Sparta', oldCost: 149, promoCost: 79, rarity: 'legendary' },
-    { id: 'ivy', label: 'Ivy', oldCost: 349, promoCost: 149, rarity: 'legendary' },
+    { id: 'sparta', label: 'Sparta', oldCost: 149, promoCost: 79, level8Cost: 639, rarity: 'epic' },
+    { id: 'lyron', label: 'Lyron', oldCost: 349, promoCost: 149, level8Cost: 899, rarity: 'legendary' },
+    { id: 'bunniie', label: 'Bunniie', oldCost: 149, promoCost: 79, rarity: 'epic' },
+    { id: 'gladiator', label: 'Gladiator', oldCost: 349, promoCost: 149, rarity: 'legendary' },
+    { id: 'firey', label: 'Mestre do Fogo', oldCost: 349, promoCost: 149, rarity: 'legendary' },
     { id: 'ignite', label: 'Ignite', oldCost: 349, promoCost: 149, rarity: 'legendary' },
-    { id: 'yuuto', label: 'Yuuto', oldCost: 349, promoCost: 149, rarity: 'legendary' },
-    { id: 'miss_macaron', label: 'Miss Macaron', oldCost: 199, promoCost: 99, rarity: 'seasonal' },
-    { id: 'vampyrus', label: 'Vampyrus', oldCost: 569, promoCost: 349, rarity: 'mythic' }
+    { id: 'sterling', label: 'Sterling', oldCost: 349, promoCost: 149, rarity: 'legendary' },
+    { id: 'frost', label: 'Frost', oldCost: 569, promoCost: 349, rarity: 'mythic' },
+    { id: 'yeti', label: 'Yeti', oldCost: 569, promoCost: 349, rarity: 'mythic' },
+    { id: 'shinobi', label: 'Shinobi', oldCost: 569, promoCost: 349, rarity: 'mythic' },
+    { id: 'glitch', label: 'Glitch', oldCost: 569, promoCost: 349, rarity: 'mythic' }
 ];
 
 function getEventBaseSnapshot() {
@@ -6121,20 +6120,13 @@ function getEventBaseSnapshot() {
     return snapshot;
 }
 function ensureEventState() {
-    if (!pd.events || typeof pd.events !== 'object') pd.events = { ruben: { claimed: false, baseStats: null }, adam: { claimed: false, baseStats: null } };
-    if (!pd.events.ruben) pd.events.ruben = { claimed: false, baseStats: null };
-    if (!pd.events.adam) pd.events.adam = { claimed: false, baseStats: null };
-    if (typeof pd.events.ruben.claimed === 'undefined') pd.events.ruben.claimed = false;
-    if (typeof pd.events.adam.claimed === 'undefined') pd.events.adam.claimed = false;
-    if (typeof pd.events.ruben.baseStats === 'undefined') pd.events.ruben.baseStats = null;
-    if (typeof pd.events.adam.baseStats === 'undefined') pd.events.adam.baseStats = null;
-    if (pd.events.ruben.missionSaveKey !== EVENT_MISSION_SAVE_KEYS.ruben) {
-        pd.events.ruben.baseStats = null;
-        pd.events.ruben.missionSaveKey = EVENT_MISSION_SAVE_KEYS.ruben;
-    }
-    if (pd.events.adam.missionSaveKey !== EVENT_MISSION_SAVE_KEYS.adam) {
-        pd.events.adam.baseStats = null;
-        pd.events.adam.missionSaveKey = EVENT_MISSION_SAVE_KEYS.adam;
+    if (!pd.events || typeof pd.events !== 'object') pd.events = {};
+    if (!pd.events.sparta) pd.events.sparta = { claimed: false, baseStats: null, missionSaveKey: EVENT_MISSION_SAVE_KEYS.sparta };
+    if (!pd.events.lyron) pd.events.lyron = { claimed: false, baseStats: null, missionSaveKey: EVENT_MISSION_SAVE_KEYS.lyron };
+    for (const id of ['sparta','lyron']) {
+        if (typeof pd.events[id].claimed === 'undefined') pd.events[id].claimed = false;
+        if (typeof pd.events[id].baseStats === 'undefined') pd.events[id].baseStats = null;
+        if (pd.events[id].missionSaveKey !== EVENT_MISSION_SAVE_KEYS[id]) { pd.events[id].baseStats = null; pd.events[id].missionSaveKey = EVENT_MISSION_SAVE_KEYS[id]; }
     }
 }
 function ensureEventSectionSnapshot(sectionId) {
@@ -6245,31 +6237,31 @@ function renderEventPromoCard(promo) {
 function renderEvents() {
     ensureEventState();
     if (currentEventSection) ensureEventSectionSnapshot(currentEventSection);
-    const rubenList = document.getElementById('event-ruben-list');
-    const adamList = document.getElementById('event-adam-list');
+    const spartaList = document.getElementById('event-sparta-list');
+    const lyronList = document.getElementById('event-lyron-list');
     const promoList = document.getElementById('event-promo-list');
-    const rubenCount = document.getElementById('event-ruben-count');
-    const adamCount = document.getElementById('event-adam-count');
-    const rubenClaim = document.getElementById('event-ruben-claim');
-    const adamClaim = document.getElementById('event-adam-claim');
-    const ruben = EVENT_CHARACTER_PROGRESS.ruben;
-    const adam = EVENT_CHARACTER_PROGRESS.adam;
-    const rubenDone = getEventCompletedCount('ruben');
-    const adamDone = getEventCompletedCount('adam');
-    if (rubenCount) rubenCount.textContent = String(rubenDone);
-    if (adamCount) adamCount.textContent = String(adamDone);
-    if (rubenClaim) {
-        const ready = rubenDone >= ruben.goal;
-        rubenClaim.disabled = !ready || !!pd.events.ruben.claimed;
-        rubenClaim.textContent = pd.events.ruben.claimed ? '✅ Resgatado' : `🎁 Resgatar ${ruben.label}`;
+    const spartaCount = document.getElementById('event-sparta-count');
+    const lyronCount = document.getElementById('event-lyron-count');
+    const spartaClaim = document.getElementById('event-sparta-claim');
+    const lyronClaim = document.getElementById('event-lyron-claim');
+    const sparta = EVENT_CHARACTER_PROGRESS.sparta;
+    const lyron = EVENT_CHARACTER_PROGRESS.lyron;
+    const spartaDone = getEventCompletedCount('sparta');
+    const lyronDone = getEventCompletedCount('lyron');
+    if (spartaCount) spartaCount.textContent = String(spartaDone);
+    if (lyronCount) lyronCount.textContent = String(lyronDone);
+    if (spartaClaim) {
+        const ready = spartaDone >= sparta.goal;
+        spartaClaim.disabled = !ready || !!pd.events.sparta.claimed;
+        spartaClaim.textContent = pd.events.sparta.claimed ? '✅ Resgatado' : `🎁 Resgatar ${sparta.label}`;
     }
-    if (adamClaim) {
-        const ready = adamDone >= adam.goal;
-        adamClaim.disabled = !ready || !!pd.events.adam.claimed;
-        adamClaim.textContent = pd.events.adam.claimed ? '✅ Resgatado' : `🎁 Resgatar ${adam.label}`;
+    if (lyronClaim) {
+        const ready = lyronDone >= lyron.goal;
+        lyronClaim.disabled = !ready || !!pd.events.lyron.claimed;
+        lyronClaim.textContent = pd.events.lyron.claimed ? '✅ Resgatado' : `🎁 Resgatar ${lyron.label}`;
     }
-    if (rubenList) rubenList.innerHTML = ruben.missions.map(m => renderEventMissionCard('ruben', m)).join('');
-    if (adamList) adamList.innerHTML = adam.missions.map(m => renderEventMissionCard('adam', m)).join('');
+    if (spartaList) spartaList.innerHTML = sparta.missions.map(m => renderEventMissionCard('sparta', m)).join('');
+    if (lyronList) lyronList.innerHTML = lyron.missions.map(m => renderEventMissionCard('lyron', m)).join('');
     if (promoList) promoList.innerHTML = EVENT_PROMOS.map(renderEventPromoCard).join('');
 }
 function showEventSection(section) {
@@ -7032,7 +7024,7 @@ let sort = document.getElementById('char-filter-sort') ? document.getElementById
     if (pd.debug?.jackEnabled && CHARACTERS?.jack) cls = 'all';
 
     let rValue = { common:1, rare:2, epic:3, legendary:4, mythic:5 };
-    let filtered = Object.values(CHARACTERS).filter(c => cls === 'all' || c.class === cls);
+    let filtered = Object.values(CHARACTERS).filter(c => !isCharacterHiddenForUnownedView(c.id) && (cls === 'all' || c.class === cls));
     filtered.sort((a, b) => {
         const aOwned = !!pd.chars[a.id];
         const bOwned = !!pd.chars[b.id];
@@ -7602,7 +7594,7 @@ function renderShop() {
         charList.innerHTML = '';
         const rarityOrder = { common: 1, rare: 2, epic: 3, legendary: 4, mythic: 5, seasonal: 6, secret: 7 };
         const shopChars = Object.values(CHARACTERS)
-            .filter(c => !pd.chars[c.id])
+            .filter(c => !pd.chars[c.id] && !isCharacterHiddenForUnownedView(c.id))
             .sort((a, b) => {
                 const rDiff = getCharacterRaritySortValue(a) - getCharacterRaritySortValue(b);
                 if (rDiff !== 0) return rDiff;
@@ -7735,7 +7727,7 @@ function buildBoxDropItem(type) {
     if(checkVipDrop(type)) { pd.vip.inventory++; return `👑 VIP GRÁTIS! (+1 no Inventário)`; }
     let r = Math.random();
 
-    if (Math.random() < 0.02) return rollChar('seasonal');
+    if (Math.random() < 0.02) { const seasonal = rollChar('seasonal', { excludeIds: ['miss_macaron'] }); return seasonal; }
 
     const medalDropChance = type === 'mega' ? 0.18 : 0.10;
     if (Math.random() < medalDropChance) {
@@ -8335,9 +8327,9 @@ function claimPass() {
     if (q.length) startGachaQueue(q);
 }
 
-function rollChar(rarity) {
-
-    const pool = Object.values(CHARACTERS).filter(c => c.rarity === rarity && c.id !== 'glitch');
+function rollChar(rarity, opts = {}) {
+    const excluded = new Set(Array.isArray(opts.excludeIds) ? opts.excludeIds : []);
+    const pool = Object.values(CHARACTERS).filter(c => c.rarity === rarity && c.id !== 'glitch' && c.id !== 'miss_macaron' && !excluded.has(c.id));
     if(pool.length === 0) return `🪙 +100 Moedas (Repetido)`;
     const c = pool[Math.floor(Math.random() * pool.length)];
     if(pd.chars[c.id]) { let evoAdd = rarity==='common'?5 : rarity==='rare'?10 : rarity==='epic'?25 : rarity==='legendary'?50 : rarity==='seasonal'?200 : 100; pd.evo += evoAdd; return `🧬 +${evoAdd} Evo (Repetido: ${c.name})`; } 
