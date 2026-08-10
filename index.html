@@ -1922,6 +1922,11 @@
                 <button class="btn-menu settings-option" type="button" onclick="toggleDevSetting('infiniteScrap')">Sucatas infinitas: <br><span id="dev-inf-scrap" style="color:var(--btn-red)">Desativado</span></button>
                 <button class="btn-menu settings-option" type="button" onclick="toggleDevSetting('unlockAllChars')">Obter todos os personagens: <br><span id="dev-all-chars" style="color:var(--btn-red)">Desativado</span></button>
                 <button class="btn-menu settings-option" type="button" onclick="toggleDevSetting('infiniteChips')">Todos os Chips: <br><span id="dev-all-chips" style="color:var(--btn-red)">Desativado</span></button>
+                <div class="settings-option" style="display:flex; flex-direction:column; justify-content:center; gap:8px; min-height:84px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.10); border-radius:14px; padding:12px;">
+                    <span style="font-size:14px; font-weight:900; color:#fff;">Mapa da rotação</span>
+                    <select id="dev-map-rotation" class="filter-select" style="width:100%; margin:0; font-size:14px; padding:8px;" onchange="setDevMapRotation(this.value)"></select>
+                    <span id="dev-map-rotation-status" style="font-size:11px; color:#aaa;">Rotação automática</span>
+                </div>
                 <button class="btn-menu settings-option" type="button" onclick="openDevLootBoxModal()">Abrir loot box</button>
             </div>
         </div>
@@ -3104,7 +3109,7 @@ const UHC_MODIFIERS = {
     "Discoteca": { night: true, strongPushBoxes: true, dancersSpawn: 6 }
 };
 
-const ENEMY_TYPES = ["Básico", "Gigante", "Tanque", "Boss", "Ninja", "Kamikaze", "Líder", "Colosso", "Elite Master", "Líder Elite"];
+const ENEMY_TYPES = ["Básico", "Gigante", "Tanque", "Boss", "Ninja", "Kamikaze", "Líder", "Colosso", "Elite Master", "Líder Elite", "Caixa de papelão", "Capacete", "Cabeça de prisma"];
 
 const FIXED_COINS = [300, 600, 900, 1200, 2400, 5000]; const FIXED_EVO = [40, 80, 120, 240, 500]; const FIXED_SCRAPS = [100, 250, 500, 750, 1000]; const FIXED_XP = [150, 300, 650, 1000];
 const FIXED_BOXES = [ { type: 'normal', qtd: 1, baseCost: 10 }, { type: 'normal', qtd: 3, baseCost: 28 }, { type: 'normal', qtd: 5, baseCost: 45 }, { type: 'mega', qtd: 1, baseCost: 40 }, { type: 'mega', qtd: 2, baseCost: 75 }, { type: 'pacote', qtd: 1, baseCost: 10 }, { type: 'pacote', qtd: 3, baseCost: 28 }, { type: 'pacote', qtd: 5, baseCost: 45 }, { type: 'pacote', qtd: 10, baseCost: 85 } ];
@@ -3285,7 +3290,7 @@ document.addEventListener('visibilitychange', () => {
 window.addEventListener('blur', pauseMusicOnFocusLoss);
 window.addEventListener('focus', resumeMusicOnFocusGain);
 
-let pd = { coins: 500, gems: 50, evo: 40, sucatas: 0, nickname: null, chars: { strike: { level: 1, slots: 2, chips: [null, null] } }, selectedChar: 'strike', passXp: 0, passLevel: 1, passClaimed: 0, passClaimedTiers: [], passRewardSeed: 0, passRewardCache: {}, passResetAt: 0, shopState: { lastRotation: 0, items: {} }, lastDaily: "", dailyWins: {date: "", count: 0}, vip: { activeUntil: 0, inventory: 0 }, hardcoreBans: { lastRotation: 0, chars: [] }, settings: { ...DEFAULT_SETTINGS }, trail: { target: null, fameLevel: 0 }, profile: { title: null, emblem: null }, events: { ruben: { claimed: false }, adam: { claimed: false } }, missions: { date: '', list: [], weekly: { weekKey: '', mission: null }, rerolls: { date: '', used: 0 } }, passOverflowXp: 0, passOverflowBoxes: 0, chipsInventory: {}, chipCrafting: null, achievements: { stats: { gamesStarted: 0, wins: 0, hardcoreWins: 0, uhcWins: 0, totalKills: 0, bossKills: 0, bestWave: 0, charsUnlocked: 1, charsUpgraded: 0, chipsEquipped: 0, boxesOpened: 0, missionClaims: 0, weeklyClaims: 0, passClaims: 0, overflowBoxes: 0, rerollsUsed: 0, vipPurchases: 0, lunchDamage: 0 }, claimed: [] }, debug: { infiniteCoins: false, infiniteGems: false, infiniteEvo: false, infiniteScrap: false, jackEnabled: false, unlockAllChars: false, infiniteChips: false, devUnlocked: false, devBaseState: null } };
+let pd = { coins: 500, gems: 50, evo: 40, sucatas: 0, nickname: null, chars: { strike: { level: 1, slots: 2, chips: [null, null] } }, selectedChar: 'strike', passXp: 0, passLevel: 1, passClaimed: 0, passClaimedTiers: [], passRewardSeed: 0, passRewardCache: {}, passResetAt: 0, shopState: { lastRotation: 0, items: {} }, lastDaily: "", dailyWins: {date: "", count: 0}, vip: { activeUntil: 0, inventory: 0 }, hardcoreBans: { lastRotation: 0, chars: [] }, settings: { ...DEFAULT_SETTINGS }, trail: { target: null, fameLevel: 0 }, profile: { title: null, emblem: null }, events: { ruben: { claimed: false }, adam: { claimed: false } }, missions: { date: '', list: [], weekly: { weekKey: '', mission: null }, rerolls: { date: '', used: 0 } }, passOverflowXp: 0, passOverflowBoxes: 0, chipsInventory: {}, chipCrafting: null, achievements: { stats: { gamesStarted: 0, wins: 0, hardcoreWins: 0, uhcWins: 0, totalKills: 0, bossKills: 0, bestWave: 0, charsUnlocked: 1, charsUpgraded: 0, chipsEquipped: 0, boxesOpened: 0, missionClaims: 0, weeklyClaims: 0, passClaims: 0, overflowBoxes: 0, rerollsUsed: 0, vipPurchases: 0, lunchDamage: 0 }, claimed: [] }, debug: { infiniteCoins: false, infiniteGems: false, infiniteEvo: false, infiniteScrap: false, jackEnabled: false, unlockAllChars: false, infiniteChips: false, devUnlocked: false, devBaseState: null, mapRotationOverride: -1 } };
 window.isHardcoreMode = false; window.gachaQueue = []; window.tempBoxData = null; window.currentMap = 0; window.currentDetailCharId = null; window.currentChipEquipSlot = null; window.debugInfiniteGems = false;
 
 const PD_TEMPLATE = JSON.parse(JSON.stringify(pd));
@@ -4103,7 +4108,13 @@ const ENEMY_SPRITES = {
     lider_elite: 'enemies/elite_leader.png',
     elite_leader: 'enemies/elite_leader.png',
     elite_master: 'enemies/master_elite_shooter.png',
-    master_elite_shooter: 'enemies/master_elite_shooter.png'
+    master_elite_shooter: 'enemies/master_elite_shooter.png',
+    cardboard_head: 'enemies/cardboard_head.png',
+    cardboard: 'enemies/cardboard_head.png',
+    motorcycle_helmet: 'enemies/motorcycle_helmet.png',
+    helmet: 'enemies/motorcycle_helmet.png',
+    prism_head: 'enemies/prism_head.png',
+    prism: 'enemies/prism_head.png'
 };
 
 const ENEMY_SPRITE_CACHE = new Map();
@@ -4685,6 +4696,15 @@ function getEnemySpriteWidthMult(type) {
         case 'mummy':
         case 'acucarado':
             return 9.0;
+        case 'cardboard_head':
+        case 'cardboard':
+            return 8.9;
+        case 'motorcycle_helmet':
+        case 'helmet':
+            return 9.0;
+        case 'prism_head':
+        case 'prism':
+            return 9.2;
         case 'basico':
         case 'basic':
         default:
@@ -5412,7 +5432,8 @@ function ensureDevDebugState() {
         unlockAllChars: false,
         infiniteChips: false,
         devUnlocked: false,
-        devBaseState: null
+        devBaseState: null,
+        mapRotationOverride: -1
     };
     for (const [k, v] of Object.entries(defaults)) {
         if (typeof pd.debug[k] === 'undefined') pd.debug[k] = v;
@@ -5738,14 +5759,37 @@ function updateSettingsUI(syncSlider = true) {
             el.style.color = active ? 'var(--btn-green)' : 'var(--btn-red)';
         }
     }
+    const devMapSelect = document.getElementById('dev-map-rotation');
+    const devMapStatus = document.getElementById('dev-map-rotation-status');
+    if (devMapSelect) {
+        if (!devMapSelect.options.length) {
+            devMapSelect.innerHTML = '<option value="-1">Rotação automática</option>' + MAPS.map((name, index) => `<option value="${index}">${name}</option>`).join('');
+        }
+        const override = Number.isInteger(Number(pd?.debug?.mapRotationOverride)) ? Number(pd.debug.mapRotationOverride) : -1;
+        devMapSelect.value = (override >= -1 && override < MAPS.length) ? String(override) : '-1';
+        if (devMapStatus) devMapStatus.textContent = override >= 0 && override < MAPS.length ? `Forçado: ${MAPS[override]}` : 'Rotação automática';
+    }
     updatePauseSettingsUI(syncSlider);
     applyControlLayout();
     applyMusicVolume();
 }
 
 function getSelectedMapIndex() {
-
+    const override = Number(pd?.debug?.mapRotationOverride);
+    if (pd?.debug?.devUnlocked && Number.isInteger(override) && override >= 0 && override < MAPS.length) return override;
     return Math.floor(Date.now() / 3600000) % MAPS.length;
+}
+
+function setDevMapRotation(value) {
+    ensureDevDebugState();
+    if (!pd.debug.devUnlocked) return;
+    const idx = Math.floor(Number(value));
+    pd.debug.mapRotationOverride = (Number.isInteger(idx) && idx >= 0 && idx < MAPS.length) ? idx : -1;
+    save();
+    window.currentMap = getSelectedMapIndex();
+    syncMapSelectUI();
+    updateSettingsUI();
+    notify(pd.debug.mapRotationOverride >= 0 ? `Mapa forçado: ${MAPS[pd.debug.mapRotationOverride]}` : 'Mapa voltou para a rotação automática!');
 }
 
 function getHourBucket() {
@@ -11206,6 +11250,19 @@ function spawnEnemy() {
     if(wave >= 30) {
         types.push('colosso'); types.push('elite_master'); types.push('lider_elite');
     }
+
+    // Inimigos globais por tempo de partida: entram na rotação em qualquer mapa.
+    // Eles têm chances crescentes, mas não substituem completamente os inimigos normais.
+    if(gameTime >= 20) {
+        types.push('cardboard_head');
+        types.push('cardboard_head');
+    }
+    if(gameTime >= 60) {
+        types.push('motorcycle_helmet');
+    }
+    if(gameTime >= 120) {
+        types.push('prism_head');
+    }
     
     let type = types[Math.floor(Math.random() * types.length)]; let mult = 1 + (wave * 0.15); if(window.isHardcoreMode) mult = 1.2 + (wave * 0.22); if(pd.settings.ultraHardcore) mult = 1.25 + (wave * 0.24);
     
@@ -11232,6 +11289,9 @@ function spawnEnemy() {
     if(type === 'lider_elite') { e.hp = 120*mult; e.speed = 1.0; e.baseDmg = 12*mult; e.size = 18; e.color = '#e84118'; e.spawnCd = 20; }
     if(type === 'mummy') { e.hp = 50*mult; e.speed = 1.3; e.baseDmg = 10*mult; e.size = 13; e.color = '#f5f6fa'; e.revives = 1; }
     if(type === 'monster_tree') { e.hp = 160*mult; e.speed = 0.75; e.baseDmg = 15*mult; e.size = 24; e.color = '#10ac84'; }
+    if(type === 'cardboard_head') { e.hp = 58*mult; e.speed = 1.35; e.baseDmg = 5*mult; e.size = 15; e.color = '#b8793c'; e.isGlobalArmored = true; e.breakIntoBasic = true; }
+    if(type === 'motorcycle_helmet') { e.hp = 110*mult; e.speed = 1.1; e.baseDmg = 6*mult; e.size = 16; e.color = '#56616d'; e.isGlobalArmored = true; e.breakIntoBasic = true; }
+    if(type === 'prism_head') { e.hp = 230*mult; e.speed = 0.92; e.baseDmg = 8*mult; e.size = 18; e.color = '#8c7cff'; e.isGlobalArmored = true; e.breakIntoBasic = true; }
 
     e.dmg = e.baseDmg; e.maxHp = e.hp; enemies.push(e);
 }
@@ -11484,6 +11544,22 @@ function updateEnemies(dt) {
         if(e.hp <= 0) {
             if(e.revives && e.revives > 0) {
                 e.revives--; e.hp = e.maxHp; e.freezeTimer = 1.0; e.color = '#7f8c8d';
+            } else if(e.breakIntoBasic && e.isGlobalArmored) {
+                // O invólucro é destruído: nasce um inimigo Básico no mesmo ponto.
+                const basicMult = Math.max(0.25, (Number(e.maxHp) > 0 ? Number(e.maxHp) / (e.type === 'cardboard_head' ? 58 : (e.type === 'motorcycle_helmet' ? 110 : 230)) : 1));
+                e.type = 'basico';
+                e.hp = 30 * basicMult;
+                e.maxHp = e.hp;
+                e.baseDmg = 5 * basicMult;
+                e.dmg = e.baseDmg;
+                e.speed = 1.5;
+                e.size = 12;
+                e.color = '#e74c3c';
+                e.isGlobalArmored = false;
+                e.breakIntoBasic = false;
+                e.freezeTimer = 0.15;
+                createParticles(e.x, e.y, '#f1c40f');
+                addFloatingText(e.x, e.y - 10, 'QUEBROU!', '#f1c40f', 11);
             } else {
                 enemiesKilled++; 
                 trackMissionProgress('kills', 1);
@@ -12892,6 +12968,51 @@ function drawShape(cCtx, x, y, size, shape, color, isBoss=false, spriteId=null) 
     cCtx.closePath(); cCtx.fill(); cCtx.lineWidth = 2; cCtx.strokeStyle = '#000'; cCtx.stroke();
 }
 
+let plainsGrassPattern = null;
+
+function getPlainsGrassPattern() {
+    if (plainsGrassPattern) return plainsGrassPattern;
+    const tile = document.createElement('canvas');
+    tile.width = 180;
+    tile.height = 180;
+    const g = tile.getContext('2d');
+    g.fillStyle = '#557A46';
+    g.fillRect(0, 0, tile.width, tile.height);
+
+    // Textura artesanal: variações suaves + tufos de grama repetíveis.
+    let seed = 918273;
+    const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+    for (let i = 0; i < 90; i++) {
+        const x = rnd() * tile.width;
+        const y = rnd() * tile.height;
+        const r = 3 + rnd() * 7;
+        g.fillStyle = rnd() > 0.5 ? 'rgba(82,118,63,0.18)' : 'rgba(170,188,92,0.10)';
+        g.beginPath();
+        g.arc(x, y, r, 0, Math.PI * 2);
+        g.fill();
+    }
+    for (let i = 0; i < 48; i++) {
+        const x = rnd() * tile.width;
+        const y = rnd() * tile.height;
+        const h = 5 + rnd() * 8;
+        const lean = (rnd() - 0.5) * 5;
+        g.strokeStyle = rnd() > 0.42 ? 'rgba(44,96,43,0.55)' : 'rgba(199,218,107,0.38)';
+        g.lineWidth = 1.35;
+        g.beginPath();
+        g.moveTo(x, y);
+        g.lineTo(x + lean, y - h);
+        g.stroke();
+        if (rnd() > 0.45) {
+            g.beginPath();
+            g.moveTo(x + lean * 0.45, y - h * 0.5);
+            g.lineTo(x + lean + (rnd() - 0.5) * 5, y - h * 0.72);
+            g.stroke();
+        }
+    }
+    plainsGrassPattern = ctx.createPattern(tile, 'repeat');
+    return plainsGrassPattern;
+}
+
 function draw() {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.globalAlpha = 1;
@@ -12899,8 +13020,17 @@ function draw() {
     ctx.save();
     ctx.translate(-camera.x, -camera.y);
     
-    ctx.fillStyle = window.currentMap===1 ? '#d2b48c' : window.currentMap===2 ? '#dff9fb' : window.currentMap===3 ? '#576574' : window.currentMap===4 ? '#4cd137' : window.currentMap===5 ? '#3b3e24' : window.currentMap===6 ? '#2f3640' : window.currentMap===7 ? '#351111' : window.currentMap===8 ? '#e1f7d5' : window.currentMap===9 ? '#1d145d' : '#557A46';
+    if (window.currentMap === 0) {
+        ctx.fillStyle = getPlainsGrassPattern() || '#557A46';
+    } else {
+        ctx.fillStyle = window.currentMap===1 ? '#d2b48c' : window.currentMap===2 ? '#dff9fb' : window.currentMap===3 ? '#576574' : window.currentMap===4 ? '#4cd137' : window.currentMap===5 ? '#3b3e24' : window.currentMap===6 ? '#2f3640' : window.currentMap===7 ? '#351111' : window.currentMap===8 ? '#e1f7d5' : '#1d145d';
+    }
     ctx.fillRect(camera.x, camera.y, cw, ch);
+    if (window.currentMap === 0) {
+        // Um véu sutil para manter a leitura dos sprites sem perder a textura.
+        ctx.fillStyle = 'rgba(56, 93, 45, 0.08)';
+        ctx.fillRect(camera.x, camera.y, cw, ch);
+    }
     if(window.currentMap === 9) {
         ctx.save();
         const tileSize = 120;
