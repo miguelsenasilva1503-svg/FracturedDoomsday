@@ -58,10 +58,6 @@ function safeCharId(charId) {
   return value || 'strike';
 }
 
-function makeSessionId() {
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
-}
-
 function toInt(value, fallback) {
   const n = Number(value);
   return Number.isFinite(n) ? Math.floor(n) : fallback;
@@ -125,7 +121,6 @@ function createRoom({ roomCode, hostId, hostName, hostCharId, settings }) {
         score: 0,
         kills: 0,
         connected: true,
-        sessionId: makeSessionId(),
       },
     ],
     started: false,
@@ -144,7 +139,7 @@ function roomSnapshot(room) {
     code: room.roomCode,
     roomCode: room.roomCode,
     hostId: room.hostId,
-    status: room.starting ? 'starting' : (room.started ? 'playing' : 'lobby'),
+    status: room.started ? 'playing' : (room.starting ? 'starting' : 'lobby'),
     started: room.started,
     starting: room.starting,
     endsAt: room.endsAt,
@@ -160,7 +155,6 @@ function roomSnapshot(room) {
         score: toInt(p.score, 0),
         kills: toInt(p.kills, 0),
         connected: !!p.connected,
-        sessionId: p.sessionId || null,
       })),
     lastResult: room.lastResult || null,
   };
@@ -186,7 +180,6 @@ function assignHost(room) {
     room.hostId = null;
     return;
   }
-
   if (!connected.some((p) => p.id === room.hostId)) {
     room.hostId = connected[0].id;
   }
@@ -278,7 +271,6 @@ function startMatch(room, cb = () => {}) {
   }
 
   room.starting = true;
-  room.started = false;
   room.players.forEach((p) => {
     p.ready = false;
     p.score = 0;
@@ -286,14 +278,6 @@ function startMatch(room, cb = () => {}) {
   });
 
   emitRoomState(room);
-
-  // Ack immediately so the host UI can react on the first click.
-  cb({
-    ok: true,
-    starting: true,
-    countdownSec: COUNTDOWN_SECONDS,
-    room: roomSnapshot(room),
-  });
 
   let countdown = COUNTDOWN_SECONDS;
 
@@ -313,7 +297,6 @@ function startMatch(room, cb = () => {}) {
 
     room.starting = false;
     room.started = true;
-
     const durationMs = durationMsFromSettings(room.settings);
     room.endsAt = Date.now() + durationMs;
 
@@ -324,12 +307,12 @@ function startMatch(room, cb = () => {}) {
       settings: normalizeSettings(room.settings),
     };
 
-    emitRoomState(room);
     io.to(room.roomCode).emit('match_start', payload);
     io.to(room.roomCode).emit('match:start', payload);
 
     startTimer(room);
     emitRoomState(room);
+    cb({ ok: true, room: roomSnapshot(room) });
   }, 1000);
 }
 
@@ -361,7 +344,6 @@ function handleCreateRoom(socket, payload = {}, cb = () => {}) {
       ok: true,
       code: roomCode,
       roomCode,
-      sessionId: room.players[0]?.sessionId || null,
       room: snapshot,
     });
   } catch (error) {
@@ -381,7 +363,6 @@ function handleJoinRoom(socket, payload = {}, cb = () => {}) {
     if (room.players.length >= MAX_PLAYERS_PER_ROOM) return cb({ ok: false, error: 'room_full' });
 
     room.players = room.players.filter((p) => p.id !== socket.id);
-    const sessionId = makeSessionId();
     room.players.push({
       id: socket.id,
       name: nick,
@@ -390,12 +371,10 @@ function handleJoinRoom(socket, payload = {}, cb = () => {}) {
       score: 0,
       kills: 0,
       connected: true,
-      sessionId,
     });
 
     socket.join(room.roomCode);
     socket.data.roomCode = room.roomCode;
-    socket.data.roomSessionId = sessionId;
     socket.data.playerName = nick;
     socket.data.charId = charId;
 
@@ -410,7 +389,6 @@ function handleJoinRoom(socket, payload = {}, cb = () => {}) {
       ok: true,
       code: room.roomCode,
       roomCode: room.roomCode,
-      sessionId,
       room: snapshot,
     });
   } catch (error) {
@@ -418,21 +396,14 @@ function handleJoinRoom(socket, payload = {}, cb = () => {}) {
   }
 }
 
-function handleLeaveRoom(socket, payload = {}, cb = () => {}) {
-  const currentSessionId = socket.data?.roomSessionId || null;
-  const requestedSessionId = String(payload?.sessionId || '').trim() || null;
-  if (requestedSessionId && currentSessionId && requestedSessionId !== currentSessionId) {
-    return cb({ ok: true, ignored: true });
-  }
-
+function removePlayerFromRoom(socket) {
   const found = findRoomBySocket(socket.id);
-  if (!found) return cb({ ok: true });
+  if (!found) return null;
 
   const { room } = found;
   room.players = room.players.filter((p) => p.id !== socket.id);
   socket.leave(room.roomCode);
   socket.data.roomCode = null;
-  socket.data.roomSessionId = null;
   socket.data.playerName = null;
   socket.data.charId = null;
   assignHost(room);
@@ -440,11 +411,16 @@ function handleLeaveRoom(socket, payload = {}, cb = () => {}) {
   if (room.players.length === 0) {
     stopTimer(room);
     rooms.delete(room.roomCode);
-    cb({ ok: true, removed: true });
-    return;
+    return { room, removed: true };
   }
 
   emitRoomState(room);
+  return { room, removed: true };
+}
+
+function handleLeaveRoom(socket, cb = () => {}) {
+  const result = removePlayerFromRoom(socket);
+  if (!result) return cb({ ok: true });
   cb({ ok: true, removed: true });
 }
 
@@ -549,21 +525,7 @@ io.on('connection', (socket) => {
   registerAlias(socket, ['room:settings', 'room_settings'], handleRoomSettings);
 
   socket.on('disconnect', () => {
-    const found = findRoomBySocket(socket.id);
-    if (!found) return;
-
-    const { room } = found;
-    room.players = room.players.filter((p) => p.id !== socket.id);
-    socket.data.roomSessionId = null;
-    assignHost(room);
-
-    if (room.players.length === 0) {
-      stopTimer(room);
-      rooms.delete(room.roomCode);
-      return;
-    }
-
-    emitRoomState(room);
+    removePlayerFromRoom(socket);
   });
 
   socket.on('match:reset', (_payload, cb = () => {}) => {
