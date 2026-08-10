@@ -3696,11 +3696,40 @@ const SUMMARY_HIGHLIGHTS = Object.keys(SUMMARY_NOTES).sort((a, b) => b.length - 
 const SUGARABLE_ENEMY_TYPES = new Set(['basico', 'atirador', 'gigante', 'tanque', 'lider', 'elite', 'curandeiro']);
 const SUGAR_IMMUNE_ENEMY_TYPES = new Set(['boss', 'megaboss', 'colosso', 'elite_master', 'lider_elite']);
 
+// Progressão global de HP/dano das ondas. Continua respeitando a hierarquia:
+// Clássico < Hardcore < UHC, mas com crescimento mais controlado ao longo das waves.
+function getEnemyDifficultyMultiplier(currentWave = wave) {
+    const w = Math.max(1, Number(currentWave) || 1);
+    if (pd?.settings?.ultraHardcore) return 1.14 + (w * 0.17);
+    if (window.isHardcoreMode) return 1.10 + (w * 0.15);
+    return 1.00 + (w * 0.11);
+}
+
+// Cada inimigo começa sua progressão na wave em que foi liberado.
+// Na wave de entrada ele recebe somente o multiplicador-base da dificuldade;
+// os buffs procedurais passam a crescer a partir dessa wave.
+function getEnemyEntryWave(type, currentWave = wave) {
+    const key = String(type || '').toLowerCase();
+    const entryWaves = {
+        basico: 1, basic: 1, cardboard_head: 2, motorcycle_helmet: 3, prism_head: 7,
+        ninja: 3, velocista: 3, dancer: 3, atirador: 5, kamikaze: 5, gigante: 6,
+        tanque: 13, curandeiro: 16, elite: 17, lider: 21, colosso: 30, elite_master: 30,
+        lider_elite: 30, mummy: 10, explorer: 15, sarcophagus: 15, camel: 18, scorpion: 30,
+        boss: 10, megaboss: 30, goblin: 1, monster_tree: 1
+    };
+    return Object.prototype.hasOwnProperty.call(entryWaves, key) ? entryWaves[key] : Math.max(1, Number(currentWave) || 1);
+}
+
+function getEnemyDifficultyMultiplierFromEntry(type, spawnWave = wave, currentWave = wave) {
+    const startWave = Math.max(1, Number(spawnWave) || getEnemyEntryWave(type, currentWave));
+    const nowWave = Math.max(startWave, Number(currentWave) || startWave);
+    const baseline = pd?.settings?.ultraHardcore ? 1.14 : (window.isHardcoreMode ? 1.10 : 1.00);
+    const slope = pd?.settings?.ultraHardcore ? 0.17 : (window.isHardcoreMode ? 0.15 : 0.11);
+    return baseline + Math.max(0, nowWave - startWave) * slope;
+}
+
 function getSugarVelocistaMult() {
-    let mult = 1 + (wave * 0.15);
-    if (window.isHardcoreMode) mult = 1.2 + (wave * 0.22);
-    if (pd?.settings?.ultraHardcore) mult = 1.25 + (wave * 0.24);
-    return mult;
+    return getEnemyDifficultyMultiplier(wave);
 }
 
 function isSugarImmuneEnemy(e) {
@@ -9452,12 +9481,12 @@ if (!isBossAlive) {
         if (wave % 2 === 0 && pd.selectedChar === 'ripper') { let s = allies.find(a => a.type === 'speaker' || a.ref === 'ripper_speaker'); if(s) { s.x = player.x; s.y = player.y; s.cd = 0; } }
         if (wave % 10 === 0) {
             let spawn = getSafeSpawnPoint(60, 340, 36); let ex = spawn.x; let ey = spawn.y;
-            let mult = 1 + (wave * 0.2); if(window.isHardcoreMode) mult *= 1.3;
+            const bossSpawnWave = wave; let mult = getEnemyDifficultyMultiplierFromEntry(wave >= 30 ? 'megaboss' : 'boss', bossSpawnWave, wave) * (pd.settings.ultraHardcore ? 1.16 : (window.isHardcoreMode ? 1.12 : 1.08));
             if(wave >= 30) {
-                enemies.push({ x: ex, y: ey, type: 'megaboss', isBoss: true, hp: 1500*mult, maxHp: 1500*mult, speed: 1.2, baseDmg: 30*mult, dmg: 30*mult, size: 60, cd: -15, dashCd: 0, color: '#2c3e50', poison: {timer:0,dmg:0}, slowTimer: 0, weakenTimer: 0, burnTimer: 0, orbitalCd: 0, soak: 0, spawnSkillUsed: false }); triggerBossSpawnSkill(enemies[enemies.length - 1]); itemsMap = itemsMap.filter(it => it.type !== 'chest');
+                enemies.push({ x: ex, y: ey, type: 'megaboss', isBoss: true, spawnWave: bossSpawnWave, entryWave: bossSpawnWave, hp: 1500*mult, maxHp: 1500*mult, speed: 1.2, baseDmg: 30*mult, dmg: 30*mult, size: 60, cd: -15, dashCd: 0, color: '#2c3e50', poison: {timer:0,dmg:0}, slowTimer: 0, weakenTimer: 0, burnTimer: 0, orbitalCd: 0, soak: 0, spawnSkillUsed: false }); triggerBossSpawnSkill(enemies[enemies.length - 1]); itemsMap = itemsMap.filter(it => it.type !== 'chest');
                 addFloatingText(cw/2 + camera.x, ch/2 + camera.y - 100, "MEGA BOSS WAVE!", '#8e44ad', 50);
             } else {
-                enemies.push({ x: ex, y: ey, type: 'boss', isBoss: true, hp: 600*mult, maxHp: 600*mult, speed: 0.8, baseDmg: 20*mult, dmg: 20*mult, size: 50, cd: -15, color: '#8b0000', poison: {timer:0,dmg:0}, slowTimer: 0, weakenTimer: 0, burnTimer: 0, soak: 0, spawnSkillUsed: false }); triggerBossSpawnSkill(enemies[enemies.length - 1]); itemsMap = itemsMap.filter(it => it.type !== 'chest');
+                enemies.push({ x: ex, y: ey, type: 'boss', isBoss: true, spawnWave: bossSpawnWave, entryWave: bossSpawnWave, hp: 600*mult, maxHp: 600*mult, speed: 0.8, baseDmg: 20*mult, dmg: 20*mult, size: 50, cd: -15, color: '#8b0000', poison: {timer:0,dmg:0}, slowTimer: 0, weakenTimer: 0, burnTimer: 0, soak: 0, spawnSkillUsed: false }); triggerBossSpawnSkill(enemies[enemies.length - 1]); itemsMap = itemsMap.filter(it => it.type !== 'chest');
                 addFloatingText(cw/2 + camera.x, ch/2 + camera.y - 100, "BOSS WAVE!", '#ff0000', 50);
             }
         }
@@ -9879,11 +9908,13 @@ if (!isBossAlive) {
     }
 
     enemySpawnTimer -= 60 * dt;
-    let baseSpawn = 160;
-    let waveRed = 4;
-    let minSpawn = 40;
-    if(window.isHardcoreMode) { baseSpawn = 112; waveRed = 6; minSpawn = 30; }
-    if(pd.settings.ultraHardcore) { baseSpawn = 92; minSpawn = 22; waveRed = 7; }
+    // Intervalos maiores = menos inimigos por segundo. A escalada ainda acelera
+    // conforme as waves, mas de forma mais moderada. UHC continua sendo o mais rápido.
+    let baseSpawn = 180;
+    let waveRed = 3;
+    let minSpawn = 48;
+    if(window.isHardcoreMode) { baseSpawn = 130; waveRed = 4; minSpawn = 36; }
+    if(pd.settings.ultraHardcore) { baseSpawn = 110; minSpawn = 30; waveRed = 5; }
     
     let spawnRate = wave <= 3 ? baseSpawn : Math.max(minSpawn, baseSpawn - (wave - 3) * waveRed);
     spawnRate *= player.stats.enemySpawnMult;
@@ -11334,12 +11365,12 @@ function spawnEnemy() {
         if (wave >= 30) types.push('scorpion');
     }
     
-    let type = types[Math.floor(Math.random() * types.length)]; let mult = 1 + (wave * 0.15); if(window.isHardcoreMode) mult = 1.2 + (wave * 0.22); if(pd.settings.ultraHardcore) mult = 1.25 + (wave * 0.24);
+    let type = types[Math.floor(Math.random() * types.length)]; const spawnWave = wave; let mult = getEnemyDifficultyMultiplierFromEntry(type, spawnWave, wave);
     
     if(pd.settings.ultraHardcore && window.currentMap === 3 && Math.random() < 0.25) type = 'goblin';
     if(pd.settings.ultraHardcore && window.currentMap === 4 && type === 'gigante') type = 'monster_tree';
 
-    let e = { x: ex, y: ey, type, hp: 0, maxHp: 0, speed: 0, baseDmg: 0, dmg: 0, size: 0, cd: 0, color: '', poison: { timer: 0, dmg: 0, tickCd: 0 }, slowTimer: 0, weakenTimer: 0, burnTimer: 0, freezeTimer: 0, burnDmg: 0, speedBuffTimer: 0, soak: 0, shockTimer: 0, shockSemiTimer: 0, shockTick: 0, shockSemiTick: 0, shockDmg: 0, shockSemiDmg: 0, shockRate: 0.3, semiShockRate: 0.4, spawnBiome: window.currentMap, stationary: false, poisonOnHit: 0 };
+    let e = { x: ex, y: ey, type, hp: 0, maxHp: 0, speed: 0, baseDmg: 0, dmg: 0, size: 0, cd: 0, color: '', poison: { timer: 0, dmg: 0, tickCd: 0 }, slowTimer: 0, weakenTimer: 0, burnTimer: 0, freezeTimer: 0, burnDmg: 0, speedBuffTimer: 0, soak: 0, shockTimer: 0, shockSemiTimer: 0, shockTick: 0, shockSemiTick: 0, shockDmg: 0, shockSemiDmg: 0, shockRate: 0.3, semiShockRate: 0.4, spawnBiome: window.currentMap, spawnWave, entryWave: spawnWave, stationary: false, poisonOnHit: 0 };
     
     if(type === 'basico') { e.hp = 30*mult; e.speed = 1.5; e.baseDmg = 5*mult; e.size = 12; e.color = '#e74c3c'; }
     if(type === 'velocista' || type === 'dancer') { e.hp = 15*mult; e.speed = 2.0; e.baseDmg = 3*mult; e.size = 10; e.color = '#f39c12'; } 
@@ -11508,8 +11539,10 @@ function updateEnemies(dt) {
                 let count = e.type === 'lider_elite' ? 8 : 4;
                 for(let k=0; k<count; k++) {
                     let isGiant = Math.random() < 0.10;
-                    let mult = 1 + (wave * 0.15);
-                    enemies.push({ x: e.x + (Math.random()-0.5)*60, y: e.y + (Math.random()-0.5)*60, type: isGiant ? 'gigante' : 'basico', hp: (isGiant?80:30)*mult, maxHp: (isGiant?80:30)*mult, speed: isGiant?0.8:1.5, baseDmg: (isGiant?15:5)*mult, dmg: (isGiant?15:5)*mult, size: isGiant?22:12, color: isGiant?'#8e44ad':'#e74c3c', poison: {timer:0,dmg:0}, slowTimer: 0, weakenTimer: 0, burnTimer: 0, soak: 0 });
+                    const summonedType = isGiant ? 'gigante' : 'basico';
+                    const summonedEntryWave = Number(e.entryWave) || getEnemyEntryWave(e.type, wave);
+                    let mult = getEnemyDifficultyMultiplierFromEntry(summonedType, summonedEntryWave, wave);
+                    enemies.push({ x: e.x + (Math.random()-0.5)*60, y: e.y + (Math.random()-0.5)*60, type: summonedType, hp: (isGiant?80:30)*mult, maxHp: (isGiant?80:30)*mult, speed: isGiant?0.8:1.5, baseDmg: (isGiant?15:5)*mult, dmg: (isGiant?15:5)*mult, size: isGiant?22:12, color: isGiant?'#8e44ad':'#e74c3c', poison: {timer:0,dmg:0}, slowTimer: 0, weakenTimer: 0, burnTimer: 0, soak: 0, spawnWave: summonedEntryWave, entryWave: summonedEntryWave });
                 }
             }
             let a = Math.atan2(targetY - e.y, targetX - e.x); nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt; ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
@@ -11648,13 +11681,13 @@ function updateEnemies(dt) {
                 // Conteúdo em cadeia do Deserto. Eles surgem somente pela destruição correspondente.
                 if (e.type === 'explorer') {
                     enemies.push({
-                        x: e.x, y: e.y, type: 'sarcophagus', hp: 150 * (1 + wave * 0.15), maxHp: 150 * (1 + wave * 0.15),
-                        speed: 0, baseDmg: 8 * (1 + wave * 0.15), dmg: 8 * (1 + wave * 0.15), size: 22, cd: 0, color: '#c7a76b',
+                        x: e.x, y: e.y, type: 'sarcophagus', hp: 150 * getEnemyDifficultyMultiplierFromEntry('sarcophagus', e.entryWave || 15, wave), maxHp: 150 * getEnemyDifficultyMultiplierFromEntry('sarcophagus', e.entryWave || 15, wave),
+                        speed: 0, baseDmg: 8 * getEnemyDifficultyMultiplierFromEntry('sarcophagus', e.entryWave || 15, wave), dmg: 8 * getEnemyDifficultyMultiplierFromEntry('sarcophagus', e.entryWave || 15, wave), size: 22, cd: 0, color: '#c7a76b',
                         poison: {timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0,
                         shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4, stationary:true, spawnBiome:1, desertEnemy:true
                     });
                 } else if (e.type === 'sarcophagus') {
-                    const mult = 1 + (wave * 0.15);
+                    const mult = getEnemyDifficultyMultiplierFromEntry('sarcophagus', e.entryWave || 15, wave);
                     if (Math.random() < 0.08) {
                         enemies.push({
                             x:e.x, y:e.y, type:'lider', hp:45*mult, maxHp:45*mult, speed:1.2, baseDmg:8*mult, dmg:8*mult, size:14, cd:0, color:'#fbc531', spawnCd:20,
@@ -13124,37 +13157,60 @@ function getPlainsGrassPattern() {
 }
 
 let biomeSandPattern = null;
-function getBiomeSandPattern() {
-    if (biomeSandPattern) return biomeSandPattern;
+let biomeSnowPattern = null;
+
+function buildBiomeTexturePattern(mode) {
     const tile = document.createElement('canvas');
     tile.width = 128; tile.height = 128;
     const g = tile.getContext('2d');
-    g.fillStyle = '#d8b16a';
+    const snow = mode === 'snow';
+    g.fillStyle = snow ? '#edf4f7' : '#d8b16a';
     g.fillRect(0, 0, tile.width, tile.height);
+
+    // Mesmo padrão espacial nos dois biomas; só muda a paleta.
+    let seed = 1357911;
+    const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
     for (let i = 0; i < 420; i++) {
-        const x = Math.random() * tile.width;
-        const y = Math.random() * tile.height;
-        const s = Math.random() * 1.8 + 0.25;
-        g.fillStyle = Math.random() > 0.52 ? 'rgba(126,92,45,0.16)' : 'rgba(255,242,190,0.17)';
+        const x = rnd() * tile.width;
+        const y = rnd() * tile.height;
+        const s = rnd() * 1.8 + 0.25;
+        g.fillStyle = snow
+            ? (rnd() > 0.52 ? 'rgba(167,190,202,0.16)' : 'rgba(255,255,255,0.30)')
+            : (rnd() > 0.52 ? 'rgba(126,92,45,0.16)' : 'rgba(255,242,190,0.17)');
         g.beginPath(); g.arc(x, y, s, 0, Math.PI * 2); g.fill();
     }
     for (let i = 0; i < 18; i++) {
-        const x = Math.random() * tile.width;
-        const y = Math.random() * tile.height;
-        g.strokeStyle = 'rgba(165,126,67,0.14)';
+        const x = rnd() * tile.width;
+        const y = rnd() * tile.height;
+        g.strokeStyle = snow ? 'rgba(170,194,204,0.15)' : 'rgba(165,126,67,0.14)';
         g.lineWidth = 1.1;
         g.beginPath();
         g.moveTo(x, y);
-        g.lineTo(x + 8 + Math.random() * 12, y + (Math.random() - 0.5) * 3);
+        g.lineTo(x + 8 + rnd() * 12, y + (rnd() - 0.5) * 3);
         g.stroke();
     }
-    biomeSandPattern = ctx.createPattern(tile, 'repeat');
+    return ctx.createPattern(tile, 'repeat');
+}
+
+function getBiomeSandPattern() {
+    if (!biomeSandPattern) biomeSandPattern = buildBiomeTexturePattern('sand');
     return biomeSandPattern;
+}
+
+function getBiomeSnowPattern() {
+    if (!biomeSnowPattern) biomeSnowPattern = buildBiomeTexturePattern('snow');
+    return biomeSnowPattern;
 }
 
 function drawSandTextureRect(x, y, w, h) {
     const p = getBiomeSandPattern();
     ctx.fillStyle = p || '#d8b16a';
+    ctx.fillRect(x, y, w, h);
+}
+
+function drawSnowTextureRect(x, y, w, h) {
+    const p = getBiomeSnowPattern();
+    ctx.fillStyle = p || '#edf4f7';
     ctx.fillRect(x, y, w, h);
 }
 
@@ -13166,18 +13222,18 @@ function draw() {
     ctx.translate(-camera.x, -camera.y);
     
     if (window.currentMap === 0 || window.currentMap === 4) {
-        // A Floresta reaproveita exatamente a textura de grama da Planície.
+        // A Floresta usa a mesma textura da Planície, apenas com uma camada verde mais forte.
         ctx.fillStyle = getPlainsGrassPattern() || '#557A46';
         ctx.fillRect(camera.x, camera.y, cw, ch);
-        ctx.fillStyle = 'rgba(56, 93, 45, 0.08)';
-        ctx.fillRect(camera.x, camera.y, cw, ch);
+        if (window.currentMap === 4) {
+            ctx.fillStyle = 'rgba(28, 105, 32, 0.24)';
+            ctx.fillRect(camera.x, camera.y, cw, ch);
+        }
     } else if (window.currentMap === 1) {
         drawSandTextureRect(camera.x, camera.y, cw, ch);
     } else if (window.currentMap === 2) {
-        // A areia pode existir visualmente na Nevasca, mas as poças de gelo são desenhadas por cima.
-        drawSandTextureRect(camera.x, camera.y, cw, ch);
-        ctx.fillStyle = 'rgba(224, 242, 248, 0.24)';
-        ctx.fillRect(camera.x, camera.y, cw, ch);
+        // Mesma distribuição da textura do Deserto, mas recolorizada para branco/neve.
+        drawSnowTextureRect(camera.x, camera.y, cw, ch);
     } else {
         ctx.fillStyle = window.currentMap===3 ? '#576574' : window.currentMap===5 ? '#3b3e24' : window.currentMap===6 ? '#2f3640' : window.currentMap===7 ? '#351111' : window.currentMap===8 ? '#e1f7d5' : '#1d145d';
         ctx.fillRect(camera.x, camera.y, cw, ch);
