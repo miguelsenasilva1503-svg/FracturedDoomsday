@@ -9870,7 +9870,7 @@ function arenaConnect() {
     });
     arenaSocket.on('disconnect', () => {
         if (arenaSocket && !arenaSocket.connected) arenaSocket = null;
-        if (arenaState.online) if (!(window.__arenaIntentionalLeave || (window.arenaState && window.arenaState.leavingRoom) || (typeof safeState === 'function' && safeState()?.leavingRoom))) notify('Conexão da Arena perdida.');
+        if (arenaState.online) notify('Conexão da Arena perdida.');
     });
     arenaSocket.on('room:update', (room) => {
         if (!room) return;
@@ -9890,18 +9890,7 @@ function arenaConnect() {
             charId: p.charId || arenaSelectedCharId()
         })) : [];
         if (room.status === 'playing') {
-            if (!window.isArenaMode && typeof enterBattleFromPayload === 'function') {
-                const durationMs = Math.max(1, Number(room?.settings?.duration) || 5) * 60000;
-                enterBattleFromPayload({
-                    mode: 'online',
-                    settings: room.settings || arenaState.settings,
-                    durationMs,
-                    endsAt: room.endsAt || (Date.now() + durationMs),
-                    roomCode: room.code || room.roomCode || arenaState.roomCode || '',
-                });
-            } else if (window.isArenaMode && typeof arenaUpdateRankingPanel === 'function') {
-                arenaUpdateRankingPanel();
-            }
+            if (window.isArenaMode) arenaUpdateRankingPanel();
             return;
         }
         arenaRenderLobby();
@@ -9913,8 +9902,7 @@ function arenaConnect() {
         arenaState.kills = 0;
         arenaState.penalty = 0;
         window.isArenaMode = true;
-        if (typeof enterBattleFromPayload === 'function') enterBattleFromPayload(payload);
-        else if (typeof showArenaMatch === 'function') showArenaMatch();
+        showArenaMatch();
     });
     arenaSocket.on('match:end', (payload) => {
         arenaHandleResults(payload?.ranking || arenaGetLivePlayers());
@@ -9972,17 +9960,14 @@ function arenaJoinRoom() {
     arenaState.view = 'lobby';
     if (arenaSocket) {
         arenaSocket.emit('room:join', { code, name: nick }, (res) => {
-            if (!res?.ok) { showAlert(res?.error || 'Não foi possível entrar na sala.'); safeState().leavingRoom = false; window.__arenaIntentionalLeave = false; return; }
+            if (!res?.ok) { showAlert(res?.error || 'Não foi possível entrar na sala.'); return; }
             arenaState.online = true;
             arenaState.mode = 'online';
             arenaState.roomCode = res.code || code;
-            arenaState.roomSessionId = res.sessionId || arenaState.roomSessionId || '';
-            arenaState.roomSessionId = res.sessionId || res.room?.players?.find?.(p => p.id === arenaSocket.id)?.sessionId || '';
             arenaState.isHost = arenaSocket.id === res.room?.hostId;
             arenaState.players = Array.isArray(res.room?.players) ? res.room.players.map(p => ({
                 id: p.id, name: p.name, score: p.score || 0, kills: p.kills || 0, ready: !!p.ready, me: p.id === arenaSocket.id, host: p.id === (res.room?.hostId || arenaSocket.id), charId: p.charId || arenaSelectedCharId()
             })) : [];
-            safeState().leavingRoom = false; window.__arenaIntentionalLeave = false;
             arenaRenderLobby();
             notify(`Entrou na sala ${arenaState.roomCode}`);
         });
@@ -10098,7 +10083,7 @@ function arenaHideLeaveConfirm() {
 function arenaLeaveSocketAndDisconnect(socket) {
     if (!socket?.connected) return;
     try {
-        socket.emit('room:leave', { sessionId: String((window.arenaState && window.arenaState.roomSessionId) || '') }, () => {});
+        socket.emit('room:leave', {}, () => {});
     } catch (e) {}
     try { socket.disconnect(); } catch (e) {}
 }
@@ -10179,8 +10164,6 @@ function arenaJoinRoom() {
             arenaState.online = true;
             arenaState.mode = 'online';
             arenaState.roomCode = res.code || code;
-            arenaState.roomSessionId = res.sessionId || arenaState.roomSessionId || '';
-            arenaState.roomSessionId = res.sessionId || res.room?.players?.find?.(p => p.id === arenaSocket.id)?.sessionId || '';
             arenaState.isHost = arenaSocket.id === res.room?.hostId;
             arenaState.players = Array.isArray(res.room?.players) ? res.room.players.map(p => ({
                 id: p.id, name: p.name, score: p.score || 0, kills: p.kills || 0, ready: !!p.ready, me: p.id === arenaSocket.id, host: p.id === (res.room?.hostId || arenaSocket.id), charId: p.charId || arenaSelectedCharId()
@@ -16721,7 +16704,6 @@ applyMusicVolume();
                 arenaState.online = true;
                 arenaState.mode = 'online';
                 arenaState.roomCode = res.code || code;
-            arenaState.roomSessionId = res.sessionId || arenaState.roomSessionId || '';
                 arenaState.isHost = arenaSocket.id === res.room?.hostId;
                 arenaState.players = Array.isArray(res.room?.players) ? res.room.players.map(p => ({
                     id: p.id,
@@ -17296,8 +17278,6 @@ applyMusicVolume();
                 window.arenaState.online = true;
                 window.arenaState.mode = 'online';
                 window.arenaState.roomCode = res.code || code;
-                window.arenaState.roomSessionId = res.sessionId || window.arenaState.roomSessionId || '';
-            arenaState.roomSessionId = res.sessionId || arenaState.roomSessionId || '';
                 window.arenaState.isHost = window.arenaSocket.id === res.room?.hostId;
                 window.arenaState.players = Array.isArray(res.room?.players) ? res.room.players.map(p => ({
                     id: p.id,
@@ -17679,7 +17659,7 @@ applyMusicVolume();
             window.arenaSocket.on('disconnect', () => {
                 if (window.arenaState) window.arenaState.online = false;
                 if (window.arenaSocket && !window.arenaSocket.connected) window.arenaSocket = null;
-                if (!window.arenaState?.leavingRoom && window.arenaState?.online) if (!(window.__arenaIntentionalLeave || (window.arenaState && window.arenaState.leavingRoom) || (typeof safeState === 'function' && safeState()?.leavingRoom))) notify('Conexão da Arena perdida.');
+                if (window.arenaState?.online) notify('Conexão da Arena perdida.');
             });
 
             window.arenaSocket.on('room:update', (room) => {
@@ -17808,8 +17788,6 @@ applyMusicVolume();
                 window.arenaState.online = true;
                 window.arenaState.mode = 'online';
                 window.arenaState.roomCode = res.code || code;
-                window.arenaState.roomSessionId = res.sessionId || window.arenaState.roomSessionId || '';
-            arenaState.roomSessionId = res.sessionId || arenaState.roomSessionId || '';
                 window.arenaState.isHost = s.id === res.room?.hostId;
                 window.arenaState.players = mapPlayers(res.room?.players || [], s.id);
                 window.arenaState.view = 'lobby';
@@ -18373,8 +18351,6 @@ applyMusicVolume();
                 window.arenaState.online = true;
                 window.arenaState.mode = 'online';
                 window.arenaState.roomCode = res.code || code;
-                window.arenaState.roomSessionId = res.sessionId || window.arenaState.roomSessionId || '';
-            arenaState.roomSessionId = res.sessionId || arenaState.roomSessionId || '';
                 window.arenaState.isHost = s.id === res.room?.hostId;
                 window.arenaState.players = Array.isArray(res.room?.players) ? res.room.players.map(p => ({
                     id: p.id,
@@ -18524,25 +18500,10 @@ applyMusicVolume();
         window.arenaState.players = players;
         window.arenaState.playerCharMap = window.arenaState.playerCharMap && typeof window.arenaState.playerCharMap === 'object' ? window.arenaState.playerCharMap : {};
         players.forEach(p => { if (p.id) window.arenaState.playerCharMap[p.id] = p.charId; });
-        syncLocalCharMap();        if (isPlaying) {
+        syncLocalCharMap();
+
+        if (isPlaying) {
             window.arenaState.view = 'playing';
-            try {
-                const endsAt = Number(room.endsAt);
-                const durationMs = Number.isFinite(endsAt)
-                    ? Math.max(1000, endsAt - Date.now())
-                    : (Math.max(1, Number(settings.duration) || 5) * 60000);
-                if (room.starting || room.status === 'starting') {
-                    // Countdown stays in the lobby. Battle only begins on match_start.
-                    if (typeof arenaRenderLobby === 'function') arenaRenderLobby();
-                } else {
-                    beginArenaBattle({
-                        mode: 'online',
-                        settings,
-                        durationMs,
-                        endsAt: endsAt || (Date.now() + durationMs),
-                    });
-                }
-            } catch (e) {}
             if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
             return;
         }
@@ -18573,23 +18534,21 @@ applyMusicVolume();
         socket.on('room:update', applyRoomSnapshot);
         socket.on('match_starting', (payload) => {
             window.arenaState.matchCountdown = Number(payload?.countdownSec) || 0;
-            openArenaBattleShell();
             if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
         });
         socket.on('match:starting', (payload) => {
             window.arenaState.matchCountdown = Number(payload?.countdownSec) || 0;
-            openArenaBattleShell();
             if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
         });
         socket.on('match_start', (payload) => {
             window.arenaState.settings = { ...window.arenaState.settings, ...(payload?.settings || {}) };
-            if (typeof enterBattleFromPayload === 'function') enterBattleFromPayload(payload); else if (typeof showArenaMatch === 'function') showArenaMatch();
+            if (typeof showArenaMatch === 'function') showArenaMatch();
             if (typeof arenaSetBattleContext === 'function') arenaSetBattleContext();
             window.arenaState.timeLeftMs = Number(payload?.durationMs) || Math.max(1, Number(window.arenaState.settings?.duration) || 5) * 60000;
         });
         socket.on('match:start', (payload) => {
             window.arenaState.settings = { ...window.arenaState.settings, ...(payload?.settings || {}) };
-            if (typeof enterBattleFromPayload === 'function') enterBattleFromPayload(payload); else if (typeof showArenaMatch === 'function') showArenaMatch();
+            if (typeof showArenaMatch === 'function') showArenaMatch();
             if (typeof arenaSetBattleContext === 'function') arenaSetBattleContext();
             window.arenaState.timeLeftMs = Number(payload?.durationMs) || Math.max(1, Number(window.arenaState.settings?.duration) || 5) * 60000;
         });
@@ -18608,7 +18567,7 @@ applyMusicVolume();
             if (typeof arenaHandleResults === 'function') arenaHandleResults(payload?.ranking || payload?.rank || payload?.results || []);
         });
         socket.on('disconnect', () => {
-            if (window.arenaState.online) if (!(window.__arenaIntentionalLeave || (window.arenaState && window.arenaState.leavingRoom) || (typeof safeState === 'function' && safeState()?.leavingRoom))) notify('Conexão da Arena perdida.');
+            if (window.arenaState.online) notify('Conexão da Arena perdida.');
         });
         return socket;
     }
@@ -18694,7 +18653,6 @@ applyMusicVolume();
             if (!res?.ok) { showAlert(res?.error || 'Não foi possível entrar na sala.'); return; }
             applyRoomSnapshot(res.room || res);
             arenaState.roomCode = res.code || code;
-            arenaState.roomSessionId = res.sessionId || arenaState.roomSessionId || '';
             arenaState.view = 'lobby';
             showScreen('screen-arena');
             arenaRenderLobby();
@@ -19765,25 +19723,23 @@ applyMusicVolume();
 
         socket.on('match_starting', (payload) => {
             window.arenaState.matchCountdown = Number(payload?.countdownSec) || 0;
-            openArenaBattleShell();
             if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
         });
         socket.on('match:starting', (payload) => {
             window.arenaState.matchCountdown = Number(payload?.countdownSec) || 0;
-            openArenaBattleShell();
             if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
         });
 
         socket.on('match_start', (payload) => {
             window.arenaState.settings = { ...arenaCloneSettings(window.arenaState.settings), ...(arenaCloneSettings(payload?.settings || {})) };
             window.arenaState.timeLeftMs = Number(payload?.durationMs) || Math.max(1, Number(window.arenaState.settings?.duration) || 5) * 60000;
-            if (typeof enterBattleFromPayload === 'function') enterBattleFromPayload(payload); else if (typeof showArenaMatch === 'function') showArenaMatch();
+            if (typeof showArenaMatch === 'function') showArenaMatch();
             if (typeof arenaSetBattleContext === 'function') arenaSetBattleContext();
         });
         socket.on('match:start', (payload) => {
             window.arenaState.settings = { ...arenaCloneSettings(window.arenaState.settings), ...(arenaCloneSettings(payload?.settings || {})) };
             window.arenaState.timeLeftMs = Number(payload?.durationMs) || Math.max(1, Number(window.arenaState.settings?.duration) || 5) * 60000;
-            if (typeof enterBattleFromPayload === 'function') enterBattleFromPayload(payload); else if (typeof showArenaMatch === 'function') showArenaMatch();
+            if (typeof showArenaMatch === 'function') showArenaMatch();
             if (typeof arenaSetBattleContext === 'function') arenaSetBattleContext();
         });
 
@@ -19804,7 +19760,7 @@ applyMusicVolume();
         });
 
         socket.on('disconnect', () => {
-            if (!window.arenaState?.leavingRoom && window.arenaState?.online) if (!(window.__arenaIntentionalLeave || (window.arenaState && window.arenaState.leavingRoom) || (typeof safeState === 'function' && safeState()?.leavingRoom))) notify('Conexão da Arena perdida.');
+            if (window.arenaState?.online) notify('Conexão da Arena perdida.');
         });
 
         return socket;
@@ -20001,7 +19957,6 @@ applyMusicVolume();
             if (!res?.ok) { showAlert(res?.error || 'Não foi possível entrar na sala.'); return; }
             arenaApplyRoom(res.room || res);
             arenaState.roomCode = res.code || code;
-            arenaState.roomSessionId = res.sessionId || arenaState.roomSessionId || '';
             arenaState.online = true;
             arenaState.mode = 'online';
             arenaState.isHost = s.id === res.room?.hostId;
@@ -20516,7 +20471,6 @@ applyMusicVolume();
 
         if (isPlaying) {
             window.arenaState.view = 'playing';
-            forceHideArenaLobbyShell();
             if (typeof arenaSetBattleContext === 'function') arenaSetBattleContext();
             if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
             return;
@@ -20550,14 +20504,14 @@ applyMusicVolume();
             arenaSafeArenaState();
             window.arenaState.settings = { ...window.arenaState.settings, ...(payload?.settings || {}) };
             if (typeof arenaSetBattleContext === 'function') arenaSetBattleContext();
-            if (typeof enterBattleFromPayload === 'function') enterBattleFromPayload(payload); else if (typeof showArenaMatch === 'function') showArenaMatch();
+            if (typeof showArenaMatch === 'function') showArenaMatch();
             window.arenaState.timeLeftMs = Number(payload?.durationMs) || Math.max(1, Number(window.arenaState.settings?.duration) || 5) * 60000;
         });
         socket.on('match:start', (payload) => {
             arenaSafeArenaState();
             window.arenaState.settings = { ...window.arenaState.settings, ...(payload?.settings || {}) };
             if (typeof arenaSetBattleContext === 'function') arenaSetBattleContext();
-            if (typeof enterBattleFromPayload === 'function') enterBattleFromPayload(payload); else if (typeof showArenaMatch === 'function') showArenaMatch();
+            if (typeof showArenaMatch === 'function') showArenaMatch();
             window.arenaState.timeLeftMs = Number(payload?.durationMs) || Math.max(1, Number(window.arenaState.settings?.duration) || 5) * 60000;
         });
         socket.on('match_tick', (payload) => {
@@ -20577,7 +20531,7 @@ applyMusicVolume();
             if (typeof arenaHandleResults === 'function') arenaHandleResults(payload?.ranking || payload?.rank || payload?.results || []);
         });
         socket.on('disconnect', () => {
-            if (!window.arenaState?.leavingRoom && window.arenaState?.online) if (!(window.__arenaIntentionalLeave || (window.arenaState && window.arenaState.leavingRoom) || (typeof safeState === 'function' && safeState()?.leavingRoom))) notify('Conexão da Arena perdida.');
+            if (window.arenaState?.online) notify('Conexão da Arena perdida.');
         });
         return socket;
     }
@@ -20658,8 +20612,6 @@ applyMusicVolume();
             if (!res?.ok) { showAlert(res?.error || 'Não foi possível entrar na sala.'); return; }
             arenaApplySnapshot(res.room || res);
             window.arenaState.roomCode = res.code || code;
-                window.arenaState.roomSessionId = res.sessionId || window.arenaState.roomSessionId || '';
-            arenaState.roomSessionId = res.sessionId || arenaState.roomSessionId || '';
             window.arenaState.view = 'lobby';
             showScreen('screen-arena');
             arenaRenderLobby();
@@ -21182,7 +21134,6 @@ applyMusicVolume();
 
         if (isPlaying) {
             window.arenaState.view = 'playing';
-            forceHideArenaLobbyShell();
             if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
             return;
         }
@@ -21219,7 +21170,7 @@ applyMusicVolume();
                 window.arenaState.settings = { ...window.arenaState.settings, ...cloneSettings(payload.settings), bannedChars: [] };
             }
             if (typeof arenaSetBattleContext === 'function') arenaSetBattleContext();
-            if (typeof enterBattleFromPayload === 'function') enterBattleFromPayload(payload); else if (typeof showArenaMatch === 'function') showArenaMatch();
+            if (typeof showArenaMatch === 'function') showArenaMatch();
             window.arenaState.timeLeftMs = Number(payload?.durationMs) || Math.max(1, Number(window.arenaState.settings?.duration) || 5) * 60000;
         });
         socket.on('match:start', (payload) => {
@@ -21228,7 +21179,7 @@ applyMusicVolume();
                 window.arenaState.settings = { ...window.arenaState.settings, ...cloneSettings(payload.settings), bannedChars: [] };
             }
             if (typeof arenaSetBattleContext === 'function') arenaSetBattleContext();
-            if (typeof enterBattleFromPayload === 'function') enterBattleFromPayload(payload); else if (typeof showArenaMatch === 'function') showArenaMatch();
+            if (typeof showArenaMatch === 'function') showArenaMatch();
             window.arenaState.timeLeftMs = Number(payload?.durationMs) || Math.max(1, Number(window.arenaState.settings?.duration) || 5) * 60000;
         });
         socket.on('match_tick', (payload) => {
@@ -21254,7 +21205,7 @@ applyMusicVolume();
             }
         });
         socket.on('disconnect', () => {
-            if (!window.arenaState?.leavingRoom && window.arenaState?.online) if (!(window.__arenaIntentionalLeave || (window.arenaState && window.arenaState.leavingRoom) || (typeof safeState === 'function' && safeState()?.leavingRoom))) notify('Conexão da Arena perdida.');
+            if (window.arenaState?.online) notify('Conexão da Arena perdida.');
         });
         return socket;
     }
@@ -21352,8 +21303,6 @@ applyMusicVolume();
             }
             applySnapshot(res.room || res);
             window.arenaState.roomCode = res.code || code;
-                window.arenaState.roomSessionId = res.sessionId || window.arenaState.roomSessionId || '';
-            arenaState.roomSessionId = res.sessionId || arenaState.roomSessionId || '';
             window.arenaState.view = 'lobby';
             showScreen('screen-arena');
             arenaRenderLobby();
@@ -21532,7 +21481,6 @@ applyMusicVolume();
         s.hostId = '';
         s.joinCode = '';
         s.roomCode = '';
-        s.roomSessionId = '';
         s.roomName = '';
         s.players = [];
         s.botRoster = [];
@@ -21849,61 +21797,19 @@ applyMusicVolume();
         }, 3600);
     }
 
-    
-function openArenaBattleShell(payload = {}) {
+    function enterBattleFromPayload(payload) {
         const s = safeState();
         const settings = payload && typeof payload.settings === 'object' ? payload.settings : s.settings;
-        if (settings && typeof settings === 'object') {
-            s.settings = { ...(s.settings || {}), ...(settings || {}) };
-            setCurrentMapFromSettings(s.settings);
-        }
-        const endsAt = Number(payload?.endsAt);
-        const durationMs = Number.isFinite(Number(payload?.durationMs))
-            ? Math.max(1000, Number(payload.durationMs))
-            : (Number.isFinite(endsAt)
-                ? Math.max(1000, endsAt - Date.now())
-                : Math.max(1, Number(s.settings?.duration) || 5) * 60000);
-        s.timeLeftMs = durationMs;
-        s.mode = payload?.mode || s.mode || (s.online ? 'online' : 'bots');
+        s.settings = { ...(s.settings || {}), ...(settings || {}) };
+        setCurrentMapFromSettings(s.settings);
+        s.timeLeftMs = Number(payload?.durationMs) || Math.max(1, Number(s.settings?.duration) || 5) * 60000;
+        s.mode = 'online';
         s.view = 'playing';
         window.isArenaMode = true;
         window.arenaIgnoreGameOver = false;
-        forceHideArenaLobbyShell();
         if (typeof arenaSetBattleContext === 'function') arenaSetBattleContext();
-        if (typeof arenaPrepBattleUI === 'function') arenaPrepBattleUI();
-        if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
-    }
-
-    function beginArenaBattle(payload = {}) {
-        openArenaBattleShell(payload);
         if (typeof arenaStartBattle === 'function') arenaStartBattle();
-        else if (typeof enterBattleFromPayload === 'function') enterBattleFromPayload(payload); else if (typeof showArenaMatch === 'function') showArenaMatch();
-    }
-
-    function enterBattleFromPayload(payload) {
-        beginArenaBattle(payload);
-    }
-
-    function forceHideArenaLobbyShell() {
-
-        const hideEl = (el) => {
-            if (!el) return;
-            el.classList.add('hidden');
-            el.style.display = 'none';
-            el.style.pointerEvents = 'none';
-        };
-
-        hideEl(document.getElementById('screen-arena'));
-        hideEl(document.getElementById('overlay-mode-select'));
-        hideEl(document.getElementById('overlay-pregame-shop'));
-        hideEl(document.getElementById('overlay-book'));
-        hideEl(document.getElementById('overlay-title-picker'));
-        hideEl(document.getElementById('overlay-profile'));
-
-        const hud = document.getElementById('game-hud');
-        if (hud) hud.classList.remove('hidden');
-        const exp = document.getElementById('exp-bar-container');
-        if (exp) exp.classList.remove('hidden');
+        else if (typeof showArenaMatch === 'function') showArenaMatch();
     }
 
     function roomStillContainsMe(room) {
@@ -21936,11 +21842,8 @@ function openArenaBattleShell(payload = {}) {
 
     function leaveRoomImmediate() {
         const sock = window.arenaSocket;
-        const s = safeState();
-        const sessionId = String(s.roomSessionId || '').trim();
-        window.__arenaIntentionalLeave = true;
-        if (sock?.connected && s.online) {
-            try { sock.emit('room:leave', sessionId ? { sessionId } : {}, () => { s.leavingRoom = false; window.__arenaIntentionalLeave = false; }); } catch (e) {}
+        if (sock?.connected && safeState().online) {
+            try { sock.emit('room:leave', {}, () => {}); } catch (e) {}
         }
         try {
             if (typeof arenaStopBattleLoop === 'function') arenaStopBattleLoop();
@@ -21991,141 +21894,8 @@ function openArenaBattleShell(payload = {}) {
         } catch (e) {}
     }
 
-    function installCanonicalArenaSocketHandlers(sock) {
-        if (!sock || sock.__canonicalArenaHandlersV1) return sock;
-        sock.__canonicalArenaHandlersV1 = true;
-
-        const events = [
-            'room_state', 'room:update',
-            'match_starting', 'match:starting',
-            'match_start', 'match:start',
-            'match_tick', 'match:tick',
-            'match_end', 'match:end',
-            'disconnect'
-        ];
-        events.forEach(ev => { try { sock.off(ev); } catch (e) {} });
-
-        const syncRoomState = (room) => {
-            const s = safeState();
-            if (!room || s.leavingRoom) return;
-
-            const meId = window.arenaSocket?.id || sock.id || 'me';
-            s.online = true;
-            s.roomCode = room.code || room.roomCode || s.roomCode || '';
-            s.hostId = room.hostId || s.hostId || '';
-            s.isHost = !!(room.hostId && meId && room.hostId === meId);
-            s.mode = 'online';
-
-            if (room.settings && typeof room.settings === 'object') {
-                s.settings = { ...(s.settings || {}), ...room.settings };
-                if (typeof setCurrentMapFromSettings === 'function') setCurrentMapFromSettings(s.settings);
-            }
-
-            const players = safeArray(room.players).map(p => ({
-                id: String(p.id || '').trim(),
-                name: String(p.name || 'Jogador'),
-                score: Math.max(0, Math.floor(Number(p.score) || 0)),
-                kills: Math.max(0, Math.floor(Number(p.kills) || 0)),
-                ready: !!p.ready,
-                me: p.id === meId,
-                host: p.id === room.hostId,
-                charId: String(p.charId || '').trim(),
-                sessionId: String(p.sessionId || '').trim(),
-            }));
-            s.players = players;
-            const me = players.find(p => p.me || p.id === meId);
-            if (me?.sessionId) s.roomSessionId = me.sessionId;
-
-            const playing = !!room.started || room.status === 'playing';
-            if (playing) {
-                const endsAt = Number(room.endsAt);
-                const durationMs = Number.isFinite(endsAt)
-                    ? Math.max(1000, endsAt - Date.now())
-                    : Math.max(1, Number(room?.settings?.duration) || 5) * 60000;
-                const payload = {
-                    mode: 'online',
-                    settings: room.settings || s.settings,
-                    durationMs,
-                    endsAt: Number.isFinite(endsAt) && endsAt > 0 ? endsAt : Date.now() + durationMs,
-                    roomCode: room.code || room.roomCode || s.roomCode || '',
-                };
-                s.view = 'playing';
-                s.timeLeftMs = durationMs;
-                beginArenaBattle(payload);
-                if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
-                return;
-            }
-
-            // A countdown is a lobby state; do not open the battle shell yet.
-            s.view = 'lobby';
-            if (typeof arenaRenderLobby === 'function') arenaRenderLobby();
-        };
-
-        sock.on('room_state', syncRoomState);
-        sock.on('room:update', syncRoomState);
-
-        const onStarting = (payload) => {
-            const s = safeState();
-            s.online = true;
-            s.matchCountdown = Number(payload?.countdownSec) || 0;
-            s.view = 'lobby';
-            if (typeof arenaRenderLobby === 'function') arenaRenderLobby();
-        };
-        sock.on('match_starting', onStarting);
-        sock.on('match:starting', onStarting);
-
-        const onStart = (payload) => {
-            const s = safeState();
-            if (s.resultsShown) return;
-            s.online = true;
-            s.mode = 'online';
-            s.view = 'playing';
-            if (payload?.settings && typeof payload.settings === 'object') {
-                s.settings = { ...(s.settings || {}), ...payload.settings };
-                if (typeof setCurrentMapFromSettings === 'function') setCurrentMapFromSettings(s.settings);
-            }
-            const durationMs = Number(payload?.durationMs) > 0
-                ? Number(payload.durationMs)
-                : Math.max(1, Number(s.settings?.duration) || 5) * 60000;
-            s.timeLeftMs = durationMs;
-            enterBattleFromPayload({
-                ...payload,
-                mode: 'online',
-                settings: payload?.settings || s.settings,
-                durationMs,
-                roomCode: payload?.roomCode || s.roomCode || '',
-            });
-        };
-        sock.on('match_start', onStart);
-        sock.on('match:start', onStart);
-
-        const onTick = (payload) => {
-            const remaining = Number(payload?.timeLeftMs ?? payload?.remainingMs);
-            if (Number.isFinite(remaining)) safeState().timeLeftMs = Math.max(0, remaining);
-        };
-        sock.on('match_tick', onTick);
-        sock.on('match:tick', onTick);
-
-        const onEnd = (payload) => {
-            renderFinalResults(payload?.ranking || payload?.rank || payload?.results || []);
-        };
-        sock.on('match_end', onEnd);
-        sock.on('match:end', onEnd);
-
-        sock.on('disconnect', () => {
-            const s = safeState();
-            if (!s.leavingRoom && s.online && !window.__arenaIntentionalLeave) {
-                notify('Conexão da Arena perdida.');
-            }
-        });
-
-        return sock;
-    }
-
     function ensureSocketConnection() {
-        if (window.arenaSocket && window.arenaSocket.connected) {
-            return installCanonicalArenaSocketHandlers(window.arenaSocket);
-        }
+        if (window.arenaSocket && window.arenaSocket.connected) return window.arenaSocket;
         if (window.arenaSocket && !window.arenaSocket.connected) {
             try { window.arenaSocket.disconnect(); } catch (e) {}
             window.arenaSocket = null;
@@ -22136,7 +21906,34 @@ function openArenaBattleShell(payload = {}) {
             : (typeof ARENA_SERVER_URL !== 'undefined' ? ARENA_SERVER_URL : 'https://roguelitelegacy.onrender.com');
         const sock = window.arenaSocket || io(url, { transports: ['websocket', 'polling'] });
         window.arenaSocket = sock;
-        return installCanonicalArenaSocketHandlers(sock);
+        if (!sock.__arenaRecoveryPatchAttached) {
+            sock.__arenaRecoveryPatchAttached = true;
+            sock.off('room_state');
+            sock.off('room:update');
+            sock.off('match_starting');
+            sock.off('match:starting');
+            sock.off('match_start');
+            sock.off('match:start');
+            sock.off('match_end');
+            sock.off('match:end');
+            sock.off('disconnect');
+            sock.on('room_state', onRoomSnapshot);
+            sock.on('room:update', onRoomSnapshot);
+            sock.on('match_starting', (payload) => {
+                safeState().matchCountdown = Number(payload?.countdownSec) || 0;
+                if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
+            });
+            sock.on('match:starting', (payload) => {
+                safeState().matchCountdown = Number(payload?.countdownSec) || 0;
+                if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
+            });
+            sock.on('match_start', (payload) => { if (!safeState().resultsShown) enterBattleFromPayload(payload); });
+            sock.on('match:start', (payload) => { if (!safeState().resultsShown) enterBattleFromPayload(payload); });
+            sock.on('match_end', (payload) => { renderFinalResults(payload?.ranking || payload?.rank || payload?.results || []); });
+            sock.on('match:end', (payload) => { renderFinalResults(payload?.ranking || payload?.rank || payload?.results || []); });
+            sock.on('disconnect', () => { if (safeState().online) notify('Conexão da Arena perdida.'); });
+        }
+        return sock;
     }
 
     function onRoomSnapshot(room) {
@@ -22161,11 +21958,8 @@ function openArenaBattleShell(payload = {}) {
             me: p.id === meId,
             host: p.id === room.hostId,
             charId: String(p.charId || '').trim(),
-            sessionId: String(p.sessionId || '').trim(),
         }));
         s.players = players;
-        const myPlayer = players.find(p => p.me || p.id === meId);
-        if (myPlayer?.sessionId) s.roomSessionId = myPlayer.sessionId;
         const inRoom = roomStillContainsMe(room);
         if (!inRoom && !room.started && !room.starting && room.status !== 'playing') {
             clearLocalLobbyState();
@@ -22173,30 +21967,9 @@ function openArenaBattleShell(payload = {}) {
             if (typeof arenaRenderJoinForm === 'function') arenaRenderJoinForm();
             return;
         }
-        if (room.starting || room.status === 'starting') {
-            // Stay in the lobby during the countdown; the real battle begins on match_start.
-            s.view = 'lobby';
-            s.matchCountdown = Number(room?.matchCountdown || room?.countdownSec || 0) || 0;
-            if (typeof arenaRenderLobby === 'function') arenaRenderLobby();
-            return;
-        }
-        if (room.started || room.status === 'playing') {
+        if (room.started || room.starting || room.status === 'playing') {
             s.view = 'playing';
-            try {
-                const endsAt = Number(room.endsAt);
-                const durationMs = Number.isFinite(endsAt)
-                    ? Math.max(1000, endsAt - Date.now())
-                    : (Math.max(1, Number(room?.settings?.duration) || 5) * 60000);
-                beginArenaBattle({
-                    mode: 'online',
-                    settings: room.settings || s.settings,
-                    durationMs,
-                    endsAt: endsAt || (Date.now() + durationMs),
-                });
-            } catch (e) {}
-            if (typeof arenaUpdateRankingPanel === 'function') {
-                arenaUpdateRankingPanel();
-            }
+            if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
             return;
         }
         if (s.view !== 'join' && s.view !== 'hub' && s.view !== 'lobby') s.view = 'lobby';
@@ -22204,7 +21977,9 @@ function openArenaBattleShell(payload = {}) {
     }
 
     function showBattleScreen() {
-        openArenaBattleShell();
+        const s = safeState();
+        s.view = 'playing';
+        window.isArenaMode = true;
         if (typeof showScreen === 'function') showScreen(null);
         const hud = document.getElementById('game-hud');
         if (hud) hud.classList.remove('hidden');
@@ -22225,14 +22000,8 @@ function openArenaBattleShell(payload = {}) {
         if (!s.isHost) { showAlert('Só o anfitrião começa a partida.'); return; }
         const sock = ensureSocketConnection();
         if (!sock) { showAlert('Socket da Arena indisponível.'); return; }
-
-        // O servidor é o único responsável por disparar o início para todos.
-        // O host não entra localmente aqui; ele espera o evento 'match_start'.
         sock.emit('room:start', {}, (res) => {
-            if (!res?.ok) {
-                showAlert(res?.error || 'Não foi possível iniciar.');
-                if (typeof arenaRenderLobby === 'function') arenaRenderLobby();
-            }
+            if (!res?.ok) showAlert(res?.error || 'Não foi possível iniciar.');
         });
     }
 
@@ -22248,40 +22017,12 @@ function openArenaBattleShell(payload = {}) {
     };
 
     window.showArenaMatch = function () {
-        if (typeof window.arenaStartBattle === 'function') {
-            window.arenaStartBattle();
-            return;
-        }
         showBattleScreen();
     };
 
     window.arenaStartBattle = function () {
-        if (typeof arenaEnsureState === 'function') arenaEnsureState();
-        if (typeof arenaStopBattleLoop === 'function') arenaStopBattleLoop();
-        const s = safeState();
-        s.view = 'playing';
-        s.mode = s.online ? 'online' : (s.mode === 'bots' ? 'bots' : 'hub');
-        s.resultsShown = false;
-        s.score = 0;
-        s.kills = 0;
-        s.penalty = 0;
-        if (!(Number(s.timeLeftMs) > 0)) s.timeLeftMs = Math.max(1, Number(s.settings?.duration) || 5) * 60000;
+        showBattleScreen();
         if (typeof arenaSetBattleContext === 'function') arenaSetBattleContext();
-        if (typeof forceHideArenaLobbyShell === 'function') forceHideArenaLobbyShell();
-        if (typeof showScreen === 'function') showScreen(null);
-        const shop = document.getElementById('overlay-pregame-shop');
-        if (shop) shop.classList.add('hidden');
-        const hud = document.getElementById('game-hud');
-        if (hud) hud.classList.remove('hidden');
-        const exp = document.getElementById('exp-bar-container');
-        if (exp) exp.classList.remove('hidden');
-        if (typeof joyZone !== 'undefined' && joyZone) joyZone.style.display = 'none';
-        if (typeof applyControlLayout === 'function') applyControlLayout();
-        if (typeof arenaPrepBattleUI === 'function') arenaPrepBattleUI();
-        if (typeof startRunAfterShop === 'function') startRunAfterShop();
-        if (typeof startArenaLoopIfNeeded === 'function') startArenaLoopIfNeeded();
-        if (typeof updateGameHud === 'function') updateGameHud();
-        if (typeof arenaUpdateRankingPanel === 'function') arenaUpdateRankingPanel();
     };
 
     window.arenaStartLobbyMatch = finalStartLobbyMatch;
@@ -22289,11 +22030,10 @@ function openArenaBattleShell(payload = {}) {
     window.arenaLeaveRoom = function () {
         safeState().leavingRoom = true;
         try { leaveRoomImmediate(); } finally {
-            setTimeout(() => { if (window.arenaState) window.arenaState.leavingRoom = false; window.__arenaIntentionalLeave = false; }, 500);
+            setTimeout(() => { if (window.arenaState) window.arenaState.leavingRoom = false; }, 150);
         }
     };
 
-    try { if (window.arenaSocket) installCanonicalArenaSocketHandlers(window.arenaSocket); } catch (e) {}
     if (window.arenaState && typeof window.arenaState === 'object' && window.arenaState.online) {
         try { ensureSocketConnection(); } catch (e) {}
     }
