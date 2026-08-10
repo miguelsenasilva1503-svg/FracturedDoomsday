@@ -10022,7 +10022,7 @@ function arenaStartLobbyMatch() {
         if (!arenaState.isHost) { showAlert('Só o anfitrião começa a partida.'); return; }
         const s = arenaConnect();
         if (!s) { showAlert('Socket da Arena indisponível.'); return; }
-        s.emit('match:start', {}, (res) => {
+        s.emit('room:start', {}, (res) => {
             if (!res?.ok) showAlert(res?.error || 'Não foi possível iniciar.');
         });
         return;
@@ -10222,7 +10222,7 @@ function arenaStartLobbyMatch() {
         if (!arenaState.isHost) { showAlert('Só o anfitrião começa a partida.'); return; }
         const s = arenaConnect();
         if (!s) { showAlert('Socket da Arena indisponível.'); return; }
-        s.emit('match:start', {}, (res) => {
+        s.emit('room:start', {}, (res) => {
             if (!res?.ok) showAlert(res?.error || 'Não foi possível iniciar.');
         });
         return;
@@ -16800,7 +16800,7 @@ applyMusicVolume();
             if (!arenaState.isHost) { showAlert('Só o anfitrião começa a partida.'); return; }
             const s = arenaConnect();
             if (!s) { showAlert('Socket da Arena indisponível.'); return; }
-            s.emit('match:start', {}, (res) => {
+            s.emit('room:start', {}, (res) => {
                 if (!res?.ok) showAlert(res?.error || 'Não foi possível iniciar.');
             });
             return;
@@ -17208,7 +17208,7 @@ applyMusicVolume();
             if (!window.arenaState.isHost) { showAlert('Só o anfitrião começa a partida.'); return; }
             const s = typeof arenaConnect === 'function' ? arenaConnect() : null;
             if (!s) { showAlert('Socket da Arena indisponível.'); return; }
-            s.emit('match:start', {}, (res) => {
+            s.emit('room:start', {}, (res) => {
                 if (!res?.ok) showAlert(res?.error || 'Não foi possível iniciar.');
             });
             return;
@@ -17851,7 +17851,7 @@ applyMusicVolume();
         if (!window.arenaState?.isHost) { showAlert('Só o anfitrião começa a partida.'); return; }
         const s = ensureSocketConnected(() => {}, 'Servidor da Arena indisponível.');
         if (!s) return;
-        const emitStart = () => s.emit('match:start', {}, (res) => {
+        const emitStart = () => s.emit('room:start', {}, (res) => {
             if (!res?.ok) showAlert(res?.error || 'Não foi possível iniciar.');
         });
         if (s.connected) emitStart();
@@ -19039,7 +19039,7 @@ applyMusicVolume();
         if (!window.arenaState.isHost) { showAlert('Só o anfitrião começa a partida.'); return; }
         const s = arenaConnect();
         if (!s) { showAlert('Servidor da Arena indisponível.'); return; }
-        s.emit('match:start', {}, (res) => {
+        s.emit('room:start', {}, (res) => {
             if (!res?.ok) showAlert(res?.error || 'Não foi possível iniciar.');
         });
     };
@@ -20050,7 +20050,7 @@ applyMusicVolume();
         }
         const s = arenaConnect();
         if (!s || !s.connected) { showAlert('Servidor da Arena indisponível.'); return; }
-        s.emit('match:start', {}, (res) => {
+        s.emit('room:start', {}, (res) => {
             if (!res?.ok) showAlert(res?.error || 'Não foi possível iniciar.');
         });
     };
@@ -20920,7 +20920,7 @@ applyMusicVolume();
         if (!isHost) { showAlert('Só o anfitrião começa a partida.'); return; }
         const s = window.arenaConnect();
         if (!s) { showAlert('Servidor da Arena indisponível.'); return; }
-        s.emit('match:start', {}, (res) => {
+        s.emit('room:start', {}, (res) => {
             if (!res?.ok) showAlert(res?.error || 'Não foi possível iniciar.');
         });
     };
@@ -21407,7 +21407,7 @@ applyMusicVolume();
         if (!isHost) { showAlert('Só o anfitrião começa a partida.'); return; }
         const s = ensureSocket();
         if (!s) { showAlert('Servidor da Arena indisponível.'); return; }
-        s.emit('match:start', {}, (res) => {
+        s.emit('room:start', {}, (res) => {
             if (!res?.ok) showAlert(res?.error || 'Não foi possível iniciar.');
         });
     };
@@ -22081,6 +22081,7 @@ function openArenaBattleShell(payload = {}) {
         const onStart = (payload) => {
             const s = safeState();
             if (s.resultsShown) return;
+            const wasAlreadyPlaying = s.view === 'playing' && s.online && s.mode === 'online';
             s.online = true;
             s.mode = 'online';
             s.view = 'playing';
@@ -22092,6 +22093,7 @@ function openArenaBattleShell(payload = {}) {
                 ? Number(payload.durationMs)
                 : Math.max(1, Number(s.settings?.duration) || 5) * 60000;
             s.timeLeftMs = durationMs;
+            if (wasAlreadyPlaying) return;
             enterBattleFromPayload({
                 ...payload,
                 mode: 'online',
@@ -22244,15 +22246,56 @@ function openArenaBattleShell(payload = {}) {
         if (!s.isHost) { showAlert('Só o anfitrião começa a partida.'); return; }
         const sock = ensureSocketConnection();
         if (!sock) { showAlert('Socket da Arena indisponível.'); return; }
-        // Do not enter the battle shell locally. The authoritative server start event
-        // is the single trigger for every client, including the host.
-        sock.emit('match:start', {}, (res) => {
+
+        const startPayload = {
+            mode: 'online',
+            settings: { ...(s.settings || {}) },
+            durationMs: Math.max(1, Number(s.settings?.duration) || 5) * 60000,
+            roomCode: s.roomCode || '',
+        };
+
+        const enterLocalBattle = (payload = startPayload) => {
+            const live = safeState();
+            live.online = true;
+            live.mode = 'online';
+            live.view = 'playing';
+
+            const mergedSettings = payload?.settings && typeof payload.settings === 'object'
+                ? payload.settings
+                : live.settings;
+            const durationMs = Number(payload?.durationMs) > 0
+                ? Number(payload.durationMs)
+                : Math.max(1, Number(live.settings?.duration) || 5) * 60000;
+
+            live.timeLeftMs = durationMs;
+            if (mergedSettings && typeof mergedSettings === 'object') {
+                live.settings = { ...(live.settings || {}), ...mergedSettings };
+                if (typeof setCurrentMapFromSettings === 'function') setCurrentMapFromSettings(live.settings);
+            }
+
+            if (typeof enterBattleFromPayload === 'function') {
+                enterBattleFromPayload({
+                    mode: 'online',
+                    settings: mergedSettings,
+                    durationMs,
+                    roomCode: payload?.roomCode || live.roomCode || '',
+                });
+            } else if (typeof showArenaMatch === 'function') {
+                showArenaMatch();
+            }
+        };
+
+        sock.emit('room:start', {}, (res) => {
             if (!res?.ok) {
                 showAlert(res?.error || 'Não foi possível iniciar.');
                 if (safeState().view === 'playing' && typeof arenaRenderLobby === 'function') {
                     safeState().view = 'lobby';
                     arenaRenderLobby();
                 }
+                return;
+            }
+            if (safeState().view !== 'playing') {
+                enterLocalBattle(startPayload);
             }
         });
     }
