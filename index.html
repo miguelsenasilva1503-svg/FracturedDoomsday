@@ -2026,7 +2026,7 @@
             <div id="detail-desc" class="char-desc"></div>
             <div id="detail-summary" class="char-summary"></div>
             <div id="detail-wild-modes" class="hidden" style="margin-top: 15px; border-top: 1px solid #555; padding-top: 15px; text-align: center;">
-                <h4>Modo de Combate:</h4>
+                <h4 id="detail-mode-title">Modo de Combate:</h4>
                 <div style="display:flex; gap:10px; justify-content: center; margin-top: 10px;">
                     <button id="wild-dash" style="font-size: 14px; padding: 10px;" onclick="setWildMode('shooter')">Lanceiro</button>
                     <button id="wild-cleave" style="font-size: 14px; padding: 10px;" onclick="setWildMode('cleave')">Espadachim</button>
@@ -2689,6 +2689,13 @@ Um astronauta experiente que canaliza energia estelar para enfrentar qualquer am
 Um jogador inglês de futebol que encara qualquer desafio como se estivesse disputando a final de um campeonato. Calmo, disciplinado e extremamente competitivo, ele mantém a cabeça fria mesmo sob pressão, sempre analisando o melhor momento para agir. Enquanto muitos confiam apenas no talento, Lyron acredita que treino, estratégia e determinação são o verdadeiro caminho para a vitória.
 
 “Futebol não é só habilidade... é saber quando fazer a jogada perfeita.”` },
+    cyro_pyro: { id: 'cyro_pyro', class: 'Controle', name: 'Cyro & Pyro', rarity: 'legendary', cost: 349, hp: 110, speed: 3.45, dmg: 18, fireRate: 54, range: 270, color: '#74b9ff', emoji: '❄️', weapon: 'cyro_pyro', desc: `“Cyro e Pyro vivem discutindo sobre qual elemento é o mais forte. O resto do mundo só tenta sobreviver à discussão.”
+
+Duas crianças elementais completamente opostas, mas inseparáveis. Enquanto Cyro mantém a calma e congela tudo ao seu redor, Pyro é impulsivo e adora incendiar qualquer coisa que pareça minimamente inflamável. Seus inimigos logo os subestimam por ainda serem jovens elementais, mas essa é a pior decisão que podem tomar. Juntos, transformam cada batalha em uma confusão de gelo, fogo e muita rivalidade entre irmãos.
+
+Cyro: “Eu falei que era pra você não colocar fogo nisso...”
+Pyro: “Mas ficou muito mais legal assim!"` },
+
 };
 const CHARACTER_SUMMARIES = {
     ripper: `Ripper: dispara MICROFONES que mudam de efeito conforme a cor.
@@ -2908,7 +2915,12 @@ ESPECIAL: depois da wave 1, ele escolhe um personagem aleatório e o copia por 3
 
 Um administrador secreto que aparece só quando o painel dev é liberado. Ele domina o campo com alcance absurdo, resistência brutal e poder total de perfuração.
 
-“dps eu faço”` }
+“dps eu faço”` },
+
+    cyro_pyro: {
+        cyro: `Cyro: dispara bolas de gelo com cadência baixa que podem desencadear uma explosão CONGELANTE`,
+        pyro: `Pyro: dispara bolas de fogo rápidas com 10% de chance de QUEIMAR inimigos`
+    },
 
 };
 
@@ -3412,6 +3424,7 @@ function normalizeSaveData(rawSave) {
         delete next.chars['wild'];
     }
     if (!next.chars['gladiator'] && Object.keys(next.chars).includes('gladiator')) next.chars['gladiator'].mode = 'shooter';
+    if (next.chars.cyro_pyro && next.chars.cyro_pyro.mode !== 'cyro' && next.chars.cyro_pyro.mode !== 'pyro') next.chars.cyro_pyro.mode = 'pyro';
 
     if (!next.profile || typeof next.profile !== 'object') next.profile = { title: null };
     if (typeof next.profile.title === 'undefined') next.profile.title = null;
@@ -3995,7 +4008,8 @@ const CHARACTER_TITLES = {
     miss_macaron: 'Bon Appétit',
     shinobi: 'Dragão Samurai',
     glitch: 'Bugado',
-    jack: 'GOD ADMIN D321'
+    jack: 'GOD ADMIN D321',
+    cyro_pyro: 'Dualidade elemental'
 };
 
 function isCharacterHiddenForUnownedView(id) { return id === 'miss_macaron' && !pd?.chars?.[id]; }
@@ -4092,7 +4106,9 @@ const CHARACTER_SPRITES = {
     necro_zombie: 'sprites/necro_zombie.png',
     sparta_lion: 'sprites/sparta_lion.png',
     adam_mech: 'sprites/adam_mech.png',
-    jack: 'sprites/jack.png'
+    jack: 'sprites/jack.png',
+    cyro: 'sprites/cyro.png',
+    pyro: 'sprites/pyro.png'
 };
 
 const ENEMY_SPRITES = {
@@ -4133,7 +4149,7 @@ const ENEMY_SPRITES = {
     prism_head: 'enemies/prism_head.png',
     prism: 'enemies/prism_head.png',
     explorer: 'enemies/explorer.png',
-    sarcophagus: 'enemies/sarcophagus.png',
+    sarcophagus: 'enemies/sarchophagus.png',
     mummy: 'enemies/mummy.png',
     camel: 'enemies/camel.png',
     scorpion: 'enemies/scorpion.png',
@@ -4199,7 +4215,17 @@ const CHARACTER_SPRITE_COMPACT_IDS = new Set([
     'gladiator_sword'
 ]);
 
+function getCyroPyroMode() {
+    return pd?.chars?.cyro_pyro?.mode === 'cyro' ? 'cyro' : 'pyro';
+}
+
+function getCharacterDisplayName(id) {
+    if (id === 'cyro_pyro') return getCyroPyroMode() === 'cyro' ? 'Cyro' : 'Pyro';
+    return CHARACTERS?.[id]?.name || id;
+}
+
 function getDynamicCharacterSpriteId(id) {
+    if (id === 'cyro_pyro') return getCyroPyroMode() === 'cyro' ? 'cyro' : 'pyro';
     if (id === 'gladiator') {
         return (pd?.chars?.gladiator?.mode === 'shooter') ? 'gladiator_spear' : 'gladiator_sword';
     }
@@ -5013,6 +5039,9 @@ function getCharacterSummary(id) {
     if (id === 'gladiator') {
         const mode = (pd.chars?.[id]?.mode || 'shooter');
         return mode === 'cleave' ? (data.cleave || data.espadachim) : (data.shooter || data.lanceiro);
+    }
+    if (id === 'cyro_pyro') {
+        return getCyroPyroMode() === 'cyro' ? (data.cyro || '') : (data.pyro || '');
     }
     return data.default || '';
 }
@@ -7063,7 +7092,7 @@ let sort = document.getElementById('char-filter-sort') ? document.getElementById
         const div = document.createElement('div'); div.className = `card-item rarity-${c.rarity}`; div.style.cursor = 'pointer'; if(isSel) div.style.borderColor = 'var(--btn-green)';
         let banTag = bannedSet.has(c.id) ? `<div style="position:absolute;top:5px;right:5px;font-size:24px;">🚫</div>` : '';
         let hasSprite = getCharacterSpriteMarkup(c.id, 'menu') || `<div style="width:78px;height:78px;background:${c.color};border-radius:50%;margin:0 auto 10px;border:3px solid #fff;"></div>`;
-        let html = `${banTag}${hasSprite}<h4>${c.name}</h4><div style="font-size:12px;color:#aaa">${c.class}</div>`;
+        let html = `${banTag}${hasSprite}<h4>${escapeHtmlText(getCharacterDisplayName(c.id))}</h4><div style="font-size:12px;color:#aaa">${c.class}</div>`;
         if(owned) {
             const medals = pd.chars[c.id]?.medals || { total: 0, run: 0 };
             html += `<p style="font-size: 14px;">Nível ${lvl}/8</p><div style="font-size:12px;color:var(--btn-yellow);font-weight:bold;margin-top:4px;">🏅 ${medals.total}</div>`;
@@ -7082,6 +7111,14 @@ function setWildMode(mode) {
     pd.chars['gladiator'].mode = mode; 
     save(); 
     showCharDetail('gladiator'); 
+}
+
+function setCyroPyroMode(mode) {
+    if (!pd.chars['cyro_pyro']) return;
+    pd.chars.cyro_pyro.mode = mode === 'cyro' ? 'cyro' : 'pyro';
+    save();
+    renderChars();
+    showCharDetail('cyro_pyro');
 }
 
 function detailPrimaryAction() {
@@ -7141,7 +7178,8 @@ function showCharDetail(id) {
             });
         }
 
-        document.getElementById('detail-name').innerHTML = c.name;
+        const displayName = getCharacterDisplayName(id);
+        document.getElementById('detail-name').innerHTML = escapeHtmlText(displayName);
         document.getElementById('detail-name').style.color = c.color;
         document.getElementById('detail-class').innerHTML = c.class;
         const titleEl = document.getElementById('detail-title');
@@ -7175,11 +7213,28 @@ function showCharDetail(id) {
         renderCharacterSummary(id);
 
         const wModes = document.getElementById('detail-wild-modes');
-        if(id === 'gladiator' && owned) {
+        const modeTitleEl = document.getElementById('detail-mode-title');
+        if((id === 'gladiator' || id === 'cyro_pyro') && owned) {
             wModes.classList.remove('hidden');
-            let mode = pd.chars['gladiator'].mode || 'shooter';
-            document.getElementById('wild-dash').style.border = mode === 'shooter' ? '2px solid var(--btn-yellow)' : '';
-            document.getElementById('wild-cleave').style.border = mode === 'cleave' ? '2px solid var(--btn-yellow)' : '';
+            if (id === 'gladiator') {
+                if (modeTitleEl) modeTitleEl.innerHTML = 'Modo de Combate:';
+                document.getElementById('wild-dash').innerHTML = 'Lanceiro';
+                document.getElementById('wild-cleave').innerHTML = 'Espadachim';
+                document.getElementById('wild-dash').onclick = () => setWildMode('shooter');
+                document.getElementById('wild-cleave').onclick = () => setWildMode('cleave');
+                let mode = pd.chars['gladiator'].mode || 'shooter';
+                document.getElementById('wild-dash').style.border = mode === 'shooter' ? '2px solid var(--btn-yellow)' : '';
+                document.getElementById('wild-cleave').style.border = mode === 'cleave' ? '2px solid var(--btn-yellow)' : '';
+            } else {
+                if (modeTitleEl) modeTitleEl.innerHTML = 'Escolha elemental:';
+                const mode = getCyroPyroMode();
+                document.getElementById('wild-dash').innerHTML = 'Cyro';
+                document.getElementById('wild-cleave').innerHTML = 'Pyro';
+                document.getElementById('wild-dash').onclick = () => setCyroPyroMode('cyro');
+                document.getElementById('wild-cleave').onclick = () => setCyroPyroMode('pyro');
+                document.getElementById('wild-dash').style.border = mode === 'cyro' ? '2px solid var(--btn-yellow)' : '';
+                document.getElementById('wild-cleave').style.border = mode === 'pyro' ? '2px solid var(--btn-yellow)' : '';
+            }
         } else {
             wModes.classList.add('hidden');
         }
@@ -7328,6 +7383,7 @@ function buyChar(id) {
         pd.gems -= c.cost;
         pd.chars[id] = { level: 1, slots: 2, chips: [null, null], unlockSource: id === 'glitch' ? 'shop-gems' : 'shop' };
         if(id === 'gladiator') pd.chars[id].mode = 'shooter';
+        if(id === 'cyro_pyro') pd.chars[id].mode = 'pyro';
         awardAchievementStat('charsUnlocked', 1);
         save();
         renderChars();
@@ -7339,6 +7395,7 @@ function buyChar(id) {
 
 function selectChar(id) {
     if(!pd.chars[id]) { showAlert("Personagem não obtido!"); return; }
+    if (id === 'cyro_pyro' && pd.chars[id].mode !== 'cyro' && pd.chars[id].mode !== 'pyro') pd.chars[id].mode = 'pyro';
     pd.selectedChar = id;
     if (!pd.run || typeof pd.run !== 'object') pd.run = { charId: id, medals: 0 };
     pd.run.charId = id;
@@ -7349,7 +7406,7 @@ function selectChar(id) {
     renderChars();
     updateUI();
     showScreen('screen-main');
-    notify(`${CHARACTERS[id].name} selecionado!`);
+    notify(`${getCharacterDisplayName(id)} selecionado!`);
 }
 
 function upgradeChar(id, evoCost, coinsCost) {
@@ -8955,7 +9012,7 @@ function startRunAfterShop() {
     
     player = {
         x: 0, y: 0, r: (pd.selectedChar === 'hank' || pd.selectedChar === 'yeti') ? 20 : ((pd.selectedChar === 'shiv' || pd.selectedChar === 'zippi') ? 10 : (pd.selectedChar === 'kaisen' ? 13 : (pd.selectedChar === 'booboo' ? 13 : (pd.selectedChar === 'eel' ? 15 : 15)))), baseHp: initialBaseHp, hp: initialBaseHp, baseSpeed: charDef.speed, baseDmg: initialBaseDmg,
-        baseFireRate: charDef.fireRate, baseRange: charDef.range, color: charDef.color, weapon: charDef.weapon, cd: 0, shieldTimer: 0,
+        baseFireRate: charDef.fireRate, baseRange: charDef.range, color: charDef.color, weapon: charDef.weapon, cyroPyroMode: pd.selectedChar === 'cyro_pyro' ? getCyroPyroMode() : null, cd: 0, shieldTimer: 0,
         zombieTimer: 0, revived: false, elekCycle: false, dashTimer: 0, meleeCd: 0, boldShots: 0, boldReload: 0, specCd: 0, invisTimer: 0, ghoulPendingCd: 0, ninjiPendingCd: 0,
         lastMoveAngle: 0, lastAimAngle: 0, tenentCycle: 0, orbitalAngle: 0, boobooReturn: true, pickedCards: [], revivesUsed: 0, qbBar: 0, qbShield: false, isDead: false, flexCombo: 0, flexReload: 0, ninjiDashCd: 0, shinobiDragonActive: false, shinobiDragonWavesLeft: 0, shinobiDragonCooldown: 0, shinobiDragonFireCd: 0, shinobiScytheCycle: 0, sterlingCharging: false, sterlingCharge: 0, sterlingAttackCd: 0, majorBriggsKills: 0, majorBriggsStage: 1,
         adamScrap: 0, adamMechActive: false, adamMechWavesLeft: 0, adamMechHpBonus: 0, adamMechSizeBonus: 0, adamBaseHpBeforeMech: null, adamBaseRBeforeMech: null,
@@ -8990,6 +9047,7 @@ function startRunAfterShop() {
     if(pd.selectedChar === 'zippi') { player.zippiBubbleHp = 80; player.zippiBubbleMaxHp = 80; player.zippiBubbleBroken = false; }
     if(pd.selectedChar === 'bunniie') { ensureBunniieRuntime(); player.bunniieHoles = []; player.bunniieTunnelCd = 0; player.bunniieTunnelWarpCd = 0; player.bunniieTunnelGrace = 0; player.bunniieTunnelSeq = 0; }
     spawnCharacterSupportAllies(pd.selectedChar, { ownerTag: 'run-start', temporary: false, x: player.x, y: player.y, baseDmg: player.baseDmg, dmgMult: player.stats.dmgMult });
+    if (pd.selectedChar === 'cyro_pyro') spawnCyroPyroPartner();
     if(pd.selectedChar === 'healy') player.stats.regen += 0.01;
 
     if(window.tempPregameCard) { window.tempPregameCard.apply(player.stats); player.pickedCards.push(window.tempPregameCard.name); window.tempPregameCard = null; }
@@ -9817,7 +9875,7 @@ if (!isBossAlive) {
                 minDist = Math.max(minDist, 900 + (player.stats.extraProj || 0) * 40);
             } else {
                 if(player.weapon === 'triple') minDist *= 1.18;
-                if(!['sniper', 'laser', 'chain_lightning', 'lightning', 'bomb', 'rocket', 'buster_rocket', 'wind_gust', 'tornado', 'puddle', 'energy_wave', 'wild'].includes(player.weapon)) {
+                if(!['sniper', 'laser', 'chain_lightning', 'lightning', 'bomb', 'rocket', 'buster_rocket', 'wind_gust', 'tornado', 'puddle', 'energy_wave', 'wild', 'cyro_pyro'].includes(player.weapon)) {
                     const shotReach = Math.max(120, 50 * (5 * player.stats.projSpdMult) * 0.95);
                     minDist = Math.min(minDist, shotReach);
                 }
@@ -10068,6 +10126,33 @@ function fireWeapon(target) {
                 splitOnce: true,
                 pierce: 1
             });
+            return;
+        }
+        if (w === 'cyro_pyro') {
+            const mode = player.cyroPyroMode || getCyroPyroMode();
+            const spawnOffset = player.r + 9;
+            const sx = player.x + Math.cos(angle) * spawnOffset;
+            const sy = player.y + Math.sin(angle) * spawnOffset;
+            const isCyro = mode === 'cyro';
+            player.cd = (isCyro ? 96 : 30) * player.stats.fireRateMult;
+            const shotSpeed = isCyro ? pSpd * 0.82 : pSpd * 1.45;
+            createProj(
+                sx,
+                sy,
+                Math.cos(angle) * shotSpeed,
+                Math.sin(angle) * shotSpeed,
+                finalDmg,
+                isCyro ? 72 : 58,
+                true,
+                isCyro ? 'cyro_iceball' : 'pyro_fireball',
+                {
+                    size: isCyro ? 13 : 9,
+                    sourceChar: isCyro ? 'cyro' : 'pyro',
+                    explodeRadius: isCyro ? 58 : 0,
+                    freezeDuration: isCyro ? 2.7 : 0,
+                    burnChance: isCyro ? 0 : 0.10
+                }
+            );
             return;
         }
         if(w === 'adam') {
@@ -11732,6 +11817,32 @@ function updateEnemies(dt) {
     }
 }
 
+
+function spawnCyroPyroPartner() {
+    const selectedMode = getCyroPyroMode();
+    const partnerMode = selectedMode === 'cyro' ? 'pyro' : 'cyro';
+    const level = Math.max(1, pd?.chars?.cyro_pyro?.level || 1);
+    const levelMult = 1 + (level - 1) * 0.15;
+    const hp = Math.max(45, player.baseHp * 0.72);
+    allies.push({
+        type: 'cyro_pyro_partner',
+        elementMode: partnerMode,
+        x: player.x + (partnerMode === 'cyro' ? -34 : 34),
+        y: player.y - 30,
+        homeAngle: Math.random() * Math.PI * 2,
+        facingLeft: false,
+        life: Infinity,
+        r: 13,
+        hp,
+        maxHp: hp,
+        speed: 3.45,
+        dmg: Math.max(1, CHARACTERS.cyro_pyro.dmg * levelMult * 0.88),
+        cd: partnerMode === 'cyro' ? 0.45 : 0.25,
+        range: 270,
+        contactDmgCd: 0
+    });
+}
+
 function updateAllies(dt) {
     for(let i=allies.length-1; i>=0; i--) {
         let a = allies[i]; a.life -= dt; let target = null; let minD = 500;
@@ -11741,7 +11852,61 @@ function updateAllies(dt) {
             a.teaCd = Math.max(0, (a.teaCd || 0) - dt);
             continue;
         }
-        if(a.type === 'penguin' || a.type === 'drone') {
+        if (a.type === 'cyro_pyro_partner') {
+            if (!Number.isFinite(a.homeAngle)) a.homeAngle = Math.random() * Math.PI * 2;
+            if (!Number.isFinite(a.contactDmgCd)) a.contactDmgCd = 0;
+            a.homeAngle += dt * 0.9;
+
+            const orbitRadius = 54;
+            const targetX = player.x + Math.cos(a.homeAngle) * orbitRadius;
+            const targetY = player.y + Math.sin(a.homeAngle) * orbitRadius;
+            const followDx = targetX - a.x;
+            const followDy = targetY - a.y;
+            const followDist = Math.hypot(followDx, followDy);
+            const followSpeed = a.speed * 75 * dt;
+            if (followDist > 2) {
+                const step = Math.min(1, followSpeed / Math.max(0.001, followDist));
+                a.x += followDx * step;
+                a.y += followDy * step;
+            }
+
+            if (target && minD < a.range) {
+                a.facingLeft = target.x < a.x;
+                if (a.cd <= 0) {
+                    const ang = Math.atan2(target.y - a.y, target.x - a.x);
+                    const isCyro = a.elementMode === 'cyro';
+                    const speed = isCyro ? 4.1 : 7.0;
+                    createProj(a.x, a.y, Math.cos(ang) * speed, Math.sin(ang) * speed, a.dmg, isCyro ? 72 : 58, true, isCyro ? 'cyro_iceball' : 'pyro_fireball', {
+                        size: isCyro ? 11 : 8,
+                        sourceChar: isCyro ? 'cyro' : 'pyro',
+                        explodeRadius: isCyro ? 52 : 0,
+                        freezeDuration: isCyro ? 2.4 : 0,
+                        burnChance: isCyro ? 0 : 0.10,
+                        elementalPartner: true
+                    });
+                    a.cd = isCyro ? 1.55 : 0.62;
+                } else {
+                    a.cd -= dt;
+                }
+            } else if (a.cd > 0) {
+                a.cd -= dt;
+            }
+
+            if (a.hp <= 0) {
+                a.life = 0;
+            }
+
+            for (const e of enemies) {
+                if (a.hp <= 0) break;
+                if (dist(a, e) < (a.r || 13) + (e.size || 0) && a.contactDmgCd <= 0) {
+                    const hit = Math.max(1, Math.floor(e.dmg || 1));
+                    a.hp -= hit;
+                    addFloatingText(a.x, a.y, `-${hit}`, '#74b9ff');
+                    a.contactDmgCd = 0.35;
+                }
+            }
+            if (a.contactDmgCd > 0) a.contactDmgCd -= dt;
+        } else if(a.type === 'penguin' || a.type === 'drone') {
             if(!a.wanderAngle) a.wanderAngle = Math.random() * Math.PI * 2;
             a.wanderAngle += dt * 0.8;
 
@@ -12073,6 +12238,10 @@ function updateProjectiles(dt) {
             }
             p.x += p.vx * 60 * dt; p.y += p.vy * 60 * dt;
         }
+        else if (p.type === 'cyro_iceball' || p.type === 'pyro_fireball') {
+            p.x += p.vx * 60 * dt;
+            p.y += p.vy * 60 * dt;
+        }
         else if (p.type === 'pipisnowball') {
             p.x += p.vx * 60 * dt; p.y += p.vy * 60 * dt;
         }
@@ -12307,6 +12476,27 @@ function updateProjectiles(dt) {
 
                         e.hp -= realDmg; e.lastHitSourceChar = p.extra?.sourceChar || (p.isPlayer ? pd.selectedChar : e.lastHitSourceChar || null); addFloatingText(e.x, e.y, Math.floor(realDmg), '#fff'); if(p.isPlayer) trackMissionDamage(realDmg);
                         if (p.type === 'shinobi' || p.type === 'shinobi_fireball' || p.type === 'scythe' || (p.type === 'sword' && pd.selectedChar === 'shinobi')) applyShinobiMark(e, realDmg);
+                        if (p.type === 'cyro_iceball') {
+                            const freezeDuration = Math.max(0.8, Number(p.extra?.freezeDuration) || 2.4);
+                            e.freezeTimer = Math.max(Number.isFinite(e.freezeTimer) ? e.freezeTimer : 0, freezeDuration);
+                            e.slowTimer = Math.max(Number.isFinite(e.slowTimer) ? e.slowTimer : 0, freezeDuration);
+                            const radius = Math.max(35, Number(p.extra?.explodeRadius) || 52);
+                            createExplosion(e.x, e.y, radius, Math.max(1, realDmg * 0.35), '#74b9ff');
+                            for (const nearby of enemies) {
+                                if (!nearby || nearby.hp <= 0) continue;
+                                if (dist({x: e.x, y: e.y}, nearby) <= radius + (nearby.size || 0)) {
+                                    nearby.freezeTimer = Math.max(Number.isFinite(nearby.freezeTimer) ? nearby.freezeTimer : 0, freezeDuration);
+                                    nearby.slowTimer = Math.max(Number.isFinite(nearby.slowTimer) ? nearby.slowTimer : 0, freezeDuration);
+                                }
+                            }
+                            addFloatingText(e.x, e.y - 12, 'CONGELADO!', '#74b9ff', 12);
+                        }
+                        if (p.type === 'pyro_fireball' && Math.random() < Math.max(0, Math.min(1, Number(p.extra?.burnChance) || 0.10))) {
+                            e.burnTimer = Math.max(Number.isFinite(e.burnTimer) ? e.burnTimer : 0, 3.2);
+                            e.burnDmg = Math.max(Number.isFinite(e.burnDmg) ? e.burnDmg : 0, Math.max(2, realDmg * 0.28));
+                            addFloatingText(e.x, e.y - 12, 'QUEIMANDO!', '#ff7b39', 12);
+                        }
+
                         if (p.type === 'glitch_bugshot') {
                             const stunDuration = Math.max(0.25, Number(p.extra?.glitchStunDuration) || 0.85);
                             const stunChance = Math.min(1, Math.max(0, Number(p.extra?.glitchStunChance) || 0.35));
@@ -13055,6 +13245,7 @@ function getPlayerSpriteId() {
         return player.glitchCurrentFormId;
     }
     if (pd?.selectedChar === 'adam' && player?.adamMechActive) return 'adam_mech';
+    if (pd?.selectedChar === 'cyro_pyro') return getCyroPyroMode() === 'cyro' ? 'cyro' : 'pyro';
     if (pd?.selectedChar === 'gladiator') {
         return (pd?.chars?.gladiator?.mode === 'shooter') ? 'gladiator_spear' : 'gladiator_sword';
     }
@@ -13441,6 +13632,12 @@ function draw() {
         if(a.isTotem) { 
             ctx.fillStyle = 'rgba(142, 68, 173, 0.2)'; ctx.beginPath(); ctx.arc(a.x, a.y, a.radius, 0, Math.PI*2); ctx.fill(); 
             ctx.fillStyle = '#8e44ad'; ctx.fillRect(a.x-8, a.y-15, 16, 30); 
+        } else if(a.type === 'cyro_pyro_partner') {
+            const rr = a.r || 13;
+            drawCharacterSprite(ctx, a.x, a.y, rr, a.elementMode === 'cyro' ? 'cyro' : 'pyro', {
+                widthMult: 9.4,
+                flipX: Boolean(a.facingLeft)
+            });
         } else if(a.type === 'penguin') {
             const rr = a.r || 18;
             drawCharacterSprite(ctx, a.x, a.y, rr, 'pipi', {
@@ -13866,6 +14063,43 @@ function draw() {
         if(p.type === 'dagger' || p.type === 'ice_dagger' || p.type === 'ice_stake') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx)); ctx.fillStyle = (p.type==='ice_dagger'||p.type==='ice_stake')?'#00ffff':'#bdc3c7'; ctx.beginPath(); ctx.moveTo(p.size, 0); ctx.lineTo(-p.size/2, -p.size/3); ctx.lineTo(-p.size/2, p.size/3); ctx.fill(); ctx.restore(); } 
         else if(p.type === 'bomb' || p.type === 'rocket' || p.type === 'buster_rocket' || p.type === 'cannon_ball') { ctx.fillStyle = '#2c3e50'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); if(p.type !== 'cannon_ball'){ctx.fillStyle = '#e67e22'; ctx.beginPath(); ctx.arc(p.x + p.size/2, p.y - p.size/2, 2, 0, Math.PI*2); ctx.fill();} }
         else if(p.type === 'grenade' || p.type === 'big_grenade') { ctx.fillStyle = '#27ae60'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); }
+        else if(p.type === 'cyro_iceball') {
+            const r = p.size || 13;
+            ctx.save();
+            ctx.translate(px, py);
+            ctx.rotate(Math.atan2(p.vy, p.vx));
+            ctx.shadowBlur = 12;
+            ctx.shadowColor = 'rgba(116,185,255,0.85)';
+            ctx.fillStyle = '#bfe8ff';
+            ctx.beginPath();
+            ctx.arc(0, 0, r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#74b9ff';
+            ctx.beginPath();
+            ctx.arc(-r * 0.25, -r * 0.2, r * 0.34, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.restore();
+        }
+        else if(p.type === 'pyro_fireball') {
+            const r = p.size || 9;
+            ctx.save();
+            ctx.translate(px, py);
+            ctx.rotate(Math.atan2(p.vy, p.vx));
+            ctx.shadowBlur = 14;
+            ctx.shadowColor = 'rgba(231,76,60,0.9)';
+            ctx.fillStyle = '#e74c3c';
+            ctx.beginPath();
+            ctx.arc(0, 0, r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#ffd27a';
+            ctx.beginPath();
+            ctx.arc(-r * 0.25, -r * 0.25, Math.max(2, r * 0.38), 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
         else if(p.type === 'shinobi_fireball') { ctx.fillStyle = '#ff6b00'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#ffd27a'; ctx.beginPath(); ctx.arc(p.x - 2, p.y - 2, Math.max(2, p.size * 0.28), 0, Math.PI*2); ctx.fill(); }
         else if(p.type === 'shinobi') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx)); ctx.fillStyle = '#8e44ad'; ctx.beginPath(); ctx.moveTo(p.size, 0); ctx.lineTo(-p.size/2, -p.size/3); ctx.lineTo(-p.size/2, p.size/3); ctx.fill(); ctx.restore(); }
         else if(p.type === 'chain_lightning') { ctx.fillStyle = '#341f97'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#0984e3'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size-2, 0, Math.PI*2); ctx.fill(); }
