@@ -2597,6 +2597,12 @@ Uma garota alegre e amigável que transforma a água em sua maior aliada. Com su
 
 “Vamos nos divertir um pouco!”` },
 
+    serrano: { id: 'serrano', class: 'Destruidor', name: 'Serrano', rarity: 'legendary', cost: 349, hp: 112, speed: 3.35, dmg: 19, fireRate: 72, range: 285, color: '#e67e22', weapon: 'serrano_taco', desc: `“Serrano diz que o segredo dos melhores tacos está no ingrediente especial. O problema é que ele nunca revela qual é.”
+
+Um mexicano apaixonado por culinária que vive preparando tacos para qualquer um disposto a experimentar. Simpático e sempre de bom humor, ele leva a cozinha tão a sério quanto uma batalha. Seus inimigos até tentam descobrir quais ingredientes misteriosos ele usa, mas ninguém jamais conseguiu arrancar essa receita dele... e talvez seja melhor continuar assim.
+
+“Es una receta familiar. ¡Sin preguntas, por favor!”` },
+
     vampyrus: { id: 'vampyrus', class: 'Suporte', name: 'Vampyrus', rarity: 'mythic', cost: 569, hp: 120, speed: 3.4, dmg: 18, fireRate: 55, range: 250, color: '#8b0000', weapon: 'blood_ball', desc: `“Vampyrus fica deslizando pelo campo de batalha com uma pá gigante… alguns juram que ele conheceu um certo coveiro dramático.”
 
 Um vampiro sombrio e assustador que prefere caçar inimigos de perto. Silencioso, rápido e imprevisível, Vampyrus transforma qualquer batalha numa perseguição digna de filme de terror… só que com muito mais gritos.
@@ -2884,6 +2890,7 @@ ESPECIAL: ao causar dano, sua barra enche. Ao encher, recebe um escudo que barra
     seae: `Seae: dispara bolhas d'água que têm 50% de chance de deixar inimigos ENCHARCADOS.
 
 ESPECIAL: pode lançar uma onda marítima que PERFURA inimigos e causa ENCHARQUE equivalente a +15% de dano.`,
+    serrano: `Serrano: dispara um taco que, ao colidir com um inimigo, se dispersa em 3 projéteis totalmente aleatórios de qualquer personagem. Os projéteis dispersados não atingem o inimigo atingido.`,
     vampyrus: `Vampyrus: dispara glóbulos de sangue que podem se dispersar e causam FRAQUEZA no inimigo atingido.
 
 ESPECIAL: nativamente tem VAMPIRISMO.
@@ -4013,6 +4020,7 @@ const CHARACTER_TITLES = {
     mrsaw: 'Segurança no trabalho',
     quarterback: 'Toutchdown',
     seae: 'Na onda da maré',
+    serrano: 'Receta de la familia',
     eel: 'Chocado',
     flex: 'Fio desencapado',
     kaisen: 'Monitoramento familiar',
@@ -4068,6 +4076,7 @@ const CHARACTER_SPRITES = {
     mrsaw: 'sprites/mr_saw.png',
     mr_saw: 'sprites/mr_saw.png',
     seae: 'sprites/seae.png',
+    serrano: 'sprites/serrano.png',
     eel: 'sprites/eel.png',
     flex: 'sprites/flex_hammer.png',
     flex_hammer: 'sprites/flex_hammer.png',
@@ -10169,6 +10178,25 @@ function fireWeapon(target) {
             });
             return;
         }
+        if (w === 'serrano_taco') {
+            if (!target || target.hp <= 0) return;
+            const spawnOffset = player.r + 9;
+            const sx = player.x + Math.cos(angle) * spawnOffset;
+            const sy = player.y + Math.sin(angle) * spawnOffset;
+            const tacoSpeed = pSpd * 1.08;
+            const tacoLife = Math.max(48, Math.ceil((player.baseRange * player.stats.rangeMult * 1.12) / Math.max(1, tacoSpeed)) + 8);
+            createProj(
+                sx, sy,
+                Math.cos(angle) * tacoSpeed,
+                Math.sin(angle) * tacoSpeed,
+                finalDmg,
+                tacoLife,
+                true,
+                'serrano_taco',
+                { size: 12, sourceChar: 'serrano', tacoTargetId: target }
+            );
+            return;
+        }
         if (w === 'cyro_pyro') {
             const mode = player.cyroPyroMode || getCyroPyroMode();
             const spawnOffset = player.r + 9;
@@ -12270,6 +12298,58 @@ function disperseAxelStone(x, y, vx, vy, dmg) {
     createParticles(x, y, '#8d6e63');
 }
 
+const SERRANO_RANDOM_PROJECTILES = [
+    { type: 'normal', sourceChar: 'strike', size: 6, speed: 4.1 },
+    { type: 'energy', sourceChar: 'fasty', size: 7, speed: 4.6 },
+    { type: 'machinegun', sourceChar: 'bold', size: 4, speed: 5.2 },
+    { type: 'grenade', sourceChar: 'grenade', size: 4, speed: 4.0 },
+    { type: 'arrow', sourceChar: 'vesper', size: 5, speed: 5.1 },
+    { type: 'triple', sourceChar: 'tenent', size: 5, speed: 4.8 },
+    { type: 'sniper', sourceChar: 'rex', size: 4, speed: 8.0 },
+    { type: 'stones', sourceChar: 'necro', size: 6, speed: 4.0 },
+    { type: 'chain_lightning', sourceChar: 'plasma', size: 7, speed: 7.0 },
+    { type: 'blood_ball', sourceChar: 'vampyrus', size: 7, speed: 4.0 },
+    { type: 'magic', sourceChar: 'elektro', size: 7, speed: 4.1 },
+    { type: 'energy_wave', sourceChar: 'ghoul', size: 9, speed: 4.4 },
+    { type: 'buster_rocket', sourceChar: 'buster', size: 6, speed: 6.5 },
+    { type: 'boomerang', sourceChar: 'booboo', size: 8, speed: 5.6 },
+    { type: 'syringe', sourceChar: 'healy', size: 6, speed: 4.5 },
+    { type: 'lyron_ball', sourceChar: 'lyron', size: 8, speed: 5.0 },
+    { type: 'yuuto_heart', sourceChar: 'yuuto', size: 9, speed: 4.8 },
+    { type: 'graffit_can', sourceChar: 'graffit', size: 10, speed: 4.5 },
+    { type: 'macaron', sourceChar: 'miss_macaron', size: 9, speed: 4.8 },
+    { type: 'tea_cup', sourceChar: 'miss_macaron', size: 8, speed: 5.0 },
+    { type: 'sterling_star', sourceChar: 'sterling', size: 10, speed: 5.4 },
+    { type: 'cyro_iceball', sourceChar: 'cyro', size: 10, speed: 3.8, extra: { explodeRadius: 42, freezeDuration: 1.8 } },
+    { type: 'pyro_fireball', sourceChar: 'pyro', size: 8, speed: 6.0, extra: { burnChance: 0.10 } },
+    { type: 'axel_stone', sourceChar: 'kaisen', size: 10, speed: 4.2, extra: { splitCount: 3, noSplit: false } },
+    { type: 'pit_bullet', sourceChar: 'pit', size: 5, speed: 5.2 },
+    { type: 'ruben_baguette', sourceChar: 'ruben', size: 9, speed: 4.8 },
+    { type: 'water_bubble', sourceChar: 'seae', size: 9, speed: 4.3 },
+    { type: 'eel_lash', sourceChar: 'eel', size: 8, speed: 4.7 },
+    { type: 'echo_shot', sourceChar: 'echo', size: 8, speed: 4.2 },
+    { type: 'shinobi_fireball', sourceChar: 'shinobi', size: 11, speed: 6.0, extra: { explodeRadius: 36, explodeDelay: 0.12 } }
+];
+
+function spawnSerranoRandomProjectile(x, y, dmg, excludedEnemy) {
+    const candidates = SERRANO_RANDOM_PROJECTILES.filter(p => p.type !== 'serrano_taco');
+    if (!candidates.length) return;
+    const def = candidates[Math.floor(Math.random() * candidates.length)];
+    const angle = Math.random() * Math.PI * 2;
+    const speed = Number.isFinite(def.speed) ? def.speed : 4.5;
+    const extra = { ...(def.extra || {}), size: def.size || 6, sourceChar: 'serrano', serranoOriginalChar: def.sourceChar };
+    if (def.type === 'boomerang') extra.returnSpeed = 11.5;
+    if (def.type === 'sterling_star') extra.pierce = 2;
+    createProj(x, y, Math.cos(angle) * speed, Math.sin(angle) * speed, Math.max(1, dmg * 0.72), 48, true, def.type, extra);
+    const spawned = projectiles[projectiles.length - 1];
+    if (spawned && excludedEnemy) spawned.hitIds.add(excludedEnemy);
+}
+
+function disperseSerranoTaco(x, y, dmg, excludedEnemy) {
+    for (let j = 0; j < 3; j++) spawnSerranoRandomProjectile(x, y, dmg, excludedEnemy);
+    createParticles(x, y, '#e67e22');
+}
+
 function updateProjectiles(dt) {
     for(let i = projectiles.length - 1; i >= 0; i--) {
         let p = projectiles[i]; p.life -= 60 * dt;
@@ -12811,6 +12891,11 @@ function updateProjectiles(dt) {
             continue;
         }
         if(hit && p.type === 'blood_ball' && (extra.size || 0) === 10) { for(let j=0; j<3; j++) { let a = Math.random()*Math.PI*2; createProj(p.x, p.y, Math.cos(a)*3, Math.sin(a)*3, p.dmg*0.4, 30, true, 'blood_ball', {size: 4}); } }
+        if(hit && p.type === 'serrano_taco') {
+            disperseSerranoTaco(p.x, p.y, p.dmg, hitTarget);
+            projectiles.splice(i, 1);
+            continue;
+        }
         if(hit && p.type === 'axel_stone') { disperseAxelStone(p.x, p.y, p.vx, p.vy, p.dmg); projectiles.splice(i, 1); continue; }
         if(hit && p.type === 'sterling_star') {
             const burstRadius = Math.max(28, Number(p.extra?.sterlingBurstRadius) || 52) * (player.stats?.rangeMult || 1);
