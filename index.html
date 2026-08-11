@@ -9995,7 +9995,7 @@ if (!isBossAlive) {
 function fireWeapon(target) {
     if(!target && player.weapon !== 'eolio_propeller') return;
     const w = player.weapon; 
-    let dToT = dist(player, target);
+    let dToT = target ? dist(player, target) : 0;
     let totemDmg = player.inTotem ? 1.2 : 1;
     let baseDmg = player.baseDmg * player.stats.dmgMult * totemDmg;
     if(w === 'sniper') baseDmg *= (1 + (dToT / 1000));
