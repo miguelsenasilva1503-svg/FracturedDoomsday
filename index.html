@@ -9899,7 +9899,7 @@ if (!isBossAlive) {
                 }
             }
             for(let e of enemies) { let d = dist(player, e); if(d < minDist) { minDist = d; target = e; } }
-            if(target || player.weapon === 'eolio_propeller') fireWeapon(target);
+            if(target) fireWeapon(target);
         }
     }
 
@@ -9993,7 +9993,8 @@ if (!isBossAlive) {
 }
 
 function fireWeapon(target) {
-    if(!target && player.weapon !== 'eolio_propeller') return;
+    // Nenhuma arma dispara sem um alvo detectado.
+    if(!target) return;
     const w = player.weapon; 
     let dToT = target ? dist(player, target) : 0;
     let totemDmg = player.inTotem ? 1.2 : 1;
@@ -11925,18 +11926,14 @@ function updateEolioPropeller(a, dt) {
         const d = Math.hypot(dx, dy);
         const step = 11.5 * 60 * dt;
         damageEnemiesNearPropeller();
-        if (d <= step + 28) {
-            a.x = player.x;
-            a.y = player.y;
+        if (d <= step + Math.max(34, player.r + 18)) {
             a.life = 0;
             return;
         }
         a.x += dx / Math.max(0.001, d) * step;
         a.y += dy / Math.max(0.001, d) * step;
         a.angle += 9 * dt;
-        if (Math.hypot(player.x - a.x, player.y - a.y) <= 28) {
-            a.x = player.x;
-            a.y = player.y;
+        if (Math.hypot(player.x - a.x, player.y - a.y) <= Math.max(34, player.r + 18)) {
             a.life = 0;
         }
     }
@@ -11952,7 +11949,12 @@ function updateAllies(dt) {
             continue;
         }
         if (a.type === 'eolio_turbine') { a.pulse = (a.pulse || 0) + dt; continue; }
-        if (a.type === 'eolio_propeller') { updateEolioPropeller(a, dt); continue; }
+        if (a.type === 'eolio_propeller') {
+            updateEolioPropeller(a, dt);
+            // O retorno precisa remover a hélice da lista imediatamente.
+            if (a.life <= 0) { allies.splice(i, 1); continue; }
+            continue;
+        }
         if (a.type === 'cyro_pyro_partner') {
             if(a.hp<=0){a.life=0;continue;}
             if(!Number.isFinite(a.aiAngle))a.aiAngle=Math.random()*Math.PI*2;
