@@ -10023,7 +10023,12 @@ function fireWeapon(target) {
 
         if (w === 'eolio_propeller') {
             const maxRange = Math.max(120, player.baseRange * player.stats.rangeMult);
-            for (const a of allies) { if (a && a.type === 'eolio_propeller' && a.phase !== 'return') a.phase = 'return'; }
+            for (let i = allies.length - 1; i >= 0; i--) {
+                const a = allies[i];
+                if (!a || a.type !== 'eolio_propeller') continue;
+                if (a.phase !== 'return') a.phase = 'return';
+                else if (Math.hypot(player.x - a.x, player.y - a.y) <= 42) allies.splice(i, 1);
+            }
             const id = ++player.eolioPropellerSeq;
             allies.push({ type:'eolio_propeller', id, x:player.x, y:player.y, phase:'outbound', vx:Math.cos(angle), vy:Math.sin(angle), traveled:0, maxRange, dmg:Math.max(1, finalDmg), r:20, life:Infinity, speed:8.2, angle:angle, hitTick:0 });
             player.cd = Math.max(42, player.baseFireRate * player.stats.fireRateMult);
@@ -11920,13 +11925,20 @@ function updateEolioPropeller(a, dt) {
         const d = Math.hypot(dx, dy);
         const step = 11.5 * 60 * dt;
         damageEnemiesNearPropeller();
-        if (d <= step + 12) {
+        if (d <= step + 28) {
+            a.x = player.x;
+            a.y = player.y;
             a.life = 0;
             return;
         }
         a.x += dx / Math.max(0.001, d) * step;
         a.y += dy / Math.max(0.001, d) * step;
         a.angle += 9 * dt;
+        if (Math.hypot(player.x - a.x, player.y - a.y) <= 28) {
+            a.x = player.x;
+            a.y = player.y;
+            a.life = 0;
+        }
     }
 }
 
