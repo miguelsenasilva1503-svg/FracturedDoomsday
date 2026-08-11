@@ -10981,6 +10981,9 @@ function createProj(x, y, vx, vy, dmg, life, isPlayer, type, extra={}) {
     else if (type === 'lyron_ball') size = extra.size || 9;
     else if (type === 'lyron_ball_big') size = extra.size || 18;
     else if (type === 'axel_stone') size = extra.size || 12;
+    else if (type === 'serrano_taco') size = extra.size || 12;
+    else if (type === 'glitch_bugshot') size = extra.size || 8;
+    else if (type === 'eolio_display_propeller') size = extra.size || 20;
     else if (type === 'shinobi_fireball') size = extra.size || 14;
     else if (type === 'axel_shard') size = extra.size || 5;
     let sourceStats = extra.sourceStats || (isPlayer ? player.stats : null);
@@ -12299,36 +12302,85 @@ function disperseAxelStone(x, y, vx, vy, dmg) {
 }
 
 const SERRANO_RANDOM_PROJECTILES = [
+    // Comuns / básicos
     { type: 'normal', sourceChar: 'strike', size: 6, speed: 4.1 },
     { type: 'energy', sourceChar: 'fasty', size: 7, speed: 4.6 },
+    { type: 'heavy', sourceChar: 'cherry', size: 8, speed: 4.1 },
     { type: 'machinegun', sourceChar: 'bold', size: 4, speed: 5.2 },
-    { type: 'grenade', sourceChar: 'grenade', size: 4, speed: 4.0 },
+    { type: 'bomb', sourceChar: 'bombman', size: 5, speed: 4.5 },
+    { type: 'power_shot', sourceChar: 'power', size: 6, speed: 5.0 },
+    { type: 'big_grenade', sourceChar: 'grenade', size: 11, speed: 4.0 },
+    { type: 'hunter', sourceChar: 'hunter', size: 4, speed: 5.0 },
     { type: 'arrow', sourceChar: 'vesper', size: 5, speed: 5.1 },
-    { type: 'triple', sourceChar: 'tenent', size: 5, speed: 4.8 },
-    { type: 'sniper', sourceChar: 'rex', size: 4, speed: 8.0 },
-    { type: 'stones', sourceChar: 'necro', size: 6, speed: 4.0 },
-    { type: 'chain_lightning', sourceChar: 'plasma', size: 7, speed: 7.0 },
-    { type: 'blood_ball', sourceChar: 'vampyrus', size: 7, speed: 4.0 },
-    { type: 'magic', sourceChar: 'elektro', size: 7, speed: 4.1 },
-    { type: 'energy_wave', sourceChar: 'ghoul', size: 9, speed: 4.4 },
-    { type: 'buster_rocket', sourceChar: 'buster', size: 6, speed: 6.5 },
-    { type: 'boomerang', sourceChar: 'booboo', size: 8, speed: 5.6 },
-    { type: 'syringe', sourceChar: 'healy', size: 6, speed: 4.5 },
-    { type: 'lyron_ball', sourceChar: 'lyron', size: 8, speed: 5.0 },
-    { type: 'yuuto_heart', sourceChar: 'yuuto', size: 9, speed: 4.8 },
-    { type: 'graffit_can', sourceChar: 'graffit', size: 10, speed: 4.5 },
-    { type: 'macaron', sourceChar: 'miss_macaron', size: 9, speed: 4.8 },
-    { type: 'tea_cup', sourceChar: 'miss_macaron', size: 8, speed: 5.0 },
-    { type: 'sterling_star', sourceChar: 'sterling', size: 10, speed: 5.4 },
-    { type: 'cyro_iceball', sourceChar: 'cyro', size: 10, speed: 3.8, extra: { explodeRadius: 42, freezeDuration: 1.8 } },
-    { type: 'pyro_fireball', sourceChar: 'pyro', size: 8, speed: 6.0, extra: { burnChance: 0.10 } },
-    { type: 'axel_stone', sourceChar: 'kaisen', size: 10, speed: 4.2, extra: { splitCount: 3, noSplit: false } },
+    { type: 'shiv', sourceChar: 'shiv', size: 10, speed: 5.8 },
+    { type: 'screw', sourceChar: 'critik', size: 5, speed: 5.0 },
     { type: 'pit_bullet', sourceChar: 'pit', size: 5, speed: 5.2 },
-    { type: 'ruben_baguette', sourceChar: 'ruben', size: 9, speed: 4.8 },
-    { type: 'water_bubble', sourceChar: 'seae', size: 9, speed: 4.3 },
-    { type: 'eel_lash', sourceChar: 'eel', size: 8, speed: 4.7 },
-    { type: 'echo_shot', sourceChar: 'echo', size: 8, speed: 4.2 },
-    { type: 'shinobi_fireball', sourceChar: 'shinobi', size: 11, speed: 6.0, extra: { explodeRadius: 36, explodeDelay: 0.12 } }
+    { type: 'ruben_baguette', sourceChar: 'ruben', size: 19, speed: 4.8 },
+    { type: 'ruben_baguette_burnt', sourceChar: 'ruben', size: 15, speed: 4.8 },
+    { type: 'normal', sourceChar: 'tenent', size: 5, speed: 5.0 },
+    { type: 'syringe', sourceChar: 'healy', size: 6, speed: 4.5 },
+    { type: 'sniper', sourceChar: 'rex', size: 4, speed: 8.0 },
+    { type: 'stones', sourceChar: 'necro', size: 8, speed: 4.0 },
+    { type: 'slime', sourceChar: 'goo', size: 6, speed: 4.2 },
+    { type: 'chain_lightning', sourceChar: 'plasma', size: 7, speed: 7.0 },
+    { type: 'wrench', sourceChar: 'meekah', size: 14, speed: 4.5 },
+
+    // Música / suporte / controle
+    { type: 'note', sourceChar: 'robin', size: 7, speed: 4.7 },
+    { type: 'double_note', sourceChar: 'robin', size: 8, speed: 4.9 },
+    { type: 'treble_clef', sourceChar: 'robin', size: 8, speed: 4.9 },
+    { type: 'vinyl', sourceChar: 'djfesta', size: 8, speed: 5.0 },
+    { type: 'microphone', sourceChar: 'ripper', size: 12, speed: 5.2, extra: { micHex: '#e74c3c' } },
+    { type: 'lunch_ketchup', sourceChar: 'lunch', size: 9, speed: 5.0, extra: { sauceType: 'ketchup' } },
+    { type: 'lunch_mayo', sourceChar: 'lunch', size: 10, speed: 5.0, extra: { sauceType: 'mayo' } },
+    { type: 'lunch_mustard', sourceChar: 'lunch', size: 9, speed: 5.0, extra: { sauceType: 'mustard' } },
+    { type: 'bunniie_carrot', sourceChar: 'bunniie', size: 10, speed: 4.8 },
+    { type: 'energy_wave', sourceChar: 'ghoul', size: 9, speed: 4.4 },
+    { type: 'dart', sourceChar: 'tiki', size: 6, speed: 5.2 },
+    { type: 'chess_piece', sourceChar: 'chessy', size: 10, speed: 4.4, extra: { chessType: 'queen' } },
+    { type: 'wind_gust', sourceChar: 'aresta', size: 34, speed: 4.8, extra: { windRadius: 72 } },
+    { type: 'nucleon_shot', sourceChar: 'nucleon', size: 8, speed: 4.6, extra: { realDmg: 20 } },
+    { type: 'dagger', sourceChar: 'ninji', size: 8, speed: 6.4 },
+    { type: 'magic', sourceChar: 'elektro', size: 7, speed: 4.8 },
+    { type: 'ivy_seed', sourceChar: 'ivy', size: 7, speed: 5.0 },
+
+    // Lendários / especiais
+    { type: 'lance', sourceChar: 'gladiator', size: 6, speed: 8.0 },
+    { type: 'gladiator_slash', sourceChar: 'gladiator', size: 9, speed: 2.5 },
+    { type: 'boomerang', sourceChar: 'booboo', size: 8, speed: 5.6, extra: { returnSpeed: 11.5 } },
+    { type: 'scythe', sourceChar: 'scythe', size: 9, speed: 3.0 },
+    { type: 'buster_rocket', sourceChar: 'buster', size: 6, speed: 6.5 },
+    { type: 'saw_throw', sourceChar: 'mrsaw', size: 10, speed: 5.2 },
+    { type: 'quarterback', sourceChar: 'quarterback', size: 14, speed: 5.0 },
+    { type: 'water_bubble', sourceChar: 'seae', size: 8, speed: 4.3 },
+    { type: 'water_wave', sourceChar: 'seae', size: 15, speed: 5.3 },
+    { type: 'blood_ball', sourceChar: 'vampyrus', size: 10, speed: 4.0 },
+    { type: 'macaron', sourceChar: 'miss_macaron', size: 11, speed: 4.8 },
+    { type: 'tea_cup', sourceChar: 'miss_macaron', size: 10, speed: 5.0 },
+    { type: 'laser', sourceChar: 'cybertron', size: 4, speed: 8.5 },
+    { type: 'ice_stake', sourceChar: 'frost', size: 8, speed: 6.2 },
+    { type: 'ice_dagger', sourceChar: 'frost', size: 8, speed: 5.8 },
+    { type: 'snowball', sourceChar: 'yeti', size: 15, speed: 4.2 },
+    { type: 'yeti_punch', sourceChar: 'yeti', size: 20, speed: 6.0 },
+    { type: 'echo_shot', sourceChar: 'echo', size: 8, speed: 5.0 },
+    { type: 'echo_bh_core', sourceChar: 'echo', size: 10, speed: 4.4, extra: { bhSize: 42 } },
+    { type: 'graffit_can', sourceChar: 'graffit', size: 11, speed: 4.5, extra: { sprayColor: '#ff7ad9' } },
+    { type: 'shinobi_fireball', sourceChar: 'shinobi', size: 14, speed: 7.5, extra: { explodeRadius: 44 } },
+    { type: 'glitch_bugshot', sourceChar: 'glitch', size: 8, speed: 5.4, extra: { glitchJitter: true } },
+    { type: 'eel_lash', sourceChar: 'eel', size: 9, speed: 7.0 },
+    { type: 'zippi_laser', sourceChar: 'zippi', size: 4, speed: 10.0 },
+    { type: 'axel_stone', sourceChar: 'kaisen', size: 12, speed: 4.5 },
+    { type: 'adam_ball', sourceChar: 'adam', size: 9, speed: 5.0 },
+    { type: 'normal', sourceChar: 'major_briggs', size: 6, speed: 5.3 },
+    { type: 'yuuto_heart', sourceChar: 'yuuto', size: 9, speed: 4.8 },
+    { type: 'sterling_star', sourceChar: 'sterling', size: 12, speed: 5.4 },
+    { type: 'lyron_ball', sourceChar: 'lyron', size: 9, speed: 5.0 },
+    { type: 'lyron_ball_big', sourceChar: 'lyron', size: 18, speed: 4.2 },
+
+    // Novos personagens
+    { type: 'eolio_display_propeller', sourceChar: 'eolio', size: 20, speed: 5.2 },
+    { type: 'cyro_iceball', sourceChar: 'cyro', size: 13, speed: 4.0, extra: { explodeRadius: 58, freezeDuration: 2.7 } },
+    { type: 'pyro_fireball', sourceChar: 'pyro', size: 9, speed: 6.3, extra: { burnChance: 0.10 } }
 ];
 
 function spawnSerranoRandomProjectile(x, y, dmg, excludedEnemy) {
@@ -12337,7 +12389,7 @@ function spawnSerranoRandomProjectile(x, y, dmg, excludedEnemy) {
     const def = candidates[Math.floor(Math.random() * candidates.length)];
     const angle = Math.random() * Math.PI * 2;
     const speed = Number.isFinite(def.speed) ? def.speed : 4.5;
-    const extra = { ...(def.extra || {}), size: def.size || 6, sourceChar: 'serrano', serranoOriginalChar: def.sourceChar };
+    const extra = { ...(def.extra || {}), size: def.size || 6, sourceChar: 'serrano', serranoOriginalChar: def.sourceChar, serranoClone: true };
     if (def.type === 'boomerang') extra.returnSpeed = 11.5;
     if (def.type === 'sterling_star') extra.pierce = 2;
     createProj(x, y, Math.cos(angle) * speed, Math.sin(angle) * speed, Math.max(1, dmg * 0.72), 48, true, def.type, extra);
@@ -14709,6 +14761,27 @@ function draw() {
             else if (p.type === 'slime') { ctx.fillStyle = '#00b894'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); }
             else if (p.type === 'lightning') { ctx.fillStyle = '#0984e3'; ctx.fillRect(p.x-10, p.y-4, 20, 8); }
             else if (p.type === 'flex_orb') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx)); ctx.shadowColor = 'rgba(241, 196, 15, 0.55)'; ctx.shadowBlur = 10; ctx.fillStyle = '#f1c40f'; if(ctx.roundRect) { const orbW = Math.max(12, p.size * 2.0); const orbH = Math.max(8, p.size * 1.05); ctx.beginPath(); ctx.roundRect(-orbW * 0.5, -orbH * 0.5, orbW, orbH, orbH * 0.45); ctx.fill(); } else { ctx.fillRect(-12, -5, 24, 10); } ctx.shadowBlur = 0; ctx.fillStyle = '#fff2a8'; ctx.beginPath(); ctx.arc(0, 0, Math.max(2, p.size * 0.35), 0, Math.PI*2); ctx.fill(); ctx.restore(); }
+            else if (p.extra?.serranoClone) {
+                const sourceId = p.extra?.serranoOriginalChar || 'strike';
+                const sourceColor = CHARACTERS[sourceId]?.color || '#f1c40f';
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(Math.atan2(p.vy, p.vx));
+                ctx.shadowColor = sourceColor;
+                ctx.shadowBlur = 8;
+                ctx.fillStyle = sourceColor;
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(p.size * 1.2, 0);
+                ctx.lineTo(0, p.size * 0.85);
+                ctx.lineTo(-p.size * 1.0, 0);
+                ctx.lineTo(0, -p.size * 0.85);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
+            }
             else { ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); }
         }
     });
