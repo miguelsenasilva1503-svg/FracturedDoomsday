@@ -406,6 +406,9 @@
     }
     #btn-special .btn-cooldown-badge { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); min-width: 30px; height: 24px; padding: 0 7px; border-radius: 999px; background: rgba(0,0,0,0.82); color: #fff; font-size: 13px; font-weight: 900; line-height: 24px; border: 2px solid rgba(255,255,255,0.35); box-shadow: 0 4px 10px rgba(0,0,0,0.35); pointer-events: none; display: none; }
     #btn-special.cooling { background: rgba(8,8,12,0.98) !important; border-color: rgba(255,255,255,0.16) !important; filter: brightness(0.34) saturate(0.45); }
+    #btn-special.charging { filter: brightness(0.55) saturate(0.7); }
+    #btn-special.charging::after { content:''; position:absolute; inset:-5px; border-radius:50%; background:conic-gradient(var(--btn-yellow) calc(var(--charge-pct, 0) * 1turn), rgba(255,255,255,0.10) 0); -webkit-mask:radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px)); mask:radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px)); pointer-events:none; animation: gladiatorChargePulse 1s ease-in-out infinite; }
+    @keyframes gladiatorChargePulse { 0%,100% { opacity:0.75; transform:scale(0.98); } 50% { opacity:1; transform:scale(1.02); } }
     #btn-special.sterling-special {
         width: 96px;
         height: 96px;
@@ -2689,6 +2692,11 @@ Um astronauta experiente que canaliza energia estelar para enfrentar qualquer am
 Um jogador inglês de futebol que encara qualquer desafio como se estivesse disputando a final de um campeonato. Calmo, disciplinado e extremamente competitivo, ele mantém a cabeça fria mesmo sob pressão, sempre analisando o melhor momento para agir. Enquanto muitos confiam apenas no talento, Lyron acredita que treino, estratégia e determinação são o verdadeiro caminho para a vitória.
 
 “Futebol não é só habilidade... é saber quando fazer a jogada perfeita.”` },
+    eolio: { id: 'eolio', class: 'Controle', name: 'Eólio', rarity: 'epic', cost: 149, hp: 110, speed: 3.6, dmg: 18, fireRate: 78, range: 300, color: '#4da6ff', weapon: 'eolio_propeller', desc: `“Eólio sempre foi fascinado pelo vento. Em algum momento, decidiu que estudar turbinas não era suficiente... ele queria ser uma.”
+
+Um engenheiro eólico que trabalha em uma empresa especializada em turbinas. Apaixonado pelo funcionamento das hélices e pela força do vento, Eólio levou sua obsessão longe demais e construiu um traje equipado com enormes hélices, permitindo que ele literalmente voe pelos céus. Para ele, transformar engenharia em algo que pode vestir é simplesmente uma evolução natural da profissão.
+
+“Quem precisa de asas quando se tem engenharia?”` },
     cyro_pyro: { id: 'cyro_pyro', class: 'Controle', name: 'Cyro & Pyro', rarity: 'legendary', cost: 349, hp: 110, speed: 3.45, dmg: 18, fireRate: 54, range: 270, color: '#74b9ff', emoji: '❄️', weapon: 'cyro_pyro', desc: `“Cyro e Pyro vivem discutindo sobre qual elemento é o mais forte. O resto do mundo só tenta sobreviver à discussão.”
 
 Duas crianças elementais completamente opostas, mas inseparáveis. Enquanto Cyro mantém a calma e congela tudo ao seu redor, Pyro é impulsivo e adora incendiar qualquer coisa que pareça minimamente inflamável. Seus inimigos logo os subestimam por ainda serem jovens elementais, mas essa é a pior decisão que podem tomar. Juntos, transformam cada batalha em uma confusão de gelo, fogo e muita rivalidade entre irmãos.
@@ -2858,7 +2866,10 @@ ESPECIAL: a flor usa 3 ESPECIAIS ao invés de 1 só e é reposicionada a cada 3 
 
 Gladiator (espadachim): ataca com uma espada em uma área de 180°.
 
-ESPECIAL: durante a partida, o botão ⚔️ alterna entre Lanceiro e Espadachim. A troca tem recarga de 10s.`,
+Durante a partida, o botão ⚔️ alterna entre Lanceiro e Espadachim. A troca tem recarga de 10s.`,
+    eolio: `Eólio: dispara uma hélice que fica parada no chão no alcance máximo e retorna para ele quando outra hélice é lançada, causando dano na volta.
+
+ESPECIAL: começa com uma turbina eólica que cria uma pequena área de efeito; dentro dela, Eólio recebe 60% de redução de dano. A turbina é recolocada a cada 3 waves.`,
     booboo: `Boo Boo: dispara um bumerangue PERFURANTE que vai e volta pra Boo Boo.`,
     scythe: `Scythe: a cada 3 ataques, um é em 360° e os outros dois são em uma área de 180°.
 
@@ -3994,6 +4005,7 @@ const CHARACTER_TITLES = {
     firey: 'Liberdade flamejante',
     elektro: 'Um raio não cai duas vezez',
     gladiator: 'Campeão da arena',
+    eolio: 'Energia eólica',
     sparta: 'Duelo Justo',
     booboo: 'Vai e volta',
     scythe: 'Ceifador',
@@ -4112,7 +4124,8 @@ const CHARACTER_SPRITES = {
     adam_mech: 'sprites/adam_mech.png',
     jack: 'sprites/jack.png',
     cyro: 'sprites/cyro.png',
-    pyro: 'sprites/pyro.png'
+    pyro: 'sprites/pyro.png',
+    eolio: 'sprites/eolio.png'
 };
 
 const ENEMY_SPRITES = {
@@ -7218,6 +7231,8 @@ function showCharDetail(id) {
             const mode = getCyroPyroMode();
             document.getElementById('wild-dash').innerHTML='Cyro';
             document.getElementById('wild-cleave').innerHTML='Pyro';
+            document.getElementById('wild-dash').style.color='#000';
+            document.getElementById('wild-cleave').style.color='#000';
             document.getElementById('wild-dash').onclick=()=>setCyroPyroMode('cyro');
             document.getElementById('wild-cleave').onclick=()=>setCyroPyroMode('pyro');
             document.getElementById('wild-dash').style.border=mode==='cyro'?'2px solid var(--btn-yellow)':'';
@@ -7367,7 +7382,6 @@ function buyChar(id) {
         if(!res) return;
         pd.gems -= c.cost;
         pd.chars[id] = { level: 1, slots: 2, chips: [null, null], unlockSource: id === 'glitch' ? 'shop-gems' : 'shop' };
-        if(id === 'gladiator') pd.chars[id].mode = 'shooter';
         if(id === 'cyro_pyro') pd.chars[id].mode = 'pyro';
         awardAchievementStat('charsUnlocked', 1);
         save();
@@ -8632,8 +8646,9 @@ function updateSpecialButtonUI() {
                     ? Math.max(0, Number(player.sterlingAttackCd || 0))
                     : 0;
 
-    const activeState = cfg.type === 'ghoul' ? isGhoulActive : cfg.type === 'ninji' ? isNinjiActive : cfg.type === 'shinobi' ? isShinobiActive : isGlitchActive;
+    const activeState = cfg.type === 'ghoul' ? isGhoulActive : cfg.type === 'ninji' ? isNinjiActive : cfg.type === 'shinobi' ? isShinobiActive : cfg.type === 'glitch' ? isGlitchActive : false;
     const shouldShowCooldown = !activeState && !isSterlingCharging && cooldownValue > 0;
+    const gladiatorCharging = cfg.type === 'gladiator' && cooldownValue > 0;
     const label = cfg.label || '';
     const chargePct = isSterling ? Math.max(0, Math.min(1, Number(player.sterlingCharge || 0))) : 0;
 
@@ -8641,7 +8656,8 @@ function updateSpecialButtonUI() {
     btnSpecial.style.display = 'flex';
     btnSpecial.disabled = false;
     btnSpecial.style.pointerEvents = 'auto';
-    btnSpecial.classList.toggle('charging', isSterlingCharging);
+    btnSpecial.classList.toggle('charging', isSterlingCharging || gladiatorCharging);
+    btnSpecial.style.setProperty('--charge-pct', cfg.type === 'gladiator' ? String(Math.max(0, Math.min(1, 1 - cooldownValue / 10))) : (isSterling ? String(chargePct) : '0'));
     btnSpecial.classList.toggle('sterling-special', isSterling);
     btnSpecial.innerHTML = isSterling
         ? `<span class="btn-special-label">⭐</span><span class="sterling-btn-title">CARGA</span><div class="btn-cooldown-badge" style="display:${shouldShowCooldown || activeState ? 'block' : 'none'}">${activeState ? '' : cooldownValue.toFixed(1)}</div>`
@@ -8768,6 +8784,11 @@ function dealPlayerDamage(amount, opts = {}) {
     if (pd.selectedChar === 'vesper') {
         player.vesperFocusTimer = 0;
         player.vesperFocusActive = false;
+    }
+
+    if (pd.selectedChar === 'eolio') {
+        const turbine = Array.isArray(allies) ? allies.find(a => a && a.type === 'eolio_turbine') : null;
+        if (turbine && dist(player, turbine) <= (turbine.radius || 78)) dmg *= 0.4;
     }
 
     if (isSpartaCharacter() && player.spartaShieldActive) {
@@ -8995,7 +9016,7 @@ function startRunAfterShop() {
     
     player = {
         x: 0, y: 0, r: (pd.selectedChar === 'hank' || pd.selectedChar === 'yeti') ? 20 : ((pd.selectedChar === 'shiv' || pd.selectedChar === 'zippi') ? 10 : (pd.selectedChar === 'kaisen' ? 13 : (pd.selectedChar === 'booboo' ? 13 : (pd.selectedChar === 'eel' ? 15 : 15)))), baseHp: initialBaseHp, hp: initialBaseHp, baseSpeed: charDef.speed, baseDmg: initialBaseDmg,
-        baseFireRate: charDef.fireRate, baseRange: charDef.range, color: charDef.color, weapon: charDef.weapon, cyroPyroMode: pd.selectedChar === 'cyro_pyro' ? getCyroPyroMode() : null, gladiatorMode: pd.selectedChar === 'gladiator' ? (pd.chars?.gladiator?.mode || 'shooter') : null, gladiatorModeCooldown: 0, cd: 0, shieldTimer: 0,
+        baseFireRate: charDef.fireRate, baseRange: charDef.range, color: charDef.color, weapon: charDef.weapon, cyroPyroMode: pd.selectedChar === 'cyro_pyro' ? getCyroPyroMode() : null, gladiatorMode: pd.selectedChar === 'gladiator' ? (pd.chars?.gladiator?.mode || 'shooter') : null, gladiatorModeCooldown: 0, eolioPropellerSeq: 0, cd: 0, shieldTimer: 0,
         zombieTimer: 0, revived: false, elekCycle: false, dashTimer: 0, meleeCd: 0, boldShots: 0, boldReload: 0, specCd: 0, invisTimer: 0, ghoulPendingCd: 0, ninjiPendingCd: 0,
         lastMoveAngle: 0, lastAimAngle: 0, tenentCycle: 0, orbitalAngle: 0, boobooReturn: true, pickedCards: [], revivesUsed: 0, qbBar: 0, qbShield: false, isDead: false, flexCombo: 0, flexReload: 0, ninjiDashCd: 0, shinobiDragonActive: false, shinobiDragonWavesLeft: 0, shinobiDragonCooldown: 0, shinobiDragonFireCd: 0, shinobiScytheCycle: 0, sterlingCharging: false, sterlingCharge: 0, sterlingAttackCd: 0, majorBriggsKills: 0, majorBriggsStage: 1,
         adamScrap: 0, adamMechActive: false, adamMechWavesLeft: 0, adamMechHpBonus: 0, adamMechSizeBonus: 0, adamBaseHpBeforeMech: null, adamBaseRBeforeMech: null,
@@ -9056,6 +9077,7 @@ function startRunAfterShop() {
     generateMapObstacles();
 
     isPlaying = true; isPaused = false; lastTime = performance.now(); updateGameHud(); ensureMissionState(); pd.missions.lastRunChar = pd.selectedChar; trackMissionProgress('games', 1); awardAchievementStat('gamesStarted', 1); 
+    if (pd.selectedChar === 'eolio') spawnEolioTurbine();
     if(player.weapon === 'wrench') { allies.push({x: player.x, y: player.y, dmg: player.baseDmg, speed: 0, life: Infinity, cd: 0, isTurret: true, ref: 'meekah_turret'}); }
     gameLoopId = requestAnimationFrame(loop);
 }
@@ -9337,7 +9359,15 @@ function triggerSpecial() {
         }
         return;
     }
-    if (cfg.type === 'gladiator' && (player.gladiatorModeCooldown||0) <= 0) { player.gladiatorMode=player.gladiatorMode==='shooter'?'cleave':'shooter'; pd.chars.gladiator.mode=player.gladiatorMode; player.gladiatorModeCooldown=10; save(); updateSpecialButtonUI(); return; }
+    if (cfg.type === 'gladiator' && (player.gladiatorModeCooldown||0) <= 0) {
+        player.gladiatorMode = player.gladiatorMode === 'shooter' ? 'cleave' : 'shooter';
+        pd.chars.gladiator.mode = player.gladiatorMode;
+        player.gladiatorModeCooldown = 10;
+        save();
+        if (btnSpecial) { btnSpecial.classList.add('cooling','charging'); btnSpecial.style.opacity = '0.55'; btnSpecial.style.setProperty('--charge-pct','0'); const badge = btnSpecial.querySelector('.btn-cooldown-badge'); if (badge) { badge.style.display='block'; badge.textContent='10'; } }
+        updateSpecialButtonUI();
+        return;
+    }
     if (cfg.type === 'bunniie' && player.bunniieTunnelCd <= 0) {
         const hole = digBunniieTunnel(player.x, player.y);
         if (hole && btnSpecial) {
@@ -9452,6 +9482,7 @@ function spawnGooClone() {
 function update(dt) {
     if(player.isDead) return;
     if(player.gladiatorModeCooldown>0) player.gladiatorModeCooldown=Math.max(0,player.gladiatorModeCooldown-dt);
+    if (pd.selectedChar === 'gladiator') updateSpecialButtonUI();
     if (player && pd.selectedChar === 'bunniie') {
         ensureBunniieRuntime();
         player.bunniieTunnelCd = Math.max(0, player.bunniieTunnelCd - dt);
@@ -9502,6 +9533,7 @@ if (!isBossAlive) {
         addFloatingText(player.x, player.y - 30, "WAVE " + wave, '#f1c40f', 30);
         if (pd.selectedChar === 'ivy' && wave > 1 && ((wave - 1) % 3 === 0)) spawnIvyFlower();
         if (pd.selectedChar === 'miss_macaron' && wave > 1 && ((wave - 1) % 3 === 0)) spawnMissMacaronTeaTable();
+        if (pd.selectedChar === 'eolio' && wave > 1 && ((wave - 1) % 3 === 0)) spawnEolioTurbine();
         if (player.glitchMorphActive && pd.selectedChar !== 'glitch' && !player.glitchTransformAnimating) {
             player.glitchMorphWavesLeft = Math.max(0, (player.glitchMorphWavesLeft || 0) - 1);
             if (player.glitchMorphWavesLeft <= 0) startGlitchMorphSequence(true);
@@ -9867,7 +9899,7 @@ if (!isBossAlive) {
                 }
             }
             for(let e of enemies) { let d = dist(player, e); if(d < minDist) { minDist = d; target = e; } }
-            if(target || (player.weapon === 'aura' && target)) fireWeapon(target);
+            if(target || player.weapon === 'eolio_propeller') fireWeapon(target);
         }
     }
 
@@ -9961,7 +9993,7 @@ if (!isBossAlive) {
 }
 
 function fireWeapon(target) {
-    if(!target) return;
+    if(!target && player.weapon !== 'eolio_propeller') return;
     const w = player.weapon; 
     let dToT = dist(player, target);
     let totemDmg = player.inTotem ? 1.2 : 1;
@@ -9986,8 +10018,17 @@ function fireWeapon(target) {
     if(w === 'energy_wave' && player.invisTimer > 0) pSpd *= 1.5;
 
     const execFire = () => {
-        const angle = Math.atan2(target.y - player.y, target.x - player.x);
+        const angle = target ? Math.atan2(target.y - player.y, target.x - player.x) : (Number.isFinite(player.lastAimAngle) ? player.lastAimAngle : (Number.isFinite(player.lastMoveAngle) ? player.lastMoveAngle : 0));
         player.lastAimAngle = angle;
+
+        if (w === 'eolio_propeller') {
+            const maxRange = Math.max(120, player.baseRange * player.stats.rangeMult);
+            for (const a of allies) { if (a && a.type === 'eolio_propeller' && a.phase !== 'return') a.phase = 'return'; }
+            const id = ++player.eolioPropellerSeq;
+            allies.push({ type:'eolio_propeller', id, x:player.x, y:player.y, phase:'outbound', vx:Math.cos(angle), vy:Math.sin(angle), traveled:0, maxRange, dmg:Math.max(1, finalDmg), r:16, life:Infinity, speed:8.2, angle:angle, hitTick:0 });
+            player.cd = Math.max(30, player.baseFireRate * player.stats.fireRateMult);
+            return;
+        }
 
         if (w === 'arrow' && pd.selectedChar === 'vesper') {
             executeVesperAttack(target, angle, finalDmg, pSpd);
@@ -11831,6 +11872,46 @@ function spawnCyroPyroPartner() {
     });
 }
 
+function spawnEolioTurbine() {
+    if (!player) return;
+    allies = Array.isArray(allies) ? allies : [];
+    allies = allies.filter(a => a && a.type !== 'eolio_turbine');
+    allies.push({ type:'eolio_turbine', x:player.x, y:player.y, dmg:0, speed:0, life:Infinity, cd:0, isTurret:true, radius:78, pulse:0 });
+}
+
+function updateEolioPropeller(a, dt) {
+    if (!a) return;
+    a.hitTick = Math.max(0, (a.hitTick || 0) - dt);
+    if (a.phase === 'outbound') {
+        const step = (a.speed || 8.2) * 60 * dt;
+        a.x += a.vx * step;
+        a.y += a.vy * step;
+        a.traveled += step;
+        if (a.traveled >= a.maxRange) { a.traveled = a.maxRange; a.phase = 'stationary'; }
+    } else if (a.phase === 'stationary') {
+        a.angle += 5.5 * dt;
+        if (a.hitTick <= 0) {
+            for (const e of enemies) {
+                if (!e || e.hp <= 0) continue;
+                if (dist(a, e) <= (a.r || 16) + (e.size || 10)) {
+                    const soakMult = 1 + (e.soak || 0) * 0.05;
+                    const hit = Math.max(1, (a.dmg || 1) * 0.95 * soakMult * dt);
+                    e.hp -= hit;
+                    createParticles(e.x, e.y, '#4da6ff');
+                }
+            }
+        }
+    } else if (a.phase === 'return') {
+        const dx = player.x - a.x, dy = player.y - a.y;
+        const d = Math.hypot(dx,dy);
+        const step = 11.5 * 60 * dt;
+        if (d <= step + 12) { a.life = 0; return; }
+        a.x += dx / Math.max(0.001,d) * step;
+        a.y += dy / Math.max(0.001,d) * step;
+        a.angle += 7 * dt;
+    }
+}
+
 function updateAllies(dt) {
     for(let i=allies.length-1; i>=0; i--) {
         let a = allies[i]; a.life -= dt; let target = null; let minD = 500;
@@ -11840,6 +11921,8 @@ function updateAllies(dt) {
             a.teaCd = Math.max(0, (a.teaCd || 0) - dt);
             continue;
         }
+        if (a.type === 'eolio_turbine') { a.pulse = (a.pulse || 0) + dt; continue; }
+        if (a.type === 'eolio_propeller') { updateEolioPropeller(a, dt); continue; }
         if (a.type === 'cyro_pyro_partner') {
             if(a.hp<=0){a.life=0;continue;}
             if(!Number.isFinite(a.aiAngle))a.aiAngle=Math.random()*Math.PI*2;
@@ -13568,6 +13651,15 @@ function draw() {
         if(a.isTotem) { 
             ctx.fillStyle = 'rgba(142, 68, 173, 0.2)'; ctx.beginPath(); ctx.arc(a.x, a.y, a.radius, 0, Math.PI*2); ctx.fill(); 
             ctx.fillStyle = '#8e44ad'; ctx.fillRect(a.x-8, a.y-15, 16, 30); 
+        } else if(a.type === 'eolio_propeller') {
+            ctx.save(); ctx.translate(a.x, a.y); ctx.rotate(a.angle || 0);
+            ctx.strokeStyle = '#dfefff'; ctx.fillStyle = '#4da6ff'; ctx.lineWidth = 3;
+            for (let k=0;k<4;k++){ const ang=k*Math.PI/2; ctx.save(); ctx.rotate(ang); ctx.beginPath(); ctx.moveTo(0,0); ctx.quadraticCurveTo(10,-7,18,0); ctx.quadraticCurveTo(10,7,0,0); ctx.fill(); ctx.stroke(); ctx.restore(); }
+            ctx.fillStyle='#ecf7ff'; ctx.beginPath(); ctx.arc(0,0,4,0,Math.PI*2); ctx.fill(); ctx.restore();
+        } else if(a.type === 'eolio_turbine') {
+            const radius = a.radius || 78; const pulse = 0.08 + 0.03*Math.sin((a.pulse||0)*3);
+            ctx.save(); ctx.globalAlpha = pulse; ctx.fillStyle='#4da6ff'; ctx.beginPath(); ctx.arc(a.x,a.y,radius,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=0.75; ctx.strokeStyle='#8fd0ff'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(a.x,a.y,radius,0,Math.PI*2); ctx.stroke();
+            ctx.globalAlpha=1; ctx.strokeStyle='#dfefff'; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(a.x,a.y+16); ctx.lineTo(a.x,a.y-14); ctx.stroke(); ctx.fillStyle='#4da6ff'; for(let k=0;k<3;k++){ const ang=(a.pulse||0)*2+k*2*Math.PI/3; ctx.save(); ctx.translate(a.x+Math.cos(ang)*10,a.y-18+Math.sin(ang)*10); ctx.rotate(ang); ctx.beginPath(); ctx.moveTo(0,0); ctx.quadraticCurveTo(18,-5,24,0); ctx.quadraticCurveTo(15,5,0,0); ctx.fill(); ctx.restore(); } ctx.restore();
         } else if(a.type === 'cyro_pyro_partner') {
             const rr = a.r || 13;
             drawCharacterSprite(ctx, a.x, a.y, rr, a.elementMode === 'cyro' ? 'cyro' : 'pyro', {
