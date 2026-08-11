@@ -12334,110 +12334,139 @@ function disperseAxelStone(x, y, vx, vy, dmg) {
     createParticles(x, y, '#8d6e63');
 }
 
-const SERRANO_RANDOM_PROJECTILES = [
-    // Comuns / básicos
-    { type: 'normal', sourceChar: 'strike', size: 6, speed: 4.1 },
-    { type: 'energy', sourceChar: 'fasty', size: 7, speed: 4.6 },
-    { type: 'heavy', sourceChar: 'cherry', size: 8, speed: 4.1 },
-    { type: 'machinegun', sourceChar: 'bold', size: 4, speed: 5.2 },
-    { type: 'bomb', sourceChar: 'bombman', size: 5, speed: 4.5 },
-    { type: 'power_shot', sourceChar: 'power', size: 6, speed: 5.0 },
-    { type: 'big_grenade', sourceChar: 'grenade', size: 11, speed: 4.0 },
-    { type: 'hunter', sourceChar: 'hunter', size: 4, speed: 5.0 },
-    { type: 'arrow', sourceChar: 'vesper', size: 5, speed: 5.1 },
-    { type: 'shiv', sourceChar: 'shiv', size: 10, speed: 5.8 },
-    { type: 'screw', sourceChar: 'critik', size: 5, speed: 5.0 },
-    { type: 'pit_bullet', sourceChar: 'pit', size: 5, speed: 5.2 },
-    { type: 'ruben_baguette', sourceChar: 'ruben', size: 19, speed: 4.8 },
-    { type: 'ruben_baguette_burnt', sourceChar: 'ruben', size: 15, speed: 4.8 },
-    { type: 'normal', sourceChar: 'tenent', size: 5, speed: 5.0 },
-    { type: 'syringe', sourceChar: 'healy', size: 6, speed: 4.5 },
-    { type: 'sniper', sourceChar: 'rex', size: 4, speed: 8.0 },
-    { type: 'stones', sourceChar: 'necro', size: 8, speed: 4.0 },
-    { type: 'slime', sourceChar: 'goo', size: 6, speed: 4.2 },
-    { type: 'chain_lightning', sourceChar: 'plasma', size: 7, speed: 7.0 },
-    { type: 'wrench', sourceChar: 'meekah', size: 14, speed: 4.5 },
+const SERRANO_CHARACTER_PROJECTILES = {
+    strike: ['normal'],
+    fasty: ['energy'],
+    cherry: ['heavy'],
+    hank: ['heavy'],
+    bold: ['machinegun'],
+    bombman: ['bomb'],
+    kayo: ['sword'],
+    power: ['power_shot'],
+    grenade: ['big_grenade'],
+    hunter: ['hunter'],
+    vesper: ['arrow'],
+    shiv: ['shiv'],
+    critik: ['screw'],
+    pit: ['pit_bullet'],
+    ruben: ['ruben_baguette', 'ruben_baguette_burnt', 'ruben_baguette_half'],
+    tenent: ['normal'],
+    healy: ['syringe'],
+    rex: ['sniper'],
+    necro: ['stones'],
+    goo: ['slime'],
+    plasma: ['chain_lightning'],
+    meekah: ['wrench'],
+    robin: ['note', 'double_note', 'treble_clef'],
+    djfesta: ['vinyl'],
+    ripper: ['microphone'],
+    lunch: ['lunch_ketchup', 'lunch_mayo', 'lunch_mustard'],
+    bunniie: ['bunniie_carrot'],
+    ghoul: ['energy_wave'],
+    tiki: ['dart'],
+    chessy: ['chess_piece'],
+    aresta: ['wind_gust', 'tornado'],
+    nucleon: ['nucleon_shot'],
+    ninji: ['dagger'],
+    elektro: ['lightning'],
+    ivy: ['ivy_seed'],
+    gladiator: ['lance', 'gladiator_slash'],
+    booboo: ['boomerang'],
+    scythe: ['scythe'],
+    buster: ['buster_rocket'],
+    mrsaw: ['saw_throw'],
+    quarterback: ['quarterback'],
+    seae: ['water_bubble', 'water_wave'],
+    vampyrus: ['blood_ball'],
+    miss_macaron: ['macaron', 'macaron_big', 'tea_cup'],
+    cybertron: ['laser', 'bomb'],
+    frost: ['ice_stake', 'ice_dagger'],
+    yeti: ['snowball', 'yeti_punch'],
+    echo: ['echo_shot', 'echo_bh_core'],
+    graffit: ['graffit_can'],
+    shinobi: ['scythe', 'shinobi_fireball'],
+    glitch: ['glitch_bugshot'],
+    eel: ['eel_lash'],
+    zippi: ['zippi_laser'],
+    kaisen: ['axel_stone', 'axel_shard'],
+    adam: ['adam_ball', 'adam_mech_ball'],
+    major_briggs: ['normal', 'heavy', 'laser'],
+    ignite: [],
+    yuuto: ['yuuto_heart'],
+    sterling: ['sterling_star'],
+    lyron: ['lyron_ball', 'lyron_ball_big'],
+    eolio: ['eolio_propeller'],
+    cyro: ['cyro_iceball'],
+    pyro: ['pyro_fireball']
+};
 
-    // Música / suporte / controle
-    { type: 'note', sourceChar: 'robin', size: 7, speed: 4.7 },
-    { type: 'double_note', sourceChar: 'robin', size: 8, speed: 4.9 },
-    { type: 'treble_clef', sourceChar: 'robin', size: 8, speed: 4.9 },
-    { type: 'vinyl', sourceChar: 'djfesta', size: 8, speed: 5.0 },
-    { type: 'microphone', sourceChar: 'ripper', size: 12, speed: 5.2, extra: { micHex: '#e74c3c' } },
-    { type: 'lunch_ketchup', sourceChar: 'lunch', size: 9, speed: 5.0, extra: { sauceType: 'ketchup' } },
-    { type: 'lunch_mayo', sourceChar: 'lunch', size: 10, speed: 5.0, extra: { sauceType: 'mayo' } },
-    { type: 'lunch_mustard', sourceChar: 'lunch', size: 9, speed: 5.0, extra: { sauceType: 'mustard' } },
-    { type: 'bunniie_carrot', sourceChar: 'bunniie', size: 10, speed: 4.8 },
-    { type: 'energy_wave', sourceChar: 'ghoul', size: 9, speed: 4.4 },
-    { type: 'dart', sourceChar: 'tiki', size: 6, speed: 5.2 },
-    { type: 'chess_piece', sourceChar: 'chessy', size: 10, speed: 4.4, extra: { chessType: 'queen' } },
-    { type: 'wind_gust', sourceChar: 'aresta', size: 34, speed: 4.8, extra: { windRadius: 72 } },
-    { type: 'nucleon_shot', sourceChar: 'nucleon', size: 8, speed: 4.6, extra: { realDmg: 20 } },
-    { type: 'dagger', sourceChar: 'ninji', size: 8, speed: 6.4 },
-    { type: 'magic', sourceChar: 'elektro', size: 7, speed: 4.8 },
-    { type: 'ivy_seed', sourceChar: 'ivy', size: 7, speed: 5.0 },
-
-    // Lendários / especiais
-    { type: 'lance', sourceChar: 'gladiator', size: 6, speed: 8.0 },
-    { type: 'gladiator_slash', sourceChar: 'gladiator', size: 9, speed: 2.5 },
-    { type: 'boomerang', sourceChar: 'booboo', size: 8, speed: 5.6, extra: { returnSpeed: 11.5 } },
-    { type: 'scythe', sourceChar: 'scythe', size: 9, speed: 3.0 },
-    { type: 'buster_rocket', sourceChar: 'buster', size: 6, speed: 6.5 },
-    { type: 'saw_throw', sourceChar: 'mrsaw', size: 10, speed: 5.2 },
-    { type: 'quarterback', sourceChar: 'quarterback', size: 14, speed: 5.0 },
-    { type: 'water_bubble', sourceChar: 'seae', size: 8, speed: 4.3 },
-    { type: 'water_wave', sourceChar: 'seae', size: 15, speed: 5.3 },
-    { type: 'blood_ball', sourceChar: 'vampyrus', size: 10, speed: 4.0 },
-    { type: 'macaron', sourceChar: 'miss_macaron', size: 11, speed: 4.8 },
-    { type: 'tea_cup', sourceChar: 'miss_macaron', size: 10, speed: 5.0 },
-    { type: 'laser', sourceChar: 'cybertron', size: 4, speed: 8.5 },
-    { type: 'ice_stake', sourceChar: 'frost', size: 8, speed: 6.2 },
-    { type: 'ice_dagger', sourceChar: 'frost', size: 8, speed: 5.8 },
-    { type: 'snowball', sourceChar: 'yeti', size: 15, speed: 4.2 },
-    { type: 'yeti_punch', sourceChar: 'yeti', size: 20, speed: 6.0 },
-    { type: 'echo_shot', sourceChar: 'echo', size: 8, speed: 5.0 },
-    { type: 'echo_bh_core', sourceChar: 'echo', size: 10, speed: 4.4, extra: { bhSize: 42 } },
-    { type: 'graffit_can', sourceChar: 'graffit', size: 11, speed: 4.5, extra: { sprayColor: '#ff7ad9' } },
-    { type: 'shinobi_fireball', sourceChar: 'shinobi', size: 14, speed: 7.5, extra: { explodeRadius: 44 } },
-    { type: 'glitch_bugshot', sourceChar: 'glitch', size: 8, speed: 5.4, extra: { glitchJitter: true } },
-    { type: 'eel_lash', sourceChar: 'eel', size: 9, speed: 7.0 },
-    { type: 'zippi_laser', sourceChar: 'zippi', size: 4, speed: 10.0 },
-    { type: 'axel_stone', sourceChar: 'kaisen', size: 12, speed: 4.5 },
-    { type: 'adam_ball', sourceChar: 'adam', size: 9, speed: 5.0 },
-    { type: 'normal', sourceChar: 'major_briggs', size: 6, speed: 5.3 },
-    { type: 'yuuto_heart', sourceChar: 'yuuto', size: 9, speed: 4.8 },
-    { type: 'sterling_star', sourceChar: 'sterling', size: 12, speed: 5.4 },
-    { type: 'lyron_ball', sourceChar: 'lyron', size: 9, speed: 5.0 },
-    { type: 'lyron_ball_big', sourceChar: 'lyron', size: 18, speed: 4.2 },
-
-    // Personagens que usam arquétipos já existentes no sistema
-    { type: 'flex_orb', sourceChar: 'flex', size: 9, speed: 5.2, extra: { stunChance: 0.08 } },
-    { type: 'energy', sourceChar: 'fasty', size: 7, speed: 4.8 },
-    { type: 'machinegun', sourceChar: 'bold', size: 4, speed: 5.2 },
-    { type: 'power_shot', sourceChar: 'power', size: 6, speed: 5.0 },
-    { type: 'triple', sourceChar: 'tenent', size: 5, speed: 5.4 },
-    { type: 'sniper', sourceChar: 'rex', size: 4, speed: 8.0 },
-    { type: 'stones', sourceChar: 'necro', size: 8, speed: 4.0 },
-    { type: 'tank', sourceChar: 'hank', size: 9, speed: 4.6 },
-    { type: 'heavy', sourceChar: 'major_briggs', size: 11, speed: 4.8 },
-    { type: 'sword', sourceChar: 'kayo', size: 14, speed: 6.0 },
-
-    // Novos personagens
-    { type: 'eolio_display_propeller', sourceChar: 'eolio', size: 20, speed: 5.2 },
-    { type: 'cyro_iceball', sourceChar: 'cyro', size: 13, speed: 4.0, extra: { explodeRadius: 58, freezeDuration: 2.7 } },
-    { type: 'pyro_fireball', sourceChar: 'pyro', size: 9, speed: 6.3, extra: { burnChance: 0.10 } }
-];
+const SERRANO_RANDOM_PROJECTILES = Object.entries(SERRANO_CHARACTER_PROJECTILES).flatMap(([sourceChar, types]) =>
+    types.map(type => ({ type, sourceChar }))
+).filter(entry => entry.sourceChar && entry.sourceChar !== 'serrano' && entry.sourceChar !== 'glitch_enemy');
 
 function spawnSerranoRandomProjectile(x, y, dmg, excludedEnemy) {
-    const candidates = SERRANO_RANDOM_PROJECTILES.filter(p => p.type !== 'serrano_taco');
+    const candidates = SERRANO_RANDOM_PROJECTILES.filter(def => def.sourceChar !== 'serrano');
     if (!candidates.length) return;
+
     const def = candidates[Math.floor(Math.random() * candidates.length)];
     const angle = Math.random() * Math.PI * 2;
-    const speed = Number.isFinite(def.speed) ? def.speed : 4.5;
-    const extra = { ...(def.extra || {}), size: def.size || 6, sourceChar: 'serrano', serranoOriginalChar: def.sourceChar, serranoClone: true };
+    const speedByType = {
+        normal: 5, energy: 4.8, heavy: 5, machinegun: 5.2, tank: 5,
+        bomb: 5, power_shot: 5, big_grenade: 5, hunter: 5, arrow: 5,
+        shiv: 9, screw: 5, pit_bullet: 5.3, ruben_baguette: 5.1, ruben_baguette_burnt: 5.1,
+        ruben_baguette_half: 5.3, triple: 5.5, syringe: 5, sniper: 10, stones: 5,
+        slime: 5, chain_lightning: 10, wrench: 5, note: 5, double_note: 5, treble_clef: 5,
+        vinyl: 5.2, microphone: 5.4, lunch_ketchup: 5.3, lunch_mayo: 5.3, lunch_mustard: 5.3,
+        bunniie_carrot: 5.4, energy_wave: 5, dart: 5, chess_piece: 5, wind_gust: 5.6, tornado: 4.2,
+        nucleon_shot: 5, dagger: 7.5, lightning: 7.5, ivy_seed: 5.7, lance: 16, gladiator_slash: 1,
+        boomerang: 9, scythe: 1, buster_rocket: 12.5, saw_throw: 6, quarterback: 4.75,
+        water_bubble: 5, water_wave: 7.5, blood_ball: 5, macaron: 5, macaron_big: 5.3, tea_cup: 5.2,
+        laser: 20, ice_stake: 7.5, ice_dagger: 6, snowball: 4, yeti_punch: 7.5, echo_shot: 6.75,
+        echo_bh_core: 5.25, graffit_can: 5.5, shinobi_fireball: 9, glitch_bugshot: 5.25, eel_lash: 19,
+        zippi_laser: 20, axel_stone: 5.6, axel_shard: 5.6, adam_ball: 5.25, adam_mech_ball: 5.6,
+        yuuto_heart: 5, sterling_star: 8.2, lyron_ball: 7.4, lyron_ball_big: 5.9,
+        eolio_propeller: 8.2, cyro_iceball: 4.1, pyro_fireball: 7.25
+    };
+    const speed = speedByType[def.type] || 5;
+    const extra = { size: 8, sourceChar: def.sourceChar, serranoClone: true, serranoOriginalChar: def.sourceChar };
+
+    if (def.type === 'eolio_propeller') {
+        extra.size = 20;
+        extra.serranoEolioPropeller = true;
+    }
+    if (def.type === 'glitch_bugshot') {
+        extra.size = 8;
+        extra.glitchJitter = true;
+        extra.glitchStunChance = 0.36;
+        extra.glitchStunDuration = 0.8;
+    }
+    if (def.type === 'cyro_iceball') {
+        extra.size = 13; extra.explodeRadius = 58; extra.freezeDuration = 2.7;
+    }
+    if (def.type === 'pyro_fireball') {
+        extra.size = 9; extra.burnChance = 0.10;
+    }
     if (def.type === 'boomerang') extra.returnSpeed = 11.5;
-    if (def.type === 'sterling_star') extra.pierce = 2;
-    createProj(x, y, Math.cos(angle) * speed, Math.sin(angle) * speed, Math.max(1, dmg * 0.72), 48, true, def.type, extra);
+    if (def.type === 'sterling_star') { extra.size = 12; extra.sterlingCharge = 0.6; extra.sterlingBurstRadius = 75; }
+    if (def.type === 'lance') { extra.size = 6; extra.lanceBaseDmg = Math.max(1, dmg * 0.72); extra.lanceHits = 0; extra.lanceFalloff = 0.78; extra.maxRange = 900; }
+    if (def.type === 'gladiator_slash') extra.size = 9;
+    if (def.type === 'scythe') extra.size = 10;
+    if (def.type === 'wind_gust') { extra.size = 34; extra.windRadius = 72; extra.windTick = 0; extra.maxRange = 420; extra.travelled = 0; extra.pushPower = 4.5; }
+    if (def.type === 'tornado') { extra.size = 30; extra.windRadius = 88; extra.windTick = 0; extra.maxRange = 900; extra.travelled = 0; extra.pullRadius = 132; }
+    if (def.type === 'water_bubble') extra.size = 8;
+    if (def.type === 'water_wave') extra.size = 15;
+    if (def.type === 'bunniie_carrot') { extra.size = 10; extra.pierce = 2; extra.carrotShot = true; }
+    if (def.type === 'wrench') { extra.size = 14; extra.pierce = 0; }
+    if (def.type === 'pit_bullet') extra.size = 5;
+    if (def.type === 'ruben_baguette') { extra.size = 19; extra.pierce = 1; }
+    if (def.type === 'ruben_baguette_burnt') { extra.size = 15; extra.burnt = true; extra.pierce = 1; }
+    if (def.type === 'ruben_baguette_half') extra.size = 9;
+    if (def.type === 'quarterback') { extra.stunChance = 0.22; extra.pushPower = 28; extra.qbCharge = Math.max(18, Math.round(dmg * 4) + 12); }
+    if (def.type === 'eel_lash') { extra.size = 9; extra.eelShockChance = 0.20; extra.eelShockDmg = Math.max(1, dmg); extra.eelRicochetChance = 0.15; extra.eelRicochetCount = 0; }
+    if (def.type === 'lyron_ball_big') { extra.size = 18; extra.pierce = 99; extra.lyronBig = true; }
+    if (def.type === 'lyron_ball') { extra.size = 9; extra.lyronBig = false; }
+
+    createProj(x, y, Math.cos(angle) * speed, Math.sin(angle) * speed, Math.max(1, dmg * 0.72), 70, true, def.type, extra);
     const spawned = projectiles[projectiles.length - 1];
     if (spawned && excludedEnemy) spawned.hitIds.add(excludedEnemy);
 }
@@ -14872,55 +14901,29 @@ function draw() {
                 ctx.fillRect(s * 0.08, s * 0.02, s * 0.25, s * 0.16);
                 ctx.restore();
             }
-            else if (p.extra?.serranoClone && (p.type === 'normal' || p.type === 'energy' || p.type === 'machinegun' || p.type === 'power_shot' || p.type === 'triple' || p.type === 'sniper' || p.type === 'stones' || p.type === 'tank' || p.type === 'heavy')) {
-                const sourceId = p.extra?.serranoOriginalChar || 'strike';
-                const sourceColor = CHARACTERS[sourceId]?.color || '#f1c40f';
-                const ang = Math.atan2(p.vy, p.vx);
+            else if (p.type === 'eolio_propeller' && p.extra?.serranoEolioPropeller) {
                 ctx.save();
                 ctx.translate(p.x, p.y);
-                ctx.rotate(ang);
-                ctx.shadowColor = sourceColor;
-                ctx.shadowBlur = 9;
-                if (p.type === 'normal') {
-                    ctx.fillStyle = '#d7d7d7'; ctx.strokeStyle = '#555'; ctx.lineWidth = 1.5;
-                    ctx.beginPath(); ctx.ellipse(0,0,Math.max(6,p.size*1.25),Math.max(3,p.size*0.48),0,0,Math.PI*2); ctx.fill(); ctx.stroke();
-                } else if (p.type === 'energy') {
-                    ctx.fillStyle = '#00d2ff'; ctx.strokeStyle = '#005b9a'; ctx.lineWidth = 2;
-                    ctx.beginPath(); ctx.moveTo(p.size*1.3,0); ctx.lineTo(0,p.size*0.7); ctx.lineTo(-p.size*1.0,0); ctx.lineTo(0,-p.size*0.7); ctx.closePath(); ctx.fill(); ctx.stroke();
-                } else if (p.type === 'machinegun') {
-                    ctx.fillStyle = '#444'; ctx.strokeStyle = '#bbb'; ctx.lineWidth = 1.5;
-                    ctx.fillRect(-p.size*1.4,-p.size*0.45,p.size*2.8,p.size*0.9);
-                    ctx.fillStyle = '#f5c542'; ctx.fillRect(p.size*0.2,-p.size*0.18,p.size*0.75,p.size*0.36);
-                } else if (p.type === 'power_shot') {
-                    ctx.fillStyle = '#8e44ad'; ctx.strokeStyle = '#f1c40f'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0,0,p.size*1.15,0,Math.PI*2); ctx.fill(); ctx.stroke();
-                } else if (p.type === 'triple') {
-                    ctx.fillStyle = '#c8d6e5'; ctx.strokeStyle = '#34495e'; ctx.lineWidth = 1.5; ctx.fillRect(-p.size*1.2,-p.size*0.45,p.size*2.4,p.size*0.9);
-                    ctx.fillStyle = '#f1c40f'; ctx.fillRect(p.size*0.35,-p.size*0.12,p.size*0.55,p.size*0.24);
-                } else if (p.type === 'sniper') {
-                    ctx.fillStyle = '#b8e0ff'; ctx.strokeStyle = '#2c3e50'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(p.size*1.7,0); ctx.lineTo(-p.size*1.0,p.size*0.42); ctx.lineTo(-p.size*1.0,-p.size*0.42); ctx.closePath(); ctx.fill(); ctx.stroke();
-                } else if (p.type === 'stones') {
-                    ctx.fillStyle = '#514f4a'; ctx.strokeStyle = '#1e1e1e'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(-p.size, -p.size*0.2); ctx.lineTo(-p.size*0.4,-p.size); ctx.lineTo(p.size*0.8,-p.size*0.55); ctx.lineTo(p.size, p.size*0.4); ctx.lineTo(0.2*p.size,p.size); ctx.lineTo(-p.size*0.8,p.size*0.35); ctx.closePath(); ctx.fill(); ctx.stroke();
-                } else if (p.type === 'tank') {
-                    ctx.fillStyle = '#95a5a6'; ctx.strokeStyle = '#2c3e50'; ctx.lineWidth = 2; ctx.fillRect(-p.size*1.3,-p.size*0.6,p.size*2.2,p.size*1.2); ctx.fillRect(p.size*0.65,-p.size*0.18,p.size*1.0,p.size*0.36);
-                } else {
-                    ctx.fillStyle = sourceColor; ctx.strokeStyle = '#333'; ctx.lineWidth = 2; ctx.fillRect(-p.size*1.2,-p.size*0.55,p.size*2.4,p.size*1.1);
+                ctx.rotate(Math.atan2(p.vy, p.vx) + (performance.now() * 0.004));
+                ctx.strokeStyle = '#dfefff';
+                ctx.fillStyle = '#4da6ff';
+                ctx.lineWidth = 3;
+                for (let k = 0; k < 4; k++) {
+                    const ang = k * Math.PI / 2;
+                    ctx.save();
+                    ctx.rotate(ang);
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.quadraticCurveTo(10, -7, 18, 0);
+                    ctx.quadraticCurveTo(10, 7, 0, 0);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.restore();
                 }
-                ctx.restore();
-            }
-            else if (p.extra?.serranoClone) {
-                const sourceId = p.extra?.serranoOriginalChar || 'strike';
-                const sourceColor = CHARACTERS[sourceId]?.color || '#f1c40f';
-                ctx.save();
-                ctx.translate(p.x, p.y);
-                ctx.rotate(Math.atan2(p.vy, p.vx));
-                ctx.shadowColor = sourceColor;
-                ctx.shadowBlur = 8;
-                ctx.fillStyle = sourceColor;
-                ctx.strokeStyle = '#333';
-                ctx.lineWidth = 2;
-                const s = Math.max(7, p.size || 7);
-                ctx.fillRect(-s * 1.4, -s * 0.42, s * 2.8, s * 0.84);
-                ctx.strokeRect(-s * 1.4, -s * 0.42, s * 2.8, s * 0.84);
+                ctx.fillStyle = '#ecf7ff';
+                ctx.beginPath();
+                ctx.arc(0, 0, 4, 0, Math.PI * 2);
+                ctx.fill();
                 ctx.restore();
             }
             else { ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); }
