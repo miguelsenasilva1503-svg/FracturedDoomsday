@@ -2028,8 +2028,8 @@
             <div id="detail-wild-modes" class="hidden" style="margin-top: 15px; border-top: 1px solid #555; padding-top: 15px; text-align: center;">
                 <h4 id="detail-mode-title">Modo de Combate:</h4>
                 <div style="display:flex; gap:10px; justify-content: center; margin-top: 10px;">
-                    <button id="wild-dash" style="font-size: 14px; padding: 10px;" onclick="setWildMode('shooter')">Lanceiro</button>
-                    <button id="wild-cleave" style="font-size: 14px; padding: 10px;" onclick="setWildMode('cleave')">Espadachim</button>
+                    <button id="wild-dash" style="font-size: 14px; padding: 10px; color:#000; text-shadow:none;" onclick="setWildMode('shooter')">Lanceiro</button>
+                    <button id="wild-cleave" style="font-size: 14px; padding: 10px; color:#000; text-shadow:none;" onclick="setWildMode('cleave')">Espadachim</button>
                 </div>
             </div>
             <div id="detail-evolve-req" style="margin-top: 10px; font-size: 14px; text-align: center;"></div>
@@ -2854,7 +2854,11 @@ Quando uma nova trepadeira surge, a anterior desaparece e causa dano igual a 60%
 ESPECIAL: começa a partida com uma flor com área maior e visível.
 ESPECIAL: quando está perto da flor, Ivy se cura.
 ESPECIAL: a flor usa 3 ESPECIAIS ao invés de 1 só e é reposicionada a cada 3 waves.`,
-    gladiator: { shooter: `Gladiator (lanceiro): dispara uma lança que perfura inimigos, a cada perfuração, o dano diminui`, cleave: `Gladiator (espadachim): ataca com uma espada em uma área de 180°` },
+    gladiator: `Gladiator (lanceiro): dispara uma lança que PERFURA inimigos; a cada perfuração, o dano diminui.
+
+Gladiator (espadachim): ataca com uma espada em uma área de 180°.
+
+ESPECIAL: durante a partida, o botão ⚔️ alterna entre Lanceiro e Espadachim. A troca tem recarga de 10s.`,
     booboo: `Boo Boo: dispara um bumerangue PERFURANTE que vai e volta pra Boo Boo.`,
     scythe: `Scythe: a cada 3 ataques, um é em 360° e os outros dois são em uma área de 180°.
 
@@ -2946,7 +2950,7 @@ const CHIPS_DATA = {
     freeze_touch: { id: 'freeze_touch', name: 'Toque Congelante', emoji: '❄️', desc: '10% chance de congelar', effect: (s) => s.freezeChance += 0.1 },
     dodge: { id: 'dodge', name: 'Esquiva', emoji: '💨', desc: '+10% Chance de Esquiva', effect: (s) => s.dodgeChance = (s.dodgeChance || 0) + 0.1 },
     push_chip: { id: 'push_chip', name: 'Empurrão', emoji: '💨', desc: '10% de empurrar', effect: (s) => s.pushChance = (s.pushChance || 0) + 0.1 },
-    drone_chip: { id: 'drone_chip', name: 'Drone do Axel', emoji: '🛸', desc: 'Drone aliado', effect: (s, p, allies) => { allies.push({x: p.x, y: p.y, dmg: p.baseDmg * p.stats.dmgMult * 0.5, speed: 2.8, life: Infinity, cd: 0, isTurret: false, type: 'drone', variant: 'axel_drone', followX: 20, followY: -20}); }, iconHtml: '<img src="elements/axel_drone.png" alt="" aria-hidden="true" style="width:34px;height:34px;object-fit:contain;display:block;">' }
+    drone_chip: { id: 'drone_chip', name: 'Drone', emoji: '🛸', desc: 'Drone aliado', effect: (s,p,allies) => { allies.push({x:p.x,y:p.y,dmg:p.baseDmg*p.stats.dmgMult*0.5,speed:2.8,life:Infinity,cd:0,isTurret:false,type:'drone',variant:'drone',followX:20,followY:-20}); }, iconHtml: '<img src="elements/drone.png" alt="" aria-hidden="true" style="width:34px;height:34px;object-fit:contain;display:block;">' }
 }
 ;
 
@@ -4227,7 +4231,7 @@ function getCharacterDisplayName(id) {
 function getDynamicCharacterSpriteId(id) {
     if (id === 'cyro_pyro') return getCyroPyroMode() === 'cyro' ? 'cyro' : 'pyro';
     if (id === 'gladiator') {
-        return (pd?.chars?.gladiator?.mode === 'shooter') ? 'gladiator_spear' : 'gladiator_sword';
+        return ((player?.gladiatorMode || pd?.chars?.gladiator?.mode || 'shooter') === 'shooter') ? 'gladiator_spear' : 'gladiator_sword';
     }
     if (id === 'flex') {
         if (typeof player !== 'undefined' && player && player.flexLowHp) return 'flex_less_health';
@@ -5036,13 +5040,7 @@ function getCharacterSummary(id) {
     const data = CHARACTER_SUMMARIES[id];
     if (!data) return '';
     if (typeof data === 'string') return data;
-    if (id === 'gladiator') {
-        const mode = (pd.chars?.[id]?.mode || 'shooter');
-        return mode === 'cleave' ? (data.cleave || data.espadachim) : (data.shooter || data.lanceiro);
-    }
-    if (id === 'cyro_pyro') {
-        return getCyroPyroMode() === 'cyro' ? (data.cyro || '') : (data.pyro || '');
-    }
+    if (id === 'cyro_pyro') return getCyroPyroMode() === 'cyro' ? (data.cyro || '') : (data.pyro || '');
     return data.default || '';
 }
 
@@ -7214,30 +7212,17 @@ function showCharDetail(id) {
 
         const wModes = document.getElementById('detail-wild-modes');
         const modeTitleEl = document.getElementById('detail-mode-title');
-        if((id === 'gladiator' || id === 'cyro_pyro') && owned) {
+        if(id === 'cyro_pyro' && owned) {
             wModes.classList.remove('hidden');
-            if (id === 'gladiator') {
-                if (modeTitleEl) modeTitleEl.innerHTML = 'Modo de Combate:';
-                document.getElementById('wild-dash').innerHTML = 'Lanceiro';
-                document.getElementById('wild-cleave').innerHTML = 'Espadachim';
-                document.getElementById('wild-dash').onclick = () => setWildMode('shooter');
-                document.getElementById('wild-cleave').onclick = () => setWildMode('cleave');
-                let mode = pd.chars['gladiator'].mode || 'shooter';
-                document.getElementById('wild-dash').style.border = mode === 'shooter' ? '2px solid var(--btn-yellow)' : '';
-                document.getElementById('wild-cleave').style.border = mode === 'cleave' ? '2px solid var(--btn-yellow)' : '';
-            } else {
-                if (modeTitleEl) modeTitleEl.innerHTML = 'Escolha elemental:';
-                const mode = getCyroPyroMode();
-                document.getElementById('wild-dash').innerHTML = 'Cyro';
-                document.getElementById('wild-cleave').innerHTML = 'Pyro';
-                document.getElementById('wild-dash').onclick = () => setCyroPyroMode('cyro');
-                document.getElementById('wild-cleave').onclick = () => setCyroPyroMode('pyro');
-                document.getElementById('wild-dash').style.border = mode === 'cyro' ? '2px solid var(--btn-yellow)' : '';
-                document.getElementById('wild-cleave').style.border = mode === 'pyro' ? '2px solid var(--btn-yellow)' : '';
-            }
-        } else {
-            wModes.classList.add('hidden');
-        }
+            if (modeTitleEl) modeTitleEl.innerHTML = 'Escolha elemental:';
+            const mode = getCyroPyroMode();
+            document.getElementById('wild-dash').innerHTML='Cyro';
+            document.getElementById('wild-cleave').innerHTML='Pyro';
+            document.getElementById('wild-dash').onclick=()=>setCyroPyroMode('cyro');
+            document.getElementById('wild-cleave').onclick=()=>setCyroPyroMode('pyro');
+            document.getElementById('wild-dash').style.border=mode==='cyro'?'2px solid var(--btn-yellow)':'';
+            document.getElementById('wild-cleave').style.border=mode==='pyro'?'2px solid var(--btn-yellow)':'';
+        } else { wModes.classList.add('hidden'); }
 
         const slotsContainer = document.getElementById('detail-chip-slots');
         slotsContainer.innerHTML = '';
@@ -8550,6 +8535,7 @@ function getSelectedSpecialConfig() {
     if (pd.selectedChar === 'bunniie') {
         return { type: 'bunniie', label: '🕳️', title: player.bunniieTunnelCd > 0 ? `Toca recarregando ${Math.ceil(player.bunniieTunnelCd)}s` : 'Cavar', ready: player.bunniieTunnelCd <= 0 };
     }
+    if (pd.selectedChar === 'gladiator') return { type:'gladiator', label:'⚔️', title:'Alternar modo', ready:(player.gladiatorModeCooldown||0)<=0 };
     return null;
 }
 
@@ -8640,7 +8626,9 @@ function updateSpecialButtonUI() {
             ? Math.max(0, Number(player.shinobiDragonCooldown || 0))
             : cfg.type === 'bunniie'
                 ? Math.max(0, Number(player.bunniieTunnelCd || 0))
-                : isSterling
+                : cfg.type === 'gladiator'
+                    ? Math.max(0, Number(player.gladiatorModeCooldown || 0))
+                    : isSterling
                     ? Math.max(0, Number(player.sterlingAttackCd || 0))
                     : 0;
 
@@ -9005,14 +8993,9 @@ function startRunAfterShop() {
     let initialBaseHp = charDef.hp * statMult;
     let initialBaseDmg = charDef.dmg * statMult;
     
-    if(pd.selectedChar === 'gladiator' && pd.chars['gladiator'].mode === 'cleave') {
-        initialBaseHp = 145; 
-        initialBaseDmg = charDef.dmg * statMult;
-    }
-    
     player = {
         x: 0, y: 0, r: (pd.selectedChar === 'hank' || pd.selectedChar === 'yeti') ? 20 : ((pd.selectedChar === 'shiv' || pd.selectedChar === 'zippi') ? 10 : (pd.selectedChar === 'kaisen' ? 13 : (pd.selectedChar === 'booboo' ? 13 : (pd.selectedChar === 'eel' ? 15 : 15)))), baseHp: initialBaseHp, hp: initialBaseHp, baseSpeed: charDef.speed, baseDmg: initialBaseDmg,
-        baseFireRate: charDef.fireRate, baseRange: charDef.range, color: charDef.color, weapon: charDef.weapon, cyroPyroMode: pd.selectedChar === 'cyro_pyro' ? getCyroPyroMode() : null, cd: 0, shieldTimer: 0,
+        baseFireRate: charDef.fireRate, baseRange: charDef.range, color: charDef.color, weapon: charDef.weapon, cyroPyroMode: pd.selectedChar === 'cyro_pyro' ? getCyroPyroMode() : null, gladiatorMode: pd.selectedChar === 'gladiator' ? (pd.chars?.gladiator?.mode || 'shooter') : null, gladiatorModeCooldown: 0, cd: 0, shieldTimer: 0,
         zombieTimer: 0, revived: false, elekCycle: false, dashTimer: 0, meleeCd: 0, boldShots: 0, boldReload: 0, specCd: 0, invisTimer: 0, ghoulPendingCd: 0, ninjiPendingCd: 0,
         lastMoveAngle: 0, lastAimAngle: 0, tenentCycle: 0, orbitalAngle: 0, boobooReturn: true, pickedCards: [], revivesUsed: 0, qbBar: 0, qbShield: false, isDead: false, flexCombo: 0, flexReload: 0, ninjiDashCd: 0, shinobiDragonActive: false, shinobiDragonWavesLeft: 0, shinobiDragonCooldown: 0, shinobiDragonFireCd: 0, shinobiScytheCycle: 0, sterlingCharging: false, sterlingCharge: 0, sterlingAttackCd: 0, majorBriggsKills: 0, majorBriggsStage: 1,
         adamScrap: 0, adamMechActive: false, adamMechWavesLeft: 0, adamMechHpBonus: 0, adamMechSizeBonus: 0, adamBaseHpBeforeMech: null, adamBaseRBeforeMech: null,
@@ -9048,6 +9031,7 @@ function startRunAfterShop() {
     if(pd.selectedChar === 'bunniie') { ensureBunniieRuntime(); player.bunniieHoles = []; player.bunniieTunnelCd = 0; player.bunniieTunnelWarpCd = 0; player.bunniieTunnelGrace = 0; player.bunniieTunnelSeq = 0; }
     spawnCharacterSupportAllies(pd.selectedChar, { ownerTag: 'run-start', temporary: false, x: player.x, y: player.y, baseDmg: player.baseDmg, dmgMult: player.stats.dmgMult });
     if (pd.selectedChar === 'cyro_pyro') spawnCyroPyroPartner();
+    if (pd.selectedChar === 'kaisen') spawnAxelDrone();
     if(pd.selectedChar === 'healy') player.stats.regen += 0.01;
 
     if(window.tempPregameCard) { window.tempPregameCard.apply(player.stats); player.pickedCards.push(window.tempPregameCard.name); window.tempPregameCard = null; }
@@ -9353,6 +9337,7 @@ function triggerSpecial() {
         }
         return;
     }
+    if (cfg.type === 'gladiator' && (player.gladiatorModeCooldown||0) <= 0) { player.gladiatorMode=player.gladiatorMode==='shooter'?'cleave':'shooter'; pd.chars.gladiator.mode=player.gladiatorMode; player.gladiatorModeCooldown=10; save(); updateSpecialButtonUI(); return; }
     if (cfg.type === 'bunniie' && player.bunniieTunnelCd <= 0) {
         const hole = digBunniieTunnel(player.x, player.y);
         if (hole && btnSpecial) {
@@ -9466,6 +9451,7 @@ function spawnGooClone() {
 
 function update(dt) {
     if(player.isDead) return;
+    if(player.gladiatorModeCooldown>0) player.gladiatorModeCooldown=Math.max(0,player.gladiatorModeCooldown-dt);
     if (player && pd.selectedChar === 'bunniie') {
         ensureBunniieRuntime();
         player.bunniieTunnelCd = Math.max(0, player.bunniieTunnelCd - dt);
@@ -9871,7 +9857,7 @@ if (!isBossAlive) {
         if(player.cd <= 0) {
             let target = null;
             let minDist = player.baseRange * player.stats.rangeMult;
-            if(player.weapon === 'wild' && (pd.chars['gladiator']?.mode === 'shooter')) {
+            if(player.weapon === 'wild' && ((player.gladiatorMode||pd.chars['gladiator']?.mode||'shooter') === 'shooter')) {
                 minDist = Math.max(minDist, 900 + (player.stats.extraProj || 0) * 40);
             } else {
                 if(player.weapon === 'triple') minDist *= 1.18;
@@ -10418,7 +10404,7 @@ function fireWeapon(target) {
             return;
         }
         if(w === 'wild') {
-            if(pd.chars['gladiator'].mode === 'shooter') {
+            if((player.gladiatorMode||pd.chars['gladiator'].mode||'shooter') === 'shooter') {
                 const totalLances = 1 + Math.max(0, Math.floor(player.stats.extraProj || 0));
                 const spacing = 12;
                 const sideX = Math.cos(angle + Math.PI / 2) * spacing;
@@ -10447,7 +10433,7 @@ function fireWeapon(target) {
                 }
                 return;
             }
-            else { for(let i=0; i<11; i++) { let a = angle - Math.PI/2 + (Math.PI/10)*i; createProj(player.x + Math.cos(a)*20, player.y + Math.sin(a)*20, Math.cos(a), Math.sin(a), finalDmg * 1.05, 10, true, 'sword'); } return; }
+            else { for(let i=0; i<11; i++) { let a = angle - Math.PI/2 + (Math.PI/10)*i; createProj(player.x + Math.cos(a)*20, player.y + Math.sin(a)*20, Math.cos(a), Math.sin(a), finalDmg * 1.05, 10, true, 'gladiator_slash', {size:9, sourceChar:'gladiator'}); } return; }
         }
         if(w === 'scythe') {
             if (pd.selectedChar === 'shinobi') {
@@ -11818,6 +11804,8 @@ function updateEnemies(dt) {
 }
 
 
+function spawnAxelDrone() { if(!player) return; const hp=Math.max(35,player.baseHp*0.58); allies.push({type:'drone',variant:'kaisen',x:player.x+42,y:player.y-18,speed:3,dmg:Math.max(1,player.baseDmg*player.stats.dmgMult*.48),cd:0,life:Infinity,hp,maxHp:hp,r:14,facingLeft:false}); }
+
 function spawnCyroPyroPartner() {
     const selectedMode = getCyroPyroMode();
     const partnerMode = selectedMode === 'cyro' ? 'pyro' : 'cyro';
@@ -11853,59 +11841,17 @@ function updateAllies(dt) {
             continue;
         }
         if (a.type === 'cyro_pyro_partner') {
-            if (!Number.isFinite(a.homeAngle)) a.homeAngle = Math.random() * Math.PI * 2;
-            if (!Number.isFinite(a.contactDmgCd)) a.contactDmgCd = 0;
-            a.homeAngle += dt * 0.9;
-
-            const orbitRadius = 54;
-            const targetX = player.x + Math.cos(a.homeAngle) * orbitRadius;
-            const targetY = player.y + Math.sin(a.homeAngle) * orbitRadius;
-            const followDx = targetX - a.x;
-            const followDy = targetY - a.y;
-            const followDist = Math.hypot(followDx, followDy);
-            const followSpeed = a.speed * 75 * dt;
-            if (followDist > 2) {
-                const step = Math.min(1, followSpeed / Math.max(0.001, followDist));
-                a.x += followDx * step;
-                a.y += followDy * step;
-            }
-
-            if (target && minD < a.range) {
-                a.facingLeft = target.x < a.x;
-                if (a.cd <= 0) {
-                    const ang = Math.atan2(target.y - a.y, target.x - a.x);
-                    const isCyro = a.elementMode === 'cyro';
-                    const speed = isCyro ? 4.1 : 7.0;
-                    createProj(a.x, a.y, Math.cos(ang) * speed, Math.sin(ang) * speed, a.dmg, isCyro ? 72 : 58, true, isCyro ? 'cyro_iceball' : 'pyro_fireball', {
-                        size: isCyro ? 11 : 8,
-                        sourceChar: isCyro ? 'cyro' : 'pyro',
-                        explodeRadius: isCyro ? 52 : 0,
-                        freezeDuration: isCyro ? 2.4 : 0,
-                        burnChance: isCyro ? 0 : 0.10,
-                        elementalPartner: true
-                    });
-                    a.cd = isCyro ? 1.55 : 0.62;
-                } else {
-                    a.cd -= dt;
-                }
-            } else if (a.cd > 0) {
-                a.cd -= dt;
-            }
-
-            if (a.hp <= 0) {
-                a.life = 0;
-            }
-
-            for (const e of enemies) {
-                if (a.hp <= 0) break;
-                if (dist(a, e) < (a.r || 13) + (e.size || 0) && a.contactDmgCd <= 0) {
-                    const hit = Math.max(1, Math.floor(e.dmg || 1));
-                    a.hp -= hit;
-                    addFloatingText(a.x, a.y, `-${hit}`, '#74b9ff');
-                    a.contactDmgCd = 0.35;
-                }
-            }
-            if (a.contactDmgCd > 0) a.contactDmgCd -= dt;
+            if(a.hp<=0){a.life=0;continue;}
+            if(!Number.isFinite(a.aiAngle))a.aiAngle=Math.random()*Math.PI*2;
+            if(!Number.isFinite(a.contactDmgCd))a.contactDmgCd=0;
+            const sp=Math.max(2.2,(a.speed||3.2)*.95)*60*dt, range=Math.max(290,(a.range||270)*1.08), pref=Math.max(60,(a.r||13)+34);
+            if(target&&minD<=range){
+                const ang=Math.atan2(target.y-a.y,target.x-a.x), delta=minD-pref;
+                if(delta>18){a.x+=Math.cos(ang)*sp;a.y+=Math.sin(ang)*sp;}else if(delta<-14){a.x-=Math.cos(ang)*sp*.6;a.y-=Math.sin(ang)*sp*.6;}else{a.aiAngle+=dt*.9;a.x+=Math.cos(a.aiAngle)*.8*60*dt;a.y+=Math.sin(a.aiAngle)*.8*60*dt;}
+                a.facingLeft=target.x<a.x;
+                if(a.cd<=0){const cy=a.elementMode==='cyro',ang2=Math.atan2(target.y-a.y,target.x-a.x),v=cy?4.1:7;createProj(a.x,a.y,Math.cos(ang2)*v,Math.sin(ang2)*v,a.dmg,cy?72:58,true,cy?'cyro_iceball':'pyro_fireball',{size:cy?11:8,sourceChar:cy?'cyro':'pyro',explodeRadius:cy?52:0,freezeDuration:cy?2.4:0,burnChance:cy?0:.1,elementalPartner:true});a.cd=cy?1.55:.62;}else a.cd-=dt;
+            }else{a.aiAngle+=dt*.5;const hx=player.x+Math.cos(a.aiAngle)*44,hy=player.y+Math.sin(a.aiAngle)*44;a.x+=(hx>a.x?1:-1)*Math.min(Math.abs(hx-a.x),sp*.72);a.y+=(hy>a.y?1:-1)*Math.min(Math.abs(hy-a.y),sp*.72);if(a.cd>0)a.cd-=dt;}
+            if(a.contactDmgCd>0)a.contactDmgCd-=dt;
         } else if(a.type === 'penguin' || a.type === 'drone') {
             if(!a.wanderAngle) a.wanderAngle = Math.random() * Math.PI * 2;
             a.wanderAngle += dt * 0.8;
@@ -11938,17 +11884,7 @@ function updateAllies(dt) {
                     if (a.type === 'penguin') {
                         createProj(a.x, a.y, Math.cos(ang)*4, Math.sin(ang)*4, a.dmg, 60, true, 'pipisnowball', { size: 13, sourceChar: 'pipi', sourceType: 'penguin' });
                         a.cd = 0.95;
-                    } else if (isKaisenDrone) {
-                        const roll = Math.random();
-                        if (roll < 0.60) {
-                            createProj(a.x, a.y, Math.cos(ang)*5.2, Math.sin(ang)*5.2, a.dmg, 60, true, 'normal', { size: 4 });
-                        } else if (roll < 0.80) {
-                            createProj(a.x, a.y, Math.cos(ang)*4.8, Math.sin(ang)*4.8, a.dmg * 0.95, 60, true, 'normal', { size: 4, bounces: 2 });
-                        } else {
-                            createProj(a.x, a.y, Math.cos(ang)*7, Math.sin(ang)*7, a.dmg * 0.9, 50, true, 'laser', { size: 3 });
-                        }
-                        a.cd = 0.75;
-                    } else {
+                    } else if (isKaisenDrone) { if(Math.random()<0.20) createProj(a.x,a.y,Math.cos(ang)*7,Math.sin(ang)*7,a.dmg*1.15,50,true,'laser',{size:3,sourceChar:'axel',axelDrone:true,zippiBurnChance:1}); else createProj(a.x,a.y,Math.cos(ang)*5.2,Math.sin(ang)*5.2,a.dmg,60,true,'normal',{size:4,sourceChar:'axel'}); a.cd=0.75; } else {
                         createProj(a.x, a.y, Math.cos(ang)*4, Math.sin(ang)*4, a.dmg, 60, true, 'normal', { size: 4, sourceChar: 'drone', sourceType: 'drone' });
                         a.cd = 0.95;
                     }
@@ -12220,7 +12156,7 @@ function updateProjectiles(dt) {
             if (!Number.isFinite(p.life) || p.life <= 0 || p.extra?.fxOnly) { projectiles.splice(i, 1); continue; }
             continue;
         }
-        else if(p.type === 'sword' || p.type === 'scythe') { p.x = player.x + p.vx * 60; p.y = player.y + p.vy * 60; } 
+        else if(p.type === 'sword' || p.type === 'scythe' || p.type === 'gladiator_slash') { p.x = player.x + p.vx * 60; p.y = player.y + p.vy * 60; } 
         else if (p.type === 'bomb') { const bombTarget = p.extra || {}; let d = dist(p, {x: Number.isFinite(bombTarget.tx) ? bombTarget.tx : p.x, y: Number.isFinite(bombTarget.ty) ? bombTarget.ty : p.y}); if(d < 5 || p.life < 10) { applyCyberBombEffects(p); projectiles.splice(i, 1); continue; } p.x += p.vx * 60 * dt; p.y += p.vy * 60 * dt; } 
         else if (p.type === 'magic') {
             let target = null; let minD = 200; for(let e of enemies) { let d = dist(p, e); if(d < minD) { minD = d; target = e; } }
@@ -12438,7 +12374,7 @@ function updateProjectiles(dt) {
         if (extra.visualOnly) continue;
         let hitObstacle = false;
         obstacles.forEach(o => { if(o.type !== 'ice' && o.type !== 'mud' && o.type !== 'car' && o.type !== 'bamboo_spike' && o.type !== 'speaker' && dist(p, o) < o.r + p.size) hitObstacle = true; });
-        if(hitObstacle && p.type !== 'sword' && p.type !== 'scythe' && p.type !== 'shinobi' && p.type !== 'shinobi_fireball' && p.type !== 'boomerang' && p.type !== 'wind_gust' && p.type !== 'tornado' && p.type !== 'energy_wave' && p.type !== 'water_wave') { 
+        if(hitObstacle && p.type !== 'sword' && p.type !== 'scythe' && p.type !== 'gladiator_slash' && p.type !== 'shinobi' && p.type !== 'shinobi_fireball' && p.type !== 'boomerang' && p.type !== 'wind_gust' && p.type !== 'tornado' && p.type !== 'energy_wave' && p.type !== 'water_wave') { 
             if(p.type === 'echo_bh_core') { spawnEchoBlackHole(p.x, p.y, p.extra); }
             if(p.type === 'blood_ball' && (extra.size || 0) === 10) { for(let j=0; j<3; j++) { let a = Math.PI*2/3 * j; createProj(p.x, p.y, Math.cos(a)*3, Math.sin(a)*3, p.dmg*0.4, 30, true, 'blood_ball', {size: 4}); } }
             if(p.type === 'rocket') { createExplosion(p.x, p.y, 80 * player.stats.rangeMult, p.dmg); projectiles.splice(i, 1); continue; }
@@ -12903,7 +12839,7 @@ function updateProjectiles(dt) {
             }
             projectiles.splice(i, 1); continue;
         }
-        if(p.isPlayer && hit && p.bounces > 0 && p.type !== 'sword' && p.type !== 'scythe' && p.type !== 'boomerang') {
+        if(p.isPlayer && hit && p.bounces > 0 && p.type !== 'sword' && p.type !== 'scythe' && p.type !== 'gladiator_slash' && p.type !== 'boomerang') {
 
             let nextTarget = null; let minDist = 300;
             for(let e of enemies) {
@@ -13245,9 +13181,9 @@ function getPlayerSpriteId() {
         return player.glitchCurrentFormId;
     }
     if (pd?.selectedChar === 'adam' && player?.adamMechActive) return 'adam_mech';
-    if (pd?.selectedChar === 'cyro_pyro') return getCyroPyroMode() === 'cyro' ? 'cyro' : 'pyro';
+    if (pd?.selectedChar === 'cyro_pyro') return (player?.cyroPyroMode || getCyroPyroMode()) === 'cyro' ? 'cyro' : 'pyro';
     if (pd?.selectedChar === 'gladiator') {
-        return (pd?.chars?.gladiator?.mode === 'shooter') ? 'gladiator_spear' : 'gladiator_sword';
+        return ((player?.gladiatorMode || pd?.chars?.gladiator?.mode || 'shooter') === 'shooter') ? 'gladiator_spear' : 'gladiator_sword';
     }
     if (pd?.selectedChar === 'shinobi' && (player?.shinobiDragonActive || player?.shinobiDragonFormActive)) return 'dragon_shinobi';
     if (pd?.selectedChar === 'glitch' && player?.glitchMorphActive && player?.glitchCurrentFormId) return player.glitchCurrentFormId;
@@ -13635,7 +13571,7 @@ function draw() {
         } else if(a.type === 'cyro_pyro_partner') {
             const rr = a.r || 13;
             drawCharacterSprite(ctx, a.x, a.y, rr, a.elementMode === 'cyro' ? 'cyro' : 'pyro', {
-                widthMult: 9.4,
+                widthMult: 10.2,
                 flipX: Boolean(a.facingLeft)
             });
         } else if(a.type === 'penguin') {
@@ -13645,7 +13581,7 @@ function draw() {
                 flipX: Boolean(a.facingLeft)
             });
         } else if(a.type === 'drone') {
-            const droneSpriteType = a.variant === 'axel_drone' ? 'axel_drone' : 'drone';
+            const droneSpriteType = a.variant === 'kaisen' ? 'axel_drone' : 'drone';
             if (!drawElementSprite(ctx, a.x, a.y, droneSpriteType, 46, { flipX: Boolean(a.facingLeft) })) {
                 ctx.fillStyle = '#bdc3c7'; ctx.beginPath(); ctx.arc(a.x, a.y, 14, 0, Math.PI*2); ctx.fill();
                 ctx.fillStyle = '#e74c3c'; ctx.beginPath(); ctx.arc(a.x, a.y+2, 9, 0, Math.PI*2); ctx.fill();
@@ -14430,7 +14366,7 @@ function draw() {
         else if(p.type === 'chess_piece') { ctx.fillStyle = '#fff'; ctx.font = '20px Arial'; let icon = '♙'; if(p.extra.chessType==='king') icon='♔'; if(p.extra.chessType==='queen') icon='♕'; if(p.extra.chessType==='rook') icon='♖'; if(p.extra.chessType==='bishop') icon='♗'; if(p.extra.chessType==='knight') icon='♘'; ctx.fillText(icon, p.x-8, p.y+8); }
         else if(p.type === 'arrow') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx)); ctx.fillStyle = '#9b59b6'; ctx.fillRect(-8, -1, 16, 2); ctx.beginPath(); ctx.moveTo(8, 0); ctx.lineTo(3, -3); ctx.lineTo(3, 3); ctx.fill(); ctx.restore(); }
         else if(p.type === 'boomerang') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(gameTime*15); ctx.fillStyle = '#c23616'; ctx.fillRect(-10, -2, 20, 4); ctx.restore(); }
-        else if(p.type === 'scythe') {
+        else if(p.type === 'scythe' || p.type === 'gladiator_slash') {
             ctx.save();
             ctx.translate(px, py);
             ctx.rotate(Math.atan2(p.vy, p.vx));
