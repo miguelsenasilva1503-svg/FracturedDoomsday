@@ -4138,35 +4138,24 @@ const CHARACTER_SPRITES = {
 };
 
 const ENEMY_SPRITES = {
-    basico: 'enemies/basic.png',
     basic: 'enemies/basic.png',
     acucarado: 'enemies/basic.png',
-    velocista: 'enemies/velocist.png',
+    velocist: 'enemies/velocist.png',
     dancer: 'enemies/dancer.png',
-    velocista_dancarino: 'enemies/dancer.png',
     goblin: 'enemies/goblin.png',
     mummy: 'enemies/mummy.png',
-    atirador: 'enemies/shooter.png',
     shooter: 'enemies/shooter.png',
-    gigante: 'enemies/giant.png',
+    giant: 'enemies/giant.png',
     boss: 'enemies/boss.png',
-    tanque: 'enemies/tank.png',
     tank: 'enemies/tank.png',
     kamikaze: 'enemies/kamikaze.png',
     ninja: 'enemies/ninja.png',
-    elite: 'enemies/elite_shooter.png',
     elite_shooter: 'enemies/elite_shooter.png',
-    curandeiro: 'enemies/healer.png',
     healer: 'enemies/healer.png',
-    megaboss: 'enemies/mega_boss.png',
     mega_boss: 'enemies/mega_boss.png',
-    colosso: 'enemies/colossum.png',
     colossum: 'enemies/colossum.png',
-    lider: 'enemies/leader.png',
     leader: 'enemies/leader.png',
-    lider_elite: 'enemies/elite_leader.png',
     elite_leader: 'enemies/elite_leader.png',
-    elite_master: 'enemies/master_elite_shooter.png',
     master_elite_shooter: 'enemies/master_elite_shooter.png',
     cardboard_head: 'enemies/cardboard_head.png',
     cardboard: 'enemies/cardboard_head.png',
@@ -4685,16 +4674,53 @@ function getEnemySpritePath(type) {
 // Assim, qualquer inimigo criado por invocação também herda a skin do Deserto.
 function getEffectiveEnemySpriteType(e) {
     const type = String(e?.type || '').toLowerCase();
+    const canonicalMap = {
+        basico: 'basic',
+        basic: 'basic',
+        acucarado: 'basic',
+        velocista: 'velocist',
+        velocist: 'velocist',
+        dancer: 'dancer',
+        velocista_dancarino: 'dancer',
+        atirador: 'shooter',
+        shooter: 'shooter',
+        gigante: 'giant',
+        giant: 'giant',
+        tanque: 'tank',
+        tank: 'tank',
+        curandeiro: 'healer',
+        healer: 'healer',
+        elite: 'elite_shooter',
+        elite_shooter: 'elite_shooter',
+        megaboss: 'mega_boss',
+        mega_boss: 'mega_boss',
+        colosso: 'colossum',
+        colossum: 'colossum',
+        lider: 'leader',
+        leader: 'leader',
+        lider_elite: 'elite_leader',
+        elite_leader: 'elite_leader',
+        elite_master: 'master_elite_shooter',
+        master_elite_shooter: 'master_elite_shooter'
+    };
     if (window.currentMap === 1) {
         const desertMap = {
             basico: 'desert_basic',
+            basic: 'desert_basic',
             cardboard_head: 'desert_cardboard_head',
+            cardboard: 'desert_cardboard_head',
             motorcycle_helmet: 'desert_motorcycle_helmet',
+            helmet: 'desert_motorcycle_helmet',
             prism_head: 'desert_prism_head',
+            prism: 'desert_prism_head',
             velocista: 'desert_velocista',
+            velocist: 'desert_velocista',
             dancer: 'desert_velocista',
+            velocista_dancarino: 'desert_velocista',
             atirador: 'desert_atirador',
+            shooter: 'desert_atirador',
             gigante: 'desert_gigante',
+            giant: 'desert_gigante',
             kamikaze: 'desert_kamikaze',
             boss: 'desert_boss',
             elite: 'desert_elite',
@@ -4717,7 +4743,7 @@ function getEffectiveEnemySpriteType(e) {
         if (desertMap[type] && getEnemySpritePath(desertMap[type])) return desertMap[type];
     }
     if (window.currentMap === 6 && type === 'prism_head' && getEnemySpritePath('metro_prism_head')) return 'metro_prism_head';
-    return type;
+    return canonicalMap[type] || type;
 }
 
 function getEnemySpriteImage(type) {
