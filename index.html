@@ -8690,7 +8690,6 @@ function updateSpecialButtonUI() {
 
     const activeState = cfg.type === 'ghoul' ? isGhoulActive : cfg.type === 'ninji' ? isNinjiActive : cfg.type === 'shinobi' ? isShinobiActive : cfg.type === 'glitch' ? isGlitchActive : false;
     const shouldShowCooldown = !activeState && !isSterlingCharging && cooldownValue > 0;
-    const gladiatorCharging = cfg.type === 'gladiator' && cooldownValue > 0;
     const label = cfg.label || '';
     const chargePct = isSterling ? Math.max(0, Math.min(1, Number(player.sterlingCharge || 0))) : 0;
 
@@ -8698,8 +8697,9 @@ function updateSpecialButtonUI() {
     btnSpecial.style.display = 'flex';
     btnSpecial.disabled = false;
     btnSpecial.style.pointerEvents = 'auto';
-    btnSpecial.classList.toggle('charging', isSterlingCharging || gladiatorCharging);
-    btnSpecial.style.setProperty('--charge-pct', cfg.type === 'gladiator' ? String(Math.max(0, Math.min(1, 1 - cooldownValue / 10))) : (isSterling ? String(chargePct) : '0'));
+    btnSpecial.classList.toggle('charging', isSterlingCharging);
+    if (isSterling) btnSpecial.style.setProperty('--charge-pct', String(chargePct));
+    else btnSpecial.style.setProperty('--charge-pct', '0');
     btnSpecial.classList.toggle('sterling-special', isSterling);
     btnSpecial.innerHTML = isSterling
         ? `<span class="btn-special-label">⭐</span><span class="sterling-btn-title">CARGA</span><div class="btn-cooldown-badge" style="display:${shouldShowCooldown || activeState ? 'block' : 'none'}">${activeState ? '' : cooldownValue.toFixed(1)}</div>`
@@ -9414,7 +9414,7 @@ function triggerSpecial() {
         pd.chars.gladiator.mode = player.gladiatorMode;
         player.gladiatorModeCooldown = 10;
         save();
-        if (btnSpecial) { btnSpecial.classList.add('cooling','charging'); btnSpecial.style.opacity = '0.55'; btnSpecial.style.setProperty('--charge-pct','0'); const badge = btnSpecial.querySelector('.btn-cooldown-badge'); if (badge) { badge.style.display='block'; badge.textContent='10'; } }
+        if (btnSpecial) { btnSpecial.classList.add('cooling'); btnSpecial.classList.remove('charging'); btnSpecial.style.opacity = '0.55'; const badge = btnSpecial.querySelector('.btn-cooldown-badge'); if (badge) { badge.style.display='block'; badge.textContent='10'; } }
         updateSpecialButtonUI();
         return;
     }
