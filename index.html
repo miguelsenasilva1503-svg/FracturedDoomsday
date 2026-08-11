@@ -8768,6 +8768,14 @@ function isZippiCharacter() {
     return pd && pd.selectedChar === 'zippi' && typeof player !== 'undefined' && player && typeof player.zippiBubbleHp === 'number';
 }
 
+function isPlayerInsideEolioTurbine() {
+    if (pd?.selectedChar !== 'eolio' || !player || !Array.isArray(allies)) return false;
+    const turbine = allies.find(a => a && a.type === 'eolio_turbine');
+    if (!turbine) return false;
+    const radius = Math.max(1, Number(turbine.radius) || 96);
+    return dist(player, turbine) <= radius + Math.max(0, Number(player.r) || 0);
+}
+
 function dealPlayerDamage(amount, opts = {}) {
     if (!player || !Number.isFinite(amount) || amount <= 0) return;
     let dmg = amount;
@@ -8786,9 +8794,9 @@ function dealPlayerDamage(amount, opts = {}) {
         player.vesperFocusActive = false;
     }
 
-    if (pd.selectedChar === 'eolio') {
-        const turbine = Array.isArray(allies) ? allies.find(a => a && a.type === 'eolio_turbine') : null;
-        if (turbine && dist(player, turbine) <= (turbine.radius || 78)) dmg *= 0.4;
+    if (isPlayerInsideEolioTurbine()) {
+        // Eólio recebe 60% de redução em qualquer dano enquanto estiver na área.
+        dmg *= 0.4;
     }
 
     if (isSpartaCharacter() && player.spartaShieldActive) {
@@ -11882,7 +11890,7 @@ function spawnEolioTurbine() {
     if (!player) return;
     allies = Array.isArray(allies) ? allies : [];
     allies = allies.filter(a => a && a.type !== 'eolio_turbine');
-    allies.push({ type:'eolio_turbine', x:player.x, y:player.y, dmg:0, speed:0, life:Infinity, cd:0, isTurret:true, radius:78, pulse:0 });
+    allies.push({ type:'eolio_turbine', x:player.x, y:player.y, dmg:0, speed:0, life:Infinity, cd:0, isTurret:true, radius:96, pulse:0 });
 }
 
 function updateEolioPropeller(a, dt) {
