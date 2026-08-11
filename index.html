@@ -2692,7 +2692,7 @@ Um astronauta experiente que canaliza energia estelar para enfrentar qualquer am
 Um jogador inglês de futebol que encara qualquer desafio como se estivesse disputando a final de um campeonato. Calmo, disciplinado e extremamente competitivo, ele mantém a cabeça fria mesmo sob pressão, sempre analisando o melhor momento para agir. Enquanto muitos confiam apenas no talento, Lyron acredita que treino, estratégia e determinação são o verdadeiro caminho para a vitória.
 
 “Futebol não é só habilidade... é saber quando fazer a jogada perfeita.”` },
-    eolio: { id: 'eolio', class: 'Controle', name: 'Eólio', rarity: 'epic', cost: 149, hp: 110, speed: 3.6, dmg: 18, fireRate: 78, range: 300, color: '#4da6ff', weapon: 'eolio_propeller', desc: `“Eólio sempre foi fascinado pelo vento. Em algum momento, decidiu que estudar turbinas não era suficiente... ele queria ser uma.”
+    eolio: { id: 'eolio', class: 'Controle', name: 'Eólio', rarity: 'epic', cost: 149, hp: 110, speed: 3.6, dmg: 18, fireRate: 105, range: 300, color: '#4da6ff', weapon: 'eolio_propeller', desc: `“Eólio sempre foi fascinado pelo vento. Em algum momento, decidiu que estudar turbinas não era suficiente... ele queria ser uma.”
 
 Um engenheiro eólico que trabalha em uma empresa especializada em turbinas. Apaixonado pelo funcionamento das hélices e pela força do vento, Eólio levou sua obsessão longe demais e construiu um traje equipado com enormes hélices, permitindo que ele literalmente voe pelos céus. Para ele, transformar engenharia em algo que pode vestir é simplesmente uma evolução natural da profissão.
 
@@ -10025,8 +10025,8 @@ function fireWeapon(target) {
             const maxRange = Math.max(120, player.baseRange * player.stats.rangeMult);
             for (const a of allies) { if (a && a.type === 'eolio_propeller' && a.phase !== 'return') a.phase = 'return'; }
             const id = ++player.eolioPropellerSeq;
-            allies.push({ type:'eolio_propeller', id, x:player.x, y:player.y, phase:'outbound', vx:Math.cos(angle), vy:Math.sin(angle), traveled:0, maxRange, dmg:Math.max(1, finalDmg), r:16, life:Infinity, speed:8.2, angle:angle, hitTick:0 });
-            player.cd = Math.max(30, player.baseFireRate * player.stats.fireRateMult);
+            allies.push({ type:'eolio_propeller', id, x:player.x, y:player.y, phase:'outbound', vx:Math.cos(angle), vy:Math.sin(angle), traveled:0, maxRange, dmg:Math.max(1, finalDmg), r:20, life:Infinity, speed:8.2, angle:angle, hitTick:0 });
+            player.cd = Math.max(42, player.baseFireRate * player.stats.fireRateMult);
             return;
         }
 
@@ -11880,35 +11880,53 @@ function spawnEolioTurbine() {
 }
 
 function updateEolioPropeller(a, dt) {
-    if (!a) return;
+    if (!a || !player) return;
+
     a.hitTick = Math.max(0, (a.hitTick || 0) - dt);
+
+    const damageEnemiesNearPropeller = () => {
+        if (a.hitTick > 0) return;
+        let hitAny = false;
+        for (const e of enemies) {
+            if (!e || e.hp <= 0) continue;
+            if (dist(a, e) <= (a.r || 20) + (e.size || 10)) {
+                const soakMult = 1 + (e.soak || 0) * 0.05;
+                const hit = Math.max(1, (a.dmg || 1) * soakMult);
+                e.hp -= hit;
+                addFloatingText(e.x, e.y, `${Math.round(hit)}`, '#4da6ff');
+                createParticles(e.x, e.y, '#4da6ff');
+                hitAny = true;
+            }
+        }
+        if (hitAny) a.hitTick = 0.16;
+    };
+
     if (a.phase === 'outbound') {
         const step = (a.speed || 8.2) * 60 * dt;
         a.x += a.vx * step;
         a.y += a.vy * step;
         a.traveled += step;
-        if (a.traveled >= a.maxRange) { a.traveled = a.maxRange; a.phase = 'stationary'; }
+        a.angle += 8 * dt;
+        damageEnemiesNearPropeller();
+        if (a.traveled >= a.maxRange) {
+            a.traveled = a.maxRange;
+            a.phase = 'stationary';
+        }
     } else if (a.phase === 'stationary') {
         a.angle += 5.5 * dt;
-        if (a.hitTick <= 0) {
-            for (const e of enemies) {
-                if (!e || e.hp <= 0) continue;
-                if (dist(a, e) <= (a.r || 16) + (e.size || 10)) {
-                    const soakMult = 1 + (e.soak || 0) * 0.05;
-                    const hit = Math.max(1, (a.dmg || 1) * 0.95 * soakMult * dt);
-                    e.hp -= hit;
-                    createParticles(e.x, e.y, '#4da6ff');
-                }
-            }
-        }
+        damageEnemiesNearPropeller();
     } else if (a.phase === 'return') {
         const dx = player.x - a.x, dy = player.y - a.y;
-        const d = Math.hypot(dx,dy);
+        const d = Math.hypot(dx, dy);
         const step = 11.5 * 60 * dt;
-        if (d <= step + 12) { a.life = 0; return; }
-        a.x += dx / Math.max(0.001,d) * step;
-        a.y += dy / Math.max(0.001,d) * step;
-        a.angle += 7 * dt;
+        damageEnemiesNearPropeller();
+        if (d <= step + 12) {
+            a.life = 0;
+            return;
+        }
+        a.x += dx / Math.max(0.001, d) * step;
+        a.y += dy / Math.max(0.001, d) * step;
+        a.angle += 9 * dt;
     }
 }
 
