@@ -3285,7 +3285,8 @@ function renderGachaRevealHtml(rawText) {
 }
 
 const DEFAULT_KEYBINDS = { up: 'w', down: 's', left: 'a', right: 'd', special: 'p', pause: 'escape' };
-const DEFAULT_SETTINGS = { skipGacha: false, controlMode: 'auto', mobileControlLayout: 'joystick', mobileJoystickFollowTap: false, ultraHardcore: false, uhcDark: false, noParticles: false, showCombatText: true, showHpBar: false, screenZoom: 1, musicVolume: 0.7, mapChoice: -1, keybinds: { ...DEFAULT_KEYBINDS } };
+const DEFAULT_INITIAL_ZOOM = (('ontouchstart' in window) || navigator.maxTouchPoints > 0) ? 0.65 : 1;
+const DEFAULT_SETTINGS = { skipGacha: false, controlMode: 'auto', mobileControlLayout: 'joystick', mobileJoystickFollowTap: false, ultraHardcore: false, uhcDark: false, noParticles: false, showCombatText: true, showHpBar: false, screenZoom: DEFAULT_INITIAL_ZOOM, musicVolume: 0.7, mapChoice: -1, keybinds: { ...DEFAULT_KEYBINDS } };
 
 const MUSIC_TRACKS = {
     menu: 'soundtracks/battle_awaits.mp3',
@@ -3368,7 +3369,7 @@ window.addEventListener('blur', pauseMusicOnFocusLoss);
 window.addEventListener('focus', resumeMusicOnFocusGain);
 
 let pd = { coins: 500, gems: 50, evo: 40, sucatas: 0, nickname: null, tutorial: { stage: 'nickname', introShown: false, firstMatch: false, controlShown: false, levelupShown: false, finalShown: false, firstLossHandled: false, charsHandled: false, evolutionHandled: false, workshopSeen: false, workshopDialogShown: false, workshopFastyPending: false }, chars: { strike: { level: 1, slots: 2, chips: [null, null] } }, selectedChar: 'strike', passXp: 0, passLevel: 1, passClaimed: 0, passClaimedTiers: [], passRewardSeed: 0, passRewardCache: {}, passResetAt: 0, shopState: { lastRotation: 0, items: {} }, lastDaily: "", dailyWins: {date: "", count: 0}, vip: { activeUntil: 0, inventory: 0 }, hardcoreBans: { lastRotation: 0, chars: [] }, settings: { ...DEFAULT_SETTINGS }, trail: { target: null, fameLevel: 0 }, profile: { title: null, emblem: null }, events: { ruben: { claimed: false }, adam: { claimed: false } }, missions: { date: '', list: [], weekly: { weekKey: '', mission: null }, rerolls: { date: '', used: 0 } }, passOverflowXp: 0, passOverflowBoxes: 0, chipsInventory: {}, chipCrafting: null, achievements: { stats: { gamesStarted: 0, wins: 0, hardcoreWins: 0, uhcWins: 0, totalKills: 0, bossKills: 0, bestWave: 0, charsUnlocked: 1, charsUpgraded: 0, chipsEquipped: 0, boxesOpened: 0, missionClaims: 0, weeklyClaims: 0, passClaims: 0, overflowBoxes: 0, rerollsUsed: 0, vipPurchases: 0, lunchDamage: 0 }, claimed: [] }, debug: { infiniteCoins: false, infiniteGems: false, infiniteEvo: false, infiniteScrap: false, jackEnabled: false, unlockAllChars: false, infiniteChips: false, infiniteXp: false, allTitles: false, devUnlocked: false, devBaseState: null, mapRotationOverride: -1 } };
-window.isHardcoreMode = false; window.gachaQueue = []; window.tempBoxData = null; window.currentMap = 0; window.currentDetailCharId = null; window.currentChipEquipSlot = null; window.debugInfiniteGems = false;
+window.isHardcoreMode = false; window.lastGameOverWasLoss = false; window.gachaQueue = []; window.tempBoxData = null; window.currentMap = 0; window.currentDetailCharId = null; window.currentChipEquipSlot = null; window.debugInfiniteGems = false;
 
 const PD_TEMPLATE = JSON.parse(JSON.stringify(pd));
 function createDefaultSaveData() {
@@ -5826,16 +5827,25 @@ function positionTutorialPointer() {
         return;
     }
     const r = target.getBoundingClientRect();
-    const gap = 10;
-    let x = r.left + r.width / 2 - el.offsetWidth / 2;
-    let y = r.top - el.offsetHeight - gap;
+    const gap = 12;
+    let x;
+    let y;
+
+    // A mão deve ficar sempre do lado oposto ao sentido da seta, apontando diretamente para o alvo.
     if (tutorialPointerDirection === 'right') {
-        x = r.right + gap;
-        y = r.top + r.height / 2 - el.offsetHeight / 2;
-    } else if (tutorialPointerDirection === 'left') {
+        // 👉 fica à esquerda, apontando para a direita.
         x = r.left - el.offsetWidth - gap;
         y = r.top + r.height / 2 - el.offsetHeight / 2;
+    } else if (tutorialPointerDirection === 'left') {
+        // 👈 fica à direita, apontando para a esquerda.
+        x = r.right + gap;
+        y = r.top + r.height / 2 - el.offsetHeight / 2;
+    } else {
+        // 👆 fica abaixo, apontando para cima.
+        x = r.left + r.width / 2 - el.offsetWidth / 2;
+        y = r.bottom + gap;
     }
+
     x = Math.max(4, Math.min(window.innerWidth - el.offsetWidth - 4, x));
     y = Math.max(4, Math.min(window.innerHeight - el.offsetHeight - 4, y));
     el.style.left = `${x}px`;
@@ -15382,6 +15392,7 @@ function updateGameHud() {
 }
 
 function gameOver(isQuit) {
+    window.lastGameOverWasLoss = !isQuit;
     isPlaying = false; cancelAnimationFrame(gameLoopId); joyZone.style.display = 'none'; document.getElementById('btn-special').style.display = 'none';
 
     const medalsThisRun = Math.max(0, Math.floor(Number(pd.run?.medals) || 0));
@@ -15432,11 +15443,22 @@ function gameOver(isQuit) {
     document.getElementById('go-medals').innerHTML = `🏅 Medalhas obtidas: <strong>${medalsThisRun || 0}</strong>`;
     document.getElementById('go-daily').innerHTML = winText;
     document.getElementById('overlay-gameover').classList.remove('hidden'); document.getElementById('game-hud').classList.add('hidden'); document.getElementById('exp-bar-container').classList.add('hidden');
-    if (!isQuit && pd?.tutorial && !pd.tutorial.firstLossHandled) beginFirstLossTutorial();
+    // O tutorial da primeira derrota começa somente depois de o jogador sair da tela de game over.
 }
 
 let runCoins = 0; let runGems = 0; let runScrap = 0; let runMedals = 0; let runChestCoins = 0; let runChestGems = 0; let runChestScrap = 0;
-function returnToMenu() { restoreGlitchSelectionIfNeeded(); document.getElementById('overlay-gameover').classList.add('hidden'); showScreen('screen-main'); playMusic('menu'); ctx.clearRect(0, 0, cw, ch); joyZone.style.display='none'; const dpad = document.getElementById('dpad-zone'); if(dpad) dpad.style.display='none'; }
+function returnToMenu() {
+    const shouldStartFirstLossTutorial = !!(window.lastGameOverWasLoss && pd?.tutorial && !pd.tutorial.firstLossHandled);
+    restoreGlitchSelectionIfNeeded();
+    document.getElementById('overlay-gameover').classList.add('hidden');
+    showScreen('screen-main');
+    playMusic('menu');
+    ctx.clearRect(0, 0, cw, ch);
+    joyZone.style.display='none';
+    const dpad = document.getElementById('dpad-zone'); if(dpad) dpad.style.display='none';
+    window.lastGameOverWasLoss = false;
+    if (shouldStartFirstLossTutorial) beginFirstLossTutorial();
+}
 try {
     load();
     updateOrientationGate();
