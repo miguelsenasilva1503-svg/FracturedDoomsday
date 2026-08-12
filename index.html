@@ -35,6 +35,17 @@
     }
 
     .screen { position: absolute; inset: 0; display: flex; flex-direction: column; background: var(--bg-color); z-index: 10; padding: 20px; overflow: hidden; }
+    .hidden { display: none !important; }
+    #overlay-tutorial-dialog { z-index: 12000; cursor: pointer; padding: 24px; }
+    .tutorial-dialog-box { width: min(92vw, 720px); display: flex; align-items: center; gap: 18px; background: linear-gradient(180deg, rgba(34,41,63,0.99), rgba(14,18,30,0.99)); border: 3px solid rgba(241,196,15,0.85); border-radius: 24px; padding: 18px 20px; box-shadow: 0 18px 40px rgba(0,0,0,0.65); }
+    .tutorial-dialog-sprite { width: 150px; height: 150px; object-fit: contain; flex: 0 0 150px; filter: drop-shadow(0 7px 12px rgba(0,0,0,0.45)); }
+    .tutorial-dialog-copy { flex: 1; min-width: 0; text-align: left; }
+    .tutorial-dialog-speaker { color: var(--btn-yellow); font-size: 22px; font-weight: 900; margin-bottom: 8px; text-shadow: 2px 2px 0 #000; }
+    .tutorial-dialog-text { color: #fff; font-size: 18px; line-height: 1.45; white-space: pre-line; }
+    .tutorial-dialog-hint { color: #aeb8c2; font-size: 12px; margin-top: 12px; text-transform: uppercase; letter-spacing: 0.08em; }
+    .tutorial-focus { position: relative !important; z-index: 12050 !important; }
+    .tutorial-blocked { pointer-events: none !important; opacity: 0.55 !important; filter: grayscale(0.2); }
+    @media (max-width: 620px) { .tutorial-dialog-box { flex-direction: column; text-align: center; gap: 6px; max-height: 84vh; overflow-y: auto; } .tutorial-dialog-copy { text-align: center; } .tutorial-dialog-sprite { width: 112px; height: 112px; flex-basis: 112px; } .tutorial-dialog-text { font-size: 16px; } }
     .scrollable { overflow-y: auto; } .hidden { display: none !important; }
     .overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); z-index: 20; display: flex; justify-content: center; align-items: center; flex-direction: column; backdrop-filter: blur(4px); }
     
@@ -1699,6 +1710,17 @@
     </div>
 </div>
 
+<div id="overlay-tutorial-dialog" class="overlay hidden" onclick="advanceTutorialDialog(event)">
+    <div class="tutorial-dialog-box">
+        <img id="tutorial-dialog-sprite" class="tutorial-dialog-sprite" src="" alt="">
+        <div class="tutorial-dialog-copy">
+            <div id="tutorial-dialog-speaker" class="tutorial-dialog-speaker">Strike</div>
+            <div id="tutorial-dialog-text" class="tutorial-dialog-text"></div>
+            <div class="tutorial-dialog-hint">Clique para continuar</div>
+        </div>
+    </div>
+</div>
+
 <div id="overlay-title-picker" class="overlay hidden" style="z-index: 9998;">
     <div class="popup-box" style="max-width: 760px; width: 92%; max-height: 84vh; overflow: hidden; display: flex; flex-direction: column;">
         <h2 style="color: var(--btn-yellow); margin-bottom: 4px;">Alterar Título</h2>
@@ -1925,6 +1947,9 @@
                 <button class="btn-menu settings-option" type="button" onclick="toggleDevSetting('infiniteScrap')">Sucatas infinitas: <br><span id="dev-inf-scrap" style="color:var(--btn-red)">Desativado</span></button>
                 <button class="btn-menu settings-option" type="button" onclick="toggleDevSetting('unlockAllChars')">Obter todos os personagens: <br><span id="dev-all-chars" style="color:var(--btn-red)">Desativado</span></button>
                 <button class="btn-menu settings-option" type="button" onclick="toggleDevSetting('infiniteChips')">Todos os Chips: <br><span id="dev-all-chips" style="color:var(--btn-red)">Desativado</span></button>
+                <button class="btn-menu settings-option" type="button" onclick="toggleDevSetting('infiniteXp')">XP infinito: <br><span id="dev-inf-xp" style="color:var(--btn-red)">Desativado</span></button>
+                <button class="btn-menu settings-option" type="button" onclick="toggleDevSetting('allTitles')">Todos os títulos: <br><span id="dev-all-titles" style="color:var(--btn-red)">Desativado</span></button>
+                <button class="btn-menu settings-option" type="button" onclick="resetDevAccount()">Reset de conta</button>
                 <div class="settings-option" style="display:flex; flex-direction:column; justify-content:center; gap:8px; min-height:84px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.10); border-radius:14px; padding:12px;">
                     <span style="font-size:14px; font-weight:900; color:#fff;">Mapa da rotação</span>
                     <select id="dev-map-rotation" class="filter-select" style="width:100%; margin:0; font-size:14px; padding:8px;" onchange="setDevMapRotation(this.value)"></select>
@@ -3324,7 +3349,7 @@ document.addEventListener('visibilitychange', () => {
 window.addEventListener('blur', pauseMusicOnFocusLoss);
 window.addEventListener('focus', resumeMusicOnFocusGain);
 
-let pd = { coins: 500, gems: 50, evo: 40, sucatas: 0, nickname: null, chars: { strike: { level: 1, slots: 2, chips: [null, null] } }, selectedChar: 'strike', passXp: 0, passLevel: 1, passClaimed: 0, passClaimedTiers: [], passRewardSeed: 0, passRewardCache: {}, passResetAt: 0, shopState: { lastRotation: 0, items: {} }, lastDaily: "", dailyWins: {date: "", count: 0}, vip: { activeUntil: 0, inventory: 0 }, hardcoreBans: { lastRotation: 0, chars: [] }, settings: { ...DEFAULT_SETTINGS }, trail: { target: null, fameLevel: 0 }, profile: { title: null, emblem: null }, events: { ruben: { claimed: false }, adam: { claimed: false } }, missions: { date: '', list: [], weekly: { weekKey: '', mission: null }, rerolls: { date: '', used: 0 } }, passOverflowXp: 0, passOverflowBoxes: 0, chipsInventory: {}, chipCrafting: null, achievements: { stats: { gamesStarted: 0, wins: 0, hardcoreWins: 0, uhcWins: 0, totalKills: 0, bossKills: 0, bestWave: 0, charsUnlocked: 1, charsUpgraded: 0, chipsEquipped: 0, boxesOpened: 0, missionClaims: 0, weeklyClaims: 0, passClaims: 0, overflowBoxes: 0, rerollsUsed: 0, vipPurchases: 0, lunchDamage: 0 }, claimed: [] }, debug: { infiniteCoins: false, infiniteGems: false, infiniteEvo: false, infiniteScrap: false, jackEnabled: false, unlockAllChars: false, infiniteChips: false, devUnlocked: false, devBaseState: null, mapRotationOverride: -1 } };
+let pd = { coins: 500, gems: 50, evo: 40, sucatas: 0, nickname: null, tutorial: { stage: 'nickname', introShown: false, firstMatch: false, controlShown: false, levelupShown: false, finalShown: false, firstLossHandled: false, charsHandled: false, evolutionHandled: false, workshopSeen: false, workshopDialogShown: false, workshopFastyPending: false }, chars: { strike: { level: 1, slots: 2, chips: [null, null] } }, selectedChar: 'strike', passXp: 0, passLevel: 1, passClaimed: 0, passClaimedTiers: [], passRewardSeed: 0, passRewardCache: {}, passResetAt: 0, shopState: { lastRotation: 0, items: {} }, lastDaily: "", dailyWins: {date: "", count: 0}, vip: { activeUntil: 0, inventory: 0 }, hardcoreBans: { lastRotation: 0, chars: [] }, settings: { ...DEFAULT_SETTINGS }, trail: { target: null, fameLevel: 0 }, profile: { title: null, emblem: null }, events: { ruben: { claimed: false }, adam: { claimed: false } }, missions: { date: '', list: [], weekly: { weekKey: '', mission: null }, rerolls: { date: '', used: 0 } }, passOverflowXp: 0, passOverflowBoxes: 0, chipsInventory: {}, chipCrafting: null, achievements: { stats: { gamesStarted: 0, wins: 0, hardcoreWins: 0, uhcWins: 0, totalKills: 0, bossKills: 0, bestWave: 0, charsUnlocked: 1, charsUpgraded: 0, chipsEquipped: 0, boxesOpened: 0, missionClaims: 0, weeklyClaims: 0, passClaims: 0, overflowBoxes: 0, rerollsUsed: 0, vipPurchases: 0, lunchDamage: 0 }, claimed: [] }, debug: { infiniteCoins: false, infiniteGems: false, infiniteEvo: false, infiniteScrap: false, jackEnabled: false, unlockAllChars: false, infiniteChips: false, infiniteXp: false, allTitles: false, devUnlocked: false, devBaseState: null, mapRotationOverride: -1 } };
 window.isHardcoreMode = false; window.gachaQueue = []; window.tempBoxData = null; window.currentMap = 0; window.currentDetailCharId = null; window.currentChipEquipSlot = null; window.debugInfiniteGems = false;
 
 const PD_TEMPLATE = JSON.parse(JSON.stringify(pd));
@@ -3435,6 +3460,24 @@ function normalizeSaveData(rawSave) {
     let next = mergeAccountValues(defaults, source);
 
     if (!next || typeof next !== 'object') next = createDefaultSaveData();
+
+    const sourceHadTutorial = Object.prototype.hasOwnProperty.call(source, 'tutorial');
+    if (!next.tutorial || typeof next.tutorial !== 'object') next.tutorial = cloneAccountValue(defaults.tutorial);
+    next.tutorial = mergeAccountValues(defaults.tutorial, next.tutorial);
+    if (!sourceHadTutorial && next.nickname) {
+        next.tutorial.stage = 'completed';
+        next.tutorial.introShown = true;
+        next.tutorial.firstMatch = true;
+        next.tutorial.controlShown = true;
+        next.tutorial.levelupShown = true;
+        next.tutorial.finalShown = true;
+        next.tutorial.firstLossHandled = true;
+        next.tutorial.charsHandled = true;
+        next.tutorial.evolutionHandled = true;
+        next.tutorial.workshopSeen = true;
+        next.tutorial.workshopDialogShown = true;
+        next.tutorial.workshopFastyPending = false;
+    }
 
     if (!next.settings || typeof next.settings !== 'object') next.settings = cloneAccountValue(defaults.settings);
     next.settings = mergeAccountValues(defaults.settings, next.settings);
@@ -5222,6 +5265,7 @@ function getTitleLabel(charId) {
 
 function getUnlockedTitles() {
     syncCharacterProgressState();
+    if (pd?.debug?.allTitles) return Object.keys(CHARACTER_TITLES);
     return Object.keys(CHARACTER_TITLES).filter(id => (pd.chars?.[id]?.medals?.total || 0) >= CHARACTER_TITLE_THRESHOLD);
 }
 
@@ -5230,7 +5274,7 @@ function getEquippedTitleText() {
     if (!titleId) return '';
     if (!CHARACTER_TITLES[titleId]) return '';
     const ch = pd.chars?.[titleId];
-    if (!ch || !ch.medals || (ch.medals.total || 0) < CHARACTER_TITLE_THRESHOLD) return '';
+    if (!pd?.debug?.allTitles && (!ch || !ch.medals || (ch.medals.total || 0) < CHARACTER_TITLE_THRESHOLD)) return '';
     return `${CHARACTER_TITLES[titleId]}`;
 }
 
@@ -5276,7 +5320,8 @@ function renderTitlePicker() {
         const btn = document.createElement('button');
         const isCurrent = pd?.profile?.title === id;
         btn.className = 'btn-menu title-picker-card' + (isCurrent ? ' title-picker-current' : '');
-        btn.innerHTML = `<span>${escapeHtmlText(decodeHtmlEntities(CHARACTERS[id].name))} — ${escapeHtmlText(decodeHtmlEntities(CHARACTER_TITLES[id]))}</span><small>Desbloqueado com ${pd.chars[id].medals.total}/${CHARACTER_TITLE_THRESHOLD} medalhas.</small>`;
+        const titleMedals = pd?.chars?.[id]?.medals?.total || (pd?.debug?.allTitles ? CHARACTER_TITLE_THRESHOLD : 0);
+        btn.innerHTML = `<span>${escapeHtmlText(decodeHtmlEntities(CHARACTERS[id].name))} — ${escapeHtmlText(decodeHtmlEntities(CHARACTER_TITLES[id]))}</span><small>Desbloqueado com ${titleMedals}/${CHARACTER_TITLE_THRESHOLD} medalhas.</small>`;
         btn.onclick = () => equipTitle(id);
         list.appendChild(btn);
     });
@@ -5424,7 +5469,7 @@ if (document.addEventListener) {
     });
 }
 
-function saveNickname() { const input = document.getElementById('nick-input').value.trim(); if(input.length > 0) { pd.nickname = input; save(); document.getElementById('overlay-nickname').classList.add('hidden'); updateNicknameDisplay(); showScreen('screen-main'); updateUI(); updateSettingsUI(); } else { showAlert("Por favor, insira um nome válido!"); } }
+function saveNickname() { const input = document.getElementById('nick-input').value.trim(); if(input.length > 0) { pd.nickname = input; if (!pd.tutorial || typeof pd.tutorial !== 'object') pd.tutorial = createDefaultTutorialState(); pd.tutorial.stage = 'intro'; pd.tutorial.introShown = false; save(); document.getElementById('overlay-nickname').classList.add('hidden'); updateNicknameDisplay(); showScreen('screen-main'); updateUI(); updateSettingsUI(); beginTutorialIntro(); } else { showAlert("Por favor, insira um nome válido!"); } }
 function changeNickname() { const el = document.getElementById('nick-input'); if (el) { el.value = pd.nickname || ''; document.getElementById('overlay-nickname').classList.remove('hidden'); setTimeout(() => { try { el.focus(); el.select(); } catch (e) {} }, 0); } else { document.getElementById('overlay-nickname').classList.remove('hidden'); } }
 
 function getBestScoreValue() {
@@ -5592,6 +5637,8 @@ function ensureDevDebugState() {
         jackEnabled: false,
         unlockAllChars: false,
         infiniteChips: false,
+        infiniteXp: false,
+        allTitles: false,
         devUnlocked: false,
         devBaseState: null,
         mapRotationOverride: -1
@@ -5722,6 +5769,229 @@ function toggleDevToolsPanel() {
     if (!panel) return;
     panel.classList.toggle('hidden');
     if (!panel.classList.contains('hidden')) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function createDefaultTutorialState() {
+    return { stage: 'nickname', introShown: false, firstMatch: false, controlShown: false, levelupShown: false, finalShown: false, firstLossHandled: false, charsHandled: false, evolutionHandled: false, workshopSeen: false, workshopDialogShown: false, workshopFastyPending: false };
+}
+
+let tutorialDialogSteps = [];
+let tutorialDialogIndex = 0;
+let tutorialDialogOnClose = null;
+
+function tutorialSpriteFor(speaker) {
+    return speaker === 'Fasty' ? 'sprites/fasty.png' : 'sprites/strike.png';
+}
+
+function showTutorialDialog(steps, onClose = null) {
+    const overlay = document.getElementById('overlay-tutorial-dialog');
+    if (!overlay) return;
+    tutorialDialogSteps = Array.isArray(steps) ? steps : [];
+    tutorialDialogIndex = 0;
+    tutorialDialogOnClose = typeof onClose === 'function' ? onClose : null;
+    isPaused = true;
+    if (isPlaying) {
+        joyZone.style.display = 'none';
+        const dpad = document.getElementById('dpad-zone');
+        if (dpad) dpad.style.display = 'none';
+    }
+    renderTutorialDialogStep();
+    overlay.classList.remove('hidden');
+}
+
+function renderTutorialDialogStep() {
+    const step = tutorialDialogSteps[tutorialDialogIndex];
+    if (!step) return;
+    const sprite = document.getElementById('tutorial-dialog-sprite');
+    const speaker = document.getElementById('tutorial-dialog-speaker');
+    const text = document.getElementById('tutorial-dialog-text');
+    if (sprite) {
+        sprite.src = tutorialSpriteFor(step.speaker);
+        sprite.alt = step.speaker;
+    }
+    if (speaker) speaker.textContent = step.speaker || 'Strike';
+    if (text) text.textContent = step.text || '';
+}
+
+function advanceTutorialDialog(event) {
+    if (event) event.stopPropagation();
+    if (tutorialDialogIndex < tutorialDialogSteps.length - 1) {
+        tutorialDialogIndex++;
+        renderTutorialDialogStep();
+        return;
+    }
+    const overlay = document.getElementById('overlay-tutorial-dialog');
+    if (overlay) overlay.classList.add('hidden');
+    const callback = tutorialDialogOnClose;
+    tutorialDialogSteps = [];
+    tutorialDialogIndex = 0;
+    tutorialDialogOnClose = null;
+    if (typeof callback === 'function') callback();
+    else if (isPlaying) { isPaused = false; applyControlLayout(); lastTime = performance.now(); }
+}
+
+function beginTutorialIntro() {
+    if (!pd?.nickname || pd?.tutorial?.introShown || pd?.tutorial?.stage !== 'intro') return;
+    showTutorialDialog([
+        { speaker: 'Strike', text: `Olá ${pd.nickname}, finalmente te encontrei\nMe ajude por favor a derrotar esses fraturados que o Echo gerou através das fraturas do espaço` }
+    ], () => {
+        pd.tutorial.introShown = true;
+        pd.tutorial.stage = 'force-play';
+        save();
+        isPaused = false;
+        showScreen('screen-main');
+        updateUI();
+    });
+}
+
+function beginFirstRunTutorial() {
+    if (!pd?.tutorial || pd.tutorial.controlShown) return;
+    pd.tutorial.firstMatch = true;
+    pd.tutorial.controlShown = true;
+    pd.tutorial.stage = 'control-dialog';
+    save();
+    const controlText = isTouchDevice()
+        ? 'use o joystick para se movimentar pelo mapa (só para mobile)\nAgora, derrote alguns inimigos para obter experiência'
+        : 'use WASD ou as setinhas para se movimentar (só para pc)\nAgora, derrote alguns inimigos para obter experiência';
+    showTutorialDialog([{ speaker: 'Strike', text: controlText }], () => {
+        pd.tutorial.stage = 'playing';
+        save();
+        isPaused = false;
+        applyControlLayout();
+        lastTime = performance.now();
+    });
+}
+
+function beginFirstPowerupTutorial() {
+    if (!pd?.tutorial || pd.tutorial.levelupShown) return;
+    pd.tutorial.levelupShown = true;
+    pd.tutorial.stage = 'choose-powerup';
+    save();
+    showTutorialDialog([{ speaker: 'Strike', text: 'chegou a hora de aumentar seu poder, escolha um power up para te impulsionar na batalha' }], () => {
+        isPaused = true;
+        const overlay = document.getElementById('overlay-levelup');
+        if (overlay) overlay.classList.remove('hidden');
+    });
+}
+
+function finishFirstPowerupTutorial() {
+    if (!pd?.tutorial || pd.tutorial.finalShown) return;
+    pd.tutorial.finalShown = true;
+    pd.tutorial.stage = 'final-dialog';
+    save();
+    showTutorialDialog([{ speaker: 'Strike', text: 'bom, acho que já ensinei o suficiente, agora acaba com eles, e daí o jogo é por sua conta própria' }], () => {
+        pd.tutorial.stage = 'completed';
+        save();
+        isPaused = false;
+        applyControlLayout();
+        lastTime = performance.now();
+    });
+}
+
+function beginFirstLossTutorial() {
+    if (!pd?.tutorial || pd.tutorial.firstLossHandled) return;
+    pd.tutorial.firstLossHandled = true;
+    pd.tutorial.stage = 'loss-dialog';
+    save();
+    const gameOverOverlay = document.getElementById('overlay-gameover');
+    if (gameOverOverlay) gameOverOverlay.classList.add('hidden');
+    showScreen('screen-main');
+    setTimeout(() => {
+        showTutorialDialog([{ speaker: 'Strike', text: 'vamos deixar o personagem mais forte, abra a tela de personagens' }], () => {
+            pd.tutorial.stage = 'force-characters';
+            save();
+            document.querySelectorAll('.screen').forEach(screen => screen.classList.add('hidden'));
+            document.getElementById('screen-main')?.classList.remove('hidden');
+            playMusic('menu');
+            updateNicknameDisplay();
+        });
+    }, 0);
+}
+
+function beginStrikeUpgradeTutorial() {
+    if (!pd?.tutorial || pd.tutorial.charsHandled) return;
+    pd.tutorial.charsHandled = true;
+    pd.tutorial.stage = 'force-strike-card';
+    save();
+    showTutorialDialog([{ speaker: 'Strike', text: 'agora evolua o personagem para ele ficar mais forte' }], () => {
+        pd.tutorial.stage = 'evolve-strike';
+        save();
+        showCharDetail('strike');
+    });
+}
+
+function finishStrikeEvolutionTutorial() {
+    if (!pd?.tutorial || pd.tutorial.evolutionHandled) return;
+    pd.tutorial.evolutionHandled = true;
+    pd.tutorial.stage = 'post-evolution-dialog';
+    save();
+    showTutorialDialog([{ speaker: 'Strike', text: 'Muito bem! Continue assim e ficará mais forte' }], () => {
+        pd.tutorial.stage = 'completed';
+        save();
+    });
+}
+
+function beginWorkshopTutorial() {
+    if (!pd?.tutorial || pd.tutorial.workshopDialogShown) return;
+    pd.tutorial.workshopSeen = true;
+    pd.tutorial.workshopDialogShown = true;
+    pd.tutorial.workshopFastyPending = true;
+    pd.tutorial.stage = 'workshop-dialogue';
+    save();
+    showTutorialDialog([
+        { speaker: 'Fasty', text: 'deixa aquele bobão do exército para lá, vamos aprender sobre as sucatas' },
+        { speaker: 'Fasty', text: 'aqui você desbloqueia personagens de forma mais fácil e consegue fabricar chips' },
+        { speaker: 'Fasty', text: 'mas antes de tudo, você pode me desbloquear de graça' }
+    ], () => {
+        pd.tutorial.stage = 'force-fasty';
+        save();
+        renderTrail();
+        showScreen('screen-trail');
+    });
+}
+
+function tutorialUnlockFastyFromWorkshop() {
+    if (!pd?.tutorial?.workshopFastyPending || pd.chars.fasty) return;
+    const c = CHARACTERS.fasty;
+    if (!c) return;
+    pd.chars.fasty = { level: 1, slots: 2, chips: [null, null], unlockSource: 'workshop-free' };
+    awardAchievementStat('charsUnlocked', 1);
+    pd.tutorial.workshopFastyPending = false;
+    pd.tutorial.stage = 'completed';
+    save();
+    renderChars();
+    renderShop();
+    renderTrail();
+}
+
+function tutorialUnlockFastyFromCharacters() {
+    if (pd?.tutorial?.workshopFastyPending) tutorialUnlockFastyFromWorkshop();
+}
+
+function resetDevAccount() {
+    ensureDevDebugState();
+    const oldDebug = cloneAccountValue(pd.debug || {});
+    const reset = createDefaultSaveData();
+    reset.debug = {
+        ...oldDebug,
+        devBaseState: null
+    };
+    reset.tutorial = createDefaultTutorialState();
+    reset.nickname = null;
+    pd = normalizeSaveData(reset);
+    ensureDevDebugState();
+    syncDevUnlocks();
+    safeStorageSet('rogueLegacySave', JSON.stringify(pd));
+    safeStorageSet('rogueLegacyBackup', JSON.stringify({ v: 2, game: 'RogueliteLegacy', exportedAt: Date.now(), checksum: accountBackupChecksum(pd), save: cloneAccountValue(pd) }));
+    document.querySelectorAll('.overlay').forEach(el => el.classList.add('hidden'));
+    const nick = document.getElementById('nick-input');
+    if (nick) nick.value = '';
+    showScreen('screen-main');
+    document.getElementById('overlay-nickname')?.classList.remove('hidden');
+    updateUI();
+    updateSettingsUI();
+    updateNicknameDisplay();
+    notify('Conta resetada. Dev Tools preservadas.');
 }
 
 function toggleDevSetting(key) {
@@ -5912,6 +6182,8 @@ function updateSettingsUI(syncSlider = true) {
         'dev-jack': !!pd?.debug?.jackEnabled,
         'dev-all-chars': !!pd?.debug?.unlockAllChars,
         'dev-all-chips': !!pd?.debug?.infiniteChips,
+        'dev-inf-xp': !!pd?.debug?.infiniteXp,
+        'dev-all-titles': !!pd?.debug?.allTitles,
     };
     for (const [id, active] of Object.entries(devStateMap)) {
         const el = document.getElementById(id);
@@ -6082,6 +6354,15 @@ function showShopSection(section) {
 }
 
 function showScreen(id) {
+    const tutorialStage = pd?.tutorial?.stage;
+    const tutorialAllowed = {
+        'force-play': ['screen-main'],
+        'force-characters': ['screen-chars'],
+        'force-strike-card': ['screen-chars', 'screen-char-detail'],
+        'evolve-strike': ['screen-chars', 'screen-char-detail'],
+        'force-fasty': ['screen-trail']
+    };
+    if (tutorialAllowed[tutorialStage] && id !== null && !tutorialAllowed[tutorialStage].includes(id)) return;
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     ['custom-popup', 'overlay-mode-select', 'overlay-pregame-shop', 'overlay-book', 'overlay-title-picker', 'overlay-profile'].forEach(overlayId => {
         const overlay = document.getElementById(overlayId);
@@ -6106,7 +6387,7 @@ function showScreen(id) {
     }
     if (id === 'screen-shop') { renderShop(); showShopSection(currentShopSection || 'offers'); }
     if (id === 'screen-pass') renderPass();
-    if (id === 'screen-trail') renderTrail();
+    if (id === 'screen-trail') { renderTrail(); if (pd?.tutorial && !pd.tutorial.workshopSeen) beginWorkshopTutorial(); }
     if (id === 'screen-missions') renderMissions();
     if (id === 'screen-achievements') renderAchievements();
     updateUI();
@@ -7151,7 +7432,8 @@ let sort = document.getElementById('char-filter-sort') ? document.getElementById
             html += `<p style="font-size: 14px;">Nível ${lvl}/8</p><div style="font-size:12px;color:var(--btn-yellow);font-weight:bold;margin-top:4px;">🏅 ${medals.total}</div>`;
             if(isSel) html += `<div style="color:var(--btn-green); font-size:12px; font-weight:bold; margin-top:5px;">[Selecionado]</div>`;
         } else {
-            html += `<p style="color:#aaa; font-size: 12px;">Não possuído</p><div style="color:var(--btn-yellow); font-size:12px; font-weight:bold; margin-top:5px;">Clique para ver detalhes</div><button class="buy-char-btn" style="padding:5px 10px;font-size:12px;background:var(--gem); margin-top:8px;" onclick="event.stopPropagation(); buyChar('${c.id}')">💎 ${c.cost}</button>`;
+            const purchaseLabel = c.id === 'fasty' ? 'GRÁTIS' : `💎 ${c.cost}`;
+            html += `<p style="color:#aaa; font-size: 12px;">Não possuído</p><div style="color:var(--btn-yellow); font-size:12px;font-weight:bold;margin-top:5px;">Clique para ver detalhes</div><button class="buy-char-btn" style="padding:5px 10px;font-size:12px;background:var(--gem); margin-top:8px;" onclick="event.stopPropagation(); buyChar('${c.id}')">${purchaseLabel}</button>`;
         }
         div.onclick = () => showCharDetail(c.id);
         div.innerHTML = html;
@@ -7184,10 +7466,13 @@ function detailPrimaryAction() {
 function detailUpgradeAction() {
     const id = window.currentDetailCharId;
     if(!id || !pd.chars[id]) return;
+    if (pd?.tutorial?.stage === 'evolve-strike' && id !== 'strike') return;
     const lvl = pd.chars[id].level || 1;
     if(lvl >= 8) return;
     const req = getUpgradeCost(lvl);
+    const before = pd.chars[id].level || 1;
     upgradeChar(id, req.evo, req.coins);
+    if (pd?.tutorial?.stage === 'evolve-strike' && (pd.chars[id].level || 1) > before) finishStrikeEvolutionTutorial();
 }
 
 function buyThirdSlot() {
@@ -7208,6 +7493,8 @@ function buyThirdSlot() {
 
 function showCharDetail(id) {
     try {
+        if ((pd?.tutorial?.stage === 'force-characters' || pd?.tutorial?.stage === 'force-strike-card') && id !== 'strike') { showAlert('Clique no Strike para continuar.'); return; }
+        if (pd?.tutorial?.stage === 'force-characters' && id === 'strike') beginStrikeUpgradeTutorial();
         const c = CHARACTERS[id];
         const owned = !!pd.chars[id];
         const lvl = owned ? (pd.chars[id].level || 1) : 0;
@@ -7334,7 +7621,7 @@ function showCharDetail(id) {
                 reqEl.innerHTML = `Nível Máximo Alcançado!`;
             }
         } else {
-            btnSel.innerHTML = `Comprar 💎 ${c.cost}`;
+            btnSel.innerHTML = c.id === 'fasty' ? 'GRÁTIS' : `Comprar 💎 ${c.cost}`;
             btnSel.style.background = "var(--btn-yellow)";
             btnSel.style.borderColor = "var(--btn-yellow-border)";
             btnSel.style.color = "#333";
@@ -7419,12 +7706,25 @@ function unequipChip(charId, slotIndex) {
 
 function buyChar(id) {
     const c = CHARACTERS[id];
-    if(pd.gems < c.cost) { showAlert("Gemas insuficientes!"); return; }
+    const isFreeFasty = id === 'fasty';
+    if (!c) return;
+    if (isFreeFasty) {
+        pd.gems = Math.max(0, Number(pd.gems) || 0);
+        pd.chars[id] = { level: 1, slots: 2, chips: [null, null], unlockSource: 'free' };
+        awardAchievementStat('charsUnlocked', 1);
+        save();
+        renderChars();
+        renderShop();
+        showCharDetail(id);
+        if (pd?.tutorial?.workshopFastyPending) tutorialUnlockFastyFromCharacters();
+        return;
+    }
+    if (pd.gems < c.cost) { showAlert("Gemas insuficientes!"); return; }
     showConfirm("Quer comprar essa oferta?", `Deseja comprar ${c.name} por ${c.cost} gemas?`, (res) => {
-        if(!res) return;
+        if (!res) return;
         pd.gems -= c.cost;
         pd.chars[id] = { level: 1, slots: 2, chips: [null, null], unlockSource: id === 'glitch' ? 'shop-gems' : 'shop' };
-        if(id === 'cyro_pyro') pd.chars[id].mode = 'pyro';
+        if (id === 'cyro_pyro') pd.chars[id].mode = 'pyro';
         awardAchievementStat('charsUnlocked', 1);
         save();
         renderChars();
@@ -7709,7 +8009,8 @@ function renderShop() {
             let hasSprite = spriteMarkup
                 ? spriteMarkup.replace('class="char-sprite char-sprite--menu"', 'class="char-sprite" style="width:96px;height:52px;margin:0 auto 8px;"')
                 : `<div style="width:40px;height:40px;background:${c.color};border-radius:50%;margin:0 auto; border:3px solid #fff;"></div>`;
-            div.innerHTML = `${hasSprite}<h5>${c.name}</h5><button style="padding:5px;font-size:12px;background:var(--gem)" type="button" onclick="event.stopPropagation(); buyChar('${c.id}')">💎 ${c.cost}</button>`;
+            const shopPurchaseLabel = c.id === 'fasty' ? 'GRÁTIS' : `💎 ${c.cost}`;
+            div.innerHTML = `${hasSprite}<h5>${c.name}</h5><button style="padding:5px;font-size:12px;background:var(--gem)" type="button" onclick="event.stopPropagation(); buyChar('${c.id}')">${shopPurchaseLabel}</button>`;
             charList.appendChild(div);
         });
     }
@@ -8434,7 +8735,7 @@ function rollChar(rarity, opts = {}) {
     else { pd.chars[c.id] = {level:1, slots:2, chips: [null, null]}; if(c.id==='gladiator') pd.chars[c.id].mode='shooter'; return `👤 NOVO PERSONAGEM: ${c.name}!`; }
 }
 
-function getTrailCost(rarity) { return rarity==='common'?150 : rarity==='rare'?390 : rarity==='epic'?950 : rarity==='legendary'?1890 : 3990; }
+function getTrailCost(rarity, charId = null) { if (charId === 'fasty') return 0; let costs = { common:150, rare:390, epic:950, legendary:1890, mythic:3990 }; return costs[rarity] || 3990; }
 function getTrailOptions() {
     const chars = getTrailOptionsForHour();
     if(chars.length > 0) return { type: 'char', chars };
@@ -8459,6 +8760,11 @@ function renderTrail() {
     container.innerHTML = '';
     
     try {
+        if (pd?.tutorial?.workshopFastyPending && CHARACTERS?.fasty && !pd.chars?.fasty) {
+            const c = CHARACTERS.fasty;
+            container.innerHTML = `<h3 style="color:var(--btn-yellow);">Fasty</h3><div class="trail-card trail-focus-card rarity-${c.rarity}"><div class="trail-focus-head"><div class="trail-focus-badge">${getCharacterCardEmoji(c)}</div><div class="trail-focus-copy"><div class="trail-focus-kicker">${c.class}</div><h3 class="trail-focus-title" style="font-size:24px;">${c.name}</h3><p class="trail-focus-sub">${getShortCardText(c.desc, 120)}</p></div></div><div class="trail-focus-meta"><div class="meta-line"><strong>GRÁTIS</strong></div><span class="card-pill">${c.rarity}</span></div><button class="btn-action card-button" style="margin-top:0;" onclick="tutorialUnlockFastyFromWorkshop()">Desbloquear Fasty grátis</button></div>`;
+            return;
+        }
         let html = '';
         if(pd.trail.target) {
             if(pd.trail.target.type === 'char' && pd.chars[pd.trail.target.id]) {
@@ -8515,7 +8821,7 @@ function renderTrail() {
                 const cardsHtml = (opts.chars || []).map(cId => {
                     let c = CHARACTERS[cId];
                     if(!c) return '';
-                    let cost = getTrailCost(c.rarity);
+                    let cost = getTrailCost(c.rarity, c.id);
                     return `
                         <div class="trail-card trail-focus-card">
                             <div class="trail-focus-head">
@@ -9022,12 +9328,13 @@ function showModeSelect() {
 }
 
 function startGame(isHardcore) {
+    if (pd?.tutorial?.stage === 'force-play' && isHardcore) { showAlert('O tutorial pede o modo Clássico.'); return; }
     if(isHardcore && getRotationBans(pd.settings.ultraHardcore).includes(pd.selectedChar)) { showAlert(`O personagem selecionado (${CHARACTERS[pd.selectedChar].name}) está banido no modo ${pd.settings.ultraHardcore ? 'Ultra Hardcore' : 'Hardcore'}.`); return; }
     if(!isHardcore && pd.settings.ultraHardcore) { showAlert("O modo Clássico está bloqueado enquanto o Ultra Hardcore estiver ativado."); return; }
     window.isHardcoreMode = isHardcore; document.getElementById('overlay-mode-select').classList.add('hidden');
     playMusic(pd.settings.ultraHardcore ? 'ultraHardcore' : 'classic');
     
-    if(!isHardcore && !pd.settings.ultraHardcore) {
+    if(!isHardcore && !pd.settings.ultraHardcore && pd?.tutorial?.stage !== 'force-play') {
         let deckFiltered = CARDS.filter(c => {
             const char = pd.selectedChar;
             if(char === 'mrsaw' && c.id === 'orbital') return false;
@@ -9127,6 +9434,8 @@ function startRunAfterShop() {
     generateMapObstacles();
 
     isPlaying = true; isPaused = false; lastTime = performance.now(); updateGameHud(); ensureMissionState(); pd.missions.lastRunChar = pd.selectedChar; trackMissionProgress('games', 1); awardAchievementStat('gamesStarted', 1); 
+    if (pd?.debug?.infiniteXp) player.stats.xpMult = Math.max(player.stats.xpMult || 1, 999999);
+    if (pd?.tutorial?.stage === 'force-play') beginFirstRunTutorial();
     if (pd.selectedChar === 'eolio') spawnEolioTurbine();
     if(player.weapon === 'wrench') { allies.push({x: player.x, y: player.y, dmg: player.baseDmg, speed: 0, life: Infinity, cd: 0, isTurret: true, ref: 'meekah_turret'}); }
     gameLoopId = requestAnimationFrame(loop);
@@ -13287,7 +13596,7 @@ function updateGems(dt) {
     for(let i = xpGems.length - 1; i >= 0; i--) {
         let g = xpGems[i]; let d = dist(g, player);
         if(d < pArea) { let a = Math.atan2(player.y - g.y, player.x - g.x); g.x += Math.cos(a) * 8 * 60 * dt; g.y += Math.sin(a) * 8 * 60 * dt; }
-        if(d < player.r + 10) { inRunXp += g.val; xpGems.splice(i, 1); if(inRunXp >= xpToNext) triggerLevelUp(); }
+        if(d < player.r + 10) { inRunXp += pd?.debug?.infiniteXp ? Math.max(g.val, xpToNext) : g.val; xpGems.splice(i, 1); if(inRunXp >= xpToNext) triggerLevelUp(); }
     }
     document.getElementById('exp-bar').style.width = `${Math.min(100, (inRunXp / xpToNext) * 100)}%`;
 }
@@ -13312,12 +13621,13 @@ function triggerLevelUp() {
     
     let drawCount = pd.settings.ultraHardcore ? 2 : 3;
     let deck = deckFiltered.sort(() => 0.5 - Math.random()).slice(0, drawCount); const cont = document.getElementById('cards-container'); cont.innerHTML = '';
+    if (pd?.tutorial?.stage === 'choose-powerup') beginFirstPowerupTutorial();
     deck.forEach(c => {
         let div = document.createElement('div');
         const iconHtml = getUpgradeCardIconMarkup(c.id);
         div.className = `upgrade-card${iconHtml ? '' : ' upgrade-card--textonly'}`;
         div.innerHTML = `${iconHtml ? `<div class="upgrade-card-icon">${iconHtml}</div>` : ''}<h3>${escapeHtmlText(decodeHtmlEntities(c.name))}</h3><p>${escapeHtmlText(decodeHtmlEntities(c.desc))}</p>`;
-        div.onclick = (e) => { e.stopPropagation(); if(!isPaused) return; c.apply(player.stats); player.pickedCards.push(c.name); document.getElementById('overlay-levelup').classList.add('hidden'); isPaused = false; applyControlLayout(); lastTime = performance.now(); };
+        div.onclick = (e) => { e.stopPropagation(); if(!isPaused) return; c.apply(player.stats); player.pickedCards.push(c.name); document.getElementById('overlay-levelup').classList.add('hidden'); if (pd?.tutorial?.levelupShown && !pd?.tutorial?.finalShown) { finishFirstPowerupTutorial(); } else { isPaused = false; applyControlLayout(); lastTime = performance.now(); } };
         cont.appendChild(div);
     });
 }
@@ -15037,6 +15347,7 @@ function gameOver(isQuit) {
     document.getElementById('go-medals').innerHTML = `🏅 Medalhas obtidas: <strong>${medalsThisRun || 0}</strong>`;
     document.getElementById('go-daily').innerHTML = winText;
     document.getElementById('overlay-gameover').classList.remove('hidden'); document.getElementById('game-hud').classList.add('hidden'); document.getElementById('exp-bar-container').classList.add('hidden');
+    if (!isQuit && pd?.tutorial && !pd.tutorial.firstLossHandled) beginFirstLossTutorial();
 }
 
 let runCoins = 0; let runGems = 0; let runScrap = 0; let runMedals = 0; let runChestCoins = 0; let runChestGems = 0; let runChestScrap = 0;
