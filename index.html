@@ -44,6 +44,22 @@
     .tutorial-dialog-text { color: #fff; font-size: 18px; line-height: 1.45; white-space: pre-line; }
     .tutorial-dialog-hint { color: #aeb8c2; font-size: 12px; margin-top: 12px; text-transform: uppercase; letter-spacing: 0.08em; }
     .tutorial-focus { position: relative !important; z-index: 12050 !important; }
+    .tutorial-pointer {
+        position: fixed;
+        z-index: 13000;
+        font-size: 54px;
+        line-height: 1;
+        pointer-events: none;
+        filter: drop-shadow(0 4px 3px rgba(0,0,0,0.65));
+        animation: tutorialPointerBounce 0.7s ease-in-out infinite;
+        transform-origin: center center;
+        display: none;
+    }
+    .tutorial-pointer.visible { display: block; }
+    @keyframes tutorialPointerBounce {
+        0%,100% { transform: translate(0,0) scale(1); }
+        50% { transform: translate(0,-8px) scale(1.08); }
+    }
     .tutorial-blocked { pointer-events: none !important; opacity: 0.55 !important; filter: grayscale(0.2); }
     @media (max-width: 620px) { .tutorial-dialog-box { flex-direction: column; text-align: center; gap: 6px; max-height: 84vh; overflow-y: auto; } .tutorial-dialog-copy { text-align: center; } .tutorial-dialog-sprite { width: 112px; height: 112px; flex-basis: 112px; } .tutorial-dialog-text { font-size: 16px; } }
     .scrollable { overflow-y: auto; } .hidden { display: none !important; }
@@ -1709,6 +1725,8 @@
         <button class="btn-action" onclick="saveNickname()">Confirmar</button>
     </div>
 </div>
+
+<div id="tutorial-pointer" class="tutorial-pointer" aria-hidden="true">👆</div>
 
 <div id="overlay-tutorial-dialog" class="overlay hidden" onclick="advanceTutorialDialog(event)">
     <div class="tutorial-dialog-box">
@@ -5778,6 +5796,55 @@ function createDefaultTutorialState() {
 let tutorialDialogSteps = [];
 let tutorialDialogIndex = 0;
 let tutorialDialogOnClose = null;
+let tutorialPointerTarget = null;
+let tutorialPointerDirection = 'up';
+
+function hideTutorialPointer() {
+    const el = document.getElementById('tutorial-pointer');
+    if (el) {
+        el.classList.remove('visible');
+        el.textContent = '👆';
+    }
+    tutorialPointerTarget = null;
+}
+
+function showTutorialPointer(target, direction = 'up') {
+    const el = document.getElementById('tutorial-pointer');
+    if (!el || !target) return;
+    tutorialPointerTarget = target;
+    tutorialPointerDirection = direction;
+    el.textContent = direction === 'right' ? '👉' : direction === 'left' ? '👈' : '👆';
+    el.classList.add('visible');
+    positionTutorialPointer();
+}
+
+function positionTutorialPointer() {
+    const el = document.getElementById('tutorial-pointer');
+    const target = tutorialPointerTarget;
+    if (!el || !target || !document.body.contains(target) || target.offsetParent === null) {
+        if (el) el.classList.remove('visible');
+        return;
+    }
+    const r = target.getBoundingClientRect();
+    const gap = 10;
+    let x = r.left + r.width / 2 - el.offsetWidth / 2;
+    let y = r.top - el.offsetHeight - gap;
+    if (tutorialPointerDirection === 'right') {
+        x = r.right + gap;
+        y = r.top + r.height / 2 - el.offsetHeight / 2;
+    } else if (tutorialPointerDirection === 'left') {
+        x = r.left - el.offsetWidth - gap;
+        y = r.top + r.height / 2 - el.offsetHeight / 2;
+    }
+    x = Math.max(4, Math.min(window.innerWidth - el.offsetWidth - 4, x));
+    y = Math.max(4, Math.min(window.innerHeight - el.offsetHeight - 4, y));
+    el.style.left = `${x}px`;
+    el.style.top = `${y}px`;
+}
+
+window.addEventListener('resize', positionTutorialPointer);
+window.addEventListener('scroll', positionTutorialPointer, true);
+
 
 function tutorialSpriteFor(speaker) {
     return speaker === 'Fasty' ? 'sprites/fasty.png' : 'sprites/strike.png';
@@ -5789,6 +5856,7 @@ function showTutorialDialog(steps, onClose = null) {
     tutorialDialogSteps = Array.isArray(steps) ? steps : [];
     tutorialDialogIndex = 0;
     tutorialDialogOnClose = typeof onClose === 'function' ? onClose : null;
+    hideTutorialPointer();
     isPaused = true;
     if (isPlaying) {
         joyZone.style.display = 'none';
@@ -5841,6 +5909,7 @@ function beginTutorialIntro() {
         isPaused = false;
         showScreen('screen-main');
         updateUI();
+        setTimeout(() => showTutorialPointer(document.querySelector('#screen-main .btn-play'), 'up'), 80);
     });
 }
 
@@ -5871,6 +5940,7 @@ function beginFirstPowerupTutorial() {
         isPaused = true;
         const overlay = document.getElementById('overlay-levelup');
         if (overlay) overlay.classList.remove('hidden');
+        setTimeout(() => showTutorialPointer(document.querySelector('#cards-container .upgrade-card'), 'up'), 80);
     });
 }
 
@@ -5904,6 +5974,7 @@ function beginFirstLossTutorial() {
             document.getElementById('screen-main')?.classList.remove('hidden');
             playMusic('menu');
             updateNicknameDisplay();
+            setTimeout(() => showTutorialPointer(document.querySelector('#screen-main .emoji-nav-chars'), 'right'), 80);
         });
     }, 0);
 }
@@ -5917,11 +5988,13 @@ function beginStrikeUpgradeTutorial() {
         pd.tutorial.stage = 'evolve-strike';
         save();
         showCharDetail('strike');
+        setTimeout(() => showTutorialPointer(document.querySelector('#screen-char-detail #detail-btn-evolve'), 'up'), 80);
     });
 }
 
 function finishStrikeEvolutionTutorial() {
     if (!pd?.tutorial || pd.tutorial.evolutionHandled) return;
+    hideTutorialPointer();
     pd.tutorial.evolutionHandled = true;
     pd.tutorial.stage = 'post-evolution-dialog';
     save();
@@ -5947,6 +6020,7 @@ function beginWorkshopTutorial() {
         save();
         renderTrail();
         showScreen('screen-trail');
+        setTimeout(() => showTutorialPointer(document.querySelector('#trail-content .card-button'), 'up'), 80);
     });
 }
 
@@ -5954,6 +6028,7 @@ function tutorialUnlockFastyFromWorkshop() {
     if (!pd?.tutorial?.workshopFastyPending || pd.chars.fasty) return;
     const c = CHARACTERS.fasty;
     if (!c) return;
+    hideTutorialPointer();
     pd.chars.fasty = { level: 1, slots: 2, chips: [null, null], unlockSource: 'workshop-free' };
     awardAchievementStat('charsUnlocked', 1);
     pd.tutorial.workshopFastyPending = false;
@@ -6376,6 +6451,7 @@ function showScreen(id) {
     if (id === 'screen-main') {
         playMusic('menu');
         updateNicknameDisplay();
+        if (pd?.tutorial?.stage === 'force-play') setTimeout(() => showTutorialPointer(document.querySelector('#screen-main .btn-play'), 'up'), 80);
     }
     if (id === 'screen-chars') {
         try { renderChars(); }
@@ -7437,8 +7513,12 @@ let sort = document.getElementById('char-filter-sort') ? document.getElementById
         }
         div.onclick = () => showCharDetail(c.id);
         div.innerHTML = html;
+        div.dataset.charId = c.id;
         list.appendChild(div);
     });
+    if (pd?.tutorial?.stage === 'force-characters') {
+        setTimeout(() => showTutorialPointer(document.querySelector('#chars-list .card-item[data-char-id="strike"]'), 'up'), 80);
+    }
 }
 
 function setWildMode(mode) { 
@@ -7495,6 +7575,7 @@ function showCharDetail(id) {
     try {
         if ((pd?.tutorial?.stage === 'force-characters' || pd?.tutorial?.stage === 'force-strike-card') && id !== 'strike') { showAlert('Clique no Strike para continuar.'); return; }
         if (pd?.tutorial?.stage === 'force-characters' && id === 'strike') beginStrikeUpgradeTutorial();
+    if (pd?.tutorial?.stage === 'force-strike-card' && id === 'strike') hideTutorialPointer();
         const c = CHARACTERS[id];
         const owned = !!pd.chars[id];
         const lvl = owned ? (pd.chars[id].level || 1) : 0;
@@ -9325,12 +9406,16 @@ function showModeSelect() {
     window.currentMap = getSelectedMapIndex();
     syncMapSelectUI();
     document.getElementById('overlay-mode-select').classList.remove('hidden');
+    if (pd?.tutorial?.stage === 'force-play') {
+        setTimeout(() => showTutorialPointer(document.getElementById('btn-classic-select'), 'up'), 60);
+    }
 }
 
 function startGame(isHardcore) {
     if (pd?.tutorial?.stage === 'force-play' && isHardcore) { showAlert('O tutorial pede o modo Clássico.'); return; }
     if(isHardcore && getRotationBans(pd.settings.ultraHardcore).includes(pd.selectedChar)) { showAlert(`O personagem selecionado (${CHARACTERS[pd.selectedChar].name}) está banido no modo ${pd.settings.ultraHardcore ? 'Ultra Hardcore' : 'Hardcore'}.`); return; }
     if(!isHardcore && pd.settings.ultraHardcore) { showAlert("O modo Clássico está bloqueado enquanto o Ultra Hardcore estiver ativado."); return; }
+    hideTutorialPointer();
     window.isHardcoreMode = isHardcore; document.getElementById('overlay-mode-select').classList.add('hidden');
     playMusic(pd.settings.ultraHardcore ? 'ultraHardcore' : 'classic');
     
@@ -13621,13 +13706,13 @@ function triggerLevelUp() {
     
     let drawCount = pd.settings.ultraHardcore ? 2 : 3;
     let deck = deckFiltered.sort(() => 0.5 - Math.random()).slice(0, drawCount); const cont = document.getElementById('cards-container'); cont.innerHTML = '';
-    if (pd?.tutorial?.stage === 'choose-powerup') beginFirstPowerupTutorial();
+    if (pd?.tutorial?.firstMatch && !pd.tutorial.levelupShown && pd.tutorial.stage === 'playing') beginFirstPowerupTutorial();
     deck.forEach(c => {
         let div = document.createElement('div');
         const iconHtml = getUpgradeCardIconMarkup(c.id);
         div.className = `upgrade-card${iconHtml ? '' : ' upgrade-card--textonly'}`;
         div.innerHTML = `${iconHtml ? `<div class="upgrade-card-icon">${iconHtml}</div>` : ''}<h3>${escapeHtmlText(decodeHtmlEntities(c.name))}</h3><p>${escapeHtmlText(decodeHtmlEntities(c.desc))}</p>`;
-        div.onclick = (e) => { e.stopPropagation(); if(!isPaused) return; c.apply(player.stats); player.pickedCards.push(c.name); document.getElementById('overlay-levelup').classList.add('hidden'); if (pd?.tutorial?.levelupShown && !pd?.tutorial?.finalShown) { finishFirstPowerupTutorial(); } else { isPaused = false; applyControlLayout(); lastTime = performance.now(); } };
+        div.onclick = (e) => { e.stopPropagation(); if(!isPaused) return; hideTutorialPointer(); c.apply(player.stats); player.pickedCards.push(c.name); document.getElementById('overlay-levelup').classList.add('hidden'); if (pd?.tutorial?.levelupShown && !pd?.tutorial?.finalShown) { finishFirstPowerupTutorial(); } else { isPaused = false; applyControlLayout(); lastTime = performance.now(); } };
         cont.appendChild(div);
     });
 }
