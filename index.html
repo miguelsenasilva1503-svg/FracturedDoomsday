@@ -11352,7 +11352,7 @@ function fireWeapon(target) {
                 createProj(player.x + Math.cos(angle) * (player.r + 7), player.y + Math.sin(angle) * (player.r + 7), Math.cos(angle) * pSpd * 0.95, Math.sin(angle) * pSpd * 0.95, finalDmg, 70, true, 'bulb_bubble', { size: 11, sourceChar: 'bulb', pierce: 0 });
                 // Cadência alta o suficiente para permitir acertar a mesma bolha
                 // várias vezes antes do STUN de 1s expirar.
-                player.cd = Math.max(22, player.baseFireRate * player.stats.fireRateMult * 0.58);
+                player.cd = Math.max(14, player.baseFireRate * player.stats.fireRateMult * 0.42);
                 return;
             }
 
@@ -13037,9 +13037,17 @@ function updateProjectiles(dt) {
 
         if (p.type === 'bulb_bubble_attached') {
             const targetEnemy = p.extra?.targetRef;
-            if (!targetEnemy || targetEnemy.hp <= 0 || !Number.isFinite(targetEnemy.x) || !Number.isFinite(targetEnemy.y)) { projectiles.splice(i, 1); continue; }
-            p.x = targetEnemy.x; p.y = targetEnemy.y;
-            if (p.life <= 0) projectiles.splice(i, 1);
+            if (!targetEnemy || targetEnemy.hp <= 0 || !Number.isFinite(targetEnemy.x) || !Number.isFinite(targetEnemy.y)) {
+                projectiles.splice(i, 1);
+                continue;
+            }
+            p.x = targetEnemy.x;
+            p.y = targetEnemy.y;
+            // A bolha presa não participa da colisão genérica de projéteis.
+            // Ela só existe para representar/guardar o estado da bolha no alvo.
+            if (p.life <= 0) {
+                projectiles.splice(i, 1);
+            }
             continue;
         }
         if (p.type === 'bulb_gas_bubble') {
@@ -13319,9 +13327,9 @@ function updateProjectiles(dt) {
                         const projStats = p.extra?.sourceStats || player.stats; let realDmg = p.dmg * (e.isBoss ? projStats.bossDmgMult : 1);
                         if (p.type === 'bulb_bubble') {
                             const attached = projectiles.find(q => q && q.type === 'bulb_bubble_attached' && q.extra?.targetRef === e);
-                            const expansions = attached ? Math.max(0, Number(attached.extra?.expansions) || 0) : 0;
-                            const stage = attached ? Math.min(4, expansions + 2) : 1;
-                            realDmg *= 1 + (stage - 1) * 0.5;
+                            const expansions = attached ? Math.max(0, Math.min(3, Number(attached.extra?.expansions) || 0)) : 0;
+                            // 0 expansões = dano base; cada expansão aumenta em 50%.
+                            realDmg *= 1 + expansions * 0.5;
                         }
                         if(p.type === 'snowball') {
                             realDmg *= Math.max(0.75, 1 + ((p.size || 15) - 15) / 35);
@@ -13340,23 +13348,42 @@ function updateProjectiles(dt) {
 
                         e.hp -= realDmg; e.lastHitSourceChar = p.extra?.sourceChar || (p.isPlayer ? pd.selectedChar : e.lastHitSourceChar || null); addFloatingText(e.x, e.y, Math.floor(realDmg), '#fff'); if(p.isPlayer) trackMissionDamage(realDmg);
                         if (p.type === 'bulb_bubble') {
+                            // A bolha presa ao inimigo é um estado persistente.
+                            // Novos tiros nunca substituem a bolha existente: eles a expandem.
                             let attached = null;
-                            for (const q of projectiles) { if (q && q.type === 'bulb_bubble_attached' && q.extra?.targetRef === e) { attached = q; break; } }
-                            if (attached) {
-                                const expansions = Math.max(0, Number(attached.extra.expansions) || 0);
+                            for (const q of projectiles) {
+                                if (q && q.type === 'bulb_bubble_attached' && q.extra?.targetRef === e) {
+                                    attached = q;
+                                    break;
+                                }
+                            }
+
+                            if (!attached) {
+                                attached = {
+                                    x: e.x, y: e.y, vx: 0, vy: 0, dmg: 0, life: 60, isPlayer: false,
+                                    size: 14, type: 'bulb_bubble_attached', pierce: 0, bounces: 0,
+                                    extra: { sourceChar: 'bulb', targetRef: e, expansions: 0, noHitFrames: 999, isAttachedBubble: true },
+                                    hitIds: new Set(), returnPhase: false, bounceCount: 0
+                                };
+                                projectiles.push(attached);
+                                e.stunTimer = Math.max(Number.isFinite(e.stunTimer) ? e.stunTimer : 0, 1.0);
+                                addFloatingText(e.x, e.y - 14, 'STUN!', '#7adfff', 12);
+                                createParticles(e.x, e.y, '#7adfff');
+                            } else {
+                                const expansions = Math.max(0, Math.min(3, Number(attached.extra.expansions) || 0));
                                 if (expansions < 3) {
                                     attached.extra.expansions = expansions + 1;
-                                    attached.size = Math.min(30, 12 + attached.extra.expansions * 6);
+                                    attached.size = 14 + attached.extra.expansions * 7;
+                                    // Antes da terceira expansão, o acerto renova o STUN e o 1s da bolha.
                                     attached.life = 60;
                                     e.stunTimer = Math.max(Number.isFinite(e.stunTimer) ? e.stunTimer : 0, 1.0);
                                     addFloatingText(e.x, e.y - 20, `BOLHA x${attached.extra.expansions + 1}!`, '#7adfff', 11);
                                     createParticles(e.x, e.y, '#7adfff');
                                 }
-                            } else {
-                                projectiles.push({ x: e.x, y: e.y, vx: 0, vy: 0, dmg: 0, life: 60, isPlayer: true, size: 12, type: 'bulb_bubble_attached', pierce: 0, bounces: 0, extra: { sourceChar: 'bulb', targetRef: e, expansions: 0, noHitFrames: 999 }, hitIds: new Set(), returnPhase: false, bounceCount: 0 });
-                                e.stunTimer = Math.max(Number.isFinite(e.stunTimer) ? e.stunTimer : 0, 1.0);
-                                addFloatingText(e.x, e.y - 14, 'STUN!', '#7adfff', 12);
+                                // Com 3 expansões, novos acertos causam apenas dano.
                             }
+
+                            p.life = 0;
                             projectiles.splice(i, 1);
                             continue;
                         }
