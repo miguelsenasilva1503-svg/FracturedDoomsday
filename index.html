@@ -2746,6 +2746,11 @@ Um jogador inglês de futebol que encara qualquer desafio como se estivesse disp
 Um engenheiro eólico que trabalha em uma empresa especializada em turbinas. Apaixonado pelo funcionamento das hélices e pela força do vento, Eólio levou sua obsessão longe demais e construiu um traje equipado com enormes hélices, permitindo que ele literalmente voe pelos céus. Para ele, transformar engenharia em algo que pode vestir é simplesmente uma evolução natural da profissão.
 
 “Quem precisa de asas quando se tem engenharia?”` },
+    stormy: { id: 'stormy', class: 'Controle', name: 'Stormy', rarity: 'epic', cost: 149, hp: 105, speed: 3.45, dmg: 17, fireRate: 58, range: 300, color: '#5dade2', weapon: 'stormy', sortLast: true, desc: `“Stormy não precisa esperar uma tempestade chegar. Ele simplesmente cria uma.”
+
+Um pequeno urso que encontrou seu jeito de brincar com as forças da natureza. Stormy controla tempestades, invocando nuvens carregadas, raios e ventos fortes por onde passa. E quando não está ocupado causando um temporal, ele simplesmente sobe em sua própria nuvem de tempestade e sai voando por aí como se fosse a coisa mais normal do mundo.
+
+“Quem disse que nuvens são só pra olhar?”` },
     cyro_pyro: { id: 'cyro_pyro', class: 'Controle', name: 'Cyro & Pyro', rarity: 'legendary', cost: 349, hp: 110, speed: 3.45, dmg: 18, fireRate: 54, range: 270, color: '#74b9ff', emoji: '❄️', weapon: 'cyro_pyro', desc: `“Cyro e Pyro vivem discutindo sobre qual elemento é o mais forte. O resto do mundo só tenta sobreviver à discussão.”
 
 Duas crianças elementais completamente opostas, mas inseparáveis. Enquanto Cyro mantém a calma e congela tudo ao seu redor, Pyro é impulsivo e adora incendiar qualquer coisa que pareça minimamente inflamável. Seus inimigos logo os subestimam por ainda serem jovens elementais, mas essa é a pior decisão que podem tomar. Juntos, transformam cada batalha em uma confusão de gelo, fogo e muita rivalidade entre irmãos.
@@ -2919,6 +2924,10 @@ Durante a partida, o botão ⚔️ alterna entre Lanceiro e Espadachim. A troca 
     eolio: `Eólio: dispara uma hélice que fica parada no chão no alcance máximo e retorna para ele quando outra hélice é lançada, causando dano na volta.
 
 ESPECIAL: começa com uma turbina eólica que cria uma pequena área de efeito; dentro dela, Eólio recebe 60% de redução de dano. A turbina é recolocada a cada 3 waves.`,
+    stormy: `Stormy: tem um ciclo de ataque de 5 fases, as 4 primeiras ele dispara um projétil elétrico que pode CHOCAR inimigos, a cada projétil de raio ele ganha mais dano e +1 ricochete.
+
+ESPECIAL: no quinto ataque dispara uma nuvem de tempestade que gruda no inimigo, gerando um campo de lentidão que segue ele, depois de 3s um raio cai encima dele.
+ESPECIAL: tem 2 orbitais`,
     booboo: `Boo Boo: dispara um bumerangue PERFURANTE que vai e volta pra Boo Boo.`,
     scythe: `Scythe: a cada 3 ataques, um é em 360° e os outros dois são em uma área de 180°.
 
@@ -4095,6 +4104,7 @@ const CHARACTER_TITLES = {
     shinobi: 'Dragão Samurai',
     glitch: 'Bugado',
     jack: 'GOD ADMIN D321',
+    stormy: 'Tempestuoso',
     cyro_pyro: 'Dualidade elemental'
 };
 
@@ -4196,7 +4206,8 @@ const CHARACTER_SPRITES = {
     jack: 'sprites/jack.png',
     cyro: 'sprites/cyro.png',
     pyro: 'sprites/pyro.png',
-    eolio: 'sprites/eolio.png'
+    eolio: 'sprites/eolio.png',
+    stormy: 'sprites/stormy.png'
 };
 
 const ENEMY_SPRITES = {
@@ -9470,7 +9481,7 @@ function startRunAfterShop() {
         x: 0, y: 0, r: (pd.selectedChar === 'hank' || pd.selectedChar === 'yeti') ? 20 : ((pd.selectedChar === 'shiv' || pd.selectedChar === 'zippi') ? 10 : (pd.selectedChar === 'kaisen' ? 13 : (pd.selectedChar === 'booboo' ? 13 : (pd.selectedChar === 'eel' ? 15 : 15)))), baseHp: initialBaseHp, hp: initialBaseHp, baseSpeed: charDef.speed, baseDmg: initialBaseDmg,
         baseFireRate: charDef.fireRate, baseRange: charDef.range, color: charDef.color, weapon: charDef.weapon, cyroPyroMode: pd.selectedChar === 'cyro_pyro' ? getCyroPyroMode() : null, gladiatorMode: pd.selectedChar === 'gladiator' ? (pd.chars?.gladiator?.mode || 'shooter') : null, gladiatorModeCooldown: 0, eolioPropellerSeq: 0, cd: 0, shieldTimer: 0,
         zombieTimer: 0, revived: false, elekCycle: false, dashTimer: 0, meleeCd: 0, boldShots: 0, boldReload: 0, specCd: 0, invisTimer: 0, ghoulPendingCd: 0, ninjiPendingCd: 0,
-        lastMoveAngle: 0, lastAimAngle: 0, tenentCycle: 0, orbitalAngle: 0, boobooReturn: true, pickedCards: [], revivesUsed: 0, qbBar: 0, qbShield: false, isDead: false, flexCombo: 0, flexReload: 0, ninjiDashCd: 0, shinobiDragonActive: false, shinobiDragonWavesLeft: 0, shinobiDragonCooldown: 0, shinobiDragonFireCd: 0, shinobiScytheCycle: 0, sterlingCharging: false, sterlingCharge: 0, sterlingAttackCd: 0, majorBriggsKills: 0, majorBriggsStage: 1,
+        lastMoveAngle: 0, lastAimAngle: 0, tenentCycle: 0, stormyCycle: 0, orbitalAngle: 0, boobooReturn: true, pickedCards: [], revivesUsed: 0, qbBar: 0, qbShield: false, isDead: false, flexCombo: 0, flexReload: 0, ninjiDashCd: 0, shinobiDragonActive: false, shinobiDragonWavesLeft: 0, shinobiDragonCooldown: 0, shinobiDragonFireCd: 0, shinobiScytheCycle: 0, sterlingCharging: false, sterlingCharge: 0, sterlingAttackCd: 0, majorBriggsKills: 0, majorBriggsStage: 1,
         adamScrap: 0, adamMechActive: false, adamMechWavesLeft: 0, adamMechHpBonus: 0, adamMechSizeBonus: 0, adamBaseHpBeforeMech: null, adamBaseRBeforeMech: null,
         spartaCycle: 0, spartaNoDamageTimer: 0, spartaShieldActive: false, spartaAttackTimer: 0, spartaAttackMode: 'straight', spartaAttackRange: 0, spartaAttackWidth: 0, spartaAttackHalfAngle: 0, vesperFocusTimer: 0, vesperFocusActive: false, vesperFocusTimer: 0, vesperFocusActive: false,
         gooRevived: false, gooCloneSpawned: false, gooFullBaseHp: initialBaseHp, gooFullBaseDmg: initialBaseDmg, gooFullR: (pd.selectedChar === 'hank' || pd.selectedChar === 'yeti') ? 20 : ((pd.selectedChar === 'shiv' || pd.selectedChar === 'zippi') ? 10 : (pd.selectedChar === 'kaisen' ? 13 : (pd.selectedChar === 'eel' ? 15 : 15))),
@@ -9498,7 +9509,7 @@ function startRunAfterShop() {
     enemies = []; allies = []; projectiles = []; puddles = []; particles = []; xpGems = []; floatingTexts = []; obstacles = []; itemsMap = []; caveVisionBursts = []; graffitMarks = [];
     window.dancersTimer = 20;
 
-    if(pd.selectedChar === 'mrsaw') player.stats.orbitals += 2;
+    if(pd.selectedChar === 'mrsaw' || pd.selectedChar === 'stormy') player.stats.orbitals += 2;
     if(pd.selectedChar === 'eel') { player.stats.orbitals += 1; player.eelOrbital = true; player.eelOrbitalLong = true; }
     if(pd.selectedChar === 'zippi') { player.zippiBubbleHp = 80; player.zippiBubbleMaxHp = 80; player.zippiBubbleBroken = false; }
     if(pd.selectedChar === 'bunniie') { ensureBunniieRuntime(); player.bunniieHoles = []; player.bunniieTunnelCd = 0; player.bunniieTunnelWarpCd = 0; player.bunniieTunnelGrace = 0; player.bunniieTunnelSeq = 0; }
@@ -11298,6 +11309,56 @@ function fireWeapon(target) {
             }
             return;
         }
+        if (w === 'stormy') {
+            const cycle = Math.max(0, Math.min(4, Number(player.stormyCycle) || 0));
+            const speed = pSpd * 1.12;
+            const spawnX = player.x + Math.cos(angle) * (player.r + 8);
+            const spawnY = player.y + Math.sin(angle) * (player.r + 8);
+
+            if (cycle < 4) {
+                const cycleDmg = finalDmg * (1 + cycle * 0.22);
+                createProj(
+                    spawnX,
+                    spawnY,
+                    Math.cos(angle) * speed,
+                    Math.sin(angle) * speed,
+                    cycleDmg,
+                    62,
+                    true,
+                    'stormy_bolt',
+                    {
+                        size: 9,
+                        sourceChar: 'stormy',
+                        bounces: cycle,
+                        stormyShockChance: 0.28
+                    }
+                );
+            } else {
+                createProj(
+                    spawnX,
+                    spawnY,
+                    Math.cos(angle) * speed,
+                    Math.sin(angle) * speed,
+                    finalDmg * 1.35,
+                    220,
+                    true,
+                    'stormy_cloud',
+                    {
+                        size: 18,
+                        sourceChar: 'stormy',
+                        targetRef: target,
+                        cloudElapsed: 0,
+                        slowRadius: 78,
+                        strikeRadius: 84,
+                        strikeColor: '#f1c40f'
+                    }
+                );
+            }
+
+            player.stormyCycle = (cycle + 1) % 5;
+            return;
+        }
+
         if (w === 'lunch_sauce') {
             const sauceTypes = ['ketchup', 'mayo', 'mustard'];
             const maxRange = player.baseRange * player.stats.rangeMult;
@@ -11385,7 +11446,7 @@ function fireWeapon(target) {
     };
 
     execFire(); 
-    let blockDouble = ['dagger','stones','grenade_gun','hunter_shotgun','wild','scythe','machinegun','ice_dagger','triple','boomerang','quarterback','saw_throw','chess','screws','snowball','echo_pull','flame_cone','puddle','flex_hammer','kaisen_tool','lunch_sauce','shinobi'];
+    let blockDouble = ['dagger','stones','grenade_gun','hunter_shotgun','wild','scythe','machinegun','ice_dagger','triple','boomerang','quarterback','saw_throw','chess','screws','snowball','echo_pull','flame_cone','puddle','flex_hammer','kaisen_tool','lunch_sauce','shinobi','stormy'];
     if(!blockDouble.includes(w) && Math.random() < player.stats.doubleShotChance) {
         setTimeout(execFire, 100);
     } else if(['grenade_gun','hunter_shotgun','stones'].includes(w) && Math.random() < player.stats.doubleShotChance) {
@@ -11422,6 +11483,8 @@ function createProj(x, y, vx, vy, dmg, life, isPlayer, type, extra={}) {
     else if (type === 'glitch_bugshot') size = extra.size || 8;
     else if (type === 'eolio_display_propeller') size = extra.size || 20;
     else if (type === 'shinobi_fireball') size = extra.size || 14;
+    else if (type === 'stormy_bolt') size = extra.size || 9;
+    else if (type === 'stormy_cloud') size = extra.size || 18;
     else if (type === 'axel_shard') size = extra.size || 5;
     let sourceStats = extra.sourceStats || (isPlayer ? player.stats : null);
     let pierce = sourceStats ? Number(sourceStats.pierce || 0) : 0;
@@ -12800,6 +12863,7 @@ const SERRANO_CHARACTER_PROJECTILES = {
     sterling: ['sterling_star'],
     lyron: ['lyron_ball', 'lyron_ball_big'],
     eolio: ['eolio_propeller'],
+    stormy: ['stormy_bolt'],
     cyro: ['cyro_iceball'],
     pyro: ['pyro_fireball']
 };
@@ -12883,6 +12947,48 @@ function disperseSerranoTaco(x, y, dmg, excludedEnemy) {
 function updateProjectiles(dt) {
     for(let i = projectiles.length - 1; i >= 0; i--) {
         let p = projectiles[i]; p.life -= 60 * dt;
+        if (p.type === 'stormy_cloud') {
+            const marked = p.extra?.targetRef;
+            if (!marked || marked.hp <= 0 || !Number.isFinite(marked.x) || !Number.isFinite(marked.y)) {
+                projectiles.splice(i, 1);
+                continue;
+            }
+
+            p.x = marked.x;
+            p.y = marked.y;
+            p.extra.cloudElapsed = (p.extra.cloudElapsed || 0) + dt;
+
+            const slowRadius = Number.isFinite(p.extra.slowRadius) ? p.extra.slowRadius * player.stats.rangeMult : 78 * player.stats.rangeMult;
+            for (const enemy of enemies) {
+                if (!enemy || enemy.hp <= 0) continue;
+                if (dist(p, enemy) <= slowRadius + (enemy.size || 0)) {
+                    enemy.slowTimer = Math.max(Number.isFinite(enemy.slowTimer) ? enemy.slowTimer : 0, 0.35);
+                }
+            }
+
+            if (!p.extra.strikeTriggered && p.extra.cloudElapsed >= 3) {
+                p.extra.strikeTriggered = true;
+                const strikeRadius = Number.isFinite(p.extra.strikeRadius) ? p.extra.strikeRadius * player.stats.rangeMult : 84 * player.stats.rangeMult;
+                const strikeDmg = Math.max(1, p.dmg);
+                createExplosion(p.x, p.y, strikeRadius, 0, p.extra.strikeColor || '#f1c40f');
+                addFloatingText(p.x, p.y - 18, 'RAIO!', '#f1c40f', 14);
+                for (const enemy of enemies) {
+                    if (!enemy || enemy.hp <= 0) continue;
+                    const d = dist(p, enemy);
+                    if (d > strikeRadius + (enemy.size || 0)) continue;
+                    const falloff = enemy === marked ? 1 : 0.55;
+                    const soakMult = 1 + (enemy.soak || 0) * 0.05;
+                    const realDmg = strikeDmg * falloff * soakMult * (enemy.isBoss ? player.stats.bossDmgMult : 1);
+                    enemy.hp -= realDmg;
+                    addFloatingText(enemy.x, enemy.y, Math.floor(realDmg), '#ffe66d');
+                    enemy.slowTimer = Math.max(Number.isFinite(enemy.slowTimer) ? enemy.slowTimer : 0, 1.8);
+                }
+                createParticles(p.x, p.y, '#f1c40f');
+                p.life = 0;
+            }
+            if (p.life <= 0) { projectiles.splice(i, 1); }
+            continue;
+        }
         if (p.type === 'lunch_mix') {
             p.x += (Number.isFinite(p.vx) ? p.vx : 0) * 60 * dt;
             p.y += (Number.isFinite(p.vy) ? p.vy : 0) * 60 * dt;
@@ -13282,6 +13388,13 @@ function updateProjectiles(dt) {
                                     continue;
                                 }
                             }
+                        }
+                    }
+                    if (p.type === 'stormy_bolt') {
+                        const shockChance = Math.max(0, Math.min(1, Number(p.extra?.stormyShockChance) || 0.28));
+                        if (Math.random() < shockChance) {
+                            applyEelShock(e, false, Math.max(1, realDmg * 0.35), p.x, p.y, false);
+                            addFloatingText(e.x, e.y - 10, 'CHOQUE!', '#3ec7ff', 11);
                         }
                     }
                     if(p.type === 'yuuto_heart') {
@@ -15149,6 +15262,55 @@ function draw() {
         else if(p.type === 'saw_throw') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(gameTime*15); ctx.fillStyle = '#7f8c8d'; ctx.beginPath(); ctx.arc(0, 0, p.size, 0, Math.PI*2); ctx.fill(); for(let k=0; k<8; k++){ ctx.beginPath(); ctx.moveTo(p.size, 0); ctx.lineTo(p.size+3, -2); ctx.lineTo(p.size, -4); ctx.fill(); ctx.rotate(Math.PI/4); } ctx.restore(); }
         else if(p.type === 'wind_gust') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx)); ctx.fillStyle = 'rgba(255,255,255,0.75)'; ctx.beginPath(); ctx.ellipse(0, 0, p.size * 1.35, p.size * 0.55, 0, -Math.PI * 0.55, Math.PI * 0.55); ctx.fill(); ctx.fillStyle = 'rgba(214, 255, 250, 0.55)'; ctx.beginPath(); ctx.arc(-p.size * 0.1, 0, p.size * 0.45, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
         else if(p.type === 'tornado') { ctx.save(); ctx.translate(p.x, p.y); const spin = gameTime * 12; ctx.rotate(spin); ctx.fillStyle = 'rgba(129, 236, 236, 0.20)'; ctx.beginPath(); ctx.arc(0, 0, p.size * 1.15, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = 'rgba(129, 236, 236, 0.9)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, p.size * 0.8, 0, Math.PI * 2); ctx.stroke(); ctx.beginPath(); ctx.arc(0, 0, p.size * 0.45, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); }
+        else if(p.type === 'stormy_bolt') {
+            ctx.save();
+            ctx.translate(px, py);
+            ctx.rotate(Math.atan2(p.vy, p.vx));
+            ctx.shadowColor = '#3ec7ff';
+            ctx.shadowBlur = 14;
+            ctx.fillStyle = '#eaf9ff';
+            ctx.strokeStyle = '#3ec7ff';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(-2, -p.size * 1.6);
+            ctx.lineTo(p.size * 0.6, -2);
+            ctx.lineTo(-1, -2);
+            ctx.lineTo(3, p.size * 1.55);
+            ctx.lineTo(-p.size * 0.7, 3);
+            ctx.lineTo(0, 1);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
+        }
+        else if(p.type === 'stormy_cloud') {
+            ctx.save();
+            ctx.translate(px, py);
+            const pulse = 1 + Math.sin((gameTime || 0) * 6) * 0.04;
+            ctx.scale(pulse, pulse);
+            ctx.shadowColor = 'rgba(93, 125, 160, 0.65)';
+            ctx.shadowBlur = 16;
+            ctx.fillStyle = 'rgba(64, 78, 98, 0.92)';
+            ctx.beginPath();
+            ctx.arc(-16, 3, 13, 0, Math.PI * 2);
+            ctx.arc(-4, -7, 17, 0, Math.PI * 2);
+            ctx.arc(12, 0, 15, 0, Math.PI * 2);
+            ctx.arc(0, 7, 19, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = 'rgba(174, 214, 255, 0.8)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.strokeStyle = '#f1c40f';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(4, 1);
+            ctx.lineTo(-1, 11);
+            ctx.lineTo(5, 10);
+            ctx.lineTo(0, 22);
+            ctx.stroke();
+            ctx.restore();
+        }
         else if(p.type === 'water_bubble') { ctx.fillStyle = 'rgba(0, 206, 209, 0.6)'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); ctx.strokeStyle = '#00cec9'; ctx.lineWidth = 2; ctx.stroke(); }
         else if(p.type === 'water_wave') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx)); ctx.fillStyle = 'rgba(0, 206, 209, 0.8)'; ctx.beginPath(); ctx.arc(0, 0, p.size, -Math.PI/2, Math.PI/2); ctx.fill(); ctx.restore(); }
         else if(p.type === 'nucleon_shot') { ctx.fillStyle = '#2ecc71'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); }
