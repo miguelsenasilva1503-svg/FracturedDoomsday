@@ -11350,7 +11350,9 @@ function fireWeapon(target) {
 
             if (mode === 0) {
                 createProj(player.x + Math.cos(angle) * (player.r + 7), player.y + Math.sin(angle) * (player.r + 7), Math.cos(angle) * pSpd * 0.95, Math.sin(angle) * pSpd * 0.95, finalDmg, 70, true, 'bulb_bubble', { size: 11, sourceChar: 'bulb', pierce: 0 });
-                player.cd = Math.max(34, player.baseFireRate * player.stats.fireRateMult);
+                // Cadência alta o suficiente para permitir acertar a mesma bolha
+                // várias vezes antes do STUN de 1s expirar.
+                player.cd = Math.max(22, player.baseFireRate * player.stats.fireRateMult * 0.58);
                 return;
             }
 
@@ -11363,8 +11365,26 @@ function fireWeapon(target) {
                     player.bulbGasActiveUntil = now + 2.0;
                     player.bulbGasAngle = angle;
                 }
+                let gasTarget = target;
+                if (!gasTarget || gasTarget.hp <= 0) {
+                    let nextTarget = null;
+                    let nextDist = Infinity;
+                    for (const candidate of enemies) {
+                        if (!candidate || candidate.hp <= 0) continue;
+                        const d = dist(player, candidate);
+                        if (d < nextDist && d <= player.baseRange * player.stats.rangeMult * 1.15) {
+                            nextDist = d;
+                            nextTarget = candidate;
+                        }
+                    }
+                    gasTarget = nextTarget;
+                }
+                if (gasTarget) {
+                    player.bulbGasAngle = Math.atan2(gasTarget.y - player.y, gasTarget.x - player.x);
+                    player.bulbGasTargetRef = gasTarget;
+                }
                 const gasAngle = Number.isFinite(player.bulbGasAngle) ? player.bulbGasAngle : angle;
-                createProj(player.x + Math.cos(gasAngle) * (player.r + 7), player.y + Math.sin(gasAngle) * (player.r + 7), Math.cos(gasAngle) * pSpd * 1.05, Math.sin(gasAngle) * pSpd * 1.05, finalDmg * 0.62, 42, true, 'bulb_gas_bubble', { size: 8, sourceChar: 'bulb', pierce: 99, pushPower: 9 });
+                createProj(player.x + Math.cos(gasAngle) * (player.r + 7), player.y + Math.sin(gasAngle) * (player.r + 7), Math.cos(gasAngle) * pSpd * 1.05, Math.sin(gasAngle) * pSpd * 1.05, finalDmg * 0.62, 42, true, 'bulb_gas_bubble', { size: 8, sourceChar: 'bulb', pierce: 99, pushPower: 9, targetRef: gasTarget });
                 if (now + 0.12 >= player.bulbGasActiveUntil) player.bulbGasCooldownUntil = player.bulbGasActiveUntil + 0.8;
                 player.cd = 7;
                 return;
@@ -13022,7 +13042,33 @@ function updateProjectiles(dt) {
             if (p.life <= 0) projectiles.splice(i, 1);
             continue;
         }
-        if (p.type === 'bulb_bubble' || p.type === 'bulb_gas_bubble' || p.type === 'bulb_crust' || p.type === 'bulb_coral_piece') {
+        if (p.type === 'bulb_gas_bubble') {
+            let gasTarget = p.extra?.targetRef;
+            if (!gasTarget || gasTarget.hp <= 0) {
+                let nextTarget = null;
+                let nextDist = Infinity;
+                for (const candidate of enemies) {
+                    if (!candidate || candidate.hp <= 0) continue;
+                    if (p.hitIds && p.hitIds.has(candidate)) continue;
+                    const d = dist(p, candidate);
+                    if (d < nextDist && d <= 320) {
+                        nextDist = d;
+                        nextTarget = candidate;
+                    }
+                }
+                if (nextTarget) {
+                    p.extra.targetRef = nextTarget;
+                    gasTarget = nextTarget;
+                }
+            }
+            if (gasTarget && gasTarget.hp > 0) {
+                const gasSpeed = Math.max(5, Math.sqrt(p.vx * p.vx + p.vy * p.vy));
+                const gasAngle = Math.atan2(gasTarget.y - p.y, gasTarget.x - p.x);
+                p.vx = Math.cos(gasAngle) * gasSpeed;
+                p.vy = Math.sin(gasAngle) * gasSpeed;
+            }
+            p.x += p.vx * 60 * dt; p.y += p.vy * 60 * dt;
+        } else if (p.type === 'bulb_bubble' || p.type === 'bulb_crust' || p.type === 'bulb_coral_piece') {
             p.x += p.vx * 60 * dt; p.y += p.vy * 60 * dt;
         }
 
@@ -14463,7 +14509,45 @@ function draw() {
         }
         else if (p.type === 'snowstorm') { ctx.fillStyle = `rgba(255, 255, 255, 0.4)`; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill(); }
         else if (p.type === 'water_puddle') { ctx.fillStyle = `rgba(0, 206, 201, 0.4)`; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill(); }
-        else if (p.type === 'bulb_coral') { ctx.save(); ctx.globalAlpha = 0.9; ctx.fillStyle = 'rgba(0, 206, 201, 0.18)'; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill(); ctx.strokeStyle = 'rgba(0, 206, 201, 0.78)'; ctx.lineWidth = 3; ctx.stroke(); ctx.fillStyle = '#ff7f9e'; for(let j=0;j<6;j++){ const a=(Math.PI*2/6)*j; ctx.beginPath(); ctx.arc(p.x+Math.cos(a)*p.r*0.55,p.y+Math.sin(a)*p.r*0.55,7,0,Math.PI*2); ctx.fill(); } ctx.restore(); }
+        else if (p.type === 'bulb_coral') {
+            // Área visível compacta, com silhueta de coral comprimido inspirada
+            // nas pás de uma turbina, em vez de vários círculos separados.
+            ctx.save();
+            ctx.globalAlpha = 0.9;
+            ctx.fillStyle = 'rgba(0, 206, 201, 0.18)';
+            ctx.strokeStyle = 'rgba(0, 206, 201, 0.78)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.translate(p.x, p.y);
+            ctx.rotate(((gameTime || 0) * 0.7) % (Math.PI * 2));
+            ctx.fillStyle = '#ff7f9e';
+            ctx.strokeStyle = '#a43f61';
+            ctx.lineWidth = 2;
+            const bladeR = p.r * 0.72;
+            for (let j = 0; j < 4; j++) {
+                ctx.save();
+                ctx.rotate((Math.PI * 2 / 4) * j);
+                ctx.beginPath();
+                ctx.moveTo(2, -4);
+                ctx.quadraticCurveTo(bladeR * 0.42, -bladeR * 0.18, bladeR, -bladeR * 0.48);
+                ctx.quadraticCurveTo(bladeR * 0.74, -bladeR * 0.02, bladeR * 0.30, bladeR * 0.22);
+                ctx.quadraticCurveTo(bladeR * 0.12, bladeR * 0.10, 2, 4);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
+            }
+            ctx.fillStyle = '#ffd6e2';
+            ctx.beginPath();
+            ctx.arc(0, 0, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
+        }
         else if (p.type === 'caramel') { ctx.fillStyle = `rgba(210, 105, 30, ${0.42 * (p.life/2.8)})`; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill(); }
         else if (p.type === 'nucleon_puddle') { ctx.fillStyle = `rgba(46, 204, 113, 0.5)`; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill(); }
         else { ctx.fillStyle = `rgba(231, 76, 60, ${0.4 * (p.life/4)})`; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill(); }
