@@ -8782,15 +8782,31 @@ function buildExactCharacterRewardHtml(charId, rewardText, ownedBefore) {
     if (!c) return `<div class="gacha-reveal-wrap"><div class="gacha-reveal-card">${renderGachaRevealHtml(rewardText)}</div></div>`;
     const rarity = getEffectiveCharacterRarity(charId);
     const rarityLabels = { common: 'Comum', rare: 'Raro', epic: 'Épico', legendary: 'Lendário', seasonal: 'Sazonal', mythic: 'Mítico' };
+    const evoByRarity = { common: 5, rare: 10, epic: 25, legendary: 50, seasonal: 200, mythic: 100 };
+    const evoValue = evoByRarity[rarity] || 5;
+
+    // Duplicata não deve aparecer como personagem desbloqueado.
+    // Mostra explicitamente o nome do personagem e a recompensa de Evo.
+    if (ownedBefore) {
+        return `<div class="gacha-drop-card gacha-drop-card-char">
+            <div class="gacha-drop-emoji">🧬</div>
+            <div class="gacha-drop-body">
+                <div class="gacha-drop-title">Recompensa repetida</div>
+                <div class="gacha-drop-name">${escapeHtmlText(decodeHtmlEntities(c.name))}</div>
+                <div class="gacha-drop-rarity rarity-${escapeHtmlText(rarity)}">${escapeHtmlText(rarityLabels[rarity] || rarity)}</div>
+                <div class="gacha-drop-amount">+${evoValue} Evo</div>
+            </div>
+        </div>`;
+    }
+
     const sprite = getCharacterSpriteMarkup(charId, 'hero');
     const visual = sprite
         ? `<div class="gacha-drop-sprite">${sprite}</div>`
         : `<div class="gacha-drop-ball" style="background: radial-gradient(circle at 30% 28%, rgba(255,255,255,.42), rgba(255,255,255,.08) 48%), ${c.color || '#8e44ad'};"></div>`;
-    const title = ownedBefore ? 'Recompensa repetida' : 'Novo personagem';
     return `<div class="gacha-drop-card gacha-drop-card-char">
         ${visual}
         <div class="gacha-drop-body">
-            <div class="gacha-drop-title">${escapeHtmlText(title)}</div>
+            <div class="gacha-drop-title">Novo personagem</div>
             <div class="gacha-drop-name">${escapeHtmlText(decodeHtmlEntities(c.name))}</div>
             <div class="gacha-drop-rarity rarity-${escapeHtmlText(rarity)}">${escapeHtmlText(rarityLabels[rarity] || rarity)}</div>
         </div>
@@ -9463,8 +9479,10 @@ function rollLootBoxCharacterReward(rarity, opts = {}) {
 }
 
 function getRouletteCharacterIds() {
-    const ids = Object.values(CHARACTERS).map(c => c?.id).filter(Boolean);
-    return ids;
+    // Fasty nunca pode ser um resultado desbloqueável da roleta.
+    return Object.values(CHARACTERS)
+        .map(c => c?.id)
+        .filter(id => Boolean(id) && id !== 'fasty');
 }
 
 function buildRouletteCharacterHtml(charId, extraAttr = '') {
