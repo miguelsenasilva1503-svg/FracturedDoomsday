@@ -1190,13 +1190,6 @@
         margin: 0;
         text-align: left;
     }
-    .turntable-panel { width:min(100%,760px); margin:0 auto; background:rgba(8,12,22,.65); border:2px solid rgba(255,255,255,.12); border-radius:16px; padding:14px; }
-    .turntable-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
-    .turntable-row { background:rgba(255,255,255,.045); border-radius:12px; padding:10px; }
-    .turntable-row label { display:block; font-weight:900; margin-bottom:6px; color:#fff; }
-    .turntable-row select { width:100%; padding:10px; border-radius:10px; border:2px solid rgba(255,255,255,.14); background:#171b2b; color:#fff; }
-    .turntable-note { margin-top:8px; color:#aaa; font-size:12px; line-height:1.4; }
-    .tutorial-skip-btn { margin-top:14px; width:100%; background:#5b2c6f; border:3px solid #7d3c98; color:#fff; font-weight:900; padding:10px 14px; border-radius:12px; cursor:pointer; }
     .low-effects *, .low-effects *::before, .low-effects *::after {
         animation: none !important;
         transition: none !important;
@@ -1876,7 +1869,6 @@
             <div id="tutorial-dialog-speaker" class="tutorial-dialog-speaker">Strike</div>
             <div id="tutorial-dialog-text" class="tutorial-dialog-text"></div>
             <div class="tutorial-dialog-hint">Clique para continuar</div>
-            <button type="button" class="tutorial-skip-btn" onclick="skipEntireTutorial(event)">PULAR TUTORIAL</button>
         </div>
     </div>
 </div>
@@ -1955,7 +1947,7 @@
             <div class="main-left-actions">
                 <div class="main-nav-row main-nav-row-left">
                     <span class="main-nav-label">Evento</span>
-                    <button class="emoji-nav-btn emoji-nav-event" onclick="openEventScreen()">⭐</button>
+                    <button class="emoji-nav-btn emoji-nav-event" onclick="renderEvents(); showScreen('screen-event')">⭐</button>
                 </div>
                 <div class="main-nav-row main-nav-row-left">
                     <span class="main-nav-label">Passe</span>
@@ -1981,25 +1973,6 @@
                     <button class="emoji-nav-btn emoji-nav-trail" onclick="showScreen('screen-trail')">🔩</button>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
-
-<div id="overlay-turntable" class="overlay hidden" style="z-index:12500;">
-    <div class="popup-box" style="width:min(94vw,820px);max-height:88vh;overflow:auto;">
-        <h2 style="margin-top:0;color:var(--btn-yellow);">🎛️ Toca Discos</h2>
-        <p style="color:#ccc;margin-top:0;">Escolha a música de cada sessão. As escolhas ficam salvas.</p>
-        <div class="turntable-panel">
-            <div class="turntable-grid">
-                <div class="turntable-row"><label>Menu</label><select id="turntable-menu"></select></div>
-                <div class="turntable-row"><label>Partidas Casuais</label><select id="turntable-casual"></select></div>
-                <div class="turntable-row"><label>UHC</label><select id="turntable-uhc"></select></div>
-            </div>
-            <div class="turntable-note">Clássico e Hardcore usam a mesma sessão de Partidas Casuais.</div>
-        </div>
-        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px;">
-            <button class="btn-action" type="button" onclick="saveTurntableSettings()">Salvar</button>
-            <button class="btn-menu" type="button" onclick="closeTurntable()">Fechar</button>
         </div>
     </div>
 </div>
@@ -2068,7 +2041,6 @@
             <div class="settings-section-title">Controle</div>
             <div class="settings-grid">
                 <button class="btn-menu settings-option" onclick="toggleSetting('controlMode')">Modo de Controle: <br><span id="set-ctrl" style="color:var(--btn-yellow)">Auto</span></button>
-                <button class="btn-menu settings-option" onclick="toggleSetting('mobileJoystickFollowTap')">Joystick Móvel: <br><span id="set-joy-follow" style="color:var(--btn-green)">Ativado</span></button>
                 <div class="settings-card settings-card--wide">
                     <div style="font-size:15px; font-weight:900; color:var(--btn-yellow); margin-bottom:6px;">Como funciona</div>
                     <div style="font-size:13px; color:#ddd; line-height:1.45;">
@@ -2098,7 +2070,6 @@
                         <div style="margin-top:8px; font-size:12px; color:#aaa; line-height:1.35;">
                             Controla só a trilha sonora. O resto do áudio fica intacto.
                         </div>
-                        <button class="btn-menu" type="button" style="width:100%; margin-top:12px;" onclick="openTurntable()">🎛️ TOCA DISCOS</button>
                     </div>
                 </div>
             </div>
@@ -2345,69 +2316,45 @@
 <div id="screen-event" class="screen scrollable hidden">
     <button class="btn-top-corner btn-back" onclick="showScreen('screen-main')">⬅️ Voltar</button>
     <h2 style="margin-top: 40px;">Evento ⭐</h2>
-    <p style="text-align:center; color:#ddd; margin: 0 0 12px 0;">Complete desafios especiais para desbloquear personagens sazonais e confira a loja sazonal.</p>
+    <p style="text-align:center; color:#ddd; margin: 0 0 12px 0;">Complete desafios especiais para liberar Kacashi, Cyro & Pyro, Mr. Perfurant e acessar a loja sazonal.</p>
 
     <div class="shop-tabs event-tabs">
         <button class="btn-menu shop-tab active" data-section="kacashi" onclick="showEventSection('kacashi')"><span class="tab-emoji">👁️</span><span class="tab-label">Kacashi</span></button>
-        <button class="btn-menu shop-tab" data-section="cyro_pyro" onclick="showEventSection('cyro_pyro')"><span class="tab-emoji">❄️🔥</span><span class="tab-label">Cyro & Pyro</span></button>
-        <button class="btn-menu shop-tab" data-section="mr_perfurant" onclick="showEventSection('mr_perfurant')"><span class="tab-emoji">🗡️</span><span class="tab-label">Mr. Perfurant</span></button>
+        <button class="btn-menu shop-tab" data-section="cyro_pyro" onclick="showEventSection('cyro_pyro')"><span class="tab-emoji">❄️🔥</span><span class="tab-label">Cyro &amp; Pyro</span></button>
+        <button class="btn-menu shop-tab" data-section="mr_perfurant" onclick="showEventSection('mr_perfurant')"><span class="tab-emoji">⚔️</span><span class="tab-label">Mr. Perfurant</span></button>
         <button class="btn-menu shop-tab" data-section="store" onclick="showEventSection('store')"><span class="tab-emoji">🛍</span><span class="tab-label">Loja sazonal</span></button>
     </div>
 
     <div id="event-section-kacashi" class="shop-section shop-panel">
         <h3>Kacashi</h3>
         <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:14px;">
-            <div class="event-hero-card">
-                <img class="char-sprite char-sprite--hero" src="sprites/kacashi.png" alt="" aria-hidden="true">
-                <div>
-                    <h4 style="margin:0; font-size:22px; color:var(--btn-yellow);">Kacashi</h4>
-                    <p style="margin:6px 0 0; color:#d9e2ea;">20 missões especiais. O progresso é salvo separadamente e permanece após sair e entrar.</p>
-                </div>
-            </div>
+            <div class="event-hero-card"><img class="char-sprite char-sprite--hero" src="sprites/kacashi.png" alt="" aria-hidden="true"><div><h4 style="margin:0; font-size:22px; color:var(--btn-yellow);">Kacashi</h4><p style="margin:6px 0 0; color:#d9e2ea;">20 missões especiais. O progresso é salvo separadamente.</p></div></div>
             <div class="event-progress-pill"><span id="event-kacashi-count">0</span>/20 concluídas</div>
             <button id="event-kacashi-claim" class="btn-action" onclick="claimEventCharacter('kacashi')">🎁 Resgatar Kacashi</button>
         </div>
         <div id="event-kacashi-list" class="menu-grid shop-grid"></div>
     </div>
-
     <div id="event-section-cyro_pyro" class="shop-section shop-panel hidden">
-        <h3>Cyro & Pyro</h3>
+        <h3>Cyro &amp; Pyro</h3>
         <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:14px;">
-            <div class="event-hero-card">
-                <img class="char-sprite char-sprite--hero" src="sprites/cyro.png" alt="" aria-hidden="true">
-                <div>
-                    <h4 style="margin:0; font-size:22px; color:var(--btn-yellow);">Cyro & Pyro</h4>
-                    <p style="margin:6px 0 0; color:#d9e2ea;">20 missões especiais. O progresso é salvo separadamente e permanece após sair e entrar.</p>
-                </div>
-            </div>
+            <div class="event-hero-card"><img class="char-sprite char-sprite--hero" src="sprites/cyro.png" alt="" aria-hidden="true"><div><h4 style="margin:0; font-size:22px; color:var(--btn-yellow);">Cyro &amp; Pyro</h4><p style="margin:6px 0 0; color:#d9e2ea;">20 missões especiais. O progresso é salvo separadamente.</p></div></div>
             <div class="event-progress-pill"><span id="event-cyro_pyro-count">0</span>/20 concluídas</div>
-            <button id="event-cyro_pyro-claim" class="btn-action" onclick="claimEventCharacter('cyro_pyro')">🎁 Resgatar Cyro & Pyro</button>
+            <button id="event-cyro_pyro-claim" class="btn-action" onclick="claimEventCharacter('cyro_pyro')">🎁 Resgatar Cyro &amp; Pyro</button>
         </div>
         <div id="event-cyro_pyro-list" class="menu-grid shop-grid"></div>
     </div>
-
     <div id="event-section-mr_perfurant" class="shop-section shop-panel hidden">
         <h3>Mr. Perfurant</h3>
         <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:14px;">
-            <div class="event-hero-card">
-                <img class="char-sprite char-sprite--hero" src="sprites/mr_perfurant.png" alt="" aria-hidden="true">
-                <div>
-                    <h4 style="margin:0; font-size:22px; color:var(--btn-yellow);">Mr. Perfurant</h4>
-                    <p style="margin:6px 0 0; color:#d9e2ea;">15 missões especiais. O progresso é salvo separadamente e permanece após sair e entrar.</p>
-                </div>
-            </div>
+            <div class="event-hero-card"><img class="char-sprite char-sprite--hero" src="sprites/mr_perfurant.png" alt="" aria-hidden="true"><div><h4 style="margin:0; font-size:22px; color:var(--btn-yellow);">Mr. Perfurant</h4><p style="margin:6px 0 0; color:#d9e2ea;">15 missões especiais. O progresso é salvo separadamente.</p></div></div>
             <div class="event-progress-pill"><span id="event-mr_perfurant-count">0</span>/15 concluídas</div>
             <button id="event-mr_perfurant-claim" class="btn-action" onclick="claimEventCharacter('mr_perfurant')">🎁 Resgatar Mr. Perfurant</button>
         </div>
         <div id="event-mr_perfurant-list" class="menu-grid shop-grid"></div>
     </div>
-
     <div id="event-section-store" class="shop-section shop-panel hidden">
         <h3>Loja sazonal</h3>
-        <div class="shop-section" style="margin-top:0;">
-            <h3>Personagens em promoção</h3>
-            <div id="event-promo-list" class="menu-grid shop-grid"></div>
-        </div>
+        <div class="shop-section" style="margin-top:0;"><h3>Personagens em promoção</h3><div id="event-promo-list" class="menu-grid shop-grid"></div></div>
     </div>
 </div>
 
@@ -3560,38 +3507,15 @@ function renderGachaRevealHtml(rawText) {
 
 const DEFAULT_KEYBINDS = { up: 'w', down: 's', left: 'a', right: 'd', special: 'p', pause: 'escape' };
 const DEFAULT_INITIAL_ZOOM = (('ontouchstart' in window) || navigator.maxTouchPoints > 0) ? 0.65 : 1;
-const DEFAULT_SETTINGS = { skipGacha: false, controlMode: 'auto', mobileControlLayout: 'joystick', mobileJoystickFollowTap: true, ultraHardcore: false, uhcDark: false, noParticles: false, showCombatText: true, showHpBar: false, screenZoom: DEFAULT_INITIAL_ZOOM, musicVolume: 0.7, musicTracks: { menu: 'legacy_awaits.mp3', casual: 'roguish_journey.mp3', uhc: 'fatal_finale.mp3' }, mapChoice: -1, keybinds: { ...DEFAULT_KEYBINDS } };
+const DEFAULT_SETTINGS = { skipGacha: false, controlMode: 'auto', mobileControlLayout: 'joystick', mobileJoystickFollowTap: false, ultraHardcore: false, uhcDark: false, noParticles: false, showCombatText: true, showHpBar: false, screenZoom: DEFAULT_INITIAL_ZOOM, musicVolume: 0.7, mapChoice: -1, keybinds: { ...DEFAULT_KEYBINDS } };
 
-const MUSIC_LIBRARY = {
-    menu: [['legacy_awaits.mp3','Legacy Awaits'],['street_awaits.mp3','Street Awaits'],['france_awaits.mp3','France Awaits'],['battle_awaits.mp3','Battle Awaits']],
-    casual: [['roguish_journey.mp3','Roguish Journey'],['bad_journey.mp3','Bad Journey'],['parisian_journey.mp3','Parisian Journey'],['gladiator_journey.mp3','Gladiator Journey']],
-    uhc: [['fatal_finale.mp3','Fatal Finale']]
+const MUSIC_TRACKS = {
+    menu: 'soundtracks/battle_awaits.mp3',
+    classic: 'soundtracks/gladiator_journey.mp3',
+    hardcore: 'soundtracks/gladiator_journey.mp3',
+    ultraHardcore: 'soundtracks/fatal_finale.mp3'
 };
-const MUSIC_TRACKS = { menu:'soundtracks/legacy_awaits.mp3', classic:'soundtracks/roguish_journey.mp3', hardcore:'soundtracks/roguish_journey.mp3', ultraHardcore:'soundtracks/fatal_finale.mp3' };
-function ensureMusicSettings(){
-    if(!pd.settings || typeof pd.settings !== 'object') pd.settings = { ...DEFAULT_SETTINGS };
-    if(!pd.settings.musicTracks || typeof pd.settings.musicTracks !== 'object') pd.settings.musicTracks = { ...DEFAULT_SETTINGS.musicTracks };
-    for(const k of ['menu','casual','uhc']) if(!MUSIC_LIBRARY[k].some(t=>t[0]===pd.settings.musicTracks[k])) pd.settings.musicTracks[k]=DEFAULT_SETTINGS.musicTracks[k];
-}
-function getConfiguredMusicFilename(session){ ensureMusicSettings(); const k=session==='ultraHardcore'?'uhc':(session==='menu'?'menu':'casual'); return pd.settings.musicTracks[k]; }
 
-function openTurntable(){
-    ensureMusicSettings();
-    const fill=(id,key)=>{ const el=document.getElementById(id); if(!el) return; el.innerHTML=MUSIC_LIBRARY[key].map(([f,n])=>`<option value="${f}">${n}</option>`).join(''); el.value=pd.settings.musicTracks[key]; };
-    fill('turntable-menu','menu'); fill('turntable-casual','casual'); fill('turntable-uhc','uhc');
-    document.getElementById('overlay-turntable')?.classList.remove('hidden');
-}
-function closeTurntable(){ document.getElementById('overlay-turntable')?.classList.add('hidden'); }
-function saveTurntableSettings(){
-    ensureMusicSettings();
-    const vals={menu:document.getElementById('turntable-menu')?.value,casual:document.getElementById('turntable-casual')?.value,uhc:document.getElementById('turntable-uhc')?.value};
-    for(const k of Object.keys(vals)) if(MUSIC_LIBRARY[k].some(t=>t[0]===vals[k])) pd.settings.musicTracks[k]=vals[k];
-    save();
-    // Atualiza imediatamente a música da sessão que já estiver tocando.
-    if (currentMusicKey) playMusic(currentMusicKey);
-    else if(document.getElementById('screen-main') && !document.getElementById('screen-main').classList.contains('hidden')) playMusic('menu');
-    closeTurntable();
-}
 let musicPlayer = null;
 let currentMusicKey = null;
 let musicUnlocked = false;
@@ -3621,7 +3545,7 @@ function setMusicVolume(value) {
 async function playMusic(trackKey = 'menu') {
     const player = ensureMusicPlayer();
     const nextKey = MUSIC_TRACKS[trackKey] ? trackKey : 'menu';
-    const nextSrc = `soundtracks/${getConfiguredMusicFilename(nextKey)}`;
+    const nextSrc = MUSIC_TRACKS[nextKey];
     applyMusicVolume();
     if (currentMusicKey !== nextKey || !player.src || !player.src.includes(nextSrc)) {
         currentMusicKey = nextKey;
@@ -3665,7 +3589,7 @@ document.addEventListener('visibilitychange', () => {
 window.addEventListener('blur', pauseMusicOnFocusLoss);
 window.addEventListener('focus', resumeMusicOnFocusGain);
 
-let pd = { coins: 500, gems: 50, evo: 40, sucatas: 0, nickname: null, tutorial: { stage: 'nickname', introShown: false, firstMatch: false, controlShown: false, levelupShown: false, finalShown: false, firstLossHandled: false, charsHandled: false, evolutionHandled: false, workshopSeen: false, workshopDialogShown: false, workshopFastyPending: false, skipped: false }, chars: { strike: { level: 1, slots: 2, chips: [null, null] } }, selectedChar: 'strike', passXp: 0, passLevel: 1, passClaimed: 0, passClaimedTiers: [], passRewardSeed: 0, passRewardCache: {}, passResetAt: 0, shopState: { lastRotation: 0, items: {} }, lastDaily: "", dailyWins: {date: "", count: 0}, vip: { activeUntil: 0, inventory: 0 }, hardcoreBans: { lastRotation: 0, chars: [] }, settings: { ...DEFAULT_SETTINGS }, trail: { target: null, fameLevel: 0 }, profile: { title: null, emblem: null }, events: { ruben: { claimed: false }, adam: { claimed: false }, kacashi: { claimed:false }, cyro_pyro: { claimed:false }, mr_perfurant: { claimed:false } }, missMacaronLegacySeasonal: false, redeemedCodes: {}, missions: { date: '', list: [], weekly: { weekKey: '', mission: null }, rerolls: { date: '', used: 0 } }, passOverflowXp: 0, passOverflowBoxes: 0, chipsInventory: {}, chipCrafting: null, achievements: { stats: { gamesStarted: 0, wins: 0, hardcoreWins: 0, uhcWins: 0, totalKills: 0, bossKills: 0, bestWave: 0, charsUnlocked: 1, charsUpgraded: 0, chipsEquipped: 0, boxesOpened: 0, missionClaims: 0, weeklyClaims: 0, passClaims: 0, overflowBoxes: 0, rerollsUsed: 0, vipPurchases: 0, lunchDamage: 0 }, claimed: [] }, debug: { infiniteCoins: false, infiniteGems: false, infiniteEvo: false, infiniteScrap: false, jackEnabled: false, unlockAllChars: false, infiniteChips: false, infiniteXp: false, infinitePassXp: false, allTitles: false, devUnlocked: false, devBaseState: null, mapRotationOverride: -1 } };
+let pd = { coins: 500, gems: 50, evo: 40, sucatas: 0, nickname: null, tutorial: { stage: 'nickname', introShown: false, firstMatch: false, controlShown: false, levelupShown: false, finalShown: false, firstLossHandled: false, charsHandled: false, evolutionHandled: false, workshopSeen: false, workshopDialogShown: false, workshopFastyPending: false }, chars: { strike: { level: 1, slots: 2, chips: [null, null] } }, selectedChar: 'strike', passXp: 0, passLevel: 1, passClaimed: 0, passClaimedTiers: [], passRewardSeed: 0, passRewardCache: {}, passResetAt: 0, shopState: { lastRotation: 0, items: {} }, lastDaily: "", dailyWins: {date: "", count: 0}, vip: { activeUntil: 0, inventory: 0 }, hardcoreBans: { lastRotation: 0, chars: [] }, settings: { ...DEFAULT_SETTINGS }, trail: { target: null, fameLevel: 0 }, profile: { title: null, emblem: null }, events: { ruben: { claimed: false }, adam: { claimed: false } }, missMacaronLegacySeasonal: false, redeemedCodes: {}, missions: { date: '', list: [], weekly: { weekKey: '', mission: null }, rerolls: { date: '', used: 0 } }, passOverflowXp: 0, passOverflowBoxes: 0, chipsInventory: {}, chipCrafting: null, achievements: { stats: { gamesStarted: 0, wins: 0, hardcoreWins: 0, uhcWins: 0, totalKills: 0, bossKills: 0, bestWave: 0, charsUnlocked: 1, charsUpgraded: 0, chipsEquipped: 0, boxesOpened: 0, missionClaims: 0, weeklyClaims: 0, passClaims: 0, overflowBoxes: 0, rerollsUsed: 0, vipPurchases: 0, lunchDamage: 0 }, claimed: [] }, debug: { infiniteCoins: false, infiniteGems: false, infiniteEvo: false, infiniteScrap: false, jackEnabled: false, unlockAllChars: false, infiniteChips: false, infiniteXp: false, infinitePassXp: false, allTitles: false, devUnlocked: false, devBaseState: null, mapRotationOverride: -1 } };
 window.isHardcoreMode = false; window.lastGameOverWasLoss = false; window.gachaQueue = []; window.tempBoxData = null; window.currentMap = 0; window.currentDetailCharId = null; window.currentChipEquipSlot = null; window.debugInfiniteGems = false;
 
 const PD_TEMPLATE = JSON.parse(JSON.stringify(pd));
@@ -3828,11 +3752,16 @@ function normalizeSaveData(rawSave) {
     if (!next.profile || typeof next.profile !== 'object') next.profile = { title: null };
     if (typeof next.profile.title === 'undefined') next.profile.title = null;
     if (!next.events || typeof next.events !== 'object') next.events = {};
-    if (!next.events || typeof next.events !== 'object') next.events = {};
-    for (const id of ['sparta','lyron','kacashi','cyro_pyro','mr_perfurant']) {
-        if (!next.events[id] || typeof next.events[id] !== 'object') next.events[id] = { claimed:false, baseStats:null, completedIds:[] };
+    for (const id of Object.keys(EVENT_CHARACTER_PROGRESS)) {
+        const key = EVENT_MISSION_SAVE_KEYS[id];
+        if (!next.events[id]) next.events[id] = { claimed:false, baseStats:null, missionSaveKey:key, completedIds:[] };
+        if (typeof next.events[id].claimed === 'undefined') next.events[id].claimed = false;
+        if (typeof next.events[id].baseStats === 'undefined') next.events[id].baseStats = null;
+        if (!Array.isArray(next.events[id].completedIds)) next.events[id].completedIds = [];
+        next.events[id].completedIds = next.events[id].completedIds.filter(mid => EVENT_CHARACTER_PROGRESS[id].missions.some(m => m.id === mid));
+        next.events[id].missionSaveKey = key;
     }
-    if (typeof next.eventProgressVersion !== 'number') next.eventProgressVersion = 0;
+    if (typeof next.eventProgressVersion !== 'number' || next.eventProgressVersion < 5) next.eventProgressVersion = 5;
 
     if (!next.run || typeof next.run !== 'object') next.run = { charId: next.selectedChar || 'strike', medals: 0 };
     if (typeof next.run.charId !== 'string' || !next.run.charId) next.run.charId = next.selectedChar || 'strike';
@@ -3962,11 +3891,16 @@ function load() {
     if (!pd.profile || typeof pd.profile !== 'object') pd.profile = { title: null };
     if (typeof pd.profile.title === 'undefined') pd.profile.title = null;
     if (!pd.events || typeof pd.events !== 'object') pd.events = {};
-    if (!pd.events || typeof pd.events !== 'object') pd.events = {};
-    for (const id of ['sparta','lyron','kacashi','cyro_pyro','mr_perfurant']) {
-        if (!pd.events[id] || typeof pd.events[id] !== 'object') pd.events[id] = { claimed:false, baseStats:null, completedIds:[] };
+    for (const id of Object.keys(EVENT_CHARACTER_PROGRESS)) {
+        const key = EVENT_MISSION_SAVE_KEYS[id];
+        if (!pd.events[id]) pd.events[id] = { claimed:false, baseStats:null, missionSaveKey:key, completedIds:[] };
+        if (typeof pd.events[id].claimed === 'undefined') pd.events[id].claimed = false;
+        if (typeof pd.events[id].baseStats === 'undefined') pd.events[id].baseStats = null;
+        if (!Array.isArray(pd.events[id].completedIds)) pd.events[id].completedIds = [];
+        pd.events[id].completedIds = pd.events[id].completedIds.filter(mid => EVENT_CHARACTER_PROGRESS[id].missions.some(m => m.id === mid));
+        pd.events[id].missionSaveKey = key;
     }
-    if (typeof pd.eventProgressVersion !== 'number') pd.eventProgressVersion = 0;
+    if (typeof pd.eventProgressVersion !== 'number' || pd.eventProgressVersion < 5) pd.eventProgressVersion = 5;
     if (!pd.run || typeof pd.run !== 'object') pd.run = { charId: pd.selectedChar || 'strike', medals: 0 };
     if (typeof pd.run.charId !== 'string' || !pd.run.charId) pd.run.charId = pd.selectedChar || 'strike';
     if (typeof pd.run.medals !== 'number' || !isFinite(pd.run.medals) || pd.run.medals < 0) pd.run.medals = 0;
@@ -3991,11 +3925,9 @@ function load() {
     pd.passXp = Math.max(0, Number(pd.passXp) || 0);
     pd.passClaimed = Number(pd.passClaimed) || 0;
     if (typeof pd.settings.musicVolume !== 'number' || !isFinite(pd.settings.musicVolume)) pd.settings.musicVolume = 0.7;
-    ensureMusicSettings();
-    ensureMusicSettings();
     if (typeof pd.settings.uhcDark === 'undefined') pd.settings.uhcDark = false;
     if (typeof pd.settings.noParticles === 'undefined') pd.settings.noParticles = false;
-    if (typeof pd.settings.mobileJoystickFollowTap === 'undefined') pd.settings.mobileJoystickFollowTap = true;
+    if (typeof pd.settings.mobileJoystickFollowTap === 'undefined') pd.settings.mobileJoystickFollowTap = false;
     if (typeof pd.settings.showCombatText === 'undefined') pd.settings.showCombatText = true;
     if (typeof pd.settings.showHpBar === 'undefined') pd.settings.showHpBar = false;
     if (typeof pd.settings.screenZoom !== 'number' || !isFinite(pd.settings.screenZoom)) pd.settings.screenZoom = 1;
@@ -4025,9 +3957,6 @@ function load() {
     if (!pd.chipsInventory) pd.chipsInventory = {};
     ensureDevDebugState();
     syncDevUnlocks();
-    ensureEventState();
-    syncEventMissionCompletions(false);
-    save();
     for (let key in pd.chars) {
         if (!pd.chars[key].chips) pd.chars[key].chips = [null, null];
         if (!pd.chars[key].slots) pd.chars[key].slots = 2;
@@ -5831,7 +5760,7 @@ if (document.addEventListener) {
     });
 }
 
-function saveNickname() { const input = document.getElementById('nick-input').value.trim(); if(input.length > 0) { pd.nickname = input; if (!pd.tutorial || typeof pd.tutorial !== 'object') pd.tutorial = createDefaultTutorialState(); if (!pd.tutorial.skipped) { pd.tutorial.stage = 'intro'; pd.tutorial.introShown = false; } else { pd.tutorial.stage = 'completed'; pd.tutorial.introShown = true; } save(); document.getElementById('overlay-nickname').classList.add('hidden'); updateNicknameDisplay(); showScreen('screen-main'); updateUI(); updateSettingsUI(); if (!pd.tutorial.skipped) beginTutorialIntro(); } else { showAlert("Por favor, insira um nome válido!"); } }
+function saveNickname() { const input = document.getElementById('nick-input').value.trim(); if(input.length > 0) { pd.nickname = input; if (!pd.tutorial || typeof pd.tutorial !== 'object') pd.tutorial = createDefaultTutorialState(); pd.tutorial.stage = 'intro'; pd.tutorial.introShown = false; save(); document.getElementById('overlay-nickname').classList.add('hidden'); updateNicknameDisplay(); showScreen('screen-main'); updateUI(); updateSettingsUI(); beginTutorialIntro(); } else { showAlert("Por favor, insira um nome válido!"); } }
 function changeNickname() { const el = document.getElementById('nick-input'); if (el) { el.value = pd.nickname || ''; document.getElementById('overlay-nickname').classList.remove('hidden'); setTimeout(() => { try { el.focus(); el.select(); } catch (e) {} }, 0); } else { document.getElementById('overlay-nickname').classList.remove('hidden'); } }
 
 function getBestScoreValue() {
@@ -6213,7 +6142,7 @@ function toggleDevToolsPanel() {
 }
 
 function createDefaultTutorialState() {
-    return { stage: 'nickname', introShown: false, firstMatch: false, controlShown: false, levelupShown: false, finalShown: false, firstLossHandled: false, charsHandled: false, evolutionHandled: false, workshopSeen: false, workshopDialogShown: false, workshopFastyPending: false, skipped: false };
+    return { stage: 'nickname', introShown: false, firstMatch: false, controlShown: false, levelupShown: false, finalShown: false, firstLossHandled: false, charsHandled: false, evolutionHandled: false, workshopSeen: false, workshopDialogShown: false, workshopFastyPending: false };
 }
 
 let tutorialDialogSteps = [];
@@ -6289,7 +6218,6 @@ function tutorialSpriteFor(speaker) {
 }
 
 function showTutorialDialog(steps, onClose = null) {
-    if (pd?.tutorial?.skipped) return;
     const overlay = document.getElementById('overlay-tutorial-dialog');
     if (!overlay) return;
     tutorialDialogSteps = Array.isArray(steps) ? steps : [];
@@ -6320,35 +6248,6 @@ function renderTutorialDialogStep() {
     if (text) text.textContent = step.text || '';
 }
 
-function skipEntireTutorial(event){
-    if(event){event.preventDefault();event.stopPropagation();}
-    if(!pd) return;
-    if(!pd.tutorial || typeof pd.tutorial!=='object') pd.tutorial=createDefaultTutorialState();
-    pd.tutorial={...pd.tutorial,skipped:true,stage:'completed',introShown:true,firstMatch:true,controlShown:true,levelupShown:true,finalShown:true,firstLossHandled:true,charsHandled:true,evolutionHandled:true,workshopSeen:true,workshopDialogShown:true,workshopFastyPending:false};
-    if(!pd.chars) pd.chars={};
-    if(!pd.chars.fasty){
-        pd.chars.fasty={level:1,slots:2,chips:[null,null]};
-        if(pd.achievements?.stats) pd.achievements.stats.charsUnlocked=Math.max(1,Number(pd.achievements.stats.charsUnlocked||1)+1);
-    }
-    // Cancela qualquer diálogo/etapa tutorial pendente e evita que ele volte após o skip.
-    tutorialDialogSteps=[];
-    tutorialDialogIndex=0;
-    tutorialDialogOnClose=null;
-    if (window.gachaQueue) window.gachaQueue.length=0;
-    window.tempBoxData=null;
-    hideTutorialPointer();
-    document.querySelectorAll('.overlay').forEach(el=>el.classList.add('hidden'));
-    if(isPlaying){isPlaying=false;isPaused=false;try{cancelAnimationFrame(gameLoopId);}catch(e){}}
-    if(joyZone) joyZone.style.display='none';
-    if(dpadZone) dpadZone.style.display='none';
-    if(btnSpecial) btnSpecial.style.display='none';
-    showScreen('screen-main');
-    save();
-    updateNicknameDisplay();
-    updateSettingsUI();
-    playMusic('menu');
-}
-
 function advanceTutorialDialog(event) {
     if (event) event.stopPropagation();
     if (tutorialDialogIndex < tutorialDialogSteps.length - 1) {
@@ -6367,7 +6266,6 @@ function advanceTutorialDialog(event) {
 }
 
 function beginTutorialIntro() {
-    if (pd?.tutorial?.skipped) return;
     if (!pd?.nickname || pd?.tutorial?.introShown || pd?.tutorial?.stage !== 'intro') return;
     showTutorialDialog([
         { speaker: 'Strike', text: `Olá ${pd.nickname}, finalmente te encontrei\nMe ajude por favor a derrotar esses fraturados que o Echo gerou através das fraturas do espaço` }
@@ -6383,7 +6281,6 @@ function beginTutorialIntro() {
 }
 
 function beginFirstRunTutorial() {
-    if (pd?.tutorial?.skipped) return;
     if (!pd?.tutorial || pd.tutorial.controlShown) return;
     pd.tutorial.firstMatch = true;
     pd.tutorial.controlShown = true;
@@ -6402,7 +6299,6 @@ function beginFirstRunTutorial() {
 }
 
 function beginFirstPowerupTutorial() {
-    if (pd?.tutorial?.skipped) return;
     if (!pd?.tutorial || pd.tutorial.levelupShown) return;
     pd.tutorial.levelupShown = true;
     pd.tutorial.stage = 'choose-powerup';
@@ -6416,7 +6312,6 @@ function beginFirstPowerupTutorial() {
 }
 
 function finishFirstPowerupTutorial() {
-    if (pd?.tutorial?.skipped) return;
     if (!pd?.tutorial || pd.tutorial.finalShown) return;
     pd.tutorial.finalShown = true;
     pd.tutorial.stage = 'final-dialog';
@@ -6431,7 +6326,6 @@ function finishFirstPowerupTutorial() {
 }
 
 function beginFirstLossTutorial() {
-    if (pd?.tutorial?.skipped) return;
     if (!pd?.tutorial || pd.tutorial.firstLossHandled) return;
     pd.tutorial.firstLossHandled = true;
     pd.tutorial.stage = 'loss-dialog';
@@ -6453,7 +6347,6 @@ function beginFirstLossTutorial() {
 }
 
 function beginStrikeUpgradeTutorial() {
-    if (pd?.tutorial?.skipped) return;
     if (!pd?.tutorial || pd.tutorial.charsHandled) return;
     pd.tutorial.charsHandled = true;
     pd.tutorial.stage = 'force-strike-card';
@@ -6467,7 +6360,6 @@ function beginStrikeUpgradeTutorial() {
 }
 
 function finishStrikeEvolutionTutorial() {
-    if (pd?.tutorial?.skipped) return;
     if (!pd?.tutorial || pd.tutorial.evolutionHandled) return;
     hideTutorialPointer();
     pd.tutorial.evolutionHandled = true;
@@ -6480,7 +6372,6 @@ function finishStrikeEvolutionTutorial() {
 }
 
 function resolveFastyTutorialIfAlreadyOwned() {
-    if (pd?.tutorial?.skipped) return;
     if (!pd?.tutorial) return false;
     if (!pd.chars?.fasty) return false;
     if (!pd.tutorial.workshopFastyPending && pd.tutorial.stage !== 'force-fasty') return false;
@@ -6492,7 +6383,6 @@ function resolveFastyTutorialIfAlreadyOwned() {
 }
 
 function beginWorkshopTutorial() {
-    if (pd?.tutorial?.skipped) return;
     if (!pd?.tutorial || pd.tutorial.workshopDialogShown) return;
     pd.tutorial.workshopSeen = true;
     pd.tutorial.workshopDialogShown = true;
@@ -6522,7 +6412,6 @@ function beginWorkshopTutorial() {
 }
 
 function tutorialUnlockFastyFromWorkshop() {
-    if (pd?.tutorial?.skipped) return;
     if (pd?.chars?.fasty) {
         resolveFastyTutorialIfAlreadyOwned();
         renderTrail();
@@ -6945,13 +6834,6 @@ function showShopSection(section) {
     screen.scrollTop = 0;
 }
 
-function openEventScreen(){
-    // A renderização não pode impedir a abertura da tela se algum card estiver com problema.
-    try { renderEvents(); } catch (e) { console.error('Erro ao renderizar Evento:', e); }
-    showScreen('screen-event');
-    try { showEventSection(currentEventSection || 'kacashi'); } catch (e) { console.error('Erro ao abrir aba do Evento:', e); }
-}
-
 function showScreen(id) {
     if (pd?.tutorial?.stage === 'force-fasty' && pd?.chars?.fasty) {
         resolveFastyTutorialIfAlreadyOwned();
@@ -6989,11 +6871,6 @@ function showScreen(id) {
         }
     }
     if (id === 'screen-shop') { renderShop(); showShopSection(currentShopSection || 'offers'); }
-    if (id === 'screen-event') {
-        try { renderEvents(); } catch (e) { console.error('Erro ao renderizar Evento:', e); }
-        try { showEventSection(currentEventSection || 'kacashi'); } catch (e) { console.error('Erro ao abrir aba do Evento:', e); }
-        playMusic('menu');
-    }
     if (id === 'screen-pass') renderPass();
     if (id === 'screen-trail') { renderTrail(); if (pd?.tutorial && !pd.tutorial.workshopSeen) beginWorkshopTutorial(); }
     if (id === 'screen-missions') renderMissions();
@@ -7022,133 +6899,121 @@ checkChipCrafting();
 
 let currentEventSection = 'kacashi';
 
-// v6: progresso do evento é persistente por missão. Nunca mais depende de um snapshot criado ao abrir a aba.
-const EVENT_PROGRESS_VERSION = 6;
 const EVENT_MISSION_SAVE_KEYS = {
-    kacashi: 'kacashi_missions_v6',
-    cyro_pyro: 'cyro_pyro_missions_v6',
-    mr_perfurant: 'mr_perfurant_missions_v6'
+    kacashi: 'kacashi_missions_v1',
+    cyro_pyro: 'cyro_pyro_missions_v1',
+    mr_perfurant: 'mr_perfurant_missions_v1'
 };
 
 const EVENT_CHARACTER_PROGRESS = {
     kacashi: { id: 'kacashi', label: 'Kacashi', sprite: 'kacashi', goal: 20, missions: [
-        { id:'k1', title:'Primeira Fratura', desc:'Inicie 1 partida.', stat:'gamesStarted', goal:1 },
-        { id:'k2', title:'Shinobi perdido', desc:'Inicie 3 partidas.', stat:'gamesStarted', goal:3 },
-        { id:'k3', title:'Kunais afiadas', desc:'Derrote 100 inimigos.', stat:'totalKills', goal:100 },
-        { id:'k4', title:'Realidade instável', desc:'Alcance wave 8.', stat:'bestWave', goal:8 },
-        { id:'k5', title:'Primeiro retorno', desc:'Vença 1 partida.', stat:'wins', goal:1 },
-        { id:'k6', title:'Dimensão quebrada', desc:'Derrote 250 inimigos.', stat:'totalKills', goal:250 },
-        { id:'k7', title:'Olho do Sharin', desc:'Alcance wave 12.', stat:'bestWave', goal:12 },
-        { id:'k8', title:'Perfurando a horda', desc:'Derrote 400 inimigos.', stat:'totalKills', goal:400 },
-        { id:'k9', title:'Caçador de Fraturas', desc:'Derrote 2 Bosses.', stat:'bossKills', goal:2 },
-        { id:'k10', title:'Sem caminho de volta', desc:'Vença 3 partidas.', stat:'wins', goal:3 },
-        { id:'k11', title:'Outra realidade', desc:'Alcance wave 16.', stat:'bestWave', goal:16 },
-        { id:'k12', title:'Chuva de kunais', desc:'Derrote 650 inimigos.', stat:'totalKills', goal:650 },
-        { id:'k13', title:'Dimensionalmente forte', desc:'Derrote 5 Bosses.', stat:'bossKills', goal:5 },
-        { id:'k14', title:'Sobrevivente da Fratura', desc:'Vença 5 partidas.', stat:'wins', goal:5 },
-        { id:'k15', title:'Passo além', desc:'Alcance wave 20.', stat:'bestWave', goal:20 },
-        { id:'k16', title:'Exército perfurado', desc:'Derrote 1.000 inimigos.', stat:'totalKills', goal:1000 },
-        { id:'k17', title:'Ninja da Fratura', desc:'Alcance wave 24.', stat:'bestWave', goal:24 },
-        { id:'k18', title:'O caminho de casa', desc:'Derrote 8 Bosses.', stat:'bossKills', goal:8 },
-        { id:'k19', title:'Entre mundos', desc:'Vença 8 partidas.', stat:'wins', goal:8 },
-        { id:'k20', title:'Hokagi', desc:'Alcance wave 28.', stat:'bestWave', goal:28 }
+        { id: 'k1', title: 'Primeira ruptura', desc: 'Inicie 1 partida.', stat: 'gamesStarted', goal: 1 },
+        { id: 'k2', title: 'Uma realidade estranha', desc: 'Inicie 3 partidas.', stat: 'gamesStarted', goal: 3 },
+        { id: 'k3', title: 'Kunais voando', desc: 'Derrote 100 inimigos.', stat: 'totalKills', goal: 100 },
+        { id: 'k4', title: 'Ninja em outro mundo', desc: 'Derrote 250 inimigos.', stat: 'totalKills', goal: 250 },
+        { id: 'k5', title: 'Primeira vitória', desc: 'Vença 1 partida.', stat: 'wins', goal: 1 },
+        { id: 'k6', title: 'Sobrevivente da Fratura', desc: 'Alcance wave 8.', stat: 'bestWave', goal: 8 },
+        { id: 'k7', title: 'Olho da realidade', desc: 'Alcance wave 12.', stat: 'bestWave', goal: 12 },
+        { id: 'k8', title: 'Caçador de criaturas', desc: 'Derrote 2 Bosses.', stat: 'bossKills', goal: 2 },
+        { id: 'k9', title: 'Dimensão de combate', desc: 'Derrote 500 inimigos.', stat: 'totalKills', goal: 500 },
+        { id: 'k10', title: 'Sem caminho de volta', desc: 'Vença 3 partidas.', stat: 'wins', goal: 3 },
+        { id: 'k11', title: 'Fratura profunda', desc: 'Alcance wave 16.', stat: 'bestWave', goal: 16 },
+        { id: 'k12', title: 'Mestre das sombras', desc: 'Derrote 5 Bosses.', stat: 'bossKills', goal: 5 },
+        { id: 'k13', title: 'Realidade quebrada', desc: 'Derrote 900 inimigos.', stat: 'totalKills', goal: 900 },
+        { id: 'k14', title: 'Voltar para casa', desc: 'Vença 5 partidas.', stat: 'wins', goal: 5 },
+        { id: 'k15', title: 'Limites da dimensão', desc: 'Alcance wave 20.', stat: 'bestWave', goal: 20 },
+        { id: 'k16', title: 'Hokagi em ação', desc: 'Derrote 1.300 inimigos.', stat: 'totalKills', goal: 1300 },
+        { id: 'k17', title: 'Mais uma missão', desc: 'Inicie 10 partidas.', stat: 'gamesStarted', goal: 10 },
+        { id: 'k18', title: 'Entre mundos', desc: 'Derrote 8 Bosses.', stat: 'bossKills', goal: 8 },
+        { id: 'k19', title: 'A última Fratura', desc: 'Alcance wave 26.', stat: 'bestWave', goal: 26 },
+        { id: 'k20', title: 'Caminho de volta', desc: 'Vença 10 partidas.', stat: 'wins', goal: 10 }
     ]},
-    cyro_pyro: { id:'cyro_pyro', label:'Cyro & Pyro', sprite:'cyro_pyro', goal:20, missions: [
-        { id:'c1', title:'Gelo e fogo', desc:'Inicie 2 partidas.', stat:'gamesStarted', goal:2 },
-        { id:'c2', title:'Dupla elemental', desc:'Inicie 5 partidas.', stat:'gamesStarted', goal:5 },
-        { id:'c3', title:'Primeiras chamas', desc:'Derrote 150 inimigos.', stat:'totalKills', goal:150 },
-        { id:'c4', title:'Primeira vitória', desc:'Vença 2 partidas.', stat:'wins', goal:2 },
-        { id:'c5', title:'Temperatura extrema', desc:'Alcance wave 10.', stat:'bestWave', goal:10 },
-        { id:'c6', title:'Dupla destruidora', desc:'Derrote 400 inimigos.', stat:'totalKills', goal:400 },
-        { id:'c7', title:'Chegando ao limite', desc:'Alcance wave 14.', stat:'bestWave', goal:14 },
-        { id:'c8', title:'Chefes elementais', desc:'Derrote 3 Bosses.', stat:'bossKills', goal:3 },
-        { id:'c9', title:'Frio intenso', desc:'Derrote 650 inimigos.', stat:'totalKills', goal:650 },
-        { id:'c10', title:'Calor crescente', desc:'Vença 4 partidas.', stat:'wins', goal:4 },
-        { id:'c11', title:'Equilíbrio impossível', desc:'Alcance wave 18.', stat:'bestWave', goal:18 },
-        { id:'c12', title:'Caos elemental', desc:'Derrote 1.000 inimigos.', stat:'totalKills', goal:1000 },
-        { id:'c13', title:'Mestres dos elementos', desc:'Derrote 5 Bosses.', stat:'bossKills', goal:5 },
-        { id:'c14', title:'Temperatura máxima', desc:'Alcance wave 22.', stat:'bestWave', goal:22 },
-        { id:'c15', title:'Campanha em chamas', desc:'Vença 6 partidas.', stat:'wins', goal:6 },
-        { id:'c16', title:'Inverno sem fim', desc:'Derrote 1.500 inimigos.', stat:'totalKills', goal:1500 },
-        { id:'c17', title:'Dualidade', desc:'Alcance wave 26.', stat:'bestWave', goal:26 },
-        { id:'c18', title:'Força combinada', desc:'Derrote 8 Bosses.', stat:'bossKills', goal:8 },
-        { id:'c19', title:'Último elemento', desc:'Vença 10 partidas.', stat:'wins', goal:10 },
-        { id:'c20', title:'Lenda elemental', desc:'Alcance wave 30.', stat:'bestWave', goal:30 }
+    cyro_pyro: { id: 'cyro_pyro', label: 'Cyro & Pyro', sprite: 'cyro_pyro', goal: 20, missions: [
+        { id: 'cp1', title: 'Gelo e fogo', desc: 'Inicie 1 partida.', stat: 'gamesStarted', goal: 1 },
+        { id: 'cp2', title: 'Dois elementos', desc: 'Inicie 3 partidas.', stat: 'gamesStarted', goal: 3 },
+        { id: 'cp3', title: 'Primeira faísca', desc: 'Derrote 100 inimigos.', stat: 'totalKills', goal: 100 },
+        { id: 'cp4', title: 'Temperatura máxima', desc: 'Derrote 250 inimigos.', stat: 'totalKills', goal: 250 },
+        { id: 'cp5', title: 'Primeira vitória dupla', desc: 'Vença 1 partida.', stat: 'wins', goal: 1 },
+        { id: 'cp6', title: 'Congelar a arena', desc: 'Alcance wave 8.', stat: 'bestWave', goal: 8 },
+        { id: 'cp7', title: 'Incendiar o caminho', desc: 'Alcance wave 12.', stat: 'bestWave', goal: 12 },
+        { id: 'cp8', title: 'Fúria elemental', desc: 'Derrote 2 Bosses.', stat: 'bossKills', goal: 2 },
+        { id: 'cp9', title: 'Caos congelante', desc: 'Derrote 500 inimigos.', stat: 'totalKills', goal: 500 },
+        { id: 'cp10', title: 'Irmãos imparáveis', desc: 'Vença 3 partidas.', stat: 'wins', goal: 3 },
+        { id: 'cp11', title: 'Equilíbrio impossível', desc: 'Alcance wave 16.', stat: 'bestWave', goal: 16 },
+        { id: 'cp12', title: 'Chega de aquecimento', desc: 'Derrote 5 Bosses.', stat: 'bossKills', goal: 5 },
+        { id: 'cp13', title: 'Tempestade de elementos', desc: 'Derrote 900 inimigos.', stat: 'totalKills', goal: 900 },
+        { id: 'cp14', title: 'Chama e geada', desc: 'Vença 5 partidas.', stat: 'wins', goal: 5 },
+        { id: 'cp15', title: 'Fase extrema', desc: 'Alcance wave 20.', stat: 'bestWave', goal: 20 },
+        { id: 'cp16', title: 'Força dos dois', desc: 'Derrote 1.300 inimigos.', stat: 'totalKills', goal: 1300 },
+        { id: 'cp17', title: 'Mais uma batalha', desc: 'Inicie 10 partidas.', stat: 'gamesStarted', goal: 10 },
+        { id: 'cp18', title: 'Chefes derretidos', desc: 'Derrote 8 Bosses.', stat: 'bossKills', goal: 8 },
+        { id: 'cp19', title: 'Ponto de fusão', desc: 'Alcance wave 26.', stat: 'bestWave', goal: 26 },
+        { id: 'cp20', title: 'Dualidade completa', desc: 'Vença 10 partidas.', stat: 'wins', goal: 10 }
     ]},
-    mr_perfurant: { id:'mr_perfurant', label:'Mr. Perfurant', sprite:'mr_perfurant', goal:15, missions: [
-        { id:'p1', title:'A primeira lâmina', desc:'Inicie 2 partidas.', stat:'gamesStarted', goal:2 },
-        { id:'p2', title:'Velho soldado', desc:'Derrote 120 inimigos.', stat:'totalKills', goal:120 },
-        { id:'p3', title:'Corte limpo', desc:'Vença 1 partida.', stat:'wins', goal:1 },
-        { id:'p4', title:'Base costeira', desc:'Alcance wave 10.', stat:'bestWave', goal:10 },
-        { id:'p5', title:'Katana em punho', desc:'Derrote 300 inimigos.', stat:'totalKills', goal:300 },
-        { id:'p6', title:'Lealdade', desc:'Inicie 5 partidas.', stat:'gamesStarted', goal:5 },
-        { id:'p7', title:'Primeiro comandante', desc:'Derrote 2 Bosses.', stat:'bossKills', goal:2 },
-        { id:'p8', title:'Sem hesitar', desc:'Vença 3 partidas.', stat:'wins', goal:3 },
-        { id:'p9', title:'Lâmina implacável', desc:'Alcance wave 16.', stat:'bestWave', goal:16 },
-        { id:'p10', title:'Pelo Mestre do Fogo', desc:'Derrote 600 inimigos.', stat:'totalKills', goal:600 },
-        { id:'p11', title:'Honra', desc:'Derrote 4 Bosses.', stat:'bossKills', goal:4 },
-        { id:'p12', title:'Desertor', desc:'Vença 5 partidas.', stat:'wins', goal:5 },
-        { id:'p13', title:'Katana absoluta', desc:'Derrote 1.000 inimigos.', stat:'totalKills', goal:1000 },
-        { id:'p14', title:'Último duelo', desc:'Alcance wave 22.', stat:'bestWave', goal:22 },
-        { id:'p15', title:'Nova causa', desc:'Derrote 7 Bosses.', stat:'bossKills', goal:7 }
+    mr_perfurant: { id: 'mr_perfurant', label: 'Mr. Perfurant', sprite: 'mr_perfurant', goal: 15, missions: [
+        { id: 'mp1', title: 'Primeiro corte', desc: 'Inicie 1 partida.', stat: 'gamesStarted', goal: 1 },
+        { id: 'mp2', title: 'Treino de lâmina', desc: 'Inicie 3 partidas.', stat: 'gamesStarted', goal: 3 },
+        { id: 'mp3', title: 'Perfurando a linha', desc: 'Derrote 100 inimigos.', stat: 'totalKills', goal: 100 },
+        { id: 'mp4', title: 'Katana precisa', desc: 'Derrote 300 inimigos.', stat: 'totalKills', goal: 300 },
+        { id: 'mp5', title: 'Primeiro duelo vencido', desc: 'Vença 1 partida.', stat: 'wins', goal: 1 },
+        { id: 'mp6', title: 'Avanço', desc: 'Alcance wave 10.', stat: 'bestWave', goal: 10 },
+        { id: 'mp7', title: 'Soldado experiente', desc: 'Derrote 2 Bosses.', stat: 'bossKills', goal: 2 },
+        { id: 'mp8', title: 'Velocidade da lâmina', desc: 'Derrote 600 inimigos.', stat: 'totalKills', goal: 600 },
+        { id: 'mp9', title: 'Sem recuar', desc: 'Vença 3 partidas.', stat: 'wins', goal: 3 },
+        { id: 'mp10', title: 'Corte decisivo', desc: 'Alcance wave 16.', stat: 'bestWave', goal: 16 },
+        { id: 'mp11', title: 'Contra a elite', desc: 'Derrote 5 Bosses.', stat: 'bossKills', goal: 5 },
+        { id: 'mp12', title: 'Lâmina lendária', desc: 'Derrote 1.000 inimigos.', stat: 'totalKills', goal: 1000 },
+        { id: 'mp13', title: 'Último combate', desc: 'Vença 5 partidas.', stat: 'wins', goal: 5 },
+        { id: 'mp14', title: 'Ataque final', desc: 'Alcance wave 22.', stat: 'bestWave', goal: 22 },
+        { id: 'mp15', title: 'Perfurante perfeito', desc: 'Vença 8 partidas.', stat: 'wins', goal: 8 }
     ]}
 };
 
 const EVENT_PROMOS = [
-    { id:'kacashi', label:'Kacashi', oldCost:199, promoCost:99, level8Cost:719, rarity:'seasonal' },
-    { id:'cyro_pyro', label:'Cyro & Pyro', oldCost:349, promoCost:149, level8Cost:899, rarity:'legendary' },
-    { id:'mr_perfurant', label:'Mr. Perfurant', oldCost:149, promoCost:79, level8Cost:639, rarity:'epic' },
-    { id:'sharkie', label:'Sharkie', oldCost:79, promoCost:29, rarity:'rare' },
-    { id:'chickbot', label:'Chickbot', oldCost:79, promoCost:29, rarity:'rare' },
-    { id:'eolio', label:'Eólio', oldCost:149, promoCost:79, rarity:'epic' },
-    { id:'stormy', label:'Stormy', oldCost:149, promoCost:79, rarity:'epic' },
-    { id:'bulb', label:'Bulb', oldCost:149, promoCost:79, rarity:'epic' },
-    { id:'kael', label:'Kael', oldCost:149, promoCost:79, rarity:'epic' },
-    { id:'joseph', label:'Joseph', oldCost:149, promoCost:79, rarity:'epic' },
-    { id:'xilo', label:'Xilo', oldCost:149, promoCost:79, rarity:'epic' },
-    { id:'vovo_cookie', label:'Vovó Cookie', oldCost:149, promoCost:79, rarity:'epic' },
-    { id:'serrano', label:'Serrano', oldCost:349, promoCost:149, rarity:'legendary' }
+    { id: 'kacashi', label: 'Kacashi', oldCost: 199, promoCost: 99, level8Cost: 719, rarity: 'seasonal' },
+    { id: 'cyro_pyro', label: 'Cyro & Pyro', oldCost: 349, promoCost: 149, level8Cost: 899, rarity: 'legendary' },
+    { id: 'mr_perfurant', label: 'Mr. Perfurant', oldCost: 149, promoCost: 79, level8Cost: 639, rarity: 'epic' },
+    { id: 'sharkie', label: 'Sharkie', oldCost: 79, promoCost: 29, rarity: 'rare' },
+    { id: 'chickbot', label: 'Chickbot', oldCost: 79, promoCost: 29, rarity: 'rare' },
+    { id: 'eolio', label: 'Eólio', oldCost: 149, promoCost: 79, rarity: 'epic' },
+    { id: 'stormy', label: 'Stormy', oldCost: 149, promoCost: 79, rarity: 'epic' },
+    { id: 'bulb', label: 'Bulb', oldCost: 149, promoCost: 79, rarity: 'epic' },
+    { id: 'kael', label: 'Kael', oldCost: 149, promoCost: 79, rarity: 'epic' },
+    { id: 'joseph', label: 'Joseph', oldCost: 149, promoCost: 79, rarity: 'epic' },
+    { id: 'xilo', label: 'Xilo', oldCost: 149, promoCost: 79, rarity: 'epic' },
+    { id: 'vovo_cookie', label: 'Vovó Cookie', oldCost: 149, promoCost: 79, rarity: 'epic' },
+    { id: 'serrano', label: 'Serrano', oldCost: 349, promoCost: 149, rarity: 'legendary' }
 ];
 
 function getEventBaseSnapshot() {
     const stats = pd?.achievements?.stats || {};
     const snapshot = {};
     const keys = new Set();
-    Object.values(EVENT_CHARACTER_PROGRESS).forEach(section => (section.missions || []).forEach(m => keys.add(m.stat)));
-    keys.forEach(key => snapshot[key] = Math.max(0, Math.floor(Number(stats[key]) || 0)));
+    Object.values(EVENT_CHARACTER_PROGRESS).forEach(section => {
+        (section.missions || []).forEach(m => keys.add(m.stat));
+    });
+    keys.forEach(key => { snapshot[key] = Math.max(0, Math.floor(Number(stats[key]) || 0)); });
     return snapshot;
-}
-function createDefaultEventState(sectionId, baseStats = null) {
-    return { claimed:false, baseStats:baseStats ? {...baseStats} : null, completedIds:[], missionSaveKey:EVENT_MISSION_SAVE_KEYS[sectionId], progressVersion:EVENT_PROGRESS_VERSION };
 }
 function ensureEventState() {
     if (!pd.events || typeof pd.events !== 'object') pd.events = {};
-    const base = getEventBaseSnapshot();
-    const statsNow = pd?.achievements?.stats || {};
     for (const id of Object.keys(EVENT_CHARACTER_PROGRESS)) {
-        let section = pd.events[id];
-        if (!section || typeof section !== 'object') {
-            section = pd.events[id] = createDefaultEventState(id, base);
-        }
-        if (section.progressVersion !== EVENT_PROGRESS_VERSION || section.missionSaveKey !== EVENT_MISSION_SAVE_KEYS[id]) {
-            const claimed = !!section.claimed;
-            section = pd.events[id] = createDefaultEventState(id, base);
-            section.claimed = claimed && !!pd.chars?.[id];
-        }
-        if (!section.baseStats || typeof section.baseStats !== 'object') section.baseStats = {...base};
-        if (!Array.isArray(section.completedIds)) section.completedIds = [];
-        section.completedIds = [...new Set(section.completedIds.map(String))].filter(mid => EVENT_CHARACTER_PROGRESS[id].missions.some(m => m.id === mid));
-        section.missionSaveKey = EVENT_MISSION_SAVE_KEYS[id];
-        section.progressVersion = EVENT_PROGRESS_VERSION;
-        // Reconcile from saved stats without resetting progress.
-        const byId = new Set(section.completedIds);
-        for (const mission of EVENT_CHARACTER_PROGRESS[id].missions) {
-            const current = Math.max(0, Math.floor(Number(statsNow[mission.stat]) || 0));
-            const started = Math.max(0, Math.floor(Number(section.baseStats[mission.stat]) || 0));
-            if (current - started >= mission.goal) byId.add(mission.id);
-        }
-        section.completedIds = [...byId];
+        const key = EVENT_MISSION_SAVE_KEYS[id];
+        if (!pd.events[id] || typeof pd.events[id] !== 'object') pd.events[id] = { claimed:false, baseStats:null, missionSaveKey:key, completedIds:[] };
+        const state = pd.events[id];
+        if (typeof state.claimed === 'undefined') state.claimed = false;
+        if (typeof state.baseStats === 'undefined') state.baseStats = null;
+        if (!Array.isArray(state.completedIds)) state.completedIds = [];
+        state.completedIds = state.completedIds.filter(mid => EVENT_CHARACTER_PROGRESS[id].missions.some(m => m.id === mid));
+        state.missionSaveKey = key;
     }
+}
+function ensureEventSectionSnapshot(sectionId) {
+    ensureEventState();
+    const section = pd.events?.[sectionId];
+    if (!section) return;
+    if (!section.baseStats || typeof section.baseStats !== 'object') { section.baseStats = getEventBaseSnapshot(); save(); }
+    syncEventMissionCompletion(sectionId, false);
 }
 function getEventStatsValue(sectionId, stat) {
     ensureEventState();
@@ -7157,57 +7022,89 @@ function getEventStatsValue(sectionId, stat) {
     const base = Math.max(0, Math.floor(Number(pd.events?.[sectionId]?.baseStats?.[stat]) || 0));
     return Math.max(0, current - base);
 }
-function getEventCompletedCount(sectionId) {
+function syncEventMissionCompletion(sectionId, saveNow = true) {
     ensureEventState();
     const section = EVENT_CHARACTER_PROGRESS[sectionId];
-    if (!section) return 0;
-    return Math.min(section.goal, pd.events?.[sectionId]?.completedIds?.length || 0);
-}
-function syncEventMissionCompletions(persist = true) {
-    if (!pd?.events) return false;
-    const stats = pd?.achievements?.stats || {};
-    let changed = false;
-    for (const id of Object.keys(EVENT_CHARACTER_PROGRESS)) {
-        const event = pd.events[id];
-        if (!event) continue;
-        const before = event.completedIds.length;
-        const done = new Set(event.completedIds);
-        for (const mission of EVENT_CHARACTER_PROGRESS[id].missions) {
-            const current = Math.max(0, Math.floor(Number(stats[mission.stat]) || 0));
-            const base = Math.max(0, Math.floor(Number(event.baseStats?.[mission.stat]) || 0));
-            if (current - base >= mission.goal) done.add(mission.id);
-        }
-        event.completedIds = [...done];
-        if (event.completedIds.length !== before) changed = true;
+    const state = pd.events?.[sectionId];
+    if (!section || !state) return false;
+    const before = state.completedIds.length;
+    const completed = new Set(state.completedIds);
+    for (const mission of section.missions) {
+        if (!completed.has(mission.id) && getEventStatsValue(sectionId, mission.stat) >= mission.goal) completed.add(mission.id);
     }
-    if (changed && persist) save();
+    state.completedIds = section.missions.map(m => m.id).filter(id => completed.has(id));
+    const changed = state.completedIds.length !== before;
+    if (changed && saveNow) save();
     return changed;
+}
+function getEventCompletedCount(sectionId) {
+    ensureEventState();
+    ensureEventSectionSnapshot(sectionId);
+    syncEventMissionCompletion(sectionId, true);
+    const section = EVENT_CHARACTER_PROGRESS[sectionId];
+    const completed = new Set(pd.events?.[sectionId]?.completedIds || []);
+    return section ? section.missions.filter(m => completed.has(m.id)).length : 0;
 }
 function getEventMissionArt(sectionId) {
     const section = EVENT_CHARACTER_PROGRESS[sectionId];
     if (!section?.sprite) return '';
-    return getCharacterSpriteMarkup(section.sprite, 'menu').replace('class="char-sprite char-sprite--menu"','class="char-sprite event-mission-sprite" style="width:96px;height:54px;margin:0;object-fit:contain;"');
+    return getCharacterSpriteMarkup(section.sprite, 'menu').replace(
+        'class="char-sprite char-sprite--menu"',
+        'class="char-sprite event-mission-sprite" style="width:96px;height:54px;margin:0;object-fit:contain;"'
+    );
 }
 function renderEventMissionCard(sectionId, mission) {
     const section = EVENT_CHARACTER_PROGRESS[sectionId];
-    const eventState = pd.events?.[sectionId] || {};
-    const done = Array.isArray(eventState.completedIds) && eventState.completedIds.includes(mission.id);
+    ensureEventSectionSnapshot(sectionId);
+    const completed = new Set(pd.events?.[sectionId]?.completedIds || []);
+    const done = completed.has(mission.id);
     const current = Math.min(getEventStatsValue(sectionId, mission.stat), mission.goal);
-    const art = getEventMissionArt(sectionId) || '<div class="event-major-icon" aria-hidden="true"></div>';
+    const art = getEventMissionArt(sectionId) || `<div class="${sectionId === 'adam' ? 'event-graffit-ball' : 'event-major-icon'}" aria-hidden="true"></div>`;
     return `<div class="mission-card event-mission-card ${done ? 'event-mission-done' : 'event-mission-lock'} ${done ? 'completed' : ''}">
-        <div class="event-mission-head">${art}<div class="event-mission-copy"><div class="mission-title">${escapeHtmlText(decodeHtmlEntities(mission.title))}</div><div class="mission-desc">${escapeHtmlText(decodeHtmlEntities(mission.desc))}</div></div></div>
-        <div class="mission-meta"><span>Progresso: <strong>${current}/${mission.goal}</strong></span><span>Status: <strong>${done ? 'Concluída' : 'Em andamento'}</strong></span></div>
-        <div class="mission-progress"><div class="mission-progress-fill ${done ? 'done' : ''}" style="width:${Math.min(100,(current/mission.goal)*100)}%"></div></div>
+        <div class="event-mission-head">
+            ${art}
+            <div class="event-mission-copy">
+                <div class="mission-title">${escapeHtmlText(decodeHtmlEntities(mission.title))}</div>
+                <div class="mission-desc">${escapeHtmlText(decodeHtmlEntities(mission.desc))}</div>
+            </div>
+        </div>
+        <div class="mission-meta">
+            <span>Progresso: <strong>${current}/${mission.goal}</strong></span>
+            <span>Status: <strong>${done ? 'Concluída' : 'Em andamento'}</strong></span>
+        </div>
+        <div class="mission-progress"><div class="mission-progress-fill ${done ? 'done' : ''}" style="width:${Math.min(100, (current / mission.goal) * 100)}%"></div></div>
     </div>`;
+}
+
+function getPromoBallColor(promo) {
+    const c = CHARACTERS[promo.id];
+    return c?.color || ({ common: '#3498db', rare: '#5dade2', epic: '#9b59b6', legendary: '#f1c40f', mythic: '#ff4d4d', seasonal: '#f39c12' }[promo.rarity] || '#8e44ad');
+}
+function darkenHexColor(hex, factor = 0.28) {
+    const match = /^#([0-9a-f]{6})$/i.exec(String(hex || '').trim());
+    if (!match) return 'rgb(40, 40, 40)';
+    const num = parseInt(match[1], 16);
+    const r = Math.max(0, Math.min(255, Math.round(((num >> 16) & 255) * (1 - factor))));
+    const g = Math.max(0, Math.min(255, Math.round(((num >> 8) & 255) * (1 - factor))));
+    const b = Math.max(0, Math.min(255, Math.round((num & 255) * (1 - factor))));
+    return `rgb(${r}, ${g}, ${b})`;
+}
+function renderPromoBall(promo) {
+    const sprite = getCharacterSpriteMarkup(promo.id, 'promo');
+    if (sprite) return sprite;
+    const ballColor = getPromoBallColor(promo);
+    const darker = darkenHexColor(ballColor, 0.36);
+    return `<div class="promo-offer-ball" style="background: radial-gradient(circle at 30% 28%, rgba(255,255,255,0.42), rgba(255,255,255,0.10) 48%), linear-gradient(180deg, ${ballColor}, ${darker});"></div>`;
 }
 function renderEventPromoOfferCard(promo, mode) {
     const c = CHARACTERS[promo.id];
     if (!c) return '';
-    const owned = !!pd.chars?.[promo.id];
+    const owned = !!pd.chars[promo.id];
     const currentLevel = Number(pd.chars?.[promo.id]?.level) || 0;
+    if (owned) return '';
+    if (mode === 'level8' && currentLevel >= 8) return '';
+    const art = getCharacterSpriteMarkup(promo.id, 'promo') || renderPromoBall(promo);
     if (mode === 'level8') {
-        if (!promo.level8Cost || currentLevel >= 8) return '';
-        const art = getCharacterSpriteMarkup(promo.id, 'promo') || renderPromoBall(promo);
         return `<div class="card-item rarity-${promo.rarity} promo-offer-card">
             ${art}
             <div class="promo-offer-title">${escapeHtmlText(decodeHtmlEntities(promo.label))} Lv. 8</div>
@@ -7216,8 +7113,6 @@ function renderEventPromoOfferCard(promo, mode) {
             <button class="btn-action promo-offer-btn" type="button" onclick="event.stopPropagation(); buyPromoCharacterOffer('${promo.id}', ${promo.level8Cost}, 8)">Comprar no máximo</button>
         </div>`;
     }
-    if (owned) return '';
-    const art = getCharacterSpriteMarkup(promo.id, 'promo') || renderPromoBall(promo);
     return `<div class="card-item rarity-${promo.rarity} promo-offer-card">
         ${art}
         <div class="promo-offer-title">${escapeHtmlText(decodeHtmlEntities(promo.label))}</div>
@@ -7238,49 +7133,100 @@ function renderEventPromoCard(promo) {
 }
 function renderEvents() {
     ensureEventState();
-    const sections = Object.values(EVENT_CHARACTER_PROGRESS);
-    sections.forEach(section => {
-        const count = getEventCompletedCount(section.id);
-        const countEl = document.getElementById(`event-${section.id}-count`);
-        const claim = document.getElementById(`event-${section.id}-claim`);
-        const list = document.getElementById(`event-${section.id}-list`);
-        if (countEl) countEl.textContent = String(count);
-        if (claim) {
-            const ready = count >= section.goal;
-            claim.disabled = !ready || !!pd.events[section.id].claimed;
-            claim.textContent = pd.events[section.id].claimed ? '✅ Resgatado' : `🎁 Resgatar ${section.label}`;
-        }
-        if (list) list.innerHTML = section.missions.map(m => renderEventMissionCard(section.id, m)).join('');
-    });
     const promoList = document.getElementById('event-promo-list');
+    for (const sectionId of Object.keys(EVENT_CHARACTER_PROGRESS)) {
+        const section = EVENT_CHARACTER_PROGRESS[sectionId];
+        // Every event section gets its own snapshot before progress is evaluated.
+        // This prevents a newly-added section from inheriting the account's lifetime stats as completed missions.
+        ensureEventSectionSnapshot(sectionId);
+        const list = document.getElementById(`event-${sectionId}-list`);
+        const count = document.getElementById(`event-${sectionId}-count`);
+        const claim = document.getElementById(`event-${sectionId}-claim`);
+        const done = getEventCompletedCount(sectionId);
+        if (count) count.textContent = String(done);
+        if (claim) {
+            const ready = done >= section.goal;
+            claim.disabled = !ready || !!pd.events[sectionId].claimed;
+            claim.textContent = pd.events[sectionId].claimed ? '✅ Resgatado' : `🎁 Resgatar ${section.label}`;
+        }
+        if (list) list.innerHTML = section.missions.map(m => renderEventMissionCard(sectionId, m)).join('');
+    }
     if (promoList) promoList.innerHTML = EVENT_PROMOS.map(renderEventPromoCard).join('');
 }
 function showEventSection(section) {
-    ensureEventState();
     currentEventSection = section;
+    ensureEventSectionSnapshot(section);
     document.querySelectorAll('#screen-event .shop-panel').forEach(el => el.classList.add('hidden'));
     const target = document.getElementById(`event-section-${section}`);
     if (target) target.classList.remove('hidden');
-    document.querySelectorAll('#screen-event .shop-tab').forEach(btn => btn.classList.toggle('active', btn.dataset.section === section));
-    renderEvents();
+    document.querySelectorAll('#screen-event .shop-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.section === section);
+    });
 }
 function claimEventCharacter(sectionId) {
     ensureEventState();
-    syncEventMissionCompletions(false);
     const section = EVENT_CHARACTER_PROGRESS[sectionId];
     if (!section) return;
+    syncEventMissionCompletion(sectionId, true);
     const done = getEventCompletedCount(sectionId);
-    if (done < section.goal) { showAlert(`Faltam mais ${section.goal - done} missões.`); return; }
-    if (pd.events[sectionId].claimed || pd.chars[section.id]) { showAlert('Recompensa já resgatada.'); return; }
+    if (done < section.goal) {
+        showAlert(`Faltam mais ${section.goal - done} missões.`);
+        return;
+    }
+    if (pd.events[sectionId].claimed) {
+        showAlert('Recompensa já resgatada.');
+        return;
+    }
     pd.events[sectionId].claimed = true;
-    pd.chars[section.id] = pd.chars[section.id] || { level:1, slots:2, chips:[null,null] };
-    if (section.id === 'cyro_pyro') pd.chars[section.id].mode = 'pyro';
-    awardAchievementStat('charsUnlocked', 1);
+    pd.chars[section.id] = pd.chars[section.id] || { level: 1, slots: 2, chips: [null, null] };
     save();
-    renderEvents(); renderShop(); renderChars?.();
-    startGachaQueue([{ type:'instant', title:'Evento concluído', contents:[`👤 NOVO PERSONAGEM: ${section.label}!`] }]);
+    renderEvents();
+    renderShop();
+    renderChars?.();
+    startGachaQueue([{ type: 'instant', title: 'Evento concluído', contents: [`👤 NOVO PERSONAGEM: ${section.label}!`] }]);
     notify(`${section.label} liberado!`);
 }
+function buyPromoCharacterOffer(id, cost, targetLevel = 1) {
+    const c = CHARACTERS[id];
+    if (!c) return;
+    if (id === 'fasty') {
+        buyChar('fasty');
+        return;
+    }
+    const owned = !!pd.chars[id];
+    const currentLevel = Number(pd.chars?.[id]?.level) || 0;
+    const isMaxOffer = Number(targetLevel) >= 8;
+    const safeCost = Number(cost);
+    if (!Number.isFinite(safeCost) || safeCost <= 0) return;
+    if (!isMaxOffer && owned) {
+        showAlert('Você já possui esse personagem.');
+        return;
+    }
+    if (isMaxOffer && currentLevel >= 8) {
+        showAlert('Esse personagem já está no nível máximo.');
+        return;
+    }
+    if (pd.gems < safeCost) {
+        showAlert('Gemas insuficientes!');
+        return;
+    }
+    const label = isMaxOffer ? `${c.name} nível 8` : c.name;
+    showConfirm('Quer comprar essa oferta?', `Deseja comprar ${label} por ${safeCost} gemas?`, (res) => {
+        if(!res) return;
+        pd.gems -= safeCost;
+        if (!owned) pd.chars[id] = { level: 1, slots: 2, chips: [null, null] };
+        if (isMaxOffer) {
+            pd.chars[id].level = Math.max(Number(pd.chars[id].level) || 1, 8);
+        }
+        save();
+        renderShop();
+        renderEvents();
+        renderChars?.();
+        showCharDetail?.(id);
+        startGachaQueue([{ type: 'instant', title: 'Você ganhou!', contents: [`👤 NOVO PERSONAGEM: ${c.name}!`] }]);
+    });
+}
+
 const MISSION_TEMPLATES = [
     { kind: 'kills', label: (n) => `Mate ${n} inimigos`, min: 60, max: 180, reward: 100 },
     { kind: 'waves', label: (n) => `Sobreviva ${n} waves`, min: 3, max: 10, reward: 100 },
@@ -7709,7 +7655,6 @@ function awardAchievementStat(key, amount = 1) {
     if (!pd.achievements.stats || typeof pd.achievements.stats !== 'object') pd.achievements.stats = {};
     const v = Number(pd.achievements.stats[key]) || 0;
     pd.achievements.stats[key] = Math.max(0, v + (Number(amount) || 0));
-    if (typeof syncEventMissionCompletions === 'function') syncEventMissionCompletions(true);
 }
 function renderAchievements() {
     const list = document.getElementById('achievements-list');
@@ -9986,7 +9931,7 @@ document.addEventListener('touchend', e => { if(e.touches.length === 0) { touchI
 document.addEventListener('touchstart', e => {
     if (!isPlaying || isPaused || !pd?.settings?.mobileJoystickFollowTap) return;
     const touch = e.changedTouches && e.changedTouches[0];
-    if (!touch || touch.clientX > window.innerWidth / 2 || isInteractiveUiTarget(e.target)) return;
+    if (!touch || isInteractiveUiTarget(e.target)) return;
     const touchControls = pd.settings.controlMode === 'mobile' || (pd.settings.controlMode === 'auto' && isTouchDevice());
     if (!touchControls || pd.settings.mobileControlLayout === 'dpad') return;
     touchId = touch.identifier;
