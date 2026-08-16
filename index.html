@@ -343,8 +343,8 @@
     .event-sprite--hero { width: 180px; height: 100px; }
     .trail-card .card-footer { justify-content: flex-start; }
 
-    #joystick-zone { position: absolute; bottom: 30px; left: 30px; width: 120px; height: 120px; background: rgba(0,0,128,0.2); border-radius: 50%; z-index: 5; display: none; touch-action: none; border: 3px solid rgba(0,0,128,0.4); }
-    #joystick-knob { position: absolute; top: 50%; left: 50%; width: 50px; height: 50px; background: rgba(0,0,128,0.7); border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; }
+    #joystick-zone { --joy-size: 120px; position: absolute; bottom: 30px; left: 30px; width: var(--joy-size); height: var(--joy-size); background: rgba(0,0,128,0.2); border-radius: 50%; z-index: 5; display: none; touch-action: none; border: 3px solid rgba(0,0,128,0.4); }
+    #joystick-knob { position: absolute; top: 50%; left: 50%; width: 41.6667%; height: 41.6667%; background: rgba(0,0,128,0.7); border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; }
     #dpad-zone {
         position: absolute;
         bottom: 18px;
@@ -514,6 +514,27 @@
     .achievement-progress-fill.done { background: linear-gradient(90deg, #f1c40f, #27ae60); }
     .achievement-badge { display:inline-flex; align-items:center; justify-content:center; padding:6px 10px; border-radius:999px; background: rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); font-size:12px; font-weight:900; }
     .hud-hp-wrap { width: 140px; height: 12px; background: rgba(0,0,0,0.45); border: 2px solid #000; border-radius: 999px; overflow: hidden; margin-top: 2px; box-shadow: 0 0 8px rgba(0,0,0,0.4); pointer-events: none; }
+
+    .gamepad-hint { display:inline-flex; align-items:center; gap:7px; margin-top:8px; font-size:12px; color:#bfc8d4; }
+    .gamepad-badge { display:inline-flex; align-items:center; justify-content:center; min-width:25px; height:25px; padding:0 7px; border-radius:8px; font-size:12px; font-weight:900; background:#111; border:2px solid #ff4fa3; color:#ff4fa3; box-shadow:0 0 10px rgba(255,79,163,.25); }
+    #gamepad-special-hint { position:absolute; right:142px; bottom:92px; z-index:6; display:none; align-items:center; gap:8px; padding:8px 12px; border-radius:12px; background:rgba(255,255,255,.94); color:#111; border:3px solid #ff4fa3; box-shadow:0 8px 20px rgba(0,0,0,.34); font-size:13px; font-weight:900; pointer-events:none; }
+    #gamepad-special-hint .gamepad-x { width:28px; height:28px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; background:#000; color:#ff4fa3; border:2px solid #ff4fa3; font-weight:900; }
+    .box-sprite { width:58px; height:58px; object-fit:contain; display:block; margin:0 auto 6px; }
+    .pass-box-icon { width: 52px; height: 52px; object-fit: contain; display:block; margin:0 auto; }
+    .gacha-final-list.gacha-final-list--gold, .gacha-final-list.gacha-final-list--chromium { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; width:min(100%,760px); max-height:min(58vh,560px); overflow-y:auto; padding:4px; margin:0 auto; }
+    .gacha-final-list.gacha-final-list--gold .gacha-item, .gacha-final-list.gacha-final-list--chromium .gacha-item { min-width:0; }
+    #gacha-result { width:min(94vw,900px); max-height:calc(100vh - 170px); overflow:visible; }
+    @media (max-width:620px) {
+        .gacha-final-list.gacha-final-list--gold, .gacha-final-list.gacha-final-list--chromium { max-height:52vh; }
+        #gacha-result { max-height:calc(100vh - 150px); }
+    }
+    #gamepad-special-hint { animation: gamepadHintPulse 1.3s ease-in-out infinite; }
+    @keyframes gamepadHintPulse { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-2px); } }
+    .gamepad-connected { color:#7CFFB1; }
+
+    .resource-icon { width:24px; height:24px; object-fit:contain; vertical-align:middle; margin-right:4px; }
+    .shop-resource-icon { width:38px; height:38px; object-fit:contain; display:block; margin:0 auto 5px; }
+
     .hud-hp-fill { height: 100%; width: 100%; background: #2ecc71; transition: width 0.15s linear, background 0.15s linear; }
 
     
@@ -1926,9 +1947,9 @@
     <div class="main-menu-shell">
         <div class="main-top-row">
             <div class="top-bar main-resources">
-                <div class="resource">🪙 <span id="menu-coins">0</span></div>
-                <div class="resource">💎 <span id="menu-gems">0</span></div>
-                <div class="resource">🧬 <span id="menu-evo">0</span></div>
+                <div class="resource"><img class="resource-icon" src="elements/coin.png" alt=""> <span id="menu-coins">0</span></div>
+                <div class="resource"><img class="resource-icon" src="elements/gems.png" alt=""> <span id="menu-gems">0</span></div>
+                <div class="resource"><img class="resource-icon" src="elements/evo.png" alt=""> <span id="menu-evo">0</span></div>
             </div>
         </div>
 
@@ -1951,7 +1972,7 @@
                 </div>
                 <div class="main-nav-row main-nav-row-left">
                     <span class="main-nav-label">Passe</span>
-                    <button class="emoji-nav-btn emoji-nav-pass" onclick="showScreen('screen-pass')">🎫</button>
+                    <button class="emoji-nav-btn emoji-nav-pass" onclick="showScreen('screen-pass')"><img class="resource-icon" src="elements/xp.png" alt=""> </button>
                 </div>
                 <div class="main-nav-row main-nav-row-left">
                     <span class="main-nav-label">Missões</span>
@@ -2042,10 +2063,16 @@
             <div class="settings-grid">
                 <button class="btn-menu settings-option" onclick="toggleSetting('controlMode')">Modo de Controle: <br><span id="set-ctrl" style="color:var(--btn-yellow)">Auto</span></button>
                 <div class="settings-card settings-card--wide">
-                    <div style="font-size:15px; font-weight:900; color:var(--btn-yellow); margin-bottom:6px;">Como funciona</div>
+                    <div style="font-size:15px; font-weight:900; color:var(--btn-yellow); margin-bottom:6px;">Gamepad</div>
                     <div style="font-size:13px; color:#ddd; line-height:1.45;">
-                        No PC, o jogo usa teclas. No mobile, o controle padrão é joystick. Se o joystick seguidor estiver ativado, tocar no mapa move o joystick para o ponto tocado.
+                        Detecção automática: ao conectar um gamepad, ele fica disponível sem precisar trocar o modo de controle. Setas movem no menu, <b>A</b> seleciona, <b>B</b> volta ou pausa, analógico esquerdo move na partida e <b>X</b> ativa a habilidade.
+                        <div class="gamepad-hint"><span class="gamepad-badge">A</span> Selecionar <span class="gamepad-badge">B</span> Voltar/Pausar <span class="gamepad-badge">X</span> Habilidade</div>
+                        <div id="gamepad-status" style="margin-top:8px; font-size:12px; font-weight:900; color:#aaa;">Nenhum gamepad detectado</div>
                     </div>
+                </div>
+                <div class="settings-card settings-card--wide">
+                    <div class="zoom-row"><span>Tamanho do Joystick</span><span id="set-joy-size" style="color:var(--btn-yellow)">120px</span></div>
+                    <input id="joystick-size-slider" type="range" min="80" max="220" step="5" value="120" oninput="setJoystickSize(this.value)">
                 </div>
             </div>
         </div>
@@ -2137,7 +2164,9 @@
         <div style="display:flex; flex-direction:column; gap:12px; margin-top:10px;">
             <select id="dev-lootbox-type" class="filter-select" style="width:100%;">
                 <option value="normal">Caixa Normal</option>
-                <option value="mega">Mega Caixa</option>
+                <option value="metal">Caixa de Metal</option>
+                <option value="gold">Caixa de Ouro</option>
+                <option value="chromium">Caixa Cromada</option>
                 <option value="pacote">Pacote</option>
             </select>
             <input id="dev-lootbox-qty" class="custom-input" type="number" min="1" step="1" value="1" style="margin:0;">
@@ -2226,10 +2255,10 @@
 <div id="screen-shop" class="screen scrollable hidden">
     <button class="btn-top-corner btn-back" onclick="showScreen('screen-main')">⬅️ Voltar</button>
     <div class="top-bar shop-hero" style="margin-left: 100px;">
-        <div class="resource">🪙 <span id="shop-coins">0</span></div>
-        <div class="resource">💎 <span id="shop-gems">0</span></div>
-        <div class="resource">🧬 <span id="shop-evo">0</span></div>
-        <div class="resource">🔩 <span id="shop-scrap">0</span></div>
+        <div class="resource"><img class="resource-icon" src="elements/coin.png" alt=""> <span id="shop-coins">0</span></div>
+        <div class="resource"><img class="resource-icon" src="elements/gems.png" alt=""> <span id="shop-gems">0</span></div>
+        <div class="resource"><img class="resource-icon" src="elements/evo.png" alt=""> <span id="shop-evo">0</span></div>
+        <div class="resource"><img class="resource-icon" src="elements/scrap.png" alt=""> <span id="shop-scrap">0</span></div>
     </div>
     <h2>Loja</h2>
     <div id="daily-reward-container" style="text-align:center; margin-bottom: 12px;"><button class="btn-action" style="font-size: 16px;" onclick="claimDailyReward()">🎁 Resgatar Diária</button></div>
@@ -2252,7 +2281,7 @@
             <div class="card-item rarity-legendary" id="vip-shop-card">
                 <div style="font-size: 40px;">👑</div>
                 <h5>Passe VIP (31 Dias)</h5>
-                <p style="font-size:12px; color:#aaa;">Mais ofertas, vitórias diárias, prêmios em dobro e megacaixas.</p>
+                <p style="font-size:12px; color:#aaa;">Mais ofertas, vitórias diárias, prêmios em dobro e caixas de metal.</p>
                 <div id="vip-shop-discount"></div>
                 <button id="vip-buy-btn" style="padding:5px;font-size:12px;background:var(--gem)" onclick="buyVIP()">💎 499</button>
             </div>
@@ -2291,8 +2320,16 @@
             <div id="shop-boxes-normal" class="menu-grid shop-grid"></div>
         </div>
         <div class="shop-section">
-            <h3>Mega Caixas</h3>
-            <div id="shop-boxes-mega" class="menu-grid shop-grid"></div>
+            <h3>Caixa de Metal</h3>
+            <div id="shop-boxes-metal" class="menu-grid shop-grid"></div>
+        </div>
+        <div class="shop-section">
+            <h3>Caixa de Ouro</h3>
+            <div id="shop-boxes-gold" class="menu-grid shop-grid"></div>
+        </div>
+        <div class="shop-section">
+            <h3>Caixa Cromada</h3>
+            <div id="shop-boxes-chromium" class="menu-grid shop-grid"></div>
         </div>
         <div class="shop-section">
             <h3>Pacotes</h3>
@@ -2376,14 +2413,14 @@
             </div>
             <div style="text-align:center;">
                 <div class="pass-bar"><div class="pass-fill" id="pass-progress-bar"></div></div>
-                <p id="pass-xp-text" style="color: #ccc; margin-top: 10px; font-weight: bold; font-size: 18px;">0 / 300 🎫</p>
+                <p id="pass-xp-text" style="color: #ccc; margin-top: 10px; font-weight: bold; font-size: 18px;"><img class="resource-icon" src="elements/xp.png" alt=""> 0 / 300</p>
                 <p id="pass-xp-needed" style="color: var(--btn-yellow); font-size: 14px; margin-top: 5px;">Faltam 300 para o próximo patamar!</p>
             </div>
             <div style="margin-top:12px; padding:14px; border-radius:16px; background: rgba(0,0,0,0.22); border:1px solid rgba(255,255,255,0.08);">
                 <div class="pass-season-note" style="margin-bottom:10px;">Passe infinito: cada patamar custa 300 XP e a recompensa fica fixa no save.</div>
                 <div style="text-align:left; color:#e8edf2; font-weight:900; margin-bottom:8px;">Bônus bom</div>
                 <div style="color:#ddd; font-size:14px; line-height:1.4;">
-                    A cada 10 patamares, uma recompensa rara é garantida. A cada 25, o raro tende a virar Mega Caixa. Nada rerrola ao entrar e sair do menu.
+                    A cada 10 patamares, uma recompensa rara é garantida. A cada 25, o raro tende a virar Caixa de Metal. Nada rerrola ao entrar e sair do menu.
                 </div>
             </div>
         </div>
@@ -2402,7 +2439,7 @@
 
 <div id="screen-trail" class="screen scrollable hidden">
     <button class="btn-top-corner btn-back" onclick="showScreen('screen-main')">⬅️ Voltar</button>
-    <div style="text-align:right; padding-top:10px;"><div class="resource" style="display:inline-flex;">🔩 <span id="trail-sucatas">0</span></div></div>
+    <div style="text-align:right; padding-top:10px;"><div class="resource" style="display:inline-flex;"><img class="resource-icon" src="elements/scrap.png" alt=""> <span id="trail-sucatas">0</span></div></div>
     <h2>Oficina</h2>
     <div id="trail-content" style="text-align:center; margin-top: 20px; padding-bottom:50px;"></div>
 </div>
@@ -2440,7 +2477,7 @@
     <button id="btn-pause" onclick="togglePause()">⏸ Pausa</button>
 </div>
 <div id="exp-bar-container" class="hidden"><div id="exp-bar"></div></div>
-<div id="joystick-zone"><div id="joystick-knob"></div></div>
+<div id="joystick-zone"><div id="joystick-knob"></div></div><div id="gamepad-special-hint"><span class="gamepad-x">X</span><span>HABILIDADE</span></div>
 <div id="dpad-zone" aria-label="Controle direcional mobile">
     <button class="dpad-btn" data-dir="up" style="grid-column: 2; grid-row: 1;">▲</button>
     <button class="dpad-btn" data-dir="left" style="grid-column: 1; grid-row: 2;">◀</button>
@@ -2502,10 +2539,10 @@
     <h1 style="color: var(--btn-red);">Fim de Jogo</h1>
     <div class="gameover-summary">
         <h3 id="go-wave">Waves Sobrevividas: 0</h3>
-        <h3 id="go-xp">XP do Passe Ganho: 0 🎫</h3>
-        <h3 id="go-coins" class="summary-line">🪙 Moedas obtidas: <strong>0</strong></h3>
-        <h3 id="go-gems" class="summary-line">💎 Gemas obtidas: <strong>0</strong></h3>
-        <h3 id="go-scrap" class="summary-line">🔩 Sucatas obtidas: <strong>0</strong></h3>
+        <h3 id="go-xp"><img class="resource-icon" src="elements/xp.png" alt=""> XP do Passe Ganho: 0</h3>
+        <h3 id="go-coins" class="summary-line"><img class="resource-icon" src="elements/coin.png" alt=""> Moedas obtidas: <strong>0</strong></h3>
+        <h3 id="go-gems" class="summary-line"><img class="resource-icon" src="elements/gems.png" alt=""> Gemas obtidas: <strong>0</strong></h3>
+        <h3 id="go-scrap" class="summary-line"><img class="resource-icon" src="elements/scrap.png" alt=""> Sucatas obtidas: <strong>0</strong></h3>
         <h3 id="go-medals" class="summary-line">🏅 Medalhas obtidas: <strong>0</strong></h3>
         <h3 id="go-daily" style="color:var(--btn-yellow);">Vitória Diária: Não ganha</h3>
     </div>
@@ -3410,7 +3447,12 @@ const UHC_MODIFIERS = {
 const ENEMY_TYPES = ["Básico", "Gigante", "Tanque", "Boss", "Ninja", "Kamikaze", "Líder", "Colosso", "Elite Master", "Líder Elite", "Caixa de papelão", "Capacete", "Cabeça de prisma"];
 
 const FIXED_COINS = [300, 600, 900, 1200, 2400, 5000]; const FIXED_EVO = [40, 80, 120, 240, 500]; const FIXED_SCRAPS = [100, 250, 500, 750, 1000]; const FIXED_XP = [150, 300, 650, 1000];
-const FIXED_BOXES = [ { type: 'normal', qtd: 1, baseCost: 10 }, { type: 'normal', qtd: 3, baseCost: 28 }, { type: 'normal', qtd: 5, baseCost: 45 }, { type: 'mega', qtd: 1, baseCost: 40 }, { type: 'mega', qtd: 2, baseCost: 75 }, { type: 'pacote', qtd: 1, baseCost: 10 }, { type: 'pacote', qtd: 3, baseCost: 28 }, { type: 'pacote', qtd: 5, baseCost: 45 }, { type: 'pacote', qtd: 10, baseCost: 85 } ];
+const FIXED_BOXES = [ { type: 'metal', qtd: 1, baseCost: 42 }, { type: 'metal', qtd: 2, baseCost: 80 }, { type: 'metal', qtd: 3, baseCost: 115 }, { type: 'metal', qtd: 5, baseCost: 180 }, { type: 'gold', qtd: 1, baseCost: 95 }, { type: 'gold', qtd: 2, baseCost: 180 }, { type: 'gold', qtd: 3, baseCost: 255 }, { type: 'chromium', qtd: 1, baseCost: 220 }, { type: 'chromium', qtd: 2, baseCost: 410 }, { type: 'normal', qtd: 1, baseCost: 10 }, { type: 'normal', qtd: 3, baseCost: 28 }, { type: 'normal', qtd: 5, baseCost: 45 }, { type: 'pacote', qtd: 1, baseCost: 10 }, { type: 'pacote', qtd: 3, baseCost: 28 }, { type: 'pacote', qtd: 5, baseCost: 45 }, { type: 'pacote', qtd: 10, baseCost: 85 } ];
+const BOX_DEFS = { pacote:{name:'Pacote',sprite:'elements/pack.png',pulls:1}, normal:{name:'Caixa Normal',sprite:'elements/cardboard_box.png',pulls:3}, metal:{name:'Caixa de Metal',sprite:'elements/steel_box.png',pulls:6}, gold:{name:'Caixa de Ouro',sprite:'elements/gold_box.png',pulls:10}, chromium:{name:'Caixa Cromada',sprite:'elements/chromium_box.png',pulls:15}, mega:{name:'Caixa de Metal',sprite:'elements/steel_box.png',pulls:6, legacy:true} };
+function normalizeBoxType(type){ const key = String(type || '').toLowerCase(); if (key === 'mega') return 'metal'; return BOX_DEFS[key] && !BOX_DEFS[key].legacy ? key : 'normal'; }
+function boxName(type){ return BOX_DEFS[normalizeBoxType(type)].name; }
+function boxSprite(type){ return BOX_DEFS[normalizeBoxType(type)].sprite; }
+function boxPulls(type){ return BOX_DEFS[normalizeBoxType(type)].pulls; }
 const PATENTE_LEVELS = [
     { name: 'Sem patente', label: '', cost: 0, slug: 'none' },
     { name: 'Patente Bronze', label: 'Bronze', cost: 10, slug: 'bronze' },
@@ -3507,12 +3549,12 @@ function renderGachaRevealHtml(rawText) {
 
 const DEFAULT_KEYBINDS = { up: 'w', down: 's', left: 'a', right: 'd', special: 'p', pause: 'escape' };
 const DEFAULT_INITIAL_ZOOM = (('ontouchstart' in window) || navigator.maxTouchPoints > 0) ? 0.65 : 1;
-const DEFAULT_SETTINGS = { skipGacha: false, controlMode: 'auto', mobileControlLayout: 'joystick', mobileJoystickFollowTap: false, ultraHardcore: false, uhcDark: false, noParticles: false, showCombatText: true, showHpBar: false, screenZoom: DEFAULT_INITIAL_ZOOM, musicVolume: 0.7, mapChoice: -1, keybinds: { ...DEFAULT_KEYBINDS } };
+const DEFAULT_SETTINGS = { skipGacha: false, controlMode: 'auto', mobileControlLayout: 'joystick', joystickSize: 120, ultraHardcore: false, uhcDark: false, noParticles: false, showCombatText: true, showHpBar: false, screenZoom: DEFAULT_INITIAL_ZOOM, musicVolume: 0.7, mapChoice: -1, keybinds: { ...DEFAULT_KEYBINDS } };
 
 const MUSIC_TRACKS = {
-    menu: 'soundtracks/battle_awaits.mp3',
-    classic: 'soundtracks/gladiator_journey.mp3',
-    hardcore: 'soundtracks/gladiator_journey.mp3',
+    menu: 'soundtracks/legacy_awaits.mp3',
+    classic: 'soundtracks/roguish_journey.mp3',
+    hardcore: 'soundtracks/roguish_journey.mp3',
     ultraHardcore: 'soundtracks/fatal_finale.mp3'
 };
 
@@ -3927,7 +3969,9 @@ function load() {
     if (typeof pd.settings.musicVolume !== 'number' || !isFinite(pd.settings.musicVolume)) pd.settings.musicVolume = 0.7;
     if (typeof pd.settings.uhcDark === 'undefined') pd.settings.uhcDark = false;
     if (typeof pd.settings.noParticles === 'undefined') pd.settings.noParticles = false;
-    if (typeof pd.settings.mobileJoystickFollowTap === 'undefined') pd.settings.mobileJoystickFollowTap = false;
+    if (typeof pd.settings.joystickSize !== 'number' || !isFinite(pd.settings.joystickSize)) pd.settings.joystickSize = 120;
+    if (pd.shopState?.items?.boxes?.mega && !pd.shopState.items.boxes.metal) pd.shopState.items.boxes.metal = pd.shopState.items.boxes.mega;
+    if (pd.shopState?.items?.boxes) delete pd.shopState.items.boxes.mega;
     if (typeof pd.settings.showCombatText === 'undefined') pd.settings.showCombatText = true;
     if (typeof pd.settings.showHpBar === 'undefined') pd.settings.showHpBar = false;
     if (typeof pd.settings.screenZoom !== 'number' || !isFinite(pd.settings.screenZoom)) pd.settings.screenZoom = 1;
@@ -4041,10 +4085,10 @@ function getEnemyEntryWave(type, currentWave = wave) {
     const key = String(type || '').toLowerCase();
     const entryWaves = {
         basico: 1, basic: 1, cardboard_head: 2, motorcycle_helmet: 3, prism_head: 7,
-        ninja: 3, velocista: 3, dancer: 3, atirador: 5, kamikaze: 5, gigante: 6,
+        ninja: 3, velocista: 3, dancer: 3, atirador: 5, kamikaze: 5, tnt_crate: 5, gigante: 6,
         tanque: 13, curandeiro: 16, elite: 17, lider: 21, colosso: 30, elite_master: 30,
         lider_elite: 30, mummy: 10, explorer: 15, sarcophagus: 15, camel: 18, scorpion: 30,
-        boss: 10, megaboss: 30, goblin: 1, monster_tree: 1
+        stone_golem: 35, boss: 10, megaboss: 30, goblin: 10, monster_tree: 1
     };
     return Object.prototype.hasOwnProperty.call(entryWaves, key) ? entryWaves[key] : Math.max(1, Number(currentWave) || 1);
 }
@@ -4531,7 +4575,22 @@ const ENEMY_SPRITES = {
     ice_statue: 'enemies/ice_statue.png',
     deer_pilot: 'enemies/deer_pilot.png',
     ballon: 'enemies/ballon.png',
-    truck: 'enemies/truck.png'
+    truck: 'enemies/truck.png',
+    cave_basic: 'enemies/cave_basic.png',
+    cave_miner: 'enemies/miner.png',
+    cave_crate_head: 'enemies/crate_head.png',
+    cave_stone_head: 'enemies/stone_head.png',
+    cave_velocist: 'enemies/cave_velocist.png',
+    cave_shooter: 'enemies/cave_shooter.png',
+    cave_giant: 'enemies/cave_giant.png',
+    cave_king_boss: 'enemies/cave_king_boss.png',
+    cave_tnt_kamikaze: 'enemies/TNT_kamikaze.png',
+    cave_healer: 'enemies/cave_healer.png',
+    drill_tank: 'enemies/drill_tank.png',
+    coal_kart: 'enemies/coal_kart.png',
+    cave_scorpion: 'enemies/spider.png',
+    stone_golem: 'enemies/stone_golem.png',
+    tnt_crate: 'enemies/TNT_crate.png'
 };
 
 const ENEMY_SPRITE_CACHE = new Map();
@@ -5107,6 +5166,49 @@ function getEffectiveEnemySpriteType(e) {
             elite_leader: 'desert_lider_elite'
         };
         if (desertMap[type] && getEnemySpritePath(desertMap[type])) return desertMap[type];
+    }
+    if (window.currentMap === 3) {
+        const caveMap = {
+            basico: 'cave_basic',
+            basic: 'cave_basic',
+            cardboard_head: 'cave_miner',
+            cardboard: 'cave_miner',
+            motorcycle_helmet: 'cave_crate_head',
+            helmet: 'cave_crate_head',
+            prism_head: 'cave_stone_head',
+            prism: 'cave_stone_head',
+            velocista: 'cave_velocist',
+            velocist: 'cave_velocist',
+            dancer: 'cave_velocist',
+            velocista_dancarino: 'cave_velocist',
+            atirador: 'cave_shooter',
+            shooter: 'cave_shooter',
+            gigante: 'cave_giant',
+            giant: 'cave_giant',
+            boss: 'cave_king_boss',
+            kamikaze: 'cave_tnt_kamikaze',
+            tanque: 'drill_tank',
+            tank: 'drill_tank',
+            curandeiro: 'cave_healer',
+            healer: 'cave_healer',
+            scorpion: 'cave_scorpion',
+            stone_golem: 'stone_golem',
+            tnt_crate: 'tnt_crate',
+            elite: 'elite_shooter',
+            elite_shooter: 'elite_shooter',
+            lider: 'leader',
+            leader: 'leader',
+            megaboss: 'mega_boss',
+            mega_boss: 'mega_boss',
+            colosso: 'colossum',
+            colossum: 'colossum',
+            elite_master: 'master_elite_shooter',
+            master_elite_shooter: 'master_elite_shooter',
+            lider_elite: 'elite_leader',
+            elite_leader: 'elite_leader',
+            truck: 'coal_kart'
+        };
+        if (caveMap[type] && getEnemySpritePath(caveMap[type])) return caveMap[type];
     }
     if (window.currentMap === 2) {
         const snowMap = {
@@ -5957,9 +6059,6 @@ function toggleSetting(key) {
     else if(key === 'ultraHardcore') {
         pd.settings.ultraHardcore = !pd.settings.ultraHardcore;
     }
-    else if(key === 'mobileJoystickFollowTap') {
-        pd.settings.mobileJoystickFollowTap = !pd.settings.mobileJoystickFollowTap;
-    }
     else if(key === 'uhcDark') {
         pd.settings.uhcDark = !pd.settings.uhcDark;
     }
@@ -6105,8 +6204,8 @@ function grantBackupOverdogReward() {
     const queue = [];
     for (let i = 0; i < 25; i++) {
         const contents = [];
-        for (let j = 0; j < 6; j++) contents.push(buildBoxDropItem('mega'));
-        queue.push({ type: 'box', boxType: 'mega', contents });
+        for (let j = 0; j < 6; j++) contents.push(buildBoxDropItem('metal'));
+        queue.push({ type: 'box', boxType: 'metal', contents });
     }
 
     pd.achievements.stats.charsUnlocked = Math.max(1, Object.keys(pd.chars || {}).filter(id => id !== 'strike' && pd.chars[id]).length + 1);
@@ -6133,7 +6232,7 @@ function redeemRewardCode() {
     renderShop?.();
     updateUI();
     startGachaQueue(reward.queue);
-    notify('Código resgatado: 5k moedas, 5k Evo, 7k sucatas, 100 gemas, 25 Mega Caixas, 10 personagens e Miss Macaron.');
+    notify('Código resgatado: 5k moedas, 5k Evo, 7k sucatas, 100 gemas, 25 Caixa de Metals, 10 personagens e Miss Macaron.');
 }
 
 function redeemDevCode() {
@@ -6559,7 +6658,7 @@ function confirmDevLootBoxOpen() {
     const qtyEl = document.getElementById('dev-lootbox-qty');
     const type = String(typeEl?.value || 'normal');
     const qty = Math.max(1, Math.min(999, Math.floor(Number(qtyEl?.value) || 1)));
-    const pullsPerBox = type === 'mega' ? 6 : (type === 'normal' ? 3 : 1);
+    const pullsPerBox = boxPulls(type);
     const queue = [];
     for (let i = 0; i < qty; i++) {
         const contents = [];
@@ -6682,17 +6781,29 @@ function resetJoystickPosition() {
     joyZone.style.bottom = '30px';
     joyZone.style.transform = 'none';
 }
+function setJoystickSize(value){
+    const size = Math.max(80, Math.min(220, Number(value)||120));
+    pd.settings.joystickSize = size;
+    if (joyZone) joyZone.style.setProperty('--joy-size', `${size}px`);
+    const label = document.getElementById('set-joy-size'); if(label) label.textContent = `${size}px`;
+    const slider = document.getElementById('joystick-size-slider'); if(slider) slider.value = size;
+    save(); applyControlLayout();
+}
 
 function applyControlLayout() {
     const touch = isTouchDevice();
+    updateGamepadStatusUI();
     const mobileControls = pd.settings.controlMode === 'mobile' || (pd.settings.controlMode === 'auto' && touch);
     const joystickMode = mobileControls && pd.settings.mobileControlLayout !== 'dpad';
     if (joyZone) {
         joyZone.style.display = joystickMode ? 'block' : 'none';
-        if (!pd.settings.mobileJoystickFollowTap || !joystickMode) resetJoystickPosition();
+        joyZone.style.setProperty('--joy-size', `${Number(pd.settings.joystickSize)||120}px`);
+        resetJoystickPosition();
     }
     if (dpadZone) dpadZone.style.display = mobileControls && pd.settings.mobileControlLayout === 'dpad' ? 'grid' : 'none';
-    if (btnSpecial) btnSpecial.style.display = mobileControls && getSelectedSpecialConfig() ? 'flex' : 'none';
+    if (btnSpecial) btnSpecial.style.display = (mobileControls || hasConnectedGamepad()) && getSelectedSpecialConfig() ? 'flex' : 'none';
+    const gpHint = document.getElementById('gamepad-special-hint');
+    if (gpHint) gpHint.style.display = hasConnectedGamepad() && !!getSelectedSpecialConfig() ? 'inline-flex' : 'none';
 }
 
 function updateSettingsUI(syncSlider = true) { 
@@ -6700,7 +6811,7 @@ function updateSettingsUI(syncSlider = true) {
     const cEl = document.getElementById('set-ctrl'); if(cEl) { cEl.innerHTML = pd.settings.controlMode === 'auto' ? 'Auto' : (pd.settings.controlMode === 'pc' ? 'PC' : 'Mobile'); }
     const uhcEl = document.getElementById('set-uhc'); if(uhcEl) { uhcEl.innerHTML = pd.settings.ultraHardcore ? 'Ativado' : 'Desativado'; uhcEl.style.color = pd.settings.ultraHardcore ? '#e056fd' : 'var(--btn-red)'; }
     const uhcDarkEl = document.getElementById('set-uhc-light'); if(uhcDarkEl) { uhcDarkEl.innerHTML = pd.settings.uhcDark ? 'Ativado' : 'Desativado'; uhcDarkEl.style.color = pd.settings.uhcDark ? 'var(--btn-green)' : 'var(--btn-red)'; }
-    const joyFollowEl = document.getElementById('set-joy-follow'); if(joyFollowEl) { joyFollowEl.innerHTML = pd.settings.mobileJoystickFollowTap ? 'Ativado' : 'Desativado'; joyFollowEl.style.color = pd.settings.mobileJoystickFollowTap ? 'var(--btn-green)' : 'var(--btn-red)'; }
+    const joySizeEl = document.getElementById('set-joy-size'); if(joySizeEl) joySizeEl.textContent = `${Number(pd.settings.joystickSize)||120}px`; const joySizeSlider = document.getElementById('joystick-size-slider'); if(syncSlider !== false && joySizeSlider) joySizeSlider.value = Number(pd.settings.joystickSize)||120;
     const pEl = document.getElementById('set-particles'); if(pEl) { pEl.innerHTML = pd.settings.noParticles ? 'Ativado' : 'Desativado'; pEl.style.color = pd.settings.noParticles ? 'var(--btn-green)' : 'var(--btn-red)'; }
     const ctEl = document.getElementById('set-combat-text'); if(ctEl) { ctEl.innerHTML = pd.settings.showCombatText ? 'Ativado' : 'Desativado'; ctEl.style.color = pd.settings.showCombatText ? 'var(--btn-green)' : 'var(--btn-red)'; }
     const hpEl = document.getElementById('set-hpbar'); if(hpEl) { hpEl.innerHTML = pd.settings.showHpBar ? 'Ativado' : 'Desativado'; hpEl.style.color = pd.settings.showHpBar ? 'var(--btn-green)' : 'var(--btn-red)'; }
@@ -6891,6 +7002,8 @@ function showShopSection(section) {
 }
 
 function showScreen(id) {
+    if (id && !window.__gamepadBackNavigation && currentScreenId && id !== currentScreenId) screenHistory.push(currentScreenId);
+    if (id) currentScreenId = id;
     if (pd?.tutorial?.stage === 'force-fasty' && pd?.chars?.fasty) {
         resolveFastyTutorialIfAlreadyOwned();
     }
@@ -7300,10 +7413,10 @@ const WEEKLY_MISSION_TEMPLATES = [
     { kind: 'kills', label: (n) => `Derrote ${n} inimigos`, min: 900, max: 1800, rewards: [{ type: 'coins', amount: 4500 }] },
     { kind: 'waves', label: (n) => `Sobreviva ${n} waves`, min: 16, max: 28, rewards: [{ type: 'box', kind: 'normal', amount: 2 }] },
     { kind: 'games', label: (n) => `Jogue ${n} partidas`, min: 10, max: 18, rewards: [{ type: 'evo', amount: 120 }] },
-    { kind: 'bosses', label: (n) => `Derrote ${n} Bosses`, min: 4, max: 8, rewards: [{ type: 'box', kind: 'mega', amount: 1 }] },
+    { kind: 'bosses', label: (n) => `Derrote ${n} Bosses`, min: 4, max: 8, rewards: [{ type: 'box', kind: 'metal', amount: 1 }] },
     { kind: 'elite', label: (n) => `Mate ${n} inimigos Elite+`, min: 35, max: 70, rewards: [{ type: 'coins', amount: 2500 }, { type: 'box', kind: 'normal', amount: 1 }] },
     { kind: 'specific', label: (n, meta) => `Elimine ${n} ${enemyMissionName(meta.enemyType)}`, min: 35, max: 70, rewards: [{ type: 'scrap', amount: 120 }] },
-    { kind: 'damage', label: (n, meta) => `Cause ${n} de dano com ${characterMissionName(meta.charId)}`, min: 30000, max: 90000, rewards: [{ type: 'box', kind: 'mega', amount: 1 }] }
+    { kind: 'damage', label: (n, meta) => `Cause ${n} de dano com ${characterMissionName(meta.charId)}`, min: 30000, max: 90000, rewards: [{ type: 'box', kind: 'metal', amount: 1 }] }
 ];
 
 function enemyMissionName(type) {
@@ -7563,7 +7676,7 @@ function describeMissionRewardItem(item) {
     if (item.type === 'evo') return `${item.amount} Evo`;
     if (item.type === 'gems') return `${item.amount} Gemas`;
     if (item.type === 'scrap') return `${item.amount} Sucatas`;
-    if (item.type === 'box') return `${item.amount}x ${item.kind === 'mega' ? 'Mega Caixa' : 'Caixa Comum'}`;
+    if (item.type === 'box') return `${item.amount}x ${boxName(item.kind)}`;
     return '';
 }
 
@@ -7579,7 +7692,7 @@ function createMissionRewardQueue(items = []) {
         else if (item.type === 'box') {
             for (let i = 0; i < item.amount; i++) {
                 const c = [];
-                const pulls = item.kind === 'mega' ? 6 : 3;
+                const pulls = boxPulls(item.kind);
                 for (let j = 0; j < pulls; j++) c.push(buildBoxDropItem(item.kind));
                 queue.push({ type: 'box', boxType: item.kind, contents: c });
             }
@@ -7949,6 +8062,11 @@ function ensureShopState() {
     if(typeof pd.shopState.vipOfferDiscount !== 'number') pd.shopState.vipOfferDiscount = 0;
     if(typeof pd.shopState.lifetimeOfferClaimed !== 'boolean') pd.shopState.lifetimeOfferClaimed = false;
     if(!pd.shopState.items || typeof pd.shopState.items !== 'object') pd.shopState.items = {};
+    if (Array.isArray(pd.shopState.bundles)) pd.shopState.bundles.forEach(b => {
+        const boxes = b?.items?.boxes;
+        if (!boxes || typeof boxes !== 'object') return;
+        if ((Number(boxes.mega) || 0) > 0) { boxes.metal = (Number(boxes.metal) || 0) + Number(boxes.mega); delete boxes.mega; }
+    });
     const ensureArr = (key, len) => {
         if(!Array.isArray(pd.shopState.items[key])) pd.shopState.items[key] = [];
         while(pd.shopState.items[key].length < len) pd.shopState.items[key].push({ discount: 0 });
@@ -8380,40 +8498,58 @@ function getRandomDiscount() {
 function isVIPActive() { return pd.vip && pd.vip.activeUntil > Date.now(); }
 
 function generateBundles() {
-    let bundles = []; let numBundles = isVIPActive() ? 4 + Math.floor(Math.random() * 4 
-) : 2 + Math.floor(Math.random() * 4);
-    for(let i=0; i<numBundles; i++) {
-        let type = Math.floor(Math.random() * 4) + 1; let costG = 0; let b = { items: { boxes: {normal:0, mega:0, pacote:0}, coins:0, evo:0, passXp:0, scrap:0, char: null, chip: null } };
-        if(type === 1 || type === 3 || type === 4) { if(Math.random() > 0.3) { let n = Math.floor(Math.random() * 3) + 1; b.items.boxes.normal = n; costG += n * 8; } else { b.items.boxes.mega = 1; costG += 35; } }
-        if(type === 2 || type === 3 || type === 4) { 
-            let unowned = Object.values(CHARACTERS).filter(c => !pd.chars[c.id] && c.id !== 'fasty');
-            if(unowned.length > 0) { 
-                let c = unowned[Math.floor(Math.random() * unowned.length)]; 
-                b.items.char = c.id; 
-                costG += c.rarity==='common'?20 : c.rarity==='rare'?60 : c.rarity==='epic'?120 : c.rarity==='legendary'?250 : 400; 
-            } else { b.items.boxes.pacote += 3; costG += 24; } 
+    const bundles = [];
+    const numBundles = isVIPActive() ? 4 + Math.floor(Math.random() * 4) : 2 + Math.floor(Math.random() * 4);
+    const boxTypes = ['normal', 'pacote', 'metal', 'gold', 'chromium'];
+    for (let i = 0; i < numBundles; i++) {
+        const b = { items: { boxes: { normal:0, pacote:0, metal:0, gold:0, chromium:0 }, coins:0, evo:0, passXp:0, scrap:0, char:null, chip:null } };
+        const flavor = Math.floor(Math.random() * 5);
+        if (flavor <= 4) {
+            const type = boxTypes[flavor];
+            if (type === 'normal') b.items.boxes.normal = 2 + Math.floor(Math.random() * 5);
+            else if (type === 'pacote') b.items.boxes.pacote = 2 + Math.floor(Math.random() * 6);
+            else if (type === 'metal') b.items.boxes.metal = 1 + Math.floor(Math.random() * 3);
+            else if (type === 'gold') b.items.boxes.gold = 1 + Math.floor(Math.random() * 3);
+            else if (type === 'chromium') b.items.boxes.chromium = 1 + Math.floor(Math.random() * 2);
         }
-        if(type === 1 || type === 2 || type === 3) { 
-            let r = Math.random();
-            if(r < 0.25) { b.items.coins = 500 + Math.floor(Math.random()*500); costG += Math.floor(b.items.coins/50); }
-            else if(r < 0.50) { b.items.evo = 20 + Math.floor(Math.random()*30); costG += Math.floor(b.items.evo/2.5); }
-            else { b.items.scrap = 50 + Math.floor(Math.random()*150); costG += Math.floor(b.items.scrap/5); }
+        if (Math.random() < 0.45) {
+            let unowned = Object.values(CHARACTERS).filter(c => c?.id && !pd.chars[c.id] && c.id !== 'fasty');
+            if (unowned.length) {
+                const c = unowned[Math.floor(Math.random() * unowned.length)];
+                b.items.char = c.id;
+            }
         }
-        if(Math.random() < 0.30) {
-            let cKeys = Object.keys(CHIPS_DATA);
-            b.items.chip = cKeys[Math.floor(Math.random() * cKeys.length)];
-            costG += 15;
+        if (Math.random() < 0.45) {
+            const r = Math.random();
+            if (r < 0.33) b.items.coins = 500 + Math.floor(Math.random() * 700);
+            else if (r < 0.66) b.items.evo = 25 + Math.floor(Math.random() * 45);
+            else b.items.scrap = 60 + Math.floor(Math.random() * 180);
         }
-        
-        let finalCostGems = Math.max(5, Math.floor(costG * 0.8)); b.discount = getRandomDiscount(); b.currency = 'gems'; b.baseCost = finalCostGems;
-        const hasHighRarityChar = !!b.items.char && ['legendary','mythic'].includes((CHARACTERS[b.items.char] && CHARACTERS[b.items.char].rarity) || '');
-        let convertedCoins = finalCostGems * 100; 
-        if(!hasHighRarityChar && convertedCoins >= 4500 && Math.random() < 0.20) { b.currency = 'coins'; b.baseCost = convertedCoins; }
+        if (Math.random() < 0.20) {
+            const keys = Object.keys(CHIPS_DATA);
+            if (keys.length) b.items.chip = keys[Math.floor(Math.random() * keys.length)];
+        }
+        let costG = 0;
+        costG += (b.items.boxes.normal || 0) * 8;
+        costG += (b.items.boxes.pacote || 0) * 7;
+        costG += (b.items.boxes.metal || 0) * 38;
+        costG += (b.items.boxes.gold || 0) * 88;
+        costG += (b.items.boxes.chromium || 0) * 205;
+        if (b.items.char && CHARACTERS[b.items.char]) {
+            const r = CHARACTERS[b.items.char].rarity;
+            costG += r==='common'?20:r==='rare'?60:r==='epic'?120:r==='legendary'?250:400;
+        }
+        if (b.items.coins) costG += Math.floor(b.items.coins/50);
+        if (b.items.evo) costG += Math.floor(b.items.evo/2.5);
+        if (b.items.scrap) costG += Math.floor(b.items.scrap/5);
+        if (b.items.chip) costG += 15;
+        b.discount = getRandomDiscount();
+        b.currency = 'gems';
+        b.baseCost = Math.max(5, Math.floor(costG * 0.82));
         bundles.push(b);
     }
     return bundles;
 }
-
 function updateShopRotation() {
     const now = Date.now();
     if(now - pd.shopState.lastRotation > 1 * 60 * 60 * 1000) {
@@ -8463,9 +8599,11 @@ function renderShop() {
             let desc = "";
             if(b.items.char && CHARACTERS[b.items.char]) desc += `👤 ${CHARACTERS[b.items.char].name}<br>`;
             if(b.items.chip && CHIPS_DATA[b.items.chip]) desc += `💽 Chip: ${CHIPS_DATA[b.items.chip].name}<br>`;
-            if(b.items.boxes.mega > 0) desc += `🗳 ${b.items.boxes.mega}x Mega<br>`;
-            if(b.items.boxes.normal > 0) desc += `📦 ${b.items.boxes.normal}x Normal<br>`;
-            if(b.items.boxes.pacote > 0) desc += `🧧 ${b.items.boxes.pacote}x Pacote<br>`;
+            if(b.items.boxes.metal > 0) desc += `<img class="resource-icon" src="elements/steel_box.png" alt=""> ${b.items.boxes.metal}x Caixa de Metal<br>`;
+            if(b.items.boxes.gold > 0) desc += `<img class="resource-icon" src="elements/gold_box.png" alt=""> ${b.items.boxes.gold}x Caixa de Ouro<br>`;
+            if(b.items.boxes.chromium > 0) desc += `<img class="resource-icon" src="elements/chromium_box.png" alt=""> ${b.items.boxes.chromium}x Caixa Cromada<br>`;
+            if(b.items.boxes.normal > 0) desc += `<img class="resource-icon" src="elements/cardboard_box.png" alt=""> ${b.items.boxes.normal}x Caixa Normal<br>`;
+            if(b.items.boxes.pacote > 0) desc += `<img class="resource-icon" src="elements/pack.png" alt=""> ${b.items.boxes.pacote}x Pacote<br>`;
             if(b.items.coins > 0) desc += `🪙 ${b.items.coins} Moedas<br>`;
             if(b.items.evo > 0) desc += `🧬 ${b.items.evo} Evo<br>`;
             if(b.items.scrap > 0) desc += `🔩 ${b.items.scrap} Sucatas<br>`;
@@ -8502,7 +8640,7 @@ function renderShop() {
             let base = Math.floor(amount/50);
             let finalCost = Math.max(1, Math.floor(base * (1 - dData.discount)));
             let tags = dData.discount > 0 ? `<div class="shop-discount">-${dData.discount*100}%</div>` : '';
-            div.innerHTML = `${tags}<h4>🪙 ${amount}</h4><button style="padding:5px;font-size:12px;background:var(--gem)" onclick="buyResource('coins', ${amount}, ${finalCost})">💎 ${finalCost}</button>`;
+            div.innerHTML = `${tags}<img class="shop-resource-icon" src="elements/coin.png" alt=""><h4>${amount} Moedas</h4><button style="padding:5px;font-size:12px;background:var(--gem)" onclick="buyResource('coins', ${amount}, ${finalCost})">💎 ${finalCost}</button>`;
             cList.appendChild(div);
         });
     }
@@ -8517,7 +8655,7 @@ function renderShop() {
             let base = Math.floor(amount/2.5);
             let finalCost = Math.max(1, Math.floor(base * (1 - dData.discount)));
             let tags = dData.discount > 0 ? `<div class="shop-discount">-${dData.discount*100}%</div>` : '';
-            div.innerHTML = `${tags}<h4>🧬 ${amount}</h4><button style="padding:5px;font-size:12px;background:var(--gem)" onclick="buyResource('evo', ${amount}, ${finalCost})">💎 ${finalCost}</button>`;
+            div.innerHTML = `${tags}<img class="shop-resource-icon" src="elements/evo.png" alt=""><h4>${amount} Evo</h4><button style="padding:5px;font-size:12px;background:var(--gem)" onclick="buyResource('evo', ${amount}, ${finalCost})">💎 ${finalCost}</button>`;
             eList.appendChild(div);
         });
     }
@@ -8532,7 +8670,7 @@ function renderShop() {
             let base = Math.floor(amount/5);
             let finalCost = Math.max(1, Math.floor(base * (1 - dData.discount)));
             let tags = dData.discount > 0 ? `<div class="shop-discount">-${dData.discount*100}%</div>` : '';
-            div.innerHTML = `${tags}<h4>🔩 ${amount}</h4><button style="padding:5px;font-size:12px;background:var(--gem)" onclick="buyResource('scrap', ${amount}, ${finalCost})">💎 ${finalCost}</button>`;
+            div.innerHTML = `${tags}<img class="shop-resource-icon" src="elements/scrap.png" alt=""><h4>${amount} Sucatas</h4><button style="padding:5px;font-size:12px;background:var(--gem)" onclick="buyResource('scrap', ${amount}, ${finalCost})">💎 ${finalCost}</button>`;
             sList.appendChild(div);
         });
     }
@@ -8547,13 +8685,15 @@ function renderShop() {
             const dData = (pd.shopState.items.boxes && pd.shopState.items.boxes[index]) ? pd.shopState.items.boxes[index] : { discount: 0 };
             let finalCost = Math.max(1, Math.floor(b.baseCost * (1 - dData.discount)));
             let tags = dData.discount > 0 ? `<div class="shop-discount">-${dData.discount*100}%</div>` : '';
-            let icon = b.type==='normal' ? '📦' : (b.type==='mega' ? '🗳' : '🧧');
-            div.innerHTML = `${tags}<div style="font-size: 40px;">${icon}</div><h4>${b.qtd}x ${b.type==='normal' ? 'Normal' : (b.type==='mega' ? 'Mega' : 'Pacote')}</h4><button style="padding:5px;font-size:12px;background:var(--gem)" onclick="buyMultipleBoxes('${b.type}', ${b.qtd}, ${finalCost})">💎 ${finalCost}</button>`;
+            const def = BOX_DEFS[b.type];
+            div.innerHTML = `${tags}<img class="box-sprite" src="${def.sprite}" alt=""><h4>${b.qtd}x ${def.name}</h4><button style="padding:5px;font-size:12px;background:var(--gem)" onclick="buyMultipleBoxes('${b.type}', ${b.qtd}, ${finalCost})">💎 ${finalCost}</button>`;
             list.appendChild(div);
         });
     };
     renderBoxGrid('shop-boxes-normal', 'normal');
-    renderBoxGrid('shop-boxes-mega', 'mega');
+    renderBoxGrid('shop-boxes-metal', 'metal');
+    renderBoxGrid('shop-boxes-gold', 'gold');
+    renderBoxGrid('shop-boxes-chromium', 'chromium');
     renderBoxGrid('shop-boxes-pacote', 'pacote');
 
     const promoList = document.getElementById('shop-char-promos');
@@ -8650,7 +8790,7 @@ function renderShop() {
         ` : `
             <div style="font-size:40px;">🛰️</div>
             <h5>Pacote Vitalício</h5>
-            <p style="font-size:12px; color:#aaa;">Resgate grátis: Necro, 100 gemas e 3 megacaixas.</p>
+            <p style="font-size:12px; color:#aaa;">Resgate grátis: Necro, 100 gemas e 3 caixas de metal.</p>
             <button style="padding:5px;font-size:12px;background:var(--gem)" type="button" onclick="buyLifetimeOffer()">RESGATAR</button>
         `;
         if (alreadyClaimed) {
@@ -8685,7 +8825,7 @@ function clickNovoOverlay(index, finalCost, el) {
 
 function checkVipDrop(type) {
     let r = Math.random();
-    if(type === 'mega' && r < 0.000067) return true;
+    if(normalizeBoxType(type) === 'metal' && r < 0.000067) return true;
     if((type === 'normal' || type === 'pacote') && r < 0.00000042) return true;
     return false;
 }
@@ -8719,7 +8859,7 @@ function rollLootBoxCharacterMedal(type) {
     const charId = owned[Math.floor(Math.random() * owned.length)];
     let amount = 1 + Math.floor(Math.random() * 7);
     if (type === 'normal' || type === 'pacote') amount = 1 + Math.floor(Math.random() * 4);
-    else if (type === 'mega') amount = 2 + Math.floor(Math.random() * 6);
+    else if (normalizeBoxType(type) === 'metal') amount = 2 + Math.floor(Math.random() * 6);
     amount = Math.max(1, Math.min(7, amount));
     const text = grantCharacterMedals(charId, amount, `caixa ${type}`);
     return text ? { text, charId, amount } : null;
@@ -8734,7 +8874,7 @@ function buildBoxDropItem(type) {
         return seasonal.isCharacter ? seasonal : seasonal.text;
     }
 
-    const medalDropChance = type === 'mega' ? 0.18 : 0.10;
+    const medalDropChance = normalizeBoxType(type) === 'metal' ? 0.18 : 0.10;
     if (Math.random() < medalDropChance) {
         const medalDrop = rollLootBoxCharacterMedal(type);
         if (medalDrop) return medalDrop.text;
@@ -8774,12 +8914,12 @@ function processNextGacha() {
     let item = window.gachaQueue.shift();
     if(item.type === 'instant') { document.getElementById('overlay-gacha-intro').classList.add('hidden'); showGachaScreen(item.title, item.contents); } 
     else if(item.type === 'box') {
-        if(pd.settings.skipGacha) { let title = "Caixa: " + (item.boxType === 'mega' ? 'Mega' : (item.boxType === 'pacote' ? 'Pacote' : 'Normal')); showGachaScreen(title, item.contents); } 
-        else { document.getElementById('overlay-gacha').classList.add('hidden'); document.getElementById('overlay-gacha-intro').classList.remove('hidden'); document.getElementById('gacha-intro-emoji').innerHTML = item.boxType === 'mega' ? '🗳' : (item.boxType === 'pacote' ? '🧧' : '📦'); window.tempBoxData = item; }
+        if(pd.settings.skipGacha) { let title = `Caixa: ${boxName(item.boxType)}`; showGachaScreen(title, item.contents); } 
+        else { document.getElementById('overlay-gacha').classList.add('hidden'); document.getElementById('overlay-gacha-intro').classList.remove('hidden'); document.getElementById('gacha-intro-emoji').innerHTML = `<img class="box-sprite" src="${boxSprite(item.boxType)}" alt="">`; window.tempBoxData = item; }
     }
 }
 
-function tapToOpenBox() { document.getElementById('overlay-gacha-intro').classList.add('hidden'); let item = window.tempBoxData; if (!item) return; let title = "Caixa: " + (item.boxType === 'mega' ? 'Mega' : (item.boxType === 'pacote' ? 'Pacote' : 'Normal')); showGachaScreen(title, item.contents); }
+function tapToOpenBox() { document.getElementById('overlay-gacha-intro').classList.add('hidden'); let item = window.tempBoxData; if (!item) return; let title = `Caixa: ${boxName(item.boxType)}`; showGachaScreen(title, item.contents); }
 function revealGachaCharacterToken(token, state, done) {
     const res = document.getElementById('gacha-result');
     if (!res || !token?.charId) { done?.(); return; }
@@ -8968,7 +9108,7 @@ function showGachaScreen(title, contents) {
         if (state.index >= state.queue.length) {
             state.finished = true;
             if (counter) counter.textContent = `${state.queue.length}/${state.queue.length}`;
-            res.innerHTML = `<div class="gacha-win-banner">VOCÊ GANHOU!</div><div class="gacha-final-list">${state.queue.map(txt => `<div class="gacha-item">${renderRewardText(txt)}</div>`).join('')}</div>`;
+            res.innerHTML = `<div class="gacha-win-banner">VOCÊ GANHOU!</div><div class="gacha-final-list${state.title.includes('Caixa de Ouro') ? ' gacha-final-list--gold' : (state.title.includes('Caixa Cromada') ? ' gacha-final-list--chromium' : '')}">${state.queue.map(txt => `<div class="gacha-item">${renderRewardText(txt)}</div>`).join('')}</div>`;
             if (continueBtn) continueBtn.classList.remove('hidden');
             return;
         }
@@ -9017,13 +9157,28 @@ function devRollCharacter() {
     startGachaQueue([{ type: 'instant', title: '🎰 Roletar personagem', contents: [{ isCharacter: true, charId: target.id, name: target.name, devRoll: true }] }]);
 }
 
+function resourceIcon(type, extraClass = 'resource-icon') {
+    const map = { coins:'elements/coin.png', gems:'elements/gems.png', evo:'elements/evo.png', xp:'elements/xp.png', scrap:'elements/scrap.png' };
+    const src = map[type] || '';
+    return src ? `<img class="${extraClass}" src="${src}" alt="">` : '';
+}
+
+function renderResourceRewardText(txt) {
+    const raw = String(txt || '');
+    let out = raw.includes('<img') ? raw.replace(/&(?!(?:amp|lt|gt|quot|#39);)/g, '&amp;') : escapeHtmlText(raw);
+    const icon = (type) => resourceIcon(type);
+    out = out.replace(/🪙/g, icon('coins')).replace(/💎/g, icon('gems')).replace(/🧬/g, icon('evo')).replace(/🔩/g, icon('scrap')).replace(/🎫/g, icon('xp'));
+    out = out.replace(/&lt;img class=&quot;resource-icon&quot;[^&gt;]*&gt;/g, '');
+    return out;
+}
+
 function renderRewardText(txt) {
     const token = getGachaCharacterToken(txt);
     if (token) {
         const c = CHARACTERS?.[token.charId];
-        return escapeHtmlText(c ? `👤 NOVO PERSONAGEM: ${c.name}!` : `👤 NOVO PERSONAGEM`);
+        return renderResourceRewardText(c ? `👤 NOVO PERSONAGEM: ${c.name}!` : `👤 NOVO PERSONAGEM`);
     }
-    return escapeHtmlText(String(txt || ''));
+    return renderResourceRewardText(txt);
 }
 
 function processBuyBundle(index, cost) {
@@ -9041,9 +9196,13 @@ function processBuyBundle(index, cost) {
         if(b.items.char) { pd.chars[b.items.char] = {level:1, slots:2, chips: [null, null]}; if(b.items.char==='gladiator') pd.chars[b.items.char].mode='shooter'; instant.push(`👤 NOVO PERSONAGEM: ${CHARACTERS[b.items.char].name}!`); }
         if(b.items.chip) { pd.chipsInventory[b.items.chip] = (pd.chipsInventory[b.items.chip]||0)+1; instant.push(`💽 NOVO CHIP: ${CHIPS_DATA[b.items.chip].name}!`); }
         if(instant.length > 0) q.push({ type: 'instant', title: 'Recompensas do Pacote', contents: instant });
-        for(let i=0; i<(b.items.boxes.mega||0); i++) { let c = []; for(let j=0; j<6; j++) c.push(buildBoxDropItem('mega')); q.push({ type: 'box', boxType: 'mega', contents: c }); }
-        for(let i=0; i<(b.items.boxes.normal||0); i++) { let c = []; for(let j=0; j<3; j++) c.push(buildBoxDropItem('normal')); q.push({ type: 'box', boxType: 'normal', contents: c }); }
-        for(let i=0; i<(b.items.boxes.pacote||0); i++) { let c = []; c.push(buildBoxDropItem('pacote')); q.push({ type: 'box', boxType: 'pacote', contents: c }); }
+        ['metal','gold','chromium','normal','pacote'].forEach(type => {
+            for(let i=0; i<(b.items.boxes[type]||0); i++) {
+                const c = [];
+                for(let j=0; j<boxPulls(type); j++) c.push(buildBoxDropItem(type));
+                q.push({ type: 'box', boxType: type, contents: c });
+            }
+        });
         pd.shopState.bundles[index] = null; save(); renderShop(); startGachaQueue(q);
     });
 }
@@ -9070,13 +9229,19 @@ function buyResource(type, amount, cost) {
 }
 
 function buyMultipleBoxes(type, qtd, cost) {
+    const safeType = normalizeBoxType(type);
     if(pd.gems < cost) { showAlert("Gemas insuficientes!"); return; }
-    const boxName = type === 'normal' ? 'Caixa Normal' : (type === 'mega' ? 'Mega Caixa' : 'Pacote');
-    showConfirm("Quer comprar essa oferta?", `Deseja comprar ${qtd}x ${boxName} por ${cost} gemas?`, (res) => {
+    const label = boxName(safeType);
+    showConfirm("Quer comprar essa oferta?", `Deseja comprar ${qtd}x ${label} por ${cost} gemas?`, (res) => {
         if(!res) return;
         pd.gems -= cost;
-        let q = [];
-        for(let k=0; k<qtd; k++) { let c = []; let pulls = type === 'normal' ? 3 : (type === 'mega' ? 6 : 1); for(let i=0; i<pulls; i++) c.push(buildBoxDropItem(type)); q.push({ type: 'box', boxType: type, contents: c }); }
+        const q = [];
+        const pulls = boxPulls(safeType);
+        for(let k=0; k<qtd; k++) {
+            const c = [];
+            for(let i=0; i<pulls; i++) c.push(buildBoxDropItem(safeType));
+            q.push({ type: 'box', boxType: safeType, contents: c });
+        }
         save();
         renderShop();
         startGachaQueue(q);
@@ -9109,9 +9274,9 @@ function buyLifetimeOffer() {
     if (!pd.chars.necro) {
         pd.chars.necro = { level: 1, slots: 2, chips: [null, null] };
         pd.gems += 100;
-        rewards.push("Necro", "100 gemas", "3 megacaixas");
+        rewards.push("Necro", "100 gemas", "3 caixas de metal");
         for (let i = 0; i < 3; i++) {
-            rewards.push(`BOX::mega`);
+            rewards.push(`BOX::metal`);
         }
     } else {
         pd.gems += 1;
@@ -9128,10 +9293,10 @@ function buyLifetimeOffer() {
     const queue = [];
     const instant = rewards.filter(r => !r.startsWith("BOX::"));
     if (instant.length) queue.push({ type: 'instant', title: 'Oferta Vitalícia', contents: instant.map(r => `🎉 ${r}`) });
-    rewards.filter(r => r.startsWith("BOX::mega")).forEach(() => {
+    rewards.filter(r => r.startsWith("BOX::metal")).forEach(() => {
         const c = [];
-        for (let i = 0; i < 6; i++) c.push(buildBoxDropItem('mega'));
-        queue.push({ type: 'box', boxType: 'mega', contents: c });
+        for (let i = 0; i < 6; i++) c.push(buildBoxDropItem('metal'));
+        queue.push({ type: 'box', boxType: 'metal', contents: c });
     });
     rewards.filter(r => r === "BOX::normal").forEach(() => {
         const c = [];
@@ -9158,7 +9323,7 @@ function claimDailyReward() {
     let rEvo = 5 + Math.floor(Math.random()*15); pd.evo += rEvo; instant.push(`🧬 +${rEvo} Evo`);
     let rXp = 10 + Math.floor(Math.random()*20); addPassXp(rXp); instant.push(`🎫 +${rXp} XP Passe`);
     q.push({ type: 'instant', title: 'Recompensas Diárias', contents: instant });
-    let isMega = Math.random() < 0.05; let type = isMega ? 'mega' : 'normal'; let pulls = isMega ? 6 : 3;
+    let isMetal = Math.random() < 0.05; let type = isMetal ? 'metal' : 'normal'; let pulls = boxPulls(type);
     let c = []; for(let i=0; i<pulls; i++) c.push(buildBoxDropItem(type)); q.push({ type: 'box', boxType: type, contents: c });
     save(); renderShop(); startGachaQueue(q);
 }
@@ -9243,11 +9408,11 @@ function clonePassReward(reward) {
 function summarizePassReward(reward) {
     const parts = [];
     (reward.rewards || []).forEach(item => {
-        if (item.type === 'coins') parts.push(`🪙 ${formatCompactNumber(item.amount)} Moedas`);
-        else if (item.type === 'evo') parts.push(`🧬 ${formatCompactNumber(item.amount)} Pontos Evo`);
-        else if (item.type === 'gems') parts.push(`💎 ${formatCompactNumber(item.amount)} Gemas`);
-        else if (item.type === 'scrap') parts.push(`🔩 ${formatCompactNumber(item.amount)} Sucatas`);
-        else if (item.type === 'box') parts.push(`${formatCompactNumber(item.amount)}x ${item.kind === 'mega' ? 'Mega Caixa' : 'Caixa'}`);
+        if (item.type === 'coins') parts.push(`${resourceIcon('coins')} ${formatCompactNumber(item.amount)} Moedas`);
+        else if (item.type === 'evo') parts.push(`${resourceIcon('evo')} ${formatCompactNumber(item.amount)} Pontos Evo`);
+        else if (item.type === 'gems') parts.push(`${resourceIcon('gems')} ${formatCompactNumber(item.amount)} Gemas`);
+        else if (item.type === 'scrap') parts.push(`${resourceIcon('scrap')} ${formatCompactNumber(item.amount)} Sucatas`);
+        else if (item.type === 'box') parts.push(`${formatCompactNumber(item.amount)}x ${boxName(item.kind)}`);
         else if (item.type === 'pack') parts.push(`${formatCompactNumber(item.amount)}x Pacote`);
     });
     return parts.join(' + ');
@@ -9261,7 +9426,7 @@ function boostPassRewardForVIP(reward) {
             next.amount = 10;
         } else if (next.type === 'coins' || next.type === 'evo' || next.type === 'scrap') {
             next.amount = Math.max(next.amount, Math.ceil(next.amount * 1.35));
-        } else if (next.type === 'box' && next.kind === 'mega') {
+        } else if (next.type === 'box' && next.kind === 'metal') {
             next.amount = Math.max(1, next.amount + 1);
         } else if (next.type === 'box' || next.type === 'pack') {
             next.amount = next.amount + 1;
@@ -9276,11 +9441,12 @@ function boostPassRewardForVIP(reward) {
 function buildPassRewardFromSeed(tier, vipActive = false) {
     const rand = seededMulberry32(getPassTierSeed(tier));
     const tierNum = Math.max(1, Math.floor(Number(tier) || 1));
-    const rareGuaranteed = tierNum % 25 === 0 ? 'mega' : tierNum % PASS_RARE_GUARANTEE_STEP === 0 ? 'gems' : null;
+    const rareGuaranteed = tierNum % 25 === 0 ? 'gold' : tierNum % PASS_RARE_GUARANTEE_STEP === 0 ? 'gems' : null;
     const vipLuck = vipActive ? 1.45 : 1;
     const pityBoost = 1 + Math.floor(tierNum / 15) * 0.05;
     const rareWeight = (2.0 * vipLuck * pityBoost) + (tierNum % 5 === 0 ? 0.6 : 0);
-    const megaWeight = (0.8 * vipLuck * pityBoost) + (tierNum % 7 === 0 ? 0.45 : 0);
+    const metalWeight = (1.0 * vipLuck * pityBoost) + (tierNum % 7 === 0 ? 0.45 : 0);
+    const goldWeight = (0.45 * vipLuck * pityBoost) + (tierNum % 12 === 0 ? 0.35 : 0);
 
     const pools = [
         { type: 'coins', w: 34, make: () => ({ type: 'coins', amount: 120 + Math.floor(rand() * 320) + Math.floor(tierNum / 4) * 10 }) },
@@ -9289,14 +9455,15 @@ function buildPassRewardFromSeed(tier, vipActive = false) {
         { type: 'box', w: 14, make: () => ({ type: 'box', kind: 'normal', amount: 1 + (rand() < 0.22 ? 1 : 0) }) },
         { type: 'pack', w: 8, make: () => ({ type: 'pack', amount: 1 }) },
         { type: 'gems', w: rareWeight, make: () => ({ type: 'gems', amount: 10 }) },
-        { type: 'mega', w: megaWeight, make: () => ({ type: 'box', kind: 'mega', amount: 1 + (rand() < 0.18 ? 1 : 0) }) }
+        { type: 'box', w: metalWeight, make: () => ({ type: 'box', kind: 'metal', amount: 1 + (rand() < 0.18 ? 1 : 0) }) },
+        { type: 'box', w: goldWeight, make: () => ({ type: 'box', kind: 'gold', amount: 1 + (rand() < 0.12 ? 1 : 0) }) }
     ];
 
     let chosen;
     if (rareGuaranteed === 'gems') {
         chosen = { type: 'gems', amount: 10 };
-    } else if (rareGuaranteed === 'mega') {
-        chosen = { type: 'box', kind: 'mega', amount: 1 + (rand() < 0.25 ? 1 : 0) };
+    } else if (rareGuaranteed === 'gold') {
+        chosen = { type: 'box', kind: 'gold', amount: 1 + (rand() < 0.25 ? 1 : 0) };
     } else {
         const total = pools.reduce((s, p) => s + p.w, 0);
         let roll = rand() * total;
@@ -9312,15 +9479,17 @@ function buildPassRewardFromSeed(tier, vipActive = false) {
             : chosen.type === 'evo' ? 'Carga Evo'
             : chosen.type === 'scrap' ? 'Sucata do Atelier'
             : chosen.type === 'gems' ? 'Brilho de Gema'
-            : chosen.type === 'mega' ? 'Mega Caixa'
+            : chosen.type === 'box' && chosen.kind === 'metal' ? 'Caixa de Metal'
+            : chosen.type === 'box' && chosen.kind === 'gold' ? 'Caixa de Ouro'
+            : chosen.type === 'box' && chosen.kind === 'normal' ? 'Caixa Normal'
             : chosen.type === 'pack' ? 'Pacote Sortido'
             : 'Caixa Normal',
         icon: chosen.type === 'coins' ? '🪙'
             : chosen.type === 'evo' ? '🧬'
             : chosen.type === 'scrap' ? '🔩'
             : chosen.type === 'gems' ? '💎'
-            : chosen.type === 'mega' ? '🗳'
-            : chosen.type === 'pack' ? '🧧'
+            : chosen.type === 'box' ? `<img class="resource-icon" src="${boxSprite(chosen.kind)}" alt="">`
+            : chosen.type === 'pack' ? `<img class="resource-icon" src="${boxSprite('pacote')}" alt="">`
             : '📦',
         tierLabel: `Patamar ${formatCompactNumber(tierNum)}`,
         rewards: [chosen]
@@ -9378,7 +9547,7 @@ function renderPassRewardCard(tier, currentTier, reward, vipActive = false, feat
         <div class="pass-tier-card ${featured ? 'featured' : ''} ${claimed ? 'claimed' : ''} ${active ? 'active' : ''} ${locked && !claimed ? 'locked' : ''} ${vipActive ? 'vip' : ''}">
             <div class="pass-tier-badge">
                 <div class="pass-tier-number">${featured ? 'RECOMPENSA ATUAL' : 'PRÓXIMO PATAMAR'}</div>
-                <div class="pass-tier-icon">${view.icon}</div>
+                <div class="pass-tier-icon">${view.rewards?.[0]?.type === 'box' ? `<img class=\"pass-box-icon\" src=\"${boxSprite(view.rewards[0].kind)}\" alt=\"\">` : (view.rewards?.[0]?.type === 'coins' ? resourceIcon('coins','pass-box-icon') : view.rewards?.[0]?.type === 'gems' ? resourceIcon('gems','pass-box-icon') : view.rewards?.[0]?.type === 'evo' ? resourceIcon('evo','pass-box-icon') : view.rewards?.[0]?.type === 'scrap' ? resourceIcon('scrap','pass-box-icon') : view.icon)}</div>
             </div>
             <div class="pass-tier-body">
                 <h4 class="pass-tier-title">${view.tierLabel || `Patamar ${formatCompactNumber(tier)}`}</h4>
@@ -9400,13 +9569,13 @@ function buildPassRewardQueue(reward, tier, vipActive = false) {
     const instant = [];
     const view = getPassRewardView(tier, vipActive);
     (view.rewards || []).forEach(item => {
-        if (item.type === 'coins') { pd.coins += item.amount; instant.push(`🪙 +${formatCompactNumber(item.amount)} Moedas`); }
-        else if (item.type === 'evo') { pd.evo += item.amount; instant.push(`🧬 +${formatCompactNumber(item.amount)} Pontos Evo`); }
-        else if (item.type === 'gems') { pd.gems += item.amount; instant.push(`💎 +${formatCompactNumber(item.amount)} Gemas`); }
-        else if (item.type === 'scrap') { pd.sucatas += item.amount; instant.push(`🔩 +${formatCompactNumber(item.amount)} Sucatas`); }
+        if (item.type === 'coins') { pd.coins += item.amount; instant.push(`${resourceIcon('coins')} +${formatCompactNumber(item.amount)} Moedas`); }
+        else if (item.type === 'evo') { pd.evo += item.amount; instant.push(`${resourceIcon('evo')} +${formatCompactNumber(item.amount)} Pontos Evo`); }
+        else if (item.type === 'gems') { pd.gems += item.amount; instant.push(`${resourceIcon('gems')} +${formatCompactNumber(item.amount)} Gemas`); }
+        else if (item.type === 'scrap') { pd.sucatas += item.amount; instant.push(`${resourceIcon('scrap')} +${formatCompactNumber(item.amount)} Sucatas`); }
         else if (item.type === 'box') {
             for (let i = 0; i < item.amount; i++) {
-                const c = []; const pulls = item.kind === 'mega' ? 6 : 3;
+                const c = []; const pulls = boxPulls(item.kind);
                 for (let j = 0; j < pulls; j++) c.push(buildBoxDropItem(item.kind));
                 queue.push({ type: 'box', boxType: item.kind, contents: c });
             }
@@ -9491,13 +9660,13 @@ function renderPass() {
     const seedText = document.getElementById('pass-seed-text');
     if (seedText) seedText.innerHTML = `Seed ${formatCompactNumber(ensurePassSeed())}`;
     document.getElementById('pass-claim-count').innerHTML = `${formatCompactNumber(claimedCount)} resgatados`;
-    document.getElementById('pass-xp-text').innerHTML = `${formatCompactNumber(pd.passXp)} / ${formatCompactNumber(req)} 🎫`;
+    document.getElementById('pass-xp-text').innerHTML = `<img class="resource-icon" src="elements/xp.png" alt=""> ${formatCompactNumber(pd.passXp)} / ${formatCompactNumber(req)}`;
     document.getElementById('pass-progress-bar').style.width = `${Math.min(100, (pd.passXp / req) * 100)}%`;
 
     const left = Math.max(0, req - pd.passXp);
     document.getElementById('pass-xp-needed').innerHTML = left > 0 ? `Faltam ${formatCompactNumber(left)} para liberar o patamar.` : 'Pode Resgatar!';
     const seasonNote = document.querySelector('.pass-season-note');
-    if (seasonNote) seasonNote.textContent = vipActive ? 'VIP ativo: gemas e mega caixas ficam mais prováveis neste passe infinito.' : 'Passe infinito: cada patamar custa 300 XP e a recompensa fica fixa no save.';
+    if (seasonNote) seasonNote.textContent = vipActive ? 'VIP ativo: gemas e Caixas de Metal/Ouro ficam mais prováveis neste passe infinito.' : 'Passe infinito: cada patamar custa 300 XP e a recompensa fica fixa no save.';
 
     syncAchievementUI();
 
@@ -9625,7 +9794,7 @@ function claimTrail() {
 
 function renderTrail() {
     let t = document.getElementById('trail-sucatas');
-    if(t) t.innerHTML = pd.sucatas; 
+    if(t) t.innerHTML = formatCompactNumber(pd.sucatas); 
     
     const container = document.getElementById('trail-content'); 
     if (!container) return;
@@ -9901,6 +10070,7 @@ function updateSpecialButtonUI() {
     btnSpecial.title = cfg.title;
     btnSpecial.classList.toggle('cooling', activeState || shouldShowCooldown);
     btnSpecial.style.opacity = (activeState || shouldShowCooldown) ? '0.55' : '1';
+    const gpHint = document.getElementById('gamepad-special-hint'); if (gpHint) gpHint.style.display = hasConnectedGamepad() && !!cfg ? 'inline-flex' : 'none';
 }
 
 function setActionState(action, pressed) {
@@ -9966,37 +10136,189 @@ function isInteractiveUiTarget(target) {
     return !!target.closest('button, input, select, textarea, a, label, [role=\"button\"], #joystick-zone, #dpad-zone');
 }
 
-function teleportJoystickToTouch(touch) {
-    if (!joyZone) return;
-    const zoneSize = joyZone.getBoundingClientRect().width || 120;
-    const pad = 10;
-    const x = Math.min(window.innerWidth - zoneSize - pad, Math.max(pad, touch.clientX - zoneSize / 2));
-    const y = Math.min(window.innerHeight - zoneSize - pad, Math.max(pad, touch.clientY - zoneSize / 2));
-    joyZone.style.position = 'fixed';
-    joyZone.style.left = `${x}px`;
-    joyZone.style.top = `${y}px`;
-    joyZone.style.right = 'auto';
-    joyZone.style.bottom = 'auto';
+
+let activeGamepadIndex = null;
+let gamepadPrevButtons = [];
+let gamepadMove = { x: 0, y: 0 };
+let gamepadNavRepeat = 0;
+let gamepadLastConnectedAt = 0;
+let screenHistory = [];
+let currentScreenId = null;
+
+function getConnectedGamepad() {
+    if (!navigator.getGamepads) return null;
+    const pads = navigator.getGamepads();
+    if (activeGamepadIndex !== null) {
+        const active = pads[activeGamepadIndex];
+        if (active) return active;
+    }
+    const first = Array.from(pads).find(Boolean) || null;
+    if (first) activeGamepadIndex = first.index;
+    return first;
 }
+function hasConnectedGamepad() { return !!getConnectedGamepad(); }
+function updateGamepadStatusUI() {
+    const status = document.getElementById('gamepad-status');
+    const gp = getConnectedGamepad();
+    if (status) {
+        status.textContent = gp ? `Conectado: ${gp.id || 'Gamepad'}` : 'Nenhum gamepad detectado';
+        status.classList.toggle('gamepad-connected', !!gp);
+    }
+    const gpHint = document.getElementById('gamepad-special-hint');
+    if (gpHint) gpHint.style.display = gp && isPlaying && !isPaused && !!getSelectedSpecialConfig() ? 'inline-flex' : 'none';
+}
+function onGamepadConnected(e) {
+    activeGamepadIndex = e.gamepad.index;
+    gamepadPrevButtons = [];
+    gamepadLastConnectedAt = performance.now();
+    updateGamepadStatusUI();
+    applyControlLayout();
+    notify(`Gamepad conectado: ${e.gamepad.id || 'controle'}`);
+    setTimeout(() => {
+        if (!isPlaying) focusFirstGamepadTarget();
+    }, 40);
+}
+function onGamepadDisconnected(e) {
+    if (activeGamepadIndex === e.gamepad.index) activeGamepadIndex = null;
+    gamepadPrevButtons = [];
+    gamepadMove.x = 0; gamepadMove.y = 0;
+    updateGamepadStatusUI();
+    applyControlLayout();
+}
+window.addEventListener('gamepadconnected', onGamepadConnected);
+window.addEventListener('gamepaddisconnected', onGamepadDisconnected);
 
-joyZone.addEventListener('touchstart', e => { e.preventDefault(); const touch = e.changedTouches[0]; touchId = touch.identifier; updateJoy(touch); });
-joyZone.addEventListener('touchmove', e => { e.preventDefault(); for(let i=0; i<e.changedTouches.length; i++) if(e.changedTouches[i].identifier === touchId) updateJoy(e.changedTouches[i]); });
-const endJoy = (e) => { for(let i=0; i<e.changedTouches.length; i++) if(e.changedTouches[i].identifier === touchId) { touchId = null; joyVec = {x:0, y:0}; joyKnob.style.transform = `translate(-50%, -50%)`; } };
-joyZone.addEventListener('touchend', endJoy); joyZone.addEventListener('touchcancel', endJoy);
-document.addEventListener('touchend', e => { if(e.touches.length === 0) { touchId = null; joyVec = {x:0, y:0}; joyKnob.style.transform = `translate(-50%, -50%)`; } });
-document.addEventListener('touchstart', e => {
-    if (!isPlaying || isPaused || !pd?.settings?.mobileJoystickFollowTap) return;
-    const touch = e.changedTouches && e.changedTouches[0];
-    if (!touch || isInteractiveUiTarget(e.target)) return;
-    const touchControls = pd.settings.controlMode === 'mobile' || (pd.settings.controlMode === 'auto' && isTouchDevice());
-    if (!touchControls || pd.settings.mobileControlLayout === 'dpad') return;
-    touchId = touch.identifier;
-    teleportJoystickToTouch(touch);
-    updateJoy(touch);
+function getGamepadNavTargets() {
+    return [...document.querySelectorAll('button:not(:disabled), [role="button"], .card-item, .upgrade-card, .levelup-card, .trail-card, .pass-tier-card')]
+        .filter(el => {
+            if (el.classList.contains('hidden')) return false;
+            const screen = el.closest('.screen');
+            if (screen && screen.classList.contains('hidden')) return false;
+            const rect = el.getBoundingClientRect();
+            return rect.width > 0 && rect.height > 0 && getComputedStyle(el).visibility !== 'hidden';
+        });
+}
+function focusFirstGamepadTarget() {
+    if (isPlaying) return;
+    const targets = getGamepadNavTargets();
+    const preferred = targets.find(el => el.id === 'btn-play' || el.id === 'btn-classic-select' || el.classList.contains('shop-tab'));
+    (preferred || targets[0])?.focus?.();
+}
+function moveGamepadFocus(dx, dy) {
+    const targets = getGamepadNavTargets();
+    if (!targets.length) return;
+    const current = document.activeElement;
+    if (!targets.includes(current)) {
+        focusFirstGamepadTarget();
+        return;
+    }
+    const a = current.getBoundingClientRect();
+    const cx = a.left + a.width / 2, cy = a.top + a.height / 2;
+    let best = null, bestScore = Infinity;
+    for (const el of targets) {
+        if (el === current) continue;
+        const b = el.getBoundingClientRect();
+        const x = b.left + b.width / 2, y = b.top + b.height / 2;
+        const primary = dx ? (x - cx) * dx : (y - cy) * dy;
+        const lateral = dx ? Math.abs(y - cy) : Math.abs(x - cx);
+        if (primary <= 8) continue;
+        const score = primary + lateral * 0.75;
+        if (score < bestScore) { bestScore = score; best = el; }
+    }
+    if (best) best.focus();
+}
+function activateFocusedGamepadTarget() {
+    if (isPlaying) return false;
+    const el = document.activeElement;
+    if (!el || !getGamepadNavTargets().includes(el)) return false;
+    try { el.click(); return true; } catch { return false; }
+}
+function gamepadBackAction() {
+    if (isPlaying) {
+        togglePause();
+        return;
+    }
+    const visibleOverlays = [...document.querySelectorAll('.overlay:not(.hidden)')].filter(o => o.id !== 'overlay-notif');
+    if (visibleOverlays.length) {
+        const top = visibleOverlays[visibleOverlays.length - 1];
+        const closeBtn = top.querySelector('[data-gamepad-back], .btn-back, .btn-close, .close-btn');
+        if (closeBtn) { closeBtn.click(); return; }
+        top.classList.add('hidden');
+        return;
+    }
+    const previous = screenHistory.pop();
+    if (previous && document.getElementById(previous)) {
+        window.__gamepadBackNavigation = true;
+        showScreen(previous);
+        window.__gamepadBackNavigation = false;
+        return;
+    }
+    const back = document.querySelector('.screen:not(.hidden) .btn-back');
+    if (back) back.click();
+}
+function gamepadFrame(now) {
+    const gp = getConnectedGamepad();
+    if (!gp) {
+        gamepadMove.x = 0; gamepadMove.y = 0;
+        requestAnimationFrame(gamepadFrame);
+        return;
+    }
+    const a0raw = Number(gp.axes?.[0] || 0), a1raw = Number(gp.axes?.[1] || 0);
+    const dead = 0.20;
+    const a0 = Math.abs(a0raw) > dead ? Math.max(-1, Math.min(1, a0raw)) : 0;
+    const a1 = Math.abs(a1raw) > dead ? Math.max(-1, Math.min(1, a1raw)) : 0;
+    if (isPlaying && !isPaused) {
+        gamepadMove.x = a0;
+        gamepadMove.y = a1;
+    } else {
+        gamepadMove.x = 0; gamepadMove.y = 0;
+        if ((Math.abs(a0) > 0.55 || Math.abs(a1) > 0.55) && now >= gamepadNavRepeat) {
+            moveGamepadFocus(a0 > 0.55 ? 1 : a0 < -0.55 ? -1 : 0, a1 > 0.55 ? 1 : a1 < -0.55 ? -1 : 0);
+            gamepadNavRepeat = now + 180;
+        }
+    }
+    const pressed = gp.buttons?.map(btn => !!btn.pressed) || [];
+    const was = gamepadPrevButtons;
+    if (pressed[12] && !was[12]) moveGamepadFocus(0, -1);
+    if (pressed[13] && !was[13]) moveGamepadFocus(0, 1);
+    if (pressed[14] && !was[14]) moveGamepadFocus(-1, 0);
+    if (pressed[15] && !was[15]) moveGamepadFocus(1, 0);
+    if (pressed[0] && !was[0]) activateFocusedGamepadTarget(); // A
+    if (pressed[1] && !was[1]) gamepadBackAction(); // B
+    if (isPlaying && !isPaused && player && getSelectedSpecialConfig()) {
+        const cfg = getSelectedSpecialConfig();
+        if (pressed[2] && !was[2]) triggerSpecial(); // X press
+        if (!pressed[2] && was[2] && cfg.type === 'sterling') releaseSterlingCharge(); // X release
+    }
+    gamepadPrevButtons = pressed;
+    updateGamepadStatusUI();
+    requestAnimationFrame(gamepadFrame);
+}
+requestAnimationFrame(gamepadFrame);
+
+function updateJoy(touch) { const rect = joyZone.getBoundingClientRect(); const cx = rect.left + rect.width/2; const cy = rect.top + rect.height/2; let dx = touch.clientX - cx; let dy = touch.clientY - cy; const distance = Math.sqrt(dx*dx + dy*dy); const maxR = rect.width/2; if(distance > maxR) { dx = (dx/distance)*maxR; dy = (dy/distance)*maxR; } joyKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`; joyVec.x = dx / maxR; joyVec.y = dy / maxR; }
+function endJoyPointer(e) {
+    if (touchId !== null && e?.pointerId !== undefined && e.pointerId !== touchId) return;
+    touchId = null;
+    joyVec.x = 0; joyVec.y = 0;
+    if (joyKnob) joyKnob.style.transform = 'translate(-50%, -50%)';
+    try { joyZone?.releasePointerCapture?.(e.pointerId); } catch {}
+}
+joyZone?.addEventListener('pointerdown', e => {
+    if (!joyZone || joyZone.style.display === 'none' || (isPlaying && isPaused)) return;
     e.preventDefault();
-}, { passive: false });
-
-function updateJoy(touch) { const rect = joyZone.getBoundingClientRect(); const cx = rect.left + rect.width/2; const cy = rect.top + rect.height/2; let dx = touch.clientX - cx; let dy = touch.clientY - cy; const dist = Math.sqrt(dx*dx + dy*dy); const maxR = rect.width/2; if(dist > maxR) { dx = (dx/dist)*maxR; dy = (dy/dist)*maxR; } joyKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`; joyVec.x = dx / maxR; joyVec.y = dy / maxR; }
+    touchId = e.pointerId;
+    try { joyZone.setPointerCapture(e.pointerId); } catch {}
+    updateJoy(e);
+});
+joyZone?.addEventListener('pointermove', e => {
+    if (touchId !== e.pointerId) return;
+    e.preventDefault();
+    updateJoy(e);
+});
+joyZone?.addEventListener('pointerup', endJoyPointer);
+joyZone?.addEventListener('pointercancel', endJoyPointer);
+joyZone?.addEventListener('pointerleave', e => { if (touchId === e.pointerId && !joyZone.hasPointerCapture?.(e.pointerId)) endJoyPointer(e); });
 const dist = (a, b) => Math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2);
 const normalizeAngle = (a) => { while(a > Math.PI) a -= Math.PI*2; while(a < -Math.PI) a += Math.PI*2; return a; };
 
@@ -10146,7 +10468,7 @@ function updatePauseSettingsUI(syncSlider = true) {
     const musicSlider = document.getElementById('pause-music-volume-slider'); if(syncSlider !== false && musicSlider) musicSlider.value = Math.round(getMusicVolume() * 100);
     const ctEl = document.getElementById('pause-set-combat-text'); if(ctEl) { ctEl.innerHTML = pd.settings.showCombatText ? 'Ativado' : 'Desativado'; ctEl.style.color = pd.settings.showCombatText ? 'var(--btn-green)' : 'var(--btn-red)'; }
     const hpEl = document.getElementById('pause-set-hpbar'); if(hpEl) { hpEl.innerHTML = pd.settings.showHpBar ? 'Ativado' : 'Desativado'; hpEl.style.color = pd.settings.showHpBar ? 'var(--btn-green)' : 'var(--btn-red)'; }
-    const joyFollowEl = document.getElementById('pause-set-joy-follow'); if(joyFollowEl) { joyFollowEl.innerHTML = pd.settings.mobileJoystickFollowTap ? 'Ativado' : 'Desativado'; joyFollowEl.style.color = pd.settings.mobileJoystickFollowTap ? 'var(--btn-green)' : 'var(--btn-red)'; }
+    
     const pEl = document.getElementById('pause-set-particles'); if(pEl) { pEl.innerHTML = pd.settings.noParticles ? 'Ativado' : 'Desativado'; pEl.style.color = pd.settings.noParticles ? 'var(--btn-green)' : 'var(--btn-red)'; }
 }
 
@@ -10707,7 +11029,9 @@ function triggerSpecial() {
 }
 
 let lastTime = 0;
-function loop(time) { if(!isPlaying) return; const dt = (time - lastTime) / 1000; lastTime = time; try { if(!isPaused) { update(dt); draw(); } } catch (err) { console.error('Loop error:', err); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; } gameLoopId = requestAnimationFrame(loop); }
+function loop(time) {
+    if (hasConnectedGamepad() && isPlaying && !isPaused) { joyVec.x = gamepadMove.x; joyVec.y = gamepadMove.y; }
+ if(!isPlaying) return; const dt = (time - lastTime) / 1000; lastTime = time; try { if(!isPaused) { update(dt); draw(); } } catch (err) { console.error('Loop error:', err); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; } gameLoopId = requestAnimationFrame(loop); }
 
 function triggerRevivePrompt() {
     if(player && player.weapon === 'slime' && !player.gooRevived) {
@@ -10903,10 +11227,11 @@ if (!isBossAlive) {
     if(window.currentMap === 6 && Math.random() < (pd.settings.ultraHardcore ? 0.015 : 0.003)) {
         let side = Math.floor(Math.random()*4);
         let cx, cy, cvx, cvy;
-        if(side===0) { cx = -1500; cy = player.y + (Math.random()-0.5)*1000; cvx = 8; cvy = 0; }
-        else if(side===1) { cx = 1500; cy = player.y + (Math.random()-0.5)*1000; cvx = -8; cvy = 0; }
-        else if(side===2) { cx = player.x + (Math.random()-0.5)*1000; cy = -1500; cvx = 0; cvy = 8; }
-        else { cx = player.x + (Math.random()-0.5)*1000; cy = 1500; cvx = 0; cvy = -8; }
+        const roadStep = 640;
+        if(side===0) { cx = -1500; cy = Math.round((player.y + (Math.random()-0.5)*1000) / roadStep) * roadStep + (Math.random() < 0.5 ? -34 : 34); cvx = 8; cvy = 0; }
+        else if(side===1) { cx = 1500; cy = Math.round((player.y + (Math.random()-0.5)*1000) / roadStep) * roadStep + (Math.random() < 0.5 ? -34 : 34); cvx = -8; cvy = 0; }
+        else if(side===2) { cx = Math.round((player.x + (Math.random()-0.5)*1000) / roadStep) * roadStep + (Math.random() < 0.5 ? -34 : 34); cy = -1500; cvx = 0; cvy = 8; }
+        else { cx = Math.round((player.x + (Math.random()-0.5)*1000) / roadStep) * roadStep + (Math.random() < 0.5 ? -34 : 34); cy = 1500; cvx = 0; cvy = -8; }
         obstacles.push({x: cx, y: cy, vx: cvx, vy: cvy, r: 30, type: 'car', life: 10});
     }
 
@@ -12564,7 +12889,7 @@ function fireWeapon(target) {
             let aOffset = (i - Math.floor(projCount/2)) * 0.2; let a = angle + aOffset;
             if(w === 'tank') a = angle;
 
-            if (w === 'shotgun') { for(let j=0; j<3; j++) { let sa = a + (j-1)*0.15; createProj(player.x, player.y, Math.cos(sa)*pSpd, Math.sin(sa)*pSpd, finalDmg*0.4, 15, true, w); } } 
+            if (w === 'shotgun') { for(let j=0; j<boxPulls('normal'); j++) { let sa = a + (j-1)*0.15; createProj(player.x, player.y, Math.cos(sa)*pSpd, Math.sin(sa)*pSpd, finalDmg*0.4, 15, true, w); } } 
             else if (w === 'sword') { createProj(player.x + Math.cos(a)*30, player.y + Math.sin(a)*30, Math.cos(a), Math.sin(a), finalDmg, 15, true, w); } 
             else if (w === 'bomb') { createProj(player.x, player.y, Math.cos(a)*pSpd*1.2, Math.sin(a)*pSpd*1.2, finalDmg, 60, true, w, { tx: target.x, ty: target.y }); } 
             else if (w === 'sniper') { createProj(player.x, player.y, Math.cos(a)*pSpd*2, Math.sin(a)*pSpd*2, finalDmg*2, 100, true, w); } 
@@ -13136,7 +13461,7 @@ function spawnEnemy() {
     let ex = spawn.x; let ey = spawn.y;
     
     let types = ['basico', 'basico', 'basico'];
-    if(wave > 2) { types.push('velocista'); types.push('ninja'); } 
+    if(wave > 2) { types.push('velocista'); if (window.currentMap === 8) types.push('ninja'); }
     if(wave > 4) { types.push('atirador'); types.push('kamikaze'); } 
     if(wave > 5) types.push('gigante');
     if(wave >= 21) types.push('lider');
@@ -13188,10 +13513,19 @@ function spawnEnemy() {
         if (wave >= 18) types.push('camel');
         if (wave >= 30) types.push('scorpion');
     }
+
+    // Conteúdo exclusivo da Caverna.
+    if (window.currentMap === 3) {
+        if (wave >= 10) {
+            types.push('goblin');
+            types.push('tnt_crate');
+        }
+        if (wave >= 30) types.push('scorpion');
+        if (wave >= 35) types.push('stone_golem');
+    }
     
     let type = types[Math.floor(Math.random() * types.length)]; const spawnWave = wave; let mult = getEnemyDifficultyMultiplierFromEntry(type, spawnWave, wave);
     
-    if(pd.settings.ultraHardcore && window.currentMap === 3 && Math.random() < 0.25) type = 'goblin';
     if(pd.settings.ultraHardcore && window.currentMap === 4 && type === 'gigante') type = 'monster_tree';
 
     let e = { x: ex, y: ey, type, hp: 0, maxHp: 0, speed: 0, baseDmg: 0, dmg: 0, size: 0, cd: 0, color: '', poison: { timer: 0, dmg: 0, tickCd: 0 }, slowTimer: 0, weakenTimer: 0, curseTimer: 0, burnTimer: 0, freezeTimer: 0, burnDmg: 0, speedBuffTimer: 0, soak: 0, shockTimer: 0, shockSemiTimer: 0, shockTick: 0, shockSemiTick: 0, shockDmg: 0, shockSemiDmg: 0, shockRate: 0.3, semiShockRate: 0.4, spawnBiome: window.currentMap, spawnWave, entryWave: spawnWave, stationary: false, poisonOnHit: 0 };
@@ -13225,6 +13559,14 @@ function spawnEnemy() {
     if(type === 'deer_pilot') { e.hp = 28*mult; e.speed = 2.65; e.baseDmg = 7*mult; e.size = 11; e.color = '#dff7ff'; e.snowEnemy = true; e.deerPilot = true; }
     if(type === 'ballon') { e.hp = 30*mult; e.speed = 1.5; e.baseDmg = 5*mult; e.size = 12; e.color = '#ff7675'; e.globalBalloon = true; e.breakIntoBasic = true; e.forceNormalOnDeath = true; }
     if(type === 'truck') { e.hp = 170*mult; e.speed = 0.55; e.baseDmg = 18*mult; e.size = 28; e.color = '#576574'; e.globalTruck = true; e.mineImmune = true; e.truckDeathPending = false; e.truckExplosionTimer = 0; }
+    if(type === 'stone_golem') {
+        e.hp = 520*mult; e.speed = 0.65; e.baseDmg = 26*mult; e.size = 30; e.color = '#7f8c8d';
+        e.golemAttackCd = 1.1; e.golemAttackTimer = 0; e.golemAttackAngle = 0; e.golemAttackApplied = false;
+    }
+    if(type === 'tnt_crate') {
+        e.hp = 58*mult; e.speed = 1.35; e.baseDmg = 5*mult; e.size = 15; e.color = '#b8793c';
+        e.tntCrate = true;
+    }
 
     e.dmg = e.baseDmg; e.maxHp = e.hp; enemies.push(e);
 }
@@ -13385,6 +13727,41 @@ function updateEnemies(dt) {
                 }
             }
             let a = Math.atan2(targetY - e.y, targetX - e.x); nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt; ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
+        } else if(e.type === 'stone_golem' && player.invisTimer <= 0 && !isFrozen && !isHypnotized) {
+            e.golemAttackCd = Math.max(0, (e.golemAttackCd || 0) - dt);
+            e.golemAttackTimer = Math.max(0, (e.golemAttackTimer || 0) - dt);
+
+            if (e.golemAttackTimer > 0 && !e.golemAttackApplied) {
+                const attackRange = Math.max(150, (e.size || 30) * 5.2);
+                const ang = Number.isFinite(e.golemAttackAngle) ? e.golemAttackAngle : Math.atan2(targetY - e.y, targetX - e.x);
+                const dp = dist(e, player);
+                if (dp <= attackRange + player.r) {
+                    const aToP = Math.atan2(player.y - e.y, player.x - e.x);
+                    if (Math.abs(normalizeAngle(aToP - ang)) <= 0.42) {
+                        const dealt = e.dmg * Math.max(0.35, player.stats?.defMult || 1) * 0.55;
+                        if (Math.random() > (player.stats?.dodgeChance || 0)) {
+                            dealPlayerDamage(dealt);
+                            addFloatingText(player.x, player.y - 22, `-${Math.floor(dealt)}`, '#b8b8b8', 12);
+                            if (player.hp <= 0) { triggerRevivePrompt(); return; }
+                        } else {
+                            addFloatingText(player.x, player.y, 'Esquiva!', '#3498db', 12);
+                        }
+                    }
+                }
+                e.golemAttackApplied = true;
+            }
+
+            if (e.golemAttackCd <= 0 && d <= 180) {
+                e.golemAttackCd = 1.35;
+                e.golemAttackTimer = 0.20;
+                e.golemAttackApplied = false;
+                e.golemAttackAngle = Math.atan2(targetY - e.y, targetX - e.x);
+            }
+            if (e.golemAttackTimer <= 0) {
+                const a = Math.atan2(targetY - e.y, targetX - e.x);
+                nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt;
+                ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
+            }
         } else if(e.type === 'boss' && player.invisTimer <= 0 && !isFrozen && !isHypnotized) {
             e.cd -= 60 * dt; if(e.cd <= 0) { for(let j=0; j<8; j++) { let a = (Math.PI / 4) * j; createProj(e.x, e.y, Math.cos(a)*3, Math.sin(a)*3, e.dmg, 80, false, 'enemy', { hypnotized: isHypnotized, sourceEnemyType: e.type }); } e.cd = 150; }
             let a = Math.atan2(targetY - e.y, targetX - e.x); nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt; ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
@@ -13537,6 +13914,25 @@ function updateEnemies(dt) {
         }
 
         if(e.hp <= 0) {
+            if (e.type === 'tnt_crate') {
+                const radius = 125;
+                const explosionDamage = Math.max(30, e.baseDmg * 2.35);
+                createExplosion(e.x, e.y, radius, explosionDamage, '#e67e22');
+                createParticles(e.x, e.y, '#e67e22');
+                if (player && player.hp > 0 && player.invisTimer <= 0 && dist(e, player) <= radius + player.r) {
+                    if (Math.random() > (player.stats?.dodgeChance || 0)) {
+                        const playerBlast = explosionDamage * 0.24;
+                        dealPlayerDamage(playerBlast);
+                        addFloatingText(player.x, player.y - 22, `-${Math.floor(playerBlast)}`, '#ff6b35', 12);
+                        if (player.hp <= 0) { triggerRevivePrompt(); return; }
+                    } else {
+                        addFloatingText(player.x, player.y, 'Esquiva!', '#3498db', 12);
+                    }
+                }
+                enemies.splice(i, 1);
+                enemiesKilled++;
+                continue;
+            }
             if(e.type === 'truck' && !e.truckDeathPending) {
                 e.truckDeathPending = true;
                 e.truckExplosionTimer = 1.0;
@@ -14618,9 +15014,9 @@ function updateProjectiles(dt) {
         obstacles.forEach(o => { if(o.type !== 'ice' && o.type !== 'mud' && o.type !== 'car' && o.type !== 'bamboo_spike' && o.type !== 'speaker' && dist(p, o) < o.r + p.size) hitObstacle = true; });
         if(hitObstacle && p.type !== 'sword' && p.type !== 'scythe' && p.type !== 'gladiator_slash' && p.type !== 'shinobi' && p.type !== 'shinobi_fireball' && p.type !== 'boomerang' && p.type !== 'wind_gust' && p.type !== 'tornado' && p.type !== 'energy_wave' && p.type !== 'water_wave') { 
             if(p.type === 'echo_bh_core') { spawnEchoBlackHole(p.x, p.y, p.extra); }
-            if(p.type === 'blood_ball' && (extra.size || 0) === 10) { for(let j=0; j<3; j++) { let a = Math.PI*2/3 * j; createProj(p.x, p.y, Math.cos(a)*3, Math.sin(a)*3, p.dmg*0.4, 30, true, 'blood_ball', {size: 4}); } }
+            if(p.type === 'blood_ball' && (extra.size || 0) === 10) { for(let j=0; j<boxPulls('normal'); j++) { let a = Math.PI*2/3 * j; createProj(p.x, p.y, Math.cos(a)*3, Math.sin(a)*3, p.dmg*0.4, 30, true, 'blood_ball', {size: 4}); } }
             if(p.type === 'rocket') { createExplosion(p.x, p.y, 80 * player.stats.rangeMult, p.dmg); projectiles.splice(i, 1); continue; }
-            if(p.type === 'buster_rocket') { createExplosion(p.x, p.y, 140 * player.stats.rangeMult, p.dmg); for(let j=0; j<6; j++) { let a = Math.PI/3 * j; createProj(p.x, p.y, Math.cos(a)*4, Math.sin(a)*4, p.dmg*0.3, 20, true, 'normal'); } projectiles.splice(i, 1); continue; }
+            if(p.type === 'buster_rocket') { createExplosion(p.x, p.y, 140 * player.stats.rangeMult, p.dmg); for(let j=0; j<boxPulls('metal'); j++) { let a = Math.PI/3 * j; createProj(p.x, p.y, Math.cos(a)*4, Math.sin(a)*4, p.dmg*0.3, 20, true, 'normal'); } projectiles.splice(i, 1); continue; }
             if(p.type === 'chess_piece' && p.extra.chessType === 'rook') { createExplosion(p.x, p.y, 80 * player.stats.rangeMult, p.dmg); }
             if(p.type === 'goblin_stone') { disperseGoblinStone(p.x, p.y, p.vx, p.vy, p.dmg); }
             if(p.type === 'nucleon_shot') { puddles.push({x: p.x, y: p.y, r: 70, dmg: p.extra.realDmg, life: 4, type: 'nucleon_puddle', tick: 0}); }
@@ -15135,7 +15531,7 @@ function updateProjectiles(dt) {
             projectiles.splice(i, 1);
             continue;
         }
-        if(hit && p.type === 'blood_ball' && (extra.size || 0) === 10) { for(let j=0; j<3; j++) { let a = Math.random()*Math.PI*2; createProj(p.x, p.y, Math.cos(a)*3, Math.sin(a)*3, p.dmg*0.4, 30, true, 'blood_ball', {size: 4}); } }
+        if(hit && p.type === 'blood_ball' && (extra.size || 0) === 10) { for(let j=0; j<boxPulls('normal'); j++) { let a = Math.random()*Math.PI*2; createProj(p.x, p.y, Math.cos(a)*3, Math.sin(a)*3, p.dmg*0.4, 30, true, 'blood_ball', {size: 4}); } }
         if(hit && p.type === 'serrano_taco') {
             disperseSerranoTaco(p.x, p.y, p.dmg, hitTarget);
             projectiles.splice(i, 1);
@@ -15150,9 +15546,9 @@ function updateProjectiles(dt) {
         if(hit && p.type === 'big_grenade') { const count = (p.extra?.sourceChar === 'grenade' && pd.fractured?.grenade) ? 16 : 8; const pSpd = 5 * player.stats.projSpdMult; for(let j=0; j<count; j++) { let a = (Math.PI * 2 / count) * j; const shard = createProj(p.x + Math.cos(a) * 10, p.y + Math.sin(a) * 10, Math.cos(a)*pSpd, Math.sin(a)*pSpd, p.dmg*0.45, 40, true, 'grenade', { size: 3, sourceChar: 'grenade', noHitFrames: 0.08 }); if (shard?.hitIds && hitTarget) shard.hitIds.add(hitTarget); } projectiles.splice(i, 1); continue; }
         if(hit && p.type === 'bomb') { applyCyberBombEffects(p); if(p.pierce > 0) { p.pierce--; } else { projectiles.splice(i, 1); continue; } }
         if(hit && p.type === 'rocket') { createExplosion(p.x, p.y, 80 * player.stats.rangeMult, p.dmg); projectiles.splice(i, 1); continue; }
-        if(hit && p.type === 'buster_rocket') { createExplosion(p.x, p.y, 140 * player.stats.rangeMult, p.dmg); for(let j=0; j<6; j++) { let a = Math.PI/3 * j; createProj(p.x, p.y, Math.cos(a)*4, Math.sin(a)*4, p.dmg*0.3, 20, true, 'normal'); } projectiles.splice(i, 1); continue; }
+        if(hit && p.type === 'buster_rocket') { createExplosion(p.x, p.y, 140 * player.stats.rangeMult, p.dmg); for(let j=0; j<boxPulls('metal'); j++) { let a = Math.PI/3 * j; createProj(p.x, p.y, Math.cos(a)*4, Math.sin(a)*4, p.dmg*0.3, 20, true, 'normal'); } projectiles.splice(i, 1); continue; }
         if(hit && p.type === 'chess_piece' && p.extra.chessType === 'rook') { createExplosion(p.x, p.y, 80 * player.stats.rangeMult, p.dmg); projectiles.splice(i, 1); continue; }
-        if(hit && p.type === 'tank') { for(let j=0; j<3; j++) { let ang = Math.random() * Math.PI * 2; createProj(p.x, p.y, Math.cos(ang)*3, Math.sin(ang)*3, p.dmg*0.3, 20, true, 'normal'); } }
+        if(hit && p.type === 'tank') { for(let j=0; j<boxPulls('normal'); j++) { let ang = Math.random() * Math.PI * 2; createProj(p.x, p.y, Math.cos(ang)*3, Math.sin(ang)*3, p.dmg*0.3, 20, true, 'normal'); } }
         if(p.type === 'puddle' && (hit || p.life <= 0)) { puddles.push({ x: p.x, y: p.y, r: 70 * player.stats.rangeMult, dmg: p.dmg, life: 4, tick: 0, type: 'fire' }); projectiles.splice(i, 1); continue; }
         if(hit && p.type === 'nucleon_shot') { 
             puddles.push({x: p.x, y: p.y, r: 70, dmg: p.extra.realDmg, life: 4, type: 'nucleon_puddle', tick: 0});
@@ -15372,6 +15768,10 @@ function updatePuddles(dt) {
 
 function createExplosion(x, y, r, dmg, color='#e74c3c') {
     if(!(pd.settings && pd.settings.noParticles)) particles.push({x, y, r:0, maxR:r, type:'expl', life: 1, color});
+    if (pd?.settings?.ultraHardcore && window.currentMap === 3 && Array.isArray(caveVisionBursts)) {
+        caveVisionBursts.push({ x, y, r: Math.max(26, Number(r) || 0), life: Math.max(0.75, Math.min(2.2, 0.75 + (Number(r) || 0) / 120)) });
+        if (caveVisionBursts.length > 24) caveVisionBursts.splice(0, caveVisionBursts.length - 24);
+    }
     if(dmg > 0) {
         trackMissionDamage(dmg);
         for(let e of enemies) if(dist({x,y}, e) < r) {
@@ -15826,6 +16226,131 @@ function drawSnowTextureRect(x, y, w, h) {
     ctx.fillRect(x, y, w, h);
 }
 
+let metroTexturePattern = null;
+let igneoTexturePattern = null;
+let bambuzalTexturePattern = null;
+
+function getMetroTexturePattern() {
+    if (metroTexturePattern) return metroTexturePattern;
+    const tile = document.createElement('canvas');
+    tile.width = 640; tile.height = 640;
+    const g = tile.getContext('2d');
+    g.fillStyle = '#30373e';
+    g.fillRect(0, 0, 640, 640);
+
+    g.fillStyle = '#242a30';
+    g.fillRect(-86, 0, 172, 640);
+    g.fillRect(554, 0, 172, 640);
+    g.fillRect(0, -86, 640, 172);
+    g.fillRect(0, 554, 640, 172);
+
+    g.fillStyle = '#6b7074';
+    g.fillRect(-92, 0, 6, 640);
+    g.fillRect(86, 0, 6, 640);
+    g.fillRect(0, -92, 640, 6);
+    g.fillRect(0, 86, 640, 6);
+
+    g.strokeStyle = 'rgba(241,196,15,0.55)';
+    g.lineWidth = 3;
+    g.setLineDash([24, 20]);
+    g.beginPath(); g.moveTo(0, 0); g.lineTo(640, 0); g.stroke();
+    g.beginPath(); g.moveTo(0, 640); g.lineTo(640, 640); g.stroke();
+    g.beginPath(); g.moveTo(0, 0); g.lineTo(0, 640); g.stroke();
+    g.beginPath(); g.moveTo(640, 0); g.lineTo(640, 640); g.stroke();
+    g.setLineDash([]);
+
+    g.strokeStyle = 'rgba(255,255,255,0.10)';
+    g.lineWidth = 2;
+    for (const k of [-54, 54]) {
+        g.beginPath(); g.moveTo(k, 0); g.lineTo(k, 640); g.stroke();
+        g.beginPath(); g.moveTo(0, k); g.lineTo(640, k); g.stroke();
+    }
+    for (let p = -70; p <= 70; p += 20) {
+        g.fillStyle = 'rgba(255,255,255,0.18)';
+        g.fillRect(p, -86, 8, 28);
+        g.fillRect(-86, p, 28, 8);
+    }
+
+    let seed = 761291;
+    const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+    for (let i = 0; i < 55; i++) {
+        const x = rnd() * 640, y = rnd() * 640;
+        if (Math.abs(x % 640) < 100 || Math.abs(y % 640) < 100) continue;
+        g.fillStyle = rnd() > 0.5 ? 'rgba(255,255,255,0.035)' : 'rgba(0,0,0,0.09)';
+        g.fillRect(x, y, 2 + rnd() * 6, 2 + rnd() * 6);
+    }
+    metroTexturePattern = ctx.createPattern(tile, 'repeat');
+    return metroTexturePattern;
+}
+
+function drawMetroTextureRect(x, y, w, h) {
+    ctx.fillStyle = getMetroTexturePattern() || '#30373e';
+    ctx.fillRect(x, y, w, h);
+}
+
+function getIgneoTexturePattern() {
+    if (igneoTexturePattern) return igneoTexturePattern;
+    const tile = document.createElement('canvas');
+    tile.width = 220; tile.height = 220;
+    const g = tile.getContext('2d');
+    g.fillStyle = '#24100d';
+    g.fillRect(0, 0, 220, 220);
+    let seed = 915733;
+    const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+    for (let i = 0; i < 42; i++) {
+        const x = rnd() * 220, y = rnd() * 220, r = 4 + rnd() * 15;
+        g.fillStyle = rnd() > 0.55 ? 'rgba(76,42,31,0.72)' : 'rgba(17,12,10,0.55)';
+        g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+    }
+    for (let i = 0; i < 8; i++) {
+        const x = rnd() * 220, y = rnd() * 220;
+        g.strokeStyle = rnd() > 0.45 ? 'rgba(255,118,0,0.75)' : 'rgba(170,50,15,0.55)';
+        g.lineWidth = 2 + rnd() * 2;
+        g.beginPath();
+        g.moveTo(x, y);
+        g.lineTo(x + 18 + rnd() * 48, y + (rnd() - 0.5) * 42);
+        g.lineTo(x + 42 + rnd() * 62, y + (rnd() - 0.5) * 70);
+        g.stroke();
+    }
+    igneoTexturePattern = ctx.createPattern(tile, 'repeat');
+    return igneoTexturePattern;
+}
+
+function drawIgneoTextureRect(x, y, w, h) {
+    ctx.fillStyle = getIgneoTexturePattern() || '#24100d';
+    ctx.fillRect(x, y, w, h);
+}
+
+function getBambuzalTexturePattern() {
+    if (bambuzalTexturePattern) return bambuzalTexturePattern;
+    const tile = document.createElement('canvas');
+    tile.width = 180; tile.height = 180;
+    const g = tile.getContext('2d');
+    g.fillStyle = '#193d18';
+    g.fillRect(0, 0, 180, 180);
+    let seed = 421337;
+    const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+    for (let i = 0; i < 95; i++) {
+        const x = rnd() * 180, y = rnd() * 180;
+        const len = 3 + rnd() * 11;
+        g.strokeStyle = rnd() > 0.5 ? 'rgba(74,180,72,0.55)' : 'rgba(110,205,63,0.30)';
+        g.lineWidth = 1 + rnd() * 1.4;
+        g.beginPath(); g.moveTo(x, y); g.lineTo(x + (rnd() - 0.5) * 5, y + len); g.stroke();
+    }
+    for (let i = 0; i < 18; i++) {
+        const x = rnd() * 180, y = rnd() * 180;
+        g.fillStyle = rnd() > 0.5 ? 'rgba(121,255,77,0.15)' : 'rgba(0,0,0,0.12)';
+        g.beginPath(); g.ellipse(x, y, 7 + rnd() * 8, 2 + rnd() * 5, rnd() * Math.PI, 0, Math.PI * 2); g.fill();
+    }
+    bambuzalTexturePattern = ctx.createPattern(tile, 'repeat');
+    return bambuzalTexturePattern;
+}
+
+function drawBambuzalTextureRect(x, y, w, h) {
+    ctx.fillStyle = getBambuzalTexturePattern() || '#193d18';
+    ctx.fillRect(x, y, w, h);
+}
+
 function draw() {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.globalAlpha = 1;
@@ -15848,8 +16373,14 @@ function draw() {
         drawSnowTextureRect(camera.x, camera.y, cw, ch);
     } else if (window.currentMap === 3) {
         drawCaveTextureRect(camera.x, camera.y, cw, ch);
+    } else if (window.currentMap === 6) {
+        drawMetroTextureRect(camera.x, camera.y, cw, ch);
+    } else if (window.currentMap === 7) {
+        drawIgneoTextureRect(camera.x, camera.y, cw, ch);
+    } else if (window.currentMap === 8) {
+        drawBambuzalTextureRect(camera.x, camera.y, cw, ch);
     } else {
-        ctx.fillStyle = window.currentMap===3 ? '#576574' : window.currentMap===5 ? '#3b3e24' : window.currentMap===6 ? '#2f3640' : window.currentMap===7 ? '#351111' : window.currentMap===8 ? '#e1f7d5' : '#1d145d';
+        ctx.fillStyle = window.currentMap===5 ? '#3b3e24' : '#1d145d';
         ctx.fillRect(camera.x, camera.y, cw, ch);
     }
     if(window.currentMap === 9) {
@@ -16068,6 +16599,24 @@ function draw() {
     });
     graffitMarks.forEach(m => drawGraffitMark(ctx, m));
     xpGems.forEach(g => { ctx.fillStyle = g.val > 10 ? '#3498db' : '#2ecc71'; ctx.beginPath(); ctx.arc(g.x, g.y, g.val>10?6:4, 0, Math.PI*2); ctx.fill(); });
+    enemies.forEach(e => {
+        if (e.type !== 'stone_golem' || !(e.golemAttackTimer > 0)) return;
+        const angle = Number.isFinite(e.golemAttackAngle) ? e.golemAttackAngle : Math.atan2(player.y - e.y, player.x - e.x);
+        const coneLen = Math.max(150, (e.size || 30) * 5.2);
+        const coneAngle = 0.42;
+        ctx.save();
+        ctx.fillStyle = 'rgba(189,195,199,0.24)';
+        ctx.strokeStyle = 'rgba(236,240,241,0.24)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(e.x, e.y);
+        ctx.arc(e.x, e.y, coneLen, angle - coneAngle, angle + coneAngle);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+    });
+
     if((player.weapon === 'flex_hammer' && player.flexTimer && player.flexTimer > 0) || (player.flameTimer && player.flameTimer > 0)) {
         let angle = player.lastMoveAngle;
         let coneLen = player.baseRange * player.stats.rangeMult * 1.5;
@@ -17420,8 +17969,69 @@ function draw() {
         ctx.save();
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.globalCompositeOperation = 'source-over';
-        ctx.fillStyle = 'rgba(0,0,0,0.6)';
-        ctx.fillRect(0, 0, cw, ch);
+
+        if (window.currentMap === 3) {
+            // Tudo fica preto, exceto a visão circular do jogador e as áreas abertas por explosões.
+            ctx.fillStyle = 'rgba(0,0,0,0.98)';
+            ctx.beginPath();
+            ctx.rect(0, 0, cw, ch);
+
+            const holes = [];
+            const playerSX = player ? player.x - camera.x : cw / 2;
+            const playerSY = player ? player.y - camera.y : ch / 2;
+            holes.push({ x: playerSX, y: playerSY, r: 215 });
+
+            (caveVisionBursts || []).forEach(b => {
+                const bx = b.x - camera.x;
+                const by = b.y - camera.y;
+                const fade = Math.max(0, Math.min(1, b.life / 0.9));
+                const rr = Math.max(22, Number(b.r) || 22) * (0.84 + fade * 0.16);
+                holes.push({ x: bx, y: by, r: rr });
+            });
+
+            // Círculos no sentido oposto ao retângulo criam "buracos" no preto;
+            // círculos sobrepostos continuam formando uma única área de visão.
+            holes.forEach(h => {
+                ctx.moveTo(h.x + h.r, h.y);
+                ctx.arc(h.x, h.y, h.r, 0, Math.PI * 2, true);
+            });
+            ctx.fill();
+        } else {
+            ctx.fillStyle = 'rgba(0,0,0,0.6)';
+            ctx.fillRect(0, 0, cw, ch);
+        }
+        ctx.restore();
+    }
+
+    // Partículas de chuva/neve exclusivas do UHC.
+    if (pd.settings.ultraHardcore && window.currentMap === 0) {
+        ctx.save();
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.globalAlpha = 0.68;
+        ctx.strokeStyle = 'rgba(180,220,255,0.75)';
+        ctx.lineWidth = 1.5;
+        for (let i = 0; i < 75; i++) {
+            const x = ((i * 137.7 + gameTime * 260) % (cw + 100)) - 50;
+            const y = ((i * 83.3 + gameTime * 520) % (ch + 100)) - 50;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x - 6, y + 20);
+            ctx.stroke();
+        }
+        ctx.restore();
+    } else if (pd.settings.ultraHardcore && window.currentMap === 2) {
+        ctx.save();
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.globalAlpha = 0.78;
+        ctx.fillStyle = 'rgba(255,255,255,0.90)';
+        for (let i = 0; i < 85; i++) {
+            const x = ((i * 149.1 + gameTime * 35) % (cw + 80)) - 40;
+            const y = ((i * 91.7 + gameTime * 105) % (ch + 80)) - 40;
+            const r = 1.2 + ((i * 17) % 7) * 0.22;
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fill();
+        }
         ctx.restore();
     }
 
@@ -17504,8 +18114,8 @@ function gameOver(isQuit) {
             let cPac = []; cPac.push(buildBoxDropItem('pacote'));
             q.push({ type: 'box', boxType: 'pacote', contents: cPac });
             if(isVIPActive() && Math.random() < 0.1) {
-                let cMega = []; for(let i=0; i<6; i++) cMega.push(buildBoxDropItem('mega'));
-                q.push({ type: 'box', boxType: 'mega', contents: cMega });
+                let cMetal = []; for(let i=0; i<6; i++) cMetal.push(buildBoxDropItem('metal'));
+                q.push({ type: 'box', boxType: 'metal', contents: cMetal });
             }
             startGachaQueue(q);
         } else { winText = `Vitória Diária: Limite Atingido (${maxWins}/${maxWins})`; }
@@ -17516,10 +18126,10 @@ function gameOver(isQuit) {
     save();
 
     document.getElementById('go-wave').innerHTML = `Waves Sobrevividas: ${wave}`; 
-    document.getElementById('go-xp').innerHTML = `XP do Passe Ganho: ${passXpGained} 🎫`; 
-    document.getElementById('go-coins').innerHTML = `🪙 Moedas obtidas: <strong>${runCoins || 0}</strong>`;
-    document.getElementById('go-gems').innerHTML = `💎 Gemas obtidas: <strong>${runGems || 0}</strong>`;
-    document.getElementById('go-scrap').innerHTML = `🔩 Sucatas obtidas: <strong>${runScrap || 0}</strong>`;
+    document.getElementById('go-xp').innerHTML = `<img class="resource-icon" src="elements/xp.png" alt=""> XP do Passe Ganho: ${passXpGained}`; 
+    document.getElementById('go-coins').innerHTML = `<img class="resource-icon" src="elements/coin.png" alt=""> Moedas obtidas: <strong>${runCoins || 0}</strong>`;
+    document.getElementById('go-gems').innerHTML = `<img class="resource-icon" src="elements/gems.png" alt=""> Gemas obtidas: <strong>${runGems || 0}</strong>`;
+    document.getElementById('go-scrap').innerHTML = `<img class="resource-icon" src="elements/scrap.png" alt=""> Sucatas obtidas: <strong>${runScrap || 0}</strong>`;
     document.getElementById('go-medals').innerHTML = `🏅 Medalhas obtidas: <strong>${medalsThisRun || 0}</strong>`;
     document.getElementById('go-daily').innerHTML = winText;
     document.getElementById('overlay-gameover').classList.remove('hidden'); document.getElementById('game-hud').classList.add('hidden'); document.getElementById('exp-bar-container').classList.add('hidden');
