@@ -4513,7 +4513,25 @@ const ENEMY_SPRITES = {
     desert_colosso: 'enemies/colossum.png',
     desert_elite_master: 'enemies/master_elite_shooter.png',
     desert_lider_elite: 'enemies/elite_leader.png',
-    metro_prism_head: 'enemies/brick_head.png'
+    metro_prism_head: 'enemies/brick_head.png',
+    snow_basic: 'enemies/snow_basic.png',
+    snowman_head: 'enemies/snowman_head.png',
+    pine_head: 'enemies/pine_head.png',
+    ice_head: 'enemies/ice_head.png',
+    snow_velocist: 'enemies/snow_velocist.png',
+    snow_shooter: 'enemies/snow_shooter.png',
+    yeti_giant: 'enemies/yeti_giant.png',
+    permafrost_boss: 'enemies/permafrost_boss.png',
+    permafrost_tank: 'enemies/permafrost_tank.png',
+    ice_elite_shooter: 'enemies/ice_elite_shooter.png',
+    ice_kamikaze: 'enemies/ice_kamikaze.png',
+    avalanche_healer: 'enemies/avalanche_healer.png',
+    snowplow: 'enemies/snowplow.png',
+    snow_walker: 'enemies/snow_walker.png',
+    ice_statue: 'enemies/ice_statue.png',
+    deer_pilot: 'enemies/deer_pilot.png',
+    ballon: 'enemies/ballon.png',
+    truck: 'enemies/truck.png'
 };
 
 const ENEMY_SPRITE_CACHE = new Map();
@@ -5014,6 +5032,14 @@ function getEnemySpritePath(type) {
 // Assim, qualquer inimigo criado por invocação também herda a skin do Deserto.
 function getEffectiveEnemySpriteType(e) {
     const type = String(e?.type || '').toLowerCase();
+    if (e?.forceNormalSkin) {
+        const forcedNormal = {
+            basico: 'basic',
+            basic: 'basic',
+            acucarado: 'basic'
+        };
+        return forcedNormal[type] || type;
+    }
     const canonicalMap = {
         basico: 'basic',
         basic: 'basic',
@@ -5081,6 +5107,36 @@ function getEffectiveEnemySpriteType(e) {
             elite_leader: 'desert_lider_elite'
         };
         if (desertMap[type] && getEnemySpritePath(desertMap[type])) return desertMap[type];
+    }
+    if (window.currentMap === 2) {
+        const snowMap = {
+            basico: 'snow_basic',
+            basic: 'snow_basic',
+            cardboard_head: 'snowman_head',
+            cardboard: 'snowman_head',
+            motorcycle_helmet: 'pine_head',
+            helmet: 'pine_head',
+            prism_head: 'ice_head',
+            prism: 'ice_head',
+            velocista: 'snow_velocist',
+            velocist: 'snow_velocist',
+            dancer: 'snow_velocist',
+            velocista_dancarino: 'snow_velocist',
+            atirador: 'snow_shooter',
+            shooter: 'snow_shooter',
+            gigante: 'yeti_giant',
+            giant: 'yeti_giant',
+            boss: 'permafrost_boss',
+            tanque: 'permafrost_tank',
+            tank: 'permafrost_tank',
+            elite: 'ice_elite_shooter',
+            elite_shooter: 'ice_elite_shooter',
+            kamikaze: 'ice_kamikaze',
+            curandeiro: 'avalanche_healer',
+            healer: 'avalanche_healer',
+            truck: 'snowplow'
+        };
+        if (snowMap[type] && getEnemySpritePath(snowMap[type])) return snowMap[type];
     }
     if (window.currentMap === 6 && type === 'prism_head' && getEnemySpritePath('metro_prism_head')) return 'metro_prism_head';
     return canonicalMap[type] || type;
@@ -10974,7 +11030,10 @@ if (!isBossAlive) {
         }
     }
 
-    let mapSpeedMult = 1; obstacles.forEach(o => { 
+    player.snowSlowTimer = Math.max(0, (Number(player.snowSlowTimer) || 0) - dt);
+    let mapSpeedMult = 1;
+    if (player.snowSlowTimer > 0) mapSpeedMult *= 0.58;
+    obstacles.forEach(o => { 
         if(o.type==='ice' && dist(player, o) < o.r + player.r) mapSpeedMult = 1.5; 
         if(o.type==='mud' && dist(player, o) < o.r + player.r) {
             mapSpeedMult = 0.5;
@@ -13104,6 +13163,24 @@ function spawnEnemy() {
         types.push('prism_head');
     }
 
+    // Novos inimigos globais. Baloneiro não nasce na Nevasca; Caminhoneiro não nasce no Deserto.
+    if (gameTime >= 45 && window.currentMap !== 2) {
+        types.push('ballon');
+        types.push('ballon');
+    }
+    if (gameTime >= 75 && window.currentMap !== 1) {
+        types.push('truck');
+    }
+
+    // Conteúdo exclusivo da Nevasca.
+    if (window.currentMap === 2) {
+        if (wave >= 7) {
+            types.push('snow_walker');
+            types.push('ice_statue');
+        }
+        if (wave >= 11) types.push('deer_pilot');
+    }
+
     // Conteúdo permanente do Deserto (independente do UHC).
     if (window.currentMap === 1) {
         if (wave >= 10) types.push('mummy');
@@ -13143,6 +13220,11 @@ function spawnEnemy() {
     if(type === 'sarcophagus') { e.hp = 150*mult; e.speed = 0; e.baseDmg = 8*mult; e.size = 22; e.color = '#c7a76b'; e.stationary = true; e.desertEnemy = true; }
     if(type === 'camel') { e.hp = 120*mult; e.speed = 0.9; e.baseDmg = 12*mult; e.size = 20; e.color = '#c89f6a'; e.desertEnemy = true; }
     if(type === 'scorpion') { e.hp = 135*mult; e.speed = 1.35; e.baseDmg = 14*mult; e.size = 18; e.color = '#8e5a2f'; e.poisonOnHit = 2.5; e.desertEnemy = true; }
+    if(type === 'snow_walker') { e.hp = 38*mult; e.speed = 1.05; e.baseDmg = 7*mult; e.size = 14; e.color = '#b9e8ff'; e.cd = 45; e.snowWalker = true; }
+    if(type === 'ice_statue') { e.hp = 150*mult; e.speed = 0; e.baseDmg = 8*mult; e.size = 22; e.color = '#b7d9e8'; e.stationary = true; e.snowEnemy = true; e.iceStatue = true; }
+    if(type === 'deer_pilot') { e.hp = 28*mult; e.speed = 2.65; e.baseDmg = 7*mult; e.size = 11; e.color = '#dff7ff'; e.snowEnemy = true; e.deerPilot = true; }
+    if(type === 'ballon') { e.hp = 30*mult; e.speed = 1.5; e.baseDmg = 5*mult; e.size = 12; e.color = '#ff7675'; e.globalBalloon = true; e.breakIntoBasic = true; e.forceNormalOnDeath = true; }
+    if(type === 'truck') { e.hp = 170*mult; e.speed = 0.55; e.baseDmg = 18*mult; e.size = 28; e.color = '#576574'; e.globalTruck = true; e.mineImmune = true; e.truckDeathPending = false; e.truckExplosionTimer = 0; }
 
     e.dmg = e.baseDmg; e.maxHp = e.hp; enemies.push(e);
 }
@@ -13150,6 +13232,15 @@ function spawnEnemy() {
 function updateEnemies(dt) {
     for(let i = enemies.length - 1; i >= 0; i--) {
         let e = enemies[i]; let d = dist(e, player);
+        if (e.truckDeathPending) {
+            e.truckExplosionTimer = Math.max(0, (e.truckExplosionTimer || 0) - dt);
+            if (e.truckExplosionTimer <= 0) {
+                createExplosion(e.x, e.y, 115, Math.max(1, e.baseDmg * 1.5), '#95a5a6');
+                createParticles(e.x, e.y, '#95a5a6');
+                enemies.splice(i, 1);
+            }
+            continue;
+        }
         if(typeof e.shockTimer !== 'number') e.shockTimer = 0;
         if(typeof e.shockSemiTimer !== 'number') e.shockSemiTimer = 0;
         if(typeof e.shockTick !== 'number') e.shockTick = 0;
@@ -13297,6 +13388,16 @@ function updateEnemies(dt) {
         } else if(e.type === 'boss' && player.invisTimer <= 0 && !isFrozen && !isHypnotized) {
             e.cd -= 60 * dt; if(e.cd <= 0) { for(let j=0; j<8; j++) { let a = (Math.PI / 4) * j; createProj(e.x, e.y, Math.cos(a)*3, Math.sin(a)*3, e.dmg, 80, false, 'enemy', { hypnotized: isHypnotized, sourceEnemyType: e.type }); } e.cd = 150; }
             let a = Math.atan2(targetY - e.y, targetX - e.x); nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt; ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
+        } else if(e.type === 'snow_walker' && player.invisTimer <= 0 && !isFrozen && !isHypnotized) {
+            e.cd -= 60 * dt;
+            if(e.cd <= 0) {
+                const a = Math.atan2(targetY - e.y, targetX - e.x);
+                createProj(e.x, e.y, Math.cos(a) * 4.2, Math.sin(a) * 4.2, e.dmg, 75, false, 'snowball_slow', { size: 8, sourceEnemyType: e.type, slowDuration: 0.6 });
+                e.cd = 95;
+            }
+            const a = Math.atan2(targetY - e.y, targetX - e.x);
+            nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt;
+            ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
         } else if(e.type === 'goblin' && player.invisTimer <= 0 && !isHypnotized) {
             e.cd -= 60 * dt;
             if(e.cd <= 0 && e.freezeTimer<=0) {
@@ -13336,7 +13437,9 @@ function updateEnemies(dt) {
             }
         }
 
-        obstacles.forEach(o => { if(o.type !== 'ice' && o.type !== 'mud' && o.type !== 'car' && o.type !== 'bamboo_spike' && o.type !== 'speaker' && dist({x:nx,y:ny}, o) < o.r + e.size) { nx = e.x; ny = e.y; } });
+        if (!e.globalBalloon) {
+            obstacles.forEach(o => { if(o.type !== 'ice' && o.type !== 'mud' && o.type !== 'car' && o.type !== 'bamboo_spike' && o.type !== 'speaker' && dist({x:nx,y:ny}, o) < o.r + e.size) { nx = e.x; ny = e.y; } });
+        }
         e.x = Math.max(-1480, Math.min(1480, nx)); e.y = Math.max(-1480, Math.min(1480, ny));
 
         for(let j = 0; j < enemies.length; j++) {
@@ -13422,7 +13525,28 @@ function updateEnemies(dt) {
             }
         }
         
+        if (e.truckDeathPending) {
+            e.truckExplosionTimer = Math.max(0, (e.truckExplosionTimer || 0) - dt);
+            if (e.truckExplosionTimer <= 0) {
+                createExplosion(e.x, e.y, 115, Math.max(1, e.baseDmg * 1.5), '#95a5a6');
+                createParticles(e.x, e.y, '#95a5a6');
+                enemies.splice(i, 1);
+                continue;
+            }
+            continue;
+        }
+
         if(e.hp <= 0) {
+            if(e.type === 'truck' && !e.truckDeathPending) {
+                e.truckDeathPending = true;
+                e.truckExplosionTimer = 1.0;
+                e.hp = 1;
+                e.speed = 0;
+                e.stationary = true;
+                e.color = '#7f8c8d';
+                addFloatingText(e.x, e.y - 18, 'BOOM em 1s!', '#f1c40f', 12);
+                continue;
+            }
             if(e.revives && e.revives > 0) {
                 e.revives--; e.hp = e.maxHp; e.freezeTimer = 1.0; e.color = '#7f8c8d';
             } else if(e.breakIntoBasic && e.isGlobalArmored) {
@@ -13442,8 +13566,25 @@ function updateEnemies(dt) {
                 createParticles(e.x, e.y, '#f1c40f');
                 addFloatingText(e.x, e.y - 10, 'QUEBROU!', '#f1c40f', 11);
             } else {
-                // Conteúdo em cadeia do Deserto. Eles surgem somente pela destruição correspondente.
-                if (e.type === 'explorer') {
+                // Conteúdo em cadeia de biomas e globais.
+                if (e.type === 'ballon' || e.type === 'deer_pilot') {
+                    const basicMult = Math.max(0.25, (Number(e.maxHp) > 0 ? Number(e.maxHp) / 30 : 1));
+                    enemies.push({
+                        x:e.x, y:e.y, type:'basico', hp:30*basicMult, maxHp:30*basicMult, speed:1.5, baseDmg:5*basicMult, dmg:5*basicMult, size:12, cd:0, color:'#e74c3c',
+                        poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0,
+                        shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4,
+                        spawnBiome: e.type === 'deer_pilot' ? 2 : window.currentMap, spawnWave: e.entryWave || wave, entryWave: e.entryWave || wave,
+                        forceNormalSkin: e.type === 'ballon'
+                    });
+                } else if (e.type === 'ice_statue') {
+                    const mult = Math.max(0.25, (Number(e.maxHp) > 0 ? Number(e.maxHp) / 150 : 1));
+                    enemies.push({
+                        x:e.x, y:e.y, type:'basico', hp:30*mult, maxHp:30*mult, speed:1.5, baseDmg:5*mult, dmg:5*mult, size:12, cd:0, color:'#e74c3c',
+                        poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0,
+                        shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4,
+                        spawnBiome:2, spawnWave:e.entryWave || wave, entryWave:e.entryWave || wave
+                    });
+                } else if (e.type === 'explorer') {
                     enemies.push({
                         x: e.x, y: e.y, type: 'sarcophagus', hp: 150 * getEnemyDifficultyMultiplierFromEntry('sarcophagus', e.entryWave || 15, wave), maxHp: 150 * getEnemyDifficultyMultiplierFromEntry('sarcophagus', e.entryWave || 15, wave),
                         speed: 0, baseDmg: 8 * getEnemyDifficultyMultiplierFromEntry('sarcophagus', e.entryWave || 15, wave), dmg: 8 * getEnemyDifficultyMultiplierFromEntry('sarcophagus', e.entryWave || 15, wave), size: 22, cd: 0, color: '#c7a76b',
@@ -13857,6 +13998,11 @@ function updateAllies(dt) {
             } 
         } else if (a.type === 'landmine') {
             for(let e of enemies) {
+                if (e?.mineImmune && dist(a, e) < 20 + e.size) {
+                    a.life = 0;
+                    createParticles(a.x, a.y, '#7f8c8d');
+                    break;
+                }
                 if(dist(a, e) < 20 + e.size) {
                     createExplosion(a.x, a.y, 100, player.baseDmg * player.stats.dmgMult * 3);
                     a.life = 0; break;
@@ -14967,7 +15113,11 @@ function updateProjectiles(dt) {
                     hit = true;
                 } else if(dist(p, player) < p.size + player.r && player.shieldTimer <= 0) {
                     if(Math.random() > (player.stats.dodgeChance || 0)) {
-                        dealPlayerDamage(p.dmg * Math.max(0.1, player.stats.defMult - player.stats.dynamicDef)); addFloatingText(player.x, player.y, `-${Math.floor(p.dmg)}`, '#e74c3c'); hit = true; 
+                        dealPlayerDamage(p.dmg * Math.max(0.1, player.stats.defMult - player.stats.dynamicDef)); addFloatingText(player.x, player.y, `-${Math.floor(p.dmg)}`, '#e74c3c'); hit = true;
+                        if (p.type === 'snowball_slow') {
+                            player.snowSlowTimer = Math.max(Number(player.snowSlowTimer) || 0, Number(p.extra?.slowDuration) || 0.6);
+                            addFloatingText(player.x, player.y - 16, 'LERDEZA!', '#74b9ff', 12);
+                        }
                         if(p.type === 'heavy_enemy') { player.x += p.vx*25; player.y += p.vy*25; }
                         if(player.hp <= 0) { triggerRevivePrompt(); return; } 
                     } else { addFloatingText(player.x, player.y, "Esquiva!", '#3498db', 12); }
@@ -15541,6 +15691,7 @@ function drawShape(cCtx, x, y, size, shape, color, isBoss=false, spriteId=null) 
 }
 
 let plainsGrassPattern = null;
+let caveFloorPattern = null;
 
 function getPlainsGrassPattern() {
     if (plainsGrassPattern) return plainsGrassPattern;
@@ -15621,6 +15772,38 @@ function buildBiomeTexturePattern(mode) {
     return ctx.createPattern(tile, 'repeat');
 }
 
+function getCaveFloorPattern() {
+    if (caveFloorPattern) return caveFloorPattern;
+    const tile = document.createElement('canvas');
+    tile.width = 150; tile.height = 150;
+    const g = tile.getContext('2d');
+    g.fillStyle = '#2a2633';
+    g.fillRect(0, 0, tile.width, tile.height);
+    let seed = 24681357;
+    const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+    for (let i = 0; i < 230; i++) {
+        const x = rnd() * tile.width, y = rnd() * tile.height;
+        const r = 0.5 + rnd() * 2.4;
+        g.fillStyle = rnd() > 0.45 ? 'rgba(112,104,126,0.22)' : 'rgba(12,10,18,0.28)';
+        g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+    }
+    for (let i = 0; i < 28; i++) {
+        const x = rnd() * tile.width, y = rnd() * tile.height;
+        const len = 6 + rnd() * 18;
+        g.strokeStyle = rnd() > 0.5 ? 'rgba(137,126,150,0.12)' : 'rgba(0,0,0,0.25)';
+        g.lineWidth = 1.2;
+        g.beginPath(); g.moveTo(x, y); g.lineTo(x + len, y + (rnd() - 0.5) * 8); g.stroke();
+    }
+    caveFloorPattern = ctx.createPattern(tile, 'repeat');
+    return caveFloorPattern;
+}
+
+function drawCaveTextureRect(x, y, w, h) {
+    const p = getCaveFloorPattern();
+    ctx.fillStyle = p || '#2a2633';
+    ctx.fillRect(x, y, w, h);
+}
+
 function getBiomeSandPattern() {
     if (!biomeSandPattern) biomeSandPattern = buildBiomeTexturePattern('sand');
     return biomeSandPattern;
@@ -15655,7 +15838,7 @@ function draw() {
         ctx.fillStyle = getPlainsGrassPattern() || '#557A46';
         ctx.fillRect(camera.x, camera.y, cw, ch);
         if (window.currentMap === 4) {
-            ctx.fillStyle = 'rgba(28, 105, 32, 0.24)';
+            ctx.fillStyle = 'rgba(154, 255, 28, 0.34)';
             ctx.fillRect(camera.x, camera.y, cw, ch);
         }
     } else if (window.currentMap === 1) {
@@ -15663,6 +15846,8 @@ function draw() {
     } else if (window.currentMap === 2) {
         // Mesma distribuição da textura do Deserto, mas recolorizada para branco/neve.
         drawSnowTextureRect(camera.x, camera.y, cw, ch);
+    } else if (window.currentMap === 3) {
+        drawCaveTextureRect(camera.x, camera.y, cw, ch);
     } else {
         ctx.fillStyle = window.currentMap===3 ? '#576574' : window.currentMap===5 ? '#3b3e24' : window.currentMap===6 ? '#2f3640' : window.currentMap===7 ? '#351111' : window.currentMap===8 ? '#e1f7d5' : '#1d145d';
         ctx.fillRect(camera.x, camera.y, cw, ch);
