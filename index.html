@@ -483,21 +483,7 @@
         font-weight: 900;
     }
     
-    #game-hud { position:absolute; inset:0; z-index:5; pointer-events:none; }
-    #hud-info-group { position:absolute; left:10px; top:10px; pointer-events:none; }
-    #btn-pause { position:absolute; top:10px; right:10px; }
-    .hud-editor-panel { width:min(1100px,96vw); height:min(860px,94vh); display:flex; flex-direction:column; gap:10px; padding:14px; box-sizing:border-box; background:rgba(9,13,22,.98); border:2px solid rgba(255,255,255,.12); border-radius:20px; }
-    .hud-editor-top,.hud-editor-bottom { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
-    .hud-editor-actions { display:flex; gap:8px; flex-wrap:wrap; }
-    .hud-editor-title { font-size:20px; font-weight:1000; color:var(--btn-yellow); }
-    .hud-editor-subtitle { margin-top:4px; font-size:12px; color:#aaa; }
-    #hud-editor-stage { position:relative; flex:1; min-height:0; overflow:hidden; border:2px solid rgba(255,255,255,.10); border-radius:18px; background:linear-gradient(180deg,rgba(15,22,35,.95),rgba(7,11,18,.95)); }
-    .hud-editor-character { position:absolute; left:50%; top:53%; transform:translate(-50%,-50%); width:120px; height:120px; display:flex; align-items:center; justify-content:center; pointer-events:none; z-index:2; }
-    .hud-editor-character img { max-width:100%; max-height:100%; object-fit:contain; }
-    .hud-editor-hint { position:absolute; left:50%; bottom:18px; transform:translateX(-50%); color:#aaa; font-size:12px; pointer-events:none; z-index:3; }
-    .hud-editor-selectable { outline:3px dashed rgba(241,196,15,.95)!important; outline-offset:4px!important; filter:drop-shadow(0 0 7px rgba(241,196,15,.35)); pointer-events:auto!important; }
-    #overlay-hud-editor .hud-edit-target { pointer-events:auto!important; }
-    #overlay-hud-editor #joystick-zone,#overlay-hud-editor #btn-special,#overlay-hud-editor #exp-bar-container,#overlay-hud-editor #game-hud { display:block!important; }
+    #game-hud { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; justify-content: space-between; align-items: flex-start; z-index: 5; pointer-events: none; }
     .hud-text { font-size: 20px; color: white; text-shadow: 2px 2px 0 #000; font-weight: bold; margin-bottom: 5px; }
     #map-text { font-size: 16px; color: #aaa; text-shadow: 1px 1px 0 #000; font-weight: bold; }
     #exp-bar-container { position: absolute; top: 50px; left: 50%; transform: translateX(-50%); width: 300px; height: 18px; background: #222; border: 3px solid #000; border-radius: 12px; overflow: hidden; z-index: 5; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
@@ -1999,17 +1985,6 @@
     </div>
 </div>
 
-<div id="overlay-hud-editor" class="overlay hidden" style="z-index:12400;">
-    <div class="hud-editor-panel">
-        <div class="hud-editor-top">
-            <div><div class="hud-editor-title">🎮 EDITAR HUD</div><div class="hud-editor-subtitle">Arraste um elemento para mover. Selecione e use − / + para redimensionar.</div></div>
-            <div class="hud-editor-actions"><button class="btn-menu" type="button" onclick="hudEditorSave()">💾 Salvar</button><button class="btn-menu" type="button" onclick="hudEditorCancel()">✖ Cancelar</button></div>
-        </div>
-        <div id="hud-editor-stage" class="hud-editor-stage"><div class="hud-editor-character" id="hud-editor-character"></div><div class="hud-editor-hint">Clique em um elemento para editar</div></div>
-        <div class="hud-editor-bottom"><button class="btn-menu" type="button" onclick="hudEditorScale(-1)">➖ Diminuir</button><div id="hud-editor-selected-name">Nenhum elemento selecionado</div><button class="btn-menu" type="button" onclick="hudEditorScale(1)">➕ Aumentar</button></div>
-    </div>
-</div>
-
 <div id="overlay-turntable" class="overlay hidden" style="z-index:12500;">
     <div class="popup-box" style="width:min(94vw,820px);max-height:88vh;overflow:auto;">
         <h2 style="margin-top:0;color:var(--btn-yellow);">🎛️ Toca Discos</h2>
@@ -2093,12 +2068,11 @@
             <div class="settings-section-title">Controle</div>
             <div class="settings-grid">
                 <button class="btn-menu settings-option" onclick="toggleSetting('controlMode')">Modo de Controle: <br><span id="set-ctrl" style="color:var(--btn-yellow)">Auto</span></button>
-                <button class="btn-menu settings-option" type="button" onclick="openHudEditor()">🎮 Editar HUD</button>
-                <button class="btn-menu settings-option" onclick="toggleSetting('leftHanded')">Modo Canhoto: <br><span id="set-left-handed" style="color:var(--btn-red)">Desativado</span></button>
+                <button class="btn-menu settings-option" onclick="toggleSetting('mobileJoystickFollowTap')">Joystick Móvel: <br><span id="set-joy-follow" style="color:var(--btn-green)">Ativado</span></button>
                 <div class="settings-card settings-card--wide">
-                    <div style="font-size:15px; font-weight:900; color:var(--btn-yellow); margin-bottom:6px;">Controles</div>
+                    <div style="font-size:15px; font-weight:900; color:var(--btn-yellow); margin-bottom:6px;">Como funciona</div>
                     <div style="font-size:13px; color:#ddd; line-height:1.45;">
-                        No PC, o jogo usa teclas. No mobile, use o joystick ou o D-pad. Em <strong>Editar HUD</strong>, você pode mover e redimensionar os elementos da interface.
+                        No PC, o jogo usa teclas. No mobile, o controle padrão é joystick. Se o joystick seguidor estiver ativado, tocar no mapa move o joystick para o ponto tocado.
                     </div>
                 </div>
             </div>
@@ -2509,16 +2483,16 @@
 
 <canvas id="gameCanvas"></canvas>
 <div id="game-hud" class="hidden">
-    <div id="hud-info-group">
-        <div class="hud-text hud-edit-target" data-hud-target="hudInfo">Wave: <span id="hud-wave">1</span></div>
-        <div class="hud-text hud-edit-target" data-hud-target="hudInfo">Tempo: <span id="hud-time">0:00</span></div>
-        <div id="hud-hp-text" class="hud-text hud-edit-target" data-hud-target="hudInfo">HP: <span id="hud-hp">100</span></div>
+    <div>
+        <div class="hud-text">Wave: <span id="hud-wave">1</span></div>
+        <div class="hud-text">Tempo: <span id="hud-time">0:00</span></div>
+        <div id="hud-hp-text" class="hud-text">HP: <span id="hud-hp">100</span></div>
         <div id="hud-hp-bar-wrap" class="hud-hp-wrap hidden"><div id="hud-hp-bar" class="hud-hp-fill"></div></div>
         <div id="map-text">Mapa: Planície</div>
     </div>
-    <button id="btn-pause" class="hud-edit-target" data-hud-target="pause" onclick="togglePause()">⏸ Pausa</button>
+    <button id="btn-pause" onclick="togglePause()">⏸ Pausa</button>
 </div>
-<div id="exp-bar-container" class="hidden hud-edit-target" data-hud-target="exp"><div id="exp-bar"></div></div>
+<div id="exp-bar-container" class="hidden"><div id="exp-bar"></div></div>
 <div id="joystick-zone"><div id="joystick-knob"></div></div>
 <div id="dpad-zone" aria-label="Controle direcional mobile">
     <button class="dpad-btn" data-dir="up" style="grid-column: 2; grid-row: 1;">▲</button>
@@ -3586,8 +3560,7 @@ function renderGachaRevealHtml(rawText) {
 
 const DEFAULT_KEYBINDS = { up: 'w', down: 's', left: 'a', right: 'd', special: 'p', pause: 'escape' };
 const DEFAULT_INITIAL_ZOOM = (('ontouchstart' in window) || navigator.maxTouchPoints > 0) ? 0.65 : 1;
-const DEFAULT_HUD_LAYOUT = { joystick:{x:0.05,y:0.78,scale:1}, special:{x:0.82,y:0.76,scale:1}, hudInfo:{x:0.025,y:0.025,scale:1}, pause:{x:0.84,y:0.025,scale:1}, exp:{x:0.50,y:0.075,scale:1} };
-const DEFAULT_SETTINGS = { skipGacha: false, controlMode: 'auto', mobileControlLayout: 'joystick', leftHanded: false, hudLayout: DEFAULT_HUD_LAYOUT, ultraHardcore: false, uhcDark: false, noParticles: false, showCombatText: true, showHpBar: false, screenZoom: DEFAULT_INITIAL_ZOOM, musicVolume: 0.7, musicTracks: { menu: 'legacy_awaits.mp3', casual: 'roguish_journey.mp3', uhc: 'fatal_finale.mp3' }, mapChoice: -1, keybinds: { ...DEFAULT_KEYBINDS } };
+const DEFAULT_SETTINGS = { skipGacha: false, controlMode: 'auto', mobileControlLayout: 'joystick', mobileJoystickFollowTap: true, ultraHardcore: false, uhcDark: false, noParticles: false, showCombatText: true, showHpBar: false, screenZoom: DEFAULT_INITIAL_ZOOM, musicVolume: 0.7, musicTracks: { menu: 'legacy_awaits.mp3', casual: 'roguish_journey.mp3', uhc: 'fatal_finale.mp3' }, mapChoice: -1, keybinds: { ...DEFAULT_KEYBINDS } };
 
 const MUSIC_LIBRARY = {
     menu: [['legacy_awaits.mp3','Legacy Awaits'],['street_awaits.mp3','Street Awaits'],['france_awaits.mp3','France Awaits'],['battle_awaits.mp3','Battle Awaits']],
@@ -4019,10 +3992,9 @@ function load() {
     ensureMusicSettings();
     if (typeof pd.settings.uhcDark === 'undefined') pd.settings.uhcDark = false;
     if (typeof pd.settings.noParticles === 'undefined') pd.settings.noParticles = false;
+    if (typeof pd.settings.mobileJoystickFollowTap === 'undefined') pd.settings.mobileJoystickFollowTap = true;
     if (typeof pd.settings.showCombatText === 'undefined') pd.settings.showCombatText = true;
     if (typeof pd.settings.showHpBar === 'undefined') pd.settings.showHpBar = false;
-    if (typeof pd.settings.leftHanded === 'undefined') pd.settings.leftHanded = false;
-    ensureHudLayout();
     if (typeof pd.settings.screenZoom !== 'number' || !isFinite(pd.settings.screenZoom)) pd.settings.screenZoom = 1;
     pd.settings.screenZoom = Math.min(1.5, Math.max(0.5, pd.settings.screenZoom));
     pd.settings.mapChoice = -1;
@@ -5997,7 +5969,9 @@ function toggleSetting(key) {
     else if(key === 'ultraHardcore') {
         pd.settings.ultraHardcore = !pd.settings.ultraHardcore;
     }
-    else if(key === 'leftHanded') { pd.settings.leftHanded = !pd.settings.leftHanded; }
+    else if(key === 'mobileJoystickFollowTap') {
+        pd.settings.mobileJoystickFollowTap = !pd.settings.mobileJoystickFollowTap;
+    }
     else if(key === 'uhcDark') {
         pd.settings.uhcDark = !pd.settings.uhcDark;
     }
@@ -6738,65 +6712,26 @@ function refreshModeSelectUI() {
     const pcMode = pd.settings.controlMode === 'pc' || (pd.settings.controlMode === 'auto' && !touch);
 }
 
-function resetJoystickPosition() { applySavedHudLayout(); }
+function resetJoystickPosition() {
+    if (!joyZone) return;
+    joyZone.style.position = 'fixed';
+    joyZone.style.left = '30px';
+    joyZone.style.top = 'auto';
+    joyZone.style.right = 'auto';
+    joyZone.style.bottom = '30px';
+    joyZone.style.transform = 'none';
+}
 
 function applyControlLayout() {
     const touch = isTouchDevice();
     const mobileControls = pd.settings.controlMode === 'mobile' || (pd.settings.controlMode === 'auto' && touch);
     const joystickMode = mobileControls && pd.settings.mobileControlLayout !== 'dpad';
-    if (joyZone) joyZone.style.display = joystickMode ? 'block' : 'none';
+    if (joyZone) {
+        joyZone.style.display = joystickMode ? 'block' : 'none';
+        if (!pd.settings.mobileJoystickFollowTap || !joystickMode) resetJoystickPosition();
+    }
     if (dpadZone) dpadZone.style.display = mobileControls && pd.settings.mobileControlLayout === 'dpad' ? 'grid' : 'none';
     if (btnSpecial) btnSpecial.style.display = mobileControls && getSelectedSpecialConfig() ? 'flex' : 'none';
-    if (!hudEditorActive) applySavedHudLayout();
-}
-
-// HUD EDITOR
-let hudEditorActive=false, hudEditorDraft=null, hudEditorSelected=null, hudEditorDrag=null;
-function ensureHudLayout(){
-    if(!pd.settings.hudLayout||typeof pd.settings.hudLayout!=='object') pd.settings.hudLayout=JSON.parse(JSON.stringify(DEFAULT_HUD_LAYOUT));
-    for(const [k,d] of Object.entries(DEFAULT_HUD_LAYOUT)){const c=pd.settings.hudLayout[k];if(!c||typeof c!=='object')pd.settings.hudLayout[k]={...d};else{c.x=Math.max(0,Math.min(1,Number.isFinite(Number(c.x))?Number(c.x):d.x));c.y=Math.max(0,Math.min(1,Number.isFinite(Number(c.y))?Number(c.y):d.y));c.scale=Math.max(.55,Math.min(2.2,Number.isFinite(Number(c.scale))?Number(c.scale):d.scale));}}
-}
-function getHudEditorTargetMap(){return{joystick:document.getElementById('joystick-zone'),special:document.getElementById('btn-special'),hudInfo:document.getElementById('hud-info-group'),pause:document.getElementById('btn-pause'),exp:document.getElementById('exp-bar-container')}}
-function hudEditorGetStageRect(){return document.getElementById('hud-editor-stage')?.getBoundingClientRect()}
-function hudEditorLabel(k){return({joystick:'Joystick',special:'Habilidade (?)',hudInfo:'Wave / Tempo / HP',pause:'Pausa',exp:'Barra de XP'})[k]||k}
-function hudEditorApplyOne(k){const m=getHudEditorTargetMap(),e=m[k],st=hudEditorGetStageRect(),c=hudEditorDraft?.[k];if(!e||!st||!c)return;e.style.position='absolute';e.style.left=`${c.x*st.width}px`;e.style.top=`${c.y*st.height}px`;e.style.right='auto';e.style.bottom='auto';e.style.transformOrigin='top left';e.style.transform=k==='exp'?`translateX(-50%) scale(${c.scale})`:`scale(${c.scale})`}
-function hudEditorApplyAll(){Object.keys(getHudEditorTargetMap()).forEach(hudEditorApplyOne)}
-function hudEditorSelect(k){hudEditorSelected=k;const m=getHudEditorTargetMap();Object.entries(m).forEach(([x,e])=>e?.classList.toggle('hud-editor-selectable',x===k));const n=document.getElementById('hud-editor-selected-name');if(n)n.textContent=k?hudEditorLabel(k):'Nenhum elemento selecionado'}
-function hudEditorScale(d){if(!hudEditorSelected)return;const c=hudEditorDraft[hudEditorSelected];c.scale=Math.max(.55,Math.min(2.2,c.scale+d*.1));hudEditorApplyOne(hudEditorSelected)}
-function hudEditorDown(e){if(!hudEditorActive)return;const t=e.currentTarget,k=t.dataset.hudTarget||({"joystick-zone":"joystick","btn-special":"special","hud-info-group":"hudInfo","btn-pause":"pause","exp-bar-container":"exp"}[t.id]);if(!k)return;e.preventDefault();e.stopPropagation();hudEditorSelect(k);const st=hudEditorGetStageRect(),c=hudEditorDraft[k];if(!st||!c)return;hudEditorDrag={k,sx:e.clientX,sy:e.clientY,x:c.x,y:c.y};try{t.setPointerCapture(e.pointerId)}catch(_){}}
-function hudEditorMove(e){if(!hudEditorActive||!hudEditorDrag)return;const st=hudEditorGetStageRect(),c=hudEditorDraft[hudEditorDrag.k];if(!st||!c)return;c.x=Math.max(0,Math.min(1,hudEditorDrag.x+(e.clientX-hudEditorDrag.sx)/st.width));c.y=Math.max(0,Math.min(1,hudEditorDrag.y+(e.clientY-hudEditorDrag.sy)/st.height));hudEditorApplyOne(hudEditorDrag.k)}
-function hudEditorUp(){hudEditorDrag=null}
-function bindHudEditorTargets(){Object.values(getHudEditorTargetMap()).forEach(e=>{if(!e||e.dataset.hudBound)return;e.dataset.hudBound='1';e.addEventListener('pointerdown',hudEditorDown);e.addEventListener('pointermove',hudEditorMove);e.addEventListener('pointerup',hudEditorUp);e.addEventListener('pointercancel',hudEditorUp)})}
-function drawHudEditorCharacter(){const h=document.getElementById('hud-editor-character');if(!h)return;const id=pd?.selectedChar||'strike';h.innerHTML=getCharacterSpriteMarkup(id,'hero')||`<div style="width:84px;height:84px;border-radius:50%;background:${CHARACTERS[id]?.color||'#3498db'};border:3px solid #fff"></div>`}
-let hudEditorParents = null;
-function openHudEditor(){
-    if(isPlaying&&!isPaused)togglePause();
-    ensureHudLayout(); hudEditorActive=true; hudEditorDraft=JSON.parse(JSON.stringify(pd.settings.hudLayout)); hudEditorSelected=null;
-    const overlay=document.getElementById('overlay-hud-editor'), stage=document.getElementById('hud-editor-stage');
-    overlay?.classList.remove('hidden'); drawHudEditorCharacter();
-    const ids=['game-hud','exp-bar-container','joystick-zone','btn-special'];
-    hudEditorParents={};
-    ids.forEach(id=>{const el=document.getElementById(id);if(!el||!stage)return;hudEditorParents[id]={parent:el.parentNode,next:el.nextSibling};stage.appendChild(el);});
-    const m=getHudEditorTargetMap();
-    Object.entries(m).forEach(([k,e])=>{if(!e)return;e.classList.remove('hidden');if(k==='special'){e.innerHTML='<span class="btn-special-label">?</span>';e.style.display='flex';}else if(k==='joystick')e.style.display='block';else if(k==='exp')e.style.display='block';});
-    document.getElementById('game-hud')?.classList.remove('hidden'); document.getElementById('exp-bar-container')?.classList.remove('hidden');
-    bindHudEditorTargets(); requestAnimationFrame(()=>{hudEditorApplyAll();hudEditorSelect(null);});
-}
-function restoreHudEditorParents(){
-    if(!hudEditorParents)return;
-    for(const [id,state] of Object.entries(hudEditorParents)){const el=document.getElementById(id);if(!el||!state?.parent)continue;if(state.nextSibling&&state.nextSibling.parentNode===state.parent)state.parent.insertBefore(el,state.nextSibling);else state.parent.appendChild(el);}
-    hudEditorParents=null;
-}
-function hudEditorSave(){if(!hudEditorActive)return;pd.settings.hudLayout=JSON.parse(JSON.stringify(hudEditorDraft));save();hudEditorClose();applyControlLayout();}
-function hudEditorCancel(){hudEditorClose();}
-function hudEditorClose(){hudEditorActive=false;hudEditorDraft=null;hudEditorDrag=null;hudEditorSelect(null);restoreHudEditorParents();document.getElementById('overlay-hud-editor')?.classList.add('hidden');if(!isPlaying){document.getElementById('game-hud')?.classList.add('hidden');document.getElementById('exp-bar-container')?.classList.add('hidden');}if(player&&isPlaying)updateSpecialButtonUI();applyControlLayout();}
-function applySavedHudLayout(){
-    ensureHudLayout(); const m=getHudEditorTargetMap(), mirror=!!pd.settings.leftHanded;
-    for(const [k,e] of Object.entries(m)){
-        if(!e)continue; const c=pd.settings.hudLayout[k]||DEFAULT_HUD_LAYOUT[k]; let x=Number(c.x)||0;
-        if(mirror&&k!=='exp'){const scale=Number(c.scale)||1;const width=Math.max(0.08,Math.min(0.30,(e.offsetWidth*scale)/Math.max(1,window.innerWidth)));x=1-x-width;}
-        e.style.position='absolute'; e.style.left=`${Math.max(0,Math.min(1,x))*window.innerWidth}px`; e.style.top=`${Math.max(0,Math.min(1,Number(c.y)||0))*window.innerHeight}px`; e.style.right='auto';e.style.bottom='auto';e.style.transformOrigin='top left';e.style.transform=k==='exp'?`translateX(-50%) scale(${c.scale})`:`scale(${c.scale})`;
-    }
 }
 
 function updateSettingsUI(syncSlider = true) { 
@@ -6804,7 +6739,7 @@ function updateSettingsUI(syncSlider = true) {
     const cEl = document.getElementById('set-ctrl'); if(cEl) { cEl.innerHTML = pd.settings.controlMode === 'auto' ? 'Auto' : (pd.settings.controlMode === 'pc' ? 'PC' : 'Mobile'); }
     const uhcEl = document.getElementById('set-uhc'); if(uhcEl) { uhcEl.innerHTML = pd.settings.ultraHardcore ? 'Ativado' : 'Desativado'; uhcEl.style.color = pd.settings.ultraHardcore ? '#e056fd' : 'var(--btn-red)'; }
     const uhcDarkEl = document.getElementById('set-uhc-light'); if(uhcDarkEl) { uhcDarkEl.innerHTML = pd.settings.uhcDark ? 'Ativado' : 'Desativado'; uhcDarkEl.style.color = pd.settings.uhcDark ? 'var(--btn-green)' : 'var(--btn-red)'; }
-    const leftEl = document.getElementById('set-left-handed'); if(leftEl) { leftEl.innerHTML = pd.settings.leftHanded ? 'Ativado' : 'Desativado'; leftEl.style.color = pd.settings.leftHanded ? 'var(--btn-green)' : 'var(--btn-red)'; }
+    const joyFollowEl = document.getElementById('set-joy-follow'); if(joyFollowEl) { joyFollowEl.innerHTML = pd.settings.mobileJoystickFollowTap ? 'Ativado' : 'Desativado'; joyFollowEl.style.color = pd.settings.mobileJoystickFollowTap ? 'var(--btn-green)' : 'var(--btn-red)'; }
     const pEl = document.getElementById('set-particles'); if(pEl) { pEl.innerHTML = pd.settings.noParticles ? 'Ativado' : 'Desativado'; pEl.style.color = pd.settings.noParticles ? 'var(--btn-green)' : 'var(--btn-red)'; }
     const ctEl = document.getElementById('set-combat-text'); if(ctEl) { ctEl.innerHTML = pd.settings.showCombatText ? 'Ativado' : 'Desativado'; ctEl.style.color = pd.settings.showCombatText ? 'var(--btn-green)' : 'var(--btn-red)'; }
     const hpEl = document.getElementById('set-hpbar'); if(hpEl) { hpEl.innerHTML = pd.settings.showHpBar ? 'Ativado' : 'Desativado'; hpEl.style.color = pd.settings.showHpBar ? 'var(--btn-green)' : 'var(--btn-red)'; }
@@ -9738,7 +9673,7 @@ function renderTrail() {
 // GAME ENGINE
 const canvas = document.getElementById('gameCanvas'); const ctx = canvas.getContext('2d');
 let cw = canvas.width = window.innerWidth; let ch = canvas.height = window.innerHeight;
-window.addEventListener('resize', () => { cw = canvas.width = window.innerWidth; ch = canvas.height = window.innerHeight; updateOrientationGate(); applySavedHudLayout(); if(hudEditorActive) requestAnimationFrame(hudEditorApplyAll); });
+window.addEventListener('resize', () => { cw = canvas.width = window.innerWidth; ch = canvas.height = window.innerHeight; updateOrientationGate(); });
 window.addEventListener('orientationchange', updateOrientationGate);
 
 let gameLoopId, isPlaying = false, isPaused = false;
@@ -9976,33 +9911,37 @@ function isInteractiveUiTarget(target) {
     return !!target.closest('button, input, select, textarea, a, label, [role=\"button\"], #joystick-zone, #dpad-zone');
 }
 
-function updateJoy(touch) {
-    if (!joyZone || !touch) return;
-    const rect = joyZone.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-    let dx = touch.clientX - cx;
-    let dy = touch.clientY - cy;
-    const maxR = Math.max(1, rect.width / 2);
-    const d = Math.hypot(dx, dy);
-    if (d > maxR) {
-        dx = (dx / d) * maxR;
-        dy = (dy / d) * maxR;
-    }
-    const deadzone = Math.min(6, maxR * 0.08);
-    const outputD = Math.max(0, d - deadzone);
-    if (d <= deadzone) {
-        joyVec.x = 0;
-        joyVec.y = 0;
-    } else {
-        const scale = Math.min(1, outputD / Math.max(1, maxR - deadzone));
-        joyVec.x = (dx / Math.max(1, d)) * scale;
-        joyVec.y = (dy / Math.max(1, d)) * scale;
-    }
-    if (joyKnob) {
-        joyKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
-    }
+function teleportJoystickToTouch(touch) {
+    if (!joyZone) return;
+    const zoneSize = joyZone.getBoundingClientRect().width || 120;
+    const pad = 10;
+    const x = Math.min(window.innerWidth - zoneSize - pad, Math.max(pad, touch.clientX - zoneSize / 2));
+    const y = Math.min(window.innerHeight - zoneSize - pad, Math.max(pad, touch.clientY - zoneSize / 2));
+    joyZone.style.position = 'fixed';
+    joyZone.style.left = `${x}px`;
+    joyZone.style.top = `${y}px`;
+    joyZone.style.right = 'auto';
+    joyZone.style.bottom = 'auto';
 }
+
+joyZone.addEventListener('touchstart', e => { e.preventDefault(); const touch = e.changedTouches[0]; touchId = touch.identifier; updateJoy(touch); });
+joyZone.addEventListener('touchmove', e => { e.preventDefault(); for(let i=0; i<e.changedTouches.length; i++) if(e.changedTouches[i].identifier === touchId) updateJoy(e.changedTouches[i]); });
+const endJoy = (e) => { for(let i=0; i<e.changedTouches.length; i++) if(e.changedTouches[i].identifier === touchId) { touchId = null; joyVec = {x:0, y:0}; joyKnob.style.transform = `translate(-50%, -50%)`; } };
+joyZone.addEventListener('touchend', endJoy); joyZone.addEventListener('touchcancel', endJoy);
+document.addEventListener('touchend', e => { if(e.touches.length === 0) { touchId = null; joyVec = {x:0, y:0}; joyKnob.style.transform = `translate(-50%, -50%)`; } });
+document.addEventListener('touchstart', e => {
+    if (!isPlaying || isPaused || !pd?.settings?.mobileJoystickFollowTap) return;
+    const touch = e.changedTouches && e.changedTouches[0];
+    if (!touch || touch.clientX > window.innerWidth / 2 || isInteractiveUiTarget(e.target)) return;
+    const touchControls = pd.settings.controlMode === 'mobile' || (pd.settings.controlMode === 'auto' && isTouchDevice());
+    if (!touchControls || pd.settings.mobileControlLayout === 'dpad') return;
+    touchId = touch.identifier;
+    teleportJoystickToTouch(touch);
+    updateJoy(touch);
+    e.preventDefault();
+}, { passive: false });
+
+function updateJoy(touch) { const rect = joyZone.getBoundingClientRect(); const cx = rect.left + rect.width/2; const cy = rect.top + rect.height/2; let dx = touch.clientX - cx; let dy = touch.clientY - cy; const dist = Math.sqrt(dx*dx + dy*dy); const maxR = rect.width/2; if(dist > maxR) { dx = (dx/dist)*maxR; dy = (dy/dist)*maxR; } joyKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`; joyVec.x = dx / maxR; joyVec.y = dy / maxR; }
 const dist = (a, b) => Math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2);
 const normalizeAngle = (a) => { while(a > Math.PI) a -= Math.PI*2; while(a < -Math.PI) a += Math.PI*2; return a; };
 
@@ -10152,6 +10091,7 @@ function updatePauseSettingsUI(syncSlider = true) {
     const musicSlider = document.getElementById('pause-music-volume-slider'); if(syncSlider !== false && musicSlider) musicSlider.value = Math.round(getMusicVolume() * 100);
     const ctEl = document.getElementById('pause-set-combat-text'); if(ctEl) { ctEl.innerHTML = pd.settings.showCombatText ? 'Ativado' : 'Desativado'; ctEl.style.color = pd.settings.showCombatText ? 'var(--btn-green)' : 'var(--btn-red)'; }
     const hpEl = document.getElementById('pause-set-hpbar'); if(hpEl) { hpEl.innerHTML = pd.settings.showHpBar ? 'Ativado' : 'Desativado'; hpEl.style.color = pd.settings.showHpBar ? 'var(--btn-green)' : 'var(--btn-red)'; }
+    const joyFollowEl = document.getElementById('pause-set-joy-follow'); if(joyFollowEl) { joyFollowEl.innerHTML = pd.settings.mobileJoystickFollowTap ? 'Ativado' : 'Desativado'; joyFollowEl.style.color = pd.settings.mobileJoystickFollowTap ? 'var(--btn-green)' : 'var(--btn-red)'; }
     const pEl = document.getElementById('pause-set-particles'); if(pEl) { pEl.innerHTML = pd.settings.noParticles ? 'Ativado' : 'Desativado'; pEl.style.color = pd.settings.noParticles ? 'var(--btn-green)' : 'var(--btn-red)'; }
 }
 
