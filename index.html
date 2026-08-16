@@ -483,7 +483,21 @@
         font-weight: 900;
     }
     
-    #game-hud { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; justify-content: space-between; align-items: flex-start; z-index: 5; pointer-events: none; }
+    #game-hud { position:absolute; inset:0; z-index:5; pointer-events:none; }
+    #hud-info-group { position:absolute; left:10px; top:10px; pointer-events:none; }
+    #btn-pause { position:absolute; top:10px; right:10px; }
+    .hud-editor-panel { width:min(1100px,96vw); height:min(860px,94vh); display:flex; flex-direction:column; gap:10px; padding:14px; box-sizing:border-box; background:rgba(9,13,22,.98); border:2px solid rgba(255,255,255,.12); border-radius:20px; }
+    .hud-editor-top,.hud-editor-bottom { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+    .hud-editor-actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .hud-editor-title { font-size:20px; font-weight:1000; color:var(--btn-yellow); }
+    .hud-editor-subtitle { margin-top:4px; font-size:12px; color:#aaa; }
+    #hud-editor-stage { position:relative; flex:1; min-height:0; overflow:hidden; border:2px solid rgba(255,255,255,.10); border-radius:18px; background:linear-gradient(180deg,rgba(15,22,35,.95),rgba(7,11,18,.95)); }
+    .hud-editor-character { position:absolute; left:50%; top:53%; transform:translate(-50%,-50%); width:120px; height:120px; display:flex; align-items:center; justify-content:center; pointer-events:none; z-index:2; }
+    .hud-editor-character img { max-width:100%; max-height:100%; object-fit:contain; }
+    .hud-editor-hint { position:absolute; left:50%; bottom:18px; transform:translateX(-50%); color:#aaa; font-size:12px; pointer-events:none; z-index:3; }
+    .hud-editor-selectable { outline:3px dashed rgba(241,196,15,.95)!important; outline-offset:4px!important; filter:drop-shadow(0 0 7px rgba(241,196,15,.35)); pointer-events:auto!important; }
+    #overlay-hud-editor .hud-edit-target { pointer-events:auto!important; }
+    #overlay-hud-editor #joystick-zone,#overlay-hud-editor #btn-special,#overlay-hud-editor #exp-bar-container,#overlay-hud-editor #game-hud { display:block!important; }
     .hud-text { font-size: 20px; color: white; text-shadow: 2px 2px 0 #000; font-weight: bold; margin-bottom: 5px; }
     #map-text { font-size: 16px; color: #aaa; text-shadow: 1px 1px 0 #000; font-weight: bold; }
     #exp-bar-container { position: absolute; top: 50px; left: 50%; transform: translateX(-50%); width: 300px; height: 18px; background: #222; border: 3px solid #000; border-radius: 12px; overflow: hidden; z-index: 5; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
@@ -1190,6 +1204,13 @@
         margin: 0;
         text-align: left;
     }
+    .turntable-panel { width:min(100%,760px); margin:0 auto; background:rgba(8,12,22,.65); border:2px solid rgba(255,255,255,.12); border-radius:16px; padding:14px; }
+    .turntable-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
+    .turntable-row { background:rgba(255,255,255,.045); border-radius:12px; padding:10px; }
+    .turntable-row label { display:block; font-weight:900; margin-bottom:6px; color:#fff; }
+    .turntable-row select { width:100%; padding:10px; border-radius:10px; border:2px solid rgba(255,255,255,.14); background:#171b2b; color:#fff; }
+    .turntable-note { margin-top:8px; color:#aaa; font-size:12px; line-height:1.4; }
+    .tutorial-skip-btn { margin-top:14px; width:100%; background:#5b2c6f; border:3px solid #7d3c98; color:#fff; font-weight:900; padding:10px 14px; border-radius:12px; cursor:pointer; }
     .low-effects *, .low-effects *::before, .low-effects *::after {
         animation: none !important;
         transition: none !important;
@@ -1869,6 +1890,7 @@
             <div id="tutorial-dialog-speaker" class="tutorial-dialog-speaker">Strike</div>
             <div id="tutorial-dialog-text" class="tutorial-dialog-text"></div>
             <div class="tutorial-dialog-hint">Clique para continuar</div>
+            <button type="button" class="tutorial-skip-btn" onclick="skipEntireTutorial(event)">PULAR TUTORIAL</button>
         </div>
     </div>
 </div>
@@ -1977,6 +1999,36 @@
     </div>
 </div>
 
+<div id="overlay-hud-editor" class="overlay hidden" style="z-index:12400;">
+    <div class="hud-editor-panel">
+        <div class="hud-editor-top">
+            <div><div class="hud-editor-title">🎮 EDITAR HUD</div><div class="hud-editor-subtitle">Arraste um elemento para mover. Selecione e use − / + para redimensionar.</div></div>
+            <div class="hud-editor-actions"><button class="btn-menu" type="button" onclick="hudEditorSave()">💾 Salvar</button><button class="btn-menu" type="button" onclick="hudEditorCancel()">✖ Cancelar</button></div>
+        </div>
+        <div id="hud-editor-stage" class="hud-editor-stage"><div class="hud-editor-character" id="hud-editor-character"></div><div class="hud-editor-hint">Clique em um elemento para editar</div></div>
+        <div class="hud-editor-bottom"><button class="btn-menu" type="button" onclick="hudEditorScale(-1)">➖ Diminuir</button><div id="hud-editor-selected-name">Nenhum elemento selecionado</div><button class="btn-menu" type="button" onclick="hudEditorScale(1)">➕ Aumentar</button></div>
+    </div>
+</div>
+
+<div id="overlay-turntable" class="overlay hidden" style="z-index:12500;">
+    <div class="popup-box" style="width:min(94vw,820px);max-height:88vh;overflow:auto;">
+        <h2 style="margin-top:0;color:var(--btn-yellow);">🎛️ Toca Discos</h2>
+        <p style="color:#ccc;margin-top:0;">Escolha a música de cada sessão. As escolhas ficam salvas.</p>
+        <div class="turntable-panel">
+            <div class="turntable-grid">
+                <div class="turntable-row"><label>Menu</label><select id="turntable-menu"></select></div>
+                <div class="turntable-row"><label>Partidas Casuais</label><select id="turntable-casual"></select></div>
+                <div class="turntable-row"><label>UHC</label><select id="turntable-uhc"></select></div>
+            </div>
+            <div class="turntable-note">Clássico e Hardcore usam a mesma sessão de Partidas Casuais.</div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px;">
+            <button class="btn-action" type="button" onclick="saveTurntableSettings()">Salvar</button>
+            <button class="btn-menu" type="button" onclick="closeTurntable()">Fechar</button>
+        </div>
+    </div>
+</div>
+
 <div id="overlay-mode-select" class="overlay hidden">
     <h1>Modo de Jogo</h1>
     <div class="popup-box" style="margin-top: 20px; background: rgba(30, 40, 60, 0.9); border: 4px solid var(--btn-blue);">
@@ -2041,10 +2093,12 @@
             <div class="settings-section-title">Controle</div>
             <div class="settings-grid">
                 <button class="btn-menu settings-option" onclick="toggleSetting('controlMode')">Modo de Controle: <br><span id="set-ctrl" style="color:var(--btn-yellow)">Auto</span></button>
+                <button class="btn-menu settings-option" type="button" onclick="openHudEditor()">🎮 Editar HUD</button>
+                <button class="btn-menu settings-option" onclick="toggleSetting('leftHanded')">Modo Canhoto: <br><span id="set-left-handed" style="color:var(--btn-red)">Desativado</span></button>
                 <div class="settings-card settings-card--wide">
-                    <div style="font-size:15px; font-weight:900; color:var(--btn-yellow); margin-bottom:6px;">Como funciona</div>
+                    <div style="font-size:15px; font-weight:900; color:var(--btn-yellow); margin-bottom:6px;">Controles</div>
                     <div style="font-size:13px; color:#ddd; line-height:1.45;">
-                        No PC, o jogo usa teclas. No mobile, o controle padrão é joystick. Se o joystick seguidor estiver ativado, tocar no mapa move o joystick para o ponto tocado.
+                        No PC, o jogo usa teclas. No mobile, use o joystick ou o D-pad. Em <strong>Editar HUD</strong>, você pode mover e redimensionar os elementos da interface.
                     </div>
                 </div>
             </div>
@@ -2070,6 +2124,7 @@
                         <div style="margin-top:8px; font-size:12px; color:#aaa; line-height:1.35;">
                             Controla só a trilha sonora. O resto do áudio fica intacto.
                         </div>
+                        <button class="btn-menu" type="button" style="width:100%; margin-top:12px;" onclick="openTurntable()">🎛️ TOCA DISCOS</button>
                     </div>
                 </div>
             </div>
@@ -2316,48 +2371,65 @@
 <div id="screen-event" class="screen scrollable hidden">
     <button class="btn-top-corner btn-back" onclick="showScreen('screen-main')">⬅️ Voltar</button>
     <h2 style="margin-top: 40px;">Evento ⭐</h2>
-    <p style="text-align:center; color:#ddd; margin: 0 0 12px 0;">Complete desafios especiais para liberar Sparta, Lyron e ofertas da loja temática.</p>
+    <p style="text-align:center; color:#ddd; margin: 0 0 12px 0;">Complete desafios especiais para desbloquear personagens sazonais e confira a loja sazonal.</p>
 
     <div class="shop-tabs event-tabs">
-        <button class="btn-menu shop-tab active" data-section="sparta" onclick="showEventSection('sparta')"><span class="tab-emoji">🛡️</span><span class="tab-label">Sparta</span></button>
-        <button class="btn-menu shop-tab" data-section="lyron" onclick="showEventSection('lyron')"><span class="tab-emoji">⚽</span><span class="tab-label">Lyron</span></button>
-        <button class="btn-menu shop-tab" data-section="store" onclick="showEventSection('store')"><span class="tab-emoji">🛍</span><span class="tab-label">Loja temática</span></button>
+        <button class="btn-menu shop-tab active" data-section="kacashi" onclick="showEventSection('kacashi')"><span class="tab-emoji">👁️</span><span class="tab-label">Kacashi</span></button>
+        <button class="btn-menu shop-tab" data-section="cyro_pyro" onclick="showEventSection('cyro_pyro')"><span class="tab-emoji">❄️🔥</span><span class="tab-label">Cyro & Pyro</span></button>
+        <button class="btn-menu shop-tab" data-section="mr_perfurant" onclick="showEventSection('mr_perfurant')"><span class="tab-emoji">🗡️</span><span class="tab-label">Mr. Perfurant</span></button>
+        <button class="btn-menu shop-tab" data-section="store" onclick="showEventSection('store')"><span class="tab-emoji">🛍</span><span class="tab-label">Loja sazonal</span></button>
     </div>
 
-    <div id="event-section-sparta" class="shop-section shop-panel">
-        <h3>Sparta</h3>
+    <div id="event-section-kacashi" class="shop-section shop-panel">
+        <h3>Kacashi</h3>
         <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:14px;">
             <div class="event-hero-card">
-                <img class="char-sprite char-sprite--hero" src="sprites/sparta.png" alt="" aria-hidden="true">
+                <img class="char-sprite char-sprite--hero" src="sprites/kacashi.png" alt="" aria-hidden="true">
                 <div>
-                    <h4 style="margin:0; font-size:22px; color:var(--btn-yellow);">Sparta</h4>
-                    <p style="margin:6px 0 0; color:#d9e2ea;">15 missões especiais. O progresso é salvo separadamente.</p>
+                    <h4 style="margin:0; font-size:22px; color:var(--btn-yellow);">Kacashi</h4>
+                    <p style="margin:6px 0 0; color:#d9e2ea;">20 missões especiais. O progresso é salvo separadamente e permanece após sair e entrar.</p>
                 </div>
             </div>
-            <div class="event-progress-pill"><span id="event-sparta-count">0</span>/15 concluídas</div>
-            <button id="event-sparta-claim" class="btn-action" onclick="claimEventCharacter('sparta')">🎁 Resgatar Sparta</button>
+            <div class="event-progress-pill"><span id="event-kacashi-count">0</span>/20 concluídas</div>
+            <button id="event-kacashi-claim" class="btn-action" onclick="claimEventCharacter('kacashi')">🎁 Resgatar Kacashi</button>
         </div>
-        <div id="event-sparta-list" class="menu-grid shop-grid"></div>
+        <div id="event-kacashi-list" class="menu-grid shop-grid"></div>
     </div>
 
-    <div id="event-section-lyron" class="shop-section shop-panel hidden">
-        <h3>Lyron</h3>
+    <div id="event-section-cyro_pyro" class="shop-section shop-panel hidden">
+        <h3>Cyro & Pyro</h3>
         <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:14px;">
             <div class="event-hero-card">
-                <img class="char-sprite char-sprite--hero" src="sprites/lyron.png" alt="" aria-hidden="true">
+                <img class="char-sprite char-sprite--hero" src="sprites/cyro.png" alt="" aria-hidden="true">
                 <div>
-                    <h4 style="margin:0; font-size:22px; color:var(--btn-yellow);">Lyron</h4>
-                    <p style="margin:6px 0 0; color:#d9e2ea;">20 missões especiais. O progresso é salvo separadamente.</p>
+                    <h4 style="margin:0; font-size:22px; color:var(--btn-yellow);">Cyro & Pyro</h4>
+                    <p style="margin:6px 0 0; color:#d9e2ea;">20 missões especiais. O progresso é salvo separadamente e permanece após sair e entrar.</p>
                 </div>
             </div>
-            <div class="event-progress-pill"><span id="event-lyron-count">0</span>/20 concluídas</div>
-            <button id="event-lyron-claim" class="btn-action" onclick="claimEventCharacter('lyron')">🎁 Resgatar Lyron</button>
+            <div class="event-progress-pill"><span id="event-cyro_pyro-count">0</span>/20 concluídas</div>
+            <button id="event-cyro_pyro-claim" class="btn-action" onclick="claimEventCharacter('cyro_pyro')">🎁 Resgatar Cyro & Pyro</button>
         </div>
-        <div id="event-lyron-list" class="menu-grid shop-grid"></div>
+        <div id="event-cyro_pyro-list" class="menu-grid shop-grid"></div>
+    </div>
+
+    <div id="event-section-mr_perfurant" class="shop-section shop-panel hidden">
+        <h3>Mr. Perfurant</h3>
+        <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:14px;">
+            <div class="event-hero-card">
+                <img class="char-sprite char-sprite--hero" src="sprites/mr_perfurant.png" alt="" aria-hidden="true">
+                <div>
+                    <h4 style="margin:0; font-size:22px; color:var(--btn-yellow);">Mr. Perfurant</h4>
+                    <p style="margin:6px 0 0; color:#d9e2ea;">15 missões especiais. O progresso é salvo separadamente e permanece após sair e entrar.</p>
+                </div>
+            </div>
+            <div class="event-progress-pill"><span id="event-mr_perfurant-count">0</span>/15 concluídas</div>
+            <button id="event-mr_perfurant-claim" class="btn-action" onclick="claimEventCharacter('mr_perfurant')">🎁 Resgatar Mr. Perfurant</button>
+        </div>
+        <div id="event-mr_perfurant-list" class="menu-grid shop-grid"></div>
     </div>
 
     <div id="event-section-store" class="shop-section shop-panel hidden">
-        <h3>Loja temática</h3>
+        <h3>Loja sazonal</h3>
         <div class="shop-section" style="margin-top:0;">
             <h3>Personagens em promoção</h3>
             <div id="event-promo-list" class="menu-grid shop-grid"></div>
@@ -2437,16 +2509,16 @@
 
 <canvas id="gameCanvas"></canvas>
 <div id="game-hud" class="hidden">
-    <div>
-        <div class="hud-text">Wave: <span id="hud-wave">1</span></div>
-        <div class="hud-text">Tempo: <span id="hud-time">0:00</span></div>
-        <div id="hud-hp-text" class="hud-text">HP: <span id="hud-hp">100</span></div>
+    <div id="hud-info-group">
+        <div class="hud-text hud-edit-target" data-hud-target="hudInfo">Wave: <span id="hud-wave">1</span></div>
+        <div class="hud-text hud-edit-target" data-hud-target="hudInfo">Tempo: <span id="hud-time">0:00</span></div>
+        <div id="hud-hp-text" class="hud-text hud-edit-target" data-hud-target="hudInfo">HP: <span id="hud-hp">100</span></div>
         <div id="hud-hp-bar-wrap" class="hud-hp-wrap hidden"><div id="hud-hp-bar" class="hud-hp-fill"></div></div>
         <div id="map-text">Mapa: Planície</div>
     </div>
-    <button id="btn-pause" onclick="togglePause()">⏸ Pausa</button>
+    <button id="btn-pause" class="hud-edit-target" data-hud-target="pause" onclick="togglePause()">⏸ Pausa</button>
 </div>
-<div id="exp-bar-container" class="hidden"><div id="exp-bar"></div></div>
+<div id="exp-bar-container" class="hidden hud-edit-target" data-hud-target="exp"><div id="exp-bar"></div></div>
 <div id="joystick-zone"><div id="joystick-knob"></div></div>
 <div id="dpad-zone" aria-label="Controle direcional mobile">
     <button class="dpad-btn" data-dir="up" style="grid-column: 2; grid-row: 1;">▲</button>
@@ -2934,6 +3006,11 @@ Pyro: “Mas ficou muito mais legal assim!"` },
 Um personagem cartunesco com luvas brancas, olhos enormes e uma energia impossível de ignorar. Xilo parece obedecer às próprias regras da animação, agindo de maneira exagerada e imprevisível mesmo quando tudo ao redor está completamente fora de controle. Com seu jeito brincalhão e expressivo, ele transforma qualquer situação em uma cena digna de um desenho antigo.
 
 “Hora de fazer isso do jeito cartunesco!”` },
+    kacashi: { id: 'kacashi', class: 'Controle', name: 'Kacashi', rarity: 'seasonal', cost: 699, hp: 105, speed: 3.45, dmg: 18, fireRate: 58, range: 300, color: '#7d5fff', weapon: 'kacashi_kunai', desc: `“Kacashi estava acostumado a enfrentar ninjas. Aparentemente, enfrentar uma realidade quebrada era o próximo passo.”
+
+Um misterioso ninja que acabou atravessando uma das Fraturas abertas por Echo e foi parar em um mundo completamente diferente do seu. Cercado por criaturas estranhas, guerreiros improváveis e um caos que não faz o menor sentido para ele, Kacashi agora precisa descobrir como voltar para casa — enquanto tenta entender por que esse lugar parece ter mais problemas do que sua própria vila.
+
+“Eu só queria encontrar o caminho de volta...”` },
 
 };
 const CHARACTER_SUMMARIES = {
@@ -3033,6 +3110,9 @@ ESPECIAL: tem 20% de chance de disparar uma flecha de impacto. Inimigos atingido
     xilo: `Xilo: dispara bigornas que causam DANO BRUTO e explodem em área.
 
 ESPECIAL: ao atingir um inimigo ou o alcance máximo, a bigorna se transforma em uma PAREDE TEMPORÁRIA. A parede bloqueia a passagem, mas nunca deixa inimigos presos dentro dela.`,
+    kacashi: `Kacashi: dispara KUNAIS que sempre PERFURAM inimigos.
+
+ESPECIAL: ativa o Sharin e entra em uma dimensão por 10s. O mapa fica roxo, os inimigos desaparecem e ele fica imune a dano enquanto recupera HP lentamente. O botão não recarrega durante a dimensão; a recarga só começa quando ele volta à realidade.`,
     sparta: `Sparta: alterna entre 2 ataques.
 
 Primeiro ataque: área reta, mais longa e em formato quadrado.
@@ -3506,15 +3586,37 @@ function renderGachaRevealHtml(rawText) {
 
 const DEFAULT_KEYBINDS = { up: 'w', down: 's', left: 'a', right: 'd', special: 'p', pause: 'escape' };
 const DEFAULT_INITIAL_ZOOM = (('ontouchstart' in window) || navigator.maxTouchPoints > 0) ? 0.65 : 1;
-const DEFAULT_SETTINGS = { skipGacha: false, controlMode: 'auto', mobileControlLayout: 'joystick', mobileJoystickFollowTap: false, ultraHardcore: false, uhcDark: false, noParticles: false, showCombatText: true, showHpBar: false, screenZoom: DEFAULT_INITIAL_ZOOM, musicVolume: 0.7, mapChoice: -1, keybinds: { ...DEFAULT_KEYBINDS } };
+const DEFAULT_HUD_LAYOUT = { joystick:{x:0.05,y:0.78,scale:1}, special:{x:0.82,y:0.76,scale:1}, hudInfo:{x:0.025,y:0.025,scale:1}, pause:{x:0.84,y:0.025,scale:1}, exp:{x:0.50,y:0.075,scale:1} };
+const DEFAULT_SETTINGS = { skipGacha: false, controlMode: 'auto', mobileControlLayout: 'joystick', leftHanded: false, hudLayout: DEFAULT_HUD_LAYOUT, ultraHardcore: false, uhcDark: false, noParticles: false, showCombatText: true, showHpBar: false, screenZoom: DEFAULT_INITIAL_ZOOM, musicVolume: 0.7, musicTracks: { menu: 'legacy_awaits.mp3', casual: 'roguish_journey.mp3', uhc: 'fatal_finale.mp3' }, mapChoice: -1, keybinds: { ...DEFAULT_KEYBINDS } };
 
-const MUSIC_TRACKS = {
-    menu: 'soundtracks/battle_awaits.mp3',
-    classic: 'soundtracks/gladiator_journey.mp3',
-    hardcore: 'soundtracks/gladiator_journey.mp3',
-    ultraHardcore: 'soundtracks/fatal_finale.mp3'
+const MUSIC_LIBRARY = {
+    menu: [['legacy_awaits.mp3','Legacy Awaits'],['street_awaits.mp3','Street Awaits'],['france_awaits.mp3','France Awaits'],['battle_awaits.mp3','Battle Awaits']],
+    casual: [['roguish_journey.mp3','Roguish Journey'],['bad_journey.mp3','Bad Journey'],['parisian_journey.mp3','Parisian Journey'],['gladiator_journey.mp3','Gladiator Journey']],
+    uhc: [['fatal_finale.mp3','Fatal Finale']]
 };
+const MUSIC_TRACKS = { menu:'soundtracks/legacy_awaits.mp3', classic:'soundtracks/roguish_journey.mp3', hardcore:'soundtracks/roguish_journey.mp3', ultraHardcore:'soundtracks/fatal_finale.mp3' };
+function ensureMusicSettings(){
+    if(!pd.settings || typeof pd.settings !== 'object') pd.settings = { ...DEFAULT_SETTINGS };
+    if(!pd.settings.musicTracks || typeof pd.settings.musicTracks !== 'object') pd.settings.musicTracks = { ...DEFAULT_SETTINGS.musicTracks };
+    for(const k of ['menu','casual','uhc']) if(!MUSIC_LIBRARY[k].some(t=>t[0]===pd.settings.musicTracks[k])) pd.settings.musicTracks[k]=DEFAULT_SETTINGS.musicTracks[k];
+}
+function getConfiguredMusicFilename(session){ ensureMusicSettings(); const k=session==='ultraHardcore'?'uhc':(session==='menu'?'menu':'casual'); return pd.settings.musicTracks[k]; }
 
+function openTurntable(){
+    ensureMusicSettings();
+    const fill=(id,key)=>{ const el=document.getElementById(id); if(!el) return; el.innerHTML=MUSIC_LIBRARY[key].map(([f,n])=>`<option value="${f}">${n}</option>`).join(''); el.value=pd.settings.musicTracks[key]; };
+    fill('turntable-menu','menu'); fill('turntable-casual','casual'); fill('turntable-uhc','uhc');
+    document.getElementById('overlay-turntable')?.classList.remove('hidden');
+}
+function closeTurntable(){ document.getElementById('overlay-turntable')?.classList.add('hidden'); }
+function saveTurntableSettings(){
+    ensureMusicSettings();
+    const vals={menu:document.getElementById('turntable-menu')?.value,casual:document.getElementById('turntable-casual')?.value,uhc:document.getElementById('turntable-uhc')?.value};
+    for(const k of Object.keys(vals)) if(MUSIC_LIBRARY[k].some(t=>t[0]===vals[k])) pd.settings.musicTracks[k]=vals[k];
+    save();
+    if(document.getElementById('screen-main') && !document.getElementById('screen-main').classList.contains('hidden')) playMusic('menu');
+    closeTurntable();
+}
 let musicPlayer = null;
 let currentMusicKey = null;
 let musicUnlocked = false;
@@ -3544,7 +3646,7 @@ function setMusicVolume(value) {
 async function playMusic(trackKey = 'menu') {
     const player = ensureMusicPlayer();
     const nextKey = MUSIC_TRACKS[trackKey] ? trackKey : 'menu';
-    const nextSrc = MUSIC_TRACKS[nextKey];
+    const nextSrc = `soundtracks/${getConfiguredMusicFilename(nextKey)}`;
     applyMusicVolume();
     if (currentMusicKey !== nextKey || !player.src || !player.src.includes(nextSrc)) {
         currentMusicKey = nextKey;
@@ -3588,7 +3690,7 @@ document.addEventListener('visibilitychange', () => {
 window.addEventListener('blur', pauseMusicOnFocusLoss);
 window.addEventListener('focus', resumeMusicOnFocusGain);
 
-let pd = { coins: 500, gems: 50, evo: 40, sucatas: 0, nickname: null, tutorial: { stage: 'nickname', introShown: false, firstMatch: false, controlShown: false, levelupShown: false, finalShown: false, firstLossHandled: false, charsHandled: false, evolutionHandled: false, workshopSeen: false, workshopDialogShown: false, workshopFastyPending: false }, chars: { strike: { level: 1, slots: 2, chips: [null, null] } }, selectedChar: 'strike', passXp: 0, passLevel: 1, passClaimed: 0, passClaimedTiers: [], passRewardSeed: 0, passRewardCache: {}, passResetAt: 0, shopState: { lastRotation: 0, items: {} }, lastDaily: "", dailyWins: {date: "", count: 0}, vip: { activeUntil: 0, inventory: 0 }, hardcoreBans: { lastRotation: 0, chars: [] }, settings: { ...DEFAULT_SETTINGS }, trail: { target: null, fameLevel: 0 }, profile: { title: null, emblem: null }, events: { ruben: { claimed: false }, adam: { claimed: false } }, missMacaronLegacySeasonal: false, redeemedCodes: {}, missions: { date: '', list: [], weekly: { weekKey: '', mission: null }, rerolls: { date: '', used: 0 } }, passOverflowXp: 0, passOverflowBoxes: 0, chipsInventory: {}, chipCrafting: null, achievements: { stats: { gamesStarted: 0, wins: 0, hardcoreWins: 0, uhcWins: 0, totalKills: 0, bossKills: 0, bestWave: 0, charsUnlocked: 1, charsUpgraded: 0, chipsEquipped: 0, boxesOpened: 0, missionClaims: 0, weeklyClaims: 0, passClaims: 0, overflowBoxes: 0, rerollsUsed: 0, vipPurchases: 0, lunchDamage: 0 }, claimed: [] }, debug: { infiniteCoins: false, infiniteGems: false, infiniteEvo: false, infiniteScrap: false, jackEnabled: false, unlockAllChars: false, infiniteChips: false, infiniteXp: false, infinitePassXp: false, allTitles: false, devUnlocked: false, devBaseState: null, mapRotationOverride: -1 } };
+let pd = { coins: 500, gems: 50, evo: 40, sucatas: 0, nickname: null, tutorial: { stage: 'nickname', introShown: false, firstMatch: false, controlShown: false, levelupShown: false, finalShown: false, firstLossHandled: false, charsHandled: false, evolutionHandled: false, workshopSeen: false, workshopDialogShown: false, workshopFastyPending: false, skipped: false }, chars: { strike: { level: 1, slots: 2, chips: [null, null] } }, selectedChar: 'strike', passXp: 0, passLevel: 1, passClaimed: 0, passClaimedTiers: [], passRewardSeed: 0, passRewardCache: {}, passResetAt: 0, shopState: { lastRotation: 0, items: {} }, lastDaily: "", dailyWins: {date: "", count: 0}, vip: { activeUntil: 0, inventory: 0 }, hardcoreBans: { lastRotation: 0, chars: [] }, settings: { ...DEFAULT_SETTINGS }, trail: { target: null, fameLevel: 0 }, profile: { title: null, emblem: null }, events: { ruben: { claimed: false }, adam: { claimed: false }, kacashi: { claimed:false }, cyro_pyro: { claimed:false }, mr_perfurant: { claimed:false } }, missMacaronLegacySeasonal: false, redeemedCodes: {}, missions: { date: '', list: [], weekly: { weekKey: '', mission: null }, rerolls: { date: '', used: 0 } }, passOverflowXp: 0, passOverflowBoxes: 0, chipsInventory: {}, chipCrafting: null, achievements: { stats: { gamesStarted: 0, wins: 0, hardcoreWins: 0, uhcWins: 0, totalKills: 0, bossKills: 0, bestWave: 0, charsUnlocked: 1, charsUpgraded: 0, chipsEquipped: 0, boxesOpened: 0, missionClaims: 0, weeklyClaims: 0, passClaims: 0, overflowBoxes: 0, rerollsUsed: 0, vipPurchases: 0, lunchDamage: 0 }, claimed: [] }, debug: { infiniteCoins: false, infiniteGems: false, infiniteEvo: false, infiniteScrap: false, jackEnabled: false, unlockAllChars: false, infiniteChips: false, infiniteXp: false, infinitePassXp: false, allTitles: false, devUnlocked: false, devBaseState: null, mapRotationOverride: -1 } };
 window.isHardcoreMode = false; window.lastGameOverWasLoss = false; window.gachaQueue = []; window.tempBoxData = null; window.currentMap = 0; window.currentDetailCharId = null; window.currentChipEquipSlot = null; window.debugInfiniteGems = false;
 
 const PD_TEMPLATE = JSON.parse(JSON.stringify(pd));
@@ -3751,14 +3853,11 @@ function normalizeSaveData(rawSave) {
     if (!next.profile || typeof next.profile !== 'object') next.profile = { title: null };
     if (typeof next.profile.title === 'undefined') next.profile.title = null;
     if (!next.events || typeof next.events !== 'object') next.events = {};
-    if (!next.events.sparta) next.events.sparta = { claimed: false, baseStats: null, missionSaveKey: EVENT_MISSION_SAVE_KEYS.sparta };
-    if (!next.events.lyron) next.events.lyron = { claimed: false, baseStats: null, missionSaveKey: EVENT_MISSION_SAVE_KEYS.lyron };
-    for (const id of ['sparta','lyron']) {
-        if (typeof next.events[id].claimed === 'undefined') next.events[id].claimed = false;
-        if (typeof next.events[id].baseStats === 'undefined') next.events[id].baseStats = null;
-        next.events[id].missionSaveKey = EVENT_MISSION_SAVE_KEYS[id];
+    if (!next.events || typeof next.events !== 'object') next.events = {};
+    for (const id of ['sparta','lyron','kacashi','cyro_pyro','mr_perfurant']) {
+        if (!next.events[id] || typeof next.events[id] !== 'object') next.events[id] = { claimed:false, baseStats:null, completedIds:[] };
     }
-    if (typeof next.eventProgressVersion !== 'number' || next.eventProgressVersion < 4) next.eventProgressVersion = 4;
+    if (typeof next.eventProgressVersion !== 'number') next.eventProgressVersion = 0;
 
     if (!next.run || typeof next.run !== 'object') next.run = { charId: next.selectedChar || 'strike', medals: 0 };
     if (typeof next.run.charId !== 'string' || !next.run.charId) next.run.charId = next.selectedChar || 'strike';
@@ -3888,14 +3987,11 @@ function load() {
     if (!pd.profile || typeof pd.profile !== 'object') pd.profile = { title: null };
     if (typeof pd.profile.title === 'undefined') pd.profile.title = null;
     if (!pd.events || typeof pd.events !== 'object') pd.events = {};
-    if (!pd.events.sparta) pd.events.sparta = { claimed: false, baseStats: null, missionSaveKey: EVENT_MISSION_SAVE_KEYS.sparta };
-    if (!pd.events.lyron) pd.events.lyron = { claimed: false, baseStats: null, missionSaveKey: EVENT_MISSION_SAVE_KEYS.lyron };
-    for (const id of ['sparta','lyron']) {
-        if (typeof pd.events[id].claimed === 'undefined') pd.events[id].claimed = false;
-        if (typeof pd.events[id].baseStats === 'undefined') pd.events[id].baseStats = null;
-        pd.events[id].missionSaveKey = EVENT_MISSION_SAVE_KEYS[id];
+    if (!pd.events || typeof pd.events !== 'object') pd.events = {};
+    for (const id of ['sparta','lyron','kacashi','cyro_pyro','mr_perfurant']) {
+        if (!pd.events[id] || typeof pd.events[id] !== 'object') pd.events[id] = { claimed:false, baseStats:null, completedIds:[] };
     }
-    if (typeof pd.eventProgressVersion !== 'number' || pd.eventProgressVersion < 4) pd.eventProgressVersion = 4;
+    if (typeof pd.eventProgressVersion !== 'number') pd.eventProgressVersion = 0;
     if (!pd.run || typeof pd.run !== 'object') pd.run = { charId: pd.selectedChar || 'strike', medals: 0 };
     if (typeof pd.run.charId !== 'string' || !pd.run.charId) pd.run.charId = pd.selectedChar || 'strike';
     if (typeof pd.run.medals !== 'number' || !isFinite(pd.run.medals) || pd.run.medals < 0) pd.run.medals = 0;
@@ -3920,11 +4016,13 @@ function load() {
     pd.passXp = Math.max(0, Number(pd.passXp) || 0);
     pd.passClaimed = Number(pd.passClaimed) || 0;
     if (typeof pd.settings.musicVolume !== 'number' || !isFinite(pd.settings.musicVolume)) pd.settings.musicVolume = 0.7;
+    ensureMusicSettings();
     if (typeof pd.settings.uhcDark === 'undefined') pd.settings.uhcDark = false;
     if (typeof pd.settings.noParticles === 'undefined') pd.settings.noParticles = false;
-    if (typeof pd.settings.mobileJoystickFollowTap === 'undefined') pd.settings.mobileJoystickFollowTap = false;
     if (typeof pd.settings.showCombatText === 'undefined') pd.settings.showCombatText = true;
     if (typeof pd.settings.showHpBar === 'undefined') pd.settings.showHpBar = false;
+    if (typeof pd.settings.leftHanded === 'undefined') pd.settings.leftHanded = false;
+    ensureHudLayout();
     if (typeof pd.settings.screenZoom !== 'number' || !isFinite(pd.settings.screenZoom)) pd.settings.screenZoom = 1;
     pd.settings.screenZoom = Math.min(1.5, Math.max(0.5, pd.settings.screenZoom));
     pd.settings.mapChoice = -1;
@@ -3952,6 +4050,9 @@ function load() {
     if (!pd.chipsInventory) pd.chipsInventory = {};
     ensureDevDebugState();
     syncDevUnlocks();
+    ensureEventState();
+    syncEventMissionCompletions(false);
+    save();
     for (let key in pd.chars) {
         if (!pd.chars[key].chips) pd.chars[key].chips = [null, null];
         if (!pd.chars[key].slots) pd.chars[key].slots = 2;
@@ -4344,7 +4445,8 @@ const CHARACTER_TITLES = {
     stormy: 'Tempestuoso',
     bulb: 'Lá no fundo do mar',
     cyro_pyro: 'Dualidade elemental',
-    xilo: 'Cartunesco'
+    xilo: 'Cartunesco',
+    kacashi: 'Hokagi'
 };
 
 function isCharacterHiddenForUnownedView(id) { return false; }
@@ -4455,7 +4557,8 @@ const CHARACTER_SPRITES = {
     stormy: 'sprites/stormy.png',
     bulb: 'sprites/bulb.png',
     chickbot: 'sprites/chickbot.png',
-    xilo: 'sprites/xilo.png'
+    xilo: 'sprites/xilo.png',
+    kacashi: 'sprites/kacashi.png'
 };
 
 const ENEMY_SPRITES = {
@@ -4805,6 +4908,8 @@ function resetMorphRuntimeState(charId) {
     player.specCd = 0;
     player.invisTimer = 0;
     player.ghoulPendingCd = 0;
+    player.kacashiDimensionTimer = 0;
+    player.kacashiDimensionCd = 0;
     player.ninjiPendingCd = 0;
     player.ninjiDashCd = 0;
     player.shinobiDragonActive = false;
@@ -5751,7 +5856,7 @@ if (document.addEventListener) {
     });
 }
 
-function saveNickname() { const input = document.getElementById('nick-input').value.trim(); if(input.length > 0) { pd.nickname = input; if (!pd.tutorial || typeof pd.tutorial !== 'object') pd.tutorial = createDefaultTutorialState(); pd.tutorial.stage = 'intro'; pd.tutorial.introShown = false; save(); document.getElementById('overlay-nickname').classList.add('hidden'); updateNicknameDisplay(); showScreen('screen-main'); updateUI(); updateSettingsUI(); beginTutorialIntro(); } else { showAlert("Por favor, insira um nome válido!"); } }
+function saveNickname() { const input = document.getElementById('nick-input').value.trim(); if(input.length > 0) { pd.nickname = input; if (!pd.tutorial || typeof pd.tutorial !== 'object') pd.tutorial = createDefaultTutorialState(); if (!pd.tutorial.skipped) { pd.tutorial.stage = 'intro'; pd.tutorial.introShown = false; } else { pd.tutorial.stage = 'completed'; pd.tutorial.introShown = true; } save(); document.getElementById('overlay-nickname').classList.add('hidden'); updateNicknameDisplay(); showScreen('screen-main'); updateUI(); updateSettingsUI(); if (!pd.tutorial.skipped) beginTutorialIntro(); } else { showAlert("Por favor, insira um nome válido!"); } }
 function changeNickname() { const el = document.getElementById('nick-input'); if (el) { el.value = pd.nickname || ''; document.getElementById('overlay-nickname').classList.remove('hidden'); setTimeout(() => { try { el.focus(); el.select(); } catch (e) {} }, 0); } else { document.getElementById('overlay-nickname').classList.remove('hidden'); } }
 
 function getBestScoreValue() {
@@ -5892,9 +5997,7 @@ function toggleSetting(key) {
     else if(key === 'ultraHardcore') {
         pd.settings.ultraHardcore = !pd.settings.ultraHardcore;
     }
-    else if(key === 'mobileJoystickFollowTap') {
-        pd.settings.mobileJoystickFollowTap = !pd.settings.mobileJoystickFollowTap;
-    }
+    else if(key === 'leftHanded') { pd.settings.leftHanded = !pd.settings.leftHanded; }
     else if(key === 'uhcDark') {
         pd.settings.uhcDark = !pd.settings.uhcDark;
     }
@@ -6133,7 +6236,7 @@ function toggleDevToolsPanel() {
 }
 
 function createDefaultTutorialState() {
-    return { stage: 'nickname', introShown: false, firstMatch: false, controlShown: false, levelupShown: false, finalShown: false, firstLossHandled: false, charsHandled: false, evolutionHandled: false, workshopSeen: false, workshopDialogShown: false, workshopFastyPending: false };
+    return { stage: 'nickname', introShown: false, firstMatch: false, controlShown: false, levelupShown: false, finalShown: false, firstLossHandled: false, charsHandled: false, evolutionHandled: false, workshopSeen: false, workshopDialogShown: false, workshopFastyPending: false, skipped: false };
 }
 
 let tutorialDialogSteps = [];
@@ -6209,6 +6312,7 @@ function tutorialSpriteFor(speaker) {
 }
 
 function showTutorialDialog(steps, onClose = null) {
+    if (pd?.tutorial?.skipped) return;
     const overlay = document.getElementById('overlay-tutorial-dialog');
     if (!overlay) return;
     tutorialDialogSteps = Array.isArray(steps) ? steps : [];
@@ -6239,6 +6343,22 @@ function renderTutorialDialogStep() {
     if (text) text.textContent = step.text || '';
 }
 
+function skipEntireTutorial(event){
+    if(event){event.preventDefault();event.stopPropagation();}
+    if(!pd) return;
+    if(!pd.tutorial || typeof pd.tutorial!=='object') pd.tutorial=createDefaultTutorialState();
+    pd.tutorial={...pd.tutorial,skipped:true,stage:'completed',introShown:true,firstMatch:true,controlShown:true,levelupShown:true,finalShown:true,firstLossHandled:true,charsHandled:true,evolutionHandled:true,workshopSeen:true,workshopDialogShown:true,workshopFastyPending:false};
+    if(!pd.chars) pd.chars={};
+    if(!pd.chars.fasty){ pd.chars.fasty={level:1,slots:2,chips:[null,null]}; if(pd.achievements?.stats) pd.achievements.stats.charsUnlocked=Math.max(1,Number(pd.achievements.stats.charsUnlocked||1)+1); }
+    hideTutorialPointer();
+    document.querySelectorAll('.overlay').forEach(el=>el.classList.add('hidden'));
+    if(isPlaying){isPlaying=false;isPaused=false;try{cancelAnimationFrame(gameLoopId);}catch(e){}}
+    if(joyZone) joyZone.style.display='none'; if(dpadZone) dpadZone.style.display='none'; if(btnSpecial) btnSpecial.style.display='none';
+    document.querySelectorAll('.screen').forEach(el=>el.classList.add('hidden'));
+    document.getElementById('screen-main')?.classList.remove('hidden');
+    save(); updateNicknameDisplay(); updateSettingsUI(); playMusic('menu');
+}
+
 function advanceTutorialDialog(event) {
     if (event) event.stopPropagation();
     if (tutorialDialogIndex < tutorialDialogSteps.length - 1) {
@@ -6257,6 +6377,7 @@ function advanceTutorialDialog(event) {
 }
 
 function beginTutorialIntro() {
+    if (pd?.tutorial?.skipped) return;
     if (!pd?.nickname || pd?.tutorial?.introShown || pd?.tutorial?.stage !== 'intro') return;
     showTutorialDialog([
         { speaker: 'Strike', text: `Olá ${pd.nickname}, finalmente te encontrei\nMe ajude por favor a derrotar esses fraturados que o Echo gerou através das fraturas do espaço` }
@@ -6272,6 +6393,7 @@ function beginTutorialIntro() {
 }
 
 function beginFirstRunTutorial() {
+    if (pd?.tutorial?.skipped) return;
     if (!pd?.tutorial || pd.tutorial.controlShown) return;
     pd.tutorial.firstMatch = true;
     pd.tutorial.controlShown = true;
@@ -6290,6 +6412,7 @@ function beginFirstRunTutorial() {
 }
 
 function beginFirstPowerupTutorial() {
+    if (pd?.tutorial?.skipped) return;
     if (!pd?.tutorial || pd.tutorial.levelupShown) return;
     pd.tutorial.levelupShown = true;
     pd.tutorial.stage = 'choose-powerup';
@@ -6303,6 +6426,7 @@ function beginFirstPowerupTutorial() {
 }
 
 function finishFirstPowerupTutorial() {
+    if (pd?.tutorial?.skipped) return;
     if (!pd?.tutorial || pd.tutorial.finalShown) return;
     pd.tutorial.finalShown = true;
     pd.tutorial.stage = 'final-dialog';
@@ -6317,6 +6441,7 @@ function finishFirstPowerupTutorial() {
 }
 
 function beginFirstLossTutorial() {
+    if (pd?.tutorial?.skipped) return;
     if (!pd?.tutorial || pd.tutorial.firstLossHandled) return;
     pd.tutorial.firstLossHandled = true;
     pd.tutorial.stage = 'loss-dialog';
@@ -6338,6 +6463,7 @@ function beginFirstLossTutorial() {
 }
 
 function beginStrikeUpgradeTutorial() {
+    if (pd?.tutorial?.skipped) return;
     if (!pd?.tutorial || pd.tutorial.charsHandled) return;
     pd.tutorial.charsHandled = true;
     pd.tutorial.stage = 'force-strike-card';
@@ -6351,6 +6477,7 @@ function beginStrikeUpgradeTutorial() {
 }
 
 function finishStrikeEvolutionTutorial() {
+    if (pd?.tutorial?.skipped) return;
     if (!pd?.tutorial || pd.tutorial.evolutionHandled) return;
     hideTutorialPointer();
     pd.tutorial.evolutionHandled = true;
@@ -6363,6 +6490,7 @@ function finishStrikeEvolutionTutorial() {
 }
 
 function resolveFastyTutorialIfAlreadyOwned() {
+    if (pd?.tutorial?.skipped) return;
     if (!pd?.tutorial) return false;
     if (!pd.chars?.fasty) return false;
     if (!pd.tutorial.workshopFastyPending && pd.tutorial.stage !== 'force-fasty') return false;
@@ -6374,6 +6502,7 @@ function resolveFastyTutorialIfAlreadyOwned() {
 }
 
 function beginWorkshopTutorial() {
+    if (pd?.tutorial?.skipped) return;
     if (!pd?.tutorial || pd.tutorial.workshopDialogShown) return;
     pd.tutorial.workshopSeen = true;
     pd.tutorial.workshopDialogShown = true;
@@ -6403,6 +6532,7 @@ function beginWorkshopTutorial() {
 }
 
 function tutorialUnlockFastyFromWorkshop() {
+    if (pd?.tutorial?.skipped) return;
     if (pd?.chars?.fasty) {
         resolveFastyTutorialIfAlreadyOwned();
         renderTrail();
@@ -6608,26 +6738,65 @@ function refreshModeSelectUI() {
     const pcMode = pd.settings.controlMode === 'pc' || (pd.settings.controlMode === 'auto' && !touch);
 }
 
-function resetJoystickPosition() {
-    if (!joyZone) return;
-    joyZone.style.position = 'fixed';
-    joyZone.style.left = '30px';
-    joyZone.style.top = 'auto';
-    joyZone.style.right = 'auto';
-    joyZone.style.bottom = '30px';
-    joyZone.style.transform = 'none';
-}
+function resetJoystickPosition() { applySavedHudLayout(); }
 
 function applyControlLayout() {
     const touch = isTouchDevice();
     const mobileControls = pd.settings.controlMode === 'mobile' || (pd.settings.controlMode === 'auto' && touch);
     const joystickMode = mobileControls && pd.settings.mobileControlLayout !== 'dpad';
-    if (joyZone) {
-        joyZone.style.display = joystickMode ? 'block' : 'none';
-        if (!pd.settings.mobileJoystickFollowTap || !joystickMode) resetJoystickPosition();
-    }
+    if (joyZone) joyZone.style.display = joystickMode ? 'block' : 'none';
     if (dpadZone) dpadZone.style.display = mobileControls && pd.settings.mobileControlLayout === 'dpad' ? 'grid' : 'none';
     if (btnSpecial) btnSpecial.style.display = mobileControls && getSelectedSpecialConfig() ? 'flex' : 'none';
+    if (!hudEditorActive) applySavedHudLayout();
+}
+
+// HUD EDITOR
+let hudEditorActive=false, hudEditorDraft=null, hudEditorSelected=null, hudEditorDrag=null;
+function ensureHudLayout(){
+    if(!pd.settings.hudLayout||typeof pd.settings.hudLayout!=='object') pd.settings.hudLayout=JSON.parse(JSON.stringify(DEFAULT_HUD_LAYOUT));
+    for(const [k,d] of Object.entries(DEFAULT_HUD_LAYOUT)){const c=pd.settings.hudLayout[k];if(!c||typeof c!=='object')pd.settings.hudLayout[k]={...d};else{c.x=Math.max(0,Math.min(1,Number.isFinite(Number(c.x))?Number(c.x):d.x));c.y=Math.max(0,Math.min(1,Number.isFinite(Number(c.y))?Number(c.y):d.y));c.scale=Math.max(.55,Math.min(2.2,Number.isFinite(Number(c.scale))?Number(c.scale):d.scale));}}
+}
+function getHudEditorTargetMap(){return{joystick:document.getElementById('joystick-zone'),special:document.getElementById('btn-special'),hudInfo:document.getElementById('hud-info-group'),pause:document.getElementById('btn-pause'),exp:document.getElementById('exp-bar-container')}}
+function hudEditorGetStageRect(){return document.getElementById('hud-editor-stage')?.getBoundingClientRect()}
+function hudEditorLabel(k){return({joystick:'Joystick',special:'Habilidade (?)',hudInfo:'Wave / Tempo / HP',pause:'Pausa',exp:'Barra de XP'})[k]||k}
+function hudEditorApplyOne(k){const m=getHudEditorTargetMap(),e=m[k],st=hudEditorGetStageRect(),c=hudEditorDraft?.[k];if(!e||!st||!c)return;e.style.position='absolute';e.style.left=`${c.x*st.width}px`;e.style.top=`${c.y*st.height}px`;e.style.right='auto';e.style.bottom='auto';e.style.transformOrigin='top left';e.style.transform=k==='exp'?`translateX(-50%) scale(${c.scale})`:`scale(${c.scale})`}
+function hudEditorApplyAll(){Object.keys(getHudEditorTargetMap()).forEach(hudEditorApplyOne)}
+function hudEditorSelect(k){hudEditorSelected=k;const m=getHudEditorTargetMap();Object.entries(m).forEach(([x,e])=>e?.classList.toggle('hud-editor-selectable',x===k));const n=document.getElementById('hud-editor-selected-name');if(n)n.textContent=k?hudEditorLabel(k):'Nenhum elemento selecionado'}
+function hudEditorScale(d){if(!hudEditorSelected)return;const c=hudEditorDraft[hudEditorSelected];c.scale=Math.max(.55,Math.min(2.2,c.scale+d*.1));hudEditorApplyOne(hudEditorSelected)}
+function hudEditorDown(e){if(!hudEditorActive)return;const t=e.currentTarget,k=t.dataset.hudTarget||({"joystick-zone":"joystick","btn-special":"special","hud-info-group":"hudInfo","btn-pause":"pause","exp-bar-container":"exp"}[t.id]);if(!k)return;e.preventDefault();e.stopPropagation();hudEditorSelect(k);const st=hudEditorGetStageRect(),c=hudEditorDraft[k];if(!st||!c)return;hudEditorDrag={k,sx:e.clientX,sy:e.clientY,x:c.x,y:c.y};try{t.setPointerCapture(e.pointerId)}catch(_){}}
+function hudEditorMove(e){if(!hudEditorActive||!hudEditorDrag)return;const st=hudEditorGetStageRect(),c=hudEditorDraft[hudEditorDrag.k];if(!st||!c)return;c.x=Math.max(0,Math.min(1,hudEditorDrag.x+(e.clientX-hudEditorDrag.sx)/st.width));c.y=Math.max(0,Math.min(1,hudEditorDrag.y+(e.clientY-hudEditorDrag.sy)/st.height));hudEditorApplyOne(hudEditorDrag.k)}
+function hudEditorUp(){hudEditorDrag=null}
+function bindHudEditorTargets(){Object.values(getHudEditorTargetMap()).forEach(e=>{if(!e||e.dataset.hudBound)return;e.dataset.hudBound='1';e.addEventListener('pointerdown',hudEditorDown);e.addEventListener('pointermove',hudEditorMove);e.addEventListener('pointerup',hudEditorUp);e.addEventListener('pointercancel',hudEditorUp)})}
+function drawHudEditorCharacter(){const h=document.getElementById('hud-editor-character');if(!h)return;const id=pd?.selectedChar||'strike';h.innerHTML=getCharacterSpriteMarkup(id,'hero')||`<div style="width:84px;height:84px;border-radius:50%;background:${CHARACTERS[id]?.color||'#3498db'};border:3px solid #fff"></div>`}
+let hudEditorParents = null;
+function openHudEditor(){
+    if(isPlaying&&!isPaused)togglePause();
+    ensureHudLayout(); hudEditorActive=true; hudEditorDraft=JSON.parse(JSON.stringify(pd.settings.hudLayout)); hudEditorSelected=null;
+    const overlay=document.getElementById('overlay-hud-editor'), stage=document.getElementById('hud-editor-stage');
+    overlay?.classList.remove('hidden'); drawHudEditorCharacter();
+    const ids=['game-hud','exp-bar-container','joystick-zone','btn-special'];
+    hudEditorParents={};
+    ids.forEach(id=>{const el=document.getElementById(id);if(!el||!stage)return;hudEditorParents[id]={parent:el.parentNode,next:el.nextSibling};stage.appendChild(el);});
+    const m=getHudEditorTargetMap();
+    Object.entries(m).forEach(([k,e])=>{if(!e)return;e.classList.remove('hidden');if(k==='special'){e.innerHTML='<span class="btn-special-label">?</span>';e.style.display='flex';}else if(k==='joystick')e.style.display='block';else if(k==='exp')e.style.display='block';});
+    document.getElementById('game-hud')?.classList.remove('hidden'); document.getElementById('exp-bar-container')?.classList.remove('hidden');
+    bindHudEditorTargets(); requestAnimationFrame(()=>{hudEditorApplyAll();hudEditorSelect(null);});
+}
+function restoreHudEditorParents(){
+    if(!hudEditorParents)return;
+    for(const [id,state] of Object.entries(hudEditorParents)){const el=document.getElementById(id);if(!el||!state?.parent)continue;if(state.nextSibling&&state.nextSibling.parentNode===state.parent)state.parent.insertBefore(el,state.nextSibling);else state.parent.appendChild(el);}
+    hudEditorParents=null;
+}
+function hudEditorSave(){if(!hudEditorActive)return;pd.settings.hudLayout=JSON.parse(JSON.stringify(hudEditorDraft));save();hudEditorClose();applyControlLayout();}
+function hudEditorCancel(){hudEditorClose();}
+function hudEditorClose(){hudEditorActive=false;hudEditorDraft=null;hudEditorDrag=null;hudEditorSelect(null);restoreHudEditorParents();document.getElementById('overlay-hud-editor')?.classList.add('hidden');if(!isPlaying){document.getElementById('game-hud')?.classList.add('hidden');document.getElementById('exp-bar-container')?.classList.add('hidden');}if(player&&isPlaying)updateSpecialButtonUI();applyControlLayout();}
+function applySavedHudLayout(){
+    ensureHudLayout(); const m=getHudEditorTargetMap(), mirror=!!pd.settings.leftHanded;
+    for(const [k,e] of Object.entries(m)){
+        if(!e)continue; const c=pd.settings.hudLayout[k]||DEFAULT_HUD_LAYOUT[k]; let x=Number(c.x)||0;
+        if(mirror&&k!=='exp'){const scale=Number(c.scale)||1;const width=Math.max(0.08,Math.min(0.30,(e.offsetWidth*scale)/Math.max(1,window.innerWidth)));x=1-x-width;}
+        e.style.position='absolute'; e.style.left=`${Math.max(0,Math.min(1,x))*window.innerWidth}px`; e.style.top=`${Math.max(0,Math.min(1,Number(c.y)||0))*window.innerHeight}px`; e.style.right='auto';e.style.bottom='auto';e.style.transformOrigin='top left';e.style.transform=k==='exp'?`translateX(-50%) scale(${c.scale})`:`scale(${c.scale})`;
+    }
 }
 
 function updateSettingsUI(syncSlider = true) { 
@@ -6635,7 +6804,7 @@ function updateSettingsUI(syncSlider = true) {
     const cEl = document.getElementById('set-ctrl'); if(cEl) { cEl.innerHTML = pd.settings.controlMode === 'auto' ? 'Auto' : (pd.settings.controlMode === 'pc' ? 'PC' : 'Mobile'); }
     const uhcEl = document.getElementById('set-uhc'); if(uhcEl) { uhcEl.innerHTML = pd.settings.ultraHardcore ? 'Ativado' : 'Desativado'; uhcEl.style.color = pd.settings.ultraHardcore ? '#e056fd' : 'var(--btn-red)'; }
     const uhcDarkEl = document.getElementById('set-uhc-light'); if(uhcDarkEl) { uhcDarkEl.innerHTML = pd.settings.uhcDark ? 'Ativado' : 'Desativado'; uhcDarkEl.style.color = pd.settings.uhcDark ? 'var(--btn-green)' : 'var(--btn-red)'; }
-    const joyFollowEl = document.getElementById('set-joy-follow'); if(joyFollowEl) { joyFollowEl.innerHTML = pd.settings.mobileJoystickFollowTap ? 'Ativado' : 'Desativado'; joyFollowEl.style.color = pd.settings.mobileJoystickFollowTap ? 'var(--btn-green)' : 'var(--btn-red)'; }
+    const leftEl = document.getElementById('set-left-handed'); if(leftEl) { leftEl.innerHTML = pd.settings.leftHanded ? 'Ativado' : 'Desativado'; leftEl.style.color = pd.settings.leftHanded ? 'var(--btn-green)' : 'var(--btn-red)'; }
     const pEl = document.getElementById('set-particles'); if(pEl) { pEl.innerHTML = pd.settings.noParticles ? 'Ativado' : 'Desativado'; pEl.style.color = pd.settings.noParticles ? 'var(--btn-green)' : 'var(--btn-red)'; }
     const ctEl = document.getElementById('set-combat-text'); if(ctEl) { ctEl.innerHTML = pd.settings.showCombatText ? 'Ativado' : 'Desativado'; ctEl.style.color = pd.settings.showCombatText ? 'var(--btn-green)' : 'var(--btn-red)'; }
     const hpEl = document.getElementById('set-hpbar'); if(hpEl) { hpEl.innerHTML = pd.settings.showHpBar ? 'Ativado' : 'Desativado'; hpEl.style.color = pd.settings.showHpBar ? 'var(--btn-green)' : 'var(--btn-red)'; }
@@ -6888,93 +7057,134 @@ function updateUI() {
 }
 checkChipCrafting();
 
-let currentEventSection = 'sparta';
+let currentEventSection = 'kacashi';
 
-const EVENT_MISSION_SAVE_KEYS = { sparta: 'sparta_missions_v1', lyron: 'lyron_missions_v1' };
+// v6: progresso do evento é persistente por missão. Nunca mais depende de um snapshot criado ao abrir a aba.
+const EVENT_PROGRESS_VERSION = 6;
+const EVENT_MISSION_SAVE_KEYS = {
+    kacashi: 'kacashi_missions_v6',
+    cyro_pyro: 'cyro_pyro_missions_v6',
+    mr_perfurant: 'mr_perfurant_missions_v6'
+};
 
 const EVENT_CHARACTER_PROGRESS = {
-    sparta: { id: 'sparta', label: 'Sparta', sprite: 'sparta', goal: 15, missions: [
-        { id: 's1', title: 'Primeiro duelo', desc: 'Inicie 1 partida.', stat: 'gamesStarted', goal: 1 },
-        { id: 's2', title: 'Treino de campo', desc: 'Inicie 3 partidas.', stat: 'gamesStarted', goal: 3 },
-        { id: 's3', title: 'Linha de frente', desc: 'Derrote 100 inimigos.', stat: 'totalKills', goal: 100 },
-        { id: 's4', title: 'Escudo erguido', desc: 'Derrote 300 inimigos.', stat: 'totalKills', goal: 300 },
-        { id: 's5', title: 'Primeira vitória', desc: 'Vença 1 partida.', stat: 'wins', goal: 1 },
-        { id: 's6', title: 'Resistência', desc: 'Alcance wave 8.', stat: 'bestWave', goal: 8 },
-        { id: 's7', title: 'Muralha viva', desc: 'Alcance wave 12.', stat: 'bestWave', goal: 12 },
-        { id: 's8', title: 'Duelo de elite', desc: 'Derrote 2 Bosses.', stat: 'bossKills', goal: 2 },
-        { id: 's9', title: 'Arena limpa', desc: 'Derrote 500 inimigos.', stat: 'totalKills', goal: 500 },
-        { id: 's10', title: 'Veterano', desc: 'Vença 3 partidas.', stat: 'wins', goal: 3 },
-        { id: 's11', title: 'Pressão máxima', desc: 'Alcance wave 18.', stat: 'bestWave', goal: 18 },
-        { id: 's12', title: 'Quebra-chefes', desc: 'Derrote 5 Bosses.', stat: 'bossKills', goal: 5 },
-        { id: 's13', title: 'Lenda de Sparta', desc: 'Derrote 1.000 inimigos.', stat: 'totalKills', goal: 1000 },
-        { id: 's14', title: 'Último teste', desc: 'Vença 5 partidas.', stat: 'wins', goal: 5 },
-        { id: 's15', title: 'Honra do guerreiro', desc: 'Alcance wave 25.', stat: 'bestWave', goal: 25 }
+    kacashi: { id: 'kacashi', label: 'Kacashi', sprite: 'kacashi', goal: 20, missions: [
+        { id:'k1', title:'Primeira Fratura', desc:'Inicie 1 partida.', stat:'gamesStarted', goal:1 },
+        { id:'k2', title:'Shinobi perdido', desc:'Inicie 3 partidas.', stat:'gamesStarted', goal:3 },
+        { id:'k3', title:'Kunais afiadas', desc:'Derrote 100 inimigos.', stat:'totalKills', goal:100 },
+        { id:'k4', title:'Realidade instável', desc:'Alcance wave 8.', stat:'bestWave', goal:8 },
+        { id:'k5', title:'Primeiro retorno', desc:'Vença 1 partida.', stat:'wins', goal:1 },
+        { id:'k6', title:'Dimensão quebrada', desc:'Derrote 250 inimigos.', stat:'totalKills', goal:250 },
+        { id:'k7', title:'Olho do Sharin', desc:'Alcance wave 12.', stat:'bestWave', goal:12 },
+        { id:'k8', title:'Perfurando a horda', desc:'Derrote 400 inimigos.', stat:'totalKills', goal:400 },
+        { id:'k9', title:'Caçador de Fraturas', desc:'Derrote 2 Bosses.', stat:'bossKills', goal:2 },
+        { id:'k10', title:'Sem caminho de volta', desc:'Vença 3 partidas.', stat:'wins', goal:3 },
+        { id:'k11', title:'Outra realidade', desc:'Alcance wave 16.', stat:'bestWave', goal:16 },
+        { id:'k12', title:'Chuva de kunais', desc:'Derrote 650 inimigos.', stat:'totalKills', goal:650 },
+        { id:'k13', title:'Dimensionalmente forte', desc:'Derrote 5 Bosses.', stat:'bossKills', goal:5 },
+        { id:'k14', title:'Sobrevivente da Fratura', desc:'Vença 5 partidas.', stat:'wins', goal:5 },
+        { id:'k15', title:'Passo além', desc:'Alcance wave 20.', stat:'bestWave', goal:20 },
+        { id:'k16', title:'Exército perfurado', desc:'Derrote 1.000 inimigos.', stat:'totalKills', goal:1000 },
+        { id:'k17', title:'Ninja da Fratura', desc:'Alcance wave 24.', stat:'bestWave', goal:24 },
+        { id:'k18', title:'O caminho de casa', desc:'Derrote 8 Bosses.', stat:'bossKills', goal:8 },
+        { id:'k19', title:'Entre mundos', desc:'Vença 8 partidas.', stat:'wins', goal:8 },
+        { id:'k20', title:'Hokagi', desc:'Alcance wave 28.', stat:'bestWave', goal:28 }
     ]},
-    lyron: { id: 'lyron', label: 'Lyron', sprite: 'lyron', goal: 20, missions: [
-        { id: 'l1', title: 'Primeiro toque', desc: 'Inicie 2 partidas.', stat: 'gamesStarted', goal: 2 },
-        { id: 'l2', title: 'Passe preciso', desc: 'Inicie 5 partidas.', stat: 'gamesStarted', goal: 5 },
-        { id: 'l3', title: 'Chute certeiro', desc: 'Derrote 150 inimigos.', stat: 'totalKills', goal: 150 },
-        { id: 'l4', title: 'Finalização', desc: 'Derrote 400 inimigos.', stat: 'totalKills', goal: 400 },
-        { id: 'l5', title: 'Primeira vitória', desc: 'Vença 2 partidas.', stat: 'wins', goal: 2 },
-        { id: 'l6', title: 'Jogada ensaiada', desc: 'Alcance wave 8.', stat: 'bestWave', goal: 8 },
-        { id: 'l7', title: 'Contra-ataque', desc: 'Alcance wave 14.', stat: 'bestWave', goal: 14 },
-        { id: 'l8', title: 'Craque dos chefes', desc: 'Derrote 3 Bosses.', stat: 'bossKills', goal: 3 },
-        { id: 'l9', title: 'Bola na rede', desc: 'Derrote 650 inimigos.', stat: 'totalKills', goal: 650 },
-        { id: 'l10', title: 'Jogo coletivo', desc: 'Vença 4 partidas.', stat: 'wins', goal: 4 },
-        { id: 'l11', title: 'Tempo extra', desc: 'Alcance wave 18.', stat: 'bestWave', goal: 18 },
-        { id: 'l12', title: 'Precisão absoluta', desc: 'Derrote 1.000 inimigos.', stat: 'totalKills', goal: 1000 },
-        { id: 'l13', title: 'Artilheiro', desc: 'Derrote 5 Bosses.', stat: 'bossKills', goal: 5 },
-        { id: 'l14', title: 'Grande campanha', desc: 'Vença 6 partidas.', stat: 'wins', goal: 6 },
-        { id: 'l15', title: 'Jogo difícil', desc: 'Alcance wave 22.', stat: 'bestWave', goal: 22 },
-        { id: 'l16', title: 'Craque completo', desc: 'Derrote 1.500 inimigos.', stat: 'totalKills', goal: 1500 },
-        { id: 'l17', title: 'Sem perder o ritmo', desc: 'Inicie 10 partidas.', stat: 'gamesStarted', goal: 10 },
-        { id: 'l18', title: 'Decisão', desc: 'Derrote 8 Bosses.', stat: 'bossKills', goal: 8 },
-        { id: 'l19', title: 'Final de campeonato', desc: 'Alcance wave 28.', stat: 'bestWave', goal: 28 },
-        { id: 'l20', title: 'Lenda do campo', desc: 'Vença 10 partidas.', stat: 'wins', goal: 10 }
+    cyro_pyro: { id:'cyro_pyro', label:'Cyro & Pyro', sprite:'cyro_pyro', goal:20, missions: [
+        { id:'c1', title:'Gelo e fogo', desc:'Inicie 2 partidas.', stat:'gamesStarted', goal:2 },
+        { id:'c2', title:'Dupla elemental', desc:'Inicie 5 partidas.', stat:'gamesStarted', goal:5 },
+        { id:'c3', title:'Primeiras chamas', desc:'Derrote 150 inimigos.', stat:'totalKills', goal:150 },
+        { id:'c4', title:'Primeira vitória', desc:'Vença 2 partidas.', stat:'wins', goal:2 },
+        { id:'c5', title:'Temperatura extrema', desc:'Alcance wave 10.', stat:'bestWave', goal:10 },
+        { id:'c6', title:'Dupla destruidora', desc:'Derrote 400 inimigos.', stat:'totalKills', goal:400 },
+        { id:'c7', title:'Chegando ao limite', desc:'Alcance wave 14.', stat:'bestWave', goal:14 },
+        { id:'c8', title:'Chefes elementais', desc:'Derrote 3 Bosses.', stat:'bossKills', goal:3 },
+        { id:'c9', title:'Frio intenso', desc:'Derrote 650 inimigos.', stat:'totalKills', goal:650 },
+        { id:'c10', title:'Calor crescente', desc:'Vença 4 partidas.', stat:'wins', goal:4 },
+        { id:'c11', title:'Equilíbrio impossível', desc:'Alcance wave 18.', stat:'bestWave', goal:18 },
+        { id:'c12', title:'Caos elemental', desc:'Derrote 1.000 inimigos.', stat:'totalKills', goal:1000 },
+        { id:'c13', title:'Mestres dos elementos', desc:'Derrote 5 Bosses.', stat:'bossKills', goal:5 },
+        { id:'c14', title:'Temperatura máxima', desc:'Alcance wave 22.', stat:'bestWave', goal:22 },
+        { id:'c15', title:'Campanha em chamas', desc:'Vença 6 partidas.', stat:'wins', goal:6 },
+        { id:'c16', title:'Inverno sem fim', desc:'Derrote 1.500 inimigos.', stat:'totalKills', goal:1500 },
+        { id:'c17', title:'Dualidade', desc:'Alcance wave 26.', stat:'bestWave', goal:26 },
+        { id:'c18', title:'Força combinada', desc:'Derrote 8 Bosses.', stat:'bossKills', goal:8 },
+        { id:'c19', title:'Último elemento', desc:'Vença 10 partidas.', stat:'wins', goal:10 },
+        { id:'c20', title:'Lenda elemental', desc:'Alcance wave 30.', stat:'bestWave', goal:30 }
+    ]},
+    mr_perfurant: { id:'mr_perfurant', label:'Mr. Perfurant', sprite:'mr_perfurant', goal:15, missions: [
+        { id:'p1', title:'A primeira lâmina', desc:'Inicie 2 partidas.', stat:'gamesStarted', goal:2 },
+        { id:'p2', title:'Velho soldado', desc:'Derrote 120 inimigos.', stat:'totalKills', goal:120 },
+        { id:'p3', title:'Corte limpo', desc:'Vença 1 partida.', stat:'wins', goal:1 },
+        { id:'p4', title:'Base costeira', desc:'Alcance wave 10.', stat:'bestWave', goal:10 },
+        { id:'p5', title:'Katana em punho', desc:'Derrote 300 inimigos.', stat:'totalKills', goal:300 },
+        { id:'p6', title:'Lealdade', desc:'Inicie 5 partidas.', stat:'gamesStarted', goal:5 },
+        { id:'p7', title:'Primeiro comandante', desc:'Derrote 2 Bosses.', stat:'bossKills', goal:2 },
+        { id:'p8', title:'Sem hesitar', desc:'Vença 3 partidas.', stat:'wins', goal:3 },
+        { id:'p9', title:'Lâmina implacável', desc:'Alcance wave 16.', stat:'bestWave', goal:16 },
+        { id:'p10', title:'Pelo Mestre do Fogo', desc:'Derrote 600 inimigos.', stat:'totalKills', goal:600 },
+        { id:'p11', title:'Honra', desc:'Derrote 4 Bosses.', stat:'bossKills', goal:4 },
+        { id:'p12', title:'Desertor', desc:'Vença 5 partidas.', stat:'wins', goal:5 },
+        { id:'p13', title:'Katana absoluta', desc:'Derrote 1.000 inimigos.', stat:'totalKills', goal:1000 },
+        { id:'p14', title:'Último duelo', desc:'Alcance wave 22.', stat:'bestWave', goal:22 },
+        { id:'p15', title:'Nova causa', desc:'Derrote 7 Bosses.', stat:'bossKills', goal:7 }
     ]}
 };
 
 const EVENT_PROMOS = [
-    { id: 'sparta', label: 'Sparta', oldCost: 149, promoCost: 79, level8Cost: 639, rarity: 'epic' },
-    { id: 'lyron', label: 'Lyron', oldCost: 349, promoCost: 149, level8Cost: 899, rarity: 'legendary' },
-    { id: 'bunniie', label: 'Bunniie', oldCost: 149, promoCost: 79, rarity: 'epic' },
-    { id: 'gladiator', label: 'Gladiator', oldCost: 349, promoCost: 149, rarity: 'legendary' },
-    { id: 'firey', label: 'Mestre do Fogo', oldCost: 349, promoCost: 149, rarity: 'legendary' },
-    { id: 'ignite', label: 'Ignite', oldCost: 349, promoCost: 149, rarity: 'legendary' },
-    { id: 'sterling', label: 'Sterling', oldCost: 349, promoCost: 149, rarity: 'legendary' },
-    { id: 'frost', label: 'Frost', oldCost: 569, promoCost: 349, rarity: 'mythic' },
-    { id: 'yeti', label: 'Yeti', oldCost: 569, promoCost: 349, rarity: 'mythic' },
-    { id: 'shinobi', label: 'Shinobi', oldCost: 569, promoCost: 349, rarity: 'mythic' },
-    { id: 'glitch', label: 'Glitch', oldCost: 569, promoCost: 349, rarity: 'mythic' }
+    { id:'kacashi', label:'Kacashi', oldCost:199, promoCost:99, level8Cost:719, rarity:'seasonal' },
+    { id:'cyro_pyro', label:'Cyro & Pyro', oldCost:349, promoCost:149, level8Cost:899, rarity:'legendary' },
+    { id:'mr_perfurant', label:'Mr. Perfurant', oldCost:149, promoCost:79, level8Cost:639, rarity:'epic' },
+    { id:'sharkie', label:'Sharkie', oldCost:79, promoCost:29, rarity:'rare' },
+    { id:'chickbot', label:'Chickbot', oldCost:79, promoCost:29, rarity:'rare' },
+    { id:'eolio', label:'Eólio', oldCost:149, promoCost:79, rarity:'epic' },
+    { id:'stormy', label:'Stormy', oldCost:149, promoCost:79, rarity:'epic' },
+    { id:'bulb', label:'Bulb', oldCost:149, promoCost:79, rarity:'epic' },
+    { id:'kael', label:'Kael', oldCost:149, promoCost:79, rarity:'epic' },
+    { id:'joseph', label:'Joseph', oldCost:149, promoCost:79, rarity:'epic' },
+    { id:'xilo', label:'Xilo', oldCost:149, promoCost:79, rarity:'epic' },
+    { id:'vovo_cookie', label:'Vovó Cookie', oldCost:149, promoCost:79, rarity:'epic' },
+    { id:'serrano', label:'Serrano', oldCost:349, promoCost:149, rarity:'legendary' }
 ];
 
 function getEventBaseSnapshot() {
     const stats = pd?.achievements?.stats || {};
     const snapshot = {};
     const keys = new Set();
-    Object.values(EVENT_CHARACTER_PROGRESS).forEach(section => {
-        (section.missions || []).forEach(m => keys.add(m.stat));
-    });
-    keys.forEach(key => { snapshot[key] = Math.max(0, Math.floor(Number(stats[key]) || 0)); });
+    Object.values(EVENT_CHARACTER_PROGRESS).forEach(section => (section.missions || []).forEach(m => keys.add(m.stat)));
+    keys.forEach(key => snapshot[key] = Math.max(0, Math.floor(Number(stats[key]) || 0)));
     return snapshot;
+}
+function createDefaultEventState(sectionId, baseStats = null) {
+    return { claimed:false, baseStats:baseStats ? {...baseStats} : null, completedIds:[], missionSaveKey:EVENT_MISSION_SAVE_KEYS[sectionId], progressVersion:EVENT_PROGRESS_VERSION };
 }
 function ensureEventState() {
     if (!pd.events || typeof pd.events !== 'object') pd.events = {};
-    if (!pd.events.sparta) pd.events.sparta = { claimed: false, baseStats: null, missionSaveKey: EVENT_MISSION_SAVE_KEYS.sparta };
-    if (!pd.events.lyron) pd.events.lyron = { claimed: false, baseStats: null, missionSaveKey: EVENT_MISSION_SAVE_KEYS.lyron };
-    for (const id of ['sparta','lyron']) {
-        if (typeof pd.events[id].claimed === 'undefined') pd.events[id].claimed = false;
-        if (typeof pd.events[id].baseStats === 'undefined') pd.events[id].baseStats = null;
-        if (pd.events[id].missionSaveKey !== EVENT_MISSION_SAVE_KEYS[id]) { pd.events[id].baseStats = null; pd.events[id].missionSaveKey = EVENT_MISSION_SAVE_KEYS[id]; }
-    }
-}
-function ensureEventSectionSnapshot(sectionId) {
-    ensureEventState();
-    const section = pd.events?.[sectionId];
-    if (!section) return;
-    if (!section.baseStats) {
-        section.baseStats = getEventBaseSnapshot();
-        save();
+    const base = getEventBaseSnapshot();
+    const statsNow = pd?.achievements?.stats || {};
+    for (const id of Object.keys(EVENT_CHARACTER_PROGRESS)) {
+        let section = pd.events[id];
+        if (!section || typeof section !== 'object') {
+            section = pd.events[id] = createDefaultEventState(id, base);
+        }
+        if (section.progressVersion !== EVENT_PROGRESS_VERSION || section.missionSaveKey !== EVENT_MISSION_SAVE_KEYS[id]) {
+            const claimed = !!section.claimed;
+            section = pd.events[id] = createDefaultEventState(id, base);
+            section.claimed = claimed && !!pd.chars?.[id];
+        }
+        if (!section.baseStats || typeof section.baseStats !== 'object') section.baseStats = {...base};
+        if (!Array.isArray(section.completedIds)) section.completedIds = [];
+        section.completedIds = [...new Set(section.completedIds.map(String))].filter(mid => EVENT_CHARACTER_PROGRESS[id].missions.some(m => m.id === mid));
+        section.missionSaveKey = EVENT_MISSION_SAVE_KEYS[id];
+        section.progressVersion = EVENT_PROGRESS_VERSION;
+        // Reconcile from saved stats without resetting progress.
+        const byId = new Set(section.completedIds);
+        for (const mission of EVENT_CHARACTER_PROGRESS[id].missions) {
+            const current = Math.max(0, Math.floor(Number(statsNow[mission.stat]) || 0));
+            const started = Math.max(0, Math.floor(Number(section.baseStats[mission.stat]) || 0));
+            if (current - started >= mission.goal) byId.add(mission.id);
+        }
+        section.completedIds = [...byId];
     }
 }
 function getEventStatsValue(sectionId, stat) {
@@ -6985,82 +7195,46 @@ function getEventStatsValue(sectionId, stat) {
     return Math.max(0, current - base);
 }
 function getEventCompletedCount(sectionId) {
+    ensureEventState();
     const section = EVENT_CHARACTER_PROGRESS[sectionId];
     if (!section) return 0;
-    return section.missions.filter(m => getEventStatsValue(sectionId, m.stat) >= m.goal).length;
+    return Math.min(section.goal, pd.events?.[sectionId]?.completedIds?.length || 0);
+}
+function syncEventMissionCompletions(persist = true) {
+    if (!pd?.events) return false;
+    const stats = pd?.achievements?.stats || {};
+    let changed = false;
+    for (const id of Object.keys(EVENT_CHARACTER_PROGRESS)) {
+        const event = pd.events[id];
+        if (!event) continue;
+        const before = event.completedIds.length;
+        const done = new Set(event.completedIds);
+        for (const mission of EVENT_CHARACTER_PROGRESS[id].missions) {
+            const current = Math.max(0, Math.floor(Number(stats[mission.stat]) || 0));
+            const base = Math.max(0, Math.floor(Number(event.baseStats?.[mission.stat]) || 0));
+            if (current - base >= mission.goal) done.add(mission.id);
+        }
+        event.completedIds = [...done];
+        if (event.completedIds.length !== before) changed = true;
+    }
+    if (changed && persist) save();
+    return changed;
 }
 function getEventMissionArt(sectionId) {
     const section = EVENT_CHARACTER_PROGRESS[sectionId];
     if (!section?.sprite) return '';
-    return getCharacterSpriteMarkup(section.sprite, 'menu').replace(
-        'class="char-sprite char-sprite--menu"',
-        'class="char-sprite event-mission-sprite" style="width:96px;height:54px;margin:0;object-fit:contain;"'
-    );
+    return getCharacterSpriteMarkup(section.sprite, 'menu').replace('class="char-sprite char-sprite--menu"','class="char-sprite event-mission-sprite" style="width:96px;height:54px;margin:0;object-fit:contain;"');
 }
 function renderEventMissionCard(sectionId, mission) {
     const section = EVENT_CHARACTER_PROGRESS[sectionId];
-    const done = getEventStatsValue(sectionId, mission.stat) >= mission.goal;
+    const eventState = pd.events?.[sectionId] || {};
+    const done = Array.isArray(eventState.completedIds) && eventState.completedIds.includes(mission.id);
     const current = Math.min(getEventStatsValue(sectionId, mission.stat), mission.goal);
-    const art = getEventMissionArt(sectionId) || `<div class="${sectionId === 'adam' ? 'event-graffit-ball' : 'event-major-icon'}" aria-hidden="true"></div>`;
+    const art = getEventMissionArt(sectionId) || '<div class="event-major-icon" aria-hidden="true"></div>';
     return `<div class="mission-card event-mission-card ${done ? 'event-mission-done' : 'event-mission-lock'} ${done ? 'completed' : ''}">
-        <div class="event-mission-head">
-            ${art}
-            <div class="event-mission-copy">
-                <div class="mission-title">${escapeHtmlText(decodeHtmlEntities(mission.title))}</div>
-                <div class="mission-desc">${escapeHtmlText(decodeHtmlEntities(mission.desc))}</div>
-            </div>
-        </div>
-        <div class="mission-meta">
-            <span>Progresso: <strong>${current}/${mission.goal}</strong></span>
-            <span>Status: <strong>${done ? 'Concluída' : 'Em andamento'}</strong></span>
-        </div>
-        <div class="mission-progress"><div class="mission-progress-fill ${done ? 'done' : ''}" style="width:${Math.min(100, (current / mission.goal) * 100)}%"></div></div>
-    </div>`;
-}
-
-function getPromoBallColor(promo) {
-    const c = CHARACTERS[promo.id];
-    return c?.color || ({ common: '#3498db', rare: '#5dade2', epic: '#9b59b6', legendary: '#f1c40f', mythic: '#ff4d4d', seasonal: '#f39c12' }[promo.rarity] || '#8e44ad');
-}
-function darkenHexColor(hex, factor = 0.28) {
-    const match = /^#([0-9a-f]{6})$/i.exec(String(hex || '').trim());
-    if (!match) return 'rgb(40, 40, 40)';
-    const num = parseInt(match[1], 16);
-    const r = Math.max(0, Math.min(255, Math.round(((num >> 16) & 255) * (1 - factor))));
-    const g = Math.max(0, Math.min(255, Math.round(((num >> 8) & 255) * (1 - factor))));
-    const b = Math.max(0, Math.min(255, Math.round((num & 255) * (1 - factor))));
-    return `rgb(${r}, ${g}, ${b})`;
-}
-function renderPromoBall(promo) {
-    const sprite = getCharacterSpriteMarkup(promo.id, 'promo');
-    if (sprite) return sprite;
-    const ballColor = getPromoBallColor(promo);
-    const darker = darkenHexColor(ballColor, 0.36);
-    return `<div class="promo-offer-ball" style="background: radial-gradient(circle at 30% 28%, rgba(255,255,255,0.42), rgba(255,255,255,0.10) 48%), linear-gradient(180deg, ${ballColor}, ${darker});"></div>`;
-}
-function renderEventPromoOfferCard(promo, mode) {
-    const c = CHARACTERS[promo.id];
-    if (!c) return '';
-    const owned = !!pd.chars[promo.id];
-    const currentLevel = Number(pd.chars?.[promo.id]?.level) || 0;
-    if (owned) return '';
-    if (mode === 'level8' && currentLevel >= 8) return '';
-    const art = getCharacterSpriteMarkup(promo.id, 'promo') || renderPromoBall(promo);
-    if (mode === 'level8') {
-        return `<div class="card-item rarity-${promo.rarity} promo-offer-card">
-            ${art}
-            <div class="promo-offer-title">${escapeHtmlText(decodeHtmlEntities(promo.label))} Lv. 8</div>
-            <div class="promo-offer-sub">Já vem no nível máximo.</div>
-            <div class="promo-offer-price"><span class="promo-offer-new">${promo.level8Cost} gemas</span></div>
-            <button class="btn-action promo-offer-btn" type="button" onclick="event.stopPropagation(); buyPromoCharacterOffer('${promo.id}', ${promo.level8Cost}, 8)">Comprar no máximo</button>
-        </div>`;
-    }
-    return `<div class="card-item rarity-${promo.rarity} promo-offer-card">
-        ${art}
-        <div class="promo-offer-title">${escapeHtmlText(decodeHtmlEntities(promo.label))}</div>
-        <div class="promo-offer-sub">Oferta normal do evento.</div>
-        <div class="promo-offer-price"><span class="promo-offer-old">${promo.oldCost} gemas</span><span class="promo-offer-new">${promo.promoCost} gemas</span></div>
-        <button class="btn-action promo-offer-btn" type="button" onclick="event.stopPropagation(); buyPromoCharacterOffer('${promo.id}', ${promo.promoCost}, 1)">Comprar personagem</button>
+        <div class="event-mission-head">${art}<div class="event-mission-copy"><div class="mission-title">${escapeHtmlText(decodeHtmlEntities(mission.title))}</div><div class="mission-desc">${escapeHtmlText(decodeHtmlEntities(mission.desc))}</div></div></div>
+        <div class="mission-meta"><span>Progresso: <strong>${current}/${mission.goal}</strong></span><span>Status: <strong>${done ? 'Concluída' : 'Em andamento'}</strong></span></div>
+        <div class="mission-progress"><div class="mission-progress-fill ${done ? 'done' : ''}" style="width:${Math.min(100,(current/mission.goal)*100)}%"></div></div>
     </div>`;
 }
 function renderEventPromoCard(promo) {
@@ -7075,107 +7249,49 @@ function renderEventPromoCard(promo) {
 }
 function renderEvents() {
     ensureEventState();
-    if (currentEventSection) ensureEventSectionSnapshot(currentEventSection);
-    const spartaList = document.getElementById('event-sparta-list');
-    const lyronList = document.getElementById('event-lyron-list');
+    const sections = Object.values(EVENT_CHARACTER_PROGRESS);
+    sections.forEach(section => {
+        const count = getEventCompletedCount(section.id);
+        const countEl = document.getElementById(`event-${section.id}-count`);
+        const claim = document.getElementById(`event-${section.id}-claim`);
+        const list = document.getElementById(`event-${section.id}-list`);
+        if (countEl) countEl.textContent = String(count);
+        if (claim) {
+            const ready = count >= section.goal;
+            claim.disabled = !ready || !!pd.events[section.id].claimed;
+            claim.textContent = pd.events[section.id].claimed ? '✅ Resgatado' : `🎁 Resgatar ${section.label}`;
+        }
+        if (list) list.innerHTML = section.missions.map(m => renderEventMissionCard(section.id, m)).join('');
+    });
     const promoList = document.getElementById('event-promo-list');
-    const spartaCount = document.getElementById('event-sparta-count');
-    const lyronCount = document.getElementById('event-lyron-count');
-    const spartaClaim = document.getElementById('event-sparta-claim');
-    const lyronClaim = document.getElementById('event-lyron-claim');
-    const sparta = EVENT_CHARACTER_PROGRESS.sparta;
-    const lyron = EVENT_CHARACTER_PROGRESS.lyron;
-    const spartaDone = getEventCompletedCount('sparta');
-    const lyronDone = getEventCompletedCount('lyron');
-    if (spartaCount) spartaCount.textContent = String(spartaDone);
-    if (lyronCount) lyronCount.textContent = String(lyronDone);
-    if (spartaClaim) {
-        const ready = spartaDone >= sparta.goal;
-        spartaClaim.disabled = !ready || !!pd.events.sparta.claimed;
-        spartaClaim.textContent = pd.events.sparta.claimed ? '✅ Resgatado' : `🎁 Resgatar ${sparta.label}`;
-    }
-    if (lyronClaim) {
-        const ready = lyronDone >= lyron.goal;
-        lyronClaim.disabled = !ready || !!pd.events.lyron.claimed;
-        lyronClaim.textContent = pd.events.lyron.claimed ? '✅ Resgatado' : `🎁 Resgatar ${lyron.label}`;
-    }
-    if (spartaList) spartaList.innerHTML = sparta.missions.map(m => renderEventMissionCard('sparta', m)).join('');
-    if (lyronList) lyronList.innerHTML = lyron.missions.map(m => renderEventMissionCard('lyron', m)).join('');
     if (promoList) promoList.innerHTML = EVENT_PROMOS.map(renderEventPromoCard).join('');
 }
 function showEventSection(section) {
+    ensureEventState();
     currentEventSection = section;
-    ensureEventSectionSnapshot(section);
     document.querySelectorAll('#screen-event .shop-panel').forEach(el => el.classList.add('hidden'));
     const target = document.getElementById(`event-section-${section}`);
     if (target) target.classList.remove('hidden');
-    document.querySelectorAll('#screen-event .shop-tab').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.section === section);
-    });
+    document.querySelectorAll('#screen-event .shop-tab').forEach(btn => btn.classList.toggle('active', btn.dataset.section === section));
+    renderEvents();
 }
 function claimEventCharacter(sectionId) {
     ensureEventState();
+    syncEventMissionCompletions(false);
     const section = EVENT_CHARACTER_PROGRESS[sectionId];
     if (!section) return;
     const done = getEventCompletedCount(sectionId);
-    if (done < section.goal) {
-        showAlert(`Faltam mais ${section.goal - done} missões.`);
-        return;
-    }
-    if (pd.events[sectionId].claimed) {
-        showAlert('Recompensa já resgatada.');
-        return;
-    }
+    if (done < section.goal) { showAlert(`Faltam mais ${section.goal - done} missões.`); return; }
+    if (pd.events[sectionId].claimed || pd.chars[section.id]) { showAlert('Recompensa já resgatada.'); return; }
     pd.events[sectionId].claimed = true;
-    pd.chars[section.id] = pd.chars[section.id] || { level: 1, slots: 2, chips: [null, null] };
+    pd.chars[section.id] = pd.chars[section.id] || { level:1, slots:2, chips:[null,null] };
+    if (section.id === 'cyro_pyro') pd.chars[section.id].mode = 'pyro';
+    awardAchievementStat('charsUnlocked', 1);
     save();
-    renderEvents();
-    renderShop();
-    renderChars?.();
-    startGachaQueue([{ type: 'instant', title: 'Evento concluído', contents: [`👤 NOVO PERSONAGEM: ${section.label}!`] }]);
+    renderEvents(); renderShop(); renderChars?.();
+    startGachaQueue([{ type:'instant', title:'Evento concluído', contents:[`👤 NOVO PERSONAGEM: ${section.label}!`] }]);
     notify(`${section.label} liberado!`);
 }
-function buyPromoCharacterOffer(id, cost, targetLevel = 1) {
-    const c = CHARACTERS[id];
-    if (!c) return;
-    if (id === 'fasty') {
-        buyChar('fasty');
-        return;
-    }
-    const owned = !!pd.chars[id];
-    const currentLevel = Number(pd.chars?.[id]?.level) || 0;
-    const isMaxOffer = Number(targetLevel) >= 8;
-    const safeCost = Number(cost);
-    if (!Number.isFinite(safeCost) || safeCost <= 0) return;
-    if (!isMaxOffer && owned) {
-        showAlert('Você já possui esse personagem.');
-        return;
-    }
-    if (isMaxOffer && currentLevel >= 8) {
-        showAlert('Esse personagem já está no nível máximo.');
-        return;
-    }
-    if (pd.gems < safeCost) {
-        showAlert('Gemas insuficientes!');
-        return;
-    }
-    const label = isMaxOffer ? `${c.name} nível 8` : c.name;
-    showConfirm('Quer comprar essa oferta?', `Deseja comprar ${label} por ${safeCost} gemas?`, (res) => {
-        if(!res) return;
-        pd.gems -= safeCost;
-        if (!owned) pd.chars[id] = { level: 1, slots: 2, chips: [null, null] };
-        if (isMaxOffer) {
-            pd.chars[id].level = Math.max(Number(pd.chars[id].level) || 1, 8);
-        }
-        save();
-        renderShop();
-        renderEvents();
-        renderChars?.();
-        showCharDetail?.(id);
-        startGachaQueue([{ type: 'instant', title: 'Você ganhou!', contents: [`👤 NOVO PERSONAGEM: ${c.name}!`] }]);
-    });
-}
-
 const MISSION_TEMPLATES = [
     { kind: 'kills', label: (n) => `Mate ${n} inimigos`, min: 60, max: 180, reward: 100 },
     { kind: 'waves', label: (n) => `Sobreviva ${n} waves`, min: 3, max: 10, reward: 100 },
@@ -7604,6 +7720,7 @@ function awardAchievementStat(key, amount = 1) {
     if (!pd.achievements.stats || typeof pd.achievements.stats !== 'object') pd.achievements.stats = {};
     const v = Number(pd.achievements.stats[key]) || 0;
     pd.achievements.stats[key] = Math.max(0, v + (Number(amount) || 0));
+    if (typeof syncEventMissionCompletions === 'function') syncEventMissionCompletions(true);
 }
 function renderAchievements() {
     const list = document.getElementById('achievements-list');
@@ -9621,7 +9738,7 @@ function renderTrail() {
 // GAME ENGINE
 const canvas = document.getElementById('gameCanvas'); const ctx = canvas.getContext('2d');
 let cw = canvas.width = window.innerWidth; let ch = canvas.height = window.innerHeight;
-window.addEventListener('resize', () => { cw = canvas.width = window.innerWidth; ch = canvas.height = window.innerHeight; updateOrientationGate(); });
+window.addEventListener('resize', () => { cw = canvas.width = window.innerWidth; ch = canvas.height = window.innerHeight; updateOrientationGate(); applySavedHudLayout(); if(hudEditorActive) requestAnimationFrame(hudEditorApplyAll); });
 window.addEventListener('orientationchange', updateOrientationGate);
 
 let gameLoopId, isPlaying = false, isPaused = false;
@@ -9669,6 +9786,10 @@ function getSelectedSpecialConfig() {
         return { type: 'bunniie', label: '🕳️', title: player.bunniieTunnelCd > 0 ? `Toca recarregando ${Math.ceil(player.bunniieTunnelCd)}s` : 'Cavar', ready: player.bunniieTunnelCd <= 0 };
     }
     if (pd.selectedChar === 'gladiator') return { type:'gladiator', label:'⚔️', title:'Alternar modo', ready:(player.gladiatorModeCooldown||0)<=0 };
+    if (pd.selectedChar === 'kacashi') {
+        const active = (player.kacashiDimensionTimer || 0) > 0;
+        return { type: 'kacashi', label: '👁️', title: active ? `Dimensão ativa ${Math.ceil(player.kacashiDimensionTimer)}s` : 'Sharin — Dimensão', ready: !active && (player.kacashiDimensionCd || 0) <= 0 };
+    }
     return null;
 }
 
@@ -9750,6 +9871,7 @@ function updateSpecialButtonUI() {
     const isShinobiActive = cfg.type === 'shinobi' && (player.shinobiDragonActive || player.shinobiDragonFormActive);
     const isGlitchActive = cfg.type === 'glitch' && !!player.glitchTransformAnimating;
     const isSterling = cfg.type === 'sterling';
+    const isKacashiActive = cfg.type === 'kacashi' && (player.kacashiDimensionTimer || 0) > 0;
     const isSterlingCharging = isSterling && !!player.sterlingCharging;
 
     const cooldownValue = cfg.type === 'ghoul'
@@ -9766,9 +9888,11 @@ function updateSpecialButtonUI() {
                     ? Math.max(0, Number(player.gladiatorModeCooldown || 0))
                     : isSterling
                     ? Math.max(0, Number(player.sterlingAttackCd || 0))
+                    : cfg.type === 'kacashi'
+                    ? Math.max(0, Number(player.kacashiDimensionCd || 0))
                     : 0;
 
-    const activeState = cfg.type === 'ghoul' ? isGhoulActive : cfg.type === 'ninji' ? isNinjiActive : cfg.type === 'joseph' ? isJosephActive : cfg.type === 'shinobi' ? isShinobiActive : cfg.type === 'glitch' ? isGlitchActive : false;
+    const activeState = cfg.type === 'ghoul' ? isGhoulActive : cfg.type === 'ninji' ? isNinjiActive : cfg.type === 'joseph' ? isJosephActive : cfg.type === 'shinobi' ? isShinobiActive : cfg.type === 'glitch' ? isGlitchActive : isKacashiActive;
     const shouldShowCooldown = !activeState && !isSterlingCharging && cooldownValue > 0;
     const label = cfg.label || '';
     const chargePct = isSterling ? Math.max(0, Math.min(1, Number(player.sterlingCharge || 0))) : 0;
@@ -9852,37 +9976,33 @@ function isInteractiveUiTarget(target) {
     return !!target.closest('button, input, select, textarea, a, label, [role=\"button\"], #joystick-zone, #dpad-zone');
 }
 
-function teleportJoystickToTouch(touch) {
-    if (!joyZone) return;
-    const zoneSize = joyZone.getBoundingClientRect().width || 120;
-    const pad = 10;
-    const x = Math.min(window.innerWidth - zoneSize - pad, Math.max(pad, touch.clientX - zoneSize / 2));
-    const y = Math.min(window.innerHeight - zoneSize - pad, Math.max(pad, touch.clientY - zoneSize / 2));
-    joyZone.style.position = 'fixed';
-    joyZone.style.left = `${x}px`;
-    joyZone.style.top = `${y}px`;
-    joyZone.style.right = 'auto';
-    joyZone.style.bottom = 'auto';
+function updateJoy(touch) {
+    if (!joyZone || !touch) return;
+    const rect = joyZone.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    let dx = touch.clientX - cx;
+    let dy = touch.clientY - cy;
+    const maxR = Math.max(1, rect.width / 2);
+    const d = Math.hypot(dx, dy);
+    if (d > maxR) {
+        dx = (dx / d) * maxR;
+        dy = (dy / d) * maxR;
+    }
+    const deadzone = Math.min(6, maxR * 0.08);
+    const outputD = Math.max(0, d - deadzone);
+    if (d <= deadzone) {
+        joyVec.x = 0;
+        joyVec.y = 0;
+    } else {
+        const scale = Math.min(1, outputD / Math.max(1, maxR - deadzone));
+        joyVec.x = (dx / Math.max(1, d)) * scale;
+        joyVec.y = (dy / Math.max(1, d)) * scale;
+    }
+    if (joyKnob) {
+        joyKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+    }
 }
-
-joyZone.addEventListener('touchstart', e => { e.preventDefault(); const touch = e.changedTouches[0]; touchId = touch.identifier; updateJoy(touch); });
-joyZone.addEventListener('touchmove', e => { e.preventDefault(); for(let i=0; i<e.changedTouches.length; i++) if(e.changedTouches[i].identifier === touchId) updateJoy(e.changedTouches[i]); });
-const endJoy = (e) => { for(let i=0; i<e.changedTouches.length; i++) if(e.changedTouches[i].identifier === touchId) { touchId = null; joyVec = {x:0, y:0}; joyKnob.style.transform = `translate(-50%, -50%)`; } };
-joyZone.addEventListener('touchend', endJoy); joyZone.addEventListener('touchcancel', endJoy);
-document.addEventListener('touchend', e => { if(e.touches.length === 0) { touchId = null; joyVec = {x:0, y:0}; joyKnob.style.transform = `translate(-50%, -50%)`; } });
-document.addEventListener('touchstart', e => {
-    if (!isPlaying || isPaused || !pd?.settings?.mobileJoystickFollowTap) return;
-    const touch = e.changedTouches && e.changedTouches[0];
-    if (!touch || isInteractiveUiTarget(e.target)) return;
-    const touchControls = pd.settings.controlMode === 'mobile' || (pd.settings.controlMode === 'auto' && isTouchDevice());
-    if (!touchControls || pd.settings.mobileControlLayout === 'dpad') return;
-    touchId = touch.identifier;
-    teleportJoystickToTouch(touch);
-    updateJoy(touch);
-    e.preventDefault();
-}, { passive: false });
-
-function updateJoy(touch) { const rect = joyZone.getBoundingClientRect(); const cx = rect.left + rect.width/2; const cy = rect.top + rect.height/2; let dx = touch.clientX - cx; let dy = touch.clientY - cy; const dist = Math.sqrt(dx*dx + dy*dy); const maxR = rect.width/2; if(dist > maxR) { dx = (dx/dist)*maxR; dy = (dy/dist)*maxR; } joyKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`; joyVec.x = dx / maxR; joyVec.y = dy / maxR; }
 const dist = (a, b) => Math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2);
 const normalizeAngle = (a) => { while(a > Math.PI) a -= Math.PI*2; while(a < -Math.PI) a += Math.PI*2; return a; };
 
@@ -9900,6 +10020,7 @@ function isPlayerInsideEolioTurbine() {
 
 function dealPlayerDamage(amount, opts = {}) {
     if (!player || !Number.isFinite(amount) || amount <= 0) return;
+    if (pd?.selectedChar === 'kacashi' && (player.kacashiDimensionTimer || 0) > 0) return;
     let dmg = amount;
 
     if (isZippiCharacter() && !opts.ignoreBubble && player.zippiBubbleHp > 0) {
@@ -10031,7 +10152,6 @@ function updatePauseSettingsUI(syncSlider = true) {
     const musicSlider = document.getElementById('pause-music-volume-slider'); if(syncSlider !== false && musicSlider) musicSlider.value = Math.round(getMusicVolume() * 100);
     const ctEl = document.getElementById('pause-set-combat-text'); if(ctEl) { ctEl.innerHTML = pd.settings.showCombatText ? 'Ativado' : 'Desativado'; ctEl.style.color = pd.settings.showCombatText ? 'var(--btn-green)' : 'var(--btn-red)'; }
     const hpEl = document.getElementById('pause-set-hpbar'); if(hpEl) { hpEl.innerHTML = pd.settings.showHpBar ? 'Ativado' : 'Desativado'; hpEl.style.color = pd.settings.showHpBar ? 'var(--btn-green)' : 'var(--btn-red)'; }
-    const joyFollowEl = document.getElementById('pause-set-joy-follow'); if(joyFollowEl) { joyFollowEl.innerHTML = pd.settings.mobileJoystickFollowTap ? 'Ativado' : 'Desativado'; joyFollowEl.style.color = pd.settings.mobileJoystickFollowTap ? 'var(--btn-green)' : 'var(--btn-red)'; }
     const pEl = document.getElementById('pause-set-particles'); if(pEl) { pEl.innerHTML = pd.settings.noParticles ? 'Ativado' : 'Desativado'; pEl.style.color = pd.settings.noParticles ? 'var(--btn-green)' : 'var(--btn-red)'; }
 }
 
@@ -10169,7 +10289,7 @@ function startRunAfterShop() {
         x: 0, y: 0, r: (pd.selectedChar === 'hank' || pd.selectedChar === 'yeti') ? 20 : ((pd.selectedChar === 'shiv' || pd.selectedChar === 'zippi') ? 10 : (pd.selectedChar === 'kaisen' ? 13 : (pd.selectedChar === 'booboo' ? 13 : (pd.selectedChar === 'eel' ? 15 : 15)))), baseHp: initialBaseHp, hp: initialBaseHp, baseSpeed: charDef.speed, baseDmg: initialBaseDmg,
         baseFireRate: charDef.fireRate, baseRange: charDef.range, color: charDef.color, weapon: charDef.weapon, cyroPyroMode: pd.selectedChar === 'cyro_pyro' ? getCyroPyroMode() : null, gladiatorMode: pd.selectedChar === 'gladiator' ? (pd.chars?.gladiator?.mode || 'shooter') : null, gladiatorModeCooldown: 0, eolioPropellerSeq: 0, cd: 0, shieldTimer: 0,
         zombieTimer: 0, revived: false, elekCycle: false, dashTimer: 0, meleeCd: 0, boldShots: 0, boldReload: 0, specCd: pd.selectedChar === 'ghoul' ? 20 : 0, invisTimer: 0, ghoulPendingCd: 0, ninjiPendingCd: 0,
-        lastMoveAngle: 0, lastAimAngle: 0, sharkieAttackTimer: 0, josephOllieCd: 0, josephOllieTimer: 0, josephOllieAngle: 0, josephOlliePendingCd: 0, josephOllieDetonate: false, sharkieAimAngle: 0, sharkieReverseAngle: 0, sharkieReverseX: 0, sharkieReverseY: 0, tenentCycle: 0, stormyCycle: 0, bulbMode: pd.selectedChar === 'bulb' ? Math.floor(Math.random() * 3) : null, bulbGasActiveUntil: 0, bulbGasCooldownUntil: 0, bulbGasAngle: 0, orbitalAngle: 0, boobooReturn: true, pickedCards: [], revivesUsed: 0, qbBar: 0, qbShield: false, isDead: false, flexCombo: 0, flexReload: 0, ninjiDashCd: 0, shinobiDragonActive: false, shinobiDragonWavesLeft: 0, shinobiDragonCooldown: pd.selectedChar === 'shinobi' ? 20 : 0, shinobiDragonFireCd: 0, shinobiScytheCycle: 0, sterlingCharging: false, sterlingCharge: 0, sterlingAttackCd: 0, majorBriggsKills: 0, majorBriggsStage: 1,
+        lastMoveAngle: 0, lastAimAngle: 0, kacashiDimensionTimer: 0, kacashiDimensionCd: 0, sharkieAttackTimer: 0, josephOllieCd: 0, josephOllieTimer: 0, josephOllieAngle: 0, josephOlliePendingCd: 0, josephOllieDetonate: false, sharkieAimAngle: 0, sharkieReverseAngle: 0, sharkieReverseX: 0, sharkieReverseY: 0, tenentCycle: 0, stormyCycle: 0, bulbMode: pd.selectedChar === 'bulb' ? Math.floor(Math.random() * 3) : null, bulbGasActiveUntil: 0, bulbGasCooldownUntil: 0, bulbGasAngle: 0, orbitalAngle: 0, boobooReturn: true, pickedCards: [], revivesUsed: 0, qbBar: 0, qbShield: false, isDead: false, flexCombo: 0, flexReload: 0, ninjiDashCd: 0, shinobiDragonActive: false, shinobiDragonWavesLeft: 0, shinobiDragonCooldown: pd.selectedChar === 'shinobi' ? 20 : 0, shinobiDragonFireCd: 0, shinobiScytheCycle: 0, sterlingCharging: false, sterlingCharge: 0, sterlingAttackCd: 0, majorBriggsKills: 0, majorBriggsStage: 1,
         adamScrap: 0, adamMechActive: false, adamMechWavesLeft: 0, adamMechHpBonus: 0, adamMechSizeBonus: 0, adamBaseHpBeforeMech: null, adamBaseRBeforeMech: null,
         spartaCycle: 0, spartaNoDamageTimer: 0, spartaShieldActive: false, spartaAttackTimer: 0, spartaAttackMode: 'straight', spartaAttackRange: 0, spartaAttackWidth: 0, spartaAttackHalfAngle: 0, vesperFocusTimer: 0, vesperFocusActive: false, vesperFocusTimer: 0, vesperFocusActive: false,
         gooRevived: false, gooCloneSpawned: false, gooFullBaseHp: initialBaseHp, gooFullBaseDmg: initialBaseDmg, gooFullR: (pd.selectedChar === 'hank' || pd.selectedChar === 'yeti') ? 20 : ((pd.selectedChar === 'shiv' || pd.selectedChar === 'zippi') ? 10 : (pd.selectedChar === 'kaisen' ? 13 : (pd.selectedChar === 'eel' ? 15 : 15))),
@@ -10563,6 +10683,15 @@ function triggerSpecial() {
         updateSpecialButtonUI();
         return;
     }
+    if (cfg.type === 'kacashi' && (player.kacashiDimensionCd || 0) <= 0 && (player.kacashiDimensionTimer || 0) <= 0) {
+        player.kacashiDimensionTimer = 10;
+        player.kacashiDimensionCd = 0;
+        projectiles = (projectiles || []).filter(p => p && p.isPlayer);
+        createExplosion(player.x, player.y, 95, 0, 'rgba(125,95,255,0.55)');
+        addFloatingText(player.x, player.y - 34, 'DIMENSÃO!', '#b88cff', 22);
+        updateSpecialButtonUI();
+        return;
+    }
     if (cfg.type === 'bunniie' && player.bunniieTunnelCd <= 0) {
         const hole = digBunniieTunnel(player.x, player.y);
         if (hole && btnSpecial) {
@@ -10676,6 +10805,24 @@ function spawnGooClone() {
 
 function update(dt) {
     if(player.isDead) return;
+
+    // Kacashi: a dimensão dura 10s; a recarga começa somente depois do retorno.
+    if (pd.selectedChar === 'kacashi') {
+        if ((player.kacashiDimensionTimer || 0) > 0) {
+            player.kacashiDimensionTimer = Math.max(0, player.kacashiDimensionTimer - dt);
+            const maxHp = player.baseHp * player.stats.maxHpMult;
+            player.hp = Math.min(maxHp, player.hp + maxHp * 0.025 * dt);
+            if (player.kacashiDimensionTimer <= 0) {
+                player.kacashiDimensionTimer = 0;
+                player.kacashiDimensionCd = 20;
+                createExplosion(player.x, player.y, 90, 0, 'rgba(125,95,255,0.30)');
+                addFloatingText(player.x, player.y - 34, 'DE VOLTA!', '#d9c2ff', 18);
+            }
+        } else if ((player.kacashiDimensionCd || 0) > 0) {
+            player.kacashiDimensionCd = Math.max(0, player.kacashiDimensionCd - dt);
+        }
+    }
+
     if(player.gladiatorModeCooldown>0) player.gladiatorModeCooldown=Math.max(0,player.gladiatorModeCooldown-dt);
     if (pd.selectedChar === 'gladiator') updateSpecialButtonUI();
     if (player && pd.selectedChar === 'bunniie') {
@@ -11185,12 +11332,18 @@ if (!isBossAlive) {
     let spawnRate = wave <= 3 ? baseSpawn : Math.max(minSpawn, baseSpawn - (wave - 3) * waveRed);
     spawnRate *= player.stats.enemySpawnMult;
     
-    if(enemySpawnTimer <= 0 && !isBossAlive) { spawnEnemy(); enemySpawnTimer = spawnRate; }
+    if(enemySpawnTimer <= 0 && !isBossAlive && !(pd.selectedChar === 'kacashi' && (player.kacashiDimensionTimer || 0) > 0)) { spawnEnemy(); enemySpawnTimer = spawnRate; }
 
-    updateEnemies(dt); updateAllies(dt); updateProjectiles(dt); updatePuddles(dt); updateGems(dt); updateParticles(dt); updateCaveVisionBursts(dt); updateGameHud();
+    if (!(pd.selectedChar === 'kacashi' && (player.kacashiDimensionTimer || 0) > 0)) updateEnemies(dt);
+    if (pd.selectedChar === 'kacashi' && (player.kacashiDimensionTimer || 0) > 0) {
+        projectiles = (projectiles || []).filter(p => p && p.isPlayer);
+    }
+    updateAllies(dt); updateProjectiles(dt); updatePuddles(dt); updateGems(dt); updateParticles(dt); updateCaveVisionBursts(dt); updateGameHud();
 }
 
 function fireWeapon(target) {
+    // Na dimensão do Kacashi, os inimigos ficam fora da realidade e ele não dispara.
+    if (pd.selectedChar === 'kacashi' && (player.kacashiDimensionTimer || 0) > 0) return;
     // Nenhuma arma dispara sem um alvo detectado.
     if(!target) return;
     const w = player.weapon; 
@@ -11349,6 +11502,28 @@ function fireWeapon(target) {
                 );
             }
             player.cd = Math.max(56, Math.round(player.baseFireRate * player.stats.fireRateMult));
+            return;
+        }
+        if (w === 'kacashi_kunai' && pd.selectedChar === 'kacashi') {
+            const kunaiSpeed = pSpd * 1.55;
+            const kunaiLife = Math.max(42, Math.ceil((player.baseRange * player.stats.rangeMult) / Math.max(1, kunaiSpeed)) + 12);
+            const totalShots = 1 + Math.max(0, Math.floor(player.stats.extraProj || 0));
+            const spread = totalShots > 1 ? 0.075 : 0;
+            for (let j = 0; j < totalShots; j++) {
+                const shotAngle = angle + (j - (totalShots - 1) / 2) * spread;
+                createProj(
+                    player.x + Math.cos(shotAngle) * (player.r + 8),
+                    player.y + Math.sin(shotAngle) * (player.r + 8),
+                    Math.cos(shotAngle) * kunaiSpeed,
+                    Math.sin(shotAngle) * kunaiSpeed,
+                    finalDmg,
+                    kunaiLife,
+                    true,
+                    'kacashi_kunai',
+                    { size: 9, sourceChar: 'kacashi', pierce: 99 }
+                );
+            }
+            player.cd = Math.max(34, Math.round(player.baseFireRate * player.stats.fireRateMult));
             return;
         }
         if (w === 'xilo_anvil' && pd.selectedChar === 'xilo') {
@@ -12408,7 +12583,7 @@ function fireWeapon(target) {
     };
 
     execFire(); 
-    let blockDouble = ['dagger','stones','grenade_gun','hunter_shotgun','wild','scythe','machinegun','ice_dagger','triple','boomerang','quarterback','saw_throw','chess','screws','snowball','echo_pull','flame_cone','puddle','flex_hammer','kaisen_tool','lunch_sauce','shinobi','stormy','bulb','mr_perfurant','kael_bow','sharkie','gma_cookie','joseph_skate','xilo_anvil'];
+    let blockDouble = ['dagger','stones','grenade_gun','hunter_shotgun','wild','scythe','machinegun','ice_dagger','triple','boomerang','quarterback','saw_throw','chess','screws','snowball','echo_pull','flame_cone','puddle','flex_hammer','kaisen_tool','lunch_sauce','shinobi','stormy','bulb','mr_perfurant','kael_bow','sharkie','gma_cookie','joseph_skate','xilo_anvil','kacashi_kunai'];
     if(!blockDouble.includes(w) && Math.random() < player.stats.doubleShotChance) {
         setTimeout(execFire, 100);
     } else if(['grenade_gun','hunter_shotgun','stones'].includes(w) && Math.random() < player.stats.doubleShotChance) {
@@ -12454,6 +12629,7 @@ function createProj(x, y, vx, vy, dmg, life, isPlayer, type, extra={}) {
     else if (type === 'kael_arrow') size = extra.size || 7;
     else if (type === 'kael_impact_arrow') size = extra.size || 9;
     else if (type === 'xilo_anvil') size = extra.size || 12;
+    else if (type === 'kacashi_kunai') size = extra.size || 9;
     else if (type === 'gma_cookie') size = extra.size || 8;
     else if (type === 'cookie_tray') size = extra.size || 18;
     else if (type === 'joseph_skate') size = extra.size || 10;
@@ -12471,7 +12647,7 @@ function createProj(x, y, vx, vy, dmg, life, isPlayer, type, extra={}) {
     let pierce = extra.disableBasePierce ? 0 : (sourceStats ? Number(sourceStats.pierce || 0) : 0);
     if (Number.isFinite(extra.pierce)) pierce += Number(extra.pierce || 0);
     if(type==='sniper') pierce += 99; if(type==='sword') pierce += 99; if(type==='scythe') pierce += 99; if(type==='mr_perfurant_slash') pierce += 99; if(type==='chain_lightning') pierce += 99; if(type==='laser' || type==='zippi_laser') pierce += 99; if(type==='eel_lash') pierce += 1; if(type==='lance') pierce += 99;
-    if(type==='arrow') pierce += Math.random() < 0.40 ? 1 : 0; if(type==='boomerang') pierce += 99; if(type==='energy_wave') pierce += 99; if(type==='microphone') pierce += 0;
+    if(type==='arrow') pierce += Math.random() < 0.40 ? 1 : 0; if(type==='kacashi_kunai') pierce = Math.max(pierce, 99); if(type==='boomerang') pierce += 99; if(type==='energy_wave') pierce += 99; if(type==='microphone') pierce += 0;
     if(type==='shiv') size = extra.size || 10;
     if(type==='saw_throw') pierce += 99;
     if(type==='chess_piece') {
@@ -13899,7 +14075,8 @@ const SERRANO_CHARACTER_PROJECTILES = {
     chickbot: ['chickbot_egg'],
     cyro: ['cyro_iceball'],
     pyro: ['pyro_fireball'],
-    bulb: ['bulb_bubble', 'bulb_gas_bubble', 'bulb_crust', 'bulb_coral_piece']
+    bulb: ['bulb_bubble', 'bulb_gas_bubble', 'bulb_crust', 'bulb_coral_piece'],
+    kacashi: ['kacashi_kunai']
 };
 
 const SERRANO_SLASH_SOURCE_CHARS = new Set(['kayo', 'gladiator', 'shinobi', 'scythe', 'mr_perfurant']);
@@ -13932,7 +14109,7 @@ function spawnSerranoRandomProjectile(x, y, dmg, excludedEnemy) {
         echo_bh_core: 5.25, graffit_can: 5.5, shinobi_fireball: 9, glitch_bugshot: 5.25, eel_lash: 16,
         zippi_laser: 20, axel_stone: 5.6, axel_shard: 5.6, adam_ball: 5.25, adam_mech_ball: 5.6,
         yuuto_heart: 5, sterling_star: 8.2, lyron_ball: 9.5, lyron_ball_big: 7.6,
-        eolio_propeller: 8.2, cyro_iceball: 4.1, pyro_fireball: 7.25
+        eolio_propeller: 8.2, cyro_iceball: 4.1, pyro_fireball: 7.25, kacashi_kunai: 7.8
     };
     const speed = speedByType[def.type] || 5;
     const extra = { size: 8, sourceChar: def.sourceChar, serranoClone: true, serranoOriginalChar: def.sourceChar };
@@ -15569,7 +15746,17 @@ function draw() {
         ctx.restore();
     }
     ctx.strokeStyle = 'rgba(0,0,0,0.1)'; ctx.lineWidth = 5; ctx.strokeRect(-1500, -1500, 3000, 3000);
-    
+
+    if (pd.selectedChar === 'kacashi' && player && (player.kacashiDimensionTimer || 0) > 0) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(126, 69, 214, 0.72)';
+        ctx.fillRect(camera.x, camera.y, cw, ch);
+        ctx.strokeStyle = 'rgba(228, 207, 255, 0.48)';
+        ctx.lineWidth = 8;
+        ctx.strokeRect(camera.x + 6, camera.y + 6, cw - 12, ch - 12);
+        ctx.restore();
+    }
+
     obstacles.forEach(o => {
         const elementKey = getMapElementSpriteKey(o.type, o);
         const spriteDrawn = elementKey
@@ -15816,9 +16003,10 @@ function draw() {
                 flipX: Boolean(a.facingLeft)
             });
         } else if(a.type === 'chick') {
-            if (!drawElementSprite(ctx, a.x, a.y, 'chick', 34, { flipX: Boolean(a.facingLeft) })) {
-                ctx.fillStyle = '#f5f6fa'; ctx.beginPath(); ctx.arc(a.x, a.y, 10, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = '#f1c40f'; ctx.beginPath(); ctx.arc(a.x + (a.facingLeft ? -7 : 7), a.y - 2, 3, 0, Math.PI*2); ctx.fill();
+            if (!drawElementSprite(ctx, a.x, a.y, 'chick', 56, { flipX: Boolean(a.facingLeft) })) {
+                ctx.fillStyle = '#f5f6fa'; ctx.beginPath(); ctx.arc(a.x, a.y, 15, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#f1c40f'; ctx.beginPath(); ctx.arc(a.x + (a.facingLeft ? -10 : 10), a.y - 3, 4, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#e67e22'; ctx.beginPath(); ctx.moveTo(a.x + (a.facingLeft ? -15 : 15), a.y + 2); ctx.lineTo(a.x + (a.facingLeft ? -21 : 21), a.y + 5); ctx.lineTo(a.x + (a.facingLeft ? -15 : 15), a.y + 8); ctx.closePath(); ctx.fill();
             }
         } else if(a.type === 'drone') {
 
@@ -16010,6 +16198,7 @@ function draw() {
     });
 
     enemies.forEach(e => { 
+        if (pd.selectedChar === 'kacashi' && (player?.kacashiDimensionTimer || 0) > 0) return;
         const effectiveSpriteType = getEffectiveEnemySpriteType(e);
         const enemySpriteType = getEnemySpritePath(effectiveSpriteType) ? effectiveSpriteType : (getEnemySpritePath(e.type) ? e.type : null);
         const enemySprite = enemySpriteType ? getEnemySpriteImage(enemySpriteType) : null;
@@ -16423,38 +16612,66 @@ function draw() {
             ctx.beginPath(); ctx.arc(sr * 1.0, sr * 0.52, sr * 0.26, 0, Math.PI * 2); ctx.fill();
             ctx.restore();
         }
+        else if(p.type === 'kacashi_kunai') {
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(Math.atan2(p.vy, p.vx));
+            const r = p.size || 9;
+            ctx.shadowColor = 'rgba(167, 119, 255, 0.95)';
+            ctx.shadowBlur = 10;
+            ctx.fillStyle = '#cfd3dc';
+            ctx.strokeStyle = '#4b4f5a';
+            ctx.lineWidth = 1.8;
+            ctx.beginPath();
+            ctx.moveTo(r * 2.9, 0);
+            ctx.lineTo(r * 0.55, -r * 0.58);
+            ctx.lineTo(-r * 1.35, -r * 0.34);
+            ctx.lineTo(-r * 1.65, 0);
+            ctx.lineTo(-r * 1.35, r * 0.34);
+            ctx.lineTo(r * 0.55, r * 0.58);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = '#7d5fff';
+            ctx.fillRect(-r * 1.15, -r * 0.16, r * 0.75, r * 0.32);
+            ctx.restore();
+        }
         else if(p.type === 'xilo_anvil') {
             ctx.save();
             const isWall = !!p.extra?.isWall;
             if (isWall) {
-                // Parede fixa: sem pulsação/balanço visual.
+                // Parede fixa com silhueta de uma bigorna — sem bloco/emoji.
                 const r = p.extra?.wallRadius || 21;
-                ctx.shadowColor = 'rgba(241,196,15,0.9)';
+                const w = r * 2.45;
+                const h = r * 1.95;
+                ctx.shadowColor = 'rgba(241,196,15,0.72)';
                 ctx.shadowBlur = 14;
-                ctx.fillStyle = 'rgba(241,196,15,0.20)';
-                ctx.strokeStyle = '#f1c40f';
-                ctx.lineWidth = 4;
+                ctx.fillStyle = '#7f8c8d';
+                ctx.strokeStyle = '#20252b';
+                ctx.lineWidth = 3.5;
                 ctx.beginPath();
-                ctx.beginPath();
-                const rw = r * 2, rh = r * 2, rr = 8;
-                ctx.moveTo(p.x - r + rr, p.y - r);
-                ctx.lineTo(p.x + r - rr, p.y - r);
-                ctx.quadraticCurveTo(p.x + r, p.y - r, p.x + r, p.y - r + rr);
-                ctx.lineTo(p.x + r, p.y + r - rr);
-                ctx.quadraticCurveTo(p.x + r, p.y + r, p.x + r - rr, p.y + r);
-                ctx.lineTo(p.x - r + rr, p.y + r);
-                ctx.quadraticCurveTo(p.x - r, p.y + r, p.x - r, p.y + r - rr);
-                ctx.lineTo(p.x - r, p.y - r + rr);
-                ctx.quadraticCurveTo(p.x - r, p.y - r, p.x - r + rr, p.y - r);
+                ctx.moveTo(p.x - w * 0.56, p.y - h * 0.34);
+                ctx.lineTo(p.x + w * 0.30, p.y - h * 0.34);
+                ctx.lineTo(p.x + w * 0.52, p.y - h * 0.22);
+                ctx.lineTo(p.x + w * 0.70, p.y - h * 0.05);
+                ctx.lineTo(p.x + w * 0.42, p.y + h * 0.03);
+                ctx.lineTo(p.x + w * 0.22, p.y + h * 0.18);
+                ctx.lineTo(p.x + w * 0.40, p.y + h * 0.43);
+                ctx.lineTo(p.x - w * 0.38, p.y + h * 0.43);
+                ctx.lineTo(p.x - w * 0.48, p.y + h * 0.22);
+                ctx.lineTo(p.x - w * 0.25, p.y + h * 0.08);
+                ctx.lineTo(p.x - w * 0.56, p.y + h * 0.02);
                 ctx.closePath();
                 ctx.fill();
                 ctx.stroke();
-                ctx.shadowBlur = 0;
-                ctx.fillStyle = '#f39c12';
-                ctx.font = 'bold 18px Arial';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText('⚒', p.x, p.y + 1);
+                ctx.fillStyle = '#bdc3c7';
+                ctx.beginPath();
+                ctx.moveTo(p.x - w * 0.48, p.y - h * 0.33);
+                ctx.lineTo(p.x + w * 0.31, p.y - h * 0.33);
+                ctx.lineTo(p.x + w * 0.50, p.y - h * 0.12);
+                ctx.lineTo(p.x - w * 0.40, p.y - h * 0.12);
+                ctx.closePath();
+                ctx.fill();
             } else {
                 ctx.translate(p.x, p.y);
                 ctx.rotate(Math.atan2(p.vy, p.vx));
