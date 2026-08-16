@@ -7200,6 +7200,32 @@ function renderEventMissionCard(sectionId, mission) {
         <div class="mission-progress"><div class="mission-progress-fill ${done ? 'done' : ''}" style="width:${Math.min(100,(current/mission.goal)*100)}%"></div></div>
     </div>`;
 }
+function renderEventPromoOfferCard(promo, mode) {
+    const c = CHARACTERS[promo.id];
+    if (!c) return '';
+    const owned = !!pd.chars?.[promo.id];
+    const currentLevel = Number(pd.chars?.[promo.id]?.level) || 0;
+    if (mode === 'level8') {
+        if (!promo.level8Cost || currentLevel >= 8) return '';
+        const art = getCharacterSpriteMarkup(promo.id, 'promo') || renderPromoBall(promo);
+        return `<div class="card-item rarity-${promo.rarity} promo-offer-card">
+            ${art}
+            <div class="promo-offer-title">${escapeHtmlText(decodeHtmlEntities(promo.label))} Lv. 8</div>
+            <div class="promo-offer-sub">Já vem no nível máximo.</div>
+            <div class="promo-offer-price"><span class="promo-offer-new">${promo.level8Cost} gemas</span></div>
+            <button class="btn-action promo-offer-btn" type="button" onclick="event.stopPropagation(); buyPromoCharacterOffer('${promo.id}', ${promo.level8Cost}, 8)">Comprar no máximo</button>
+        </div>`;
+    }
+    if (owned) return '';
+    const art = getCharacterSpriteMarkup(promo.id, 'promo') || renderPromoBall(promo);
+    return `<div class="card-item rarity-${promo.rarity} promo-offer-card">
+        ${art}
+        <div class="promo-offer-title">${escapeHtmlText(decodeHtmlEntities(promo.label))}</div>
+        <div class="promo-offer-sub">Oferta normal do evento.</div>
+        <div class="promo-offer-price"><span class="promo-offer-old">${promo.oldCost} gemas</span><span class="promo-offer-new">${promo.promoCost} gemas</span></div>
+        <button class="btn-action promo-offer-btn" type="button" onclick="event.stopPropagation(); buyPromoCharacterOffer('${promo.id}', ${promo.promoCost}, 1)">Comprar personagem</button>
+    </div>`;
+}
 function renderEventPromoCard(promo) {
     const c = CHARACTERS[promo.id];
     if (!c) return '';
