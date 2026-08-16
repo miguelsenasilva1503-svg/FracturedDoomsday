@@ -1955,7 +1955,7 @@
             <div class="main-left-actions">
                 <div class="main-nav-row main-nav-row-left">
                     <span class="main-nav-label">Evento</span>
-                    <button class="emoji-nav-btn emoji-nav-event" onclick="renderEvents(); showScreen('screen-event')">⭐</button>
+                    <button class="emoji-nav-btn emoji-nav-event" onclick="openEventScreen()">⭐</button>
                 </div>
                 <div class="main-nav-row main-nav-row-left">
                     <span class="main-nav-label">Passe</span>
@@ -3587,7 +3587,9 @@ function saveTurntableSettings(){
     const vals={menu:document.getElementById('turntable-menu')?.value,casual:document.getElementById('turntable-casual')?.value,uhc:document.getElementById('turntable-uhc')?.value};
     for(const k of Object.keys(vals)) if(MUSIC_LIBRARY[k].some(t=>t[0]===vals[k])) pd.settings.musicTracks[k]=vals[k];
     save();
-    if(document.getElementById('screen-main') && !document.getElementById('screen-main').classList.contains('hidden')) playMusic('menu');
+    // Atualiza imediatamente a música da sessão que já estiver tocando.
+    if (currentMusicKey) playMusic(currentMusicKey);
+    else if(document.getElementById('screen-main') && !document.getElementById('screen-main').classList.contains('hidden')) playMusic('menu');
     closeTurntable();
 }
 let musicPlayer = null;
@@ -3989,6 +3991,7 @@ function load() {
     pd.passXp = Math.max(0, Number(pd.passXp) || 0);
     pd.passClaimed = Number(pd.passClaimed) || 0;
     if (typeof pd.settings.musicVolume !== 'number' || !isFinite(pd.settings.musicVolume)) pd.settings.musicVolume = 0.7;
+    ensureMusicSettings();
     ensureMusicSettings();
     if (typeof pd.settings.uhcDark === 'undefined') pd.settings.uhcDark = false;
     if (typeof pd.settings.noParticles === 'undefined') pd.settings.noParticles = false;
@@ -6323,14 +6326,27 @@ function skipEntireTutorial(event){
     if(!pd.tutorial || typeof pd.tutorial!=='object') pd.tutorial=createDefaultTutorialState();
     pd.tutorial={...pd.tutorial,skipped:true,stage:'completed',introShown:true,firstMatch:true,controlShown:true,levelupShown:true,finalShown:true,firstLossHandled:true,charsHandled:true,evolutionHandled:true,workshopSeen:true,workshopDialogShown:true,workshopFastyPending:false};
     if(!pd.chars) pd.chars={};
-    if(!pd.chars.fasty){ pd.chars.fasty={level:1,slots:2,chips:[null,null]}; if(pd.achievements?.stats) pd.achievements.stats.charsUnlocked=Math.max(1,Number(pd.achievements.stats.charsUnlocked||1)+1); }
+    if(!pd.chars.fasty){
+        pd.chars.fasty={level:1,slots:2,chips:[null,null]};
+        if(pd.achievements?.stats) pd.achievements.stats.charsUnlocked=Math.max(1,Number(pd.achievements.stats.charsUnlocked||1)+1);
+    }
+    // Cancela qualquer diálogo/etapa tutorial pendente e evita que ele volte após o skip.
+    tutorialDialogSteps=[];
+    tutorialDialogIndex=0;
+    tutorialDialogOnClose=null;
+    if (window.gachaQueue) window.gachaQueue.length=0;
+    window.tempBoxData=null;
     hideTutorialPointer();
     document.querySelectorAll('.overlay').forEach(el=>el.classList.add('hidden'));
     if(isPlaying){isPlaying=false;isPaused=false;try{cancelAnimationFrame(gameLoopId);}catch(e){}}
-    if(joyZone) joyZone.style.display='none'; if(dpadZone) dpadZone.style.display='none'; if(btnSpecial) btnSpecial.style.display='none';
-    document.querySelectorAll('.screen').forEach(el=>el.classList.add('hidden'));
-    document.getElementById('screen-main')?.classList.remove('hidden');
-    save(); updateNicknameDisplay(); updateSettingsUI(); playMusic('menu');
+    if(joyZone) joyZone.style.display='none';
+    if(dpadZone) dpadZone.style.display='none';
+    if(btnSpecial) btnSpecial.style.display='none';
+    showScreen('screen-main');
+    save();
+    updateNicknameDisplay();
+    updateSettingsUI();
+    playMusic('menu');
 }
 
 function advanceTutorialDialog(event) {
@@ -6929,6 +6945,13 @@ function showShopSection(section) {
     screen.scrollTop = 0;
 }
 
+function openEventScreen(){
+    // A renderização não pode impedir a abertura da tela se algum card estiver com problema.
+    try { renderEvents(); } catch (e) { console.error('Erro ao renderizar Evento:', e); }
+    showScreen('screen-event');
+    try { showEventSection(currentEventSection || 'kacashi'); } catch (e) { console.error('Erro ao abrir aba do Evento:', e); }
+}
+
 function showScreen(id) {
     if (pd?.tutorial?.stage === 'force-fasty' && pd?.chars?.fasty) {
         resolveFastyTutorialIfAlreadyOwned();
@@ -6966,6 +6989,11 @@ function showScreen(id) {
         }
     }
     if (id === 'screen-shop') { renderShop(); showShopSection(currentShopSection || 'offers'); }
+    if (id === 'screen-event') {
+        try { renderEvents(); } catch (e) { console.error('Erro ao renderizar Evento:', e); }
+        try { showEventSection(currentEventSection || 'kacashi'); } catch (e) { console.error('Erro ao abrir aba do Evento:', e); }
+        playMusic('menu');
+    }
     if (id === 'screen-pass') renderPass();
     if (id === 'screen-trail') { renderTrail(); if (pd?.tutorial && !pd.tutorial.workshopSeen) beginWorkshopTutorial(); }
     if (id === 'screen-missions') renderMissions();
