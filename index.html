@@ -3837,8 +3837,36 @@ function normalizeSaveData(rawSave) {
     const sourceHadTutorial = Object.prototype.hasOwnProperty.call(source, 'tutorial');
     if (!next.tutorial || typeof next.tutorial !== 'object') next.tutorial = cloneAccountValue(defaults.tutorial);
     next.tutorial = mergeAccountValues(defaults.tutorial, next.tutorial);
-    // Migração: contas antigas que já têm progresso e/ou passaram do onboarding não podem reabrir o tutorial.
-    if (next.nickname && (Number(next?.achievements?.stats?.gamesStarted) > 0 || Number(next?.achievements?.stats?.charsUpgraded) > 0 || next.tutorial.stage === 'completed')) {
+    // Migração segura: só contas realmente antigas, sem estado ativo do tutorial,
+    // podem ser marcadas como concluídas. Contas novas passam por `save()` durante
+    // a primeira partida, então `gamesStarted > 0` NÃO pode mais apagar o tutorial.
+    const tutorialHasProgress = !!(
+        next.tutorial.introShown ||
+        next.tutorial.firstMatch ||
+        next.tutorial.controlShown ||
+        next.tutorial.levelupShown ||
+        next.tutorial.finalShown ||
+        next.tutorial.firstLossHandled ||
+        next.tutorial.charsHandled ||
+        next.tutorial.evolutionHandled ||
+        next.tutorial.workshopSeen ||
+        next.tutorial.workshopDialogShown ||
+        next.tutorial.workshopFastyPending ||
+        next.tutorial.stage === 'intro' ||
+        next.tutorial.stage === 'force-play' ||
+        next.tutorial.stage === 'control-dialog' ||
+        next.tutorial.stage === 'playing' ||
+        next.tutorial.stage === 'choose-powerup' ||
+        next.tutorial.stage === 'final-dialog' ||
+        next.tutorial.stage === 'loss-dialog' ||
+        next.tutorial.stage === 'force-characters' ||
+        next.tutorial.stage === 'force-strike-card' ||
+        next.tutorial.stage === 'evolve-strike' ||
+        next.tutorial.stage === 'post-evolution-dialog' ||
+        next.tutorial.stage === 'workshop-dialogue' ||
+        next.tutorial.stage === 'force-fasty'
+    );
+    if (next.nickname && !tutorialHasProgress && (Number(next?.achievements?.stats?.gamesStarted) > 0 || Number(next?.achievements?.stats?.charsUpgraded) > 0 || next.tutorial.stage === 'completed')) {
         next.tutorial.stage = 'completed';
         next.tutorial.introShown = true;
         next.tutorial.firstMatch = true;
