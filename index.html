@@ -4620,6 +4620,7 @@ const CHARACTER_SPRITES = {
     merlin_old: 'sprites/old_merlin.png',
     merlin_young: 'sprites/young_merlin.png',
     merlin_baby: 'sprites/baby_merlin.png',
+    merlin_baby_form: 'sprites/baby_merlin.png',
     old_merlin: 'sprites/old_merlin.png',
     young_merlin: 'sprites/young_merlin.png',
     baby_merlin: 'sprites/baby_merlin.png',
@@ -17014,11 +17015,30 @@ function getPlayerSpriteId() {
     if (pd?.selectedChar === 'shinobi' && (player?.shinobiDragonActive || player?.shinobiDragonFormActive)) return 'dragon_shinobi';
     if (pd?.selectedChar === 'glitch' && player?.glitchMorphActive && player?.glitchCurrentFormId) return player.glitchCurrentFormId;
     if (pd?.selectedChar === 'miss_macaron') return 'miss_macaron';
-    if (pd?.selectedChar === 'merlin') return `merlin_${player?.merlinAge || 'old'}`;
+    if (pd?.selectedChar === 'merlin') return player?.merlinAge === 'baby' ? 'merlin_baby_form' : `merlin_${player?.merlinAge || 'old'}`;
     return pd?.selectedChar || null;
 }
 
 function drawShape(cCtx, x, y, size, shape, color, isBoss=false, spriteId=null) {
+    // Player Merlin Bebê has its own sprite id (`merlin_baby_form`) so it
+    // can never collide with the separate enemy baby id (`merlin_baby`).
+    const isCharacterSpriteId = !!spriteId && (
+        spriteId === 'merlin' ||
+        spriteId === 'merlin_old' ||
+        spriteId === 'merlin_young' ||
+        spriteId === 'merlin_baby_form' ||
+        spriteId === 'old_merlin' ||
+        spriteId === 'young_merlin' ||
+        spriteId === 'baby_merlin'
+    );
+    if (isCharacterSpriteId) {
+        const characterImg = getCharacterSpriteImage(spriteId);
+        if (characterImg && characterImg.complete && characterImg.naturalWidth) {
+            drawCharacterSprite(cCtx, x, y, size, spriteId, { widthMult: 10.2, autoFlip: true });
+            return;
+        }
+    }
+
     const enemyImg = spriteId ? getEnemySpriteImage(spriteId) : null;
     if (enemyImg && enemyImg.complete && enemyImg.naturalWidth) {
         const ratio = enemyImg.naturalWidth / enemyImg.naturalHeight;
