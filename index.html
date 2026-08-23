@@ -49,6 +49,7 @@
     @media(max-width:500px){ .merlin-age-panel{padding:14px;} .merlin-age-grid{gap:8px;} .merlin-age-card{padding:9px;border-width:2px;} .merlin-age-card img{width:160px;height:96px;} .merlin-age-card h3{font-size:17px;} .merlin-age-card p,.merlin-age-card .age-stat{font-size:10px;} .merlin-age-card button{padding:9px 6px;font-size:12px;} }
     #overlay-merlin-age { z-index: 30000 !important; pointer-events:auto !important; }
     #overlay-merlin-age .merlin-age-panel, #overlay-merlin-age .merlin-age-card, #overlay-merlin-age .merlin-age-card button { pointer-events:auto !important; }
+    #overlay-merlin-age .merlin-equip-btn { position:relative; z-index:10001; pointer-events:auto !important; }
     #overlay-tutorial-dialog { z-index: 12000; cursor: pointer; padding: 24px; }
     .tutorial-dialog-box { width: min(92vw, 720px); display: flex; align-items: center; gap: 18px; background: linear-gradient(180deg, rgba(34,41,63,0.99), rgba(14,18,30,0.99)); border: 3px solid rgba(241,196,15,0.85); border-radius: 24px; padding: 18px 20px; box-shadow: 0 18px 40px rgba(0,0,0,0.65); }
     .tutorial-dialog-sprite { width: 150px; height: 150px; object-fit: contain; flex: 0 0 150px; filter: drop-shadow(0 7px 12px rgba(0,0,0,0.45)); }
@@ -4166,6 +4167,8 @@ const SUMMARY_NOTES = {
 };
 
 const SUMMARY_HIGHLIGHTS = Object.keys(SUMMARY_NOTES).sort((a, b) => b.length - a.length);
+// Termos do Merlin permanecem explicitamente clicáveis no Summary.
+for (const merlinTerm of ['BEBETIZADO','BEBETIZAR']) { if (!SUMMARY_HIGHLIGHTS.includes(merlinTerm)) SUMMARY_HIGHLIGHTS.push(merlinTerm); }
 
 const SUGARABLE_ENEMY_TYPES = new Set(['basico', 'atirador', 'gigante', 'tanque', 'lider', 'elite', 'curandeiro']);
 const SUGAR_IMMUNE_ENEMY_TYPES = new Set(['boss', 'megaboss', 'colosso', 'elite_master', 'lider_elite']);
@@ -4220,7 +4223,6 @@ function applyMerlinBabyEffect(enemy, opts={}) {
     if(!enemy.merlinBabySnapshot) {
         enemy.merlinBabySnapshot = {
             type: enemy.type,
-            hp: enemy.hp,
             maxHp: enemy.maxHp,
             speed: enemy.speed,
             baseDmg: enemy.baseDmg,
@@ -4611,11 +4613,14 @@ const CHARACTER_SPRITES = {
     serrano: 'sprites/serrano.png',
     eel: 'sprites/eel.png',
     shell: 'sprites/shell.png',
-    grapple: 'grapple.png',
+    grapple: 'sprites/grapple.png',
     merlin: 'sprites/old_merlin.png',
     merlin_old: 'sprites/old_merlin.png',
     merlin_young: 'sprites/young_merlin.png',
     merlin_baby: 'sprites/baby_merlin.png',
+    old_merlin: 'sprites/old_merlin.png',
+    young_merlin: 'sprites/young_merlin.png',
+    baby_merlin: 'sprites/baby_merlin.png',
     flex: 'sprites/flex_hammer.png',
     flex_hammer: 'sprites/flex_hammer.png',
     flex_less_health: 'sprites/flex_less_health.png',
@@ -4842,8 +4847,10 @@ function getCharacterSpriteMarkup(id, variant = 'menu') {
     const path = getCharacterSpritePath(id);
     if (!path) return '';
     const variantClass = variant === 'detail' ? 'detail' : (variant === 'hero' ? 'hero' : (variant === 'promo' ? 'promo' : 'menu'));
-    const smallClass = CHARACTER_SPRITE_COMPACT_IDS.has(getDynamicCharacterSpriteId(id)) ? ' char-sprite--shiv' : '';
-    return `<img class="char-sprite char-sprite--${variantClass}${smallClass}" src="${path}" alt="" aria-hidden="true">`;
+    const resolvedId = getDynamicCharacterSpriteId(id);
+    const smallClass = CHARACTER_SPRITE_COMPACT_IDS.has(resolvedId) ? ' char-sprite--shiv' : '';
+    const fallback = resolvedId === 'grapple' ? ` onerror=\"if(this.src.endsWith('sprites/grapple.png'))this.src='grapple.png';\"` : '';
+    return `<img class=\"char-sprite char-sprite--${variantClass}${smallClass}\" src=\"${path}\" alt=\"\" aria-hidden=\"true\"${fallback}>`;
 }
 
 function getCharacterSpriteImage(id) {
@@ -4852,6 +4859,11 @@ function getCharacterSpriteImage(id) {
     const resolvedId = getDynamicCharacterSpriteId(id);
     if (!CHARACTER_SPRITE_CACHE.has(resolvedId)) {
         const img = new Image();
+        if (resolvedId === 'grapple') {
+            img.onerror = () => {
+                if (img.src.endsWith('/sprites/grapple.png')) img.src = new URL('grapple.png', document.baseURI).href;
+            };
+        }
         img.src = path;
         CHARACTER_SPRITE_CACHE.set(resolvedId, img);
     }
@@ -4917,8 +4929,11 @@ function renderMerlinAgeHub() {
         const d=getMerlinAgeData(age);
         const card=document.createElement('div');
         card.className='merlin-age-card';
-        card.innerHTML=`<img src="${CHARACTER_SPRITES[d.sprite]||''}" alt=""><h3>${d.label}</h3><p>${d.desc}</p><div class="age-stat"><strong>Especial:</strong> ${age==='baby'?'15% de chance de disparar uma chupeta que sempre BEBETIZA':age==='old'?'25% de chance de BEBETIZAR':'25% de chance de ENVENENAR'}</div><button type="button" class="btn-action merlin-equip-btn" data-merlin-age="${age}" style="margin-top:12px;width:100%;" onclick="selectMerlinAge('${age}'); return false;">Equipar</button>`;
+        const spritePath=CHARACTER_SPRITES[d.sprite] || CHARACTER_SPRITES[`merlin_${age}`] || '';
+        card.innerHTML=`<img src="${spritePath}" alt="${d.label}"><h3>${d.label}</h3><p>${d.desc}</p><div class="age-stat"><strong>Especial:</strong> ${age==='baby'?'15% de chance de disparar uma chupeta que sempre BEBETIZA':age==='old'?'25% de chance de BEBETIZAR':'25% de chance de ENVENENAR'}</div><button type="button" class="btn-action merlin-equip-btn" data-merlin-age="${age}" style="margin-top:12px;width:100%;">Equipar</button>`;
         box.appendChild(card);
+        const equipBtn=card.querySelector('.merlin-equip-btn');
+        equipBtn?.addEventListener('click', (ev) => { ev.preventDefault(); ev.stopPropagation(); selectMerlinAge(age); });
     });
 }
 function openMerlinAgeHub() {
@@ -4932,6 +4947,7 @@ function openMerlinAgeHub() {
 }
 function closeMerlinAgeHub() {
     document.getElementById('overlay-merlin-age')?.classList.add('hidden');
+    if (isPlaying) { isPaused = false; lastTime = performance.now(); }
     updateSpecialButtonUI();
 }
 function selectMerlinAge(age) {
@@ -4948,17 +4964,6 @@ function selectMerlinAge(age) {
     updateSpecialButtonUI();
     return false;
 }
-
-// Captura o clique diretamente no hub para que o botão nunca dependa de bubbling de outros controles.
-document.addEventListener('pointerup', (ev) => {
-    const btn = ev.target && ev.target.closest ? ev.target.closest('.merlin-equip-btn') : null;
-    if (!btn) return;
-    const overlay = document.getElementById('overlay-merlin-age');
-    if (!overlay || overlay.classList.contains('hidden')) return;
-    const age = btn.dataset.merlinAge;
-    if (age) { ev.preventDefault(); ev.stopPropagation(); selectMerlinAge(age); }
-}, true);
-
 
 function getElementSpritePath(type) {
     const entry = ALLY_ELEMENT_SPRITES[String(type || '').toLowerCase()];
@@ -14685,6 +14690,14 @@ function updateEnemies(dt) {
         }
 
         if(e.hp <= 0) {
+            // BEBETIZADO é uma entidade temporária independente. Ao morrer, desaparece
+            // imediatamente e nunca executa revive, quebra de armadura, spawn em cadeia
+            // ou qualquer outra rotina de morte do inimigo original.
+            if (e.type === 'merlin_baby') {
+                enemies.splice(i, 1);
+                enemiesKilled++;
+                continue;
+            }
             if (e.type === 'tnt_crate') {
                 const radius = 125;
                 const explosionDamage = Math.max(30, e.baseDmg * 2.35);
@@ -17869,7 +17882,7 @@ function draw() {
         const effectiveSpriteType = getEffectiveEnemySpriteType(e);
         const enemySpriteType = getEnemySpritePath(effectiveSpriteType) ? effectiveSpriteType : (getEnemySpritePath(e.type) ? e.type : null);
         const enemySprite = enemySpriteType ? getEnemySpriteImage(enemySpriteType) : null;
-        const visualSize = Number.isFinite(e.spriteSize) ? e.spriteSize : e.size;
+        const visualSize = (e.merlinBabyTimer > 0 && e.type === 'merlin_baby') ? 9.5 : (Number.isFinite(e.spriteSize) ? e.spriteSize : e.size);
         let drawW = Math.max(24, visualSize * 2);
         let drawH = drawW;
 
