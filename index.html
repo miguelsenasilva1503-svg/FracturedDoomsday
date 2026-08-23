@@ -38,12 +38,14 @@
     .hidden { display: none !important; }
     .merlin-age-panel { position:relative; z-index:2; pointer-events:auto; width:min(1180px,94vw); min-height:min(620px,86vh); max-height:86vh; background:linear-gradient(180deg,rgba(28,36,58,.99),rgba(13,18,31,.99)); border:4px solid #9b59b6; border-radius:28px; padding:26px 30px 24px; box-shadow:0 24px 60px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.06); display:flex; flex-direction:column; overflow:hidden; }
     .merlin-age-grid { width:100%; flex:1 1 auto; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:22px; margin:16px 0 18px; min-height:0; }
-    .merlin-age-card { min-width:0; min-height:0; background:linear-gradient(180deg,rgba(43,43,64,.99),rgba(20,20,34,.99)); border:3px solid #6f42c1; border-radius:22px; padding:20px; color:#fff; text-align:center; box-shadow:0 16px 34px rgba(0,0,0,.42); display:flex; flex-direction:column; overflow:hidden; }
+    .merlin-age-card { min-width:0; min-height:0; background:linear-gradient(180deg,rgba(43,43,64,.99),rgba(20,20,34,.99)); border:3px solid #6f42c1; border-radius:22px; padding:20px; color:#fff; text-align:center; box-shadow:0 16px 34px rgba(0,0,0,.42); display:flex; flex-direction:column; overflow:hidden; cursor:pointer; transition:transform .15s,border-color .15s,box-shadow .15s; }
+    .merlin-age-card:hover { transform:translateY(-4px); border-color:#c39af6; box-shadow:0 20px 38px rgba(0,0,0,.5),0 0 18px rgba(155,89,182,.28); }
+    .merlin-age-card:active { transform:translateY(-1px) scale(.99); }
     .merlin-age-card img { width:300px; height:170px; max-width:100%; object-fit:contain; display:block; margin:0 auto 8px; filter:drop-shadow(0 9px 16px rgba(0,0,0,.48)); image-rendering:auto; flex:0 0 auto; }
     .merlin-age-card h3 { margin:2px 0 8px; font-size:26px; }
     .merlin-age-card p { margin:0; color:#dbe4ec; line-height:1.4; font-size:15px; min-height:50px; }
     .merlin-age-card .age-stat { font-size:14px; margin-top:10px; color:#c7d0da; line-height:1.4; min-height:44px; }
-    .merlin-age-card button { width:100%; margin-top:auto !important; padding:14px 16px; font-size:17px; position:relative; z-index:3; pointer-events:auto; }
+    .merlin-age-equip-hint { margin-top:auto; padding-top:12px; font-size:12px; font-weight:900; letter-spacing:.08em; color:#d9b8ff; text-shadow:1px 1px 0 #000; }
     .merlin-age-current { width:100%; margin:0; text-align:center; color:#fff; font-size:20px; flex:0 0 auto; }
     @media(max-width:760px){ .merlin-age-panel{width:96vw; min-height:0; height:auto; max-height:92vh; padding:18px;} .merlin-age-grid{gap:12px;} .merlin-age-card{padding:12px;} .merlin-age-card img{width:220px;height:130px;} .merlin-age-card h3{font-size:21px;} .merlin-age-card p,.merlin-age-card .age-stat{font-size:12px;} .merlin-age-card button{padding:11px 8px;font-size:14px;} }
     @media(max-width:500px){ .merlin-age-panel{padding:14px;} .merlin-age-grid{gap:8px;} .merlin-age-card{padding:9px;border-width:2px;} .merlin-age-card img{width:160px;height:96px;} .merlin-age-card h3{font-size:17px;} .merlin-age-card p,.merlin-age-card .age-stat{font-size:10px;} .merlin-age-card button{padding:9px 6px;font-size:12px;} }
@@ -4930,10 +4932,9 @@ function renderMerlinAgeHub() {
         const card=document.createElement('div');
         card.className='merlin-age-card';
         const spritePath=CHARACTER_SPRITES[d.sprite] || CHARACTER_SPRITES[`merlin_${age}`] || '';
-        card.innerHTML=`<img src="${spritePath}" alt="${d.label}"><h3>${d.label}</h3><p>${d.desc}</p><div class="age-stat"><strong>Especial:</strong> ${age==='baby'?'15% de chance de disparar uma chupeta que sempre BEBETIZA':age==='old'?'25% de chance de BEBETIZAR':'25% de chance de ENVENENAR'}</div><button type="button" class="btn-action merlin-equip-btn" data-merlin-age="${age}" style="margin-top:12px;width:100%;">Equipar</button>`;
+        card.innerHTML=`<img src="${spritePath}" alt="${d.label}"><h3>${d.label}</h3><p>${d.desc}</p><div class="age-stat"><strong>Especial:</strong> ${age==='baby'?'15% de chance de disparar uma chupeta que sempre BEBETIZA':age==='old'?'25% de chance de BEBETIZAR':'25% de chance de ENVENENAR'}</div><div class="merlin-age-equip-hint">TOQUE PARA EQUIPAR</div>`;
         box.appendChild(card);
-        const equipBtn=card.querySelector('.merlin-equip-btn');
-        equipBtn?.addEventListener('click', (ev) => { ev.preventDefault(); ev.stopPropagation(); selectMerlinAge(age); });
+        card.addEventListener('click', () => selectMerlinAge(age));
     });
 }
 function openMerlinAgeHub() {
