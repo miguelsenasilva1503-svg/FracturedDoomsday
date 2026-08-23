@@ -36,6 +36,15 @@
 
     .screen { position: absolute; inset: 0; display: flex; flex-direction: column; background: var(--bg-color); z-index: 10; padding: 20px; overflow: hidden; }
     .hidden { display: none !important; }
+    .merlin-age-grid { width:100%; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; margin:18px 0 12px; }
+    .merlin-age-card { min-height:360px; background:linear-gradient(180deg,rgba(43,43,64,.99),rgba(20,20,34,.99)); border:4px solid #6f42c1; border-radius:24px; padding:22px; color:#fff; text-align:center; box-shadow:0 18px 38px rgba(0,0,0,.48); display:flex; flex-direction:column; justify-content:space-between; overflow:hidden; }
+    .merlin-age-card h3 { margin:4px 0 10px; font-size:28px; }
+    .merlin-age-card p { margin:6px 0; color:#dbe4ec; line-height:1.45; font-size:16px; }
+    .merlin-age-card img { width:320px; height:190px; object-fit:contain; display:block; margin:0 auto 6px; filter:drop-shadow(0 9px 16px rgba(0,0,0,.48)); image-rendering:auto; }
+    .merlin-age-card .age-stat { font-size:15px; margin-top:12px; color:#c7d0da; line-height:1.4; }
+    .merlin-age-current { width:100%; margin:0 auto 6px; text-align:center; color:#fff; font-size:20px; }
+    @media(max-width:760px){ .merlin-age-grid{grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px;} .merlin-age-card{min-height:300px;padding:14px;border-width:3px;} .merlin-age-card img{width:220px;height:140px;} .merlin-age-card h3{font-size:22px;} .merlin-age-card p,.merlin-age-card .age-stat{font-size:13px;} .merlin-age-card button{padding:10px 8px;font-size:14px;} }
+    @media(max-width:500px){ .merlin-age-grid{grid-template-columns:1fr 1fr; gap:8px;} .merlin-age-card{min-height:255px;padding:8px;} .merlin-age-card img{width:150px;height:105px;} .merlin-age-card h3{font-size:17px;} .merlin-age-card p,.merlin-age-card .age-stat{font-size:11px;} }
     #overlay-tutorial-dialog { z-index: 12000; cursor: pointer; padding: 24px; }
     .tutorial-dialog-box { width: min(92vw, 720px); display: flex; align-items: center; gap: 18px; background: linear-gradient(180deg, rgba(34,41,63,0.99), rgba(14,18,30,0.99)); border: 3px solid rgba(241,196,15,0.85); border-radius: 24px; padding: 18px 20px; box-shadow: 0 18px 40px rgba(0,0,0,0.65); }
     .tutorial-dialog-sprite { width: 150px; height: 150px; object-fit: contain; flex: 0 0 150px; filter: drop-shadow(0 7px 12px rgba(0,0,0,0.45)); }
@@ -2015,6 +2024,18 @@
     </div>
 </div>
 
+<div id="overlay-merlin-age" class="overlay hidden" style="z-index:80;">
+    <h1 style="color:#b06cd9;">Flor da idade</h1>
+    <div class="popup-box" style="width:min(94vw,1240px); height:min(82vh,760px); max-height:760px; overflow:hidden; background:linear-gradient(180deg,rgba(30,40,60,.99),rgba(20,24,38,.99)); border:4px solid #9b59b6; padding:30px 34px 24px; display:flex; flex-direction:column; justify-content:center;">
+        <div class="merlin-age-current">
+            <strong>Idade equipada:</strong> <span id="merlin-current-age">Merlin Velho</span>
+            <div style="font-size:13px;color:#aeb8c2;margin-top:5px;">Escolha uma das outras duas idades.</div>
+        </div>
+        <div id="merlin-age-options" class="merlin-age-grid"></div>
+        <button class="btn-menu" onclick="closeMerlinAgeHub()">Voltar</button>
+    </div>
+</div>
+
 <div id="overlay-mode-select" class="overlay hidden">
     <h1>Modo de Jogo</h1>
     <div class="popup-box" style="margin-top: 20px; background: rgba(30, 40, 60, 0.9); border: 4px solid var(--btn-blue);">
@@ -2880,7 +2901,16 @@ Um surfista destemido que vive em perfeita sintonia com o oceano e suas criatura
 Uma misteriosa criatura dos mares equipada com um poderoso tridente e uma enorme concha cobrindo completamente sua cabeça. Considerado o governante dos mares do sul, Shell é respeitado por criaturas marinhas e temido por aqueles que ousam desafiar seu domínio. Sua verdadeira identidade permanece um dos maiores mistérios dos oceanos, e até mesmo aqueles que dizem conhecê-lo nunca viram seu rosto.
 
 “Os mares do sul respondem a mim.”` },
-    grapple: { id: 'grapple', class: 'Controle', name: 'Grapple', rarity: 'legendary', cost: 349, hp: 112, speed: 3.5, dmg: 18, fireRate: 58, range: 260, color: '#9b59b6', weapon: 'grapple', emoji: '🪝', sortLast: true, desc: `placeholder` },
+    grapple: { id: 'grapple', class: 'Controle', name: 'Grapple', rarity: 'legendary', cost: 349, hp: 112, speed: 3.5, dmg: 18, fireRate: 58, range: 260, color: '#9b59b6', weapon: 'grapple', emoji: '🪝', sortLast: true, desc: `“Grapple diz que correr é perda de tempo. Afinal, por que usar as pernas quando você pode simplesmente se pendurar em alguma coisa?”
+
+Um aventureiro que transformou um simples gancho em seu principal meio de locomoção. Grapple se lança de um lugar para outro, atravessando obstáculos e alcançando lugares difíceis com uma facilidade impressionante. Para ele, qualquer parede, árvore ou estrutura é apenas mais um ponto de onde pode se puxar. Correr? Só quando não existe absolutamente nada para enganchar.
+
+“É muito mais fácil assim!”` },
+    merlin: { id: 'merlin', class: 'Controle', name: 'Merlin', rarity: 'legendary', cost: 349, hp: 120, speed: 3.5, dmg: 20, fireRate: 62, range: 310, color: '#9b59b6', weapon: 'merlin_magic', emoji: '🪄', sortLast: true, desc: `“Merlin já viveu por tempo demais para se preocupar com a própria idade. Afinal, ele pode simplesmente mudá-la quando quiser.”
+
+Um mago extremamente experiente que domina uma magia capaz de alterar a idade de seres vivos — inclusive a sua própria. Merlin pode envelhecer seus inimigos até que mal consigam lutar ou rejuvenescer a si mesmo quando quiser voltar a uma aparência mais jovem. Apesar de toda sua experiência, ele tem uma peculiaridade: às vezes, simplesmente decide que ser um bebê é divertido.
+
+“Ser um bebê de vez em quando não faz mal!”` },
     zippi: { id: 'zippi', class: 'Suporte', name: 'Zippi', rarity: 'epic', cost: 149, hp: 75, speed: 3.4, dmg: 16, fireRate: 52, range: 250, color: '#4da3ff', weapon: 'zippi_laser', bubbleHp: 80, desc: `“Zippi ainda é só um bebê. O universo inteiro agradece por isso.”
 
 Uma pequena criatura alienígena envolta por uma misteriosa bolha protetora. Curioso, inocente e surpreendentemente amigável, Zippi explora o mundo sem entender completamente os estranhos poderes que possui. Quando sua proteção desaparece, algo dentro dele parece despertar, revelando apenas uma fração de um poder que nem ele próprio compreende.
@@ -2980,6 +3010,14 @@ Um enorme golem feito de gelo maciço, com um corpo pesado e uma força impressi
 
 };
 const CHARACTER_SUMMARIES = {
+    merlin: `Merlin: dispara uma magia teleguiada que tem 15% de chance de ENVENENAR e 15% de chance de BEBETIZAR.
+
+ESPECIAL: tem 3 modos que podem ser escolhidos ao usar seu botão.
+
+VELHO: baixa vida, baixa velocidade, mais chance de bebetizar (25%).
+JOVEM: vida mais alta, velocidade padrão, mais chance de envenenar (25%).
+BEBÊ: vida bem mais baixa, alta velocidade, tem 15% de chance de disparar uma chupeta que tem 100% de chance de bebetizar um inimigo.`,
+
     ripper: `Ripper: dispara MICROFONES que mudam de efeito conforme a cor.
 
 VERMELHO: dano bruto.
@@ -4167,6 +4205,24 @@ function isSugarImmuneEnemy(e) {
     return SUGAR_IMMUNE_ENEMY_TYPES.has(e.type) || e.isBoss || e.type === 'boss' || e.type === 'megaboss' || e.type === 'colosso';
 }
 
+function isMerlinBabyImmuneEnemy(enemy) {
+    if (!enemy) return true;
+    return !!enemy.isBoss || enemy.type === 'boss' || enemy.type === 'megaboss' || enemy.type === 'colosso';
+}
+function applyMerlinBabyEffect(enemy, opts={}) {
+    if(!enemy || enemy.hp<=0 || isMerlinBabyImmuneEnemy(enemy)) return false;
+    if(!enemy.merlinBabySnapshot) {
+        enemy.merlinBabySnapshot={speed:enemy.speed,size:enemy.size,color:enemy.color};
+    }
+    enemy.merlinBabyTimer=Math.max(Number(enemy.merlinBabyTimer)||0,4);
+    enemy.size=Math.max(4.5,enemy.merlinBabySnapshot.size*0.45);
+    enemy.hp=Math.min(enemy.hp,Math.max(1,enemy.maxHp*0.15));
+    enemy.forceNormalSkin=false;
+    addFloatingText(enemy.x,enemy.y-14,'BEBETIZADO!','#c39af6',12);
+    if(!opts.silentFx) createParticles(enemy.x,enemy.y,'#c39af6');
+    return true;
+}
+
 function applySugarEffect(enemy, duration = 6, opts = {}) {
     if (!enemy) return false;
 
@@ -4440,6 +4496,7 @@ const CHARACTER_TITLES = {
     eel: 'Chocado',
     shell: 'Rei dos mares',
     grapple: 'Gancho',
+    merlin: 'Flor da idade',
     flex: 'Fio desencapado',
     kaisen: 'Monitoramento familiar',
     vampyrus: 'Sangue-suga',
@@ -4510,6 +4567,10 @@ const CHARACTER_SPRITES = {
     eel: 'sprites/eel.png',
     shell: 'sprites/shell.png',
     grapple: 'grapple.png',
+    merlin: 'sprites/old_merlin.png',
+    merlin_old: 'sprites/old_merlin.png',
+    merlin_young: 'sprites/young_merlin.png',
+    merlin_baby: 'sprites/baby_merlin.png',
     flex: 'sprites/flex_hammer.png',
     flex_hammer: 'sprites/flex_hammer.png',
     flex_less_health: 'sprites/flex_less_health.png',
@@ -4597,6 +4658,7 @@ const ENEMY_SPRITES = {
     leader: 'enemies/leader.png',
     elite_leader: 'enemies/elite_leader.png',
     master_elite_shooter: 'enemies/master_elite_shooter.png',
+    merlin_baby: 'enemies/baby.png',
     cardboard_head: 'enemies/cardboard_head.png',
     cardboard: 'enemies/cardboard_head.png',
     motorcycle_helmet: 'enemies/motorcycle_helmet.png',
@@ -4768,6 +4830,72 @@ function getCharacterRadiusById(id) {
     if (id === 'shiv' || id === 'zippi') return 10;
     if (id === 'kaisen' || id === 'booboo' || id === 'beezy') return 13;
     return 15;
+}
+
+function getMerlinAgeData(age) {
+    const modes = {
+        old: { id:'old', label:'Merlin Velho', sprite:'old_merlin', hpMult:0.88, speed:2.8, poisonChance:0.15, babyChance:0.25, radius:15,
+            desc:'Vida um pouco menor • velocidade baixa • 25% de chance de BEBETIZAR' },
+        young: { id:'young', label:'Merlin Jovem', sprite:'young_merlin', hpMult:1, speed:3.5, poisonChance:0.25, babyChance:0.15, radius:15,
+            desc:'Vida padrão • velocidade padrão • 25% de chance de ENVENENAR' },
+        baby: { id:'baby', label:'Merlin Bebê', sprite:'baby_merlin', hpMult:0.62, speed:5.5, poisonChance:0.15, babyChance:0.15, radius:10, pacifierChance:0.15,
+            desc:'Vida bem menor • alta velocidade • 15% de CHUPETA com BEBETIZAÇÃO garantida' }
+    };
+    return modes[age] || modes.old;
+}
+function applyMerlinAgeStats(age='old', preserveHpRatio=true) {
+    if (!player || pd?.selectedChar !== 'merlin') return;
+    const data=getMerlinAgeData(age);
+    const oldMax=Math.max(1,(player.baseHp||1)*(player.stats?.maxHpMult||1));
+    const ratio=Math.max(0,Math.min(1,(player.hp||oldMax)/oldMax));
+    player.merlinAge=data.id;
+    player.baseHp=Math.max(1,Math.round(player.merlinBaseHp*data.hpMult));
+    player.baseSpeed=data.speed;
+    player.r=data.radius;
+    player.merlinPoisonChance=data.poisonChance;
+    player.merlinBabyChance=data.babyChance;
+    player.merlinPacifierChance=data.pacifierChance||0;
+    const newMax=Math.max(1,player.baseHp*(player.stats?.maxHpMult||1));
+    player.hp=preserveHpRatio?Math.max(1,Math.min(newMax,ratio*newMax)):newMax;
+    const cur=document.getElementById('merlin-current-age');
+    if(cur) cur.textContent=data.label;
+}
+function renderMerlinAgeHub() {
+    if(!player || pd?.selectedChar!=='merlin') return;
+    const currentAge=player.merlinAge||'old';
+    const cur=document.getElementById('merlin-current-age');
+    if(cur) cur.textContent=getMerlinAgeData(currentAge).label;
+    const box=document.getElementById('merlin-age-options');
+    if(!box) return;
+    box.innerHTML='';
+    ['old','young','baby'].filter(age=>age!==currentAge).forEach(age=>{
+        const d=getMerlinAgeData(age);
+        const card=document.createElement('div');
+        card.className='merlin-age-card';
+        card.innerHTML=`<img src="${CHARACTER_SPRITES[d.sprite]||''}" alt=""><h3>${d.label}</h3><p>${d.desc}</p><div class="age-stat"><strong>Especial:</strong> ${age==='baby'?'15% de chance de disparar uma chupeta que sempre BEBETIZA':age==='old'?'25% de chance de BEBETIZAR':'25% de chance de ENVENENAR'}</div><button class="btn-action" style="margin-top:12px;width:100%;" onclick="selectMerlinAge('${age}')">Equipar</button>`;
+        box.appendChild(card);
+    });
+}
+function openMerlinAgeHub() {
+    if(!player || pd?.selectedChar!=='merlin') return;
+    renderMerlinAgeHub();
+    document.getElementById('overlay-merlin-age')?.classList.remove('hidden');
+    updateSpecialButtonUI();
+}
+function closeMerlinAgeHub() {
+    document.getElementById('overlay-merlin-age')?.classList.add('hidden');
+    updateSpecialButtonUI();
+}
+function selectMerlinAge(age) {
+    if(!player || pd?.selectedChar!=='merlin') return;
+    if ((player.merlinAgeCooldown || 0) > 0) return;
+    applyMerlinAgeStats(age,true);
+    player.merlinAgeCooldown = 20;
+    closeMerlinAgeHub();
+    save();
+    addFloatingText(player.x,player.y-28,getMerlinAgeData(age).label.toUpperCase(),'#b06cd9',14);
+    updateSpecialButtonUI();
+    if (isPlaying) { isPaused = false; lastTime = performance.now(); }
 }
 
 
@@ -5158,6 +5286,7 @@ function getEnemySpritePath(type) {
 // Retorna a skin visual específica do bioma sem alterar a lógica do inimigo.
 // Assim, qualquer inimigo criado por invocação também herda a skin do Deserto.
 function getEffectiveEnemySpriteType(e) {
+    if (e?.merlinBabyTimer > 0) return 'merlin_baby';
     const type = String(e?.type || '').toLowerCase();
     if (e?.forceNormalSkin) {
         const forcedNormal = {
@@ -7243,6 +7372,7 @@ const EVENT_PROMOS = [
     { id: 'popeye', label: 'Popeye', oldCost: 349, promoCost: 149, level8Cost: 899, rarity: 'legendary' },
     { id: 'shell', label: 'Shell', oldCost: 349, promoCost: 149, level8Cost: 899, rarity: 'legendary' },
     { id: 'grapple', label: 'Grapple', oldCost: 349, promoCost: 149, level8Cost: 899, rarity: 'legendary' },
+    { id: 'merlin', label: 'Merlin', oldCost: 349, promoCost: 149, level8Cost: 899, rarity: 'legendary' },
     { id: 'bit', label: 'Bit', oldCost: 149, promoCost: 79, rarity: 'epic' },
     { id: 'beezy', label: 'Beezzy', oldCost: 149, promoCost: 79, rarity: 'epic' },
     { id: 'glace', label: 'Glace', oldCost: 349, promoCost: 149, rarity: 'legendary' }
@@ -10119,7 +10249,8 @@ function getSelectedSpecialConfig() {
         const active = (player.shellTorpedoTimer || 0) > 0;
         return { type: 'shell', label: '🌊', title: active ? 'Torpedo ativo' : ((player.shellTorpedoCooldown || 0) > 0 ? `Torpedo recarregando ${Math.ceil(Math.max(0, player.shellTorpedoCooldown || 0))}s` : 'Torpedo'), ready: !active && (player.shellTorpedoCooldown || 0) <= 0 };
     }
-    if (pd.selectedChar === 'grapple') { const active=(player.grappleHookTimer||0)>0; const charging=!!player.grappleCharging; return {type:'grapple',label:'🪝',title:active?'Gancho em movimento':charging?'Gancho carregando':((player.grappleCooldown||0)>0?`Gancho recarregando ${Math.ceil(player.grappleCooldown||0)}s`:'Gancho'),ready:!active&&!charging&&(player.grappleCooldown||0)<=0}; }
+    if (pd.selectedChar === 'grapple') { const active=(player.grappleHookTimer||0)>0; const charging=!!player.grappleCharging; return {type:'grapple',label:'🪝',title:active?'Gancho em movimento':charging?'Gancho carregando':((player.grappleCooldown||0)>0?`Gancho recarregando ${Math.ceil(player.grappleCooldown||0)}s`:'Gancho'),ready:!active&&!charging&&(player.grappleCooldown||0)<=0}; }    if (pd.selectedChar === 'merlin') { const cd=Math.max(0,Number(player.merlinAgeCooldown||0)); return { type:'merlin', label:'🪄', title: cd>0 ? `Idade recarregando ${Math.ceil(cd)}s` : 'Mudar idade', ready: cd<=0 }; }
+
     if (pd.selectedChar === 'popeye') {
         const active = (player.popeyeSpinTimer || 0) > 0;
         return { type: 'popeye', label: '🥬', title: active ? 'Espinafre ativo' : ((player.popeyeSpinCooldown || 0) > 0 ? `Espinafre recarregando ${Math.ceil(Math.max(0, player.popeyeSpinCooldown || 0))}s` : 'Comer espinafre'), ready: !active && (player.popeyeSpinCooldown || 0) <= 0 };
@@ -10231,6 +10362,7 @@ function updateSpecialButtonUI() {
     const isGlitchActive = cfg.type === 'glitch' && !!player.glitchTransformAnimating;
     const isSterling = cfg.type === 'sterling';
     const isGrapple = cfg.type === 'grapple';
+    const isMerlin = cfg.type === 'merlin';
     const isKacashiActive = cfg.type === 'kacashi' && (player.kacashiDimensionTimer || 0) > 0;
     const isSterlingCharging = isSterling && !!player.sterlingCharging;
     const isGrappleCharging = isGrapple && !!player.grappleCharging;
@@ -10257,6 +10389,8 @@ function updateSpecialButtonUI() {
                         ? Math.max(0, Number(player.shellTorpedoCooldown || 0))
                     : cfg.type === 'grapple'
                         ? Math.max(0, Number(player.grappleCooldown || 0))
+                    : cfg.type === 'merlin'
+                        ? Math.max(0, Number(player.merlinAgeCooldown || 0))
                     : 0;
 
     const activeState = cfg.type === 'ghoul' ? isGhoulActive : cfg.type === 'ninji' ? isNinjiActive : cfg.type === 'joseph' ? isJosephActive : cfg.type === 'shinobi' ? isShinobiActive : cfg.type === 'glitch' ? isGlitchActive : cfg.type === 'popeye' ? ((player.popeyeSpinTimer || 0) > 0) : cfg.type === 'shell' ? ((player.shellTorpedoTimer || 0) > 0) : cfg.type === 'grapple' ? ((player.grappleHookTimer || 0) > 0) : isKacashiActive;
@@ -10816,7 +10950,7 @@ function startRunAfterShop() {
     
     player = {
         x: 0, y: 0, r: (pd.selectedChar === 'hank' || pd.selectedChar === 'yeti' || pd.selectedChar === 'glace') ? 20 : ((pd.selectedChar === 'shiv' || pd.selectedChar === 'zippi') ? 10 : (pd.selectedChar === 'kaisen' ? 13 : (pd.selectedChar === 'booboo' ? 13 : (pd.selectedChar === 'eel' ? 15 : 15)))), baseHp: initialBaseHp, hp: initialBaseHp, baseSpeed: charDef.speed, baseDmg: initialBaseDmg,
-        baseFireRate: charDef.fireRate, baseRange: charDef.range, color: charDef.color, weapon: charDef.weapon, cyroPyroMode: pd.selectedChar === 'cyro_pyro' ? getCyroPyroMode() : null, gladiatorMode: pd.selectedChar === 'gladiator' ? (pd.chars?.gladiator?.mode || 'shooter') : null, gladiatorModeCooldown: 0, eolioPropellerSeq: 0, cd: 0, shieldTimer: 0,
+        baseFireRate: charDef.fireRate, baseRange: charDef.range, color: charDef.color, weapon: charDef.weapon, merlinAge: pd.selectedChar === 'merlin' ? 'old' : null, merlinBaseHp: pd.selectedChar === 'merlin' ? initialBaseHp : null, merlinPoisonChance: 0.15, merlinBabyChance: 0.15, merlinPacifierChance: 0, merlinAgeCooldown: 0, cyroPyroMode: pd.selectedChar === 'cyro_pyro' ? getCyroPyroMode() : null, gladiatorMode: pd.selectedChar === 'gladiator' ? (pd.chars?.gladiator?.mode || 'shooter') : null, gladiatorModeCooldown: 0, eolioPropellerSeq: 0, cd: 0, shieldTimer: 0,
         zombieTimer: 0, revived: false, elekCycle: false, dashTimer: 0, meleeCd: 0, boldShots: 0, boldReload: 0, specCd: pd.selectedChar === 'ghoul' ? 20 : 0, invisTimer: 0, ghoulPendingCd: 0, ninjiPendingCd: 0,
         lastMoveAngle: 0, lastAimAngle: 0, kacashiDimensionTimer: 0, kacashiDimensionCd: 0, sharkieAttackTimer: 0, josephOllieCd: 0, josephOllieTimer: 0, josephOllieAngle: 0, josephOlliePendingCd: 0, josephOllieDetonate: false, sharkieAimAngle: 0, sharkieReverseAngle: 0, sharkieReverseX: 0, sharkieReverseY: 0, tenentCycle: 0, stormyCycle: 0, bulbMode: pd.selectedChar === 'bulb' ? Math.floor(Math.random() * 3) : null, bulbGasActiveUntil: 0, bulbGasCooldownUntil: 0, bulbGasAngle: 0, orbitalAngle: 0, popeyeSpinTimer: 0, popeyeSpinCooldown: 30, popeyeSpinUsed: true, popeyeSpinEndingFx: 0, shellTorpedoTimer: 0, shellTorpedoCooldown: pd.selectedChar === 'shell' ? 20 : 0, shellTorpedoTarget: null, shellTorpedoHitCd: 0, shellTorpedoDamageTick: 0, shellTorpedoWasActive: false, shellTorpedoExitTracked: false, grappleCooldown: 0, grappleCharging: false, grappleCharge: 0, grappleHookTimer: 0, grappleHookDuration: 0.28, grappleHookStartX: 0, grappleHookStartY: 0, grappleHookX: 0, grappleHookY: 0, grappleHookTargetX: 0, grappleHookTargetY: 0, grappleHookAngle: 0, grappleHookHitEnemy: null, grappleHookDamageApplied: false, grappleAttackTimer: 0, grappleAttackAngle: 0, boobooReturn: true, pickedCards: [], revivesUsed: 0, qbBar: 0, qbShield: false, isDead: false, flexCombo: 0, flexReload: 0, ninjiDashCd: 0, shinobiDragonActive: false, shinobiDragonWavesLeft: 0, shinobiDragonCooldown: pd.selectedChar === 'shinobi' ? 20 : 0, shinobiDragonFireCd: 0, shinobiScytheCycle: 0, sterlingCharging: false, sterlingCharge: 0, sterlingAttackCd: 0, majorBriggsKills: 0, majorBriggsStage: 1,
         adamScrap: 0, adamMechActive: false, adamMechWavesLeft: 0, adamMechHpBonus: 0, adamMechSizeBonus: 0, adamBaseHpBeforeMech: null, adamBaseRBeforeMech: null,
@@ -10827,6 +10961,7 @@ function startRunAfterShop() {
         glitchMorphActive: false, glitchMorphWavesLeft: 0, glitchTransformAnimating: false, glitchTransformReverting: false, glitchTransformElapsed: 0, glitchTransformTimer: 0, glitchTransformPreviewId: 'glitch', glitchTransformFinalId: 'glitch', glitchTransformCycleIds: [], glitchMorphLevel: 1, glitchCurrentFormId: 'glitch', glitchOriginChar: pd.selectedChar === 'glitch' ? 'glitch' : null,
         stats: { dmgMult: 1, maxHpMult: 1, speedMult: 1, fireRateMult: 1, rangeMult: 1, extraProj: 0, regen: 0, critChance: 0, critDmg: 2, pierce: 0, projSpdMult: 1, defMult: 1, vamp: 0, coinMult: 1, xpMult: 1, explodeHit: false, waveBuff: false, doubleShotChance: 0, dynamicDef: 0, magnetMult: 1, poisonChance: 0, freezeChance: 0, bounce: 0, enemySpawnMult: 1, bossDmgMult: 1, orbitals: 0, dodgeChance: charDef.baseDodge || 0, landmine: 0, pushChance: 0 }
     };
+    if (pd.selectedChar === 'merlin') applyMerlinAgeStats('old', false);
     updateSpecialButtonUI();
     
     enemies = []; allies = []; projectiles = []; puddles = []; particles = []; xpGems = []; floatingTexts = []; obstacles = []; itemsMap = []; caveVisionBursts = []; graffitMarks = [];
@@ -11153,6 +11288,7 @@ function triggerSpecial() {
     if (!cfg) return;
     if (cfg.type === 'sterling') { startSterlingCharge(); return; }
     if (cfg.type === 'grapple') { startGrappleCharge(); return; }
+    if (cfg.type === 'merlin') { if ((player.merlinAgeCooldown || 0) > 0) { updateSpecialButtonUI(); return; } openMerlinAgeHub(); return; }
     if (cfg.type === 'ghoul' && player.specCd <= 0 && player.invisTimer <= 0) {
         player.invisTimer = 8;
         player.ghoulPendingCd = 25;
@@ -11662,6 +11798,7 @@ if (!isBossAlive) {
     if(player.shinobiDragonCooldown > 0) player.shinobiDragonCooldown = Math.max(0, player.shinobiDragonCooldown - dt);
     if(player.shellTorpedoCooldown > 0) player.shellTorpedoCooldown = Math.max(0, player.shellTorpedoCooldown - dt);
     if(player.grappleCooldown > 0) player.grappleCooldown = Math.max(0, player.grappleCooldown - dt);
+    if(player.merlinAgeCooldown > 0) player.merlinAgeCooldown = Math.max(0, player.merlinAgeCooldown - dt);
     if (pd.selectedChar === 'grapple') updateSpecialButtonUI();
 
     if(pd.selectedChar === 'quarterback' && player.qbShield) {
@@ -12064,6 +12201,23 @@ function fireWeapon(target) {
         const angle = target ? Math.atan2(target.y - player.y, target.x - player.x) : (Number.isFinite(player.lastAimAngle) ? player.lastAimAngle : (Number.isFinite(player.lastMoveAngle) ? player.lastMoveAngle : 0));
         player.lastAimAngle = angle;
 
+        if (w === 'merlin_magic' && pd.selectedChar === 'merlin') {
+            const spawnOffset=player.r+8;
+            const sx=player.x+Math.cos(angle)*spawnOffset, sy=player.y+Math.sin(angle)*spawnOffset;
+            const speed=pSpd*1.08;
+            const isPacifier=player.merlinAge==='baby' && Math.random() < (player.merlinPacifierChance||0.15);
+            const shotType=isPacifier ? 'merlin_pacifier' : 'merlin_magic';
+            createProj(sx,sy,Math.cos(angle)*speed,Math.sin(angle)*speed,finalDmg,70,true,shotType,{
+                size:isPacifier ? 9 : 8,
+                sourceChar:'merlin',
+                targetRef:target,
+                pierce:isPacifier ? 0 : Math.max(0,player.stats.pierce||0),
+                poisonChance:isPacifier ? 0 : (player.merlinPoisonChance||0.15),
+                babyChance:isPacifier ? 1 : (player.merlinBabyChance||0.15),
+                merlinPacifier:isPacifier
+            });
+            return;
+        }
         if (w === 'grapple' && pd.selectedChar === 'grapple') { const range=Math.max(78,player.baseRange*player.stats.rangeMult*0.78),half=30*Math.PI/180; player.grappleAttackAngle=angle;player.grappleAttackTimer=.16; for(const e of enemies){if(!e?.hp)continue;const d=dist(player,e),a=Math.atan2(e.y-player.y,e.x-player.x);if(d<=range+(e.size||0)&&Math.abs(normalizeAngle(a-angle))<=half){const dmg=Math.max(1,finalDmg)*getEnemyDamageTakenMultiplier(e);e.hp-=dmg;addFloatingText(e.x,e.y,`${Math.floor(dmg)}`,'#9b59b6');}}player.cd=Math.max(28,Math.round(player.baseFireRate*player.stats.fireRateMult));return;}
         if (w === 'beezy_honey' && pd.selectedChar === 'beezy') {
             const spawnOffset = player.r + 9;
@@ -13401,6 +13555,8 @@ function createProj(x, y, vx, vy, dmg, life, isPlayer, type, extra={}) {
     else if (type === 'kael_impact_arrow') size = extra.size || 9;
     else if (type === 'xilo_anvil') size = extra.size || 12;
     else if (type === 'kacashi_kunai') size = extra.size || 9;
+    else if (type === 'merlin_magic') size = extra.size || 10;
+    else if (type === 'merlin_pacifier') size = extra.size || 11;
     else if (type === 'gma_cookie') size = extra.size || 8;
     else if (type === 'cookie_tray') size = extra.size || 18;
     else if (type === 'joseph_skate') size = extra.size || 10;
@@ -14042,6 +14198,19 @@ function updateEnemies(dt) {
         if(typeof e.shockRate !== 'number') e.shockRate = 0.3;
         if(typeof e.semiShockRate !== 'number') e.semiShockRate = 0.4;
         if(typeof e.hypnotizedTimer !== 'number') e.hypnotizedTimer = 0;
+        if(typeof e.merlinBabyTimer !== 'number') e.merlinBabyTimer = 0;
+        if(e.merlinBabyTimer > 0) {
+            e.merlinBabyTimer -= dt;
+            if(e.merlinBabyTimer <= 0) {
+                if(e.merlinBabySnapshot) {
+                    e.speed=e.merlinBabySnapshot.speed;
+                    e.size=e.merlinBabySnapshot.size;
+                    e.color=e.merlinBabySnapshot.color;
+                }
+                delete e.merlinBabySnapshot;
+                e.merlinBabyTimer=0;
+            }
+        }
         if((e.type === 'boss' || e.type === 'megaboss') && !e.spawnSkillUsed) triggerBossSpawnSkill(e);
         if(e.weakenTimer > 0) { e.weakenTimer -= dt; e.dmg = e.baseDmg * 0.5; } else { e.dmg = e.baseDmg; }
         if (e.curseTimer > 0) e.curseTimer = Math.max(0, e.curseTimer - dt);
@@ -14105,6 +14274,7 @@ function updateEnemies(dt) {
         
         let ivySlowMult = e.ivySlowTimer > 0 ? 0.18 : 1; if(e.ivySlowTimer > 0) e.ivySlowTimer -= dt;
         let currentSpeed = (e.slowTimer > 0 ? e.speed * 0.5 : e.speed) * ivySlowMult; if(e.slowTimer > 0) e.slowTimer -= dt;
+        if (e.merlinBabyTimer > 0) currentSpeed = 0;
         if (e.sugarTimer > 0 && e.sugarSnapshot) currentSpeed *= 1.7;
         if(e.speedBuffTimer > 0) { e.speedBuffTimer -= dt; currentSpeed *= 1.5; }
         let eSpeedMult = 1; obstacles.forEach(o => { if(o.type==='ice' && dist(e, o) < o.r + e.size) eSpeedMult = 1.5; if(o.type==='mud' && dist(e, o) < o.r + e.size) eSpeedMult = 0.5; if(o.type==='cacto') { let d2=dist(e,o); if(d2<o.r+e.size){ e.hp -= 30 * dt * getEnemyDamageTakenMultiplier(e); } } });
@@ -15121,7 +15291,7 @@ function spawnSerranoRandomProjectile(x, y, dmg, excludedEnemy) {
         bit_cherry: 6.2, bit_banana: 5.5, bit_banana_peeled: 6.8, bit_arcade: 4.2, beezy_honey: 5.6, beezy_bee: 6.4, shinobi_katana: 1,
         zippi_laser: 20, axel_stone: 5.6, axel_shard: 5.6, adam_ball: 5.25, adam_mech_ball: 5.6,
         yuuto_heart: 5, sterling_star: 8.2, lyron_ball: 9.5, lyron_ball_big: 7.6,
-        eolio_propeller: 8.2, cyro_iceball: 4.1, pyro_fireball: 7.25, kacashi_kunai: 7.8
+        eolio_propeller: 8.2, cyro_iceball: 4.1, pyro_fireball: 7.25, kacashi_kunai: 7.8, merlin_magic: 6.2, merlin_pacifier: 6.8
     };
     const speed = speedByType[def.type] || 5;
     const extra = { size: 8, sourceChar: def.sourceChar, serranoClone: true, serranoOriginalChar: def.sourceChar };
@@ -15192,6 +15362,27 @@ function updateProjectiles(dt) {
             if (p.life <= 0) projectiles.splice(i, 1);
             continue;
         }
+        if (p.type === 'merlin_magic' || p.type === 'merlin_pacifier') {
+            let targetRef=p.extra?.targetRef;
+            if(!targetRef || targetRef.hp<=0){
+                let next=null,nextD=Infinity;
+                for(const candidate of enemies){
+                    if(!candidate || candidate.hp<=0) continue;
+                    const dd=dist(p,candidate);
+                    if(dd<nextD){nextD=dd;next=candidate;}
+                }
+                targetRef=next;p.extra.targetRef=next;
+            }
+            if(targetRef && targetRef.hp>0){
+                const speed=Math.max(4.5,Math.hypot(p.vx,p.vy));
+                const desired=Math.atan2(targetRef.y-p.y,targetRef.x-p.x);
+                const current=Math.atan2(p.vy,p.vx);
+                const delta=normalizeAngle(desired-current);
+                const nextAngle=current+Math.max(-0.24,Math.min(0.24,delta));
+                p.vx=Math.cos(nextAngle)*speed;p.vy=Math.sin(nextAngle)*speed;
+            }
+        }
+
         if (p.type === 'beezy_bee') {
             let targetRef = p.extra?.targetRef;
             if (!targetRef || targetRef.hp <= 0) {
@@ -16033,6 +16224,15 @@ function updateProjectiles(dt) {
                         }
                     }
                     if(player.stats.poisonChance > 0 && Math.random() < player.stats.poisonChance) { e.poison.timer = 4; e.poison.dmg = p.dmg * 0.3; }
+                    if (p.extra?.sourceChar === 'merlin') {
+                        const poisonChance=Math.max(0,Math.min(1,Number(p.extra?.poisonChance)||0));
+                        const babyChance=Math.max(0,Math.min(1,Number(p.extra?.babyChance)||0));
+                        if(poisonChance>0 && Math.random()<poisonChance){
+                            e.poison={timer:4,dmg:Math.max(1,p.dmg*0.30),tickCd:0.3};
+                            addFloatingText(e.x,e.y-12,'VENENO!','#2ecc71',11);
+                        }
+                        if(babyChance>0 && Math.random()<babyChance) applyMerlinBabyEffect(e);
+                    }
                     if(player.stats.freezeChance > 0 && Math.random() < player.stats.freezeChance) { e.freezeTimer = 2; }
                     if(p.type === 'blood_ball' && (extra.size || 0) === 10) e.weakenTimer = 3;
                     if(p.type === 'laser' && !(extra.zippiBurnLocked || Object.prototype.hasOwnProperty.call(extra, 'zippiBurnChance'))) { e.burnTimer = 2; e.burnDmg = 5; }
@@ -16723,6 +16923,7 @@ function getPlayerSpriteId() {
     if (pd?.selectedChar === 'shinobi' && (player?.shinobiDragonActive || player?.shinobiDragonFormActive)) return 'dragon_shinobi';
     if (pd?.selectedChar === 'glitch' && player?.glitchMorphActive && player?.glitchCurrentFormId) return player.glitchCurrentFormId;
     if (pd?.selectedChar === 'miss_macaron') return 'miss_macaron';
+    if (pd?.selectedChar === 'merlin') return `merlin_${player?.merlinAge || 'old'}`;
     return pd?.selectedChar || null;
 }
 
@@ -17592,6 +17793,7 @@ function draw() {
         const enemySpriteType = getEnemySpritePath(effectiveSpriteType) ? effectiveSpriteType : (getEnemySpritePath(e.type) ? e.type : null);
         const enemySprite = enemySpriteType ? getEnemySpriteImage(enemySpriteType) : null;
         const visualSize = Number.isFinite(e.spriteSize) ? e.spriteSize : e.size;
+        const spriteScale = e.merlinBabyTimer > 0 ? 2.15 : 1;
         let drawW = Math.max(24, visualSize * 2);
         let drawH = drawW;
 
@@ -17601,7 +17803,8 @@ function draw() {
             drawW = Math.max(22, visualSize * widthMult);
             drawH = drawW / ratio;
             drawEnemySprite(ctx, e.x, e.y, visualSize, enemySpriteType, {
-                flipX: Boolean(e.facingLeft)
+                flipX: Boolean(e.facingLeft),
+                scale: spriteScale
             });
         } else {
             drawShape(ctx, e.x, e.y, e.size, 'circle', e.color, e.isBoss);
@@ -17918,7 +18121,43 @@ function draw() {
     projectiles.forEach(p => {
         const px = p.x;
         const py = p.y;
-        if(p.type === 'dagger' || p.type === 'ice_dagger' || p.type === 'ice_stake') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx)); ctx.fillStyle = (p.type==='ice_dagger'||p.type==='ice_stake')?'#00ffff':'#bdc3c7'; ctx.beginPath(); ctx.moveTo(p.size, 0); ctx.lineTo(-p.size/2, -p.size/3); ctx.lineTo(-p.size/2, p.size/3); ctx.fill(); ctx.restore(); } 
+        if (p.type === 'merlin_magic' || p.type === 'merlin_pacifier') {
+            const r = p.size || (p.type === 'merlin_pacifier' ? 12 : 11);
+            ctx.save();
+            ctx.translate(px, py);
+            ctx.rotate(Math.atan2(p.vy, p.vx));
+            if (p.type === 'merlin_magic') {
+                const aqua = '#45e0c1';
+                const aqua2 = '#0fa889';
+                const aquaLight = '#b8fff0';
+                ctx.shadowColor = 'rgba(69,224,193,0.95)';
+                ctx.shadowBlur = 18;
+                const g = ctx.createRadialGradient(-r*0.35,-r*0.35,1,r*0.15,r*0.15,r*1.15);
+                g.addColorStop(0, aquaLight); g.addColorStop(0.38, aqua); g.addColorStop(1, aqua2);
+                ctx.fillStyle = g;
+                ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2); ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = 'rgba(220,255,248,0.95)'; ctx.lineWidth = 1.4;
+                ctx.beginPath(); ctx.arc(0,0,r*0.72,0.15,Math.PI*1.65); ctx.stroke();
+                ctx.strokeStyle = 'rgba(8,112,94,0.75)'; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.arc(0,0,r*0.46,Math.PI*0.7,Math.PI*2.15); ctx.stroke();
+                ctx.fillStyle = 'rgba(255,255,255,0.75)'; ctx.beginPath(); ctx.arc(-r*0.32,-r*0.32,Math.max(1.5,r*0.16),0,Math.PI*2); ctx.fill();
+            } else {
+                // Textura de chupeta: bico translúcido + escudo circular + alça.
+                ctx.shadowColor = 'rgba(247,170,219,0.9)'; ctx.shadowBlur = 15;
+                ctx.fillStyle = '#f48dcc'; ctx.strokeStyle = '#fff0fb'; ctx.lineWidth = 1.6;
+                ctx.beginPath(); ctx.arc(0, -r*0.18, r*0.60, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = '#fff6fc';
+                ctx.beginPath(); ctx.arc(0, -r*0.18, r*0.30, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#8fe9d6';
+                ctx.beginPath(); ctx.roundRect(-r*0.26, r*0.10, r*0.52, r*0.60, r*0.18); ctx.fill();
+                ctx.strokeStyle = '#2a9b83'; ctx.lineWidth = 1.1; ctx.stroke();
+                ctx.strokeStyle = '#ffd7f1'; ctx.lineWidth = 1.7;
+                ctx.beginPath(); ctx.arc(0, r*0.82, r*0.30, Math.PI*0.1, Math.PI*0.9); ctx.stroke();
+            }
+            ctx.restore();
+        }
+        else if(p.type === 'dagger' || p.type === 'ice_dagger' || p.type === 'ice_stake') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx)); ctx.fillStyle = (p.type==='ice_dagger'||p.type==='ice_stake')?'#00ffff':'#bdc3c7'; ctx.beginPath(); ctx.moveTo(p.size, 0); ctx.lineTo(-p.size/2, -p.size/3); ctx.lineTo(-p.size/2, p.size/3); ctx.fill(); ctx.restore(); } 
         else if(p.type === 'bomb' || p.type === 'rocket' || p.type === 'buster_rocket' || p.type === 'cannon_ball') { ctx.fillStyle = '#2c3e50'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); if(p.type !== 'cannon_ball'){ctx.fillStyle = '#e67e22'; ctx.beginPath(); ctx.arc(p.x + p.size/2, p.y - p.size/2, 2, 0, Math.PI*2); ctx.fill();} }
         else if(p.type === 'grenade' || p.type === 'big_grenade') { ctx.fillStyle = '#27ae60'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); }
         else if(p.type === 'cyro_iceball') {
