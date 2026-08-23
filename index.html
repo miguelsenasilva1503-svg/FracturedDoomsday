@@ -36,7 +36,7 @@
 
     .screen { position: absolute; inset: 0; display: flex; flex-direction: column; background: var(--bg-color); z-index: 10; padding: 20px; overflow: hidden; }
     .hidden { display: none !important; }
-    .merlin-age-panel { width:min(1180px,94vw); min-height:min(620px,86vh); max-height:86vh; background:linear-gradient(180deg,rgba(28,36,58,.99),rgba(13,18,31,.99)); border:4px solid #9b59b6; border-radius:28px; padding:26px 30px 24px; box-shadow:0 24px 60px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.06); display:flex; flex-direction:column; overflow:hidden; }
+    .merlin-age-panel { position:relative; z-index:2; pointer-events:auto; width:min(1180px,94vw); min-height:min(620px,86vh); max-height:86vh; background:linear-gradient(180deg,rgba(28,36,58,.99),rgba(13,18,31,.99)); border:4px solid #9b59b6; border-radius:28px; padding:26px 30px 24px; box-shadow:0 24px 60px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.06); display:flex; flex-direction:column; overflow:hidden; }
     .merlin-age-grid { width:100%; flex:1 1 auto; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:22px; margin:16px 0 18px; min-height:0; }
     .merlin-age-card { min-width:0; min-height:0; background:linear-gradient(180deg,rgba(43,43,64,.99),rgba(20,20,34,.99)); border:3px solid #6f42c1; border-radius:22px; padding:20px; color:#fff; text-align:center; box-shadow:0 16px 34px rgba(0,0,0,.42); display:flex; flex-direction:column; overflow:hidden; }
     .merlin-age-card img { width:300px; height:170px; max-width:100%; object-fit:contain; display:block; margin:0 auto 8px; filter:drop-shadow(0 9px 16px rgba(0,0,0,.48)); image-rendering:auto; flex:0 0 auto; }
@@ -47,6 +47,8 @@
     .merlin-age-current { width:100%; margin:0; text-align:center; color:#fff; font-size:20px; flex:0 0 auto; }
     @media(max-width:760px){ .merlin-age-panel{width:96vw; min-height:0; height:auto; max-height:92vh; padding:18px;} .merlin-age-grid{gap:12px;} .merlin-age-card{padding:12px;} .merlin-age-card img{width:220px;height:130px;} .merlin-age-card h3{font-size:21px;} .merlin-age-card p,.merlin-age-card .age-stat{font-size:12px;} .merlin-age-card button{padding:11px 8px;font-size:14px;} }
     @media(max-width:500px){ .merlin-age-panel{padding:14px;} .merlin-age-grid{gap:8px;} .merlin-age-card{padding:9px;border-width:2px;} .merlin-age-card img{width:160px;height:96px;} .merlin-age-card h3{font-size:17px;} .merlin-age-card p,.merlin-age-card .age-stat{font-size:10px;} .merlin-age-card button{padding:9px 6px;font-size:12px;} }
+    #overlay-merlin-age { z-index: 30000 !important; pointer-events:auto !important; }
+    #overlay-merlin-age .merlin-age-panel, #overlay-merlin-age .merlin-age-card, #overlay-merlin-age .merlin-age-card button { pointer-events:auto !important; }
     #overlay-tutorial-dialog { z-index: 12000; cursor: pointer; padding: 24px; }
     .tutorial-dialog-box { width: min(92vw, 720px); display: flex; align-items: center; gap: 18px; background: linear-gradient(180deg, rgba(34,41,63,0.99), rgba(14,18,30,0.99)); border: 3px solid rgba(241,196,15,0.85); border-radius: 24px; padding: 18px 20px; box-shadow: 0 18px 40px rgba(0,0,0,0.65); }
     .tutorial-dialog-sprite { width: 150px; height: 150px; object-fit: contain; flex: 0 0 150px; filter: drop-shadow(0 7px 12px rgba(0,0,0,0.45)); }
@@ -4216,12 +4218,51 @@ function isMerlinBabyImmuneEnemy(enemy) {
 function applyMerlinBabyEffect(enemy, opts={}) {
     if(!enemy || enemy.hp<=0 || isMerlinBabyImmuneEnemy(enemy)) return false;
     if(!enemy.merlinBabySnapshot) {
-        enemy.merlinBabySnapshot={speed:enemy.speed,size:enemy.size,color:enemy.color};
+        enemy.merlinBabySnapshot = {
+            type: enemy.type,
+            hp: enemy.hp,
+            maxHp: enemy.maxHp,
+            speed: enemy.speed,
+            baseDmg: enemy.baseDmg,
+            dmg: enemy.dmg,
+            size: enemy.size,
+            color: enemy.color,
+            cd: enemy.cd,
+            spawnCd: enemy.spawnCd,
+            isGlobalArmored: !!enemy.isGlobalArmored,
+            breakIntoBasic: !!enemy.breakIntoBasic,
+            revives: enemy.revives,
+            stationary: !!enemy.stationary
+        };
     }
-    enemy.merlinBabyTimer=Math.max(Number(enemy.merlinBabyTimer)||0,4);
-    enemy.size=Math.max(4.5,enemy.merlinBabySnapshot.size*0.45);
-    enemy.hp=Math.min(enemy.hp,Math.max(1,enemy.maxHp*0.15));
-    enemy.forceNormalSkin=false;
+    const babyMaxHp = Math.max(1, Number(enemy.merlinBabySnapshot.maxHp || enemy.maxHp || enemy.hp) * 0.15);
+    enemy.merlinBabyTimer = Math.max(Number(enemy.merlinBabyTimer)||0,4);
+    enemy.merlinBabyOriginalType = enemy.merlinBabySnapshot.type;
+    enemy.type = 'merlin_baby';
+    enemy.maxHp = babyMaxHp;
+    enemy.hp = babyMaxHp;
+    enemy.speed = 0;
+    enemy.baseDmg = 0;
+    enemy.dmg = 0;
+    enemy.cd = Infinity;
+    enemy.spawnCd = Infinity;
+    enemy.size = Math.max(4.5, enemy.merlinBabySnapshot.size * 0.45);
+    enemy.color = '#c39af6';
+    enemy.isGlobalArmored = false;
+    enemy.breakIntoBasic = false;
+    enemy.revives = 0;
+    enemy.stationary = true;
+    enemy.freezeTimer = 0;
+    enemy.stunTimer = 0;
+    enemy.slowTimer = 0;
+    enemy.poison = {timer:0,dmg:0,tickCd:0};
+    enemy.burnTimer = 0;
+    enemy.shockTimer = 0;
+    enemy.shockSemiTimer = 0;
+    enemy.shinobiMarks = 0;
+    enemy.hypnotizedTimer = 0;
+    enemy.popeyePush = null;
+    enemy.forceNormalSkin = false;
     addFloatingText(enemy.x,enemy.y-14,'BEBETIZADO!','#c39af6',12);
     if(!opts.silentFx) createParticles(enemy.x,enemy.y,'#c39af6');
     return true;
@@ -4570,7 +4611,7 @@ const CHARACTER_SPRITES = {
     serrano: 'sprites/serrano.png',
     eel: 'sprites/eel.png',
     shell: 'sprites/shell.png',
-    grapple: 'sprites/grapple.png',
+    grapple: 'grapple.png',
     merlin: 'sprites/old_merlin.png',
     merlin_old: 'sprites/old_merlin.png',
     merlin_young: 'sprites/young_merlin.png',
@@ -4876,14 +4917,17 @@ function renderMerlinAgeHub() {
         const d=getMerlinAgeData(age);
         const card=document.createElement('div');
         card.className='merlin-age-card';
-        card.innerHTML=`<img src="${CHARACTER_SPRITES[d.sprite]||''}" alt=""><h3>${d.label}</h3><p>${d.desc}</p><div class="age-stat"><strong>Especial:</strong> ${age==='baby'?'15% de chance de disparar uma chupeta que sempre BEBETIZA':age==='old'?'25% de chance de BEBETIZAR':'25% de chance de ENVENENAR'}</div><button class="btn-action" style="margin-top:12px;width:100%;" onclick="selectMerlinAge('${age}')">Equipar</button>`;
+        card.innerHTML=`<img src="${CHARACTER_SPRITES[d.sprite]||''}" alt=""><h3>${d.label}</h3><p>${d.desc}</p><div class="age-stat"><strong>Especial:</strong> ${age==='baby'?'15% de chance de disparar uma chupeta que sempre BEBETIZA':age==='old'?'25% de chance de BEBETIZAR':'25% de chance de ENVENENAR'}</div><button type="button" class="btn-action merlin-equip-btn" data-merlin-age="${age}" style="margin-top:12px;width:100%;" onclick="selectMerlinAge('${age}'); return false;">Equipar</button>`;
         box.appendChild(card);
     });
 }
 function openMerlinAgeHub() {
     if(!player || pd?.selectedChar!=='merlin') return;
+    if ((player.merlinAgeCooldown||0) > 0) return;
     renderMerlinAgeHub();
-    document.getElementById('overlay-merlin-age')?.classList.remove('hidden');
+    const overlay=document.getElementById('overlay-merlin-age');
+    if (overlay) overlay.classList.remove('hidden');
+    if (isPlaying) isPaused=true;
     updateSpecialButtonUI();
 }
 function closeMerlinAgeHub() {
@@ -4891,16 +4935,29 @@ function closeMerlinAgeHub() {
     updateSpecialButtonUI();
 }
 function selectMerlinAge(age) {
-    if(!player || pd?.selectedChar!=='merlin') return;
-    if ((player.merlinAgeCooldown || 0) > 0) return;
+    if(!player || pd?.selectedChar!=='merlin') return false;
+    if(!['old','young','baby'].includes(age)) return false;
+    if ((player.merlinAgeCooldown || 0) > 0) return false;
+    if ((player.merlinAge||'old') === age) return false;
     applyMerlinAgeStats(age,true);
     player.merlinAgeCooldown = 20;
     closeMerlinAgeHub();
     save();
     addFloatingText(player.x,player.y-28,getMerlinAgeData(age).label.toUpperCase(),'#b06cd9',14);
-    updateSpecialButtonUI();
     if (isPlaying) { isPaused = false; lastTime = performance.now(); }
+    updateSpecialButtonUI();
+    return false;
 }
+
+// Captura o clique diretamente no hub para que o botão nunca dependa de bubbling de outros controles.
+document.addEventListener('pointerup', (ev) => {
+    const btn = ev.target && ev.target.closest ? ev.target.closest('.merlin-equip-btn') : null;
+    if (!btn) return;
+    const overlay = document.getElementById('overlay-merlin-age');
+    if (!overlay || overlay.classList.contains('hidden')) return;
+    const age = btn.dataset.merlinAge;
+    if (age) { ev.preventDefault(); ev.stopPropagation(); selectMerlinAge(age); }
+}, true);
 
 
 function getElementSpritePath(type) {
@@ -14206,12 +14263,26 @@ function updateEnemies(dt) {
         if(e.merlinBabyTimer > 0) {
             e.merlinBabyTimer -= dt;
             if(e.merlinBabyTimer <= 0) {
-                if(e.merlinBabySnapshot) {
-                    e.speed=e.merlinBabySnapshot.speed;
-                    e.size=e.merlinBabySnapshot.size;
-                    e.color=e.merlinBabySnapshot.color;
+                const snap=e.merlinBabySnapshot;
+                if(snap) {
+                    const ratio=Math.max(0, Math.min(1, (e.hp||0) / Math.max(1,e.maxHp||1)));
+                    e.type=snap.type;
+                    e.maxHp=snap.maxHp;
+                    e.hp=Math.max(1, Math.min(e.maxHp, e.maxHp*ratio));
+                    e.speed=snap.speed;
+                    e.baseDmg=snap.baseDmg;
+                    e.dmg=snap.baseDmg;
+                    e.size=snap.size;
+                    e.color=snap.color;
+                    e.cd=Number.isFinite(snap.cd)?snap.cd:0;
+                    e.spawnCd=Number.isFinite(snap.spawnCd)?snap.spawnCd:0;
+                    e.isGlobalArmored=snap.isGlobalArmored;
+                    e.breakIntoBasic=snap.breakIntoBasic;
+                    e.revives=snap.revives;
+                    e.stationary=snap.stationary;
                 }
                 delete e.merlinBabySnapshot;
+                delete e.merlinBabyOriginalType;
                 e.merlinBabyTimer=0;
             }
         }
@@ -14375,7 +14446,9 @@ function updateEnemies(dt) {
             continue;
         }
 
-        if(e.type === 'curandeiro') {
+        if(e.type === 'merlin_baby') {
+            // BEBETIZADO é um inimigo temporário independente: não cura, não atira, não spawna e não se move.
+        } else if(e.type === 'curandeiro') {
             e.cd -= 60 * dt;
             if(e.cd <= 0 && !isFrozen) {
                 if(isHypnotized) {
@@ -14643,7 +14716,7 @@ function updateEnemies(dt) {
             }
             if(e.revives && e.revives > 0) {
                 e.revives--; e.hp = e.maxHp; e.freezeTimer = 1.0; e.color = '#7f8c8d';
-            } else if(e.breakIntoBasic && e.isGlobalArmored) {
+            } else if(e.type !== 'merlin_baby' && e.breakIntoBasic && e.isGlobalArmored) {
                 // O invólucro é destruído: nasce um inimigo Básico no mesmo ponto.
                 const basicMult = Math.max(0.25, (Number(e.maxHp) > 0 ? Number(e.maxHp) / (e.type === 'cardboard_head' ? 58 : (e.type === 'motorcycle_helmet' ? 110 : 230)) : 1));
                 e.type = 'basico';
@@ -17802,7 +17875,7 @@ function draw() {
 
         if (enemySprite && enemySprite.complete && enemySprite.naturalWidth) {
             if (e.merlinBabyTimer > 0 && enemySpriteType === 'merlin_baby') {
-                const BABY_VISUAL_WIDTH = 88;
+                const BABY_VISUAL_WIDTH = 96;
                 const ratio = enemySprite.naturalWidth / enemySprite.naturalHeight;
                 drawW = BABY_VISUAL_WIDTH;
                 drawH = drawW / ratio;
