@@ -1000,6 +1000,10 @@
         color: #ff4d4d;
         font-weight: 900;
     }
+    .summary-ability {
+        color: #8fdcff;
+        font-weight: 900;
+    }
 
     .patente-chip {
         display: inline-flex;
@@ -2264,7 +2268,7 @@
             <table class="char-table">
                 <tr><td>Dano:</td><td id="detail-dmg" style="text-align: right;">0</td></tr>
                 <tr><td>Vida (HP):</td><td id="detail-hp" style="text-align: right;">0</td></tr>
-                <tr><td>Nível Atual:</td><td id="detail-lvl" style="text-align: right;">0/8</td></tr>
+                <tr><td>Nível Atual:</td><td id="detail-lvl" style="text-align: right;">0/10</td></tr>
             </table>
 
             <div style="margin-top: 15px; text-align: center; border-top: 1px solid #555; padding-top: 15px;">
@@ -3083,11 +3087,19 @@ ESPECIAL: quando KETCHUP, MAIONESE e MOSTARDA acertam o mesmo inimigo em até 0,
     bunniie: `Bunniie: dispara uma cenoura PERFURANTE, ao derrotar um inimigo, ele deixa uma cenoura no chão, caso Bunniie pegue, ele recupera hp
 
 ESPECIAL: pode cavar tocas, quando duas tocas estão interligadas, Bunniie pode se teletransportar por elas`,
-    strike: `Strike: dispara projéteis pra frente.`,
+    strike: `Strike: dispara projéteis pra frente.
 
-    fasty: `Fasty: troca vida e dano por velocidade e cadência, dispara bolas energéticas.`,
-    hank: `Hank: dispara projéteis pesados, tem mais vida mas é mais lento.`,
-    cherry: `Cherry: dispara projéteis que empurram inimigos.`,
+HABILIDADE: dispara um projétil grande, com alcance alto e PERFURANTE (10s de recarga).`,
+
+    fasty: `Fasty: troca vida e dano por velocidade e cadência, dispara bolas energéticas.
+
+HABILIDADE: calça seus tênis e ganha um boost de velocidade por 5s (20s de recarga).`,
+    hank: `Hank: dispara projéteis pesados, tem mais vida mas é mais lento.
+
+HABILIDADE: dispara um míssil com uma área de explosão grande (15s de recarga).`,
+    cherry: `Cherry: dispara projéteis que empurram inimigos.
+
+HABILIDADE: dispara uma rajada de 3 balas pesadas (15s de recarga).`,
     bold: `Bold: dispara uma rajada de 5 projéteis e, após isso, tem uma recarga de 1 segundo.`,
     bombman: `Bombeiro: dispara bombas que explodem em área.`,
     kayo: `Kayo: avança com um corte curto, mais largo e mais agressivo.
@@ -5153,7 +5165,7 @@ function getRandomGlitchMorphId(excludeIds = []) {
 function getCharacterLoadout(charId, levelOverride = null) {
     const charDef = CHARACTERS?.[charId];
     if (!charDef) return null;
-    const level = Math.max(1, Math.min(8, Number.isFinite(levelOverride) ? Math.floor(levelOverride) : (pd?.chars?.[charId]?.level || 1)));
+    const level = Math.max(1, Math.min(10, Number.isFinite(levelOverride) ? Math.floor(levelOverride) : (pd?.chars?.[charId]?.level || 1)));
     const levelMult = 1 + Math.max(0, level - 1) * 0.15;
     const speedMult = 1 + Math.max(0, level - 1) * 0.03;
     const fireRateMult = Math.max(0.55, 1 - Math.max(0, level - 1) * 0.03);
@@ -5179,6 +5191,8 @@ function resetMorphRuntimeState(charId) {
     player.boldShots = 0;
     player.boldReload = 0;
     player.specCd = 0;
+    player.commonAbilityCd = 0;
+    player.fastyAbilityTimer = 0;
     player.invisTimer = 0;
     player.ghoulPendingCd = 0;
     player.kacashiDimensionTimer = 0;
@@ -5267,7 +5281,7 @@ function applyCharacterLoadout(charId, levelOverride = null, opts = {}) {
 
 function startGlitchMorphSequence(reverting = false) {
     if (!player || player.glitchTransformAnimating) return false;
-    const glitchLevel = Math.max(1, Math.min(8, Number(pd?.chars?.glitch?.level) || 1));
+    const glitchLevel = Math.max(1, Math.min(10, Number(pd?.chars?.glitch?.level) || 1));
     const finalId = reverting ? 'glitch' : getRandomGlitchMorphId(['glitch']);
     const pool = getGlitchMorphPool().filter(id => id !== finalId);
     const shuffled = pool.slice().sort(() => Math.random() - 0.5);
@@ -5287,7 +5301,7 @@ function startGlitchMorphSequence(reverting = false) {
 
 function finishGlitchMorphSequence() {
     if (!player) return;
-    const glitchLevel = Math.max(1, Math.min(8, Number(pd?.chars?.glitch?.level) || 1));
+    const glitchLevel = Math.max(1, Math.min(10, Number(pd?.chars?.glitch?.level) || 1));
     const finalId = player.glitchTransformFinalId || 'glitch';
     clearTaggedAllies('glitch-morph');
     player.glitchTransformAnimating = false;
@@ -5336,7 +5350,7 @@ function updateGlitchMorphSequence(dt) {
 function restoreGlitchSelectionIfNeeded() {
     if (!player || !pd || player.glitchOriginChar !== 'glitch') return;
     clearTaggedAllies('glitch-morph');
-    const glitchLevel = Math.max(1, Math.min(8, Number(pd?.chars?.glitch?.level) || 1));
+    const glitchLevel = Math.max(1, Math.min(10, Number(pd?.chars?.glitch?.level) || 1));
     pd.selectedChar = 'glitch';
     if (pd.run && typeof pd.run === 'object') pd.run.charId = 'glitch';
     player.glitchMorphActive = false;
@@ -5787,7 +5801,7 @@ function escapeHtmlText(text) {
 function highlightSummaryText(text, excludeTerms = []) {
     const raw = decodeHtmlEntities(String(text)).replace(/\r\n/g, '\n');
     const exclusions = new Set((excludeTerms || []).map(t => String(t).toUpperCase()));
-    const terms = ['ESPECIAL', ...SUMMARY_HIGHLIGHTS.filter(term => !exclusions.has(term))].filter(Boolean);
+    const terms = ['ESPECIAL', 'HABILIDADE', ...SUMMARY_HIGHLIGHTS.filter(term => !exclusions.has(term))].filter(Boolean);
 
     if (!terms.length) return escapeHtmlText(raw);
 
@@ -5816,6 +5830,8 @@ function highlightSummaryText(text, excludeTerms = []) {
 
         if (term.toUpperCase() === 'ESPECIAL') {
             result += escapeHtmlText(prefix) + '<span class="summary-special">ESPECIAL</span>';
+        } else if (term.toUpperCase() === 'HABILIDADE') {
+            result += escapeHtmlText(prefix) + '<span class="summary-ability">HABILIDADE</span>';
         } else {
             const note = SUMMARY_NOTES[term.toUpperCase()];
             if (note) {
@@ -5925,9 +5941,14 @@ function renderGraffitSummary(text) {
 }
 
 function renderCharacterSummary(id) {
-    const text = getCharacterSummary(id);
+    let text = getCharacterSummary(id);
     const el = document.getElementById('detail-summary');
     if (!el) return;
+    const commonAbilityIds = new Set(['strike', 'fasty', 'hank', 'cherry']);
+    const charLevel = Number(pd?.chars?.[id]?.level) || 0;
+    if (commonAbilityIds.has(id) && charLevel < 5) {
+        text = String(text || '').replace(/\n?HABILIDADE:[^\n]*(?:\n|$)/i, '');
+    }
     if (!text) {
         el.innerHTML = '';
         el.classList.add('hidden');
@@ -7465,10 +7486,10 @@ const EVENT_CHARACTER_PROGRESS = {
 };
 
 const EVENT_PROMOS = [
-    { id: 'popeye', label: 'Popeye', oldCost: 349, promoCost: 149, level8Cost: 899, rarity: 'legendary' },
-    { id: 'shell', label: 'Shell', oldCost: 349, promoCost: 149, level8Cost: 899, rarity: 'legendary' },
-    { id: 'grapple', label: 'Grapple', oldCost: 349, promoCost: 149, level8Cost: 899, rarity: 'legendary' },
-    { id: 'merlin', label: 'Merlin', oldCost: 349, promoCost: 149, level8Cost: 899, rarity: 'legendary' },
+    { id: 'popeye', label: 'Popeye', oldCost: 349, promoCost: 149, level10Cost: 899, rarity: 'legendary' },
+    { id: 'shell', label: 'Shell', oldCost: 349, promoCost: 149, level10Cost: 899, rarity: 'legendary' },
+    { id: 'grapple', label: 'Grapple', oldCost: 349, promoCost: 149, level10Cost: 899, rarity: 'legendary' },
+    { id: 'merlin', label: 'Merlin', oldCost: 349, promoCost: 149, level10Cost: 899, rarity: 'legendary' },
     { id: 'bit', label: 'Bit', oldCost: 149, promoCost: 79, rarity: 'epic' },
     { id: 'beezy', label: 'Beezzy', oldCost: 149, promoCost: 79, rarity: 'epic' },
     { id: 'glace', label: 'Glace', oldCost: 349, promoCost: 149, rarity: 'legendary' }
@@ -7591,15 +7612,15 @@ function renderEventPromoOfferCard(promo, mode) {
     const owned = !!pd.chars[promo.id];
     const currentLevel = Number(pd.chars?.[promo.id]?.level) || 0;
     if (owned) return '';
-    if (mode === 'level8' && currentLevel >= 8) return '';
+    if (mode === 'level10' && currentLevel >= 10) return '';
     const art = getCharacterSpriteMarkup(promo.id, 'promo') || renderPromoBall(promo);
-    if (mode === 'level8') {
+    if (mode === 'level10') {
         return `<div class="card-item rarity-${promo.rarity} promo-offer-card">
             ${art}
-            <div class="promo-offer-title">${escapeHtmlText(decodeHtmlEntities(promo.label))} Lv. 8</div>
+            <div class="promo-offer-title">${escapeHtmlText(decodeHtmlEntities(promo.label))} Lv. 10</div>
             <div class="promo-offer-sub">Já vem no nível máximo.</div>
-            <div class="promo-offer-price"><span class="promo-offer-new">${promo.level8Cost} gemas</span></div>
-            <button class="btn-action promo-offer-btn" type="button" onclick="event.stopPropagation(); buyPromoCharacterOffer('${promo.id}', ${promo.level8Cost}, 8)">Comprar no máximo</button>
+            <div class="promo-offer-price"><span class="promo-offer-new">${promo.level10Cost} gemas</span></div>
+            <button class="btn-action promo-offer-btn" type="button" onclick="event.stopPropagation(); buyPromoCharacterOffer('${promo.id}', ${promo.level10Cost}, 10)">Comprar no máximo</button>
         </div>`;
     }
     return `<div class="card-item rarity-${promo.rarity} promo-offer-card">
@@ -7617,7 +7638,7 @@ function renderEventPromoCard(promo) {
     const currentLevel = Number(pd.chars?.[promo.id]?.level) || 0;
     const cards = [];
     if (!owned) cards.push(renderEventPromoOfferCard(promo, 'regular'));
-    if (promo.level8Cost && currentLevel < 8) cards.push(renderEventPromoOfferCard(promo, 'level8'));
+    if (promo.level10Cost && currentLevel < 10) cards.push(renderEventPromoOfferCard(promo, 'level10'));
     return cards.join('');
 }
 function renderEvents() {
@@ -7692,14 +7713,14 @@ function buyPromoCharacterOffer(id, cost, targetLevel = 1) {
     }
     const owned = !!pd.chars[id];
     const currentLevel = Number(pd.chars?.[id]?.level) || 0;
-    const isMaxOffer = Number(targetLevel) >= 8;
+    const isMaxOffer = Number(targetLevel) >= 10;
     const safeCost = Number(cost);
     if (!Number.isFinite(safeCost) || safeCost <= 0) return;
     if (!isMaxOffer && owned) {
         showAlert('Você já possui esse personagem.');
         return;
     }
-    if (isMaxOffer && currentLevel >= 8) {
+    if (isMaxOffer && currentLevel >= 10) {
         showAlert('Esse personagem já está no nível máximo.');
         return;
     }
@@ -7707,13 +7728,13 @@ function buyPromoCharacterOffer(id, cost, targetLevel = 1) {
         showAlert('Gemas insuficientes!');
         return;
     }
-    const label = isMaxOffer ? `${c.name} nível 8` : c.name;
+    const label = isMaxOffer ? `${c.name} nível 10` : c.name;
     showConfirm('Quer comprar essa oferta?', `Deseja comprar ${label} por ${safeCost} gemas?`, (res) => {
         if(!res) return;
         pd.gems -= safeCost;
         if (!owned) pd.chars[id] = { level: 1, slots: 2, chips: [null, null] };
         if (isMaxOffer) {
-            pd.chars[id].level = Math.max(Number(pd.chars[id].level) || 1, 8);
+            pd.chars[id].level = Math.max(Number(pd.chars[id].level) || 1, 10);
         }
         save();
         renderShop();
@@ -8472,7 +8493,7 @@ function ensureShopState() {
     ensureArr('xp', FIXED_XP.length);
 }
 
-function getUpgradeCost(lvl) { let e=0, c=0; if(lvl==1) e=20; else if(lvl==2) e=40; else if(lvl==3) {e=60; c=100;} else if(lvl==4) {e=80; c=250;} else if(lvl==5) {e=100; c=500;} else if(lvl==6) {e=150; c=1000;} else if(lvl==7) {e=200; c=2000;} return {evo:e, coins:c}; }
+function getUpgradeCost(lvl) { let e=0, c=0; if(lvl==1) e=20; else if(lvl==2) e=40; else if(lvl==3) {e=60; c=100;} else if(lvl==4) {e=80; c=250;} else if(lvl==5) {e=100; c=500;} else if(lvl==6) {e=150; c=1000;} else if(lvl==7) {e=200; c=2000;} else if(lvl==8) {e=250; c=3000;} else if(lvl==9) {e=300; c=4000;} return {evo:e, coins:c}; }
 
 function renderChars() {
     const list = document.getElementById('chars-list'); list.innerHTML = '';
@@ -8486,8 +8507,8 @@ let sort = document.getElementById('char-filter-sort') ? document.getElementById
     filtered.sort((a, b) => {
         const aOwned = !!pd.chars[a.id];
         const bOwned = !!pd.chars[b.id];
-        const aLvl = aOwned ? Math.max(1, Math.min(8, pd.chars[a.id].level || 1)) : 0;
-        const bLvl = bOwned ? Math.max(1, Math.min(8, pd.chars[b.id].level || 1)) : 0;
+        const aLvl = aOwned ? Math.max(1, Math.min(10, pd.chars[a.id].level || 1)) : 0;
+        const bLvl = bOwned ? Math.max(1, Math.min(10, pd.chars[b.id].level || 1)) : 0;
 
         if (sort === 'alpha') return a.name.localeCompare(b.name);
         if (sort === 'rarity_asc') return getCharacterRaritySortValue(a) - getCharacterRaritySortValue(b);
@@ -8517,7 +8538,7 @@ let sort = document.getElementById('char-filter-sort') ? document.getElementById
         let html = `${banTag}${hasSprite}<h4>${escapeHtmlText(getCharacterDisplayName(c.id))}</h4><div style="font-size:12px;color:#aaa">${c.class}</div>`;
         if(owned) {
             const medals = pd.chars[c.id]?.medals || { total: 0, run: 0 };
-            html += `<p style="font-size: 14px;">Nível ${lvl}/8</p><div style="font-size:12px;color:var(--btn-yellow);font-weight:bold;margin-top:4px;">🏅 ${medals.total}</div>`;
+            html += `<p style="font-size: 14px;">Nível ${lvl}/10</p><div style="font-size:12px;color:var(--btn-yellow);font-weight:bold;margin-top:4px;">🏅 ${medals.total}</div>`;
             if(isSel) html += `<div style="color:var(--btn-green); font-size:12px; font-weight:bold; margin-top:5px;">[Selecionado]</div>`;
         } else {
             const purchaseLabel = c.id === 'fasty' ? 'GRÁTIS' : `💎 ${c.cost}`;
@@ -8560,7 +8581,7 @@ function detailUpgradeAction() {
     if(!id || !pd.chars[id]) return;
     if (pd?.tutorial?.stage === 'evolve-strike' && id !== 'strike') return;
     const lvl = pd.chars[id].level || 1;
-    if(lvl >= 8) return;
+    if(lvl >= 10) return;
     const req = getUpgradeCost(lvl);
     const before = pd.chars[id].level || 1;
     upgradeChar(id, req.evo, req.coins);
@@ -8631,7 +8652,7 @@ function showCharDetail(id) {
         document.getElementById('detail-dmg').innerHTML = `${Math.floor(displayDmg * statMult)}${bonusDmg > 0 ? ` <span style="color:var(--btn-green)">(+${Math.floor(bonusDmg)})</span>` : ""}`;
         document.getElementById('detail-hp').innerHTML = `${Math.floor(displayHp * statMult)}${bonusHp > 0 ? ` <span style="color:var(--btn-green)">(+${Math.floor(bonusHp)})</span>` : ""}`;
 
-        document.getElementById('detail-lvl').innerHTML = owned ? `${lvl}/8` : `0/8`;
+        document.getElementById('detail-lvl').innerHTML = owned ? `${lvl}/10` : `0/10`;
         const medalsEl = document.getElementById('detail-medals');
         if (medalsEl) {
             const medals = owned ? (pd.chars[id].medals || { total: 0, run: 0 }) : { total: 0, run: 0 };
@@ -8702,7 +8723,7 @@ function showCharDetail(id) {
             btnSel.style.borderColor = (pd.selectedChar === id) ? "#333" : "var(--btn-green-border)";
             btnSel.innerHTML = (pd.selectedChar === id) ? "Equipado" : "Selecionar";
 
-            if(lvl < 8) {
+            if(lvl < 10) {
                 let req = getUpgradeCost(lvl);
                 btnEv.style.background = "var(--evo)";
                 btnEv.style.borderColor = "#8e44ad";
@@ -9115,14 +9136,14 @@ function renderShop() {
                     <button class="btn-action promo-offer-btn" type="button" onclick="event.stopPropagation(); buyPromoCharacterOffer('${promo.id}', ${promo.promoCost}, 1)">Comprar personagem</button>
                 </div>
             `);
-            if (promo.level8Cost && level < 8) {
+            if (promo.level10Cost && level < 10) {
                 cards.push(`
                     <div class="card-item rarity-${rarity} promo-offer-card">
                         ${renderPromoBall(promo)}
-                        <div class="promo-offer-title">${escapeHtmlText(decodeHtmlEntities(promo.label))} Lv. 8</div>
+                        <div class="promo-offer-title">${escapeHtmlText(decodeHtmlEntities(promo.label))} Lv. 10</div>
                         <div class="promo-offer-sub">Já vem no nível máximo.</div>
-                        <div class="promo-offer-price"><span class="promo-offer-new">${promo.level8Cost} gemas</span></div>
-                        <button class="btn-action promo-offer-btn" type="button" onclick="event.stopPropagation(); buyPromoCharacterOffer('${promo.id}', ${promo.level8Cost}, 8)">Comprar no máximo</button>
+                        <div class="promo-offer-price"><span class="promo-offer-new">${promo.level10Cost} gemas</span></div>
+                        <button class="btn-action promo-offer-btn" type="button" onclick="event.stopPropagation(); buyPromoCharacterOffer('${promo.id}', ${promo.level10Cost}, 10)">Comprar no máximo</button>
                     </div>
                 `);
             }
@@ -10317,6 +10338,79 @@ if (nickInputEl) {
     });
 }
 
+const COMMON_ABILITY_CONFIGS = {
+    strike: { label: '🎯', title: 'Habilidade — Tiro Perfurante', cooldown: 10 },
+    fasty: { label: '👟', title: 'Habilidade — Boost de Velocidade', cooldown: 20 },
+    hank: { label: '🚀', title: 'Habilidade — Míssil', cooldown: 15 },
+    cherry: { label: '💥', title: 'Habilidade — Rajada Pesada', cooldown: 15 }
+};
+
+function getCommonAbilityTarget(maxRange = 1100) {
+    if (!player || !Array.isArray(enemies)) return null;
+    let best = null, bestDist = maxRange;
+    for (const e of enemies) {
+        if (!e || e.hp <= 0) continue;
+        const d = dist(player, e);
+        if (d < bestDist) {
+            bestDist = d;
+            best = e;
+        }
+    }
+    return best;
+}
+
+function triggerCommonCharacterAbility(id) {
+    const cfg = COMMON_ABILITY_CONFIGS?.[id];
+    const lvl = Number(pd?.chars?.[id]?.level) || 0;
+    if (!player || !cfg || lvl < 5 || (player.commonAbilityCd || 0) > 0) return false;
+
+    if (id === 'fasty') {
+        player.fastyAbilityTimer = 5;
+        player.commonAbilityCd = cfg.cooldown;
+        addFloatingText(player.x, player.y - 34, 'TÊNIS!', '#8fdcff', 18);
+        createParticles(player.x, player.y, '#8fdcff');
+        updateSpecialButtonUI();
+        return true;
+    }
+
+    const target = getCommonAbilityTarget();
+    const angle = target
+        ? Math.atan2(target.y - player.y, target.x - player.x)
+        : (Number.isFinite(player.lastAimAngle) ? player.lastAimAngle : (Number.isFinite(player.lastMoveAngle) ? player.lastMoveAngle : 0));
+    player.lastAimAngle = angle;
+    const pSpd = 5 * player.stats.projSpdMult;
+    const finalDmg = Math.max(1, player.baseDmg * player.stats.dmgMult);
+    const spawnOffset = player.r + 10;
+    const sx = player.x + Math.cos(angle) * spawnOffset;
+    const sy = player.y + Math.sin(angle) * spawnOffset;
+
+    if (id === 'strike') {
+        createProj(sx, sy, Math.cos(angle) * pSpd * 1.08, Math.sin(angle) * pSpd * 1.08, finalDmg * 1.35, 120, true, 'strike_ability', {
+            size: 18, sourceChar: 'strike', pierce: 9999, abilityShot: true
+        });
+        addFloatingText(player.x, player.y - 34, 'PERFURANTE!', '#8fdcff', 16);
+    } else if (id === 'hank') {
+        createProj(sx, sy, Math.cos(angle) * pSpd * 0.95, Math.sin(angle) * pSpd * 0.95, finalDmg * 1.30, 80, true, 'hank_ability_missile', {
+            size: 10, sourceChar: 'hank', abilityShot: true, abilityExplosionRadius: 160
+        });
+        addFloatingText(player.x, player.y - 34, 'MÍSSIL!', '#8fdcff', 16);
+    } else if (id === 'cherry') {
+        const spread = 0.13;
+        for (let i = 0; i < 3; i++) {
+            const shotAngle = angle + (i - 1) * spread;
+            createProj(sx, sy, Math.cos(shotAngle) * pSpd * 1.02, Math.sin(shotAngle) * pSpd * 1.02, finalDmg * 0.90, 58, true, 'heavy', {
+                sourceChar: 'cherry', abilityShot: true
+            });
+        }
+        addFloatingText(player.x, player.y - 34, 'RAJADA!', '#8fdcff', 16);
+    }
+
+    player.commonAbilityCd = cfg.cooldown;
+    createParticles(player.x, player.y, '#8fdcff');
+    updateSpecialButtonUI();
+    return true;
+}
+
 function getSelectedSpecialConfig() {
     if (!player || !pd?.selectedChar) return null;
     if (pd.selectedChar === 'ghoul') {
@@ -10354,6 +10448,10 @@ function getSelectedSpecialConfig() {
     if (pd.selectedChar === 'kacashi') {
         const active = (player.kacashiDimensionTimer || 0) > 0;
         return { type: 'kacashi', label: '👁️', title: active ? `Dimensão ativa ${Math.ceil(player.kacashiDimensionTimer)}s` : 'Sharin — Dimensão', ready: !active && (player.kacashiDimensionCd || 0) <= 0 };
+    }
+    const commonAbility = COMMON_ABILITY_CONFIGS?.[pd.selectedChar];
+    if (commonAbility && (Number(pd?.chars?.[pd.selectedChar]?.level) || 0) >= 5) {
+        return { type: 'common_ability', label: commonAbility.label, title: (player.commonAbilityCd || 0) > 0 ? `${commonAbility.title} — recarregando ${Math.ceil(player.commonAbilityCd)}s` : commonAbility.title, ready: (player.commonAbilityCd || 0) <= 0 };
     }
     return null;
 }
@@ -10487,7 +10585,9 @@ function updateSpecialButtonUI() {
                         ? Math.max(0, Number(player.grappleCooldown || 0))
                     : cfg.type === 'merlin'
                         ? Math.max(0, Number(player.merlinAgeCooldown || 0))
-                    : 0;
+                        : cfg.type === 'common_ability'
+                            ? Math.max(0, Number(player.commonAbilityCd || 0))
+                            : 0;
 
     const activeState = cfg.type === 'ghoul' ? isGhoulActive : cfg.type === 'ninji' ? isNinjiActive : cfg.type === 'joseph' ? isJosephActive : cfg.type === 'shinobi' ? isShinobiActive : cfg.type === 'glitch' ? isGlitchActive : cfg.type === 'popeye' ? ((player.popeyeSpinTimer || 0) > 0) : cfg.type === 'shell' ? ((player.shellTorpedoTimer || 0) > 0) : cfg.type === 'grapple' ? ((player.grappleHookTimer || 0) > 0) : isKacashiActive;
     const shouldShowCooldown = !activeState && !isSterlingCharging && !isGrappleCharging && cooldownValue > 0;
@@ -11047,7 +11147,7 @@ function startRunAfterShop() {
     player = {
         x: 0, y: 0, r: (pd.selectedChar === 'hank' || pd.selectedChar === 'yeti' || pd.selectedChar === 'glace') ? 20 : ((pd.selectedChar === 'shiv' || pd.selectedChar === 'zippi') ? 10 : (pd.selectedChar === 'kaisen' ? 13 : (pd.selectedChar === 'booboo' ? 13 : (pd.selectedChar === 'eel' ? 15 : 15)))), baseHp: initialBaseHp, hp: initialBaseHp, baseSpeed: charDef.speed, baseDmg: initialBaseDmg,
         baseFireRate: charDef.fireRate, baseRange: charDef.range, color: charDef.color, weapon: charDef.weapon, merlinAge: pd.selectedChar === 'merlin' ? 'old' : null, merlinBaseHp: pd.selectedChar === 'merlin' ? initialBaseHp : null, merlinPoisonChance: 0.15, merlinBabyChance: 0.15, merlinPacifierChance: 0, merlinAgeCooldown: 0, cyroPyroMode: pd.selectedChar === 'cyro_pyro' ? getCyroPyroMode() : null, gladiatorMode: pd.selectedChar === 'gladiator' ? (pd.chars?.gladiator?.mode || 'shooter') : null, gladiatorModeCooldown: 0, eolioPropellerSeq: 0, cd: 0, shieldTimer: 0,
-        zombieTimer: 0, revived: false, elekCycle: false, dashTimer: 0, meleeCd: 0, boldShots: 0, boldReload: 0, specCd: pd.selectedChar === 'ghoul' ? 20 : 0, invisTimer: 0, ghoulPendingCd: 0, ninjiPendingCd: 0,
+        zombieTimer: 0, revived: false, elekCycle: false, dashTimer: 0, meleeCd: 0, boldShots: 0, boldReload: 0, specCd: pd.selectedChar === 'ghoul' ? 20 : 0, commonAbilityCd: 0, fastyAbilityTimer: 0, invisTimer: 0, ghoulPendingCd: 0, ninjiPendingCd: 0,
         lastMoveAngle: 0, lastAimAngle: 0, kacashiDimensionTimer: 0, kacashiDimensionCd: 0, sharkieAttackTimer: 0, josephOllieCd: 0, josephOllieTimer: 0, josephOllieAngle: 0, josephOlliePendingCd: 0, josephOllieDetonate: false, sharkieAimAngle: 0, sharkieReverseAngle: 0, sharkieReverseX: 0, sharkieReverseY: 0, tenentCycle: 0, stormyCycle: 0, bulbMode: pd.selectedChar === 'bulb' ? Math.floor(Math.random() * 3) : null, bulbGasActiveUntil: 0, bulbGasCooldownUntil: 0, bulbGasAngle: 0, orbitalAngle: 0, popeyeSpinTimer: 0, popeyeSpinCooldown: 30, popeyeSpinUsed: true, popeyeSpinEndingFx: 0, shellTorpedoTimer: 0, shellTorpedoCooldown: pd.selectedChar === 'shell' ? 20 : 0, shellTorpedoTarget: null, shellTorpedoHitCd: 0, shellTorpedoDamageTick: 0, shellTorpedoWasActive: false, shellTorpedoExitTracked: false, grappleCooldown: 0, grappleCharging: false, grappleCharge: 0, grappleHookTimer: 0, grappleHookDuration: 0.28, grappleHookStartX: 0, grappleHookStartY: 0, grappleHookX: 0, grappleHookY: 0, grappleHookTargetX: 0, grappleHookTargetY: 0, grappleHookAngle: 0, grappleHookHitEnemy: null, grappleHookDamageApplied: false, grappleAttackTimer: 0, grappleAttackAngle: 0, boobooReturn: true, pickedCards: [], revivesUsed: 0, qbBar: 0, qbShield: false, isDead: false, flexCombo: 0, flexReload: 0, ninjiDashCd: 0, shinobiDragonActive: false, shinobiDragonWavesLeft: 0, shinobiDragonCooldown: pd.selectedChar === 'shinobi' ? 20 : 0, shinobiDragonFireCd: 0, shinobiScytheCycle: 0, sterlingCharging: false, sterlingCharge: 0, sterlingAttackCd: 0, majorBriggsKills: 0, majorBriggsStage: 1,
         adamScrap: 0, adamMechActive: false, adamMechWavesLeft: 0, adamMechHpBonus: 0, adamMechSizeBonus: 0, adamBaseHpBeforeMech: null, adamBaseRBeforeMech: null,
         spartaCycle: 0, spartaNoDamageTimer: 0, spartaShieldActive: false, spartaAttackTimer: 0, spartaAttackMode: 'straight', spartaAttackRange: 0, spartaAttackWidth: 0, spartaAttackHalfAngle: 0, vesperFocusTimer: 0, vesperFocusActive: false, vesperFocusTimer: 0, vesperFocusActive: false,
@@ -11382,6 +11482,7 @@ function triggerSpecial() {
     player.specialTriggerLockUntil = now + 120;
     const cfg = getSelectedSpecialConfig();
     if (!cfg) return;
+    if (cfg.type === 'common_ability') { triggerCommonCharacterAbility(pd.selectedChar); return; }
     if (cfg.type === 'sterling') { startSterlingCharge(); return; }
     if (cfg.type === 'grapple') { startGrappleCharge(); return; }
     if (cfg.type === 'merlin') { if ((player.merlinAgeCooldown || 0) > 0) { updateSpecialButtonUI(); return; } openMerlinAgeHub(); return; }
@@ -11885,6 +11986,8 @@ if (!isBossAlive) {
     if(player.specCd > 0) {
         player.specCd = Math.max(0, player.specCd - dt);
     }
+    if(player.commonAbilityCd > 0) player.commonAbilityCd = Math.max(0, player.commonAbilityCd - dt);
+    if(player.fastyAbilityTimer > 0) player.fastyAbilityTimer = Math.max(0, player.fastyAbilityTimer - dt);
     if(player.ninjiDashCd > 0) {
         player.ninjiDashCd = Math.max(0, player.ninjiDashCd - dt);
     }
@@ -11975,7 +12078,8 @@ if (!isBossAlive) {
         (o.type === 'cacto' || o.type === 'tree' || o.type === 'rock') &&
         dist(player, o) <= o.r + player.r + 70
     ) ? 1.35 : 1;
-    let pSpeed = player.baseSpeed * player.stats.speedMult * mapSpeedMult * totemSpd * vesperMobilityMult * josephWallBoost * 60 * dt;
+    let fastyAbilitySpeedMult = (pd.selectedChar === 'fasty' && (player.fastyAbilityTimer || 0) > 0) ? 1.8 : 1;
+    let pSpeed = player.baseSpeed * player.stats.speedMult * mapSpeedMult * totemSpd * vesperMobilityMult * josephWallBoost * fastyAbilitySpeedMult * 60 * dt;
     
     if (pd.selectedChar === 'joseph' && (player.josephOllieTimer || 0) > 0) {
         player.josephOllieTimer = Math.max(0, player.josephOllieTimer - dt);
@@ -13094,7 +13198,7 @@ function fireWeapon(target) {
             return;
         }
         if (w === 'glitch_bugshot') {
-            const glitchLevel = Math.max(1, Math.min(8, Number(pd?.chars?.glitch?.level) || 1));
+            const glitchLevel = Math.max(1, Math.min(10, Number(pd?.chars?.glitch?.level) || 1));
             const stunChance = Math.min(0.9, 0.36 + (glitchLevel - 1) * 0.04);
             const stunDuration = 0.8 + (glitchLevel - 1) * 0.07;
             createProj(player.x, player.y, Math.cos(angle)*pSpd*1.05, Math.sin(angle)*pSpd*1.05, finalDmg, 42, true, 'glitch_bugshot', { size: 8, sourceChar: 'glitch', glitchStunChance: stunChance, glitchStunDuration: stunDuration, glitchJitter: true });
@@ -13669,6 +13773,7 @@ function createProj(x, y, vx, vy, dmg, life, isPlayer, type, extra={}) {
     else if (type === 'beezy_bee') size = extra.size || 9;
     else if (type === 'shell_trident') size = extra.size || 9;
     else if (type === 'axel_shard') size = extra.size || 5;
+    else if (type === 'hank_ability_missile') size = extra.size || 10;
     let sourceStats = extra.sourceStats || (isPlayer ? player.stats : null);
     let pierce = extra.disableBasePierce ? 0 : (sourceStats ? Number(sourceStats.pierce || 0) : 0);
     if (Number.isFinite(extra.pierce)) pierce += Number(extra.pierce || 0);
@@ -16506,6 +16611,13 @@ function updateProjectiles(dt) {
         }
         if(hit && p.type === 'big_grenade') { const count = (p.extra?.sourceChar === 'grenade' && pd.fractured?.grenade) ? 16 : 8; const pSpd = 5 * player.stats.projSpdMult; for(let j=0; j<count; j++) { let a = (Math.PI * 2 / count) * j; const shard = createProj(p.x + Math.cos(a) * 10, p.y + Math.sin(a) * 10, Math.cos(a)*pSpd, Math.sin(a)*pSpd, p.dmg*0.45, 40, true, 'grenade', { size: 3, sourceChar: 'grenade', noHitFrames: 0.08 }); if (shard?.hitIds && hitTarget) shard.hitIds.add(hitTarget); } projectiles.splice(i, 1); continue; }
         if(hit && p.type === 'bomb') { applyCyberBombEffects(p); if(p.pierce > 0) { p.pierce--; } else { projectiles.splice(i, 1); continue; } }
+        if(hit && p.type === 'hank_ability_missile') {
+            const radius = Math.max(1, Number(p.extra?.abilityExplosionRadius) || 160) * player.stats.rangeMult;
+            createExplosion(p.x, p.y, radius, p.dmg, '#7f8c8d');
+            createParticles(p.x, p.y, '#a5b1c2');
+            projectiles.splice(i, 1);
+            continue;
+        }
         if(hit && p.type === 'rocket') { createExplosion(p.x, p.y, 80 * player.stats.rangeMult, p.dmg); projectiles.splice(i, 1); continue; }
         if(hit && p.type === 'buster_rocket') { createExplosion(p.x, p.y, 140 * player.stats.rangeMult, p.dmg); for(let j=0; j<boxPulls('metal'); j++) { let a = Math.PI/3 * j; createProj(p.x, p.y, Math.cos(a)*4, Math.sin(a)*4, p.dmg*0.3, 20, true, 'normal'); } projectiles.splice(i, 1); continue; }
         if(hit && p.type === 'chess_piece' && p.extra.chessType === 'rook') { createExplosion(p.x, p.y, 80 * player.stats.rangeMult, p.dmg); projectiles.splice(i, 1); continue; }
@@ -18304,6 +18416,35 @@ function draw() {
             ctx.restore();
         }
         else if(p.type === 'dagger' || p.type === 'ice_dagger' || p.type === 'ice_stake') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx)); ctx.fillStyle = (p.type==='ice_dagger'||p.type==='ice_stake')?'#00ffff':'#bdc3c7'; ctx.beginPath(); ctx.moveTo(p.size, 0); ctx.lineTo(-p.size/2, -p.size/3); ctx.lineTo(-p.size/2, p.size/3); ctx.fill(); ctx.restore(); } 
+        else if(p.type === 'hank_ability_missile') {
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(Math.atan2(p.vy, p.vx));
+            const r = p.size || 10;
+            ctx.shadowBlur = 7;
+            ctx.shadowColor = 'rgba(127,140,141,0.55)';
+            ctx.fillStyle = '#8e9aa3';
+            ctx.beginPath();
+            ctx.moveTo(r * 1.55, 0);
+            ctx.lineTo(r * 0.55, -r * 0.58);
+            ctx.lineTo(-r * 0.95, -r * 0.45);
+            ctx.lineTo(-r * 1.15, 0);
+            ctx.lineTo(-r * 0.95, r * 0.45);
+            ctx.lineTo(r * 0.55, r * 0.58);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = '#d9e0e4';
+            ctx.fillRect(-r * 0.35, -r * 0.42, r * 0.18, r * 0.84);
+            ctx.fillStyle = '#ff8c42';
+            ctx.beginPath();
+            ctx.moveTo(-r * 1.05, 0);
+            ctx.lineTo(-r * 1.7, -r * 0.32);
+            ctx.lineTo(-r * 1.35, 0);
+            ctx.lineTo(-r * 1.7, r * 0.32);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
         else if(p.type === 'bomb' || p.type === 'rocket' || p.type === 'buster_rocket' || p.type === 'cannon_ball') { ctx.fillStyle = '#2c3e50'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); if(p.type !== 'cannon_ball'){ctx.fillStyle = '#e67e22'; ctx.beginPath(); ctx.arc(p.x + p.size/2, p.y - p.size/2, 2, 0, Math.PI*2); ctx.fill();} }
         else if(p.type === 'grenade' || p.type === 'big_grenade') { ctx.fillStyle = '#27ae60'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); }
         else if(p.type === 'cyro_iceball') {
