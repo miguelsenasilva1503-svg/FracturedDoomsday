@@ -2155,6 +2155,10 @@
         <div class="settings-section">
             <div class="settings-section-title">Desenvolvimento</div>
             <div class="settings-grid">
+                <div class="settings-card settings-card--wide" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                    <input id="dev-code-input" class="custom-input" type="text" placeholder="Digite o código" autocomplete="off" spellcheck="false" style="margin:0; flex:1 1 220px;">
+                    <button class="btn-action" type="button" onclick="redeemDevCode()" style="margin:0; flex:0 0 auto;">Confirmar</button>
+                </div>
                 <button id="btn-dev-tools-entry" class="btn-menu settings-option hidden" type="button" onclick="toggleDevToolsPanel()">Dev Tools</button>
             </div>
         </div>
@@ -6595,20 +6599,18 @@ function redeemRewardCode() {
 }
 
 function redeemDevCode() {
-    ensureRedeemedCodesState();
     const input = document.getElementById('dev-code-input');
     const code = String(input?.value || '').trim();
     if (code !== 'dev321@d321') {
-        showAlert('Código de desenvolvedor inválido.');
+        showAlert('Código inválido.');
         return;
     }
     if (pd.debug?.devUnlocked) {
-        showAlert('As Dev Tools já estão desbloqueadas.');
+        if (input) input.value = '';
         return;
     }
     ensureDevDebugState();
     pd.debug.devUnlocked = true;
-    pd.redeemedCodes.dev321d321 = true;
     save();
     if (input) input.value = '';
     updateSettingsUI();
@@ -10354,6 +10356,15 @@ let wave, gameTime, waveTimer, enemySpawnTimer, enemiesKilled, inRunXp, inRunLev
 
 const joyZone = document.getElementById('joystick-zone'); const joyKnob = document.getElementById('joystick-knob'); let touchId = null;
 const btnSpecial = document.getElementById('btn-special');
+const devCodeInputEl = document.getElementById('dev-code-input');
+if (devCodeInputEl) {
+    devCodeInputEl.addEventListener('keydown', e => {
+        e.stopPropagation();
+        if (e.key === 'Enter') redeemDevCode();
+    });
+    devCodeInputEl.addEventListener('keyup', e => e.stopPropagation());
+}
+
 const nickInputEl = document.getElementById('nick-input');
 if (nickInputEl) {
     nickInputEl.addEventListener('keydown', e => e.stopPropagation());
