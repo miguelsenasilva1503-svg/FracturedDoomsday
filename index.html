@@ -521,6 +521,10 @@
     .resource-icon { width:24px; height:24px; object-fit:contain; vertical-align:middle; margin-right:4px; }
     .nav-resource-icon { width:50px; height:50px; object-fit:contain; display:block; margin:0; }
     .shop-resource-icon { width:38px; height:38px; object-fit:contain; display:block; margin:0 auto 5px; }
+    .ui-sprite-icon { width:50px; height:50px; object-fit:contain; display:block; }
+    .tab-sprite-icon { width:34px; height:34px; object-fit:contain; display:block; }
+    .inline-sprite-icon { width:22px; height:22px; object-fit:contain; vertical-align:middle; margin-right:4px; }
+    .patente-emblem-sprite { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; padding:3px; z-index:2; }
 
     .hud-hp-fill { height: 100%; width: 100%; background: #2ecc71; transition: width 0.15s linear, background 0.15s linear; }
 
@@ -2005,7 +2009,7 @@
             <div class="main-left-actions">
                 <div class="main-nav-row main-nav-row-left">
                     <span class="main-nav-label">Evento</span>
-                    <button class="emoji-nav-btn emoji-nav-event" onclick="renderEvents(); showScreen('screen-event')">⭐</button>
+                    <button class="emoji-nav-btn emoji-nav-event" onclick="renderEvents(); showScreen('screen-event')"><img class="ui-sprite-icon" src="elements/event.png" alt="Evento"></button>
                 </div>
                 <div class="main-nav-row main-nav-row-left">
                     <span class="main-nav-label">Passe</span>
@@ -2013,18 +2017,18 @@
                 </div>
                 <div class="main-nav-row main-nav-row-left">
                     <span class="main-nav-label">Missões</span>
-                    <button class="emoji-nav-btn emoji-nav-missions" onclick="showMissions()">📜</button>
+                    <button class="emoji-nav-btn emoji-nav-missions" onclick="showMissions()"><img class="ui-sprite-icon" src="elements/medal.png" alt="Missões"></button>
                 </div>
             </div>
 
             <div class="main-right-actions">
                 <div class="main-nav-row">
                     <span class="main-nav-label">Personagens</span>
-                    <button class="emoji-nav-btn emoji-nav-chars" onclick="showScreen('screen-chars')">👤</button>
+                    <button class="emoji-nav-btn emoji-nav-chars" onclick="showScreen('screen-chars')"><img class="ui-sprite-icon" src="elements/characters.png" alt="Personagens"></button>
                 </div>
                 <div class="main-nav-row">
                     <span class="main-nav-label">Loja</span>
-                    <button class="emoji-nav-btn emoji-nav-shop" onclick="showScreen('screen-shop')">💰</button>
+                    <button class="emoji-nav-btn emoji-nav-shop" onclick="showScreen('screen-shop')"><img class="ui-sprite-icon" src="elements/shop.png" alt="Loja"></button>
                 </div>
                 <div class="main-nav-row">
                     <span class="main-nav-label">Oficina</span>
@@ -2309,10 +2313,10 @@
     <div id="daily-reward-container" style="text-align:center; margin-bottom: 12px;"><button class="btn-action" style="font-size: 16px;" onclick="claimDailyReward()">🎁 Resgatar Diária</button></div>
 
     <div class="shop-tabs">
-        <button class="btn-menu shop-tab active" data-section="offers" onclick="showShopSection('offers')"><span class="tab-emoji">🎁</span><span class="tab-label">Ofertas</span></button>
-        <button class="btn-menu shop-tab" data-section="resources" onclick="showShopSection('resources')"><span class="tab-emoji">💰</span><span class="tab-label">Recursos</span></button>
-        <button class="btn-menu shop-tab" data-section="chips" onclick="showShopSection('chips')"><span class="tab-emoji">🧩</span><span class="tab-label">Chips</span></button>
-        <button class="btn-menu shop-tab" data-section="chars" onclick="showShopSection('chars')"><span class="tab-emoji">👤</span><span class="tab-label">Personagens</span></button>
+        <button class="btn-menu shop-tab active" data-section="offers" onclick="showShopSection('offers')"><img class="tab-sprite-icon" src="elements/shop.png" alt=""><span class="tab-label">Ofertas</span></button>
+        <button class="btn-menu shop-tab" data-section="resources" onclick="showShopSection('resources')"><img class="tab-sprite-icon" src="elements/coin.png" alt=""><span class="tab-label">Recursos</span></button>
+        <button class="btn-menu shop-tab" data-section="chips" onclick="showShopSection('chips')"><img class="tab-sprite-icon" src="elements/chip.png" alt=""><span class="tab-label">Chips</span></button>
+        <button class="btn-menu shop-tab" data-section="chars" onclick="showShopSection('chars')"><img class="tab-sprite-icon" src="elements/characters.png" alt=""><span class="tab-label">Personagens</span></button>
     </div>
 
     <div id="shop-section-offers" class="shop-section shop-panel">
@@ -2376,10 +2380,10 @@
     <p style="text-align:center; color:#ddd; margin: 0 0 12px 0;">Complete desafios especiais para liberar Popeye, Shell, Grapple e acessar a loja sazonal.</p>
 
     <div class="shop-tabs event-tabs">
-        <button class="btn-menu shop-tab active" data-section="popeye" onclick="showEventSection('popeye')"><span class="tab-emoji">🥬</span><span class="tab-label">Popeye</span></button>
-        <button class="btn-menu shop-tab" data-section="shell" onclick="showEventSection('shell')"><span class="tab-emoji">🌊</span><span class="tab-label">Shell</span></button>
-        <button class="btn-menu shop-tab" data-section="grapple" onclick="showEventSection('grapple')"><span class="tab-emoji">🪝</span><span class="tab-label">Grapple</span></button>
-        <button class="btn-menu shop-tab" data-section="store" onclick="showEventSection('store')"><span class="tab-emoji">🛍</span><span class="tab-label">Loja sazonal</span></button>
+        <button class="btn-menu shop-tab active" data-section="popeye" onclick="showEventSection('popeye')"><span class="tab-label">Popeye</span></button>
+        <button class="btn-menu shop-tab" data-section="shell" onclick="showEventSection('shell')"><span class="tab-label">Shell</span></button>
+        <button class="btn-menu shop-tab" data-section="grapple" onclick="showEventSection('grapple')"><span class="tab-label">Grapple</span></button>
+        <button class="btn-menu shop-tab" data-section="store" onclick="showEventSection('store')"><img class="tab-sprite-icon" src="elements/shop.png" alt=""><span class="tab-label">Loja sazonal</span></button>
     </div>
 
     <div id="event-section-popeye" class="shop-section shop-panel">
@@ -2557,7 +2561,7 @@
         <h3 id="go-coins" class="summary-line"><img class="resource-icon" src="elements/coin.png" alt=""> Moedas obtidas: <strong>0</strong></h3>
         <h3 id="go-gems" class="summary-line"><img class="resource-icon" src="elements/gems.png" alt=""> Gemas obtidas: <strong>0</strong></h3>
         <h3 id="go-scrap" class="summary-line"><img class="resource-icon" src="elements/scrap.png" alt=""> Sucatas obtidas: <strong>0</strong></h3>
-        <h3 id="go-medals" class="summary-line">🏅 Medalhas obtidas: <strong>0</strong></h3>
+        <h3 id="go-medals" class="summary-line"><img class="inline-sprite-icon" src="elements/medal.png" alt=""> Medalhas obtidas: <strong>0</strong></h3>
         <h3 id="go-daily" style="color:var(--btn-yellow);">Vitória Diária: Não ganha</h3>
     </div>
     <button class="btn-play" style="margin-top: 20px;" onclick="returnToMenu()">Voltar ao Menu</button>
@@ -3553,7 +3557,20 @@ function getPatenteInfo(level) {
 function getPatenteBadge(level, compact = false) {
     const patente = getPatenteInfo(level);
     if (!patente || !patente.label) return '';
-    return `<span class="patente-chip${compact ? ' patente-chip--compact' : ''}"><span class="patente-emblem patente-${patente.slug}"></span><span>${patente.label}</span></span>`;
+    const spriteBySlug = {
+        bronze: 'elements/bronze.png',
+        prata: 'elements/silver.png',
+        ouro: 'elements/gold.png',
+        diamante: 'elements/diamond.png',
+        lendario: 'elements/legendary.png',
+        mestre: 'elements/master.png',
+        elite: 'elements/elite.png'
+    };
+    const sprite = spriteBySlug[patente.slug] || '';
+    const emblem = sprite
+        ? `<span class="patente-emblem"><img class="patente-emblem-sprite" src="${sprite}" alt="${escapeHtmlText(patente.label)}"></span>`
+        : `<span class="patente-emblem patente-${patente.slug}"></span>`;
+    return `<span class="patente-chip${compact ? ' patente-chip--compact' : ''}">${emblem}<span>${patente.label}</span></span>`;
 }
 
 function getCharByDisplayName(displayName) {
@@ -3598,7 +3615,7 @@ function getGachaRewardRenderData(rawText) {
         /gemas?/i.test(label) || icon === '💎' ? 'gems' :
         /evo|pontos? evo/i.test(label) || icon === '🧬' ? 'evo' :
         /sucatas?/i.test(label) || icon === '🔩' ? 'scrap' :
-        /xp|passe/i.test(label) || icon === '🎫' ? 'xp' : '';
+        /xp|passe/i.test(label) || icon === '🎫' ? 'xp' : /chip/i.test(label) || icon === '💽' || icon === '🧩' ? 'chip' : /medal/i.test(label) || icon === '🏅' ? 'medal' : '';
     return {
         type: 'resource',
         icon,
@@ -5780,7 +5797,7 @@ function drawEnemyStatusHud(ctx, e, drawW, drawH) {
 }
 
 
-const CHARACTER_TITLE_THRESHOLD = 100;
+const CHARACTER_TITLE_THRESHOLD = 150;
 
 const _htmlDecodeEl = document.createElement('textarea');
 
@@ -8538,7 +8555,7 @@ let sort = document.getElementById('char-filter-sort') ? document.getElementById
         let html = `${banTag}${hasSprite}<h4>${escapeHtmlText(getCharacterDisplayName(c.id))}</h4><div style="font-size:12px;color:#aaa">${c.class}</div>`;
         if(owned) {
             const medals = pd.chars[c.id]?.medals || { total: 0, run: 0 };
-            html += `<p style="font-size: 14px;">Nível ${lvl}/10</p><div style="font-size:12px;color:var(--btn-yellow);font-weight:bold;margin-top:4px;">🏅 ${medals.total}</div>`;
+            html += `<p style="font-size: 14px;">Nível ${lvl}/10</p><div style="font-size:12px;color:var(--btn-yellow);font-weight:bold;margin-top:4px;">${resourceIcon('medal','inline-sprite-icon')} ${medals.total}</div>`;
             if(isSel) html += `<div style="color:var(--btn-green); font-size:12px; font-weight:bold; margin-top:5px;">[Selecionado]</div>`;
         } else {
             const purchaseLabel = c.id === 'fasty' ? 'GRÁTIS' : `💎 ${c.cost}`;
@@ -8658,7 +8675,7 @@ function showCharDetail(id) {
             const medals = owned ? (pd.chars[id].medals || { total: 0, run: 0 }) : { total: 0, run: 0 };
             const titleText = getTitleLabel(id);
             medalsEl.innerHTML = `
-                <div class="char-medal-card"><span class="label">Medalhas Totais</span><span class="value">🏅 ${medals.total}</span></div>
+                <div class="char-medal-card"><span class="label">Medalhas Totais</span><span class="value">${resourceIcon('medal', 'inline-sprite-icon')} ${medals.total}</span></div>
                 <div class="char-medal-card"><span class="label">Título Exclusivo</span><span class="value">🏷️ ${escapeHtmlText(titleText) || '—'}</span><small>${medals.total >= CHARACTER_TITLE_THRESHOLD ? 'Desbloqueado e pronto para equipar nas configurações.' : `Desbloqueia com ${CHARACTER_TITLE_THRESHOLD} medalhas.`}</small></div>
                 <div class="char-medal-card"><span class="label">Progresso do Título</span><span class="value">${medals.total >= CHARACTER_TITLE_THRESHOLD ? '🏆 Liberado' : `🔒 ${medals.total}/${CHARACTER_TITLE_THRESHOLD}`}</span></div>
             `;
@@ -9045,7 +9062,7 @@ function renderShop() {
             div.style.padding = "15px";
             let desc = "";
             if(b.items.char && CHARACTERS[b.items.char]) desc += `👤 ${CHARACTERS[b.items.char].name}<br>`;
-            if(b.items.chip && CHIPS_DATA[b.items.chip]) desc += `💽 Chip: ${CHIPS_DATA[b.items.chip].name}<br>`;
+            if(b.items.chip && CHIPS_DATA[b.items.chip]) desc += `${resourceIcon('chip','inline-sprite-icon')} Chip: ${CHIPS_DATA[b.items.chip].name}<br>`;
             if(b.items.coins > 0) desc += `🪙 ${b.items.coins} Moedas<br>`;
             if(b.items.evo > 0) desc += `🧬 ${b.items.evo} Evo<br>`;
             if(b.items.scrap > 0) desc += `🔩 ${b.items.scrap} Sucatas<br>`;
@@ -9232,7 +9249,7 @@ function buyChip(id, cost) {
         pd.chipsInventory[id] = (pd.chipsInventory[id] || 0) + 1;
         save();
         renderShop();
-        startGachaQueue([{ type: 'instant', title: 'Compra Bem Sucedida', contents: [`💽 CHIP ADQUIRIDO: ${c.name}!`] }]);
+        startGachaQueue([{ type: 'instant', title: 'Compra Bem Sucedida', contents: [`CHIP ADQUIRIDO: ${c.name}!`] }]);
     });
 }
 
@@ -9255,7 +9272,7 @@ function rollChip() {
     let keys = Object.keys(CHIPS_DATA);
     let id = keys[Math.floor(Math.random() * keys.length)];
     pd.chipsInventory[id] = (pd.chipsInventory[id] || 0) + 1;
-    return `💽 Chip Encontrado: ${CHIPS_DATA[id].name}`;
+    return `Chip Encontrado: ${CHIPS_DATA[id].name}`;
 }
 
 function getOwnedCharacterIdsForMedals() {
@@ -9271,7 +9288,7 @@ function grantCharacterMedals(charId, amount = 1, source = 'loot box') {
     save();
     const title = getTitleLabel(charId);
     const medalWord = n === 1 ? 'medalha' : 'medalhas';
-    return `🏅 +${n} ${medalWord} de ${escapeHtmlText(CHARACTERS[charId].name)}${title ? ` — ${escapeHtmlText(title)}` : ''}`;
+    return `${resourceIcon('medal', 'inline-sprite-icon')} +${n} ${medalWord} de ${escapeHtmlText(CHARACTERS[charId].name)}${title ? ` — ${escapeHtmlText(title)}` : ''}`;
 }
 
 function rollLootBoxCharacterMedal(type) {
@@ -9586,7 +9603,15 @@ function devRollCharacter() {
 }
 
 function resourceIcon(type, extraClass = 'resource-icon') {
-    const map = { coins:'elements/coin.png', gems:'elements/gems.png', evo:'elements/evo.png', xp:'elements/xp.png', scrap:'elements/scrap.png' };
+    const map = {
+        coins:'elements/coin.png',
+        gems:'elements/gems.png',
+        evo:'elements/evo.png',
+        xp:'elements/xp.png',
+        scrap:'elements/scrap.png',
+        medal:'elements/medal.png',
+        chip:'elements/chip.png'
+    };
     const src = map[type] || '';
     return src ? `<img class="${extraClass}" src="${src}" alt="">` : '';
 }
@@ -9595,7 +9620,7 @@ function renderResourceRewardText(txt) {
     const raw = String(txt || '');
     let out = raw.includes('<img') ? raw.replace(/&(?!(?:amp|lt|gt|quot|#39);)/g, '&amp;') : escapeHtmlText(raw);
     const icon = (type) => resourceIcon(type);
-    out = out.replace(/🪙/g, icon('coins')).replace(/💎/g, icon('gems')).replace(/🧬/g, icon('evo')).replace(/🔩/g, icon('scrap')).replace(/🎫/g, icon('xp'));
+    out = out.replace(/🪙/g, icon('coins')).replace(/💎/g, icon('gems')).replace(/🧬/g, icon('evo')).replace(/🔩/g, icon('scrap')).replace(/🎫/g, icon('xp')).replace(/💽|🧩/g, icon('chip')).replace(/🏅/g, icon('medal'));
     out = out.replace(/&lt;img class=&quot;resource-icon&quot;[^&gt;]*&gt;/g, '');
     return out;
 }
@@ -9667,7 +9692,7 @@ function processBuyBundle(index, cost) {
         if(b.items.evo) { pd.evo += b.items.evo; instant.push(`🧬 +${b.items.evo} Evo`); }
         if(b.items.scrap) { pd.sucatas += b.items.scrap; instant.push(`🔩 +${b.items.scrap} Sucatas`); }
         if(b.items.char) { pd.chars[b.items.char] = {level:1, slots:2, chips: [null, null]}; if(b.items.char==='gladiator') pd.chars[b.items.char].mode='shooter'; instant.push(`👤 NOVO PERSONAGEM: ${CHARACTERS[b.items.char].name}!`); }
-        if(b.items.chip) { pd.chipsInventory[b.items.chip] = (pd.chipsInventory[b.items.chip]||0)+1; instant.push(`💽 NOVO CHIP: ${CHIPS_DATA[b.items.chip].name}!`); }
+        if(b.items.chip) { pd.chipsInventory[b.items.chip] = (pd.chipsInventory[b.items.chip]||0)+1; instant.push(`NOVO CHIP: ${CHIPS_DATA[b.items.chip].name}!`); }
         if(instant.length > 0) q.push({ type: 'instant', title: 'Recompensas do Pacote', contents: instant });
         pd.shopState.bundles[index] = null; save(); renderShop(); startGachaQueue(q);
     });
@@ -10265,7 +10290,7 @@ function renderTrail() {
                     let f = getPatenteInfo(opts.level);
                     html += `<h3 style="color:#aaa; text-align:center;">Próxima patente</h3><div class="trail-card trail-focus-card" style="max-width: 420px; margin: 20px auto; text-align:left;">
                         <div class="trail-focus-head">
-                            <div class="trail-focus-badge">${getPatenteBadge(opts.level) || '<span style="font-size:34px;">🏅</span>'}</div>
+                            <div class="trail-focus-badge">${getPatenteBadge(opts.level) || '<img class="ui-sprite-icon" style="width:34px;height:34px;" src="elements/medal.png" alt="Medalha">'}</div>
                             <div class="trail-focus-copy">
                                 <div class="trail-focus-kicker">Patente alvo</div>
                                 <h3 class="trail-focus-title" style="font-size:28px;">${f.name}</h3>
@@ -11178,7 +11203,7 @@ function startRunAfterShop() {
     equippedChips.forEach(chipId => {
         if(chipId && CHIPS_DATA[chipId]) {
             CHIPS_DATA[chipId].effect(player.stats, player, allies);
-            player.pickedCards.push(`💽 ` + CHIPS_DATA[chipId].name);
+            player.pickedCards.push(`CHIP: ${CHIPS_DATA[chipId].name}`);
         }
     });
     
@@ -11596,8 +11621,10 @@ function loop(time) {
  if(!isPlaying) return; const dt = (time - lastTime) / 1000; lastTime = time; try { if(!isPaused) { update(dt); draw(); } } catch (err) { console.error('Loop error:', err); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; } gameLoopId = requestAnimationFrame(loop); }
 
 function triggerRevivePrompt() {
-    if(player && player.weapon === 'bit_arcade') {
-        player.bitReviveCount = Math.max(0, Number(player.bitReviveCount) || 0) + 1;
+    // Bit possui exatamente 1 revive automático. Depois dele, a próxima morte
+    // cai no fluxo normal e mostra o revive por gemas.
+    if(player && player.weapon === 'bit_arcade' && (Number(player.bitReviveCount) || 0) < 1) {
+        player.bitReviveCount = 1;
         player.baseHp *= 0.5;
         player.hp = player.baseHp * player.stats.maxHpMult;
         player.shieldTimer = 2.2;
@@ -11897,10 +11924,10 @@ if (!isBossAlive) {
             let spawn = getSafeSpawnPoint(60, 340, 36); let ex = spawn.x; let ey = spawn.y;
             const bossSpawnWave = wave; let mult = getEnemyDifficultyMultiplierFromEntry(wave >= 30 ? 'megaboss' : 'boss', bossSpawnWave, wave) * (pd.settings.ultraHardcore ? 1.16 : (window.isHardcoreMode ? 1.12 : 1.08));
             if(wave >= 30) {
-                enemies.push({ x: ex, y: ey, type: 'megaboss', isBoss: true, spawnWave: bossSpawnWave, entryWave: bossSpawnWave, hp: 1500*mult, maxHp: 1500*mult, speed: 1.2, baseDmg: 30*mult, dmg: 30*mult, size: 60, cd: -15, dashCd: 0, color: '#2c3e50', poison: {timer:0,dmg:0}, slowTimer: 0, weakenTimer: 0, burnTimer: 0, orbitalCd: 0, soak: 0, spawnSkillUsed: false }); triggerBossSpawnSkill(enemies[enemies.length - 1]); itemsMap = itemsMap.filter(it => it.type !== 'chest');
+                enemies.push({ x: ex, y: ey, type: 'megaboss', isBoss: true, spawnWave: bossSpawnWave, entryWave: bossSpawnWave, hp: 2250*mult, maxHp: 2250*mult, speed: 1.2, baseDmg: 30*mult, dmg: 30*mult, size: 60, cd: -15, dashCd: 0, color: '#2c3e50', poison: {timer:0,dmg:0}, slowTimer: 0, weakenTimer: 0, burnTimer: 0, orbitalCd: 0, soak: 0, spawnSkillUsed: false }); triggerBossSpawnSkill(enemies[enemies.length - 1]); itemsMap = itemsMap.filter(it => it.type !== 'chest');
                 addFloatingText(cw/2 + camera.x, ch/2 + camera.y - 100, "MEGA BOSS WAVE!", '#8e44ad', 50);
             } else {
-                enemies.push({ x: ex, y: ey, type: 'boss', isBoss: true, spawnWave: bossSpawnWave, entryWave: bossSpawnWave, hp: 600*mult, maxHp: 600*mult, speed: 0.8, baseDmg: 20*mult, dmg: 20*mult, size: 50, cd: -15, color: '#8b0000', poison: {timer:0,dmg:0}, slowTimer: 0, weakenTimer: 0, burnTimer: 0, soak: 0, spawnSkillUsed: false }); triggerBossSpawnSkill(enemies[enemies.length - 1]); itemsMap = itemsMap.filter(it => it.type !== 'chest');
+                enemies.push({ x: ex, y: ey, type: 'boss', isBoss: true, spawnWave: bossSpawnWave, entryWave: bossSpawnWave, hp: 900*mult, maxHp: 900*mult, speed: 0.8, baseDmg: 20*mult, dmg: 20*mult, size: 50, cd: -15, color: '#8b0000', poison: {timer:0,dmg:0}, slowTimer: 0, weakenTimer: 0, burnTimer: 0, soak: 0, spawnSkillUsed: false }); triggerBossSpawnSkill(enemies[enemies.length - 1]); itemsMap = itemsMap.filter(it => it.type !== 'chest');
                 addFloatingText(cw/2 + camera.x, ch/2 + camera.y - 100, "BOSS WAVE!", '#ff0000', 50);
             }
         }
@@ -13570,7 +13597,23 @@ function fireWeapon(target) {
             const now = getNowSeconds();
 
             if (mode === 0) {
-                createProj(player.x + Math.cos(angle) * (player.r + 7), player.y + Math.sin(angle) * (player.r + 7), Math.cos(angle) * pSpd * 0.95, Math.sin(angle) * pSpd * 0.95, finalDmg, 1.4, true, 'bulb_bubble', { size: 11, sourceChar: 'bulb', pierce: 0, bulbBubble: true });
+                const bubbleSpeed = Math.max(6.5, pSpd * 1.08);
+                const bubbleX = player.x + Math.cos(angle) * (player.r + 10);
+                const bubbleY = player.y + Math.sin(angle) * (player.r + 10);
+                createProj(
+                    bubbleX, bubbleY,
+                    Math.cos(angle) * bubbleSpeed,
+                    Math.sin(angle) * bubbleSpeed,
+                    finalDmg, 4.0, true, 'bulb_bubble',
+                    {
+                        size: 11,
+                        sourceChar: 'bulb',
+                        pierce: 0,
+                        bulbBubble: true,
+                        maxTravel: Math.max(300, player.baseRange * player.stats.rangeMult * 1.15),
+                        traveled: 0
+                    }
+                );
                 // Cadência alta o suficiente para permitir acertar a mesma bolha
                 // várias vezes antes do STUN de 1s expirar.
                 player.cd = Math.max(18, player.baseFireRate * player.stats.fireRateMult * 0.78);
@@ -14355,9 +14398,9 @@ function spawnEnemy() {
     if(type === 'lider_elite') { e.hp = 120*mult; e.speed = 1.0; e.baseDmg = 12*mult; e.size = 18; e.color = '#e84118'; e.spawnCd = 20; }
     if(type === 'mummy') { e.hp = 50*mult; e.speed = 1.3; e.baseDmg = 10*mult; e.size = 13; e.color = '#f5f6fa'; e.revives = 1; }
     if(type === 'monster_tree') { e.hp = 160*mult; e.speed = 0.75; e.baseDmg = 15*mult; e.size = 24; e.color = '#10ac84'; }
-    if(type === 'cardboard_head') { e.hp = 58*mult; e.speed = 1.35; e.baseDmg = 5*mult; e.size = 15; e.color = '#b8793c'; e.isGlobalArmored = true; e.breakIntoBasic = true; }
-    if(type === 'motorcycle_helmet') { e.hp = 110*mult; e.speed = 1.1; e.baseDmg = 6*mult; e.size = 16; e.color = '#56616d'; e.isGlobalArmored = true; e.breakIntoBasic = true; }
-    if(type === 'prism_head') { e.hp = 230*mult; e.speed = 0.92; e.baseDmg = 8*mult; e.size = 18; e.color = '#8c7cff'; e.isGlobalArmored = true; e.breakIntoBasic = true; }
+    if(type === 'cardboard_head') { e.hp = 45*mult; e.speed = 1.35; e.baseDmg = 5*mult; e.size = 15; e.color = '#b8793c'; e.isGlobalArmored = true; e.breakIntoBasic = true; }
+    if(type === 'motorcycle_helmet') { e.hp = 85*mult; e.speed = 1.1; e.baseDmg = 6*mult; e.size = 16; e.color = '#56616d'; e.isGlobalArmored = true; e.breakIntoBasic = true; }
+    if(type === 'prism_head') { e.hp = 180*mult; e.speed = 0.92; e.baseDmg = 8*mult; e.size = 18; e.color = '#8c7cff'; e.isGlobalArmored = true; e.breakIntoBasic = true; }
     if(type === 'explorer') { e.hp = 42*mult; e.speed = 1.4; e.baseDmg = 6.5*mult; e.size = 13; e.color = '#b97735'; e.desertEnemy = true; }
     if(type === 'sarcophagus') { e.hp = 150*mult; e.speed = 0; e.baseDmg = 8*mult; e.size = 22; e.color = '#c7a76b'; e.stationary = true; e.desertEnemy = true; }
     if(type === 'camel') { e.hp = 120*mult; e.speed = 0.9; e.baseDmg = 12*mult; e.size = 20; e.color = '#c89f6a'; e.desertEnemy = true; }
@@ -14866,7 +14909,7 @@ function updateEnemies(dt) {
                 e.revives--; e.hp = e.maxHp; e.freezeTimer = 1.0; e.color = '#7f8c8d';
             } else if(e.type !== 'merlin_baby' && e.breakIntoBasic && e.isGlobalArmored) {
                 // O invólucro é destruído: nasce um inimigo Básico no mesmo ponto.
-                const basicMult = Math.max(0.25, (Number(e.maxHp) > 0 ? Number(e.maxHp) / (e.type === 'cardboard_head' ? 58 : (e.type === 'motorcycle_helmet' ? 110 : 230)) : 1));
+                const basicMult = Math.max(0.25, (Number(e.maxHp) > 0 ? Number(e.maxHp) / (e.type === 'cardboard_head' ? 45 : (e.type === 'motorcycle_helmet' ? 85 : 180)) : 1));
                 e.type = 'basico';
                 e.hp = 30 * basicMult;
                 e.maxHp = e.hp;
@@ -14922,12 +14965,12 @@ function updateEnemies(dt) {
                 } else if (e.type === 'camel') {
                     const mult = 1 + (wave * 0.15);
                     enemies.push({ x:e.x-10, y:e.y, type:'basico', hp:30*mult, maxHp:30*mult, speed:1.5, baseDmg:5*mult, dmg:5*mult, size:12, cd:0, color:'#e74c3c', poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0, shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4, spawnBiome:1 });
-                    enemies.push({ x:e.x+10, y:e.y, type:'cardboard_head', hp:58*mult, maxHp:58*mult, speed:1.35, baseDmg:5*mult, dmg:5*mult, size:15, cd:0, color:'#b8793c', poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0, shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4, isGlobalArmored:true, breakIntoBasic:true, spawnBiome:1 });
+                    enemies.push({ x:e.x+10, y:e.y, type:'cardboard_head', hp:45*mult, maxHp:45*mult, speed:1.35, baseDmg:5*mult, dmg:5*mult, size:15, cd:0, color:'#b8793c', poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0, shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4, isGlobalArmored:true, breakIntoBasic:true, spawnBiome:1 });
                 }
                 enemiesKilled++; 
                 trackMissionProgress('kills', 1);
                 awardAchievementStat('totalKills', 1);
-                if(e.isBoss) { trackMissionProgress('bosses', 1); awardAchievementStat('bossKills', 1); awardCharacterMedal(pd.selectedChar, e.type === 'megaboss' ? 2 : 1); const bossBoxType = rollBossBoxDropType(); if (bossBoxType) itemsMap.push({x:e.x,y:e.y,type:'loot_box_drop',r:20,boxType:bossBoxType}); }
+                if(e.isBoss) { trackMissionProgress('bosses', 1); awardAchievementStat('bossKills', 1); awardCharacterMedal(pd.selectedChar, e.type === 'megaboss' ? 8 : 5); const bossBoxType = rollBossBoxDropType(); if (bossBoxType) itemsMap.push({x:e.x,y:e.y,type:'loot_box_drop',r:20,boxType:bossBoxType}); }
                 const eliteTypes = ['gigante','tanque','colosso','elite','elite_master','lider','lider_elite','megaboss'];
                 if(eliteTypes.includes(e.type)) trackMissionProgress('elite', 1);
                 trackMissionProgress('specific', 1, { enemyType: e.type });
@@ -15681,6 +15724,9 @@ function updateProjectiles(dt) {
             }
             p.x = targetEnemy.x;
             p.y = targetEnemy.y;
+            // A bolha fica centrada no inimigo e cresce a cada acerto, visualizando
+            // literalmente o inimigo dentro dela. Ela não é um projétil separado.
+            p.size = Math.max(14, Number(p.size) || 14);
             // A bolha presa não participa da colisão genérica de projéteis.
             // Ela só existe para representar/guardar o estado da bolha no alvo.
             if (p.life <= 0) {
@@ -15715,7 +15761,17 @@ function updateProjectiles(dt) {
             }
             p.x += p.vx * 60 * dt; p.y += p.vy * 60 * dt;
         } else if (p.type === 'bulb_bubble' || p.type === 'bulb_crust' || p.type === 'bulb_coral_piece') {
-            p.x += p.vx * 60 * dt; p.y += p.vy * 60 * dt;
+            const stepX = p.vx * 60 * dt;
+            const stepY = p.vy * 60 * dt;
+            p.x += stepX;
+            p.y += stepY;
+            if (p.type === 'bulb_bubble') {
+                p.extra = p.extra || {};
+                p.extra.traveled = (Number(p.extra.traveled) || 0) + Math.hypot(stepX, stepY);
+                if (p.extra.maxTravel && p.extra.traveled >= p.extra.maxTravel) {
+                    p.life = 0;
+                }
+            }
         }
 
         if (p.type === 'lunch_mix') {
@@ -16238,7 +16294,7 @@ function updateProjectiles(dt) {
                             if (!attached) {
                                 attached = {
                                     x: e.x, y: e.y, vx: 0, vy: 0, dmg: 0, life: 1.0, isPlayer: false,
-                                    size: 14, type: 'bulb_bubble_attached', pierce: 0, bounces: 0,
+                                    size: Math.max(18, (Number(e.size) || 10) + 6), type: 'bulb_bubble_attached', pierce: 0, bounces: 0,
                                     extra: { sourceChar: 'bulb', targetRef: e, expansions: 0, noHitFrames: 999, isAttachedBubble: true, bulbBubbleVisible: true },
                                     hitIds: new Set(), returnPhase: false, bounceCount: 0
                                 };
@@ -19514,8 +19570,17 @@ function gameOver(isQuit) {
             startGachaQueue(q);
         } else { winText = `Vitória Diária: Limite Atingido (${maxWins}/${maxWins})`; const q = (runBossBoxDrops.splice(0) || []).map(buildBoxQueue); if (q.length) startGachaQueue(q); }
     }
-    pd.missions.coins += runCoins || 0;
-    pd.achievements.stats.bestWave = Math.max(Number(pd.achievements?.stats?.bestWave) || 0, Math.max(0, wave));
+    if (!isQuit) {
+        pd.missions.coins += runCoins || 0;
+        pd.achievements.stats.bestWave = Math.max(Number(pd.achievements?.stats?.bestWave) || 0, Math.max(0, wave));
+    } else {
+        // Quitar invalida tudo que depende da conclusão da partida:
+        // medalhas da run, melhor wave e recursos vindos de baús.
+        runMedals = 0;
+        runChestCoins = 0;
+        runChestGems = 0;
+        runChestScrap = 0;
+    }
     restoreGlitchSelectionIfNeeded();
     save();
 
@@ -19524,7 +19589,7 @@ function gameOver(isQuit) {
     document.getElementById('go-coins').innerHTML = `<img class="resource-icon" src="elements/coin.png" alt=""> Moedas obtidas: <strong>${runCoins || 0}</strong>`;
     document.getElementById('go-gems').innerHTML = `<img class="resource-icon" src="elements/gems.png" alt=""> Gemas obtidas: <strong>${runGems || 0}</strong>`;
     document.getElementById('go-scrap').innerHTML = `<img class="resource-icon" src="elements/scrap.png" alt=""> Sucatas obtidas: <strong>${runScrap || 0}</strong>`;
-    document.getElementById('go-medals').innerHTML = `🏅 Medalhas obtidas: <strong>${medalsThisRun || 0}</strong>`;
+    document.getElementById('go-medals').innerHTML = `${resourceIcon('medal')} Medalhas obtidas: <strong>${isQuit ? 0 : (medalsThisRun || 0)}</strong>`;
     document.getElementById('go-daily').innerHTML = winText;
     document.getElementById('overlay-gameover').classList.remove('hidden'); document.getElementById('game-hud').classList.add('hidden'); document.getElementById('exp-bar-container').classList.add('hidden');
     // O tutorial da primeira derrota começa somente depois de o jogador sair da tela de game over.
