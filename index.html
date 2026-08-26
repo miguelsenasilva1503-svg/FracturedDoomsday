@@ -5571,18 +5571,19 @@ function getEnemySpritePath(type) {
 function getFracturedEnemySkinType(e) {
     if (!e || window.currentMap !== 11) return null;
     const type = String(e.type || '').toLowerCase();
+    if (e.fracturedSkinType && getEnemySpritePath(e.fracturedSkinType)) return e.fracturedSkinType;
     const biomeMaps = {
-        0: { basico:'basic', velocista:'velocist', atirador:'shooter', gigante:'giant', tanque:'tank', curandeiro:'healer', elite:'elite_shooter', lider:'leader', kamikaze:'kamikaze', cardboard_head:'cardboard_head', motorcycle_helmet:'motorcycle_helmet', prism_head:'prism_head', ballon:'ballon', truck:'truck' },
-        1: { basico:'desert_basic', cardboard_head:'desert_cardboard_head', motorcycle_helmet:'desert_motorcycle_helmet', prism_head:'desert_prism_head', velocista:'desert_velocista', atirador:'desert_atirador', gigante:'desert_gigante', kamikaze:'desert_kamikaze', elite:'desert_elite', tanque:'desert_tanque', curandeiro:'desert_curandeiro', lider:'desert_lider', truck:'desert_truck', ballon:'desert_ballon' },
-        2: { basico:'snow_basic', cardboard_head:'snowman_head', motorcycle_helmet:'pine_head', prism_head:'ice_head', velocista:'snow_velocist', atirador:'snow_shooter', gigante:'yeti_giant', tanque:'permafrost_tank', elite:'ice_elite_shooter', kamikaze:'ice_kamikaze', curandeiro:'avalanche_healer', truck:'snowplow', ballon:'snow_ballon' },
-        3: { basico:'cave_basic', cardboard_head:'cave_miner', motorcycle_helmet:'cave_crate_head', prism_head:'cave_stone_head', velocista:'cave_velocist', atirador:'cave_shooter', gigante:'cave_giant', tanque:'drill_tank', curandeiro:'cave_healer', elite:'elite_shooter', kamikaze:'cave_tnt_kamikaze', scorpion:'cave_scorpion', truck:'coal_kart', stone_golem:'stone_golem', tnt_crate:'tnt_crate', goblin:'hunter_goblin' },
-        4: { basico:'forest_basic', cardboard_head:'forest_cardboard_head', motorcycle_helmet:'forest_motorcycle_helmet', prism_head:'forest_prism_head', velocista:'forest_velocist', atirador:'forest_shooter', gigante:'forest_giant', tanque:'forest_tank', curandeiro:'forest_healer', elite:'forest_elite', kamikaze:'forest_kamikaze', lider:'forest_leader', ballon:'forest_ballon', truck:'forest_truck', goblin:'hunter_goblin', gorilla:'gorilla', leopard:'leopard', lumberjack:'lumberjack', monkey:'monkey' },
+        0: { basico:'basic', velocista:'velocist', atirador:'shooter', gigante:'giant', tanque:'tank', curandeiro:'healer', elite:'elite_shooter', lider:'leader', kamikaze:'kamikaze', cardboard_head:'cardboard_head', motorcycle_helmet:'motorcycle_helmet', prism_head:'prism_head', ballon:'ballon', truck:'truck', boss:'boss' },
+        1: { basico:'desert_basic', cardboard_head:'desert_cardboard_head', motorcycle_helmet:'desert_motorcycle_helmet', prism_head:'desert_prism_head', velocista:'desert_velocista', atirador:'desert_atirador', gigante:'desert_gigante', kamikaze:'desert_kamikaze', elite:'desert_elite', tanque:'desert_tanque', curandeiro:'desert_curandeiro', lider:'desert_lider', truck:'desert_truck', ballon:'desert_ballon', boss:'desert_boss' },
+        2: { basico:'snow_basic', cardboard_head:'snowman_head', motorcycle_helmet:'pine_head', prism_head:'ice_head', velocista:'snow_velocist', atirador:'snow_shooter', gigante:'yeti_giant', tanque:'permafrost_tank', elite:'ice_elite_shooter', kamikaze:'ice_kamikaze', curandeiro:'avalanche_healer', truck:'snowplow', ballon:'snow_ballon', boss:'permafrost_boss' },
+        3: { basico:'cave_basic', cardboard_head:'cave_miner', motorcycle_helmet:'cave_crate_head', prism_head:'cave_stone_head', velocista:'cave_velocist', atirador:'cave_shooter', gigante:'cave_giant', tanque:'drill_tank', curandeiro:'cave_healer', elite:'elite_shooter', kamikaze:'cave_tnt_kamikaze', scorpion:'cave_scorpion', truck:'coal_kart', stone_golem:'stone_golem', tnt_crate:'tnt_crate', goblin:'hunter_goblin', boss:'cave_king_boss' },
+        4: { basico:'forest_basic', cardboard_head:'forest_cardboard_head', motorcycle_helmet:'forest_motorcycle_helmet', prism_head:'forest_prism_head', velocista:'forest_velocist', atirador:'forest_shooter', gigante:'forest_giant', tanque:'forest_tank', curandeiro:'forest_healer', elite:'forest_elite', kamikaze:'forest_kamikaze', lider:'forest_leader', ballon:'forest_ballon', truck:'forest_truck', goblin:'hunter_goblin', gorilla:'gorilla', leopard:'leopard', lumberjack:'lumberjack', monkey:'monkey', boss:'forest_boss' },
         5: { basico:'basic', velocista:'velocist', atirador:'shooter', gigante:'giant', tanque:'tank', curandeiro:'healer', elite:'elite_shooter', lider:'leader' },
         6: { prism_head:'metro_prism_head' },
         7: { basico:'basic', velocista:'velocist', atirador:'shooter', gigante:'giant', tanque:'tank', curandeiro:'healer', elite:'elite_shooter', lider:'leader' },
-        8: { basico:'basic', velocista:'velocist', atirador:'shooter', gigante:'giant', tanque:'tank', curandeiro:'healer', elite:'elite_shooter', lider:'leader', ninja:'ninja' },
-        9: { basico:'basic', velocista:'dancer', atirador:'shooter', gigante:'giant', tanque:'tank', curandeiro:'healer', elite:'elite_shooter', lider:'leader', dancer:'dancer' },
-        10:{ basico:'swim_basic', velocista:'seahorse_velocist', atirador:'swim_shooter', gigante:'swim_giant', tanque:'swim_tank', curandeiro:'swim_healer', elite:'swim_elite_shooter', lider:'swim_leader', truck:'submarine', ballon:'pupperfish', swordfish:'swordfish', shark:'shark', triton:'triton', ghost_fisher:'ghost_fisher' }
+        8: { basico:'basic', velocista:'velocist', atirador:'shooter', gigante:'giant', tanque:'tank', curandeiro:'healer', elite:'elite_shooter', lider:'leader', ninja:'ninja', boss:'boss' },
+        9: { basico:'basic', velocista:'dancer', atirador:'shooter', gigante:'giant', tanque:'tank', curandeiro:'healer', elite:'elite_shooter', lider:'leader', dancer:'dancer', boss:'boss' },
+        10:{ basico:'swim_basic', velocista:'seahorse_velocist', atirador:'swim_shooter', gigante:'swim_giant', tanque:'swim_tank', curandeiro:'swim_healer', elite:'swim_elite_shooter', lider:'swim_leader', truck:'submarine', ballon:'pupperfish', swordfish:'swordfish', shark:'shark', triton:'triton', ghost_fisher:'ghost_fisher', boss:'swim_boss' }
     };
     const candidates=[];
     for (const mapId of Object.keys(biomeMaps)) {
@@ -14687,6 +14688,7 @@ function spawnEnemy() {
     if(pd.settings.ultraHardcore && window.currentMap === 4 && type === 'gigante') type = 'monster_tree';
 
     let e = { x: ex, y: ey, type, hp: 0, maxHp: 0, speed: 0, baseDmg: 0, dmg: 0, size: 0, cd: 0, color: '', poison: { timer: 0, dmg: 0, tickCd: 0 }, slowTimer: 0, weakenTimer: 0, curseTimer: 0, burnTimer: 0, freezeTimer: 0, burnDmg: 0, speedBuffTimer: 0, soak: 0, shockTimer: 0, shockSemiTimer: 0, shockTick: 0, shockSemiTick: 0, shockDmg: 0, shockSemiDmg: 0, shockRate: 0.3, semiShockRate: 0.4, spawnBiome: window.currentMap, spawnWave, entryWave: spawnWave, stationary: false, poisonOnHit: 0, enemySkin: (window.currentMap === 4 && type === 'goblin') ? 'hunter' : null, fracturedOrigin: false, fractureMapId: null };
+    if (window.currentMap === 11) e.fracturedSkinType = getFracturedEnemySkinType(e);
     
     if(type === 'basico') { e.hp = 30*mult; e.speed = 1.5; e.baseDmg = 5*mult; e.size = 12; e.color = '#e74c3c'; }
     if(type === 'velocista' || type === 'dancer') { e.hp = 15*mult; e.speed = 2.0; e.baseDmg = 3*mult; e.size = 10; e.color = '#f39c12'; } 
@@ -18306,7 +18308,7 @@ function drawFractureRay(fracture) {
 
 function getFractureSpawnPosition() {
     const angle = Math.random() * Math.PI * 2;
-    const distanceFromPlayer = 480 + Math.random() * 520;
+    const distanceFromPlayer = 300 + Math.random() * 320;
     return {
         x: Math.max(-1420, Math.min(1420, player.x + Math.cos(angle) * distanceFromPlayer)),
         y: Math.max(-1420, Math.min(1420, player.y + Math.sin(angle) * distanceFromPlayer))
@@ -18334,22 +18336,20 @@ function createFracture() {
 }
 
 function getFractureBiomePool(mapId) {
-    const pool = [];
-    const add = t => {
-        if (!pool.includes(t) && getEnemyEntryWave(t, wave) <= wave) pool.push(t);
-    };
     const byMap = {
-        1: ['mummy','explorer','camel','scorpion'],
-        2: ['snow_walker','ice_statue','deer_pilot'],
-        3: ['goblin','tnt_crate','scorpion','stone_golem'],
-        4: ['goblin','lumberjack','gorilla','leopard'],
-        8: ['ninja'],
-        9: ['dancer'],
-        10:['ghost_fisher','swordfish','triton']
+        0: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','boss'],
+        1: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','boss','mummy','explorer','camel','scorpion'],
+        2: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','boss','snow_walker','ice_statue','deer_pilot'],
+        3: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','boss','goblin','tnt_crate','scorpion','stone_golem'],
+        4: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','boss','goblin','lumberjack','gorilla','leopard'],
+        5: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','boss'],
+        6: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','boss'],
+        7: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','boss'],
+        8: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','boss','ninja'],
+        9: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','boss','dancer'],
+        10:['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','boss','ghost_fisher','swordfish','shark','triton']
     };
-    (byMap[Number(mapId)] || []).forEach(add);
-    ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon'].forEach(add);
-    return pool;
+    return [...new Set(byMap[Number(mapId)] || byMap[0])];
 }
 
 function getFracturedGlobalEnemyPool() {
@@ -18386,6 +18386,7 @@ function spawnFractureEnemy(fracture) {
         fracturedOrigin: true, fractureMapId: fracture.mapId,
         enemySkin: (fracture.mapId === 4 && type === 'goblin') ? 'hunter' : null
     };
+    e.fracturedSkinType = getFracturedEnemySkinType(e) || null;
     // Copia apenas a parametrização do inimigo da mesma tabela já usada pelo spawn normal.
     const templateTypes = { basico:30, velocista:15, dancer:40, ninja:20, atirador:20, gigante:80, tanque:110, curandeiro:40, elite:30, kamikaze:10, lider:45, cardboard_head:45, motorcycle_helmet:85, prism_head:180, truck:170, ballon:30,
         mummy:50, explorer:42, camel:120, scorpion:135, snow_walker:38, ice_statue:150, deer_pilot:28, goblin:28, tnt_crate:58, stone_golem:520, lumberjack:150, gorilla:80, leopard:52, ghost_fisher:34, swordfish:38, triton:105 };
