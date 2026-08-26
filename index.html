@@ -2163,7 +2163,7 @@
                                 <select id="music-menu-select" onchange="setMenuMusic(this.value)">
                                     <option value="legacy_awaits">Legacy Awaits</option>
                                     <option value="street_awaits">Street Awaits</option>
-                                    <option value="france_awaits">Frace Awaits</option>
+                                    <option value="france_awaits">France Awaits</option>
                                     <option value="battle_awaits">Battle Awaits</option>
                                     <option value="sea_awaits">Sea Awaits</option>
                                 </select>
@@ -3726,7 +3726,7 @@ const MUSIC_OPTIONS = {
 const MUSIC_LABELS = {
     legacy_awaits: 'Legacy Awaits',
     street_awaits: 'Street Awaits',
-    france_awaits: 'Frace Awaits',
+    france_awaits: 'France Awaits',
     battle_awaits: 'Battle Awaits',
     sea_awaits: 'Sea Awaits',
     roguish_journey: 'Roguish Journey',
@@ -4360,7 +4360,8 @@ function getEnemyEntryWave(type, currentWave = wave) {
         tanque: 13, curandeiro: 16, elite: 17, lider: 21, colosso: 30, elite_master: 30,
         lider_elite: 30, mummy: 10, explorer: 15, sarcophagus: 15, camel: 18, scorpion: 30,
         stone_golem: 35, boss: 10, megaboss: 30, goblin: 10, monster_tree: 1, lumberjack: 15,
-        gorilla: 22, monkey: 22, leopard: 30
+        gorilla: 22, monkey: 22, leopard: 30, truck: 5, ballon: 5, snow_walker: 7, ice_statue: 7, deer_pilot: 11,
+        ghost_fisher: 8, swordfish: 10, triton: 16, explorer: 15, camel: 18, scorpion: 30
     };
     return Object.prototype.hasOwnProperty.call(entryWaves, key) ? entryWaves[key] : Math.max(1, Number(currentWave) || 1);
 }
@@ -5568,18 +5569,32 @@ function getEnemySpritePath(type) {
 // Retorna a skin visual específica do bioma sem alterar a lógica do inimigo.
 // Assim, qualquer inimigo criado por invocação também herda a skin do Deserto.
 function getFracturedEnemySkinType(e) {
-    if (!e || window.currentMap !== 11 || !e.fracturedOrigin) return null;
-    const mapId = Number.isInteger(e.fractureMapId) ? e.fractureMapId : Math.floor(Math.random() * 11);
+    if (!e || window.currentMap !== 11) return null;
     const type = String(e.type || '').toLowerCase();
-    const maps = {
-        1: { basico:'desert_basic', cardboard_head:'desert_cardboard_head', motorcycle_helmet:'desert_motorcycle_helmet', prism_head:'desert_prism_head', velocista:'desert_velocista', atirador:'desert_atirador', gigante:'desert_gigante', kamikaze:'desert_kamikaze', boss:'desert_boss', elite:'desert_elite', tanque:'desert_tanque', curandeiro:'desert_curandeiro', lider:'desert_lider', truck:'desert_truck', ballon:'desert_ballon' },
-        2: { basico:'snow_basic', cardboard_head:'snowman_head', motorcycle_helmet:'pine_head', prism_head:'ice_head', velocista:'snow_velocist', atirador:'snow_shooter', gigante:'yeti_giant', boss:'permafrost_boss', tanque:'permafrost_tank', elite:'ice_elite_shooter', kamikaze:'ice_kamikaze', curandeiro:'avalanche_healer', truck:'snowplow', ballon:'snow_ballon' },
-        3: { basico:'cave_basic', cardboard_head:'cave_miner', motorcycle_helmet:'cave_crate_head', prism_head:'cave_stone_head', velocista:'cave_velocist', atirador:'cave_shooter', gigante:'cave_giant', boss:'cave_king_boss', kamikaze:'cave_tnt_kamikaze', tanque:'drill_tank', curandeiro:'cave_healer', truck:'coal_kart', scorpion:'cave_scorpion' },
-        4: { basico:'forest_basic', cardboard_head:'forest_cardboard_head', motorcycle_helmet:'forest_motorcycle_helmet', prism_head:'forest_prism_head', velocista:'forest_velocist', atirador:'forest_shooter', gigante:'forest_giant', boss:'forest_boss', kamikaze:'forest_kamikaze', tanque:'forest_tank', curandeiro:'forest_healer', elite:'forest_elite', lider:'forest_leader', truck:'forest_truck', ballon:'forest_ballon', goblin:'hunter_goblin', gorilla:'gorilla', leopard:'leopard', lumberjack:'lumberjack', monkey:'monkey' },
-        10:{ basico:'swim_basic', cardboard_head:'kelp_head', motorcycle_helmet:'coral_head', prism_head:'swim_helmet', velocista:'seahorse_velocist', atirador:'swim_shooter', gigante:'swim_giant', tanque:'swim_tank', boss:'swim_boss', kamikaze:'coral_kamikaze', curandeiro:'swim_healer', truck:'submarine', ballon:'pupperfish', elite:'swim_elite_shooter', lider:'swim_leader', swordfish:'swordfish', shark:'shark', triton:'triton' }
+    const biomeMaps = {
+        0: { basico:'basic', velocista:'velocist', atirador:'shooter', gigante:'giant', tanque:'tank', curandeiro:'healer', elite:'elite_shooter', lider:'leader', kamikaze:'kamikaze', cardboard_head:'cardboard_head', motorcycle_helmet:'motorcycle_helmet', prism_head:'prism_head', ballon:'ballon', truck:'truck' },
+        1: { basico:'desert_basic', cardboard_head:'desert_cardboard_head', motorcycle_helmet:'desert_motorcycle_helmet', prism_head:'desert_prism_head', velocista:'desert_velocista', atirador:'desert_atirador', gigante:'desert_gigante', kamikaze:'desert_kamikaze', elite:'desert_elite', tanque:'desert_tanque', curandeiro:'desert_curandeiro', lider:'desert_lider', truck:'desert_truck', ballon:'desert_ballon' },
+        2: { basico:'snow_basic', cardboard_head:'snowman_head', motorcycle_helmet:'pine_head', prism_head:'ice_head', velocista:'snow_velocist', atirador:'snow_shooter', gigante:'yeti_giant', tanque:'permafrost_tank', elite:'ice_elite_shooter', kamikaze:'ice_kamikaze', curandeiro:'avalanche_healer', truck:'snowplow', ballon:'snow_ballon' },
+        3: { basico:'cave_basic', cardboard_head:'cave_miner', motorcycle_helmet:'cave_crate_head', prism_head:'cave_stone_head', velocista:'cave_velocist', atirador:'cave_shooter', gigante:'cave_giant', tanque:'drill_tank', curandeiro:'cave_healer', elite:'elite_shooter', kamikaze:'cave_tnt_kamikaze', scorpion:'cave_scorpion', truck:'coal_kart', stone_golem:'stone_golem', tnt_crate:'tnt_crate', goblin:'hunter_goblin' },
+        4: { basico:'forest_basic', cardboard_head:'forest_cardboard_head', motorcycle_helmet:'forest_motorcycle_helmet', prism_head:'forest_prism_head', velocista:'forest_velocist', atirador:'forest_shooter', gigante:'forest_giant', tanque:'forest_tank', curandeiro:'forest_healer', elite:'forest_elite', kamikaze:'forest_kamikaze', lider:'forest_leader', ballon:'forest_ballon', truck:'forest_truck', goblin:'hunter_goblin', gorilla:'gorilla', leopard:'leopard', lumberjack:'lumberjack', monkey:'monkey' },
+        5: { basico:'basic', velocista:'velocist', atirador:'shooter', gigante:'giant', tanque:'tank', curandeiro:'healer', elite:'elite_shooter', lider:'leader' },
+        6: { prism_head:'metro_prism_head' },
+        7: { basico:'basic', velocista:'velocist', atirador:'shooter', gigante:'giant', tanque:'tank', curandeiro:'healer', elite:'elite_shooter', lider:'leader' },
+        8: { basico:'basic', velocista:'velocist', atirador:'shooter', gigante:'giant', tanque:'tank', curandeiro:'healer', elite:'elite_shooter', lider:'leader', ninja:'ninja' },
+        9: { basico:'basic', velocista:'dancer', atirador:'shooter', gigante:'giant', tanque:'tank', curandeiro:'healer', elite:'elite_shooter', lider:'leader', dancer:'dancer' },
+        10:{ basico:'swim_basic', velocista:'seahorse_velocist', atirador:'swim_shooter', gigante:'swim_giant', tanque:'swim_tank', curandeiro:'swim_healer', elite:'swim_elite_shooter', lider:'swim_leader', truck:'submarine', ballon:'pupperfish', swordfish:'swordfish', shark:'shark', triton:'triton', ghost_fisher:'ghost_fisher' }
     };
-    const map = maps[mapId];
-    return map && map[type] && getEnemySpritePath(map[type]) ? map[type] : null;
+    const candidates=[];
+    for (const mapId of Object.keys(biomeMaps)) {
+        const key = biomeMaps[mapId][type];
+        if (key && getEnemySpritePath(key)) candidates.push(key);
+    }
+    if (!candidates.length) return null;
+    const selected = e.fracturedOrigin
+        ? (Number.isInteger(e.fractureMapId) ? biomeMaps[e.fractureMapId]?.[type] : null)
+        : candidates[Math.floor(Math.random()*candidates.length)];
+    if (selected && getEnemySpritePath(selected)) return selected;
+    return candidates[Math.floor(Math.random()*candidates.length)];
 }
 
 function getEffectiveEnemySpriteType(e) {
@@ -14660,12 +14675,10 @@ function spawnEnemy() {
         if (wave >= 30) types.push('leopard');
     }
 
-    // Fraturado: o spawn normal reúne os inimigos de todos os mapas que já
-    // poderiam aparecer nesta wave, mas mantém Boss/Mega Boss nas waves de boss.
+    // Fraturado: todos os inimigos entram pela PRÓPRIA wave de estreia,
+    // independentemente do mapa onde normalmente aparecem.
     if (window.currentMap === 11) {
-        const allPool = new Set(types);
-        [1,2,3,4,10].forEach(mapId => getFractureBiomePool(mapId).forEach(t => allPool.add(t)));
-        types = Array.from(allPool);
+        types = getFracturedGlobalEnemyPool();
         if (pd.selectedChar === 'healy') types = types.filter(t => t !== 'curandeiro');
     }
     
@@ -14673,7 +14686,7 @@ function spawnEnemy() {
     
     if(pd.settings.ultraHardcore && window.currentMap === 4 && type === 'gigante') type = 'monster_tree';
 
-    let e = { x: ex, y: ey, type, hp: 0, maxHp: 0, speed: 0, baseDmg: 0, dmg: 0, size: 0, cd: 0, color: '', poison: { timer: 0, dmg: 0, tickCd: 0 }, slowTimer: 0, weakenTimer: 0, curseTimer: 0, burnTimer: 0, freezeTimer: 0, burnDmg: 0, speedBuffTimer: 0, soak: 0, shockTimer: 0, shockSemiTimer: 0, shockTick: 0, shockSemiTick: 0, shockDmg: 0, shockSemiDmg: 0, shockRate: 0.3, semiShockRate: 0.4, spawnBiome: window.currentMap, spawnWave, entryWave: spawnWave, stationary: false, poisonOnHit: 0, enemySkin: (window.currentMap === 4 && type === 'goblin') ? 'hunter' : null };
+    let e = { x: ex, y: ey, type, hp: 0, maxHp: 0, speed: 0, baseDmg: 0, dmg: 0, size: 0, cd: 0, color: '', poison: { timer: 0, dmg: 0, tickCd: 0 }, slowTimer: 0, weakenTimer: 0, curseTimer: 0, burnTimer: 0, freezeTimer: 0, burnDmg: 0, speedBuffTimer: 0, soak: 0, shockTimer: 0, shockSemiTimer: 0, shockTick: 0, shockSemiTick: 0, shockDmg: 0, shockSemiDmg: 0, shockRate: 0.3, semiShockRate: 0.4, spawnBiome: window.currentMap, spawnWave, entryWave: spawnWave, stationary: false, poisonOnHit: 0, enemySkin: (window.currentMap === 4 && type === 'goblin') ? 'hunter' : null, fracturedOrigin: false, fractureMapId: null };
     
     if(type === 'basico') { e.hp = 30*mult; e.speed = 1.5; e.baseDmg = 5*mult; e.size = 12; e.color = '#e74c3c'; }
     if(type === 'velocista' || type === 'dancer') { e.hp = 15*mult; e.speed = 2.0; e.baseDmg = 3*mult; e.size = 10; e.color = '#f39c12'; } 
@@ -18301,7 +18314,7 @@ function getFractureSpawnPosition() {
 }
 
 function createFracture() {
-    if (window.currentMap !== 11 || wave < 5 || !pd.settings.ultraHardcore) return false;
+    if (window.currentMap !== 11 || wave < 5) return false;
     const pos = getFractureSpawnPosition();
     const mapId = Math.floor(Math.random() * 11);
     const maxLife = 13 + Math.random() * 3;
@@ -18322,20 +18335,32 @@ function createFracture() {
 
 function getFractureBiomePool(mapId) {
     const pool = [];
-    const add = t => { if (getEnemyEntryWave(t, wave) <= wave && !pool.includes(t)) pool.push(t); };
-    // Inimigos comuns que podem usar a skin do bioma do portal.
+    const add = t => {
+        if (!pool.includes(t) && getEnemyEntryWave(t, wave) <= wave) pool.push(t);
+    };
+    const byMap = {
+        1: ['mummy','explorer','camel','scorpion'],
+        2: ['snow_walker','ice_statue','deer_pilot'],
+        3: ['goblin','tnt_crate','scorpion','stone_golem'],
+        4: ['goblin','lumberjack','gorilla','leopard'],
+        8: ['ninja'],
+        9: ['dancer'],
+        10:['ghost_fisher','swordfish','triton']
+    };
+    (byMap[Number(mapId)] || []).forEach(add);
     ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon'].forEach(add);
-    switch (Number(mapId)) {
-        case 1: ['mummy','explorer','camel','scorpion'].forEach(add); break;
-        case 2: ['snow_walker','ice_statue','deer_pilot'].forEach(add); break;
-        case 3: ['goblin','tnt_crate','scorpion','stone_golem'].forEach(add); break;
-        case 4: ['goblin','lumberjack','gorilla','leopard'].forEach(add); break;
-        case 8: ['ninja'].forEach(add); break;
-        case 9: ['dancer'].forEach(add); break;
-        case 10: ['ghost_fisher','swordfish','triton'].forEach(add); break;
-        default: break;
-    }
     return pool;
+}
+
+function getFracturedGlobalEnemyPool() {
+    const candidates = [
+        'basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider',
+        'cardboard_head','motorcycle_helmet','prism_head','truck','ballon','colosso','elite_master','lider_elite',
+        'mummy','explorer','camel','scorpion','snow_walker','ice_statue','deer_pilot',
+        'goblin','tnt_crate','stone_golem','lumberjack','gorilla','leopard','ninja','dancer',
+        'ghost_fisher','swordfish','triton'
+    ];
+    return candidates.filter(t => getEnemyEntryWave(t, wave) <= wave);
 }
 
 function spawnFractureEnemy(fracture) {
@@ -18404,7 +18429,7 @@ function spawnFractureEnemy(fracture) {
 }
 
 function updateFractures(dt) {
-    if (window.currentMap !== 11 || !pd.settings.ultraHardcore) {
+    if (window.currentMap !== 11) {
         window.fractures = [];
         return;
     }
@@ -20435,70 +20460,70 @@ function draw() {
             });
             ctx.fill();
         } else {
-            // Todos os mapas UHC usam exatamente a mesma base de escuridão.
-            // A Discoteca só adiciona os recortes móveis dos holofotes por cima dessa camada.
+            // Todos os mapas UHC usam exatamente uma camada base de escuridão.
+            // A Discoteca aplica essa mesma camada no canvas auxiliar para que os holofotes
+            // possam recortá-la sem somar uma segunda camada escura por cima.
             ctx.globalAlpha = 1;
             ctx.globalCompositeOperation = 'source-over';
-            ctx.fillStyle = 'rgba(0,0,0,0.76)';
-            ctx.fillRect(0, 0, cw, ch);
-            if (window.currentMap === 11 && Array.isArray(window.fractures)) {
-                // As fraturas recortam a escuridão existente com o mesmo formato de raio do portal.
-                ctx.globalCompositeOperation = 'destination-out';
-                window.fractures.forEach(f => {
-                    const x = f.x - camera.x, y = f.y - camera.y;
-                    const fade = Math.max(0, Math.min(1, (f.life || 0) / (f.maxLife || 14)));
-                    const len = Number(f.length) || 330, width = Number(f.width) || 115, angle = Number(f.angle) || 0;
-                    ctx.save();
-                    ctx.translate(x, y);
-                    ctx.rotate(angle);
-                    ctx.globalAlpha = Math.min(1, fade * 1.8);
-                    ctx.beginPath();
-                    ctx.moveTo(-len * 0.52, -width * 0.22);
-                    ctx.lineTo(-len * 0.17, -width * 0.58);
-                    ctx.lineTo(len * 0.10, -width * 0.30);
-                    ctx.lineTo(len * 0.54, -width * 0.14);
-                    ctx.lineTo(len * 0.30, width * 0.18);
-                    ctx.lineTo(len * 0.05, width * 0.52);
-                    ctx.lineTo(-len * 0.28, width * 0.24);
-                    ctx.closePath();
-                    ctx.fill();
-                    ctx.globalAlpha = Math.min(0.82, fade);
-                    ctx.lineWidth = Math.max(12, width * 0.18);
-                    ctx.strokeStyle = '#000';
-                    ctx.stroke();
-                    ctx.restore();
-                });
-                ctx.globalCompositeOperation = 'source-over';
-            }
             if (window.currentMap === 9) {
-                // Discoteca: a névoa UHC continua existindo, mas os holofotes "furam" apenas a própria camada de névoa.
-                // Usamos um canvas auxiliar para não apagar o cenário que já foi renderizado no canvas principal.
-                const lights = Array.isArray(window.discoSpotlights) ? window.discoSpotlights : [];
                 if (!window.discoFogCanvas) window.discoFogCanvas = document.createElement('canvas');
-                const fog = window.discoFogCanvas;
-                if (fog.width !== cw || fog.height !== ch) { fog.width = cw; fog.height = ch; }
-                const fctx = fog.getContext('2d');
-                fctx.setTransform(1, 0, 0, 1, 0, 0);
-                fctx.globalCompositeOperation = 'source-over';
-                fctx.clearRect(0, 0, cw, ch);
-                fctx.fillStyle = 'rgba(0,0,0,0.76)';
-                fctx.fillRect(0, 0, cw, ch);
-                fctx.globalCompositeOperation = 'destination-out';
-                fctx.fillStyle = '#000';
+                const baseFog = window.discoFogCanvas;
+                if (baseFog.width !== cw || baseFog.height !== ch) { baseFog.width = cw; baseFog.height = ch; }
+                const baseCtx = baseFog.getContext('2d');
+                baseCtx.setTransform(1, 0, 0, 1, 0, 0);
+                baseCtx.globalCompositeOperation = 'source-over';
+                baseCtx.clearRect(0, 0, cw, ch);
+                baseCtx.fillStyle = 'rgba(0,0,0,0.76)';
+                baseCtx.fillRect(0, 0, cw, ch);
+                baseCtx.globalCompositeOperation = 'destination-out';
+                const lights = Array.isArray(window.discoSpotlights) ? window.discoSpotlights : [];
                 for (const light of lights) {
                     const x = light.x - camera.x;
                     const y = light.y - camera.y;
                     const radius = Math.max(52, Number(light.r) || 90);
-                    const grad = fctx.createRadialGradient(x, y, 0, x, y, radius);
+                    const grad = baseCtx.createRadialGradient(x, y, 0, x, y, radius);
                     grad.addColorStop(0, 'rgba(0,0,0,1)');
                     grad.addColorStop(0.72, 'rgba(0,0,0,0.95)');
                     grad.addColorStop(1, 'rgba(0,0,0,0)');
-                    fctx.fillStyle = grad;
-                    fctx.beginPath();
-                    fctx.arc(x, y, radius, 0, Math.PI * 2);
-                    fctx.fill();
+                    baseCtx.fillStyle = grad;
+                    baseCtx.beginPath();
+                    baseCtx.arc(x, y, radius, 0, Math.PI * 2);
+                    baseCtx.fill();
                 }
-                ctx.drawImage(fog, 0, 0);
+                ctx.drawImage(baseFog, 0, 0);
+            } else {
+                ctx.fillStyle = 'rgba(0,0,0,0.76)';
+                ctx.fillRect(0, 0, cw, ch);
+            }
+            if (window.currentMap === 11 && Array.isArray(window.fractures)) {
+                // A escuridão é aplicada em uma camada auxiliar; as fraturas removem
+                // a névoa dessa camada e depois são redesenhadas para recuperar a textura
+                // do mapa do portal + o brilho. Assim elas realmente iluminam o chão.
+                if (!window.fractureFogCanvas) window.fractureFogCanvas = document.createElement('canvas');
+                const fog = window.fractureFogCanvas;
+                if (fog.width !== cw || fog.height !== ch) { fog.width = cw; fog.height = ch; }
+                const fctx = fog.getContext('2d');
+                fctx.setTransform(1,0,0,1,0,0);
+                fctx.globalCompositeOperation = 'source-over';
+                fctx.clearRect(0,0,cw,ch);
+                fctx.fillStyle = 'rgba(0,0,0,0.76)';
+                fctx.fillRect(0,0,cw,ch);
+                fctx.globalCompositeOperation = 'destination-out';
+                window.fractures.forEach(f => {
+                    const x = f.x - camera.x, y = f.y - camera.y;
+                    const fade = Math.max(0, Math.min(1, (f.life || 0) / (f.maxLife || 14)));
+                    const len = Number(f.length)||330, width = Number(f.width)||115, angle = Number(f.angle)||0;
+                    fctx.save();
+                    fctx.translate(x,y); fctx.rotate(angle); fctx.globalAlpha = Math.min(1, fade * 1.8);
+                    fctx.beginPath();
+                    fctx.moveTo(-len*0.52,-width*0.22); fctx.lineTo(-len*0.17,-width*0.58);
+                    fctx.lineTo(len*0.10,-width*0.30); fctx.lineTo(len*0.54,-width*0.14);
+                    fctx.lineTo(len*0.30,width*0.18); fctx.lineTo(len*0.05,width*0.52);
+                    fctx.lineTo(-len*0.28,width*0.24); fctx.closePath();
+                    fctx.fill(); fctx.restore();
+                });
+                ctx.drawImage(fog,0,0);
+                window.fractures.forEach(drawFractureRay);
             }
         }
         ctx.restore();
