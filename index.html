@@ -5569,14 +5569,17 @@ function getEnemySpritePath(type) {
 // Retorna a skin visual específica do bioma sem alterar a lógica do inimigo.
 // Assim, qualquer inimigo criado por invocação também herda a skin do Deserto.
 function getFracturedEnemySkinType(e) {
-    if (!e || window.currentMap !== 11) return null;
+    if (!e) return null;
+    const fracturedContext = !!e.fracturedOrigin || e.spawnBiome === 11 || window.currentMap === 11;
+    if (!fracturedContext) return null;
     const type = String(e.type || '').toLowerCase();
     if (e.fracturedSkinType && getEnemySpritePath(e.fracturedSkinType)) return e.fracturedSkinType;
+    if (e.resolvedFracturedSkinType && getEnemySpritePath(e.resolvedFracturedSkinType)) return e.resolvedFracturedSkinType;
     const biomeMaps = {
         0: { basico:'basic', velocista:'velocist', atirador:'shooter', gigante:'giant', tanque:'tank', curandeiro:'healer', elite:'elite_shooter', lider:'leader', kamikaze:'kamikaze', cardboard_head:'cardboard_head', motorcycle_helmet:'motorcycle_helmet', prism_head:'prism_head', ballon:'ballon', truck:'truck', boss:'boss' },
         1: { basico:'desert_basic', cardboard_head:'desert_cardboard_head', motorcycle_helmet:'desert_motorcycle_helmet', prism_head:'desert_prism_head', velocista:'desert_velocista', atirador:'desert_atirador', gigante:'desert_gigante', kamikaze:'desert_kamikaze', elite:'desert_elite', tanque:'desert_tanque', curandeiro:'desert_curandeiro', lider:'desert_lider', truck:'desert_truck', ballon:'desert_ballon', boss:'desert_boss' },
         2: { basico:'snow_basic', cardboard_head:'snowman_head', motorcycle_helmet:'pine_head', prism_head:'ice_head', velocista:'snow_velocist', atirador:'snow_shooter', gigante:'yeti_giant', tanque:'permafrost_tank', elite:'ice_elite_shooter', kamikaze:'ice_kamikaze', curandeiro:'avalanche_healer', truck:'snowplow', ballon:'snow_ballon', boss:'permafrost_boss' },
-        3: { basico:'cave_basic', cardboard_head:'cave_miner', motorcycle_helmet:'cave_crate_head', prism_head:'cave_stone_head', velocista:'cave_velocist', atirador:'cave_shooter', gigante:'cave_giant', tanque:'drill_tank', curandeiro:'cave_healer', elite:'elite_shooter', kamikaze:'cave_tnt_kamikaze', scorpion:'cave_scorpion', truck:'coal_kart', stone_golem:'stone_golem', tnt_crate:'tnt_crate', goblin:'hunter_goblin', boss:'cave_king_boss' },
+        3: { basico:'cave_basic', cardboard_head:'cave_miner', motorcycle_helmet:'cave_crate_head', prism_head:'cave_stone_head', velocista:'cave_velocist', atirador:'cave_shooter', gigante:'cave_giant', tanque:'drill_tank', curandeiro:'cave_healer', elite:'elite_shooter', kamikaze:'cave_tnt_kamikaze', scorpion:'cave_scorpion', truck:'coal_kart', stone_golem:'stone_golem', tnt_crate:'tnt_crate', goblin:'goblin', boss:'cave_king_boss' },
         4: { basico:'forest_basic', cardboard_head:'forest_cardboard_head', motorcycle_helmet:'forest_motorcycle_helmet', prism_head:'forest_prism_head', velocista:'forest_velocist', atirador:'forest_shooter', gigante:'forest_giant', tanque:'forest_tank', curandeiro:'forest_healer', elite:'forest_elite', kamikaze:'forest_kamikaze', lider:'forest_leader', ballon:'forest_ballon', truck:'forest_truck', goblin:'hunter_goblin', gorilla:'gorilla', leopard:'leopard', lumberjack:'lumberjack', monkey:'monkey', boss:'forest_boss' },
         5: { basico:'basic', velocista:'velocist', atirador:'shooter', gigante:'giant', tanque:'tank', curandeiro:'healer', elite:'elite_shooter', lider:'leader' },
         6: { prism_head:'metro_prism_head' },
@@ -5590,12 +5593,20 @@ function getFracturedEnemySkinType(e) {
         const key = biomeMaps[mapId][type];
         if (key && getEnemySpritePath(key)) candidates.push(key);
     }
+    if (e.fracturedOrigin) {
+        const mapSkin = Number.isInteger(e.fractureMapId) ? biomeMaps[e.fractureMapId]?.[type] : null;
+        if (mapSkin && getEnemySpritePath(mapSkin)) {
+            e.resolvedFracturedSkinType = mapSkin;
+            return mapSkin;
+        }
+        const fallback = getEnemySpritePath(type) ? type : null;
+        e.resolvedFracturedSkinType = fallback;
+        return fallback;
+    }
     if (!candidates.length) return null;
-    const selected = e.fracturedOrigin
-        ? (Number.isInteger(e.fractureMapId) ? biomeMaps[e.fractureMapId]?.[type] : null)
-        : candidates[Math.floor(Math.random()*candidates.length)];
-    if (selected && getEnemySpritePath(selected)) return selected;
-    return candidates[Math.floor(Math.random()*candidates.length)];
+    const selected = candidates[Math.floor(Math.random()*candidates.length)];
+    e.resolvedFracturedSkinType = selected;
+    return selected;
 }
 
 function getEffectiveEnemySpriteType(e) {
@@ -12701,7 +12712,7 @@ if (!isBossAlive) {
     let spawnRate = wave <= 3 ? baseSpawn : Math.max(minSpawn, baseSpawn - (wave - 3) * waveRed);
     spawnRate *= player.stats.enemySpawnMult;
     
-    if(enemySpawnTimer <= 0 && !isBossAlive) { spawnEnemy(); enemySpawnTimer = spawnRate; }
+    if(enemySpawnTimer <= 0 && !isBossAlive && wave % 10 !== 0) { spawnEnemy(); enemySpawnTimer = spawnRate; }
 
     updateEnemies(dt);
     updateAllies(dt); updateProjectiles(dt); updatePuddles(dt); updateGems(dt); updateParticles(dt); updateCaveVisionBursts(dt); updateMarineOxygen(dt); updateGameHud();
@@ -18308,7 +18319,7 @@ function drawFractureRay(fracture) {
 
 function getFractureSpawnPosition() {
     const angle = Math.random() * Math.PI * 2;
-    const distanceFromPlayer = 300 + Math.random() * 320;
+    const distanceFromPlayer = 180 + Math.random() * 180;
     return {
         x: Math.max(-1420, Math.min(1420, player.x + Math.cos(angle) * distanceFromPlayer)),
         y: Math.max(-1420, Math.min(1420, player.y + Math.sin(angle) * distanceFromPlayer))
@@ -18316,7 +18327,7 @@ function getFractureSpawnPosition() {
 }
 
 function createFracture() {
-    if (window.currentMap !== 11 || wave < 5) return false;
+    if (window.currentMap !== 11 || wave < 5 || wave % 10 === 0 || enemies.some(e => e && e.isBoss)) return false;
     const pos = getFractureSpawnPosition();
     const mapId = Math.floor(Math.random() * 11);
     const maxLife = 13 + Math.random() * 3;
@@ -18364,7 +18375,7 @@ function getFracturedGlobalEnemyPool() {
 }
 
 function spawnFractureEnemy(fracture) {
-    if (!fracture) return false;
+    if (!fracture || wave % 10 === 0 || enemies.some(e => e && e.isBoss)) return false;
     const pool = getFractureBiomePool(fracture.mapId);
     if (!pool.length) return false;
     const type = pool[Math.floor(Math.random() * pool.length)];
@@ -18435,7 +18446,7 @@ function updateFractures(dt) {
         return;
     }
     window.fractures = Array.isArray(window.fractures) ? window.fractures : [];
-    if (wave >= 5) {
+    if (wave >= 5 && wave % 10 !== 0 && !enemies.some(e => e && e.isBoss)) {
         if (!Number.isFinite(window.fractureSpawnTimer)) window.fractureSpawnTimer = 14 + Math.random() * 10;
         window.fractureSpawnTimer -= dt;
         if (window.fractureSpawnTimer <= 0) {
