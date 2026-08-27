@@ -1901,6 +1901,10 @@
     #joystick-zone { position: fixed !important; left: 30px !important; right: auto !important; top: auto !important; bottom: 30px !important; transform: none !important; }
 
     #joystick-zone { position: fixed !important; left: 30px !important; top: auto !important; right: auto !important; bottom: 30px !important; transform: none !important; }
+
+.map-destination-panel{width:min(1100px,94vw);max-height:92vh;overflow:auto;padding:28px 22px;border-radius:24px;background:linear-gradient(180deg,rgba(25,30,46,.98),rgba(10,12,22,.98));border:2px solid rgba(171,111,255,.55);box-shadow:0 20px 70px rgba(0,0,0,.55),0 0 45px rgba(133,78,255,.16);text-align:center}
+.map-destination-kicker{font-size:12px;letter-spacing:4px;font-weight:900;color:#b98cff;margin-bottom:4px}.map-destination-panel h1{margin:0;color:#fff;font-size:clamp(28px,5vw,52px);line-height:1.05}.map-destination-subtitle{margin:10px auto 20px;color:#b7becb;font-size:14px;max-width:760px}.map-destination-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.map-destination-card{position:relative;border:2px solid rgba(255,255,255,.10);border-radius:20px;background:rgba(255,255,255,.045);padding:10px;cursor:pointer;transition:transform .16s,border-color .16s,box-shadow .16s}.map-destination-card:hover,.map-destination-card:focus-visible{transform:translateY(-4px);border-color:rgba(190,144,255,.8);box-shadow:0 14px 35px rgba(0,0,0,.35)}.map-destination-card canvas{display:block;width:100%;aspect-ratio:16/10;border-radius:14px;background:#111;image-rendering:auto}.map-destination-fracture{position:absolute;left:10px;right:10px;top:10px;aspect-ratio:16/10;border-radius:14px;pointer-events:none;overflow:hidden}.map-destination-fracture::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.16),rgba(180,98,255,.06) 33%,rgba(0,0,0,0) 65%)}.map-destination-fracture::after{content:"";position:absolute;left:50%;top:50%;width:72%;height:140%;transform:translate(-50%,-50%) rotate(10deg);background:repeating-linear-gradient(112deg,transparent 0 26px,rgba(238,224,255,.8) 27px 29px,rgba(102,44,153,.6) 30px 31px,transparent 32px 58px);mix-blend-mode:screen;opacity:.75}.map-destination-name{font-size:20px;font-weight:1000;color:#fff;margin:10px 0 3px}.map-destination-meta{font-size:11px;color:#9da8ba}.map-destination-timer{margin-top:16px;color:#858fa0;font-size:11px}.map-destination-card.is-fracturado{border-color:rgba(184,140,255,.55)}
+@media(max-width:760px){.map-destination-grid{grid-template-columns:1fr}.map-destination-panel{padding:20px 14px}}
 </style>
 </head>
 <body>
@@ -2051,6 +2055,16 @@
         </div>
         <div id="merlin-age-options" class="merlin-age-grid"></div>
         <button class="btn-menu" style="width:100%; margin:0; flex:0 0 auto;" onclick="closeMerlinAgeHub()">Voltar para a partida</button>
+    </div>
+</div>
+
+<div id="overlay-map-destination" class="overlay hidden" style="z-index: 12000; background:rgba(5,6,12,0.96);">
+    <div class="map-destination-panel">
+        <div class="map-destination-kicker">ROTA DAS FRATURAS</div>
+        <h1>ESCOLHA SEU DESTINO</h1>
+        <p class="map-destination-subtitle">Escolha uma das três Fraturas. O destino ficará ativo até a próxima rotação.</p>
+        <div id="map-destination-grid" class="map-destination-grid"></div>
+        <div id="map-destination-timer" class="map-destination-timer"></div>
     </div>
 </div>
 
@@ -2219,6 +2233,7 @@
                 <button class="btn-menu settings-option" type="button" onclick="toggleDevSetting('infinitePassXp')">Passe XP infinito: <br><span id="dev-inf-pass-xp" style="color:var(--btn-red)">Desativado</span></button>
                 <button class="btn-menu settings-option" type="button" onclick="toggleDevSetting('allTitles')">Todos os títulos: <br><span id="dev-all-titles" style="color:var(--btn-red)">Desativado</span></button>
                 <button class="btn-menu settings-option" type="button" onclick="resetDevAccount()">Reset de conta</button>
+                <button class="btn-menu settings-option" type="button" onclick="resetMapDestination()">Reset de mapa</button>
                 <div class="settings-option" style="display:flex; flex-direction:column; justify-content:center; gap:8px; min-height:84px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.10); border-radius:14px; padding:12px;">
                     <span style="font-size:14px; font-weight:900; color:#fff;">Mapa da rotação</span>
                     <select id="dev-map-rotation" class="filter-select" style="width:100%; margin:0; font-size:14px; padding:8px;" onchange="setDevMapRotation(this.value)"></select>
@@ -3704,7 +3719,7 @@ function renderGachaRevealHtml(rawText) {
 
 const DEFAULT_KEYBINDS = { up: 'w', down: 's', left: 'a', right: 'd', special: 'p', pause: 'escape' };
 const DEFAULT_INITIAL_ZOOM = (('ontouchstart' in window) || navigator.maxTouchPoints > 0) ? 0.65 : 1;
-const DEFAULT_SETTINGS = { skipGacha: false, controlMode: 'auto', joystickSize: 120, ultraHardcore: false, uhcDark: false, noParticles: false, showCombatText: true, showHpBar: false, screenZoom: DEFAULT_INITIAL_ZOOM, musicVolume: 0.7, mapChoice: -1, menuMusic: 'sea_awaits', casualMusic: 'marine_journey', keybinds: { ...DEFAULT_KEYBINDS } };
+const DEFAULT_SETTINGS = { skipGacha: false, controlMode: 'auto', joystickSize: 120, ultraHardcore: false, uhcDark: false, noParticles: false, showCombatText: true, showHpBar: false, screenZoom: DEFAULT_INITIAL_ZOOM, musicVolume: 0.7, mapChoice: -1, mapChoiceBucket: -1, menuMusic: 'sea_awaits', casualMusic: 'marine_journey', keybinds: { ...DEFAULT_KEYBINDS } };
 
 const MUSIC_OPTIONS = {
     menu: {
@@ -4361,7 +4376,7 @@ function getEnemyEntryWave(type, currentWave = wave) {
         lider_elite: 30, mummy: 10, explorer: 15, sarcophagus: 15, camel: 18, scorpion: 30,
         stone_golem: 35, boss: 10, megaboss: 30, goblin: 10, monster_tree: 1, lumberjack: 15,
         gorilla: 22, monkey: 22, leopard: 30, truck: 5, ballon: 5, snow_walker: 7, ice_statue: 7, deer_pilot: 11,
-        ghost_fisher: 8, swordfish: 10, triton: 16, explorer: 15, camel: 18, scorpion: 30
+        ghost_fisher: 8, swordfish: 10, triton: 16, crocodile: 10, swamp_monster: 20, explorer: 15, camel: 18, scorpion: 30, worker: 8, conehead: 9, motorcycle: 10, police_car: 15, ambulance: 16
     };
     return Object.prototype.hasOwnProperty.call(entryWaves, key) ? entryWaves[key] : Math.max(1, Number(currentWave) || 1);
 }
@@ -4387,7 +4402,7 @@ function isMerlinBabyImmuneEnemy(enemy) {
     if (!enemy) return true;
     if (enemy.isBoss || enemy.type === 'boss' || enemy.type === 'megaboss' || enemy.type === 'colosso') return true;
     const type = String(enemy.type || '').toLowerCase();
-    const protectedTypes = new Set(['scorpion','sarcophagus','mummy','swordfish','shark','stone_golem','ice_statue']);
+    const protectedTypes = new Set(['scorpion','sarcophagus','mummy','swordfish','shark','stone_golem','ice_statue','crocodile','swamp_monster']);
     if (protectedTypes.has(type)) return true;
     if (type === 'goblin' && enemy.enemySkin !== 'hunter') return true;
     return false;
@@ -4914,6 +4929,17 @@ const ENEMY_SPRITES = {
     desert_truck: 'enemies/jeep.png',
     desert_ballon: 'enemies/desert_parachute.png',
     metro_prism_head: 'enemies/brick_head.png',
+    metro_boss: 'enemies/boss_boss.png',
+    metro_ballon: 'enemies/gangster_baloon.png',
+    metro_truck: 'enemies/car_enemie.png',
+    metro_shooter: 'enemies/police.png',
+    metro_elite: 'enemies/militarium.png',
+    gangster: 'enemies/gangster.png',
+    worker: 'enemies/worker.png',
+    conehead: 'enemies/conehead.png',
+    ambulance: 'enemies/ambulance.png',
+    police_car: 'enemies/police_car.png',
+    motorcycle: 'enemies/motorcycle.png',
     snow_basic: 'enemies/snow_basic.png',
     snowman_head: 'enemies/snowman_head.png',
     pine_head: 'enemies/pine_head.png',
@@ -4987,7 +5013,14 @@ const ENEMY_SPRITES = {
     gorilla: 'enemies/gorilla.png',
     leopard: 'enemies/leopard.png',
     lumberjack: 'enemies/lumberjack.png',
-    hunter_goblin: 'enemies/hunter_enemie.png'
+    hunter_goblin: 'enemies/hunter_enemie.png',
+    swamp_king_boss: 'enemies/swamp_king_boss.png',
+    mud_kamikaze: 'enemies/mud_kamikaze.png',
+    mud_truck: 'enemies/mud_truck.png',
+    swamp_leader: 'enemies/swamp_leader.png',
+    crocodile: 'enemies/crocodile.png',
+    mudded: 'enemies/mudded.png',
+    swamp_monster: 'enemies/swamp_monster.png'
 };
 
 const ENEMY_SPRITE_CACHE = new Map();
@@ -5573,44 +5606,79 @@ function getFracturedEnemySkinType(e) {
     const fracturedContext = !!e.fracturedOrigin || e.spawnBiome === 11 || window.currentMap === 11;
     if (!fracturedContext) return null;
     const type = String(e.type || '').toLowerCase();
-    if (e.fracturedSkinType && getEnemySpritePath(e.fracturedSkinType)) return e.fracturedSkinType;
-    if (e.resolvedFracturedSkinType && getEnemySpritePath(e.resolvedFracturedSkinType)) return e.resolvedFracturedSkinType;
+
+    // IMPORTANT: this is called by the renderer every frame. Never randomize here
+    // once a skin has already been chosen for this logical enemy type.
+    if (e._skinTypeForEnemy === type) {
+        const cached = e.fracturedSkinType || e.resolvedFracturedSkinType;
+        if (cached && getEnemySpritePath(cached)) return cached;
+    }
+
     const biomeMaps = {
-        0: { basico:'basic', velocista:'velocist', atirador:'shooter', gigante:'giant', tanque:'tank', curandeiro:'healer', elite:'elite_shooter', lider:'leader', kamikaze:'kamikaze', cardboard_head:'cardboard_head', motorcycle_helmet:'motorcycle_helmet', prism_head:'prism_head', ballon:'ballon', truck:'truck', boss:'boss' },
-        1: { basico:'desert_basic', cardboard_head:'desert_cardboard_head', motorcycle_helmet:'desert_motorcycle_helmet', prism_head:'desert_prism_head', velocista:'desert_velocista', atirador:'desert_atirador', gigante:'desert_gigante', kamikaze:'desert_kamikaze', elite:'desert_elite', tanque:'desert_tanque', curandeiro:'desert_curandeiro', lider:'desert_lider', truck:'desert_truck', ballon:'desert_ballon', boss:'desert_boss' },
-        2: { basico:'snow_basic', cardboard_head:'snowman_head', motorcycle_helmet:'pine_head', prism_head:'ice_head', velocista:'snow_velocist', atirador:'snow_shooter', gigante:'yeti_giant', tanque:'permafrost_tank', elite:'ice_elite_shooter', kamikaze:'ice_kamikaze', curandeiro:'avalanche_healer', truck:'snowplow', ballon:'snow_ballon', boss:'permafrost_boss' },
-        3: { basico:'cave_basic', cardboard_head:'cave_miner', motorcycle_helmet:'cave_crate_head', prism_head:'cave_stone_head', velocista:'cave_velocist', atirador:'cave_shooter', gigante:'cave_giant', tanque:'drill_tank', curandeiro:'cave_healer', elite:'elite_shooter', kamikaze:'cave_tnt_kamikaze', scorpion:'cave_scorpion', truck:'coal_kart', stone_golem:'stone_golem', tnt_crate:'tnt_crate', goblin:'goblin', boss:'cave_king_boss' },
-        4: { basico:'forest_basic', cardboard_head:'forest_cardboard_head', motorcycle_helmet:'forest_motorcycle_helmet', prism_head:'forest_prism_head', velocista:'forest_velocist', atirador:'forest_shooter', gigante:'forest_giant', tanque:'forest_tank', curandeiro:'forest_healer', elite:'forest_elite', kamikaze:'forest_kamikaze', lider:'forest_leader', ballon:'forest_ballon', truck:'forest_truck', goblin:'hunter_goblin', gorilla:'gorilla', leopard:'leopard', lumberjack:'lumberjack', monkey:'monkey', boss:'forest_boss' },
-        5: { basico:'basic', velocista:'velocist', atirador:'shooter', gigante:'giant', tanque:'tank', curandeiro:'healer', elite:'elite_shooter', lider:'leader' },
-        6: { prism_head:'metro_prism_head' },
-        7: { basico:'basic', velocista:'velocist', atirador:'shooter', gigante:'giant', tanque:'tank', curandeiro:'healer', elite:'elite_shooter', lider:'leader' },
-        8: { basico:'basic', velocista:'velocist', atirador:'shooter', gigante:'giant', tanque:'tank', curandeiro:'healer', elite:'elite_shooter', lider:'leader', ninja:'ninja', boss:'boss' },
-        9: { basico:'basic', velocista:'dancer', atirador:'shooter', gigante:'giant', tanque:'tank', curandeiro:'healer', elite:'elite_shooter', lider:'leader', dancer:'dancer', boss:'boss' },
-        10:{ basico:'swim_basic', velocista:'seahorse_velocist', atirador:'swim_shooter', gigante:'swim_giant', tanque:'swim_tank', curandeiro:'swim_healer', elite:'swim_elite_shooter', lider:'swim_leader', truck:'submarine', ballon:'pupperfish', swordfish:'swordfish', shark:'shark', triton:'triton', ghost_fisher:'ghost_fisher', boss:'swim_boss' }
+        0: { basico:'basic', velocista:'velocist', dancer:'dancer', atirador:'shooter', gigante:'giant', tanque:'tank', curandeiro:'healer', elite:'elite_shooter', lider:'leader', kamikaze:'kamikaze', cardboard_head:'cardboard_head', motorcycle_helmet:'motorcycle_helmet', prism_head:'prism_head', ballon:'ballon', truck:'truck', boss:'boss' },
+        1: { basico:'desert_basic', cardboard_head:'desert_cardboard_head', motorcycle_helmet:'desert_motorcycle_helmet', prism_head:'desert_prism_head', velocista:'desert_velocista', dancer:'desert_velocista', atirador:'desert_atirador', gigante:'desert_gigante', kamikaze:'desert_kamikaze', elite:'desert_elite', tanque:'desert_tanque', curandeiro:'desert_curandeiro', lider:'desert_lider', truck:'desert_truck', ballon:'desert_ballon', boss:'desert_boss' },
+        2: { basico:'snow_basic', cardboard_head:'snowman_head', motorcycle_helmet:'pine_head', prism_head:'ice_head', velocista:'snow_velocist', dancer:'snow_velocist', atirador:'snow_shooter', gigante:'yeti_giant', tanque:'permafrost_tank', elite:'ice_elite_shooter', kamikaze:'ice_kamikaze', curandeiro:'avalanche_healer', truck:'snowplow', ballon:'snow_ballon', boss:'permafrost_boss' },
+        3: { basico:'cave_basic', cardboard_head:'cave_miner', motorcycle_helmet:'cave_crate_head', prism_head:'cave_stone_head', velocista:'cave_velocist', dancer:'cave_velocist', atirador:'cave_shooter', gigante:'cave_giant', tanque:'drill_tank', curandeiro:'cave_healer', elite:'elite_shooter', kamikaze:'cave_tnt_kamikaze', scorpion:'cave_scorpion', truck:'coal_kart', stone_golem:'stone_golem', tnt_crate:'tnt_crate', goblin:'goblin', boss:'cave_king_boss' },
+        4: { basico:'forest_basic', cardboard_head:'forest_cardboard_head', motorcycle_helmet:'forest_motorcycle_helmet', prism_head:'forest_prism_head', velocista:'forest_velocist', dancer:'forest_velocist', atirador:'forest_shooter', gigante:'forest_giant', tanque:'forest_tank', curandeiro:'forest_healer', elite:'forest_elite', kamikaze:'forest_kamikaze', lider:'forest_leader', ballon:'forest_ballon', truck:'forest_truck', goblin:'hunter_goblin', gorilla:'gorilla', leopard:'leopard', lumberjack:'lumberjack', monkey:'monkey', boss:'forest_boss' },
+        5: { basico:'forest_basic', basic:'forest_basic', cardboard_head:'forest_cardboard_head', cardboard:'forest_cardboard_head', motorcycle_helmet:'forest_motorcycle_helmet', helmet:'forest_motorcycle_helmet', prism_head:'forest_prism_head', prism:'forest_prism_head', velocista:'forest_velocist', velocist:'forest_velocist', dancer:'forest_velocist', velocista_dancarino:'forest_velocist', atirador:'forest_shooter', shooter:'forest_shooter', gigante:'forest_giant', giant:'forest_giant', tanque:'forest_tank', tank:'forest_tank', curandeiro:'forest_healer', healer:'forest_healer', elite:'forest_elite', elite_shooter:'forest_elite', kamikaze:'mud_kamikaze', lider:'swamp_leader', leader:'swamp_leader', ballon:'forest_ballon', truck:'mud_truck', boss:'swamp_king_boss', snow_walker:'mudded', mudded:'mudded', crocodile:'crocodile', swamp_monster:'swamp_monster' },
+        6: { basico:'basic', cardboard_head:'cardboard_head', motorcycle_helmet:'motorcycle_helmet', prism_head:'metro_prism_head', velocista:'velocist', dancer:'dancer', atirador:'metro_shooter', gigante:'giant', tanque:'tank', curandeiro:'healer', elite:'metro_elite', kamikaze:'kamikaze', lider:'leader', ballon:'metro_ballon', truck:'metro_truck', boss:'metro_boss' },
+        7: { basico:'basic', velocista:'velocist', dancer:'dancer', atirador:'shooter', gigante:'giant', tanque:'tank', curandeiro:'healer', elite:'elite_shooter', lider:'leader' },
+        8: { basico:'basic', velocista:'velocist', dancer:'dancer', atirador:'shooter', gigante:'giant', tanque:'tank', curandeiro:'healer', elite:'elite_shooter', lider:'leader', ninja:'ninja', boss:'boss' },
+        9: { basico:'basic', velocista:'dancer', dancer:'dancer', atirador:'shooter', gigante:'giant', tanque:'tank', curandeiro:'healer', elite:'elite_shooter', lider:'leader', boss:'boss' },
+        10:{ basico:'swim_basic', velocista:'seahorse_velocist', dancer:'seahorse_velocist', atirador:'swim_shooter', gigante:'swim_giant', tanque:'swim_tank', curandeiro:'swim_healer', elite:'swim_elite_shooter', lider:'swim_leader', truck:'submarine', ballon:'pupperfish', swordfish:'swordfish', shark:'shark', triton:'triton', ghost_fisher:'ghost_fisher', boss:'swim_boss' }
     };
+
+    // A Fracture is authoritative: its enemies must always use the fracture biome.
+    if (e.fracturedOrigin) {
+        const mapId = Number.isInteger(e.fractureMapId) ? e.fractureMapId : null;
+        const mapSkin = mapId !== null ? biomeMaps[mapId]?.[type] : null;
+        const selected = mapSkin && getEnemySpritePath(mapSkin) ? mapSkin : (getEnemySpritePath(type) ? type : null);
+        e.fracturedSkinType = selected;
+        e.resolvedFracturedSkinType = selected;
+        e._skinTypeForEnemy = type;
+        e.skinSourceMapId = mapId;
+        return selected;
+    }
+
+    // The Fraturado map itself: choose one compatible biome skin exactly once.
     const candidates=[];
     for (const mapId of Object.keys(biomeMaps)) {
         const key = biomeMaps[mapId][type];
-        if (key && getEnemySpritePath(key)) candidates.push(key);
+        if (key && getEnemySpritePath(key)) candidates.push({ key, mapId: Number(mapId) });
     }
-    if (e.fracturedOrigin) {
-        const mapSkin = Number.isInteger(e.fractureMapId) ? biomeMaps[e.fractureMapId]?.[type] : null;
-        if (mapSkin && getEnemySpritePath(mapSkin)) {
-            e.resolvedFracturedSkinType = mapSkin;
-            return mapSkin;
-        }
+    if (!candidates.length) {
         const fallback = getEnemySpritePath(type) ? type : null;
+        e.fracturedSkinType = fallback;
         e.resolvedFracturedSkinType = fallback;
+        e._skinTypeForEnemy = type;
         return fallback;
     }
-    if (!candidates.length) return null;
-    const selected = candidates[Math.floor(Math.random()*candidates.length)];
-    e.resolvedFracturedSkinType = selected;
-    return selected;
-}
 
+    // Chained enemies (armor shells, balloons, camel drops, etc.) can carry the
+    // biome that produced their current skin. Reuse it instead of rerolling.
+    const explicitMapId = Number.isInteger(e.skinSourceMapId) && e.skinSourceMapId >= 0 && e.skinSourceMapId <= 10
+        ? e.skinSourceMapId : null;
+    if (explicitMapId !== null) {
+        const explicit = candidates.find(c => c.mapId === explicitMapId);
+        if (explicit) {
+            e.fracturedSkinType = explicit.key;
+            e.resolvedFracturedSkinType = explicit.key;
+            e._skinTypeForEnemy = type;
+            e.skinSourceMapId = explicit.mapId;
+            return explicit.key;
+        }
+    }
+
+    const selected = candidates[Math.floor(Math.random()*candidates.length)];
+    e.fracturedSkinType = selected.key;
+    e.resolvedFracturedSkinType = selected.key;
+    e._skinTypeForEnemy = type;
+    e.skinSourceMapId = selected.mapId;
+    return selected.key;
+}
 function getEffectiveEnemySpriteType(e) {
     if (e?.merlinBabyTimer > 0) return 'merlin_baby';
+    if (e?.skinOverride && getEnemySpritePath(e.skinOverride)) return e.skinOverride;
     const fracturedSkin = getFracturedEnemySkinType(e);
     if (fracturedSkin) return fracturedSkin;
     const type = String(e?.type || '').toLowerCase();
@@ -5652,6 +5720,10 @@ function getEffectiveEnemySpriteType(e) {
         elite_master: 'master_elite_shooter',
         master_elite_shooter: 'master_elite_shooter'
     };
+    if (window.currentMap === 6) {
+        const metroMap = { basico:'basic', basic:'basic', cardboard_head:'cardboard_head', cardboard:'cardboard_head', motorcycle_helmet:'motorcycle_helmet', helmet:'motorcycle_helmet', prism_head:'metro_prism_head', prism:'metro_prism_head', velocista:'velocist', velocist:'velocist', dancer:'dancer', velocista_dancarino:'dancer', atirador:'metro_shooter', shooter:'metro_shooter', gigante:'giant', giant:'giant', tanque:'tank', tank:'tank', curandeiro:'healer', healer:'healer', elite:'metro_elite', elite_shooter:'metro_elite', kamikaze:'kamikaze', lider:'leader', leader:'leader', ballon:'metro_ballon', truck:'metro_truck', boss:'metro_boss' };
+        if (metroMap[type] && getEnemySpritePath(metroMap[type])) return metroMap[type];
+    }
     if (window.currentMap === 1) {
         const desertMap = {
             basico: 'desert_basic',
@@ -5804,6 +5876,24 @@ function getEffectiveEnemySpriteType(e) {
             lumberjack: 'lumberjack'
         };
         if (forestMap[type] && getEnemySpritePath(forestMap[type])) return forestMap[type];
+    }
+    if (window.currentMap === 5) {
+        const swampMap = {
+            basico:'forest_basic', basic:'forest_basic',
+            cardboard_head:'forest_cardboard_head', cardboard:'forest_cardboard_head',
+            motorcycle_helmet:'forest_motorcycle_helmet', helmet:'forest_motorcycle_helmet',
+            prism_head:'forest_prism_head', prism:'forest_prism_head',
+            velocista:'forest_velocist', velocist:'forest_velocist', dancer:'forest_velocist', velocista_dancarino:'forest_velocist',
+            atirador:'forest_shooter', shooter:'forest_shooter',
+            gigante:'forest_giant', giant:'forest_giant',
+            tanque:'forest_tank', tank:'forest_tank',
+            curandeiro:'forest_healer', healer:'forest_healer',
+            elite:'forest_elite', elite_shooter:'forest_elite',
+            kamikaze:'mud_kamikaze', lider:'swamp_leader', leader:'swamp_leader',
+            boss:'swamp_king_boss', ballon:'forest_ballon', truck:'mud_truck',
+            snow_walker:'mudded', crocodile:'crocodile', swamp_monster:'swamp_monster'
+        };
+        if (swampMap[type] && getEnemySpritePath(swampMap[type])) return swampMap[type];
     }
     if (window.currentMap === 10) {
         const marineMap = {
@@ -7486,10 +7576,141 @@ function updateSettingsUI(syncSlider = true) {
     applyMusicVolume();
 }
 
+function isTutorialMapForced() {
+    const stage = pd?.tutorial?.stage;
+    return !!stage && stage !== 'completed';
+}
+
+function getMapChoiceBucket() {
+    return Math.floor(Date.now() / 3600000);
+}
+
+function hasValidMapChoice() {
+    if (isTutorialMapForced()) return true;
+    const bucket = getMapChoiceBucket();
+    const idx = Number(pd?.settings?.mapChoice);
+    const chosenBucket = Number(pd?.settings?.mapChoiceBucket);
+    return Number.isInteger(idx) && idx >= 0 && idx < MAPS.length && chosenBucket === bucket;
+}
+
 function getSelectedMapIndex() {
     const override = Number(pd?.debug?.mapRotationOverride);
     if (pd?.debug?.devUnlocked && Number.isInteger(override) && override >= 0 && override < MAPS.length) return override;
-    return Math.floor(Date.now() / 3600000) % MAPS.length;
+    if (isTutorialMapForced()) return 0;
+    if (hasValidMapChoice()) return Number(pd.settings.mapChoice);
+    return 0;
+}
+
+function getDestinationChoices() {
+    const bucket = getMapChoiceBucket();
+    const seed = `destinations:${bucket}`;
+    return shuffleWithSeed(MAPS.map((name, index) => index), seed).slice(0, 3);
+}
+
+function drawDestinationPreview(canvas, mapId) {
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const w = Math.max(320, Math.floor(rect.width || 520));
+    const h = Math.max(180, Math.floor(w * 0.625));
+    const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+    canvas.width = w * dpr; canvas.height = h * dpr;
+    const c = canvas.getContext('2d');
+    c.setTransform(dpr,0,0,dpr,0,0);
+    const bases = ['#4f7b47','#c58d52','#dcefff','#3b414a','#537a3d','#465f43','#4b535e','#5d2d23','#3c7c4c','#21172d','#185b70','#26113f'];
+    const base = bases[mapId] || '#26113f';
+    c.fillStyle = base; c.fillRect(0,0,w,h);
+    c.globalAlpha = .34;
+    if (mapId === 1) {
+        for(let y=0;y<h;y+=16){ c.fillStyle = y%32 ? '#d9b177' : '#a86e3f'; c.fillRect(0,y,w,8); }
+        for(let i=0;i<22;i++){ c.fillStyle='#e9c98f'; c.fillRect((i*73)%w,(i*41)%h,24,3); }
+    } else if (mapId === 2) {
+        c.fillStyle='#fff'; for(let i=0;i<90;i++){ c.beginPath(); c.arc((i*47)%w,(i*83)%h,1+(i%3),0,Math.PI*2); c.fill(); }
+    } else if (mapId === 3) {
+        c.fillStyle='#777'; for(let i=0;i<34;i++){ c.beginPath(); c.arc((i*91)%w,(i*57)%h,4+(i%5),0,Math.PI*2); c.fill(); }
+    } else if (mapId === 4) {
+        c.fillStyle='#7fb15c'; for(let i=0;i<34;i++){ c.beginPath(); c.arc((i*53)%w,(i*79)%h,4+(i%4),0,Math.PI*2); c.fill(); }
+    } else if (mapId === 5) {
+        c.fillStyle='#6f523d'; for(let i=0;i<12;i++){ c.beginPath(); c.ellipse((i*91)%w,(i*49)%h,28,15,0,0,Math.PI*2); c.fill(); }
+    } else if (mapId === 6) {
+        c.fillStyle='#a7adb6'; for(let x=20;x<w;x+=80)c.fillRect(x,0,4,h); for(let y=35;y<h;y+=80)c.fillRect(0,y,w,4);
+    } else if (mapId === 7) {
+        c.fillStyle='#ff7b39'; for(let i=0;i<14;i++){ c.beginPath(); c.arc((i*61)%w,(i*43)%h,3+(i%4),0,Math.PI*2); c.fill(); }
+    } else if (mapId === 8) {
+        c.fillStyle='#b9e87d'; for(let x=12;x<w;x+=34)c.fillRect(x,0,7,h);
+    } else if (mapId === 9) {
+        for(let x=0;x<w;x+=54)for(let y=0;y<h;y+=54){ c.fillStyle=((x+y)/54)%2?'#a838d5':'#2f7de1'; c.fillRect(x,y,54,54); }
+    } else if (mapId === 10) {
+        c.fillStyle='#66d8e8'; for(let i=0;i<9;i++){ c.beginPath(); c.moveTo(0,(i+1)*h/10); c.quadraticCurveTo(w*.5,(i+.5)*h/10,w,(i+1)*h/10); c.stroke(); }
+    } else if (mapId === 11) {
+        c.fillStyle='#6d46a1'; for(let x=0;x<w;x+=58) c.fillRect(x,0,2,h);
+    } else {
+        c.fillStyle='#90b07d'; for(let i=0;i<24;i++){ c.fillRect((i*67)%w,(i*37)%h,26,5); }
+    }
+    c.globalAlpha = 1;
+    c.fillStyle='rgba(0,0,0,.22)'; c.fillRect(0,0,w,h);
+}
+
+function renderMapDestinationChoices() {
+    const grid = document.getElementById('map-destination-grid');
+    const timer = document.getElementById('map-destination-timer');
+    if (!grid) return;
+    const choices = getDestinationChoices();
+    grid.innerHTML = choices.map((mapId, slot) => `<button type="button" class="map-destination-card${mapId===11?' is-fracturado':''}" data-map-id="${mapId}" aria-label="Escolher ${escapeHtmlText(MAPS[mapId])}">
+        <canvas id="map-destination-preview-${slot}"></canvas>
+        <span class="map-destination-fracture"></span>
+        <div class="map-destination-name">${escapeHtmlText(MAPS[mapId])}</div>
+        <div class="map-destination-meta">Fratura ${slot+1}</div>
+    </button>`).join('');
+    choices.forEach((mapId, slot) => {
+        const card = grid.querySelector(`.map-destination-card[data-map-id="${mapId}"]`);
+        const canvas = document.getElementById(`map-destination-preview-${slot}`);
+        drawDestinationPreview(canvas, mapId);
+        card?.addEventListener('click', () => selectMapDestination(mapId));
+    });
+    if (timer) {
+        const remaining = Math.max(0, 3600 - (Date.now() % 3600000) / 1000);
+        const mins = Math.floor(remaining / 60); const secs = Math.floor(remaining % 60).toString().padStart(2,'0');
+        timer.textContent = `Próxima rotação em ${mins}:${secs}`;
+    }
+}
+
+function openMapDestinationSelection() {
+    if (isTutorialMapForced()) return false;
+    if (pd?.debug?.devUnlocked && Number.isInteger(Number(pd?.debug?.mapRotationOverride)) && Number(pd.debug.mapRotationOverride) >= 0) return false;
+    if (hasValidMapChoice()) return false;
+    renderMapDestinationChoices();
+    document.getElementById('overlay-mode-select')?.classList.add('hidden');
+    document.getElementById('overlay-map-destination')?.classList.remove('hidden');
+    return true;
+}
+
+function selectMapDestination(mapId) {
+    const idx = Math.floor(Number(mapId));
+    if (!Number.isInteger(idx) || idx < 0 || idx >= MAPS.length) return;
+    pd.settings.mapChoice = idx;
+    pd.settings.mapChoiceBucket = getMapChoiceBucket();
+    save();
+    document.getElementById('overlay-map-destination')?.classList.add('hidden');
+    window.currentMap = idx;
+    syncMapSelectUI();
+    showModeSelect();
+}
+
+function resetMapDestination() {
+    if (isPlaying) { showAlert('Saia da partida antes de resetar o mapa.'); return; }
+    pd.settings.mapChoice = -1;
+    pd.settings.mapChoiceBucket = -1;
+    if (pd?.debug) pd.debug.mapRotationOverride = -1;
+    save();
+    openMapDestinationSelection();
+}
+
+function maybeShowMapDestination() {
+    if (isTutorialMapForced() || isPlaying) return;
+    const mainScreen = document.getElementById('screen-main');
+    if (!mainScreen || mainScreen.classList.contains('hidden')) return;
+    if (document.getElementById('overlay-map-destination')?.classList.contains('hidden') === false) return;
+    if (!hasValidMapChoice()) openMapDestinationSelection();
 }
 
 function setDevMapRotation(value) {
@@ -7648,7 +7869,7 @@ function showScreen(id) {
     };
     if (tutorialAllowed[tutorialStage] && id !== null && !tutorialAllowed[tutorialStage].includes(id)) return;
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-    ['custom-popup', 'overlay-mode-select', 'overlay-pregame-shop', 'overlay-book', 'overlay-title-picker', 'overlay-profile'].forEach(overlayId => {
+    ['custom-popup', 'overlay-mode-select', 'overlay-map-destination', 'overlay-pregame-shop', 'overlay-book', 'overlay-title-picker', 'overlay-profile'].forEach(overlayId => {
         const overlay = document.getElementById(overlayId);
         if (overlay && id !== overlayId) overlay.classList.add('hidden');
     });
@@ -11393,6 +11614,7 @@ function quitGame(isQuit) {
 }
 
 function showModeSelect() {
+    if (!isTutorialMapForced() && !hasValidMapChoice() && openMapDestinationSelection()) return;
     const bans = getRotationBans(pd.settings.ultraHardcore);
 
     let bansText = bans.map(c => CHARACTERS[c].name).join(', ');
@@ -14687,6 +14909,21 @@ function spawnEnemy() {
         if (wave >= 30) types.push('leopard');
     }
 
+    // Expansão do Pântano. A base visual é da Floresta, com quatro exceções e novos inimigos.
+    if (window.currentMap === 5) {
+        if (wave >= 7) types.push('snow_walker'); // Lamacento.
+        if (wave >= 10) types.push('crocodile');
+        if (wave >= 20) types.push('swamp_monster');
+    }
+
+    if (window.currentMap === 6) {
+        if (wave >= 8) types.push('worker');
+        if (wave >= 9) types.push('conehead');
+        if (wave >= 10) types.push('motorcycle');
+        if (wave >= 15) types.push('police_car');
+        if (wave >= 16) types.push('ambulance');
+    }
+
     // Fraturado: todos os inimigos entram pela PRÓPRIA wave de estreia,
     // independentemente do mapa onde normalmente aparecem.
     if (window.currentMap === 11) {
@@ -14695,10 +14932,19 @@ function spawnEnemy() {
     }
     
     let type = types[Math.floor(Math.random() * types.length)]; const spawnWave = wave; let mult = getEnemyDifficultyMultiplierFromEntry(type, spawnWave, wave);
+    if (window.currentMap === 5 && type === 'crocodile') {
+        const mudPools = obstacles.filter(o => o && o.type === 'mud');
+        if (mudPools.length) {
+            const mud = mudPools[Math.floor(Math.random() * mudPools.length)];
+            const a = Math.random() * Math.PI * 2;
+            const rr = Math.random() * Math.max(0, (mud.r || 70) - 12);
+            ex = mud.x + Math.cos(a) * rr; ey = mud.y + Math.sin(a) * rr;
+        }
+    }
     
     if(pd.settings.ultraHardcore && window.currentMap === 4 && type === 'gigante') type = 'monster_tree';
 
-    let e = { x: ex, y: ey, type, hp: 0, maxHp: 0, speed: 0, baseDmg: 0, dmg: 0, size: 0, cd: 0, color: '', poison: { timer: 0, dmg: 0, tickCd: 0 }, slowTimer: 0, weakenTimer: 0, curseTimer: 0, burnTimer: 0, freezeTimer: 0, burnDmg: 0, speedBuffTimer: 0, soak: 0, shockTimer: 0, shockSemiTimer: 0, shockTick: 0, shockSemiTick: 0, shockDmg: 0, shockSemiDmg: 0, shockRate: 0.3, semiShockRate: 0.4, spawnBiome: window.currentMap, spawnWave, entryWave: spawnWave, stationary: false, poisonOnHit: 0, enemySkin: (window.currentMap === 4 && type === 'goblin') ? 'hunter' : null, fracturedOrigin: false, fractureMapId: null };
+    let e = { x: ex, y: ey, type, hp: 0, maxHp: 0, speed: 0, baseDmg: 0, dmg: 0, size: 0, cd: 0, color: '', poison: { timer: 0, dmg: 0, tickCd: 0 }, slowTimer: 0, weakenTimer: 0, curseTimer: 0, burnTimer: 0, freezeTimer: 0, burnDmg: 0, speedBuffTimer: 0, soak: 0, shockTimer: 0, shockSemiTimer: 0, shockTick: 0, shockSemiTick: 0, shockDmg: 0, shockSemiDmg: 0, shockRate: 0.3, semiShockRate: 0.4, spawnBiome: window.currentMap, spawnWave, entryWave: spawnWave, stationary: false, poisonOnHit: 0, enemySkin: (window.currentMap === 4 && type === 'goblin') ? 'hunter' : null, fracturedOrigin: false, fractureMapId: null, skinSourceMapId: window.currentMap === 11 ? null : window.currentMap };
     if (window.currentMap === 11) e.fracturedSkinType = getFracturedEnemySkinType(e);
     
     if(type === 'basico') { e.hp = 30*mult; e.speed = 1.5; e.baseDmg = 5*mult; e.size = 12; e.color = '#e74c3c'; }
@@ -14726,10 +14972,17 @@ function spawnEnemy() {
     if(type === 'camel') { e.hp = 120*mult; e.speed = 0.9; e.baseDmg = 12*mult; e.size = 20; e.color = '#c89f6a'; e.desertEnemy = true; }
     if(type === 'scorpion') { e.hp = 135*mult; e.speed = 1.35; e.baseDmg = 14*mult; e.size = 18; e.color = '#8e5a2f'; e.poisonOnHit = 2.5; e.desertEnemy = true; }
     if(type === 'snow_walker') { e.hp = 38*mult; e.speed = 1.05; e.baseDmg = 7*mult; e.size = 14; e.color = '#b9e8ff'; e.cd = 45; e.snowWalker = true; }
+    if(type === 'crocodile') { e.hp = 95*mult; e.speed = 0; e.baseDmg = 18*mult; e.size = 20; e.color = '#496b3d'; e.cd = 1.2; e.crocodile = true; e.crocodileDashTimer = 0.65; }
+    if(type === 'swamp_monster') { e.hp = 190*mult; e.speed = 0.82; e.baseDmg = 22*mult; e.size = 30; e.color = '#355f3a'; e.swampMonster = true; e.swampMonsterAttackCd = 0.9; }
     if(type === 'ice_statue') { e.hp = 150*mult; e.speed = 0; e.baseDmg = 8*mult; e.size = 22; e.color = '#b7d9e8'; e.stationary = true; e.snowEnemy = true; e.iceStatue = true; }
     if(type === 'deer_pilot') { e.hp = 28*mult; e.speed = 2.65; e.baseDmg = 7*mult; e.size = 11; e.color = '#dff7ff'; e.snowEnemy = true; e.deerPilot = true; }
     if(type === 'ballon') { e.hp = 30*mult; e.speed = 1.5; e.baseDmg = 5*mult; e.size = 12; e.color = '#ff7675'; e.globalBalloon = true; e.breakIntoBasic = true; e.forceNormalOnDeath = true; }
     if(type === 'truck') { e.hp = 170*mult; e.speed = 0.55; e.baseDmg = 18*mult; e.size = 34; e.spriteSize = 28; e.color = '#576574'; e.globalTruck = true; e.mineImmune = true; e.truckDeathPending = false; e.truckExplosionTimer = 0; }
+    if(type === 'worker') { e.hp = 38*mult; e.speed = 3.0; e.baseDmg = 14*mult; e.size = 13; e.color = '#d35400'; e.worker = true; }
+    if(type === 'conehead') { e.hp = 85*mult; e.speed = 1.2; e.baseDmg = 8*mult; e.size = 16; e.color = '#e67e22'; e.conehead = true; e.isGlobalArmored = true; e.breakIntoBasic = false; }
+    if(type === 'ambulance') { e.hp = 170*mult; e.speed = 0.45; e.baseDmg = 8*mult; e.size = 34; e.spriteSize = 28; e.color = '#ecf0f1'; e.ambulance = true; e.ambulanceHealCd = 5.5; e.ambulanceDeathPending = false; e.ambulanceExplosionTimer = 0; e.mineImmune = true; }
+    if(type === 'police_car') { e.hp = 155*mult; e.speed = 0.62; e.baseDmg = 16*mult; e.size = 32; e.spriteSize = 25; e.color = '#2f3542'; e.policeCar = true; e.cd = 90; e.policeCarDeathPending = false; e.policeCarExplosionTimer = 0; e.mineImmune = true; }
+    if(type === 'motorcycle') { e.hp = 60*mult; e.speed = 3.0; e.baseDmg = 12*mult; e.size = 15; e.color = '#34495e'; e.motorcycle = true; e.motorcycleArmor = true; }
     if(type === 'stone_golem') {
         e.hp = 520*mult; e.speed = 0.65; e.baseDmg = 26*mult; e.size = 30; e.color = '#7f8c8d';
         e.golemAttackCd = 1.1; e.golemAttackTimer = 0; e.golemAttackAngle = 0; e.golemAttackApplied = false;
@@ -14739,7 +14992,7 @@ function spawnEnemy() {
         e.tntCrate = true;
     }
     if(type === 'swordfish') {
-        e.hp = 38*mult; e.speed = 3.9; e.baseDmg = 18*mult; e.size = 15; e.color = '#d6f6ff';
+        e.hp = 38*mult; e.speed = 3.0; e.baseDmg = 18*mult; e.size = 15; e.color = '#d6f6ff';
         e.swordfish = true; e.swordfishPassCd = 0;
     }
     if(type === 'shark') {
@@ -14765,6 +15018,8 @@ function spawnEnemy() {
 function updateEnemies(dt) {
     for(let i = enemies.length - 1; i >= 0; i--) {
         let e = enemies[i]; let d = dist(e, player);
+        if (e.ambulanceDeathPending) { e.ambulanceExplosionTimer = Math.max(0,(e.ambulanceExplosionTimer||0)-dt); if(e.ambulanceExplosionTimer<=0){ createExplosion(e.x,e.y,95,0,'rgba(241,196,15,0.25)'); enemies.splice(i,1); } continue; }
+        if (e.policeCarDeathPending) { e.policeCarExplosionTimer = Math.max(0,(e.policeCarExplosionTimer||0)-dt); if(e.policeCarExplosionTimer<=0){ createExplosion(e.x,e.y,85,0,'rgba(231,76,60,0.35)'); const sm=Math.max(0.25,(Number(e.maxHp)||155)/155); const mapId=Number.isInteger(e.fractureMapId)?e.fractureMapId:6; for(let k=0;k<3;k++){const a=Math.random()*Math.PI*2; enemies.push({x:e.x+Math.cos(a)*35,y:e.y+Math.sin(a)*35,type:'atirador',hp:20*sm,maxHp:20*sm,speed:1.2,baseDmg:8*sm,dmg:8*sm,size:14,cd:30,color:'#2980b9',poison:{timer:0,dmg:0,tickCd:0},slowTimer:0,weakenTimer:0,burnTimer:0,freezeTimer:0,burnDmg:0,spawnBiome:mapId,skinSourceMapId:mapId,fracturedOrigin:!!e.fracturedOrigin,fractureMapId:Number.isInteger(e.fractureMapId)?e.fractureMapId:null,enemySkin:null,fracturedSkinType:null,resolvedFracturedSkinType:null,_skinTypeForEnemy:null});} enemies.splice(i,1); } continue; }
         if (e.truckDeathPending) {
             e.truckExplosionTimer = Math.max(0, (e.truckExplosionTimer || 0) - dt);
             if (e.truckExplosionTimer <= 0) {
@@ -15001,7 +15256,7 @@ function updateEnemies(dt) {
                     poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0,
                     burnDmg:0, speedBuffTimer:0, soak:0, shockTimer:0, shockSemiTimer:0, shockTick:0,
                     shockSemiTick:0, shockDmg:0, shockRate:0.3, semiShockRate:0.4,
-                    spawnBiome: window.currentMap, spawnWave: wave, entryWave: wave, stationary: false
+                    spawnBiome: Number.isInteger(e.skinSourceMapId) ? e.skinSourceMapId : window.currentMap, spawnWave: wave, entryWave: wave, stationary: false, skinSourceMapId: Number.isInteger(e.skinSourceMapId) ? e.skinSourceMapId : window.currentMap, fracturedOrigin: !!e.fracturedOrigin, fractureMapId: Number.isInteger(e.fractureMapId) ? e.fractureMapId : null
                 });
                 createParticles(e.x, e.y, '#a1887f');
                 addFloatingText(e.x, e.y - 28, 'MACACO!', '#d7ccc8', 12);
@@ -15033,6 +15288,22 @@ function updateEnemies(dt) {
             let a = Math.atan2(targetY - e.y, targetX - e.x);
             nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt;
             ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
+        } else if (e.type === 'worker') {
+            const a = Math.atan2(targetY - e.y, targetX - e.x);
+            nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt; ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
+            if (dist({x:nx,y:ny}, player) <= e.size + player.r + 2 && player.invisTimer <= 0) { e.workerConverted = true; e.hp = 0; }
+        } else if (e.type === 'ambulance') {
+            e.ambulanceHealCd = Math.max(0, (e.ambulanceHealCd || 0) - dt);
+            if (e.ambulanceHealCd <= 0 && !isFrozen && !isHypnotized) { e.ambulanceHealCd = 5.5; createExplosion(e.x,e.y,180,0,'rgba(46,204,113,0.28)'); for (const other of enemies) if (other !== e && other.hp > 0 && dist(e,other) <= 180) other.hp = Math.min(other.maxHp, other.hp + 28); }
+            const a=Math.atan2(targetY-e.y,targetX-e.x); nx += Math.cos(a)*currentSpeed*eSpeedMult*60*dt; ny += Math.sin(a)*currentSpeed*eSpeedMult*60*dt;
+        } else if (e.type === 'police_car') {
+            e.cd = Math.max(0,(e.cd||0)-dt*60);
+            if (e.cd <= 0 && player.invisTimer <= 0 && !isFrozen && !isHypnotized) { const a=Math.atan2(targetY-e.y,targetX-e.x); createProj(e.x,e.y,Math.cos(a)*3,Math.sin(a)*3,e.dmg,60,false,'enemy',{size:6,sourceEnemyType:'atirador'}); e.cd=100; }
+            const a=Math.atan2(targetY-e.y,targetX-e.x); nx += Math.cos(a)*currentSpeed*eSpeedMult*60*dt; ny += Math.sin(a)*currentSpeed*eSpeedMult*60*dt;
+        } else if (e.type === 'motorcycle') {
+            const a=Math.atan2(targetY-e.y,targetX-e.x); nx += Math.cos(a)*currentSpeed*eSpeedMult*60*dt; ny += Math.sin(a)*currentSpeed*eSpeedMult*60*dt;
+        } else if (e.type === 'conehead') {
+            const a=Math.atan2(targetY-e.y,targetX-e.x); nx += Math.cos(a)*currentSpeed*eSpeedMult*60*dt; ny += Math.sin(a)*currentSpeed*eSpeedMult*60*dt;
         } else if (e.type === 'swordfish') {
             if (Number(e.swordfishPassCd || 0) > 0) e.swordfishPassCd = Math.max(0, e.swordfishPassCd - dt);
             const swordAngle = Math.atan2(targetY - e.y, targetX - e.x);
@@ -15133,7 +15404,8 @@ function updateEnemies(dt) {
                     const summonedType = isGiant ? 'gigante' : 'basico';
                     const summonedEntryWave = Number(e.entryWave) || getEnemyEntryWave(e.type, wave);
                     let mult = getEnemyDifficultyMultiplierFromEntry(summonedType, summonedEntryWave, wave);
-                    enemies.push({ x: e.x + (Math.random()-0.5)*60, y: e.y + (Math.random()-0.5)*60, type: summonedType, hp: (isGiant?80:30)*mult, maxHp: (isGiant?80:30)*mult, speed: isGiant?0.8:1.5, baseDmg: (isGiant?15:5)*mult, dmg: (isGiant?15:5)*mult, size: isGiant?22:12, color: isGiant?'#8e44ad':'#e74c3c', poison: {timer:0,dmg:0}, slowTimer: 0, weakenTimer: 0, burnTimer: 0, soak: 0, spawnWave: summonedEntryWave, entryWave: summonedEntryWave });
+                    const leaderSourceMap = Number.isInteger(e.fractureMapId) ? e.fractureMapId : (Number.isInteger(e.skinSourceMapId) ? e.skinSourceMapId : window.currentMap);
+                    enemies.push({ x: e.x + (Math.random()-0.5)*60, y: e.y + (Math.random()-0.5)*60, type: summonedType, hp: (isGiant?80:30)*mult, maxHp: (isGiant?80:30)*mult, speed: isGiant?0.8:1.5, baseDmg: (isGiant?15:5)*mult, dmg: (isGiant?15:5)*mult, size: isGiant?22:12, color: isGiant?'#8e44ad':'#e74c3c', poison: {timer:0,dmg:0}, slowTimer: 0, weakenTimer: 0, burnTimer: 0, soak: 0, spawnWave: summonedEntryWave, entryWave: summonedEntryWave, spawnBiome: leaderSourceMap, skinSourceMapId: leaderSourceMap, fracturedOrigin: !!e.fracturedOrigin, fractureMapId: Number.isInteger(e.fractureMapId) ? e.fractureMapId : null, enemySkin: null, fracturedSkinType: null, resolvedFracturedSkinType: null, _skinTypeForEnemy: null });
                 }
             }
             let a = Math.atan2(targetY - e.y, targetX - e.x); nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt; ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
@@ -15175,6 +15447,21 @@ function updateEnemies(dt) {
         } else if(e.type === 'boss' && player.invisTimer <= 0 && !isFrozen && !isHypnotized) {
             e.cd -= 60 * dt; if(e.cd <= 0) { for(let j=0; j<8; j++) { let a = (Math.PI / 4) * j; createProj(e.x, e.y, Math.cos(a)*3, Math.sin(a)*3, e.dmg, 80, false, 'enemy', { hypnotized: isHypnotized, sourceEnemyType: e.type }); } e.cd = 150; }
             let a = Math.atan2(targetY - e.y, targetX - e.x); nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt; ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
+        } else if(e.type === 'crocodile' && player.invisTimer <= 0 && !isFrozen && !isHypnotized) {
+            e.crocodileDashTimer = Math.max(0, (e.crocodileDashTimer || 0) - dt);
+            e.cd = Math.max(0, (e.cd || 0) - 60 * dt);
+            if (e.crocodileDashTimer <= 0) {
+                const a = Math.atan2(targetY - e.y, targetX - e.x);
+                const dashDistance = 150;
+                e.x = Math.max(-1480, Math.min(1480, e.x + Math.cos(a) * dashDistance));
+                e.y = Math.max(-1480, Math.min(1480, e.y + Math.sin(a) * dashDistance));
+                e.crocodileDashTimer = 1.15 + Math.random() * 0.65;
+                createParticles(e.x, e.y, '#6f8f4c');
+            }
+        } else if(e.type === 'swamp_monster' && player.invisTimer <= 0 && !isFrozen && !isHypnotized) {
+            const a = Math.atan2(targetY - e.y, targetX - e.x);
+            nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt;
+            ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
         } else if(e.type === 'snow_walker' && player.invisTimer <= 0 && !isFrozen && !isHypnotized) {
             e.cd -= 60 * dt;
             if(e.cd <= 0) {
@@ -15301,6 +15588,10 @@ function updateEnemies(dt) {
                 const spartaShieldMult = (isSpartaCharacter() && player.spartaShieldActive) ? 0.6 : 1;
                 const defMul = Math.max(0.1, (player.stats.defMult - (pd.selectedChar === 'quarterback' && player.qbShield ? 0.4 : player.stats.dynamicDef) - (player.graffitDefFlat || 0)) * spartaShieldMult);
                 dealPlayerDamage(e.dmg * defMul); addFloatingText(player.x, player.y, `-${Math.floor(e.dmg * defMul)}`, '#e74c3c');
+                if (e.type === 'swamp_monster' && Math.random() < 0.35) {
+                    player.snowSlowTimer = Math.max(Number(player.snowSlowTimer) || 0, 1.5);
+                    addFloatingText(player.x, player.y - 16, 'LERDO!', '#8bd17c', 11);
+                }
                 if (pd.selectedChar === 'beezy' && player.hp > 0 && e.hp > 0) {
                     e.poison.timer = Math.max(Number(e.poison.timer) || 0, 3);
                     e.poison.dmg = Math.max(Number(e.poison.dmg) || 0, 2.5);
@@ -15373,9 +15664,16 @@ function updateEnemies(dt) {
             }
             if(e.revives && e.revives > 0) {
                 e.revives--; e.hp = e.maxHp; e.freezeTimer = 1.0; e.color = '#7f8c8d';
+            } else if (e.type === 'worker' && e.workerConverted) {
+                e.type='basico'; e.hp=30*Math.max(0.25,(Number(e.maxHp)||38)/38); e.maxHp=e.hp; e.speed=1.5; e.baseDmg=5; e.dmg=5; e.size=12; e.color='#e74c3c'; e.workerConverted=false; e.skinSourceMapId=Number.isInteger(e.fractureMapId)?e.fractureMapId:(Number.isInteger(e.skinSourceMapId)?e.skinSourceMapId:6); e.fracturedSkinType=null; e.resolvedFracturedSkinType=null; e._skinTypeForEnemy=null; if(e.fracturedOrigin)e.fractureMapId=e.skinSourceMapId; continue;
+            } else if (e.type === 'ambulance' && !e.ambulanceDeathPending) { e.ambulanceDeathPending=true; e.ambulanceExplosionTimer=1.0; e.hp=1; e.speed=0; e.stationary=true; addFloatingText(e.x,e.y-18,'BOOM em 1s!','#f1c40f',12); continue;
+            } else if (e.type === 'police_car' && !e.policeCarDeathPending) { e.policeCarDeathPending=true; e.policeCarExplosionTimer=1.0; e.hp=1; e.speed=0; e.stationary=true; addFloatingText(e.x,e.y-18,'BOOM em 1s!','#f1c40f',12); continue;
+            } else if (e.type === 'conehead' && e.conehead) { e.type='atirador'; e.hp=20; e.maxHp=20; e.baseDmg=8; e.dmg=8; e.size=14; e.speed=1.2; e.conehead=false; e.isGlobalArmored=false; e.breakIntoBasic=false; delete e.armorHp; e.skinSourceMapId=Number.isInteger(e.fractureMapId)?e.fractureMapId:6; e.skinOverride=e.fracturedOrigin?null:'metro_shooter'; e.fracturedSkinType=null; e.resolvedFracturedSkinType=null; e._skinTypeForEnemy=null; if(e.fracturedOrigin)e.fractureMapId=e.skinSourceMapId; continue;
+            } else if (e.type === 'motorcycle' && e.motorcycle) { e.type='motorcycle_helmet'; e.hp=85; e.maxHp=85; e.baseDmg=6; e.dmg=6; e.size=16; e.speed=1.1; e.motorcycle=false; e.motorcycleArmor=false; e.isGlobalArmored=true; e.breakIntoBasic=true; delete e.armorHp; e.skinSourceMapId=Number.isInteger(e.fractureMapId)?e.fractureMapId:6; e.fracturedSkinType=null; e.resolvedFracturedSkinType=null; e._skinTypeForEnemy=null; if(e.fracturedOrigin)e.fractureMapId=e.skinSourceMapId; continue;
             } else if(e.type !== 'merlin_baby' && e.breakIntoBasic && e.isGlobalArmored) {
                 // O invólucro é destruído: nasce um inimigo Básico no mesmo ponto.
                 const basicMult = Math.max(0.25, (Number(e.maxHp) > 0 ? Number(e.maxHp) / (e.type === 'cardboard_head' ? 45 : (e.type === 'motorcycle_helmet' ? 85 : 180)) : 1));
+                const sourceMapId = Number.isInteger(e.fractureMapId) ? e.fractureMapId : (Number.isInteger(e.skinSourceMapId) ? e.skinSourceMapId : (Number.isInteger(e.spawnBiome) ? e.spawnBiome : window.currentMap));
                 e.type = 'basico';
                 e.hp = 30 * basicMult;
                 e.maxHp = e.hp;
@@ -15386,6 +15684,11 @@ function updateEnemies(dt) {
                 e.color = '#e74c3c';
                 e.isGlobalArmored = false;
                 e.breakIntoBasic = false;
+                e.skinSourceMapId = sourceMapId;
+                e.fracturedSkinType = null;
+                e.resolvedFracturedSkinType = null;
+                e._skinTypeForEnemy = null;
+                if (e.fracturedOrigin) e.fractureMapId = sourceMapId;
                 e.freezeTimer = 0.15;
                 createParticles(e.x, e.y, '#f1c40f');
                 addFloatingText(e.x, e.y - 10, 'QUEBROU!', '#f1c40f', 11);
@@ -15397,7 +15700,11 @@ function updateEnemies(dt) {
                         x:e.x, y:e.y, type:'basico', hp:30*basicMult, maxHp:30*basicMult, speed:1.5, baseDmg:5*basicMult, dmg:5*basicMult, size:12, cd:0, color:'#e74c3c',
                         poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0,
                         shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4,
-                        spawnBiome: e.type === 'deer_pilot' ? 2 : window.currentMap, spawnWave: e.entryWave || wave, entryWave: e.entryWave || wave
+                        spawnBiome: Number.isInteger(e.skinSourceMapId) ? e.skinSourceMapId : (e.type === 'deer_pilot' ? 2 : window.currentMap), spawnWave: e.entryWave || wave, entryWave: e.entryWave || wave,
+                        skinSourceMapId: Number.isInteger(e.skinSourceMapId) ? e.skinSourceMapId : (e.type === 'deer_pilot' ? 2 : window.currentMap),
+                        fracturedOrigin: !!e.fracturedOrigin, fractureMapId: Number.isInteger(e.fractureMapId) ? e.fractureMapId : null,
+                        skinOverride: (e.type === 'ballon' && Number.isInteger(e.skinSourceMapId) && e.skinSourceMapId === 6 && !e.fracturedOrigin) ? 'gangster' : null,
+                        enemySkin: null, fracturedSkinType: null, resolvedFracturedSkinType: null, _skinTypeForEnemy: null
                     });
                 } else if (e.type === 'ice_statue') {
                     const mult = Math.max(0.25, (Number(e.maxHp) > 0 ? Number(e.maxHp) / 150 : 1));
@@ -15405,7 +15712,10 @@ function updateEnemies(dt) {
                         x:e.x, y:e.y, type:'basico', hp:30*mult, maxHp:30*mult, speed:1.5, baseDmg:5*mult, dmg:5*mult, size:12, cd:0, color:'#e74c3c',
                         poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0,
                         shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4,
-                        spawnBiome:2, spawnWave:e.entryWave || wave, entryWave:e.entryWave || wave
+                        spawnBiome: Number.isInteger(e.skinSourceMapId) ? e.skinSourceMapId : 2, spawnWave:e.entryWave || wave, entryWave:e.entryWave || wave,
+                        skinSourceMapId: Number.isInteger(e.skinSourceMapId) ? e.skinSourceMapId : 2,
+                        fracturedOrigin: !!e.fracturedOrigin, fractureMapId: Number.isInteger(e.fractureMapId) ? e.fractureMapId : null,
+                        enemySkin: null, fracturedSkinType: null, resolvedFracturedSkinType: null, _skinTypeForEnemy: null
                     });
                 } else if (e.type === 'explorer') {
                     enemies.push({
@@ -15429,8 +15739,10 @@ function updateEnemies(dt) {
                     }
                 } else if (e.type === 'camel') {
                     const mult = 1 + (wave * 0.15);
-                    enemies.push({ x:e.x-10, y:e.y, type:'basico', hp:30*mult, maxHp:30*mult, speed:1.5, baseDmg:5*mult, dmg:5*mult, size:12, cd:0, color:'#e74c3c', poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0, shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4, spawnBiome:1 });
-                    enemies.push({ x:e.x+10, y:e.y, type:'cardboard_head', hp:45*mult, maxHp:45*mult, speed:1.35, baseDmg:5*mult, dmg:5*mult, size:15, cd:0, color:'#b8793c', poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0, shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4, isGlobalArmored:true, breakIntoBasic:true, spawnBiome:1 });
+                    const camelSourceMap = Number.isInteger(e.skinSourceMapId) ? e.skinSourceMapId : (Number.isInteger(e.fractureMapId) ? e.fractureMapId : 1);
+                    const camelFractured = !!e.fracturedOrigin;
+                    enemies.push({ x:e.x-10, y:e.y, type:'basico', hp:30*mult, maxHp:30*mult, speed:1.5, baseDmg:5*mult, dmg:5*mult, size:12, cd:0, color:'#e74c3c', poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0, shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4, spawnBiome:camelSourceMap, skinSourceMapId:camelSourceMap, fracturedOrigin:camelFractured, fractureMapId:camelFractured ? camelSourceMap : null, enemySkin:null, fracturedSkinType:null, resolvedFracturedSkinType:null, _skinTypeForEnemy:null });
+                    enemies.push({ x:e.x+10, y:e.y, type:'cardboard_head', hp:45*mult, maxHp:45*mult, speed:1.35, baseDmg:5*mult, dmg:5*mult, size:15, cd:0, color:'#b8793c', poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0, shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4, isGlobalArmored:true, breakIntoBasic:true, spawnBiome:camelSourceMap, skinSourceMapId:camelSourceMap, fracturedOrigin:camelFractured, fractureMapId:camelFractured ? camelSourceMap : null, enemySkin:null, fracturedSkinType:null, resolvedFracturedSkinType:null, _skinTypeForEnemy:null });
                 }
                 enemiesKilled++; 
                 trackMissionProgress('kills', 1);
@@ -18253,6 +18565,69 @@ function getFractureMapTexture(mapId) {
     }
 }
 
+function getFractureDecorTypes(mapId) {
+    switch (Number(mapId)) {
+        case 1: return ['cacto'];
+        case 2: return ['ice'];
+        case 3: return ['rock'];
+        case 4: return ['tree'];
+        case 5: return ['mud'];
+        case 6: return [];
+        case 7: return ['volcano'];
+        case 8: return ['bamboo'];
+        case 9: return ['speaker'];
+        case 10: return ['kelp'];
+        default: return [];
+    }
+}
+
+function drawFractureDecorPrimitive(type, x, y, size, seed = 0) {
+    ctx.save();
+    const r = Math.max(8, size * 0.55);
+    if (type === 'ice') {
+        ctx.translate(x, y);
+        ctx.rotate(Math.sin(seed * 3.17) * 0.18);
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = 'rgba(116,185,255,0.35)';
+        ctx.fillStyle = 'rgba(193,238,255,0.78)';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, r * 1.35, r * 0.72, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(116,185,255,0.58)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+    } else if (type === 'mud') {
+        ctx.translate(x, y);
+        ctx.rotate(Math.sin(seed * 2.71) * 0.25);
+        ctx.fillStyle = 'rgba(69,50,31,0.90)';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, r * 1.45, r * 0.72, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(135,95,53,0.35)';
+        ctx.beginPath();
+        ctx.ellipse(-r * 0.22, -r * 0.08, r * 0.42, r * 0.18, 0, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    ctx.restore();
+}
+
+function drawFractureDecorations(fracture) {
+    const types = getFractureDecorTypes(fracture.mapId);
+    const decor = Array.isArray(fracture.decorations) ? fracture.decorations : [];
+    for (const item of decor) {
+        if (!types.includes(item.type)) continue;
+        if (item.type === 'ice' || item.type === 'mud') {
+            drawFractureDecorPrimitive(item.type, item.x, item.y, item.size, item.seed);
+        } else {
+            drawMapElementSprite(ctx, getMapElementSpriteKey(item.type, item), item.x, item.y, item.size, {
+                rotate: item.rotate || 0,
+                flipX: !!item.flipX,
+                opacity: 0.92
+            });
+        }
+    }
+}
+
 function drawFractureRay(fracture) {
     if (!fracture || !Number.isFinite(fracture.x) || !Number.isFinite(fracture.y)) return;
     const lifeRatio = Math.max(0, Math.min(1, (fracture.life || 0) / (fracture.maxLife || 14)));
@@ -18279,9 +18654,24 @@ function drawFractureRay(fracture) {
     ctx.lineTo(len * 0.04, width * 0.46);
     ctx.lineTo(-len * 0.26, width * 0.20);
     ctx.closePath();
+    const rayClip = new Path2D();
+    rayClip.moveTo(-len * 0.5, -width * 0.16);
+    rayClip.lineTo(-len * 0.16, -width * 0.48);
+    rayClip.lineTo(len * 0.08, -width * 0.24);
+    rayClip.lineTo(len * 0.5, -width * 0.12);
+    rayClip.lineTo(len * 0.28, width * 0.16);
+    rayClip.lineTo(len * 0.04, width * 0.46);
+    rayClip.lineTo(-len * 0.26, width * 0.20);
+    rayClip.closePath();
+    ctx.clip(rayClip);
     const pattern = getFractureMapTexture(fracture.mapId);
     if (pattern) { ctx.fillStyle = pattern; } else { ctx.fillStyle = '#27143f'; }
     ctx.fill();
+
+    // Os elementos do bioma também ficam dentro do recorte da Fratura.
+    // Isso impede árvores, cactos, pedras etc. de vazarem para fora do raio.
+    drawFractureDecorations(fracture);
+
     ctx.restore();
 
     // Núcleo luminoso em formato de raio.
@@ -18332,33 +18722,57 @@ function createFracture() {
     const mapId = Math.floor(Math.random() * 11);
     const maxLife = 13 + Math.random() * 3;
     window.fractures = window.fractures || [];
+    const angle = Math.random() * Math.PI * 2;
+    const length = 300 + Math.random() * 100;
+    const width = 95 + Math.random() * 50;
+    const decorations = [];
+    const decorTypes = getFractureDecorTypes(mapId);
+    if (decorTypes.length) {
+        const count = 3 + Math.floor(Math.random() * 4);
+        for (let i = 0; i < count; i++) {
+            const type = decorTypes[Math.floor(Math.random() * decorTypes.length)];
+            const localX = (Math.random() - 0.5) * length * 0.72;
+            const localY = (Math.random() - 0.5) * width * 0.52;
+            const cosA = Math.cos(angle), sinA = Math.sin(angle);
+            decorations.push({
+                type,
+                x: pos.x + localX * cosA - localY * sinA,
+                y: pos.y + localX * sinA + localY * cosA,
+                size: type === 'volcano' ? 42 + Math.random() * 14 : (type === 'tree' ? 34 + Math.random() * 10 : 28 + Math.random() * 14),
+                rotate: Math.random() * Math.PI * 2,
+                flipX: Math.random() < 0.5,
+                seed: Math.random() * 1000
+            });
+        }
+    }
     window.fractures.push({
         x: pos.x, y: pos.y, mapId,
-        angle: Math.random() * Math.PI * 2,
-        length: 300 + Math.random() * 100,
-        width: 95 + Math.random() * 50,
+        angle,
+        length,
+        width,
         branch: 80 + Math.random() * 110,
         life: maxLife, maxLife,
         spawnCount: 3 + Math.floor(Math.random() * 4),
         spawned: 0,
-        spawnTimer: 0.8 + Math.random() * 0.9
+        spawnTimer: 0.8 + Math.random() * 0.9,
+        decorations
     });
     return true;
 }
 
 function getFractureBiomePool(mapId) {
     const byMap = {
-        0: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','boss'],
-        1: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','boss','mummy','explorer','camel','scorpion'],
-        2: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','boss','snow_walker','ice_statue','deer_pilot'],
-        3: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','boss','goblin','tnt_crate','scorpion','stone_golem'],
-        4: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','boss','goblin','lumberjack','gorilla','leopard'],
-        5: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','boss'],
-        6: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','boss'],
-        7: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','boss'],
-        8: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','boss','ninja'],
-        9: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','boss','dancer'],
-        10:['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','boss','ghost_fisher','swordfish','shark','triton']
+        0: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon'],
+        1: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','mummy','explorer','camel','scorpion'],
+        2: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','snow_walker','ice_statue','deer_pilot'],
+        3: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','goblin','tnt_crate','scorpion','stone_golem'],
+        4: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','goblin','lumberjack','gorilla','leopard'],
+        5: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','snow_walker','crocodile','swamp_monster'],
+        6: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','worker','conehead','motorcycle','police_car','ambulance'],
+        7: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon'],
+        8: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','ninja'],
+        9: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','dancer'],
+        10:['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','ghost_fisher','swordfish','shark','triton']
     };
     return [...new Set(byMap[Number(mapId)] || byMap[0])];
 }
@@ -18367,9 +18781,9 @@ function getFracturedGlobalEnemyPool() {
     const candidates = [
         'basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider',
         'cardboard_head','motorcycle_helmet','prism_head','truck','ballon','colosso','elite_master','lider_elite',
-        'mummy','explorer','camel','scorpion','snow_walker','ice_statue','deer_pilot',
+        'mummy','explorer','camel','scorpion','snow_walker','ice_statue','deer_pilot','crocodile','swamp_monster',
         'goblin','tnt_crate','stone_golem','lumberjack','gorilla','leopard','ninja','dancer',
-        'ghost_fisher','swordfish','triton'
+        'ghost_fisher','swordfish','triton','worker','conehead','ambulance','police_car','motorcycle'
     ];
     return candidates.filter(t => getEnemyEntryWave(t, wave) <= wave);
 }
@@ -18388,19 +18802,28 @@ function spawnFractureEnemy(fracture) {
     window.currentMap = fracture.mapId;
     const spawnWave = wave;
     let mult = getEnemyDifficultyMultiplierFromEntry(type, spawnWave, wave);
+    if (fracture.mapId === 5 && type === 'crocodile') {
+        const mudPools = obstacles.filter(o => o && o.type === 'mud');
+        if (mudPools.length) {
+            const mud = mudPools[Math.floor(Math.random() * mudPools.length)];
+            const ang = Math.random() * Math.PI * 2;
+            const rr = Math.random() * Math.max(0, (mud.r || 70) - 12);
+            x = mud.x + Math.cos(ang) * rr; y = mud.y + Math.sin(ang) * rr;
+        }
+    }
     const e = {
         x, y, type, hp: 0, maxHp: 0, speed: 0, baseDmg: 0, dmg: 0, size: 0, cd: 0, color: '',
         poison: {timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, curseTimer:0, burnTimer:0,
         freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0, shockTimer:0, shockSemiTimer:0,
         shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4,
         spawnBiome: fracture.mapId, spawnWave, entryWave: spawnWave, stationary:false, poisonOnHit:0,
-        fracturedOrigin: true, fractureMapId: fracture.mapId,
+        fracturedOrigin: true, fractureMapId: fracture.mapId, skinSourceMapId: fracture.mapId, spriteScale: 1,
         enemySkin: (fracture.mapId === 4 && type === 'goblin') ? 'hunter' : null
     };
     e.fracturedSkinType = getFracturedEnemySkinType(e) || null;
     // Copia apenas a parametrização do inimigo da mesma tabela já usada pelo spawn normal.
     const templateTypes = { basico:30, velocista:15, dancer:40, ninja:20, atirador:20, gigante:80, tanque:110, curandeiro:40, elite:30, kamikaze:10, lider:45, cardboard_head:45, motorcycle_helmet:85, prism_head:180, truck:170, ballon:30,
-        mummy:50, explorer:42, camel:120, scorpion:135, snow_walker:38, ice_statue:150, deer_pilot:28, goblin:28, tnt_crate:58, stone_golem:520, lumberjack:150, gorilla:80, leopard:52, ghost_fisher:34, swordfish:38, triton:105 };
+        mummy:50, explorer:42, camel:120, scorpion:135, snow_walker:38, ice_statue:150, deer_pilot:28, crocodile:95, swamp_monster:190, goblin:28, tnt_crate:58, stone_golem:520, lumberjack:150, gorilla:80, leopard:52, ghost_fisher:34, swordfish:38, triton:105, worker:38, conehead:105, ambulance:170, police_car:155, motorcycle:90 };
     const hpBase = templateTypes[type] || 30;
     e.hp = hpBase * mult; e.maxHp = e.hp;
     if (type === 'velocista' || type === 'dancer') { e.speed=2.2; e.baseDmg=3*mult; e.size=10; e.color='#f39c12'; }
@@ -18416,12 +18839,19 @@ function spawnFractureEnemy(fracture) {
     else if (type === 'motorcycle_helmet') { e.speed=1.1; e.baseDmg=6*mult; e.size=16; e.color='#56616d'; e.isGlobalArmored=true; e.breakIntoBasic=true; }
     else if (type === 'prism_head') { e.speed=0.92; e.baseDmg=8*mult; e.size=18; e.color='#8c7cff'; e.isGlobalArmored=true; e.breakIntoBasic=true; }
     else if (type === 'truck') { e.speed=0.55; e.baseDmg=18*mult; e.size=34; e.spriteSize=28; e.color='#576574'; e.globalTruck=true; e.mineImmune=true; e.truckDeathPending=false; e.truckExplosionTimer=0; }
+    else if (type === 'worker') { e.speed=3.0; e.baseDmg=14*mult; e.size=13; e.color='#d35400'; e.worker=true; }
+    else if (type === 'conehead') { e.speed=1.2; e.baseDmg=8*mult; e.size=16; e.color='#e67e22'; e.conehead=true; e.isGlobalArmored=true; e.breakIntoBasic=false; }
+    else if (type === 'ambulance') { e.speed=0.45; e.baseDmg=8*mult; e.size=34; e.spriteSize=28; e.color='#ecf0f1'; e.ambulance=true; e.ambulanceHealCd=5.5; e.ambulanceDeathPending=false; e.ambulanceExplosionTimer=0; e.mineImmune=true; }
+    else if (type === 'police_car') { e.speed=0.62; e.baseDmg=16*mult; e.size=32; e.spriteSize=25; e.color='#2f3542'; e.policeCar=true; e.cd=90; e.policeCarDeathPending=false; e.policeCarExplosionTimer=0; e.mineImmune=true; }
+    else if (type === 'motorcycle') { e.speed=3.0; e.baseDmg=12*mult; e.size=15; e.color='#34495e'; e.motorcycle=true; e.motorcycleArmor=true; }
     else if (type === 'ballon') { e.speed=1.5; e.baseDmg=5*mult; e.size=12; e.color='#ff7675'; e.globalBalloon=true; e.breakIntoBasic=true; e.forceNormalOnDeath=false; }
     else if (type === 'mummy') { e.speed=1.3; e.baseDmg=10*mult; e.size=13; e.color='#f5f6fa'; e.revives=1; }
     else if (type === 'explorer') { e.speed=1.4; e.baseDmg=6.5*mult; e.size=13; e.color='#b97735'; }
     else if (type === 'camel') { e.speed=0.9; e.baseDmg=12*mult; e.size=20; e.color='#c89f6a'; }
     else if (type === 'scorpion') { e.speed=1.35; e.baseDmg=14*mult; e.size=18; e.color='#8e5a2f'; e.poisonOnHit=2.5; }
     else if (type === 'snow_walker') { e.speed=1.05; e.baseDmg=7*mult; e.size=14; e.color='#b9e8ff'; e.cd=45; e.snowWalker=true; }
+    else if (type === 'crocodile') { e.speed=0; e.baseDmg=18*mult; e.size=20; e.color='#496b3d'; e.cd=1.2; e.crocodile=true; e.crocodileDashTimer=0.65; }
+    else if (type === 'swamp_monster') { e.speed=0.82; e.baseDmg=22*mult; e.size=30; e.color='#355f3a'; e.swampMonster=true; e.swampMonsterAttackCd=0.9; }
     else if (type === 'ice_statue') { e.speed=0; e.baseDmg=8*mult; e.size=22; e.color='#b7d9e8'; e.stationary=true; e.iceStatue=true; }
     else if (type === 'deer_pilot') { e.speed=2.65; e.baseDmg=7*mult; e.size=11; e.color='#dff7ff'; e.deerPilot=true; }
     else if (type === 'goblin') { e.speed=1.45; e.baseDmg=7*mult; e.size=13; e.color='#7bed9f'; e.cd=0; if (fracture.mapId===4) e.enemySkin='hunter'; }
@@ -18431,7 +18861,7 @@ function spawnFractureEnemy(fracture) {
     else if (type === 'gorilla') { e.speed=0.8; e.baseDmg=15*mult; e.size=22; e.color='#6d4c41'; e.gorilla=true; e.gorillaSplitUsed=false; }
     else if (type === 'leopard') { e.speed=1.6; e.baseDmg=13*mult; e.size=15; e.color='#d4a017'; e.cd=150; e.leopardHunter=true; }
     else if (type === 'ghost_fisher') { e.speed=0.82; e.baseDmg=9*mult; e.size=14; e.color='#b8c9ff'; e.ghostFisher=true; e.dodgeChance=0.25; e.cd=90; }
-    else if (type === 'swordfish') { e.speed=3.9; e.baseDmg=18*mult; e.size=15; e.color='#d6f6ff'; e.swordfish=true; e.swordfishPassCd=0; }
+    else if (type === 'swordfish') { e.speed=3.0; e.baseDmg=18*mult; e.size=15; e.color='#d6f6ff'; e.swordfish=true; e.swordfishPassCd=0; }
     else if (type === 'triton') { e.speed=1.95; e.baseDmg=12*mult; e.size=20; e.color='#44d7c8'; e.triton=true; e.spawnCd=20; }
     else { e.speed=1.5; e.baseDmg=5*mult; e.size=12; e.color='#e74c3c'; }
     e.dmg = e.baseDmg;
@@ -20477,7 +20907,11 @@ function draw() {
             // possam recortá-la sem somar uma segunda camada escura por cima.
             ctx.globalAlpha = 1;
             ctx.globalCompositeOperation = 'source-over';
-            if (window.currentMap === 9) {
+            if (window.currentMap === 11) {
+                // O Fraturado usa a mesma névoa base dos outros mapas em uma única camada.
+                // A camada auxiliar abaixo aplica os recortes das Fraturas; não desenhe
+                // uma segunda camada de 0.76 aqui, ou a escuridão ficaria acumulada.
+            } else if (window.currentMap === 9) {
                 if (!window.discoFogCanvas) window.discoFogCanvas = document.createElement('canvas');
                 const baseFog = window.discoFogCanvas;
                 if (baseFog.width !== cw || baseFog.height !== ch) { baseFog.width = cw; baseFog.height = ch; }
@@ -20508,7 +20942,7 @@ function draw() {
                 ctx.fillRect(0, 0, cw, ch);
             }
             if (window.currentMap === 11 && Array.isArray(window.fractures)) {
-                // A escuridão é aplicada em uma camada auxiliar; as fraturas removem
+                // A única camada base de 0.76 é aplicada nesta camada auxiliar; as fraturas removem
                 // a névoa dessa camada e depois são redesenhadas para recuperar a textura
                 // do mapa do portal + o brilho. Assim elas realmente iluminam o chão.
                 if (!window.fractureFogCanvas) window.fractureFogCanvas = document.createElement('canvas');
@@ -20746,6 +21180,7 @@ function returnToMenu() {
     joyZone.style.display='none';
     window.lastGameOverWasLoss = false;
     if (shouldStartFirstLossTutorial) beginFirstLossTutorial();
+    setTimeout(() => maybeShowMapDestination(), 0);
 }
 try {
     load();
@@ -20760,8 +21195,10 @@ try {
 }
 checkChipCrafting();
 setInterval(() => { checkChipCrafting(); if(!document.getElementById('screen-trail')?.classList.contains('hidden')) renderTrail(); }, 1000);
+setInterval(() => { maybeShowMapDestination(); }, 1000);
 syncMenuMusic();
 applyMusicVolume();
+setTimeout(() => maybeShowMapDestination(), 50);
 
 </script>
 </body>
