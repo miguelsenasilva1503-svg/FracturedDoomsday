@@ -1903,7 +1903,7 @@
     #joystick-zone { position: fixed !important; left: 30px !important; top: auto !important; right: auto !important; bottom: 30px !important; transform: none !important; }
 
 .map-destination-panel{width:min(1100px,94vw);max-height:92vh;overflow:auto;padding:28px 22px;border-radius:24px;background:linear-gradient(180deg,rgba(25,30,46,.98),rgba(10,12,22,.98));border:2px solid rgba(171,111,255,.55);box-shadow:0 20px 70px rgba(0,0,0,.55),0 0 45px rgba(133,78,255,.16);text-align:center}
-.map-destination-kicker{font-size:12px;letter-spacing:4px;font-weight:900;color:#b98cff;margin-bottom:4px}.map-destination-panel h1{margin:0;color:#fff;font-size:clamp(28px,5vw,52px);line-height:1.05}.map-destination-subtitle{margin:10px auto 20px;color:#b7becb;font-size:14px;max-width:760px}.map-destination-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.map-destination-card{position:relative;border:2px solid rgba(255,255,255,.10);border-radius:20px;background:rgba(255,255,255,.045);padding:10px;cursor:pointer;transition:transform .16s,border-color .16s,box-shadow .16s}.map-destination-card:hover,.map-destination-card:focus-visible{transform:translateY(-4px);border-color:rgba(190,144,255,.8);box-shadow:0 14px 35px rgba(0,0,0,.35)}.map-destination-card canvas{display:block;width:100%;aspect-ratio:16/10;border-radius:14px;background:#111;image-rendering:auto}.map-destination-fracture{position:absolute;left:10px;right:10px;top:10px;aspect-ratio:16/10;border-radius:14px;pointer-events:none;overflow:hidden}.map-destination-fracture::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.16),rgba(180,98,255,.06) 33%,rgba(0,0,0,0) 65%)}.map-destination-fracture::after{content:"";position:absolute;left:50%;top:50%;width:72%;height:140%;transform:translate(-50%,-50%) rotate(10deg);background:repeating-linear-gradient(112deg,transparent 0 26px,rgba(238,224,255,.8) 27px 29px,rgba(102,44,153,.6) 30px 31px,transparent 32px 58px);mix-blend-mode:screen;opacity:.75}.map-destination-name{font-size:20px;font-weight:1000;color:#fff;margin:10px 0 3px}.map-destination-meta{font-size:11px;color:#9da8ba}.map-destination-timer{margin-top:16px;color:#858fa0;font-size:11px}.map-destination-card.is-fracturado{border-color:rgba(184,140,255,.55)}
+.map-destination-kicker{font-size:12px;letter-spacing:4px;font-weight:900;color:#b98cff;margin-bottom:4px}.map-destination-panel h1{margin:0;color:#fff;font-size:clamp(28px,5vw,52px);line-height:1.05}.map-destination-subtitle{margin:10px auto 20px;color:#b7becb;font-size:14px;max-width:760px}.map-destination-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.map-destination-card{position:relative;border:2px solid rgba(255,255,255,.10);border-radius:20px;background:rgba(255,255,255,.045);padding:10px;cursor:pointer;transition:transform .16s,border-color .16s,box-shadow .16s}.map-destination-card:hover,.map-destination-card:focus-visible{transform:translateY(-4px);border-color:rgba(190,144,255,.8);box-shadow:0 14px 35px rgba(0,0,0,.35)}.map-destination-card canvas{display:block;width:100%;aspect-ratio:1/1;border-radius:14px;background:#111;image-rendering:auto}.map-destination-name{font-size:20px;font-weight:1000;color:#fff;margin:10px 0 0;text-align:center;line-height:1.15;white-space:normal;overflow-wrap:anywhere}.map-destination-meta{font-size:11px;color:#9da8ba}.map-destination-timer{margin-top:16px;color:#858fa0;font-size:11px}
 @media(max-width:760px){.map-destination-grid{grid-template-columns:1fr}.map-destination-panel{padding:20px 14px}}
 </style>
 </head>
@@ -4375,8 +4375,9 @@ function getEnemyEntryWave(type, currentWave = wave) {
         tanque: 13, curandeiro: 16, elite: 17, lider: 21, colosso: 30, elite_master: 30,
         lider_elite: 30, mummy: 10, explorer: 15, sarcophagus: 15, camel: 18, scorpion: 30,
         stone_golem: 35, boss: 10, megaboss: 30, goblin: 10, monster_tree: 1, lumberjack: 15,
-        gorilla: 22, monkey: 22, leopard: 30, truck: 5, ballon: 5, snow_walker: 7, ice_statue: 7, deer_pilot: 11,
-        ghost_fisher: 8, swordfish: 10, triton: 16, crocodile: 10, swamp_monster: 20, explorer: 15, camel: 18, scorpion: 30, worker: 8, conehead: 9, motorcycle: 10, police_car: 15, ambulance: 16
+        gorilla: 22, monkey: 22, leopard: 30, truck: 12, ballon: 5, snow_walker: 7, ice_statue: 7, deer_pilot: 11,
+        ghost_fisher: 8, swordfish: 10, triton: 16, crocodile: 10, swamp_monster: 20, explorer: 15, camel: 18, scorpion: 30, worker: 8, conehead: 9, motorcycle: 10, police_car: 15, ambulance: 16,
+        sein_sein: 10, samurai: 16, panda_suit: 16, panda: 16, nunchaku: 17, geisha: 20
     };
     return Object.prototype.hasOwnProperty.call(entryWaves, key) ? entryWaves[key] : Math.max(1, Number(currentWave) || 1);
 }
@@ -5020,7 +5021,29 @@ const ENEMY_SPRITES = {
     swamp_leader: 'enemies/swamp_leader.png',
     crocodile: 'enemies/crocodile.png',
     mudded: 'enemies/mudded.png',
-    swamp_monster: 'enemies/swamp_monster.png'
+    swamp_monster: 'enemies/swamp_monster.png',
+    // Bambuzal — skins orientais
+    bambuzal_basic: 'enemies/oriental_basic.png',
+    bambuzal_cardboard_head: 'enemies/hat_head.png',
+    bambuzal_motorcycle_helmet: 'enemies/gourd_head.png',
+    bambuzal_prism_head: 'enemies/bamboo_head.png',
+    bambuzal_velocista: 'enemies/oriental_velocist.png',
+    bambuzal_atirador: 'enemies/oriental_shooter.png',
+    bambuzal_gigante: 'enemies/oriental_giant.png',
+    bambuzal_boss: 'enemies/oriental_boss.png',
+    bambuzal_tanque: 'enemies/bamboo_tank.png',
+    bambuzal_kamikaze: 'enemies/tengu_kamikaze.png',
+    bambuzal_curandeiro: 'enemies/gourd_healer.png',
+    bambuzal_ballon: 'enemies/chinese_baloon.png',
+    bambuzal_truck: 'enemies/bamboo_truck.png',
+    bambuzal_elite: 'enemies/oriental_elite_shooter.png',
+    bambuzal_lider: 'enemies/oriental_leader.png',
+    sein_sein: 'enemies/sein_sein.png',
+    samurai: 'enemies/samurai.png',
+    panda_suit: 'enemies/panda_suit.png',
+    panda: 'enemies/panda.png',
+    nunchaku: 'enemies/nunchaku.png',
+    geisha: 'enemies/gheisha.png'
 };
 
 const ENEMY_SPRITE_CACHE = new Map();
@@ -5623,7 +5646,7 @@ function getFracturedEnemySkinType(e) {
         5: { basico:'forest_basic', basic:'forest_basic', cardboard_head:'forest_cardboard_head', cardboard:'forest_cardboard_head', motorcycle_helmet:'forest_motorcycle_helmet', helmet:'forest_motorcycle_helmet', prism_head:'forest_prism_head', prism:'forest_prism_head', velocista:'forest_velocist', velocist:'forest_velocist', dancer:'forest_velocist', velocista_dancarino:'forest_velocist', atirador:'forest_shooter', shooter:'forest_shooter', gigante:'forest_giant', giant:'forest_giant', tanque:'forest_tank', tank:'forest_tank', curandeiro:'forest_healer', healer:'forest_healer', elite:'forest_elite', elite_shooter:'forest_elite', kamikaze:'mud_kamikaze', lider:'swamp_leader', leader:'swamp_leader', ballon:'forest_ballon', truck:'mud_truck', boss:'swamp_king_boss', snow_walker:'mudded', mudded:'mudded', crocodile:'crocodile', swamp_monster:'swamp_monster' },
         6: { basico:'basic', cardboard_head:'cardboard_head', motorcycle_helmet:'motorcycle_helmet', prism_head:'metro_prism_head', velocista:'velocist', dancer:'dancer', atirador:'metro_shooter', gigante:'giant', tanque:'tank', curandeiro:'healer', elite:'metro_elite', kamikaze:'kamikaze', lider:'leader', ballon:'metro_ballon', truck:'metro_truck', boss:'metro_boss' },
         7: { basico:'basic', velocista:'velocist', dancer:'dancer', atirador:'shooter', gigante:'giant', tanque:'tank', curandeiro:'healer', elite:'elite_shooter', lider:'leader' },
-        8: { basico:'basic', velocista:'velocist', dancer:'dancer', atirador:'shooter', gigante:'giant', tanque:'tank', curandeiro:'healer', elite:'elite_shooter', lider:'leader', ninja:'ninja', boss:'boss' },
+        8: { basico:'bambuzal_basic', basic:'bambuzal_basic', cardboard_head:'bambuzal_cardboard_head', cardboard:'bambuzal_cardboard_head', motorcycle_helmet:'bambuzal_motorcycle_helmet', helmet:'bambuzal_motorcycle_helmet', prism_head:'bambuzal_prism_head', prism:'bambuzal_prism_head', velocista:'bambuzal_velocista', velocist:'bambuzal_velocista', dancer:'bambuzal_velocista', velocista_dancarino:'bambuzal_velocista', atirador:'bambuzal_atirador', shooter:'bambuzal_atirador', gigante:'bambuzal_gigante', giant:'bambuzal_gigante', boss:'bambuzal_boss', tanque:'bambuzal_tanque', tank:'bambuzal_tanque', kamikaze:'bambuzal_kamikaze', curandeiro:'bambuzal_curandeiro', healer:'bambuzal_curandeiro', elite:'bambuzal_elite', elite_shooter:'bambuzal_elite', lider:'bambuzal_lider', leader:'bambuzal_lider', ballon:'bambuzal_ballon', truck:'bambuzal_truck', ninja:'ninja', sein_sein:'sein_sein', samurai:'samurai', panda_suit:'panda_suit', panda:'panda', nunchaku:'nunchaku', geisha:'geisha' },
         9: { basico:'basic', velocista:'dancer', dancer:'dancer', atirador:'shooter', gigante:'giant', tanque:'tank', curandeiro:'healer', elite:'elite_shooter', lider:'leader', boss:'boss' },
         10:{ basico:'swim_basic', velocista:'seahorse_velocist', dancer:'seahorse_velocist', atirador:'swim_shooter', gigante:'swim_giant', tanque:'swim_tank', curandeiro:'swim_healer', elite:'swim_elite_shooter', lider:'swim_leader', truck:'submarine', ballon:'pupperfish', swordfish:'swordfish', shark:'shark', triton:'triton', ghost_fisher:'ghost_fisher', boss:'swim_boss' }
     };
@@ -5720,6 +5743,18 @@ function getEffectiveEnemySpriteType(e) {
         elite_master: 'master_elite_shooter',
         master_elite_shooter: 'master_elite_shooter'
     };
+    if (window.currentMap === 8) {
+        const bambuzalMap = {
+            basico:'bambuzal_basic', basic:'bambuzal_basic', cardboard_head:'bambuzal_cardboard_head', cardboard:'bambuzal_cardboard_head',
+            motorcycle_helmet:'bambuzal_motorcycle_helmet', helmet:'bambuzal_motorcycle_helmet', prism_head:'bambuzal_prism_head', prism:'bambuzal_prism_head',
+            velocista:'bambuzal_velocista', velocist:'bambuzal_velocista', dancer:'bambuzal_velocista', velocista_dancarino:'bambuzal_velocista',
+            atirador:'bambuzal_atirador', shooter:'bambuzal_atirador', gigante:'bambuzal_gigante', giant:'bambuzal_gigante', boss:'bambuzal_boss',
+            tanque:'bambuzal_tanque', tank:'bambuzal_tanque', kamikaze:'bambuzal_kamikaze', curandeiro:'bambuzal_curandeiro', healer:'bambuzal_curandeiro',
+            elite:'bambuzal_elite', elite_shooter:'bambuzal_elite', lider:'bambuzal_lider', leader:'bambuzal_lider', ballon:'bambuzal_ballon', truck:'bambuzal_truck', ninja:'ninja',
+            sein_sein:'sein_sein', samurai:'samurai', panda_suit:'panda_suit', panda:'panda', nunchaku:'nunchaku', geisha:'geisha'
+        };
+        if (bambuzalMap[type] && getEnemySpritePath(bambuzalMap[type])) return bambuzalMap[type];
+    }
     if (window.currentMap === 6) {
         const metroMap = { basico:'basic', basic:'basic', cardboard_head:'cardboard_head', cardboard:'cardboard_head', motorcycle_helmet:'motorcycle_helmet', helmet:'motorcycle_helmet', prism_head:'metro_prism_head', prism:'metro_prism_head', velocista:'velocist', velocist:'velocist', dancer:'dancer', velocista_dancarino:'dancer', atirador:'metro_shooter', shooter:'metro_shooter', gigante:'giant', giant:'giant', tanque:'tank', tank:'tank', curandeiro:'healer', healer:'healer', elite:'metro_elite', elite_shooter:'metro_elite', kamikaze:'kamikaze', lider:'leader', leader:'leader', ballon:'metro_ballon', truck:'metro_truck', boss:'metro_boss' };
         if (metroMap[type] && getEnemySpritePath(metroMap[type])) return metroMap[type];
@@ -6045,6 +6080,12 @@ function getEnemySpriteWidthMult(type) {
         case 'goblin':
         case 'mummy':
         case 'acucarado':
+        case 'sein_sein':
+        case 'samurai':
+        case 'panda_suit':
+        case 'panda':
+        case 'nunchaku':
+        case 'geisha':
             return 9.0;
         case 'cardboard_head':
         case 'cardboard':
@@ -6100,6 +6141,7 @@ function getEnemyStatusIndicators(e) {
     if (e.weakenTimer > 0) indicators.push({ key: 'weaken', icon: '🛡️', color: '#dfe6e9' });
     if (e.curseTimer > 0) indicators.push({ key: 'curse', icon: '☠', color: '#ff69b4' });
     if (e.speedBuffTimer > 0) indicators.push({ key: 'speed', icon: '⏩', color: '#f1c40f' });
+    if (getSeinSeinProtector(e)) indicators.push({ key: 'sein_shield', icon: '🛡️', color: '#74b9ff' });
     if (e.soak > 0) indicators.push({ key: 'soak', icon: '💧', color: '#00e5ff' });
     const shinobiMarks = Math.max(0, Math.min(5, Number(e.shinobiMarks) || 0));
     if (shinobiMarks > 0) indicators.push({ key: 'shinobi_mark', count: shinobiMarks, color: '#e056fd' });
@@ -7610,44 +7652,49 @@ function getDestinationChoices() {
 function drawDestinationPreview(canvas, mapId) {
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
-    const w = Math.max(320, Math.floor(rect.width || 520));
-    const h = Math.max(180, Math.floor(w * 0.625));
+    const w = Math.max(180, Math.floor(rect.width || 360));
+    const h = w;
     const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-    canvas.width = w * dpr; canvas.height = h * dpr;
+    canvas.width = Math.floor(w * dpr); canvas.height = Math.floor(h * dpr);
     const c = canvas.getContext('2d');
     c.setTransform(dpr,0,0,dpr,0,0);
-    const bases = ['#4f7b47','#c58d52','#dcefff','#3b414a','#537a3d','#465f43','#4b535e','#5d2d23','#3c7c4c','#21172d','#185b70','#26113f'];
-    const base = bases[mapId] || '#26113f';
-    c.fillStyle = base; c.fillRect(0,0,w,h);
-    c.globalAlpha = .34;
-    if (mapId === 1) {
-        for(let y=0;y<h;y+=16){ c.fillStyle = y%32 ? '#d9b177' : '#a86e3f'; c.fillRect(0,y,w,8); }
-        for(let i=0;i<22;i++){ c.fillStyle='#e9c98f'; c.fillRect((i*73)%w,(i*41)%h,24,3); }
-    } else if (mapId === 2) {
-        c.fillStyle='#fff'; for(let i=0;i<90;i++){ c.beginPath(); c.arc((i*47)%w,(i*83)%h,1+(i%3),0,Math.PI*2); c.fill(); }
-    } else if (mapId === 3) {
-        c.fillStyle='#777'; for(let i=0;i<34;i++){ c.beginPath(); c.arc((i*91)%w,(i*57)%h,4+(i%5),0,Math.PI*2); c.fill(); }
-    } else if (mapId === 4) {
-        c.fillStyle='#7fb15c'; for(let i=0;i<34;i++){ c.beginPath(); c.arc((i*53)%w,(i*79)%h,4+(i%4),0,Math.PI*2); c.fill(); }
-    } else if (mapId === 5) {
-        c.fillStyle='#6f523d'; for(let i=0;i<12;i++){ c.beginPath(); c.ellipse((i*91)%w,(i*49)%h,28,15,0,0,Math.PI*2); c.fill(); }
-    } else if (mapId === 6) {
-        c.fillStyle='#a7adb6'; for(let x=20;x<w;x+=80)c.fillRect(x,0,4,h); for(let y=35;y<h;y+=80)c.fillRect(0,y,w,4);
-    } else if (mapId === 7) {
-        c.fillStyle='#ff7b39'; for(let i=0;i<14;i++){ c.beginPath(); c.arc((i*61)%w,(i*43)%h,3+(i%4),0,Math.PI*2); c.fill(); }
-    } else if (mapId === 8) {
-        c.fillStyle='#b9e87d'; for(let x=12;x<w;x+=34)c.fillRect(x,0,7,h);
-    } else if (mapId === 9) {
-        for(let x=0;x<w;x+=54)for(let y=0;y<h;y+=54){ c.fillStyle=((x+y)/54)%2?'#a838d5':'#2f7de1'; c.fillRect(x,y,54,54); }
-    } else if (mapId === 10) {
-        c.fillStyle='#66d8e8'; for(let i=0;i<9;i++){ c.beginPath(); c.moveTo(0,(i+1)*h/10); c.quadraticCurveTo(w*.5,(i+.5)*h/10,w,(i+1)*h/10); c.stroke(); }
-    } else if (mapId === 11) {
-        c.fillStyle='#6d46a1'; for(let x=0;x<w;x+=58) c.fillRect(x,0,2,h);
-    } else {
-        c.fillStyle='#90b07d'; for(let i=0;i<24;i++){ c.fillRect((i*67)%w,(i*37)%h,26,5); }
+    c.clearRect(0,0,w,h);
+
+    // A prévia usa a textura do próprio mapa.
+    const pattern = getFractureMapTexture(mapId);
+    if (pattern) c.fillStyle = pattern;
+    else {
+        const fallback = ['#4f7b47','#c58d52','#dcefff','#3b414a','#537a3d','#465f43','#4b535e','#5d2d23','#3c7c4c','#21172d','#185b70','#26113f'];
+        c.fillStyle = fallback[mapId] || '#26113f';
     }
-    c.globalAlpha = 1;
-    c.fillStyle='rgba(0,0,0,.22)'; c.fillRect(0,0,w,h);
+    c.fillRect(0,0,w,h);
+
+    const elementTypes = {
+        1:['cacto'], 2:['ice'], 3:['rock'], 4:['tree'], 5:['mud'],
+        6:['side_car','front_car','behind_car'], 7:['volcano'], 8:['bamboo'],
+        9:['speaker'], 10:['kelp']
+    };
+    const list = elementTypes[Number(mapId)] || [];
+    const positions = [[0.18,0.22],[0.52,0.18],[0.82,0.30],[0.28,0.55],[0.67,0.51],[0.47,0.78],[0.83,0.77],[0.12,0.77]];
+    const cache = window.__destPreviewImageCache || (window.__destPreviewImageCache = new Map());
+    list.forEach((type,i)=>{
+        const key = getMapElementSpriteKey(type,{vx:i%2?1:-1,vy:0});
+        const path = MAP_ELEMENT_SPRITES[key] || '';
+        if(!path) return;
+        let img = cache.get(key);
+        if(!img){ img=new Image(); img.src=path; cache.set(key,img); }
+        if(!img.complete || !img.naturalWidth){ img.onload=()=>drawDestinationPreview(canvas,mapId); return; }
+        const [px,py]=positions[i%positions.length];
+        const size=Math.max(24,w*(mapId===6?0.17:0.15));
+        const ratio=img.naturalWidth/img.naturalHeight;
+        const iw=size, ih=iw/ratio;
+        c.save();
+        if(type==='side_car' && i%2){ c.translate(px*w,py*h); c.scale(-1,1); c.drawImage(img,-iw/2,-ih/2,iw,ih); }
+        else c.drawImage(img,px*w-iw/2,py*h-ih/2,iw,ih);
+        c.restore();
+    });
+
+    // O Fraturado aparece como o quadrado roxo original, sem simular uma fratura.
 }
 
 function renderMapDestinationChoices() {
@@ -7655,11 +7702,9 @@ function renderMapDestinationChoices() {
     const timer = document.getElementById('map-destination-timer');
     if (!grid) return;
     const choices = getDestinationChoices();
-    grid.innerHTML = choices.map((mapId, slot) => `<button type="button" class="map-destination-card${mapId===11?' is-fracturado':''}" data-map-id="${mapId}" aria-label="Escolher ${escapeHtmlText(MAPS[mapId])}">
+    grid.innerHTML = choices.map((mapId, slot) => `<button type="button" class="map-destination-card" data-map-id="${mapId}" aria-label="Escolher ${escapeHtmlText(MAPS[mapId])}">
         <canvas id="map-destination-preview-${slot}"></canvas>
-        <span class="map-destination-fracture"></span>
         <div class="map-destination-name">${escapeHtmlText(MAPS[mapId])}</div>
-        <div class="map-destination-meta">Fratura ${slot+1}</div>
     </button>`).join('');
     choices.forEach((mapId, slot) => {
         const card = grid.querySelector(`.map-destination-card[data-map-id="${mapId}"]`);
@@ -14270,11 +14315,22 @@ function fireWeapon(target) {
     }
 }
 
+function getSeinSeinProtector(enemy) {
+    if (!enemy || enemy.hp <= 0) return null;
+    for (const protector of enemies) {
+        if (!protector || protector === enemy || protector.hp <= 0 || protector.type !== 'sein_sein') continue;
+        const radius = Number(protector.seinAuraRadius) || 115;
+        if (dist(protector, enemy) <= radius + (enemy.size || 0) * 0.15) return protector;
+    }
+    return null;
+}
+
 function getEnemyDamageTakenMultiplier(enemy) {
     if (!enemy) return 1;
     let mult = 1;
     if (Number(enemy.weakenTimer) > 0) mult *= 1.2;
     if (Number(enemy.curseTimer) > 0) mult *= 1.2;
+    if (getSeinSeinProtector(enemy)) mult *= 0.60;
     return mult;
 }
 
@@ -14859,7 +14915,7 @@ function spawnEnemy() {
         types.push('ballon');
         types.push('ballon');
     }
-    if (gameTime >= 75 && window.currentMap !== 1) {
+    if (wave >= 12 && window.currentMap !== 1) {
         types.push('truck');
     }
 
@@ -14899,6 +14955,17 @@ function spawnEnemy() {
         }
         if (wave >= 30) types.push('scorpion');
         if (wave >= 35) types.push('stone_golem');
+    }
+
+    // Expansão do Bambuzal.
+    if (window.currentMap === 8) {
+        if (wave >= 10) types.push('sein_sein');
+        if (wave >= 16) {
+            types.push('samurai');
+            types.push('panda_suit');
+        }
+        if (wave >= 17) types.push('nunchaku');
+        if (wave >= 20) types.push('geisha');
     }
 
     // Expansão da Floresta.
@@ -14944,14 +15011,14 @@ function spawnEnemy() {
     
     if(pd.settings.ultraHardcore && window.currentMap === 4 && type === 'gigante') type = 'monster_tree';
 
-    let e = { x: ex, y: ey, type, hp: 0, maxHp: 0, speed: 0, baseDmg: 0, dmg: 0, size: 0, cd: 0, color: '', poison: { timer: 0, dmg: 0, tickCd: 0 }, slowTimer: 0, weakenTimer: 0, curseTimer: 0, burnTimer: 0, freezeTimer: 0, burnDmg: 0, speedBuffTimer: 0, soak: 0, shockTimer: 0, shockSemiTimer: 0, shockTick: 0, shockSemiTick: 0, shockDmg: 0, shockSemiDmg: 0, shockRate: 0.3, semiShockRate: 0.4, spawnBiome: window.currentMap, spawnWave, entryWave: spawnWave, stationary: false, poisonOnHit: 0, enemySkin: (window.currentMap === 4 && type === 'goblin') ? 'hunter' : null, fracturedOrigin: false, fractureMapId: null, skinSourceMapId: window.currentMap === 11 ? null : window.currentMap };
+    let e = { x: ex, y: ey, type, hp: 0, maxHp: 0, speed: 0, baseDmg: 0, dmg: 0, size: 0, cd: 0, color: '', poison: { timer: 0, dmg: 0, tickCd: 0 }, slowTimer: 0, weakenTimer: 0, curseTimer: 0, burnTimer: 0, freezeTimer: 0, burnDmg: 0, speedBuffTimer: 0, soak: 0, shockTimer: 0, shockSemiTimer: 0, shockTick: 0, shockSemiTick: 0, shockDmg: 0, shockSemiDmg: 0, shockRate: 0.3, semiShockRate: 0.4, spawnBiome: window.currentMap, spawnWave, entryWave: spawnWave, stationary: false, poisonOnHit: 0, enemySkin: (window.currentMap === 4 && type === 'goblin') ? 'hunter' : null, fracturedOrigin: false, fractureMapId: null, skinSourceMapId: window.currentMap === 11 ? null : window.currentMap, pandaSummonTimer: 0, pandaSummoned: false, seinSein: false, seinAuraRadius: 115, samuraiAttackTimer: 0, samuraiAttackAngle: 0, samuraiAttackApplied: false, samuraiCd: 0, nunchakuAttackTimer: 0, nunchakuAttackAngle: 0, nunchakuAttackApplied: false, nunchakuCd: 0 };
     if (window.currentMap === 11) e.fracturedSkinType = getFracturedEnemySkinType(e);
     
     if(type === 'basico') { e.hp = 30*mult; e.speed = 1.5; e.baseDmg = 5*mult; e.size = 12; e.color = '#e74c3c'; }
     if(type === 'velocista' || type === 'dancer') { e.hp = 15*mult; e.speed = 2.0; e.baseDmg = 3*mult; e.size = 10; e.color = '#f39c12'; } 
-    if(type === 'gigante') { e.hp = 80*mult; e.speed = 0.8; e.baseDmg = 15*mult; e.size = 22; e.color = '#8e44ad'; }
+    if(type === 'gigante') { e.hp = 120*mult; e.speed = 0.8; e.baseDmg = 15*mult; e.size = 22; e.color = '#8e44ad'; }
     if(type === 'atirador') { e.hp = 20*mult; e.speed = 1.2; e.baseDmg = 8*mult; e.size = 14; e.color = '#2980b9'; }
-    if(type === 'tanque') { e.hp = 110*mult; e.speed = 0.7; e.baseDmg = 20*mult; e.size = 25; e.color = '#34495e'; }
+    if(type === 'tanque') { e.hp = 160*mult; e.speed = 0.7; e.baseDmg = 20*mult; e.size = 25; e.color = '#34495e'; }
     if(type === 'curandeiro') { e.hp = 40*mult; e.speed = 1.3; e.baseDmg = 0; e.size = 13; e.color = '#ffffff'; e.cd = 60; }
     if(type === 'elite') { e.hp = 30*mult; e.speed = 1.1; e.baseDmg = 12*mult; e.size = 14; e.color = '#1abc9c'; e.cd = 80; }
     
@@ -15007,6 +15074,12 @@ function spawnEnemy() {
         e.hp = 34*mult; e.speed = 0.82; e.baseDmg = 9*mult; e.size = 14; e.color = '#b8c9ff';
         e.ghostFisher = true; e.dodgeChance = 0.25; e.cd = 90;
     }
+    if(type === 'sein_sein') { e.hp = 55*mult; e.speed = 0.95; e.baseDmg = 6*mult; e.size = 14; e.color = '#6c8f44'; e.seinSein = true; e.seinAuraRadius = 115; }
+    if(type === 'samurai') { e.hp = 70*mult; e.speed = 1.1; e.baseDmg = 16*mult; e.size = 15; e.color = '#9b2c2c'; e.samurai = true; e.samuraiCd = 1.45; e.samuraiAttackTimer = 0; e.samuraiAttackAngle = 0; e.samuraiAttackApplied = false; }
+    if(type === 'panda_suit') { e.hp = 15*mult; e.speed = 2.0; e.baseDmg = 3*mult; e.size = 10; e.color = '#f1f1f1'; e.pandaSuit = true; e.pandaSummonTimer = 10; e.pandaSummoned = false; }
+    if(type === 'panda') { e.hp = 72*mult; e.speed = 1.35; e.baseDmg = 14*mult; e.size = 18; e.color = '#202020'; e.panda = true; }
+    if(type === 'nunchaku') { e.hp = 65*mult; e.speed = 1.15; e.baseDmg = 14*mult; e.size = 15; e.color = '#7a5530'; e.nunchaku = true; e.nunchakuCd = 1.15; e.nunchakuAttackTimer = 0; e.nunchakuAttackAngle = 0; e.nunchakuAttackApplied = false; }
+    if(type === 'geisha') { e.hp = 45*mult; e.speed = 1.05; e.baseDmg = 0; e.size = 14; e.color = '#f4d6e2'; e.geisha = true; e.cd = 2.4; }
     if(type === 'monkey') { e.hp = 15*mult; e.speed = 2.0; e.baseDmg = 3*mult; e.size = 10; e.color = '#8d6e63'; e.monkey = true; }
     if(type === 'gorilla') { e.hp = 80*mult; e.speed = 0.8; e.baseDmg = 15*mult; e.size = 22; e.color = '#6d4c41'; e.gorilla = true; e.gorillaSplitUsed = false; }
     if(type === 'leopard') { e.hp = 52*mult; e.speed = 1.6; e.baseDmg = 13*mult; e.size = 15; e.color = '#d4a017'; e.cd = 150; e.leopardHunter = true; }
@@ -15038,6 +15111,8 @@ function updateEnemies(dt) {
         if(typeof e.semiShockRate !== 'number') e.semiShockRate = 0.4;
         if(typeof e.hypnotizedTimer !== 'number') e.hypnotizedTimer = 0;
         if(typeof e.merlinBabyTimer !== 'number') e.merlinBabyTimer = 0;
+        if(typeof e.pandaSummonTimer !== 'number') e.pandaSummonTimer = (e.type === 'panda_suit' ? 10 : 0);
+        if(typeof e.pandaSummoned !== 'boolean') e.pandaSummoned = false;
         if(e.merlinBabyTimer > 0) {
             e.merlinBabyTimer -= dt;
             if(e.merlinBabyTimer <= 0) {
@@ -15159,6 +15234,26 @@ function updateEnemies(dt) {
         const prevY = e.y;
         const isHypnotized = e.hypnotizedTimer > 0 && e.type !== 'boss' && e.type !== 'megaboss' && e.type !== 'colosso';
         const hypSnapshot = isHypnotized ? (e.hypnotizedSnapshot || null) : null;
+        if (e.type === 'panda_suit' && !e.pandaSummoned && e.hp > 0 && !isFrozen && !isHypnotized) {
+            e.pandaSummonTimer = Math.max(0, e.pandaSummonTimer - dt);
+            if (e.pandaSummonTimer <= 0) {
+                e.pandaSummoned = true;
+                const pandaEntry = Math.max(16, Number(e.entryWave) || 16);
+                const pandaMult = getEnemyDifficultyMultiplierFromEntry('panda', pandaEntry, wave);
+                const sourceMapId = Number.isInteger(e.fractureMapId) ? e.fractureMapId : (Number.isInteger(e.skinSourceMapId) ? e.skinSourceMapId : window.currentMap);
+                const pandaFractured = !!e.fracturedOrigin;
+                enemies.push({
+                    x:e.x + (Math.random()-0.5)*24, y:e.y + (Math.random()-0.5)*24, type:'panda',
+                    hp:72*pandaMult, maxHp:72*pandaMult, speed:1.35, baseDmg:14*pandaMult, dmg:14*pandaMult, size:18, cd:0, color:'#202020',
+                    poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, curseTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0,
+                    shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4,
+                    spawnBiome:sourceMapId, spawnWave:pandaEntry, entryWave:pandaEntry, stationary:false, skinSourceMapId:sourceMapId, fracturedOrigin:pandaFractured, fractureMapId:pandaFractured ? sourceMapId : null,
+                    panda:true, enemySkin:null, fracturedSkinType:null, resolvedFracturedSkinType:null, _skinTypeForEnemy:null, seinSein:false, seinAuraRadius:115, pandaSummonTimer:0, pandaSummoned:false, samuraiAttackTimer:0, samuraiAttackAngle:0, samuraiAttackApplied:false, samuraiCd:0, nunchakuAttackTimer:0, nunchakuAttackAngle:0, nunchakuAttackApplied:false, nunchakuCd:0
+                });
+                createParticles(e.x, e.y, '#ffffff');
+                addFloatingText(e.x, e.y - 26, 'PANDA!', '#ffffff', 12);
+            }
+        }
         if (isHypnotized && hypSnapshot && Number.isFinite(hypSnapshot.dmg)) {
             e.dmg = hypSnapshot.dmg;
         }
@@ -15346,6 +15441,76 @@ function updateEnemies(dt) {
                 createParticles(e.x, e.y, '#44d7c8');
             }
             let a = Math.atan2(targetY - e.y, targetX - e.x);
+            nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt;
+            ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
+        } else if (e.type === 'sein_sein') {
+            const a = Math.atan2(targetY - e.y, targetX - e.x);
+            nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt;
+            ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
+        } else if (e.type === 'samurai') {
+            e.samuraiCd = Math.max(0, (e.samuraiCd || 0) - dt);
+            e.samuraiAttackTimer = Math.max(0, (e.samuraiAttackTimer || 0) - dt);
+            if (e.samuraiAttackTimer > 0 && !e.samuraiAttackApplied && player.invisTimer <= 0 && !isFrozen && !isHypnotized) {
+                const range = Math.max(120, (e.size || 15) * 7.0);
+                if (dist(e, player) <= range + player.r) {
+                    const toPlayer = Math.atan2(player.y - e.y, player.x - e.x);
+                    if (Math.abs(normalizeAngle(toPlayer - e.samuraiAttackAngle)) <= Math.PI / 2) {
+                        if (Math.random() > (player.stats.dodgeChance || 0)) {
+                            dealPlayerDamage(e.dmg);
+                            addFloatingText(player.x, player.y, `-${Math.floor(e.dmg)}`, '#e74c3c');
+                            if (player.hp <= 0) { triggerRevivePrompt(); return; }
+                        } else addFloatingText(player.x, player.y, 'Esquiva!', '#3498db', 12);
+                    }
+                }
+                e.samuraiAttackApplied = true;
+            }
+            if (e.samuraiCd <= 0 && d <= 190 && player.invisTimer <= 0 && !isFrozen && !isHypnotized) {
+                e.samuraiCd = 1.65;
+                e.samuraiAttackTimer = 0.22;
+                e.samuraiAttackApplied = false;
+                e.samuraiAttackAngle = Math.atan2(targetY - e.y, targetX - e.x);
+            }
+            const a = Math.atan2(targetY - e.y, targetX - e.x);
+            nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt;
+            ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
+        } else if (e.type === 'panda_suit' || e.type === 'panda') {
+            const a = Math.atan2(targetY - e.y, targetX - e.x);
+            nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt;
+            ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
+        } else if (e.type === 'nunchaku') {
+            e.nunchakuCd = Math.max(0, (e.nunchakuCd || 0) - dt);
+            e.nunchakuAttackTimer = Math.max(0, (e.nunchakuAttackTimer || 0) - dt);
+            if (e.nunchakuAttackTimer > 0 && !e.nunchakuAttackApplied && player.invisTimer <= 0 && !isFrozen && !isHypnotized) {
+                const range = Math.max(105, (e.size || 15) * 6.2);
+                if (dist(e, player) <= range + player.r) {
+                    const toPlayer = Math.atan2(player.y - e.y, player.x - e.x);
+                    if (Math.abs(normalizeAngle(toPlayer - e.nunchakuAttackAngle)) <= Math.PI / 3) {
+                        if (Math.random() > (player.stats.dodgeChance || 0)) {
+                            dealPlayerDamage(e.dmg);
+                            addFloatingText(player.x, player.y, `-${Math.floor(e.dmg)}`, '#e67e22');
+                            if (player.hp <= 0) { triggerRevivePrompt(); return; }
+                        } else addFloatingText(player.x, player.y, 'Esquiva!', '#3498db', 12);
+                    }
+                }
+                e.nunchakuAttackApplied = true;
+            }
+            if (e.nunchakuCd <= 0 && d <= 155 && player.invisTimer <= 0 && !isFrozen && !isHypnotized) {
+                e.nunchakuCd = 1.25;
+                e.nunchakuAttackTimer = 0.20;
+                e.nunchakuAttackApplied = false;
+                e.nunchakuAttackAngle = Math.atan2(targetY - e.y, targetX - e.x);
+            }
+            const a = Math.atan2(targetY - e.y, targetX - e.x);
+            nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt;
+            ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
+        } else if (e.type === 'geisha') {
+            e.cd = Math.max(0, (e.cd || 0) - dt);
+            if (e.cd <= 0 && player.invisTimer <= 0 && !isFrozen && !isHypnotized) {
+                const a = Math.atan2(targetY - e.y, targetX - e.x);
+                createProj(e.x, e.y, Math.cos(a) * 4.4, Math.sin(a) * 4.4, 0, 90, false, 'geisha_gong', { size: 11, pushDistance: 85, sourceEnemy: e });
+                e.cd = 2.5;
+            }
+            const a = Math.atan2(targetY - e.y, targetX - e.x);
             nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt;
             ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
         } else if (e.type === 'ghost_fisher') {
@@ -16865,7 +17030,7 @@ function updateProjectiles(dt) {
         const extra = p.extra || {};
         let hitObstacle = false;
         obstacles.forEach(o => { if(o.type !== 'ice' && o.type !== 'mud' && o.type !== 'car' && o.type !== 'bamboo_spike' && o.type !== 'speaker' && dist(p, o) < o.r + p.size) hitObstacle = true; });
-        if(hitObstacle && p.type !== 'lumber_axe' && p.type !== 'lance' && p.type !== 'ghost_fishing_line' && p.type !== 'sword' && p.type !== 'scythe' && p.type !== 'gladiator_slash' && p.type !== 'shinobi' && p.type !== 'shinobi_fireball' && p.type !== 'boomerang' && p.type !== 'wind_gust' && p.type !== 'tornado' && p.type !== 'energy_wave' && p.type !== 'water_wave' && p.type !== 'beezy_honey' && p.type !== 'beezy_bee' && p.type !== 'shell_trident') { 
+        if(hitObstacle && p.type !== 'lumber_axe' && p.type !== 'lance' && p.type !== 'ghost_fishing_line' && p.type !== 'sword' && p.type !== 'scythe' && p.type !== 'gladiator_slash' && p.type !== 'shinobi' && p.type !== 'shinobi_fireball' && p.type !== 'boomerang' && p.type !== 'wind_gust' && p.type !== 'tornado' && p.type !== 'energy_wave' && p.type !== 'water_wave' && p.type !== 'beezy_honey' && p.type !== 'beezy_bee' && p.type !== 'shell_trident' && p.type !== 'geisha_gong') { 
             if(p.type === 'echo_bh_core') { spawnEchoBlackHole(p.x, p.y, p.extra); }
             if(p.type === 'blood_ball' && (extra.size || 0) === 10) { for(let j=0; j<boxPulls('normal'); j++) { let a = Math.PI*2/3 * j; createProj(p.x, p.y, Math.cos(a)*3, Math.sin(a)*3, p.dmg*0.4, 30, true, 'blood_ball', {size: 4}); } }
             if(p.type === 'rocket') { createExplosion(p.x, p.y, 80 * player.stats.rangeMult, p.dmg); projectiles.splice(i, 1); continue; }
@@ -17416,7 +17581,11 @@ function updateProjectiles(dt) {
                     hit = true;
                 } else if(dist(p, player) < p.size + player.r && player.shieldTimer <= 0 && !(p.type === 'lumber_axe' && p.extra?.returnPhase)) {
                     if(Math.random() > (player.stats.dodgeChance || 0)) {
-                        dealPlayerDamage(p.dmg * Math.max(0.1, player.stats.defMult - player.stats.dynamicDef)); addFloatingText(player.x, player.y, `-${Math.floor(p.dmg)}`, '#e74c3c'); hit = true;
+                        if (p.type !== 'geisha_gong') {
+                            dealPlayerDamage(p.dmg * Math.max(0.1, player.stats.defMult - player.stats.dynamicDef));
+                            addFloatingText(player.x, player.y, `-${Math.floor(p.dmg)}`, '#e74c3c');
+                        }
+                        hit = true;
                         if (p.type === 'snowball_slow') {
                             player.snowSlowTimer = Math.max(Number(player.snowSlowTimer) || 0, Number(p.extra?.slowDuration) || 0.6);
                             addFloatingText(player.x, player.y - 16, 'LERDEZA!', '#74b9ff', 12);
@@ -17428,6 +17597,16 @@ function updateProjectiles(dt) {
             }
         }
 
+        if(hit && p.type === 'geisha_gong') {
+            const pushDistance = Math.max(20, Number(p.extra?.pushDistance) || 85);
+            const a = Math.atan2(p.vy, p.vx);
+            player.x = Math.max(-1480, Math.min(1480, player.x + Math.cos(a) * pushDistance));
+            player.y = Math.max(-1480, Math.min(1480, player.y + Math.sin(a) * pushDistance));
+            addFloatingText(player.x, player.y - 18, 'EMPURRÃO!', '#f5c6ff', 12);
+            createParticles(player.x, player.y, '#d98cff');
+            projectiles.splice(i, 1);
+            continue;
+        }
         if(hit && p.type === 'lumber_axe') {
             if (!p.extra?.returnPhase) {
                 p.extra.returnPhase = true;
@@ -18614,12 +18793,18 @@ function drawFractureDecorPrimitive(type, x, y, size, seed = 0) {
 function drawFractureDecorations(fracture) {
     const types = getFractureDecorTypes(fracture.mapId);
     const decor = Array.isArray(fracture.decorations) ? fracture.decorations : [];
+    const a = Number(fracture.angle) || 0;
+    const ca = Math.cos(a), sa = Math.sin(a);
     for (const item of decor) {
         if (!types.includes(item.type)) continue;
+        const dx = item.x - fracture.x;
+        const dy = item.y - fracture.y;
+        const localX = dx * ca + dy * sa;
+        const localY = -dx * sa + dy * ca;
         if (item.type === 'ice' || item.type === 'mud') {
-            drawFractureDecorPrimitive(item.type, item.x, item.y, item.size, item.seed);
+            drawFractureDecorPrimitive(item.type, localX, localY, item.size, item.seed);
         } else {
-            drawMapElementSprite(ctx, getMapElementSpriteKey(item.type, item), item.x, item.y, item.size, {
+            drawMapElementSprite(ctx, getMapElementSpriteKey(item.type, item), localX, localY, item.size, {
                 rotate: item.rotate || 0,
                 flipX: !!item.flipX,
                 opacity: 0.92
@@ -18770,7 +18955,7 @@ function getFractureBiomePool(mapId) {
         5: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','snow_walker','crocodile','swamp_monster'],
         6: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','worker','conehead','motorcycle','police_car','ambulance'],
         7: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon'],
-        8: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','ninja'],
+        8: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','ninja','sein_sein','samurai','panda_suit','nunchaku','geisha'],
         9: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','dancer'],
         10:['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','ghost_fisher','swordfish','shark','triton']
     };
@@ -18783,14 +18968,16 @@ function getFracturedGlobalEnemyPool() {
         'cardboard_head','motorcycle_helmet','prism_head','truck','ballon','colosso','elite_master','lider_elite',
         'mummy','explorer','camel','scorpion','snow_walker','ice_statue','deer_pilot','crocodile','swamp_monster',
         'goblin','tnt_crate','stone_golem','lumberjack','gorilla','leopard','ninja','dancer',
-        'ghost_fisher','swordfish','triton','worker','conehead','ambulance','police_car','motorcycle'
+        'ghost_fisher','swordfish','triton','worker','conehead','ambulance','police_car','motorcycle',
+        'sein_sein','samurai','panda_suit','nunchaku','geisha'
     ];
     return candidates.filter(t => getEnemyEntryWave(t, wave) <= wave);
 }
 
 function spawnFractureEnemy(fracture) {
     if (!fracture || wave % 10 === 0 || enemies.some(e => e && e.isBoss)) return false;
-    const pool = getFractureBiomePool(fracture.mapId);
+    const pool = getFractureBiomePool(fracture.mapId)
+        .filter(t => getEnemyEntryWave(t, wave) <= wave);
     if (!pool.length) return false;
     const type = pool[Math.floor(Math.random() * pool.length)];
     const distance = 25 + Math.random() * 70;
@@ -18818,12 +19005,13 @@ function spawnFractureEnemy(fracture) {
         shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4,
         spawnBiome: fracture.mapId, spawnWave, entryWave: spawnWave, stationary:false, poisonOnHit:0,
         fracturedOrigin: true, fractureMapId: fracture.mapId, skinSourceMapId: fracture.mapId, spriteScale: 1,
+        pandaSummonTimer: 0, pandaSummoned: false, seinSein: false, seinAuraRadius: 115, samuraiAttackTimer: 0, samuraiAttackAngle: 0, samuraiAttackApplied: false, samuraiCd: 0, nunchakuAttackTimer: 0, nunchakuAttackAngle: 0, nunchakuAttackApplied: false, nunchakuCd: 0,
         enemySkin: (fracture.mapId === 4 && type === 'goblin') ? 'hunter' : null
     };
     e.fracturedSkinType = getFracturedEnemySkinType(e) || null;
     // Copia apenas a parametrização do inimigo da mesma tabela já usada pelo spawn normal.
-    const templateTypes = { basico:30, velocista:15, dancer:40, ninja:20, atirador:20, gigante:80, tanque:110, curandeiro:40, elite:30, kamikaze:10, lider:45, cardboard_head:45, motorcycle_helmet:85, prism_head:180, truck:170, ballon:30,
-        mummy:50, explorer:42, camel:120, scorpion:135, snow_walker:38, ice_statue:150, deer_pilot:28, crocodile:95, swamp_monster:190, goblin:28, tnt_crate:58, stone_golem:520, lumberjack:150, gorilla:80, leopard:52, ghost_fisher:34, swordfish:38, triton:105, worker:38, conehead:105, ambulance:170, police_car:155, motorcycle:90 };
+    const templateTypes = { basico:30, velocista:15, dancer:40, ninja:20, atirador:20, gigante:120, tanque:160, curandeiro:40, elite:30, kamikaze:10, lider:45, cardboard_head:45, motorcycle_helmet:85, prism_head:180, truck:170, ballon:30,
+        mummy:50, explorer:42, camel:120, scorpion:135, snow_walker:38, ice_statue:150, deer_pilot:28, crocodile:95, swamp_monster:190, goblin:28, tnt_crate:58, stone_golem:520, lumberjack:150, gorilla:80, leopard:52, ghost_fisher:34, sein_sein:55, samurai:70, panda_suit:15, panda:72, nunchaku:65, geisha:45, swordfish:38, triton:105, worker:38, conehead:105, ambulance:170, police_car:155, motorcycle:90 };
     const hpBase = templateTypes[type] || 30;
     e.hp = hpBase * mult; e.maxHp = e.hp;
     if (type === 'velocista' || type === 'dancer') { e.speed=2.2; e.baseDmg=3*mult; e.size=10; e.color='#f39c12'; }
@@ -18861,6 +19049,12 @@ function spawnFractureEnemy(fracture) {
     else if (type === 'gorilla') { e.speed=0.8; e.baseDmg=15*mult; e.size=22; e.color='#6d4c41'; e.gorilla=true; e.gorillaSplitUsed=false; }
     else if (type === 'leopard') { e.speed=1.6; e.baseDmg=13*mult; e.size=15; e.color='#d4a017'; e.cd=150; e.leopardHunter=true; }
     else if (type === 'ghost_fisher') { e.speed=0.82; e.baseDmg=9*mult; e.size=14; e.color='#b8c9ff'; e.ghostFisher=true; e.dodgeChance=0.25; e.cd=90; }
+    else if (type === 'sein_sein') { e.speed=0.95; e.baseDmg=6*mult; e.size=14; e.color='#6c8f44'; e.seinSein=true; e.seinAuraRadius=115; }
+    else if (type === 'samurai') { e.speed=1.1; e.baseDmg=16*mult; e.size=15; e.color='#9b2c2c'; e.samurai=true; e.samuraiCd=1.45; e.samuraiAttackTimer=0; e.samuraiAttackAngle=0; e.samuraiAttackApplied=false; }
+    else if (type === 'panda_suit') { e.speed=2.0; e.baseDmg=3*mult; e.size=10; e.color='#f1f1f1'; e.pandaSuit=true; e.pandaSummonTimer=10; e.pandaSummoned=false; }
+    else if (type === 'panda') { e.speed=1.35; e.baseDmg=14*mult; e.size=18; e.color='#202020'; e.panda=true; }
+    else if (type === 'nunchaku') { e.speed=1.15; e.baseDmg=14*mult; e.size=15; e.color='#7a5530'; e.nunchaku=true; e.nunchakuCd=1.15; e.nunchakuAttackTimer=0; e.nunchakuAttackAngle=0; e.nunchakuAttackApplied=false; }
+    else if (type === 'geisha') { e.speed=1.05; e.baseDmg=0; e.size=14; e.color='#f4d6e2'; e.geisha=true; e.cd=2.4; }
     else if (type === 'swordfish') { e.speed=3.0; e.baseDmg=18*mult; e.size=15; e.color='#d6f6ff'; e.swordfish=true; e.swordfishPassCd=0; }
     else if (type === 'triton') { e.speed=1.95; e.baseDmg=12*mult; e.size=20; e.color='#44d7c8'; e.triton=true; e.spawnCd=20; }
     else { e.speed=1.5; e.baseDmg=5*mult; e.size=12; e.color='#e74c3c'; }
@@ -19549,6 +19743,25 @@ function draw() {
             drawShape(ctx, e.x, e.y, e.size, 'circle', e.color, e.isBoss);
         }
 
+        if (e.hp > 0 && e.type === 'sein_sein') {
+            const auraR = Number(e.seinAuraRadius) || 115;
+            const pulse = 1 + Math.sin((gameTime || 0) * 4) * 0.025;
+            ctx.save(); ctx.globalAlpha=0.13; ctx.fillStyle='#74b9ff'; ctx.beginPath(); ctx.arc(e.x,e.y,auraR*pulse,0,Math.PI*2); ctx.fill();
+            ctx.globalAlpha=0.75; ctx.strokeStyle='#74b9ff'; ctx.lineWidth=2.5; ctx.setLineDash([8,6]); ctx.beginPath(); ctx.arc(e.x,e.y,auraR*pulse,0,Math.PI*2); ctx.stroke(); ctx.setLineDash([]); ctx.restore();
+        }
+        if (e.hp > 0 && e.type !== 'sein_sein' && getSeinSeinProtector(e)) {
+            ctx.save(); ctx.globalAlpha=0.28; ctx.fillStyle='#74b9ff'; ctx.beginPath(); ctx.arc(e.x,e.y,Math.max(12,(e.size||10)+5),0,Math.PI*2); ctx.fill();
+            ctx.globalAlpha=0.9; ctx.strokeStyle='#bfe3ff'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(e.x,e.y,Math.max(12,(e.size||10)+5),0,Math.PI*2); ctx.stroke(); ctx.restore();
+        }
+        if (e.samuraiAttackTimer > 0 && e.hp > 0) {
+            ctx.save(); ctx.translate(e.x,e.y); ctx.rotate(e.samuraiAttackAngle || 0); ctx.globalAlpha=Math.min(0.62,Math.max(0.12,e.samuraiAttackTimer*3));
+            ctx.fillStyle='rgba(255,75,75,0.45)'; ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,Math.max(42,(e.size||15)*7),-Math.PI/2,Math.PI/2); ctx.closePath(); ctx.fill();
+            ctx.strokeStyle='#ff7675'; ctx.lineWidth=3; ctx.stroke(); ctx.restore();
+        }
+        if (e.nunchakuAttackTimer > 0 && e.hp > 0) {
+            ctx.save(); ctx.translate(e.x,e.y); ctx.rotate(e.nunchakuAttackAngle || 0); ctx.globalAlpha=Math.min(0.7,Math.max(0.14,e.nunchakuAttackTimer*3.5));
+            ctx.strokeStyle='#f6c36b'; ctx.lineWidth=Math.max(4,(e.size||15)*0.36); ctx.beginPath(); ctx.arc(0,0,Math.max(35,(e.size||15)*5.4),-Math.PI/3,Math.PI/3); ctx.stroke(); ctx.restore();
+        }
         drawEnemyStatusHud(ctx, e, drawW, drawH);
     });
 
@@ -20670,6 +20883,13 @@ function draw() {
                 ctx.stroke();
                 ctx.restore();
             }
+        }
+        else if(p.type === 'geisha_gong') {
+            ctx.save(); ctx.translate(p.x,p.y);
+            const pulse = 1 + Math.sin((gameTime || 0) * 16) * 0.08;
+            ctx.scale(pulse,pulse); ctx.shadowColor='rgba(217,140,255,0.85)'; ctx.shadowBlur=14; ctx.strokeStyle='#f5d6ff'; ctx.lineWidth=3;
+            for(let r=1;r<=3;r++){ ctx.globalAlpha=0.78-r*0.16; ctx.beginPath(); ctx.arc(0,0,p.size*(r*0.65),0,Math.PI*2); ctx.stroke(); }
+            ctx.globalAlpha=1; ctx.fillStyle='#d98cff'; ctx.beginPath(); ctx.arc(0,0,Math.max(3,p.size*0.28),0,Math.PI*2); ctx.fill(); ctx.restore();
         }
         else if(p.type === 'heavy_enemy') { ctx.fillStyle = '#7f8c8d'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); }
         else if(p.type === 'screw') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx)); const isKaisenTool = !!p.extra?.kaisenTool; const bodyW = isKaisenTool ? 16 : 10; const bodyH = isKaisenTool ? 6 : 5; ctx.fillStyle = '#7f8c8d'; if(ctx.roundRect) { ctx.beginPath(); ctx.roundRect(-bodyW * 0.5, -bodyH * 0.5, bodyW, bodyH, Math.max(2, bodyH * 0.35)); ctx.fill(); } else { ctx.fillRect(-bodyW * 0.5, -bodyH * 0.5, bodyW, bodyH); } ctx.fillStyle = '#bdc3c7'; ctx.beginPath(); ctx.arc(isKaisenTool ? 5.2 : 4, 0, isKaisenTool ? 4.2 : 3.5, 0, Math.PI*2); ctx.fill(); ctx.restore(); }
