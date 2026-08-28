@@ -476,6 +476,11 @@
     #o2-bar-label { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 900; text-shadow: 1px 1px 0 #000; pointer-events: none; }
     #qb-bar-container { position: absolute; top: 76px; left: 50%; transform: translateX(-50%); width: 300px; height: 16px; background: #1b1024; border: 3px solid #000; border-radius: 12px; overflow: hidden; z-index: 5; box-shadow: 0 0 10px rgba(0,0,0,0.5); display: none; }
     #qb-bar { height: 100%; background: linear-gradient(90deg, #8e44ad, #e056fd); width: 0%; transition: width 0.15s; }
+    #blizzard-temp-container { position:absolute; top:118px; left:50%; transform:translateX(-50%); width:300px; height:34px; display:none; align-items:center; gap:9px; padding:5px 9px; background:linear-gradient(180deg,rgba(232,244,255,.96),rgba(183,214,238,.96)); border:3px solid #0b1f33; border-radius:18px; z-index:5; box-shadow:0 4px 16px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.8); }
+    #blizzard-temp-container::before { content:''; width:11px; height:11px; flex:0 0 11px; border-radius:50%; background:var(--blizzard-thermo,#fff); border:2px solid #1b2c3d; box-shadow:0 0 9px rgba(116,185,255,.55); }
+    #blizzard-temp-container::after { content:''; position:absolute; left:36px; right:42px; top:50%; height:8px; transform:translateY(-50%); background:linear-gradient(90deg,#132b45 0%,#3d73a6 25%,#e9f7ff 52%,#f4e7b2 100%); border:1px solid rgba(11,31,51,.55); border-radius:999px; opacity:.48; pointer-events:none; }
+    #blizzard-temp-fill { position:absolute; left:36px; top:50%; height:10px; transform:translateY(-50%); width:0%; border-radius:999px; background:var(--blizzard-fill,#ffffff); box-shadow:0 0 10px rgba(255,255,255,.55); pointer-events:none; transition:width .16s linear,background .16s linear; }
+    #blizzard-temp-value { position:relative; z-index:2; margin-left:auto; min-width:54px; text-align:right; font-size:16px; line-height:1; font-weight:900; color:var(--blizzard-text,#111); text-shadow:0 1px 0 rgba(255,255,255,.35); }
     #btn-pause { pointer-events: auto; padding: 8px 18px; font-size: 16px; background: var(--btn-blue); border: 2px solid var(--btn-blue-border); }
     .btn-missions { background-color: #e67e22; border: 4px solid #d35400 !important; }
     .mission-card { background: linear-gradient(135deg, #2a1b0f, #4d2c10); border: 3px solid #e67e22; border-radius: 16px; padding: 16px; color: white; text-align: left; box-shadow: 0 10px 20px rgba(0,0,0,0.35); position: relative; overflow: hidden; }
@@ -2556,6 +2561,7 @@
 </div>
 <div id="exp-bar-container" class="hidden"><div id="exp-bar"></div></div>
 <div id="o2-bar-container" class="hidden" aria-label="Oxigênio"><div id="o2-bar"></div><span id="o2-bar-label">O2</span></div>
+<div id="blizzard-temp-container" aria-label="Temperatura"><div id="blizzard-temp-fill"></div><span id="blizzard-temp-value">20°C</span></div>
 <div id="joystick-zone"><div id="joystick-knob"></div></div><div id="gamepad-special-hint"><span class="gamepad-x">X</span><span>HABILIDADE</span></div>
 <div id="btn-special"></div>
 <div id="btn-special-hint"><span class="hotkey">P</span><span class="hint-text">aperte para ativar</span></div>
@@ -2899,6 +2905,16 @@ Especialista em armamento pesado, Buster dispara foguetes devastadores que trans
 Um engenheiro excêntrico especializado em ferramentas perigosamente afiadas. Mr. Saw transforma o campo de batalha em uma oficina mortal, espalhando serras por todos os lados enquanto procura a próxima vítima azarada. Seus inimigos aprendem rapidamente que olhar para onde pisam é uma excelente ideia.
 
 “Cuidado com os dedos.”` },
+    rowan: { id: 'rowan', class: 'Tiro preciso', name: 'Rowan', rarity: 'epic', cost: 149, hp: 105, speed: 3.4, dmg: 15, fireRate: 68, range: 280, color: '#ff4fa3', weapon: 'rowan_shard', desc: `“Rowan não aceita perder sua melhor amiga para as Fraturas. Se existe uma maneira de trazê-la de volta, ele vai encontrá-la.”
+
+Um jovem determinado e leal que desenvolveu uma pistola laser especial capaz de purificar a contaminação das Fraturas. Depois que Nyla foi enganada por Echo e acabou contaminada, Rowan passou a usar sua arma não apenas para lutar, mas principalmente para tentar salvá-la. Ele acredita que, por trás da corrupção das Fraturas, sua melhor amiga ainda está lá — e fará o que for preciso para trazê-la de volta.
+
+“Você ainda está aí dentro. Eu sei que está.”` },
+    nyla: { id: 'nyla', class: 'Controle', name: 'Nyla', rarity: 'legendary', cost: 349, hp: 108, speed: 3.4, dmg: 19, fireRate: 68, range: 285, color: '#c56cf0', weapon: 'nyla_shard', desc: `“Echo prometeu realizar seu maior desejo. Ela só não sabia que o preço seria se tornar parte das Fraturas.”
+
+Uma mulher determinada que caiu em uma emboscada de Echo e acabou contaminada pelas Fraturas. Agora, Nyla carrega esse poder dentro de si, deixando sua aparência e comportamento cada vez mais marcados pela influência delas. Rowan, seu melhor amigo, se recusa a abandoná-la e tenta fazê-la perceber que seguir Echo não é realmente o que ela deseja.
+
+“Rowan... por que você ainda está tentando me salvar?”` },
     quarterback: { id: 'quarterback', class: 'Tanque', name: 'Quarterback', rarity: 'legendary', cost: 349, hp: 150, speed: 3.5, dmg: 20, fireRate: 70, range: 200, color: '#c0392b', weapon: 'quarterback', desc: `“Quarterback entrou na batalha achando que isso era uma final de campeonato. Honestamente, ninguém teve coragem de corrigir ele.”
 
 Um verdadeiro tanque humano equipado com proteção pesada e força brutal. Quarterback domina o combate de perto, avançando sem medo enquanto atropela qualquer inimigo azarado o suficiente pra ficar no caminho. Derrubar ele é difícil. Parar ele é pior ainda.
@@ -2951,6 +2967,11 @@ Uma entidade envolta em sombras e mistério, cuja verdadeira origem permanece de
 Um artista de rua rebelde que transforma a cidade em sua tela. Armado com latas de spray e uma criatividade sem limites, Graffit deixa sua marca por onde passa, ignorando placas de “proibido”. Entre uma pintura e outra, ele prova que arte e confusão podem andar perfeitamente juntas.
 
 “Ei... essa parede tava sem graça.”` },
+    blizzard: { id: 'blizzard', class: 'Controle', name: 'Blizzard', rarity: 'mythic', cost: 569, hp: 112, speed: 3.3, dmg: 19, fireRate: 62, range: 285, color: '#74b9ff', weapon: 'blizzard_flake', sortLast: true, sortLastMythic: true, desc: `“Blizzard não controla o inverno. O inverno simplesmente parece obedecer quando ele chega.”
+
+Um poderoso mago especializado em magia de gelo e neve. Blizzard consegue manipular as baixas temperaturas ao seu redor, criando tempestades congelantes e moldando o gelo através de feitiços. Reservado e confiante, ele raramente demonstra preocupação, mesmo quando o campo de batalha inteiro começa a desaparecer sob uma camada de neve.
+
+“O inverno chegou.”` },
     shinobi: { id: 'shinobi', class: 'Samurai', name: 'Shinobi', rarity: 'mythic', cost: 699, hp: 125, speed: 4.0, dmg: 19, fireRate:  34, range: 235, color: '#8e44ad', weapon: 'shinobi_katana', sortLast: true, desc: `“Shinobi acredita que a disciplina supera qualquer truque. Por isso, costuma olhar Ninji com certo desdém.”
 
 Um samurai extremamente habilidoso que dedicou a vida ao aperfeiçoamento da espada e da honra. Para ele, ninjas dependem demais de furtividade e artifícios, enquanto um verdadeiro guerreiro vence de frente. Quando a situação exige, Shinobi desperta seu poder ancestral e se transforma em um imponente dragão, fazendo até os inimigos mais destemidos recuarem.
@@ -3114,7 +3135,22 @@ ESPECIAL: sua última explosão cria rachaduras de magma, inimigos que pisam nel
 `,
     yuuto: `Yuuto: dispara um coração que tem 15% de chance de PERFURAR e 25% de chance de HIPNOTIZAR inimigos.
 
-ESPECIAL: HIPNOTIZAR faz o inimigo atacar outros inimigos por 10s (não funciona em colossos, bosses e mega bosses); enquanto estiver hipnotizado, ele não usa ataques contra o jogador.`,
+ESPECIAL: HIPNOTIZAR faz o inimigo atacar somente inimigos não hipnotizados por 10s (não funciona em colossos, bosses e mega bosses); enquanto estiver hipnotizado, ataques dos personagens não podem escolhê-lo nem causar dano nele.`,
+    rowan: `Rowan: dispara 3 projéteis dispersados.
+
+ESPECIAL: cada vez que derrota inimigos, sua barra de PURIFICAÇÃO enche. Quando está totalmente cheia, seu próximo ataque causa PURIFICAÇÃO nos inimigos atingidos.`,
+    nyla: `Nyla: dispara 3 estilhaços retos que se dispersam em menores, com 15% de chance de ENVENENAR.
+
+ESPECIAL: a cada fim de wave, invoca uma mini fratura que invoca de 1 a 2 inimigos aleatórios HIPNOTIZADOS permanentemente.`,
+    blizzard: `Blizzard: dispara flocos de neve que podem LERDAR inimigos. Quanto mais baixa sua temperatura, mais fortes ficam seus ataques.
+
+20°C: dispara 1 floco de neve.
+0°C: dispara 2 flocos de neve.
+-20°C: dispara 3 flocos de neve e ganha chance de CONGELAR.
+-40°C: ganha chance de DANO CRÍTICO e aumenta a chance de CONGELAR.
+-60°C: pode disparar uma bola de neve mais poderosa e com muita chance de CONGELAR. Uma tempestade de neve o rodeia em 360°, causando dano e LERDA aos inimigos que entram em contato.
+
+ESPECIAL: a temperatura diminui ao eliminar inimigos e ao ficar parado por algum tempo, mas aumenta ao sofrer dano e ao se movimentar. Ao subir de temperatura, Blizzard perde os bônus das faixas mais frias.`,
     sterling: `Sterling: não possui auto attack. Ele usa um botão de ataque com carga.
 
 ESPECIAL: quanto mais tempo você segura o botão, maior o projétil, maior o dano e maior a explosão da estrela. Quando a carga chega no limite, o tiro totalmente carregado perfura inimigos também.`,
@@ -4335,9 +4371,10 @@ const SUMMARY_NOTES = {
     "ENFRAQUECE": { color: "#f5b7b1", title: "ENFRAQUECER", msg: "Quer dizer que o alvo fica mais fraco." },
     "ENFRAQUECER": { color: "#f5b7b1", title: "ENFRAQUECER", msg: "Quer dizer que o alvo fica mais fraco." },
     "CURSE": { color: "#ff69b4", title: "CURSE", msg: "O inimigo fica amaldiçoado e passa a receber 20% a mais de dano de qualquer fonte. Quando morre enquanto CURSE está ativo, explode em área." },
-    "HIPNOTIZAR": { color: "#ff6bb5", title: "HIPNOTIZAR", msg: "Quer dizer que o inimigo fica sob controle por 10s e passa a atacar outros inimigos. Não funciona em colossos, bosses e mega bosses." },
-    "HIPNOTIZADO": { color: "#ff6bb5", title: "HIPNOTIZAR", msg: "Quer dizer que o inimigo fica sob controle por 10s e passa a atacar outros inimigos. Não funciona em colossos, bosses e mega bosses." },
-    "HIPNOTIZADOS": { color: "#ff6bb5", title: "HIPNOTIZAR", msg: "Quer dizer que o inimigo fica sob controle por 10s e passa a atacar outros inimigos. Não funciona em colossos, bosses e mega bosses." },
+    "HIPNOTIZAR": { color: "#ff6bb5", title: "HIPNOTIZAR", msg: "Quer dizer que o inimigo fica sob controle por 10s e passa a atacar somente inimigos não hipnotizados. Enquanto estiver hipnotizado, ataques dos personagens não podem escolhê-lo nem causar dano nele." },
+    "HIPNOTIZADO": { color: "#ff6bb5", title: "HIPNOTIZAR", msg: "Quer dizer que o inimigo fica sob controle por 10s e passa a atacar somente inimigos não hipnotizados. Enquanto estiver hipnotizado, ataques dos personagens não podem escolhê-lo nem causar dano nele." },
+    "HIPNOTIZADOS": { color: "#ff6bb5", title: "HIPNOTIZAR", msg: "Quer dizer que o inimigo fica sob controle por 10s e passa a atacar somente inimigos não hipnotizados. Enquanto estiver hipnotizado, ataques dos personagens não podem escolhê-lo nem causar dano nele." },
+    "PURIFICAÇÃO": { color: "#ff4fa3", title: "PURIFICAÇÃO", msg: "Quando a barra de Purificação de Rowan está cheia, seu próximo ataque pode purificar um inimigo Fraturado atingido, removendo a contaminação e eliminando-o instantaneamente. Não funciona em inimigos que não sejam Fraturados nem nos alvos resistentes à Purificação." },
     "BEBETIZAR": { color: "#8fe8d1", title: "BEBETIZAR", msg: "O ataque de Merlin reduz o tamanho de um inimigo elegível, deixa-o imóvel, reduz sua vida para até 15% da vida máxima e troca sua aparência pelo sprite de bebê. Não funciona em bosses, mega bosses e colossos." },
     "BEBETIZADO": { color: "#8fe8d1", title: "BEBETIZADO", msg: "É o estado aplicado por Merlin: o inimigo fica imóvel, com hitbox menor, pouca vida e com o mesmo sprite de bebê padronizado visualmente entre todos os inimigos." },
     "QUEIMAR": { color: "#e67e22", title: "QUEIMAR", msg: "Quer dizer que o inimigo passa a tomar dano com o tempo." },
@@ -4728,6 +4765,9 @@ const CHARACTER_TITLES = {
     mr_perfurant: 'Honra da Katana',
     buster: 'Foguetão',
     mrsaw: 'Segurança no trabalho',
+    rowan: 'Purificação',
+    nyla: 'Estilhaço',
+    blizzard: 'Nevasca',
     quarterback: 'Toutchdown',
     seae: 'Na onda da maré',
     serrano: 'Receta de la familia',
@@ -4760,6 +4800,7 @@ function getCharacterRaritySortValue(c) {
     const rarityOrder = { common: 1, rare: 2, epic: 3, legendary: 4, mythic: 5, seasonal: 6 };
     const base = rarityOrder[c?.rarity] || 99;
     if (c?.rarity === 'epic' && c?.sortLastEpic) return base + 0.99 + (Number(c?.sortLastEpicOrder) || 0) * 0.001;
+    if (c?.rarity === 'mythic' && c?.sortLastMythic) return base + 0.995;
     return base + (c?.sortLast ? 0.9 : 0);
 }
 
@@ -4779,6 +4820,9 @@ const CHARACTER_SPRITES = {
     vovo_cookie: 'sprites/gma_cookie.png',
     joseph: 'sprites/joseph.png',
     kael: 'sprites/kael.png',
+    rowan: 'sprites/rowan.png',
+    nyla: 'sprites/nyla.png',
+    blizzard: 'sprites/blizzard.png',
     quarterback: 'sprites/quarterback.png',
     pipi: 'sprites/pipi.png',
     shiv: 'sprites/shiv.png',
@@ -10622,7 +10666,7 @@ function getCharacterCardEmoji(char) {
         aura: '⛏️', slime: '🟢', chain_lightning: '⚡', wrench: '🔧', note: '🎵', energy_wave: '👻',
         dark: '🌑', boomerang: '🪃', fan: '🌀', remote: '🎮', fire: '🔥', axe: '🪓', pit_musket: '🔫', ruben_baguette: '🥖', ruben_baguette_burnt: '🥖',
         katana: '⚔️', flowers: '🌸', shield: '🛡️', drill: '🪛', cannon: '🛰️', shotgun: '💥',
-        garlic: '🧄', star: '⭐', sterling_star: '⭐', orb: '🪐', radio: '📻', claws: '🦈', ghost: '👻', wind: '🌪️', flame_cone: '🔥', water_bubble: '💧', puddle: '💧', zippi_laser: '👽', eel_lash: '⚡', flex_hammer: '🔨', ivy_seed: '🌿', kaisen_tool: '🪨', grapple: '🪝'
+        garlic: '🧄', snow: '❄️', blizzard_flake: '❄️', star: '⭐', sterling_star: '⭐', orb: '🪐', radio: '📻', claws: '🦈', ghost: '👻', wind: '🌪️', flame_cone: '🔥', water_bubble: '💧', puddle: '💧', zippi_laser: '👽', eel_lash: '⚡', flex_hammer: '🔨', ivy_seed: '🌿', kaisen_tool: '🪨', grapple: '🪝'
     };
     return byWeapon[char.weapon] || '✨';
 }
@@ -10933,7 +10977,7 @@ function getCommonAbilityTarget(maxRange = 1100) {
     if (!player || !Array.isArray(enemies)) return null;
     let best = null, bestDist = maxRange;
     for (const e of enemies) {
-        if (!e || e.hp <= 0) continue;
+        if (!e || e.hp <= 0 || isCurrentlyHypnotized(e)) continue;
         const d = dist(player, e);
         if (d < bestDist) {
             bestDist = d;
@@ -11456,6 +11500,7 @@ function dealPlayerDamage(amount, opts = {}) {
     if (!player || !Number.isFinite(amount) || amount <= 0) return false;
     if (pd?.selectedChar === 'shell' && player && (player.shellTorpedoTimer || 0) > 0) return false;
     let dmg = amount;
+    blizzardTakeDamageHeat();
 
     if (isZippiCharacter() && !opts.ignoreBubble && player.zippiBubbleHp > 0) {
         const absorbed = Math.min(player.zippiBubbleHp, dmg);
@@ -11725,7 +11770,7 @@ function startRunAfterShop() {
         x: 0, y: 0, r: (pd.selectedChar === 'hank' || pd.selectedChar === 'yeti' || pd.selectedChar === 'glace') ? 20 : ((pd.selectedChar === 'shiv' || pd.selectedChar === 'zippi') ? 10 : (pd.selectedChar === 'kaisen' ? 13 : (pd.selectedChar === 'booboo' ? 13 : (pd.selectedChar === 'eel' ? 15 : 15)))), baseHp: initialBaseHp, hp: initialBaseHp, baseSpeed: charDef.speed, baseDmg: initialBaseDmg,
         baseFireRate: charDef.fireRate, baseRange: charDef.range, color: charDef.color, weapon: charDef.weapon, merlinAge: pd.selectedChar === 'merlin' ? 'old' : null, merlinBaseHp: pd.selectedChar === 'merlin' ? initialBaseHp : null, merlinPoisonChance: 0.15, merlinBabyChance: 0.15, merlinPacifierChance: 0, merlinAgeCooldown: 0, cyroPyroMode: pd.selectedChar === 'cyro_pyro' ? getCyroPyroMode() : null, gladiatorMode: pd.selectedChar === 'gladiator' ? (pd.chars?.gladiator?.mode || 'shooter') : null, gladiatorModeCooldown: 0, eolioPropellerSeq: 0, cd: 0, shieldTimer: 0,
         zombieTimer: 0, revived: false, elekCycle: false, dashTimer: 0, meleeCd: 0, boldShots: 0, boldReload: 0, specCd: pd.selectedChar === 'ghoul' ? 20 : 0, commonAbilityCd: 0, fastyAbilityTimer: 0, invisTimer: 0, ghoulPendingCd: 0, ninjiPendingCd: 0,
-        lastMoveAngle: 0, lastAimAngle: 0, sharkieAttackTimer: 0, josephOllieCd: 0, josephOllieTimer: 0, josephOllieAngle: 0, josephOlliePendingCd: 0, josephOllieDetonate: false, sharkieAimAngle: 0, sharkieReverseAngle: 0, sharkieReverseX: 0, sharkieReverseY: 0, tenentCycle: 0, stormyCycle: 0, bulbMode: pd.selectedChar === 'bulb' ? Math.floor(Math.random() * 3) : null, bulbGasActiveUntil: 0, bulbGasCooldownUntil: 0, bulbGasAngle: 0, orbitalAngle: 0, popeyeSpinTimer: 0, popeyeSpinCooldown: 30, popeyeSpinUsed: true, popeyeSpinEndingFx: 0, shellTorpedoTimer: 0, shellTorpedoCooldown: pd.selectedChar === 'shell' ? 20 : 0, shellTorpedoTarget: null, shellTorpedoHitCd: 0, shellTorpedoDamageTick: 0, shellTorpedoWasActive: false, shellTorpedoExitTracked: false, grappleCooldown: 0, grappleCharging: false, grappleCharge: 0, grappleHookTimer: 0, grappleHookDuration: 0.28, grappleHookStartX: 0, grappleHookStartY: 0, grappleHookX: 0, grappleHookY: 0, grappleHookTargetX: 0, grappleHookTargetY: 0, grappleHookAngle: 0, grappleHookHitEnemy: null, grappleHookDamageApplied: false, grappleAttackTimer: 0, grappleAttackAngle: 0, boobooReturn: true, pickedCards: [], revivesUsed: 0, qbBar: 0, qbShield: false, isDead: false, flexCombo: 0, flexReload: 0, ninjiDashCd: 0, shinobiDragonActive: false, shinobiDragonWavesLeft: 0, shinobiDragonCooldown: pd.selectedChar === 'shinobi' ? 20 : 0, shinobiDragonFireCd: 0, shinobiScytheCycle: 0, sterlingCharging: false, sterlingCharge: 0, sterlingAttackCd: 0, majorBriggsKills: 0, majorBriggsStage: 1,
+        lastMoveAngle: 0, lastAimAngle: 0, sharkieAttackTimer: 0, josephOllieCd: 0, josephOllieTimer: 0, josephOllieAngle: 0, josephOlliePendingCd: 0, josephOllieDetonate: false, sharkieAimAngle: 0, sharkieReverseAngle: 0, sharkieReverseX: 0, sharkieReverseY: 0, tenentCycle: 0, stormyCycle: 0, bulbMode: pd.selectedChar === 'bulb' ? Math.floor(Math.random() * 3) : null, bulbGasActiveUntil: 0, bulbGasCooldownUntil: 0, bulbGasAngle: 0, orbitalAngle: 0, popeyeSpinTimer: 0, popeyeSpinCooldown: 30, popeyeSpinUsed: true, popeyeSpinEndingFx: 0, shellTorpedoTimer: 0, shellTorpedoCooldown: pd.selectedChar === 'shell' ? 20 : 0, shellTorpedoTarget: null, shellTorpedoHitCd: 0, shellTorpedoDamageTick: 0, shellTorpedoWasActive: false, shellTorpedoExitTracked: false, grappleCooldown: 0, grappleCharging: false, grappleCharge: 0, grappleHookTimer: 0, grappleHookDuration: 0.28, grappleHookStartX: 0, grappleHookStartY: 0, grappleHookX: 0, grappleHookY: 0, grappleHookTargetX: 0, grappleHookTargetY: 0, grappleHookAngle: 0, grappleHookHitEnemy: null, grappleHookDamageApplied: false, grappleAttackTimer: 0, grappleAttackAngle: 0, boobooReturn: true, pickedCards: [], revivesUsed: 0, qbBar: 0, qbShield: false, rowanPurificationBar: 0, rowanPurificationReady: false, nylaMiniFractureCount: 0, blizzardTemperature: 20, blizzardIdleTimer: 0, blizzardMoveTimer: 0, blizzardTier: 0, blizzardStormTick: 0, isDead: false, flexCombo: 0, flexReload: 0, ninjiDashCd: 0, shinobiDragonActive: false, shinobiDragonWavesLeft: 0, shinobiDragonCooldown: pd.selectedChar === 'shinobi' ? 20 : 0, shinobiDragonFireCd: 0, shinobiScytheCycle: 0, sterlingCharging: false, sterlingCharge: 0, sterlingAttackCd: 0, majorBriggsKills: 0, majorBriggsStage: 1,
         adamScrap: 0, adamMechActive: false, adamMechWavesLeft: 0, adamMechHpBonus: 0, adamMechSizeBonus: 0, adamBaseHpBeforeMech: null, adamBaseRBeforeMech: null,
         spartaCycle: 0, spartaNoDamageTimer: 0, spartaShieldActive: false, spartaAttackTimer: 0, spartaAttackMode: 'straight', spartaAttackRange: 0, spartaAttackWidth: 0, spartaAttackHalfAngle: 0, vesperFocusTimer: 0, vesperFocusActive: false, vesperFocusTimer: 0, vesperFocusActive: false,
         gooRevived: false, gooCloneSpawned: false, gooFullBaseHp: initialBaseHp, gooFullBaseDmg: initialBaseDmg, bitReviveTimer: 0, bitReviveFlashTimer: 0, bitReviveCount: 0, gooFullR: (pd.selectedChar === 'hank' || pd.selectedChar === 'yeti' || pd.selectedChar === 'glace') ? 20 : ((pd.selectedChar === 'shiv' || pd.selectedChar === 'zippi') ? 10 : (pd.selectedChar === 'kaisen' ? 13 : (pd.selectedChar === 'eel' ? 15 : 15))),
@@ -12022,6 +12067,7 @@ function getSterlingAimAngle() {
     let target = null;
     let minDist = player.baseRange * player.stats.rangeMult;
     for (const e of enemies) {
+        if (isCurrentlyHypnotized(e)) continue;
         const d = dist(player, e);
         if (d < minDist) {
             minDist = d;
@@ -12082,7 +12128,7 @@ function findGrappleSafe(maxRange){const base={x:player.x,y:player.y};let best=b
 function traceGrapple(maxRange,angle){let end={x:player.x,y:player.y},hit=null;for(let d=8;d<=maxRange;d+=8){const x=Math.max(-1480,Math.min(1480,player.x+Math.cos(angle)*d)),y=Math.max(-1480,Math.min(1480,player.y+Math.sin(angle)*d));const e=enemies.find(e=>e?.hp>0&&dist({x,y},e)<=(e.size||0)+6);if(e){hit=e;end={x:e.x,y:e.y};break;}if(grappleBlocked(x,y))break;end={x,y};}return {...end,hitEnemy:hit};}
 function startGrappleCharge(){if(!player||player.grappleCooldown>0||player.grappleHookTimer>0||player.grappleCharging)return;player.grappleCharging=true;player.grappleCharge=0;updateSpecialButtonUI();}
 function releaseGrappleHook(){if(!player||!player.grappleCharging)return;const c=Math.max(0,Math.min(1,Number(player.grappleCharge)||0));player.grappleCharging=false;player.grappleCharge=0;if(player.grappleCooldown>0||player.grappleHookTimer>0)return;const range=110+430*c,manual=(isTouchDevice()&&Math.hypot(grappleAimVec?.x||0,grappleAimVec?.y||0)>.08)||(hasConnectedGamepad()&&Math.hypot(gamepadAim.x||0,gamepadAim.y||0)>.08);let ep;if(manual)ep=traceGrapple(range,getGrappleAimAngle());else{const hp=player.hp/Math.max(1,player.baseHp*player.stats.maxHpMult);if(hp<.45){const p=findGrappleSafe(range);ep={x:p.x,y:p.y,hitEnemy:null};}else{let n=null,nd=1e9;for(const e of enemies)if(e?.hp>0){const d=dist(player,e);if(d<=range&&d<nd){nd=d;n=e;}}ep=n?{x:n.x,y:n.y,hitEnemy:n}:traceGrapple(range,getGrappleAimAngle());}}player.grappleHookTimer=.28;player.grappleHookStartX=player.x;player.grappleHookStartY=player.y;player.grappleHookX=player.x;player.grappleHookY=player.y;player.grappleHookTargetX=ep.x;player.grappleHookTargetY=ep.y;player.grappleHookHitEnemy=ep.hitEnemy||null;player.grappleHookDamageApplied=false;player.grappleCooldown=7;updateSpecialButtonUI();}
-function updateGrappleHook(dt){if(!player||pd.selectedChar!=='grapple')return false;player.grappleAttackTimer=Math.max(0,(player.grappleAttackTimer||0)-dt);if(player.grappleCharging){player.grappleCharge=Math.min(1,(player.grappleCharge||0)+dt/1.25);updateSpecialButtonUI();}if((player.grappleHookTimer||0)<=0)return false;player.grappleHookTimer=Math.max(0,player.grappleHookTimer-dt);const pr=1-player.grappleHookTimer/.28;player.grappleHookX=player.grappleHookStartX+(player.grappleHookTargetX-player.grappleHookStartX)*pr;player.grappleHookY=player.grappleHookStartY+(player.grappleHookTargetY-player.grappleHookStartY)*pr;if(player.grappleHookTimer<=0){player.x=player.grappleHookTargetX;player.y=player.grappleHookTargetY;player.shieldTimer=60;const e=player.grappleHookHitEnemy;if(e?.hp>0&&!player.grappleHookDamageApplied){const d=Math.max(1,player.baseDmg*player.stats.dmgMult*1.15);e.hp-=d;e.lastHitSourceChar='grapple';addFloatingText(e.x,e.y,`${Math.floor(d)}`,'#9b59b6');player.grappleHookDamageApplied=true;}updateSpecialButtonUI();}return true;}
+function updateGrappleHook(dt){if(!player||pd.selectedChar!=='grapple')return false;player.grappleAttackTimer=Math.max(0,(player.grappleAttackTimer||0)-dt);if(player.grappleCharging){player.grappleCharge=Math.min(1,(player.grappleCharge||0)+dt/1.25);updateSpecialButtonUI();}if((player.grappleHookTimer||0)<=0)return false;player.grappleHookTimer=Math.max(0,player.grappleHookTimer-dt);const pr=1-player.grappleHookTimer/.28;player.grappleHookX=player.grappleHookStartX+(player.grappleHookTargetX-player.grappleHookStartX)*pr;player.grappleHookY=player.grappleHookStartY+(player.grappleHookTargetY-player.grappleHookStartY)*pr;if(player.grappleHookTimer<=0){player.x=player.grappleHookTargetX;player.y=player.grappleHookTargetY;player.shieldTimer=60;const e=player.grappleHookHitEnemy;if(e?.hp>0&&!player.grappleHookDamageApplied&&!isCurrentlyHypnotized(e)){const d=Math.max(1,player.baseDmg*player.stats.dmgMult*1.15);e.hp-=d;e.lastHitSourceChar='grapple';addFloatingText(e.x,e.y,`${Math.floor(d)}`,'#9b59b6');player.grappleHookDamageApplied=true;}updateSpecialButtonUI();}return true;}
 function triggerSpecial() {
     if(!player) return;
     const now = performance.now();
@@ -12455,6 +12501,7 @@ if (!isBossAlive) {
     gameTime += dt;
 
     if(waveTimer >= 20) {
+        if (pd.selectedChar === 'nyla') spawnNylaMiniFracture();
         wave++; waveTimer = 0; if(player.stats.waveBuff) player.hp = Math.min(player.hp + 20, player.baseHp * player.stats.maxHpMult); trackMissionProgress('waves', 1);
         if (pd.selectedChar === 'sparta') spawnSpartaLion();
         if(pd.selectedChar === 'adam' && player.adamMechWavesLeft > 0) {
@@ -12657,6 +12704,40 @@ if (!isBossAlive) {
     if(!shellTorpedoActive) { if(inputState.up) dy -= 1; if(inputState.down) dy += 1; if(inputState.left) dx -= 1; if(inputState.right) dx += 1; }
     if(dx !== 0 || dy !== 0) { let len = Math.sqrt(dx*dx + dy*dy); dx /= len; dy /= len; player.lastMoveAngle = Math.atan2(dy, dx); playerFacingLeft = dx < 0; } else if (joyVec.x !== 0 || joyVec.y !== 0) { dx = joyVec.x; dy = joyVec.y; player.lastMoveAngle = Math.atan2(dy, dx); if (dx !== 0) playerFacingLeft = dx < 0; }
 
+    if (pd.selectedChar === 'blizzard') {
+        const moving = Math.hypot(dx, dy) > 0.05;
+        player.blizzardIdleTimer = moving ? 0 : (Number(player.blizzardIdleTimer) || 0) + dt;
+        if (moving) {
+            player.blizzardMoveTimer = (Number(player.blizzardMoveTimer) || 0) + dt;
+            const coldFactor = 1 + Math.max(0, (20 - (Number(player.blizzardTemperature) || 20)) / 20);
+            player.blizzardTemperature = clampBlizzardTemperature((Number(player.blizzardTemperature) || 20) + dt * 1.35 * coldFactor);
+        } else if ((Number(player.blizzardIdleTimer) || 0) >= 2.5) {
+            player.blizzardIdleTimer = 0;
+            player.blizzardTemperature = clampBlizzardTemperature((Number(player.blizzardTemperature) || 20) - 1.5);
+        }
+        player.blizzardTier = getBlizzardTier(player.blizzardTemperature);
+        updateBlizzardTemperatureVisual();
+        if (player.blizzardTemperature <= -60) {
+            player.blizzardStormTick = Math.max(0, (Number(player.blizzardStormTick) || 0) - dt);
+            if (player.blizzardStormTick <= 0) {
+                player.blizzardStormTick = 0.20;
+                const blizzardAuraRadius = 58 * player.stats.rangeMult;
+                for (const e of enemies) {
+                    if (!e || e.hp <= 0 || isCurrentlyHypnotized(e)) continue;
+                    if (dist(player, e) <= blizzardAuraRadius + (e.size || 0)) {
+                        const auraDmg = Math.max(1, player.baseDmg * player.stats.dmgMult * 0.28);
+                        e.hp -= auraDmg * getEnemyDamageTakenMultiplier(e);
+                        e.slowTimer = Math.max(Number(e.slowTimer) || 0, 0.65);
+                        addFloatingText(e.x, e.y - 12, 'FRIO!', '#bfe7ff', 9);
+                    }
+                }
+            }
+            if (Math.random() < 0.12) createParticles(player.x + (Math.random()-0.5)*42, player.y + (Math.random()-0.5)*42, '#dff5ff');
+        }
+    } else if (document.getElementById('blizzard-temp-container')) {
+        document.getElementById('blizzard-temp-container').style.display = 'none';
+    }
+
     if(pd.selectedChar === 'seae') {
         if(player.seaePuddleCd > 0) player.seaePuddleCd -= dt;
         if((dx!==0 || dy!==0) && player.seaePuddleCd <= 0 && Math.random() < 0.02) {
@@ -12824,6 +12905,7 @@ if (!isBossAlive) {
             player.flameTickCd = Math.max(0, (player.flameTickCd || 0) - dt);
             let target = null; let minDist = player.baseRange * player.stats.rangeMult;
             for(let e of enemies) {
+                if (isCurrentlyHypnotized(e)) continue;
                 let d = dist(player, e);
                 if(d < minDist) { minDist = d; target = e; }
             }
@@ -12844,6 +12926,7 @@ if (!isBossAlive) {
             if(player.flameTickCd <= 0) {
                 player.flameTickCd = flameTickRate;
                 for(let e of enemies) {
+                    if (isCurrentlyHypnotized(e)) continue;
                     let d = dist(player, e);
                     if(d < coneLen) {
                         let aToE = Math.atan2(e.y - player.y, e.x - player.x);
@@ -12863,7 +12946,7 @@ if (!isBossAlive) {
             player.cd -= 60 * dt;
             if(player.cd <= 0) {
                 let target = null; let minDist = player.baseRange * player.stats.rangeMult;
-                for(let e of enemies) { if (pd.selectedChar === 'yuuto' && isCurrentlyHypnotized(e)) continue; let d = dist(player, e); if(d < minDist) { minDist = d; target = e; } }
+                for(let e of enemies) { if (isCurrentlyHypnotized(e)) continue; let d = dist(player, e); if(d < minDist) { minDist = d; target = e; } }
                 if(target) { fireWeapon(target); player.boldShots++; if(player.boldShots >= 5) { player.boldShots = 0; player.boldReload = 1; } }
             }
         }
@@ -12872,7 +12955,7 @@ if (!isBossAlive) {
             player.cd -= 60 * dt;
             if(player.cd <= 0) {
                 let target = null; let minDist = player.baseRange * player.stats.rangeMult;
-                for(let e of enemies) { if (pd.selectedChar === 'yuuto' && isCurrentlyHypnotized(e)) continue; let d = dist(player, e); if(d < minDist) { minDist = d; target = e; } }
+                for(let e of enemies) { if (isCurrentlyHypnotized(e)) continue; let d = dist(player, e); if(d < minDist) { minDist = d; target = e; } }
                 if(target) { fireWeapon(target); player.boobooReturn = false; }
             }
         }
@@ -12890,7 +12973,7 @@ if (!isBossAlive) {
                     minDist = Math.min(minDist, shotReach);
                 }
             }
-            for(let e of enemies) { if (pd.selectedChar === 'yuuto' && isCurrentlyHypnotized(e)) continue; let d = dist(player, e); if(d < minDist) { minDist = d; target = e; } }
+            for(let e of enemies) { if (isCurrentlyHypnotized(e)) continue; let d = dist(player, e); if(d < minDist) { minDist = d; target = e; } }
             if(target) fireWeapon(target);
         }
     }
@@ -12986,8 +13069,8 @@ if (!isBossAlive) {
 }
 
 function fireWeapon(target) {
-    // Nenhuma arma dispara sem um alvo detectado.
-    if(!target) return;
+    // Nenhuma arma dispara sem um alvo detectado nem contra inimigos hipnotizados.
+    if(!target || isCurrentlyHypnotized(target)) return;
     const w = player.weapon; 
     let dToT = target ? dist(player, target) : 0;
     let totemDmg = player.inTotem ? 1.2 : 1;
@@ -13015,6 +13098,23 @@ function fireWeapon(target) {
         const angle = target ? Math.atan2(target.y - player.y, target.x - player.x) : (Number.isFinite(player.lastAimAngle) ? player.lastAimAngle : (Number.isFinite(player.lastMoveAngle) ? player.lastMoveAngle : 0));
         player.lastAimAngle = angle;
 
+        if (w === 'blizzard_flake' && pd.selectedChar === 'blizzard') {
+            const profile = getBlizzardAttackProfile();
+            const spawnOffset = player.r + 9;
+            const sx = player.x + Math.cos(angle) * spawnOffset;
+            const sy = player.y + Math.sin(angle) * spawnOffset;
+            if (profile.tier === 4 && Math.random() < profile.snowballChance) {
+                createProj(sx, sy, Math.cos(angle) * pSpd * 0.78, Math.sin(angle) * pSpd * 0.78, finalDmg * profile.damageMult * 1.55, 86, true, 'blizzard_snowball', { size: 16, sourceChar: 'blizzard', slowChance: 0.68, freezeChance: profile.freezeChance });
+            } else {
+                const count = profile.flakes + Math.max(0, Math.floor(player.stats.extraProj || 0));
+                for (let k = 0; k < count; k++) {
+                    const off = count === 1 ? 0 : (k - (count - 1) / 2) * 0.11;
+                    createProj(sx, sy, Math.cos(angle + off) * pSpd, Math.sin(angle + off) * pSpd, finalDmg * profile.damageMult, 62, true, 'blizzard_flake', { size: profile.tier >= 3 ? 8 : 7, sourceChar: 'blizzard', slowChance: profile.slowChance, freezeChance: profile.freezeChance, critChance: profile.critChance });
+                }
+            }
+            player.cd = Math.max(36, Math.round(player.baseFireRate * player.stats.fireRateMult * (profile.tier >= 3 ? 0.88 : 1)));
+            return;
+        }
         if (w === 'merlin_magic' && pd.selectedChar === 'merlin') {
             const spawnOffset=player.r+8;
             const sx=player.x+Math.cos(angle)*spawnOffset, sy=player.y+Math.sin(angle)*spawnOffset;
@@ -13248,6 +13348,7 @@ function fireWeapon(target) {
                     if(d > coneRange) continue;
                     const aToE = Math.atan2(e.y - player.y, e.x - player.x);
                     if(Math.abs(normalizeAngle(aToE - aimAngle)) <= lowHpHalf) {
+                        if (isCurrentlyHypnotized(e)) continue;
                         const soakMult = 1 + (e.soak || 0) * 0.08;
                         const hitDmg = Math.max(1, Math.round(swingDamage * soakMult * getEnemyDamageTakenMultiplier(e)));
                         e.hp -= hitDmg;
@@ -13271,6 +13372,7 @@ function fireWeapon(target) {
                     if(d > coneRange) continue;
                     const aToE = Math.atan2(e.y - player.y, e.x - player.x);
                     if(Math.abs(normalizeAngle(aToE - aimAngle)) <= coneHalf) {
+                        if (isCurrentlyHypnotized(e)) continue;
                         const soakMult = 1 + (e.soak || 0) * 0.08;
                         const hitDmg = Math.max(1, Math.round(finalDmg * damageMult * soakMult));
                         e.hp -= hitDmg;
@@ -13665,6 +13767,38 @@ function fireWeapon(target) {
                 } else {
                     createProj(player.x, player.y, Math.cos(angle + off)*pSpd*1.35, Math.sin(angle + off)*pSpd*1.35, finalDmg, 60, true, 'echo_shot', { bounces: Math.max(0, Math.floor(player.stats.bounce || 0)) });
                 }
+            }
+            return;
+        }
+        if(w === 'nyla_shard') {
+            const total = 3 + Math.max(0, Math.floor(player.stats.extraProj || 0));
+            const spawnOffset = player.r + 8;
+            const lineSpacing = 7;
+            for (let k = 0; k < total; k++) {
+                const along = (k - (total - 1) / 2) * lineSpacing;
+                const sx = player.x + Math.cos(angle) * spawnOffset - Math.sin(angle) * along;
+                const sy = player.y + Math.sin(angle) * spawnOffset + Math.cos(angle) * along;
+                createProj(sx, sy, Math.cos(angle) * pSpd * 1.02, Math.sin(angle) * pSpd * 1.02, finalDmg, 58, true, 'nyla_shard', { size: 8, sourceChar: 'nyla', nylaPoisonChance: 0.15, splitDone: false, pierce: 0, noHitFrames: 0.08 });
+            }
+            return;
+        }
+        if(w === 'rowan_shard') {
+            const total = 3 + Math.max(0, Math.floor(player.stats.extraProj || 0));
+            const spread = 0.12;
+            const spawnOffset = player.r + 8;
+            const purificationReady = !!player.rowanPurificationReady || (Number(player.rowanPurificationBar) || 0) >= 1000;
+            for (let k = 0; k < total; k++) {
+                const off = (k - (total - 1) / 2) * spread;
+                const shotAngle = angle + off;
+                const sx = player.x + Math.cos(shotAngle) * spawnOffset;
+                const sy = player.y + Math.sin(shotAngle) * spawnOffset;
+                createProj(sx, sy, Math.cos(shotAngle) * pSpd * 1.05, Math.sin(shotAngle) * pSpd * 1.05, finalDmg, 58, true, 'rowan_shard', {
+                    size: 6, sourceChar: 'rowan', rowanPurification: purificationReady, noHitFrames: 0.08
+                });
+            }
+            if (purificationReady) {
+                player.rowanPurificationReady = false;
+                player.rowanPurificationBar = 0;
             }
             return;
         }
@@ -14327,6 +14461,9 @@ function getSeinSeinProtector(enemy) {
 
 function getEnemyDamageTakenMultiplier(enemy) {
     if (!enemy) return 1;
+    // Inimigos hipnotizados ficam temporariamente fora do combate do jogador:
+    // nenhum dano de fonte do jogador pode afetá-los enquanto o efeito durar.
+    if (isCurrentlyHypnotized(enemy)) return 0;
     let mult = 1;
     if (Number(enemy.weakenTimer) > 0) mult *= 1.2;
     if (Number(enemy.curseTimer) > 0) mult *= 1.2;
@@ -14348,6 +14485,11 @@ function createProj(x, y, vx, vy, dmg, life, isPlayer, type, extra={}) {
     else if (type === 'wind_gust') size = 34;
     else if (type === 'tornado') size = 26;
     else if (type === 'quarterback') size = 14;
+    else if (type === 'rowan_shard') size = extra.size || 6;
+    else if (type === 'nyla_shard') size = extra.size || 8;
+    else if (type === 'nyla_shard_small') size = extra.size || 4.5;
+    else if (type === 'blizzard_flake') size = extra.size || 7;
+    else if (type === 'blizzard_snowball') size = extra.size || 16;
     else if (type === 'wrench') size = extra.size || 14;
     else if (type === 'puddle' || type === 'slime') size = 6;
     else if (type === 'grenade') size = 3;
@@ -14688,7 +14830,7 @@ function findEelRicochetTarget(sourceEnemy, sourceProjectile) {
     let best = null;
     let bestDist = 99999;
     for (const other of enemies) {
-        if (!other || other === sourceEnemy || other.hp <= 0) continue;
+        if (!other || other === sourceEnemy || other.hp <= 0 || isCurrentlyHypnotized(other)) continue;
         if (sourceProjectile?.hitIds?.has(other)) continue;
         const d = dist(sourceEnemy, other);
         if (d < bestDist) {
@@ -14810,7 +14952,7 @@ function getNearestEnemyFrom(x, y, maxDist = Infinity) {
     let target = null;
     let best = maxDist;
     for (const e of enemies) {
-        if (!e || e.hp <= 0) continue;
+        if (!e || e.hp <= 0 || isCurrentlyHypnotized(e)) continue;
         const d = dist({ x, y }, e);
         if (d < best) {
             best = d;
@@ -15088,15 +15230,92 @@ function spawnEnemy() {
     e.dmg = e.baseDmg; e.maxHp = e.hp; enemies.push(e);
 }
 
+function isRowanFracturedEnemy(e) {
+    if (!e) return false;
+    return !!e.fracturedOrigin || e.spawnBiome === 11 || window.currentMap === 11;
+}
+
+const ROWAN_PURIFICATION_IMMUNE_TYPES = new Set([
+    'boss', 'megaboss', 'colosso',
+    'crocodile', 'scorpion', 'spider', 'sarcophagus', 'ice_statue', 'stone_golem',
+    'leopard', 'gorilla', 'monkey', 'panda'
+]);
+
+function canRowanPurifyEnemy(e) {
+    if (!isRowanFracturedEnemy(e)) return false;
+    if (e.isBoss) return false;
+    return !ROWAN_PURIFICATION_IMMUNE_TYPES.has(String(e.type || '').toLowerCase());
+}
+
+function chargeRowanPurificationOnKill(e) {
+    if (!player || pd?.selectedChar !== 'rowan' || !e || e.lastHitSourceChar !== 'rowan' || e.rowanKillCounted) return;
+    e.rowanKillCounted = true;
+    player.rowanPurificationBar = Math.min(1000, (Number(player.rowanPurificationBar) || 0) + 100);
+    if (player.rowanPurificationBar >= 1000) {
+        player.rowanPurificationBar = 1000;
+        player.rowanPurificationReady = true;
+    }
+}
+
+
+function getBlizzardTier(temp) {
+    const t = Number(temp);
+    if (t <= -60) return 4;
+    if (t <= -40) return 3;
+    if (t <= -20) return 2;
+    if (t <= 0) return 1;
+    return 0;
+}
+function clampBlizzardTemperature(t) { return Math.max(-60, Math.min(20, Number(t) || 20)); }
+function updateBlizzardTemperatureVisual() {
+    if (!player || pd?.selectedChar !== 'blizzard') return;
+    const wrap = document.getElementById('blizzard-temp-container');
+    const fill = document.getElementById('blizzard-temp-fill');
+    const value = document.getElementById('blizzard-temp-value');
+    if (!wrap || !fill || !value) return;
+    const t = clampBlizzardTemperature(player.blizzardTemperature);
+    const pct = ((20 - t) / 80) * 100;
+    let thermo = '#fff8d6', fillColor = '#fff8d6';
+    if (t <= -60) { thermo = '#12345a'; fillColor = '#12345a'; }
+    else if (t <= -40) { thermo = '#2f75b5'; fillColor = '#2f75b5'; }
+    else if (t <= -20) { thermo = '#d9f2ff'; fillColor = '#bfe7ff'; }
+    else if (t <= 0) { thermo = '#f4f7fa'; fillColor = '#f4f7fa'; }
+    wrap.style.setProperty('--blizzard-thermo', thermo);
+    wrap.style.setProperty('--blizzard-fill', fillColor);
+    wrap.style.setProperty('--blizzard-text', t <= -60 ? '#ffffff' : '#111');
+    fill.style.width = `${Math.max(0, Math.min(100, pct)) * 0.63}%`;
+    value.textContent = `${Math.round(t)}°C`;
+    wrap.style.display = 'flex';
+}
+function getBlizzardAttackProfile() {
+    const t = clampBlizzardTemperature(player?.blizzardTemperature ?? 20);
+    if (t <= -60) return { tier:4, flakes:1, damageMult:2.05, slowChance:0.55, freezeChance:0.72, critChance:0.25, snowballChance:0.48 };
+    if (t <= -40) return { tier:3, flakes:3, damageMult:1.72, slowChance:0.48, freezeChance:0.48, critChance:0.20, snowballChance:0 };
+    if (t <= -20) return { tier:2, flakes:3, damageMult:1.45, slowChance:0.40, freezeChance:0.16, critChance:0, snowballChance:0 };
+    if (t <= 0) return { tier:1, flakes:2, damageMult:1.22, slowChance:0.30, freezeChance:0, critChance:0, snowballChance:0 };
+    return { tier:0, flakes:1, damageMult:1, slowChance:0.20, freezeChance:0, critChance:0, snowballChance:0 };
+}
+function blizzardCoolDownOnKill(e) {
+    if (!player || pd?.selectedChar !== 'blizzard' || !e || e.hp > 0) return;
+    player.blizzardTemperature = clampBlizzardTemperature((Number(player.blizzardTemperature) || 20) - 2);
+    player.blizzardIdleTimer = 0;
+}
+function blizzardTakeDamageHeat() {
+    if (!player || pd?.selectedChar !== 'blizzard') return;
+    player.blizzardTemperature = clampBlizzardTemperature((Number(player.blizzardTemperature) || 20) + 6);
+    player.blizzardIdleTimer = 0;
+}
+
 function updateEnemies(dt) {
     for(let i = enemies.length - 1; i >= 0; i--) {
         let e = enemies[i]; let d = dist(e, player);
-        if (e.ambulanceDeathPending) { e.ambulanceExplosionTimer = Math.max(0,(e.ambulanceExplosionTimer||0)-dt); if(e.ambulanceExplosionTimer<=0){ createExplosion(e.x,e.y,95,0,'rgba(241,196,15,0.25)'); enemies.splice(i,1); } continue; }
-        if (e.policeCarDeathPending) { e.policeCarExplosionTimer = Math.max(0,(e.policeCarExplosionTimer||0)-dt); if(e.policeCarExplosionTimer<=0){ createExplosion(e.x,e.y,85,0,'rgba(231,76,60,0.35)'); const sm=Math.max(0.25,(Number(e.maxHp)||155)/155); const mapId=Number.isInteger(e.fractureMapId)?e.fractureMapId:6; for(let k=0;k<3;k++){const a=Math.random()*Math.PI*2; enemies.push({x:e.x+Math.cos(a)*35,y:e.y+Math.sin(a)*35,type:'atirador',hp:20*sm,maxHp:20*sm,speed:1.2,baseDmg:8*sm,dmg:8*sm,size:14,cd:30,color:'#2980b9',poison:{timer:0,dmg:0,tickCd:0},slowTimer:0,weakenTimer:0,burnTimer:0,freezeTimer:0,burnDmg:0,spawnBiome:mapId,skinSourceMapId:mapId,fracturedOrigin:!!e.fracturedOrigin,fractureMapId:Number.isInteger(e.fractureMapId)?e.fractureMapId:null,enemySkin:null,fracturedSkinType:null,resolvedFracturedSkinType:null,_skinTypeForEnemy:null});} enemies.splice(i,1); } continue; }
+        if (e.ambulanceDeathPending) { e.ambulanceExplosionTimer = Math.max(0,(e.ambulanceExplosionTimer||0)-dt); if(e.ambulanceExplosionTimer<=0){ createExplosion(e.x,e.y,95,0,'rgba(241,196,15,0.25)'); chargeRowanPurificationOnKill(e);blizzardCoolDownOnKill(e); enemies.splice(i,1); } continue; }
+        if (e.policeCarDeathPending) { e.policeCarExplosionTimer = Math.max(0,(e.policeCarExplosionTimer||0)-dt); if(e.policeCarExplosionTimer<=0){ createExplosion(e.x,e.y,85,0,'rgba(231,76,60,0.35)'); chargeRowanPurificationOnKill(e);blizzardCoolDownOnKill(e); const sm=Math.max(0.25,(Number(e.maxHp)||155)/155); const mapId=Number.isInteger(e.fractureMapId)?e.fractureMapId:6; for(let k=0;k<3;k++){const a=Math.random()*Math.PI*2; enemies.push({x:e.x+Math.cos(a)*35,y:e.y+Math.sin(a)*35,type:'atirador',hp:20*sm,maxHp:20*sm,speed:1.2,baseDmg:8*sm,dmg:8*sm,size:14,cd:30,color:'#2980b9',poison:{timer:0,dmg:0,tickCd:0},slowTimer:0,weakenTimer:0,burnTimer:0,freezeTimer:0,burnDmg:0,spawnBiome:mapId,skinSourceMapId:mapId,fracturedOrigin:!!e.fracturedOrigin,fractureMapId:Number.isInteger(e.fractureMapId)?e.fractureMapId:null,enemySkin:null,fracturedSkinType:null,resolvedFracturedSkinType:null,_skinTypeForEnemy:null});} enemies.splice(i,1); } continue; }
         if (e.truckDeathPending) {
             e.truckExplosionTimer = Math.max(0, (e.truckExplosionTimer || 0) - dt);
             if (e.truckExplosionTimer <= 0) {
                 resolveTruckDeathExplosion(e);
+                chargeRowanPurificationOnKill(e);blizzardCoolDownOnKill(e);
                 enemies.splice(i, 1);
             }
             continue;
@@ -15730,7 +15949,7 @@ function updateEnemies(dt) {
                 e.y = Math.max(-1480, Math.min(1480, e.y));
             }
         }
-        if(player.weapon === 'blood_ball' && player.meleeCd <= 0 && d < 60) { 
+        if(player.weapon === 'blood_ball' && player.meleeCd <= 0 && d < 60 && !isCurrentlyHypnotized(e)) { 
             let aToE = Math.atan2(e.y - player.y, e.x - player.x);
             if (Math.abs(normalizeAngle(aToE - player.lastMoveAngle)) < Math.PI/4) { const md = player.baseDmg * player.stats.dmgMult * 1.5 * player.stats.bossDmgMult; let soakMult = 1 + (e.soak||0)*0.05; e.hp -= md * soakMult * getEnemyDamageTakenMultiplier(e); trackMissionDamage(md); player.meleeCd = 0.8; createExplosion(player.x, player.y, 60, 0, 'rgba(139,0,0,0.5)'); }
         }
@@ -15794,6 +16013,7 @@ function updateEnemies(dt) {
             // imediatamente e nunca executa revive, quebra de armadura, spawn em cadeia
             // ou qualquer outra rotina de morte do inimigo original.
             if (e.type === 'merlin_baby') {
+                chargeRowanPurificationOnKill(e);blizzardCoolDownOnKill(e);
                 enemies.splice(i, 1);
                 enemiesKilled++;
                 continue;
@@ -15813,6 +16033,7 @@ function updateEnemies(dt) {
                         addFloatingText(player.x, player.y, 'Esquiva!', '#3498db', 12);
                     }
                 }
+                chargeRowanPurificationOnKill(e);blizzardCoolDownOnKill(e);
                 enemies.splice(i, 1);
                 enemiesKilled++;
                 continue;
@@ -15942,6 +16163,8 @@ function updateEnemies(dt) {
                 if (pd.selectedChar === 'bulb' && Number(player.bulbMode) === 2) puddles.push({ x: e.x, y: e.y, r: 78, dmg: 0, life: 5, type: 'bulb_coral', tick: 0 });
                 if (Number(e.curseTimer) > 0) { const curseBlastDmg = Math.max(1, player.baseDmg * player.stats.dmgMult * 0.55); createExplosion(e.x, e.y, 68, curseBlastDmg, '#ff69b4'); }
                 if(player.stats.explodeHit) createExplosion(e.x, e.y, 60, player.baseDmg * 0.5);
+                chargeRowanPurificationOnKill(e);
+                blizzardCoolDownOnKill(e);
                 createParticles(e.x, e.y, e.color); enemies.splice(i, 1);
             }
         }
@@ -16435,6 +16658,9 @@ const SERRANO_CHARACTER_PROJECTILES = {
     mr_perfurant: ['mr_perfurant_slash'],
     buster: ['buster_rocket'],
     mrsaw: ['saw_throw'],
+    rowan: ['rowan_shard'],
+    nyla: ['nyla_shard'],
+    blizzard: ['blizzard_flake', 'blizzard_snowball'],
     quarterback: ['quarterback'],
     seae: ['water_bubble', 'water_wave'],
     vampyrus: ['blood_ball'],
@@ -16493,14 +16719,14 @@ function spawnSerranoRandomProjectile(x, y, dmg, excludedEnemy) {
         vinyl: 5.2, microphone: 5.4, lunch_ketchup: 5.3, lunch_mayo: 5.3, lunch_mustard: 5.3,
         bunniie_carrot: 5.4, energy_wave: 5, dart: 5, chess_piece: 5, wind_gust: 5.6, tornado: 4.2,
         nucleon_shot: 5, dagger: 7.5, lightning: 7.5, ivy_seed: 5.7, lance: 16, gladiator_slash: 1,
-        boomerang: 9, scythe: 1, mr_perfurant_slash: 1, buster_rocket: 12.5, saw_throw: 6, quarterback: 4.75,
+        boomerang: 9, scythe: 1, mr_perfurant_slash: 1, buster_rocket: 12.5, saw_throw: 6, quarterback: 4.75, rowan_shard: 6.6, nyla_shard: 6.2,
         gma_cookie: 5.6, cookie_tray: 5.2, kael_arrow: 6.2, kael_impact_arrow: 5.6, water_bubble: 5, water_wave: 7.5, blood_ball: 5, macaron: 5, macaron_big: 5.3, tea_cup: 5.2,
         laser: 20, ice_stake: 7.5, ice_dagger: 6, snowball: 4, yeti_punch: 7.5, echo_shot: 6.75,
         echo_bh_core: 5.25, graffit_can: 5.5, shinobi_fireball: 9, glitch_bugshot: 5.25, eel_lash: 16, shell_trident: 8.5,
         bit_cherry: 6.2, bit_banana: 5.5, bit_banana_peeled: 6.8, bit_arcade: 4.2, beezy_honey: 5.6, beezy_bee: 6.4, shinobi_katana: 1,
         zippi_laser: 20, axel_stone: 5.6, axel_shard: 5.6, adam_ball: 5.25, adam_mech_ball: 5.6,
         yuuto_heart: 5, sterling_star: 8.2, lyron_ball: 9.5, lyron_ball_big: 7.6,
-        eolio_propeller: 8.2, cyro_iceball: 4.1, pyro_fireball: 7.25, merlin_magic: 6.2, merlin_pacifier: 6.8
+        eolio_propeller: 8.2, cyro_iceball: 4.1, pyro_fireball: 7.25, merlin_magic: 6.2, merlin_pacifier: 6.8, blizzard_flake: 5.8, blizzard_snowball: 4.6
     };
     const speed = speedByType[def.type] || 5;
     const extra = { size: 8, sourceChar: def.sourceChar, serranoClone: true, serranoOriginalChar: def.sourceChar };
@@ -16725,7 +16951,7 @@ function updateProjectiles(dt) {
         else if(p.type === 'sword' || p.type === 'scythe' || p.type === 'gladiator_slash') { p.x = player.x + p.vx * 60; p.y = player.y + p.vy * 60; } 
         else if (p.type === 'bomb') { const bombTarget = p.extra || {}; let d = dist(p, {x: Number.isFinite(bombTarget.tx) ? bombTarget.tx : p.x, y: Number.isFinite(bombTarget.ty) ? bombTarget.ty : p.y}); if(d < 5 || p.life < 10) { applyCyberBombEffects(p); projectiles.splice(i, 1); continue; } p.x += p.vx * 60 * dt; p.y += p.vy * 60 * dt; } 
         else if (p.type === 'magic') {
-            let target = null; let minD = 200; for(let e of enemies) { let d = dist(p, e); if(d < minD) { minD = d; target = e; } }
+            let target = null; let minD = 200; for(let e of enemies) { if (isCurrentlyHypnotized(e)) continue; let d = dist(p, e); if(d < minD) { minD = d; target = e; } }
             if(target) { let a = Math.atan2(target.y - p.y, target.x - p.x); let spd = Math.sqrt(p.vx*p.vx + p.vy*p.vy); p.vx += Math.cos(a)*spd*0.05; p.vy += Math.sin(a)*spd*0.05; let nSpd = Math.sqrt(p.vx*p.vx + p.vy*p.vy); p.vx = (p.vx/nSpd)*spd; p.vy = (p.vy/nSpd)*spd; }
             p.x += p.vx * 60 * dt; p.y += p.vy * 60 * dt;
         }
@@ -17251,7 +17477,41 @@ function updateProjectiles(dt) {
                             const cherryMult = Math.max(1, Number(p.extra?.cherryMultiplier) || 2);
                             realDmg *= cherryMult;
                         }
-                        e.hp -= realDmg * getEnemyDamageTakenMultiplier(e); e.lastHitSourceChar = p.extra?.sourceChar || (p.isPlayer ? pd.selectedChar : e.lastHitSourceChar || null); addFloatingText(e.x, e.y, Math.floor(realDmg), '#fff'); if(p.isPlayer) trackMissionDamage(realDmg);
+                        const rowanPurificationHit = p.type === 'rowan_shard' && p.extra?.rowanPurification && pd.selectedChar === 'rowan' && canRowanPurifyEnemy(e);
+                        e.lastHitSourceChar = p.extra?.sourceChar || (p.isPlayer ? pd.selectedChar : e.lastHitSourceChar || null);
+                        if (rowanPurificationHit) {
+                            e.hp = 0;
+                            e.rowanPurified = true;
+                            addFloatingText(e.x, e.y - 10, 'PURIFICAÇÃO!', '#ff4fa3', 12);
+                            createParticles(e.x, e.y, '#ff4fa3');
+                        } else {
+                            e.hp -= realDmg * getEnemyDamageTakenMultiplier(e);
+                            addFloatingText(e.x, e.y, Math.floor(realDmg), '#fff');
+                            if(p.isPlayer) trackMissionDamage(realDmg);
+                        }
+
+                        if (p.type === 'nyla_shard' || p.type === 'nyla_shard_small') {
+                            const poisonChance = Math.max(0, Math.min(1, Number(p.extra?.nylaPoisonChance) || 0.15));
+                            if (Math.random() < poisonChance) {
+                                e.poison = { timer: 4, dmg: Math.max(1, realDmg * 0.30), tickCd: 0.3 };
+                                addFloatingText(e.x, e.y - 12, 'VENENO!', '#2ecc71', 11);
+                                createParticles(e.x, e.y, '#2ecc71');
+                            }
+                        }
+
+                        if (p.type === 'nyla_shard' && !p.extra?.splitDone) {
+                            p.extra.splitDone = true;
+                            const baseAngle = Math.atan2(p.vy, p.vx);
+                            const smallCount = 5;
+                            const smallSpeed = Math.max(3.8, Math.hypot(p.vx, p.vy) * 0.92);
+                            for (let j = 0; j < smallCount; j++) {
+                                const spread = (j - (smallCount - 1) / 2) * 0.24;
+                                const a = baseAngle + spread;
+                                const small = createProj(p.x, p.y, Math.cos(a) * smallSpeed, Math.sin(a) * smallSpeed, Math.max(1, p.dmg * 0.34), 38, true, 'nyla_shard_small', { size: 4.5, sourceChar: 'nyla', nylaPoisonChance: 0.15, splitDone: true, pierce: 0, noHitFrames: 0.08 });
+                                if (small?.hitIds && e) small.hitIds.add(e);
+                            }
+                            createParticles(p.x, p.y, '#c56cf0');
+                        }
 
                         if (p.type === 'bit_banana') {
                             const radius = Math.max(32, Number(p.extra?.explodeRadius) || 62);
@@ -17473,6 +17733,18 @@ function updateProjectiles(dt) {
                         if(babyChance>0 && Math.random()<babyChance) applyMerlinBabyEffect(e);
                     }
                     if(player.stats.freezeChance > 0 && Math.random() < player.stats.freezeChance) { e.freezeTimer = 2; }
+                    if (p.type === 'blizzard_flake' || p.type === 'blizzard_snowball') {
+                        const slowChance = Math.max(0, Math.min(1, Number(p.extra?.slowChance) || 0));
+                        const freezeChance = Math.max(0, Math.min(1, Number(p.extra?.freezeChance) || 0));
+                        const critChance = Math.max(0, Math.min(1, Number(p.extra?.critChance) || 0));
+                        if (critChance > 0 && Math.random() < critChance) {
+                            const bonus = Math.max(1, p.dmg * 0.9 * getEnemyDamageTakenMultiplier(e));
+                            e.hp -= bonus;
+                            addFloatingText(e.x, e.y - 16, 'CRÍTICO!', '#e8f7ff', 11);
+                        }
+                        if (slowChance > 0 && Math.random() < slowChance) e.slowTimer = Math.max(Number(e.slowTimer) || 0, 1.7);
+                        if (freezeChance > 0 && Math.random() < freezeChance) e.freezeTimer = Math.max(Number(e.freezeTimer) || 0, 2.1);
+                    }
                     if(p.type === 'blood_ball' && (extra.size || 0) === 10) e.weakenTimer = 3;
                     if(p.type === 'laser' && !(extra.zippiBurnLocked || Object.prototype.hasOwnProperty.call(extra, 'zippiBurnChance'))) { e.burnTimer = 2; e.burnDmg = 5; }
                     if((p.type === 'laser' || p.type === 'zippi_laser') && Object.prototype.hasOwnProperty.call(extra, 'zippiBurnChance') && extra.zippiBurnChance > 0 && Math.random() < extra.zippiBurnChance) { e.burnTimer = 2.5; e.burnDmg = Math.max(e.burnDmg || 0, p.dmg * 0.15); }
@@ -17903,6 +18175,8 @@ function updatePuddles(dt) {
                     }
                 }
             }
+        } else if (p.type === 'nyla_fracture') {
+            // Visual-only mini Fracture created by Nyla at the end of each wave.
         } else if (p.type === 'magma_crack') {
             if (p.tick >= 0.35) {
                 p.tick = 0;
@@ -18974,8 +19248,10 @@ function getFracturedGlobalEnemyPool() {
     return candidates.filter(t => getEnemyEntryWave(t, wave) <= wave);
 }
 
-function spawnFractureEnemy(fracture) {
-    if (!fracture || wave % 10 === 0 || enemies.some(e => e && e.isBoss)) return false;
+function spawnFractureEnemy(fracture, options = {}) {
+    const nylaMini = !!options.nylaMini;
+    if (!fracture) return false;
+    if (!nylaMini && (wave % 10 === 0 || enemies.some(e => e && e.isBoss))) return false;
     const pool = getFractureBiomePool(fracture.mapId)
         .filter(t => getEnemyEntryWave(t, wave) <= wave);
     if (!pool.length) return false;
@@ -19062,6 +19338,26 @@ function spawnFractureEnemy(fracture) {
     enemies.push(e);
     window.currentMap = oldMap;
     return e;
+}
+
+function spawnNylaMiniFracture() {
+    if (!player || pd?.selectedChar !== 'nyla') return;
+    puddles.push({ x: player.x, y: player.y, r: 30, life: 1.25, tick: 0, type: 'nyla_fracture', sourceChar: 'nyla' });
+    const fracture = { x: player.x, y: player.y, mapId: Math.floor(Math.random() * 11), angle: Math.random() * Math.PI * 2, length: 80, width: 52 };
+    const count = 1 + Math.floor(Math.random() * 2);
+    let spawnedCount = 0;
+    for (let i = 0; i < count; i++) {
+        const summoned = spawnFractureEnemy(fracture, { nylaMini: true });
+        if (!summoned) continue;
+        summoned.hypnotizedTimer = Infinity;
+        summoned.hypnotizedTick = 0;
+        summoned.hypnotizedSnapshot = { baseDmg: summoned.baseDmg, dmg: summoned.dmg, speed: summoned.speed, maxHp: summoned.maxHp, size: summoned.size, color: summoned.color };
+        summoned.nylaPermanentHypnosis = true;
+        spawnedCount++;
+        addFloatingText(summoned.x, summoned.y - 18, 'HIPNOTIZADO!', '#ff6bb5', 11);
+    }
+    if (spawnedCount > 0) createParticles(player.x, player.y, '#c56cf0');
+    player.nylaMiniFractureCount = (Number(player.nylaMiniFractureCount) || 0) + 1;
 }
 
 function updateFractures(dt) {
@@ -19357,6 +19653,34 @@ function draw() {
             ctx.fill();
             ctx.restore();
         }
+        else if (p.type === 'nyla_fracture') {
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            const pulse = 0.9 + Math.sin((gameTime || 0) * 9 + p.x * 0.01) * 0.08;
+            ctx.globalAlpha = Math.max(0, Math.min(1, p.life / 1.25));
+            ctx.shadowColor = '#c56cf0';
+            ctx.shadowBlur = 18;
+            ctx.strokeStyle = '#e6b8ff';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.arc(0, 0, p.r * 0.72 * pulse, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = '#9b59b6';
+            ctx.lineWidth = 2;
+            for (let k = 0; k < 6; k++) {
+                const a = k * Math.PI / 3 + gameTime * 0.5;
+                ctx.beginPath();
+                ctx.moveTo(Math.cos(a) * 5, Math.sin(a) * 5);
+                ctx.lineTo(Math.cos(a) * p.r * 0.65, Math.sin(a) * p.r * 0.65);
+                ctx.stroke();
+            }
+            ctx.fillStyle = 'rgba(197,108,240,0.16)';
+            ctx.beginPath();
+            ctx.arc(0, 0, p.r * 0.82, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
         else if (p.type === 'magma_crack') {
             ctx.save();
             ctx.translate(p.x, p.y);
@@ -19476,7 +19800,7 @@ function draw() {
             strokeColor = player.flexLowHp ? 'rgba(255, 215, 0, 0.24)' : 'rgba(255, 215, 0, 0.18)';
         } else {
             let target = null; let minDist = player.baseRange * player.stats.rangeMult;
-            for(let e of enemies) { let d = dist(player, e); if(d < minDist) { minDist = d; target = e; } }
+            for(let e of enemies) { if (isCurrentlyHypnotized(e)) continue; let d = dist(player, e); if(d < minDist) { minDist = d; target = e; } }
             if(target) angle = Math.atan2(target.y - player.y, target.x - player.x);
         }
 
@@ -19856,6 +20180,22 @@ function draw() {
             ctx.globalAlpha = 0.22; ctx.fillStyle = '#00cec9'; ctx.beginPath(); ctx.ellipse(0,0,player.r+24,player.r+10,0,0,Math.PI*2); ctx.fill();
             ctx.globalAlpha = 0.9; ctx.strokeStyle = '#9ffcff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-player.r-18,0); ctx.lineTo(player.r+18,0); ctx.stroke(); ctx.restore();
         }
+        // Blizzard storm aura
+        if (pd.selectedChar === 'blizzard' && Number(player.blizzardTemperature) <= -60) {
+            ctx.save();
+            const rr = 58 * (player.stats?.rangeMult || 1);
+            const spin = (gameTime || 0) * 3.6;
+            for (let k = 0; k < 18; k++) {
+                const a = spin + (Math.PI * 2 * k / 18);
+                const px = player.x + Math.cos(a) * rr * (0.72 + 0.10 * Math.sin((gameTime || 0) * 5 + k));
+                const py = player.y + Math.sin(a) * rr * (0.72 + 0.10 * Math.sin((gameTime || 0) * 5 + k));
+                ctx.strokeStyle = 'rgba(190,230,255,0.75)'; ctx.lineWidth = 2; ctx.beginPath();
+                ctx.moveTo(px, py); ctx.lineTo(px - Math.cos(a) * 7 + Math.sin(a) * 3, py - Math.sin(a) * 7 - Math.cos(a) * 3); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px - Math.cos(a) * 7 - Math.sin(a) * 3, py - Math.sin(a) * 7 + Math.cos(a) * 3); ctx.stroke();
+            }
+            ctx.strokeStyle = 'rgba(180,225,255,0.28)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(player.x, player.y, rr, 0, Math.PI*2); ctx.stroke();
+            ctx.restore();
+        }
         drawShape(ctx, player.x, player.y, player.r, 'circle', player.color, false, getPlayerSpriteId());
         ctx.globalAlpha = 1; 
         if(player.shieldTimer > 0 || player.qbShield) { const shieldColor = pd.selectedChar === 'vesper' ? '#7b3fe4' : (player.qbShield ? '#8e44ad' : '#3498db'); ctx.strokeStyle = shieldColor; ctx.lineWidth = (pd.selectedChar === 'vesper' || player.qbShield) ? 6 : 4; ctx.beginPath(); ctx.arc(player.x, player.y, player.r + 5, 0, Math.PI*2); ctx.stroke(); } 
@@ -19997,6 +20337,23 @@ function draw() {
             if (stFill > 0) {
                 ctx.fillStyle = 'rgba(255,255,255,0.18)';
                 ctx.fillRect(player.x - stWidth / 2, player.y - player.r - 18, stWidth * stFill, stHeight);
+            }
+        }
+        if(pd.selectedChar === 'rowan') {
+            const rowanWidth = 58;
+            const rowanHeight = 9;
+            const rowanFill = Math.max(0, Math.min(1, Number(player.rowanPurificationBar || 0) / 1000));
+            ctx.fillStyle = '#111';
+            ctx.fillRect(player.x - rowanWidth / 2, player.y - player.r - 18, rowanWidth, rowanHeight);
+            ctx.fillStyle = '#ff4fa3';
+            ctx.fillRect(player.x - rowanWidth / 2, player.y - player.r - 18, rowanWidth * rowanFill, rowanHeight);
+            ctx.strokeStyle = player.rowanPurificationReady ? '#ffffff' : '#ffffff';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(player.x - rowanWidth / 2, player.y - player.r - 18, rowanWidth, rowanHeight);
+            if (player.rowanPurificationReady) {
+                ctx.strokeStyle = '#ff4fa3';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(player.x - rowanWidth / 2 - 1, player.y - player.r - 19, rowanWidth + 2, rowanHeight + 2);
             }
         }
         if(pd.selectedChar === 'adam') {
@@ -20853,6 +21210,77 @@ function draw() {
         else if(p.type === 'chickbot_egg') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx)); ctx.fillStyle = '#fffdf5'; ctx.strokeStyle = '#f1c40f'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(0, 0, Math.max(7, p.size * 0.78), Math.max(10, p.size), 0, 0, Math.PI*2); ctx.fill(); ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.beginPath(); ctx.arc(-2, -3, 2, 0, Math.PI*2); ctx.fill(); ctx.restore(); }
         else if(p.type === 'nucleon_shot') { ctx.fillStyle = '#2ecc71'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); }
         else if(p.type === 'lyron_ball' || p.type === 'lyron_ball_big') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx)); const isBig = p.type === 'lyron_ball_big'; const r = Math.max(isBig ? 14 : 8, p.size || (isBig ? 18 : 9)); ctx.shadowColor = isBig ? 'rgba(46, 204, 113, 0.8)' : 'rgba(255,255,255,0.45)'; ctx.shadowBlur = isBig ? 14 : 8; ctx.fillStyle = isBig ? '#fefefe' : '#ffffff'; ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0; ctx.strokeStyle = isBig ? '#27ae60' : '#2c3e50'; ctx.lineWidth = Math.max(1.5, r * 0.12); ctx.stroke(); ctx.strokeStyle = '#2c2c54'; ctx.lineWidth = Math.max(1.2, r * 0.08); ctx.beginPath(); ctx.moveTo(-r * 0.75, 0); ctx.lineTo(r * 0.75, 0); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0, -r * 0.72); ctx.lineTo(0, r * 0.72); ctx.stroke(); ctx.fillStyle = '#2c3e50'; ctx.beginPath(); ctx.arc(-r * 0.22, -r * 0.15, Math.max(1.6, r * 0.14), 0, Math.PI * 2); ctx.fill(); ctx.beginPath(); ctx.arc(r * 0.24, r * 0.18, Math.max(1.6, r * 0.14), 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+        else if(p.type === 'blizzard_flake' || p.type === 'blizzard_snowball') {
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(Math.atan2(p.vy, p.vx));
+            const big = p.type === 'blizzard_snowball';
+            const r = Math.max(big ? 11 : 4, p.size || (big ? 16 : 7));
+            ctx.shadowColor = big ? '#2f75b5' : '#a8dcff';
+            ctx.shadowBlur = big ? 18 : 12;
+            if (big) {
+                ctx.fillStyle = '#6ea7d8';
+                ctx.strokeStyle = '#eaf8ff';
+                ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = 'rgba(255,255,255,.85)';
+                ctx.beginPath(); ctx.arc(-r*.3,-r*.3,Math.max(2,r*.18),0,Math.PI*2); ctx.fill();
+            } else {
+                ctx.strokeStyle = '#eaf8ff';
+                ctx.lineWidth = 1.5;
+                for(let k=0;k<6;k++){
+                    const a=Math.PI*k/3;
+                    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(Math.cos(a)*r*1.7,Math.sin(a)*r*1.7); ctx.stroke();
+                    const ex=Math.cos(a)*r*1.22, ey=Math.sin(a)*r*1.22;
+                    const ba=a+0.58, bb=a-0.58;
+                    ctx.beginPath(); ctx.moveTo(ex,ey); ctx.lineTo(ex-Math.cos(ba)*r*.42,ey-Math.sin(ba)*r*.42); ctx.moveTo(ex,ey); ctx.lineTo(ex-Math.cos(bb)*r*.42,ey-Math.sin(bb)*r*.42); ctx.stroke();
+                }
+                ctx.fillStyle='#dff5ff'; ctx.beginPath(); ctx.arc(0,0,Math.max(1.4,r*.22),0,Math.PI*2); ctx.fill();
+            }
+            ctx.restore();
+        }
+        else if(p.type === 'nyla_shard' || p.type === 'nyla_shard_small') {
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(Math.atan2(p.vy, p.vx));
+            const r = Math.max(3, p.size || (p.type === 'nyla_shard' ? 8 : 4.5));
+            const big = p.type === 'nyla_shard';
+            ctx.shadowColor = '#c56cf0';
+            ctx.shadowBlur = big ? 16 : 9;
+            ctx.fillStyle = big ? '#d98cff' : '#efc8ff';
+            ctx.strokeStyle = '#6c3483';
+            ctx.lineWidth = big ? 2 : 1.2;
+            ctx.beginPath();
+            ctx.moveTo(r * (big ? 2.8 : 2.4), 0);
+            ctx.lineTo(-r * 0.9, -r * 0.62);
+            ctx.lineTo(-r * 1.25, 0);
+            ctx.lineTo(-r * 0.9, r * 0.62);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
+        }
+        else if(p.type === 'rowan_shard') {
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(Math.atan2(p.vy, p.vx));
+            const r = Math.max(4, p.size || 6);
+            ctx.shadowColor = '#ff4fa3';
+            ctx.shadowBlur = p.extra?.rowanPurification ? 18 : 10;
+            ctx.fillStyle = p.extra?.rowanPurification ? '#ffb6d9' : '#ff4fa3';
+            ctx.beginPath();
+            ctx.moveTo(r * 2.6, 0);
+            ctx.lineTo(-r * 1.15, -r * 0.58);
+            ctx.lineTo(-r * 1.6, 0);
+            ctx.lineTo(-r * 1.15, r * 0.58);
+            ctx.closePath();
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.restore();
+        }
         else if(p.type === 'quarterback') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx)); ctx.shadowColor = '#8e44ad'; ctx.shadowBlur = 12; ctx.fillStyle = '#8e44ad'; ctx.beginPath(); if(ctx.ellipse) { ctx.ellipse(0, 0, p.size + 4, p.size * 0.55, 0, 0, Math.PI * 2); } else { ctx.scale(1.4, 0.75); ctx.arc(0, 0, p.size, 0, Math.PI * 2); } ctx.fill(); ctx.shadowBlur = 0; ctx.lineWidth = 2; ctx.strokeStyle = '#f5f6fa'; ctx.beginPath(); if(ctx.ellipse) { ctx.ellipse(0, 0, p.size + 4, p.size * 0.55, 0, 0, Math.PI * 2); } else { ctx.scale(1, 1); ctx.arc(0, 0, p.size, 0, Math.PI * 2); } ctx.stroke(); ctx.strokeStyle = '#2c2c54'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(-p.size + 2, 0); ctx.lineTo(p.size - 2, 0); ctx.stroke(); ctx.restore(); }
         else if(p.type === 'lance') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx)); ctx.shadowColor = 'rgba(255, 215, 0, 0.35)'; ctx.shadowBlur = 8; ctx.fillStyle = '#f39c12'; ctx.strokeStyle = '#7f4f00'; ctx.lineWidth = 2; const len = Math.max(30, (p.size || 6) * 5); const shaft = Math.max(3, (p.size || 6) * 0.45); if(ctx.roundRect) { ctx.beginPath(); ctx.roundRect(-len * 0.45, -shaft * 0.5, len * 0.75, shaft, 2); ctx.fill(); ctx.stroke(); } else { ctx.fillRect(-len * 0.45, -shaft * 0.5, len * 0.75, shaft); ctx.strokeRect(-len * 0.45, -shaft * 0.5, len * 0.75, shaft); } ctx.beginPath(); ctx.moveTo(len * 0.30, 0); ctx.lineTo(len * 0.62, -shaft * 1.05); ctx.lineTo(len * 0.62, shaft * 1.05); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#fefae0'; ctx.beginPath(); ctx.arc(-len * 0.48, 0, Math.max(1.5, shaft * 0.45), 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
         else if(p.type === 'ghost_fishing_line') {
@@ -21289,6 +21717,11 @@ function updateGameHud() {
     if (o2Wrap) o2Wrap.classList.toggle('hidden', window.currentMap !== 10);
     const o2Fill = document.getElementById('o2-bar');
     if (o2Fill && window.currentMap === 10 && player) o2Fill.style.width = `${Math.max(0, Math.min(100, (Number(player.o2) || 0) / (Number(player.o2Max) || 100) * 100))}%`;
+    const blizWrap = document.getElementById('blizzard-temp-container');
+    if (blizWrap) {
+        if (pd.selectedChar === 'blizzard' && player) updateBlizzardTemperatureVisual();
+        else blizWrap.style.display = 'none';
+    }
     const vesperFocusEl = document.getElementById('vesper-focus-text');
     if (vesperFocusEl) {
         vesperFocusEl.classList.add('hidden');
@@ -21385,7 +21818,7 @@ function gameOver(isQuit) {
     document.getElementById('go-scrap').innerHTML = `<img class="resource-icon" src="elements/scrap.png" alt=""> Sucatas obtidas: <strong>${runScrap || 0}</strong>`;
     document.getElementById('go-medals').innerHTML = `${resourceIcon('medal')} Medalhas obtidas: <strong>${isQuit ? 0 : (medalsThisRun || 0)}</strong>`;
     document.getElementById('go-daily').innerHTML = winText;
-    document.getElementById('overlay-gameover').classList.remove('hidden'); document.getElementById('game-hud').classList.add('hidden'); document.getElementById('exp-bar-container').classList.add('hidden');
+    document.getElementById('overlay-gameover').classList.remove('hidden'); document.getElementById('game-hud').classList.add('hidden'); document.getElementById('exp-bar-container').classList.add('hidden'); const bt=document.getElementById('blizzard-temp-container'); if(bt) bt.style.display='none';
     // O tutorial da primeira derrota começa somente depois de o jogador sair da tela de game over.
 }
 
