@@ -368,6 +368,8 @@
 .grapple-aim-label { position:absolute; left:50%; bottom:-20px; transform:translateX(-50%); color:#fff; font-size:11px; font-weight:900; letter-spacing:.08em; text-shadow:1px 1px 0 #000; pointer-events:none; }
 #btn-special { position: absolute; bottom: 50px; right: 50px; width: 80px; height: 80px; background: rgba(52, 152, 219, 0.5); border: 3px solid rgba(255,255,255,0.5); border-radius: 50%; font-size: 30px; color: white; display: none; justify-content: center; align-items: center; z-index: 5; touch-action: none; cursor: pointer; overflow: visible; }
     #btn-special .btn-special-label { pointer-events: none; }
+    #btn-special .btn-special-label img { width:42px; height:42px; object-fit:contain; display:block; }
+    #btn-special.sterling-special .btn-special-label img { width:52px; height:52px; }
     #btn-special .sterling-btn-title {
         position: absolute;
         bottom: -22px;
@@ -479,7 +481,7 @@
     #o2-bar-label { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 900; text-shadow: 1px 1px 0 #000; pointer-events: none; }
     #qb-bar-container { position: absolute; top: 76px; left: 50%; transform: translateX(-50%); width: 300px; height: 16px; background: #1b1024; border: 3px solid #000; border-radius: 12px; overflow: hidden; z-index: 5; box-shadow: 0 0 10px rgba(0,0,0,0.5); display: none; }
     #qb-bar { height: 100%; background: linear-gradient(90deg, #8e44ad, #e056fd); width: 0%; transition: width 0.15s; }
-    #blizzard-temp-container { position:absolute; top:118px; left:50%; transform:translateX(-50%); width:300px; height:38px; display:none; align-items:center; gap:10px; padding:5px 10px; background:linear-gradient(180deg,rgba(241,248,255,.98),rgba(180,213,239,.98)); border:3px solid #0b1f33; border-radius:20px; z-index:5; box-shadow:0 4px 16px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.9); overflow:hidden; }
+    #blizzard-temp-container { display:none !important; }
     #blizzard-temp-container::before { content:''; position:relative; z-index:3; width:18px; height:18px; flex:0 0 18px; border-radius:50%; background:var(--blizzard-thermo,#fff); border:3px solid #182d42; box-shadow:0 0 10px rgba(116,185,255,.6); }
     #blizzard-temp-container::after { content:''; position:absolute; left:19px; right:58px; top:50%; height:11px; transform:translateY(-50%); background:linear-gradient(90deg,#102b4b 0%,#3f7bb0 27%,#eaf8ff 55%,#f5e8b0 100%); border:2px solid #182d42; border-radius:999px; opacity:.7; pointer-events:none; }
     #blizzard-temp-fill { position:absolute; left:21px; top:50%; height:8px; transform:translateY(-50%); width:0%; border-radius:999px; background:var(--blizzard-fill,#ffffff); box-shadow:0 0 12px rgba(255,255,255,.75); pointer-events:none; transition:width .16s linear,background .16s linear; z-index:2; }
@@ -12718,10 +12720,10 @@ if (nickInputEl) {
 }
 
 const COMMON_ABILITY_CONFIGS = {
-    strike: { label: '🎯', title: 'Habilidade — Tiro Perfurante', cooldown: 10 },
-    fasty: { label: '👟', title: 'Habilidade — Boost de Velocidade', cooldown: 20 },
+    strike: { label: '<img src="elements/cadence.png" alt="" aria-hidden="true">', title: 'Habilidade — Tiro Perfurante', cooldown: 10 },
+    fasty: { label: '<img src="elements/speed.png" alt="" aria-hidden="true">', title: 'Habilidade — Boost de Velocidade', cooldown: 20 },
     hank: { label: '🚀', title: 'Habilidade — Míssil', cooldown: 15 },
-    cherry: { label: '💥', title: 'Habilidade — Rajada Pesada', cooldown: 15 }
+    cherry: { label: '<img src="elements/push.png" alt="" aria-hidden="true">', title: 'Habilidade — Rajada Pesada', cooldown: 15 }
 };
 
 function getCommonAbilityTarget(maxRange = 1100) {
@@ -12808,7 +12810,7 @@ function getSelectedSpecialConfig() {
         return { type: 'glitch', label: '🎲', title: player.glitchTransformAnimating ? 'Corrompendo...' : 'Bugado', ready: !player.glitchTransformAnimating };
     }
     if (pd.selectedChar === 'sterling') {
-        return { type: 'sterling', label: '⭐', title: 'Entre as estrelas', ready: (player.sterlingAttackCd || 0) <= 0 && !player.sterlingCharging };
+        return { type: 'sterling', label: '<img src="elements/event.png" alt="" aria-hidden="true">', title: 'Entre as estrelas', ready: (player.sterlingAttackCd || 0) <= 0 && !player.sterlingCharging };
     }
     if (pd.selectedChar === 'bunniie') {
         return { type: 'bunniie', label: '🕳️', title: player.bunniieTunnelCd > 0 ? `Toca recarregando ${Math.ceil(player.bunniieTunnelCd)}s` : 'Cavar', ready: player.bunniieTunnelCd <= 0 };
@@ -12977,7 +12979,7 @@ function updateSpecialButtonUI() {
     btnSpecial.classList.toggle('grapple-special', isGrapple);
     btnSpecial.classList.toggle('grapple-charging', isGrappleCharging);
     btnSpecial.innerHTML = isSterling
-        ? `<span class="btn-special-label">⭐</span><span class="sterling-btn-title">CARGA</span><div class="btn-cooldown-badge" style="display:${shouldShowCooldown || activeState ? 'block' : 'none'}">${activeState ? '' : cooldownValue.toFixed(1)}</div>`
+        ? `<span class="btn-special-label"><img src="elements/event.png" alt="" aria-hidden="true"></span><span class="sterling-btn-title">CARGA</span><div class="btn-cooldown-badge" style="display:${shouldShowCooldown || activeState ? 'block' : 'none'}">${activeState ? '' : cooldownValue.toFixed(1)}</div>`
         : isGrapple
             ? `<span class="btn-special-label">🪝</span><span class="grapple-btn-title">GANCHO</span><div class="grapple-charge-wrap"><div class="grapple-charge-percent">${Math.round(chargePct * 100)}%</div><div class="grapple-charge-track"><div class="grapple-charge-fill" style="width:${chargePct*100}%"></div></div></div><div class="btn-cooldown-badge" style="display:${shouldShowCooldown || activeState ? 'block' : 'none'}">${activeState ? '' : String(Math.ceil(cooldownValue))}</div>`
             : `<span class="btn-special-label">${label}</span><div class="btn-cooldown-badge" style="display:${shouldShowCooldown || activeState ? 'block' : 'none'}">${activeState ? '' : String(Math.ceil(cooldownValue))}</div>`;
@@ -14493,13 +14495,20 @@ if (!isBossAlive) {
         player.blizzardIdleTimer = moving ? 0 : (Number(player.blizzardIdleTimer) || 0) + dt;
         if (moving) {
             player.blizzardMoveTimer = (Number(player.blizzardMoveTimer) || 0) + dt;
-            const coldFactor = 1 + Math.max(0, (20 - (Number(player.blizzardTemperature) || 20)) / 20);
-            player.blizzardTemperature = clampBlizzardTemperature((Number(player.blizzardTemperature) || 20) + dt * 1.35 * coldFactor);
-        } else if ((Number(player.blizzardIdleTimer) || 0) >= 2.5) {
-            player.blizzardIdleTimer = 0;
-            player.blizzardTemperature = clampBlizzardTemperature((Number(player.blizzardTemperature) || 20) - 1.5);
+            // Depois de 5s de movimento contínuo, andar passa a resfriar Blizzard.
+            // Isso é independente da temperatura atual; não há mais aquecimento por movimento.
+            if (player.blizzardMoveTimer > 5) {
+                player.blizzardTemperature = clampBlizzardTemperature((Number(player.blizzardTemperature) || 20) - dt * 1.35);
+            }
+        } else {
+            player.blizzardMoveTimer = 0;
+            if ((Number(player.blizzardIdleTimer) || 0) >= 2.5) {
+                player.blizzardIdleTimer = 0;
+                player.blizzardTemperature = clampBlizzardTemperature((Number(player.blizzardTemperature) || 20) - 1.5);
+            }
         }
         player.blizzardTier = getBlizzardTier(player.blizzardTemperature);
+        syncBlizzardActiveProjectiles();
         updateBlizzardTemperatureVisual();
         if (player.blizzardTemperature <= -60) {
             player.blizzardStormTick = Math.max(0, (Number(player.blizzardStormTick) || 0) - dt);
@@ -14888,12 +14897,12 @@ function fireWeapon(target) {
             const sx = player.x + Math.cos(angle) * spawnOffset;
             const sy = player.y + Math.sin(angle) * spawnOffset;
             if (profile.tier === 4 && Math.random() < profile.snowballChance) {
-                createProj(sx, sy, Math.cos(angle) * pSpd * 0.78, Math.sin(angle) * pSpd * 0.78, finalDmg * profile.damageMult * 1.55, 86, true, 'blizzard_snowball', { size: 16, sourceChar: 'blizzard', slowChance: 0.68, freezeChance: profile.freezeChance });
+                createProj(sx, sy, Math.cos(angle) * pSpd * 0.78, Math.sin(angle) * pSpd * 0.78, finalDmg * profile.damageMult * 1.55, 86, true, 'blizzard_snowball', { size: 16, sourceChar: 'blizzard', blizzardBaseDamage: finalDmg * 1.55, slowChance: 0.68, freezeChance: profile.freezeChance });
             } else {
                 const count = profile.flakes + Math.max(0, Math.floor(player.stats.extraProj || 0));
                 for (let k = 0; k < count; k++) {
                     const off = count === 1 ? 0 : (k - (count - 1) / 2) * 0.11;
-                    createProj(sx, sy, Math.cos(angle + off) * pSpd, Math.sin(angle + off) * pSpd, finalDmg * profile.damageMult, 62, true, 'blizzard_flake', { size: profile.tier >= 3 ? 8 : 7, sourceChar: 'blizzard', slowChance: profile.slowChance, freezeChance: profile.freezeChance, critChance: profile.critChance });
+                    createProj(sx, sy, Math.cos(angle + off) * pSpd, Math.sin(angle + off) * pSpd, finalDmg * profile.damageMult, 62, true, 'blizzard_flake', { size: profile.tier >= 3 ? 8 : 7, sourceChar: 'blizzard', blizzardBaseDamage: finalDmg, slowChance: profile.slowChance, freezeChance: profile.freezeChance, critChance: profile.critChance });
                 }
             }
             player.cd = Math.max(36, Math.round(player.baseFireRate * player.stats.fireRateMult * (profile.tier >= 3 ? 0.88 : 1)));
@@ -16424,7 +16433,7 @@ function isHypnotizableEnemy(enemy) {
 }
 
 function isCurrentlyHypnotized(enemy) {
-    return !!enemy && Number.isFinite(enemy.hypnotizedTimer) && enemy.hypnotizedTimer > 0;
+    return !!enemy && (enemy.hypnotizedTimer === Infinity || (Number.isFinite(enemy.hypnotizedTimer) && enemy.hypnotizedTimer > 0));
 }
 
 function getHypnosisTarget(sourceEnemy) {
@@ -17051,6 +17060,18 @@ function getBlizzardTier(temp) {
     return 0;
 }
 function clampBlizzardTemperature(t) { return Math.max(-60, Math.min(20, Number(t) || 20)); }
+function syncBlizzardActiveProjectiles() {
+    if (!player || !Array.isArray(projectiles) || pd?.selectedChar !== 'blizzard') return;
+    const profile = getBlizzardAttackProfile();
+    for (const p of projectiles) {
+        if (!p || p.extra?.sourceChar !== 'blizzard' || (p.type !== 'blizzard_flake' && p.type !== 'blizzard_snowball')) continue;
+        if (Number.isFinite(p.extra.blizzardBaseDamage)) p.dmg = p.extra.blizzardBaseDamage * profile.damageMult;
+        p.extra.slowChance = p.type === 'blizzard_snowball' ? 0.68 : profile.slowChance;
+        p.extra.freezeChance = profile.freezeChance;
+        p.extra.critChance = profile.critChance;
+        if (p.type === 'blizzard_flake') p.size = profile.tier >= 3 ? 8 : 7;
+    }
+}
 function updateBlizzardTemperatureVisual() {
     if (!player || pd?.selectedChar !== 'blizzard') return;
     const wrap = document.getElementById('blizzard-temp-container');
@@ -19994,7 +20015,7 @@ function createExplosion(x, y, r, dmg, color='#e74c3c') {
     }
     if(dmg > 0) {
         trackMissionDamage(dmg);
-        for(let e of enemies) if(dist({x,y}, e) < r) {
+        for(let e of enemies) if(!isCurrentlyHypnotized(e) && dist({x,y}, e) < r) {
             let soakMult = 1 + (e.soak || 0) * 0.05;
             const weakenedMult = getEnemyDamageTakenMultiplier(e);
             const dealt = dmg * soakMult * weakenedMult * (e.isBoss ? player.stats.bossDmgMult : 1);
@@ -22086,42 +22107,102 @@ function draw() {
             ctx.stroke();
             ctx.restore();
         }
-        if(pd.selectedChar === 'quarterback') { 
-            const qbWidth = 58;
-            const qbHeight = 9;
-            const qbFill = Math.max(0, Math.min(1, player.qbBar / 1000));
-            ctx.fillStyle = '#111';
-            ctx.fillRect(player.x - qbWidth / 2, player.y - player.r - 18, qbWidth, qbHeight);
-            ctx.fillStyle = '#8e44ad';
-            ctx.fillRect(player.x - qbWidth / 2, player.y - player.r - 18, qbWidth * qbFill, qbHeight);
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 1;
-            ctx.strokeRect(player.x - qbWidth / 2, player.y - player.r - 18, qbWidth, qbHeight);
-            if (qbFill > 0) {
-                ctx.fillStyle = player.qbShield ? '#9b59b6' : 'rgba(255,255,255,0.2)';
-                ctx.fillRect(player.x - qbWidth / 2, player.y - player.r - 18, qbWidth * qbFill, qbHeight);
+        function drawRoundedBar(x, y, w, h, pct, fillStyle, strokeStyle, accentStyle, kind, active=false) {
+            const clamped = Math.max(0, Math.min(1, Number(pct) || 0));
+            const radius = h / 2;
+            ctx.save();
+            // sombra externa
+            ctx.shadowColor = 'rgba(0,0,0,0.42)';
+            ctx.shadowBlur = 7;
+            ctx.fillStyle = 'rgba(8,12,20,0.90)';
+            ctx.beginPath();
+            ctx.roundRect(x, y, w, h, radius);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = strokeStyle;
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.roundRect(x, y, w, h, radius);
+            ctx.stroke();
+            ctx.save();
+            ctx.beginPath();
+            ctx.roundRect(x + 1.5, y + 1.5, Math.max(0, (w - 3) * clamped), Math.max(0, h - 3), Math.max(2, radius - 1.5));
+            ctx.clip();
+            const g = ctx.createLinearGradient(x, y, x + w, y + h);
+            g.addColorStop(0, fillStyle);
+            g.addColorStop(1, accentStyle);
+            ctx.fillStyle = g;
+            ctx.fillRect(x + 1.5, y + 1.5, w - 3, h - 3);
+            ctx.fillStyle = 'rgba(255,255,255,0.14)';
+            ctx.fillRect(x + 2, y + 2, w - 4, Math.max(2, h * 0.28));
+            ctx.restore();
+            // ícone translúcido na ponta direita
+            const ix = x + w - 1;
+            const iy = y + h / 2;
+            ctx.globalAlpha = active ? 0.45 : 0.22;
+            ctx.strokeStyle = accentStyle;
+            ctx.fillStyle = fillStyle;
+            ctx.lineWidth = 1.7;
+            if (kind === 'football') {
+                ctx.save(); ctx.translate(ix + 8, iy); ctx.rotate(-0.12);
+                ctx.beginPath(); ctx.ellipse(0, 0, 10, 6.2, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                ctx.globalAlpha *= 0.9; ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.2;
+                ctx.beginPath(); ctx.moveTo(-3, -4); ctx.lineTo(3, 4); ctx.moveTo(-2, -2); ctx.lineTo(4, 2); ctx.stroke();
+                ctx.restore();
+            } else if (kind === 'gear') {
+                ctx.beginPath(); ctx.arc(ix + 8, iy, 7, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                for (let k=0;k<8;k++){ const a=k*Math.PI/4; ctx.save(); ctx.translate(ix+8,iy); ctx.rotate(a); ctx.fillRect(-1.3,-10,2.6,4); ctx.restore(); }
+                ctx.globalAlpha *= 0.9; ctx.fillStyle='rgba(8,12,20,0.5)'; ctx.beginPath(); ctx.arc(ix+8,iy,2.8,0,Math.PI*2); ctx.fill();
+            } else if (kind === 'star') {
+                ctx.beginPath();
+                for(let k=0;k<10;k++){ const a=-Math.PI/2+k*Math.PI/5; const rr=k%2===0?9:4; const sx=ix+8+Math.cos(a)*rr, sy=iy+Math.sin(a)*rr; if(k===0)ctx.moveTo(sx,sy);else ctx.lineTo(sx,sy); }
+                ctx.closePath(); ctx.fill(); ctx.stroke();
+            } else if (kind === 'thermo') {
+                ctx.beginPath(); ctx.arc(ix + 7, iy, 6.5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
             }
-            if (player.qbShield) {
-                ctx.strokeStyle = '#e056fd';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(player.x - qbWidth / 2 - 1, player.y - player.r - 19, qbWidth + 2, qbHeight + 2);
-            }
+            ctx.globalAlpha = 1;
+            ctx.restore();
+        }
+
+        function drawBlizzardThermometer(x, y, w, temp) {
+            const t = clampBlizzardTemperature(temp);
+            const pct = (20 - t) / 80;
+            const h = 11;
+            const ballR = 7;
+            const bodyX = x + 8;
+            const bodyW = w - 8;
+            const yMid = y + h / 2;
+            ctx.save();
+            ctx.shadowColor = 'rgba(0,0,0,0.45)'; ctx.shadowBlur = 7;
+            ctx.fillStyle = 'rgba(7,16,29,0.92)';
+            ctx.beginPath(); ctx.arc(x + 1, yMid, ballR + 2, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.roundRect(bodyX, y, bodyW, h, h/2); ctx.fill();
+            ctx.shadowBlur = 0;
+            const cold = t <= -60 ? '#12345a' : (t <= -40 ? '#2f75b5' : (t <= -20 ? '#bfe7ff' : (t <= 0 ? '#f4f7fa' : '#fff8d6')));
+            ctx.fillStyle = cold;
+            ctx.globalAlpha = 0.92;
+            ctx.beginPath(); ctx.roundRect(bodyX + 1.5, y + 1.5, Math.max(0, (bodyW - 3) * pct), h - 3, (h-3)/2); ctx.fill();
+            ctx.globalAlpha = 0.28;
+            ctx.fillStyle = '#ffffff'; ctx.fillRect(bodyX+2,y+2,Math.max(0,(bodyW-4)*pct),2);
+            ctx.globalAlpha = 0.72; ctx.strokeStyle = '#dceeff'; ctx.lineWidth=1.2;
+            ctx.beginPath(); ctx.arc(x + 1, yMid, ballR, 0, Math.PI*2); ctx.stroke();
+            ctx.beginPath(); ctx.roundRect(bodyX, y, bodyW, h, h/2); ctx.stroke();
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = t <= -60 ? '#fff' : '#0d2032';
+            ctx.font = '900 8px Roboto, Arial, sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+            ctx.fillText(`${Math.round(t)}°C`, bodyX + bodyW/2, yMid + 0.2);
+            ctx.restore();
+        }
+
+        if(pd.selectedChar === 'quarterback') {
+            const qbWidth = 62, qbHeight = 10;
+            const qbFill = Math.max(0, Math.min(1, Number(player.qbBar || 0) / 1000));
+            drawRoundedBar(player.x - qbWidth / 2, player.y - player.r - 20, qbWidth, qbHeight, qbFill, '#8e44ad', '#f1d8ff', '#e056fd', 'football', !!player.qbShield);
         }
         if(pd.selectedChar === 'sterling') {
-            const stWidth = 58;
-            const stHeight = 9;
+            const stWidth = 62, stHeight = 10;
             const stFill = Math.max(0, Math.min(1, Number(player.sterlingCharge || 0)));
-            ctx.fillStyle = '#111';
-            ctx.fillRect(player.x - stWidth / 2, player.y - player.r - 18, stWidth, stHeight);
-            ctx.fillStyle = '#f1c40f';
-            ctx.fillRect(player.x - stWidth / 2, player.y - player.r - 18, stWidth * stFill, stHeight);
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 1;
-            ctx.strokeRect(player.x - stWidth / 2, player.y - player.r - 18, stWidth, stHeight);
-            if (stFill > 0) {
-                ctx.fillStyle = 'rgba(255,255,255,0.18)';
-                ctx.fillRect(player.x - stWidth / 2, player.y - player.r - 18, stWidth * stFill, stHeight);
-            }
+            drawRoundedBar(player.x - stWidth / 2, player.y - player.r - 20, stWidth, stHeight, stFill, '#f1c40f', '#fff2a8', '#ffffff', 'star', !!player.sterlingCharging);
         }
         if(pd.selectedChar === 'rowan') {
             const rowanWidth = 58;
@@ -22141,22 +22222,11 @@ function draw() {
             }
         }
         if(pd.selectedChar === 'adam') {
-            const adamWidth = 58;
-            const adamHeight = 9;
+            const adamWidth = 62, adamHeight = 10;
             const adamFill = player.adamMechActive ? 1 : Math.max(0, Math.min(1, (Number(player.adamScrap) || 0) / 8));
-            ctx.fillStyle = '#111';
-            ctx.fillRect(player.x - adamWidth / 2, player.y - player.r - 18, adamWidth, adamHeight);
-            ctx.fillStyle = player.adamMechActive ? '#34ff7a' : '#95a5a6';
-            ctx.fillRect(player.x - adamWidth / 2, player.y - player.r - 18, adamWidth * adamFill, adamHeight);
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 1;
-            ctx.strokeRect(player.x - adamWidth / 2, player.y - player.r - 18, adamWidth, adamHeight);
-            if (player.adamMechActive) {
-                ctx.strokeStyle = '#34ff7a';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(player.x - adamWidth / 2 - 1, player.y - player.r - 19, adamWidth + 2, adamHeight + 2);
-            }
+            drawRoundedBar(player.x - adamWidth / 2, player.y - player.r - 20, adamWidth, adamHeight, adamFill, player.adamMechActive ? '#34ff7a' : '#95a5a6', '#e7edf2', player.adamMechActive ? '#7dffb0' : '#c8d0d8', 'gear', !!player.adamMechActive);
         }
+        if(pd.selectedChar === 'blizzard') { drawBlizzardThermometer(player.x - 31, player.y - player.r - 20, 70, player.blizzardTemperature); }
     }
     if(player.hp > 0 && player.invisTimer > 0 && !player.isDead) { ctx.globalAlpha = 0.3; drawShape(ctx, player.x, player.y, player.r, 'circle', player.color, false, getPlayerSpriteId()); ctx.globalAlpha = 1; }
 
