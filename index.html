@@ -545,7 +545,7 @@
     .ui-sprite-icon { width:50px; height:50px; object-fit:contain; display:block; }
     .tab-sprite-icon { width:34px; height:34px; object-fit:contain; display:block; }
     .inline-sprite-icon { width:22px; height:22px; object-fit:contain; vertical-align:middle; margin-right:4px; }
-    .patente-emblem-sprite { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; padding:3px; z-index:2; }
+    .patente-emblem-sprite { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; padding:0; z-index:2; display:block; }
 
     .hud-hp-fill { height: 100%; width: 100%; background: #2ecc71; transition: width 0.15s linear, background 0.15s linear; }
 
@@ -1103,7 +1103,32 @@
         letter-spacing: 0.02em;
         white-space: nowrap;
     }
-    .patente-chip--compact { padding: 5px 9px; font-size: 12px; }
+    .patente-chip--compact {
+        padding: 0;
+        width: 58px;
+        height: 58px;
+        font-size: 0;
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .patente-chip--compact .patente-emblem {
+        width: 58px;
+        height: 58px;
+        flex: 0 0 58px;
+        border-radius: 0;
+        background: transparent !important;
+        box-shadow: none !important;
+        overflow: visible;
+    }
+    .patente-chip--compact .patente-emblem::before,
+    .patente-chip--compact .patente-emblem::after {
+        display: none;
+    }
+    .patente-chip--compact > span:not(.patente-emblem) { display: none; }
     .patente-emblem {
         width: 30px;
         height: 30px;
@@ -1441,13 +1466,13 @@
     }
     .chip-emoji {
         font-size: 26px;
-        background: #111;
-        border: 2px solid #333;
+        background: transparent;
+        border: 2px solid transparent;
         border-radius: 4px;
         width: 44px; height: 44px;
         line-height: 40px;
         margin: 0 auto 5px auto;
-        box-shadow: inset 0 0 5px rgba(0,0,0,0.8);
+        box-shadow: none;
         position: relative;
         z-index: 1;
         display: flex;
@@ -4739,7 +4764,7 @@ const CHIPS_DATA = {
     proj: { id: 'proj', name: '+1 Projétil', iconHtml: '<img src=\"elements/more_bullets.png\" alt=\"\" aria-hidden=\"true\">', desc: 'Dispara um tiro extra', effect: (s) => s.extraProj += 1 },
     magnet: { id: 'magnet', name: 'Magnetismo', iconHtml: '<img src=\"elements/magnet.png\" alt=\"\" aria-hidden=\"true\">', desc: '+50% Raio de Coleta', effect: (s) => s.magnetMult += 0.5 },
     white_flag: { id: 'white_flag', name: 'Bandeira Branca', iconHtml: '<img src=\"elements/white_flag.png\" alt=\"\" aria-hidden=\"true\">', desc: '-10% de Inimigos', effect: (s) => s.enemySpawnMult = 0.9 },
-    boss_hunter: { id: 'boss_hunter', name: 'Caçador de Chefões', iconHtml: '<img src=\"elements/skulll.png\" alt=\"\" aria-hidden=\"true\">', desc: '+Dano em Chefes', effect: (s) => s.bossDmgMult = 1.5 },
+    boss_hunter: { id: 'boss_hunter', name: 'Caçador de Chefões', iconHtml: '<img src=\"elements/skull.png\" alt=\"\" aria-hidden=\"true\">', desc: '+Dano em Chefes', effect: (s) => s.bossDmgMult = 1.5 },
     crit_chip: { id: 'crit_chip', name: 'Crítico', iconHtml: '<img src=\"elements/critical_damage.png\" alt=\"\" aria-hidden=\"true\">', desc: '+10% Chance Crítico', effect: (s) => s.critChance += 0.1 },
     orbital: { id: 'orbital', name: '+1 Orbital', iconHtml: '<img src=\"elements/orbit.png\" alt=\"\" aria-hidden=\"true\">', desc: 'Orbital ao seu redor', effect: (s, p) => s.orbitals = (s.orbitals || 0) + 1 },
     freeze_touch: { id: 'freeze_touch', name: 'Toque Congelante', iconHtml: '<img src=\"elements/frost_toutch.png\" alt=\"\" aria-hidden=\"true\">', desc: '10% chance de congelar', effect: (s) => s.freezeChance += 0.1 },
@@ -4971,7 +4996,8 @@ function getPatenteBadge(level, compact = false) {
     const emblem = sprite
         ? `<span class="patente-emblem"><img class="patente-emblem-sprite" src="${sprite}" alt="${escapeHtmlText(patente.label)}"></span>`
         : `<span class="patente-emblem patente-${patente.slug}"></span>`;
-    return `<span class="patente-chip${compact ? ' patente-chip--compact' : ''}">${emblem}<span>${patente.label}</span></span>`;
+    if (compact) return `<span class="patente-chip patente-chip--compact">${emblem}</span>`;
+    return `<span class="patente-chip">${emblem}<span>${patente.label}</span></span>`;
 }
 
 function getCharByDisplayName(displayName) {
