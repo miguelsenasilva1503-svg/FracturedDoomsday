@@ -3224,6 +3224,14 @@
 .float-xp-icon { width: 22px; height: 22px; object-fit: contain; display:block; }
 </style>
 
+
+<style id="blizzard-thermometer-final">
+#blizzard-temp-container{display:none;position:absolute;top:118px;left:50%;transform:translateX(-50%);width:300px;height:24px;align-items:center;justify-content:center;padding:0 10px 0 28px;box-sizing:border-box;background:var(--blizzard-fill,#fff8d6);border:3px solid #182d42;border-radius:999px;z-index:5;box-shadow:0 4px 14px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.72);overflow:visible;transition:background .16s linear}
+#blizzard-temp-container::before{content:'';position:absolute;left:-2px;top:50%;width:24px;height:24px;transform:translateY(-50%);border-radius:50%;background:var(--blizzard-thermo,#fff8d6);border:3px solid #182d42;box-shadow:0 0 9px rgba(116,185,255,.42),inset 0 1px 2px rgba(255,255,255,.7);z-index:4}
+#blizzard-temp-container::after{content:'';position:absolute;inset:0;border-radius:inherit;border:1px solid rgba(255,255,255,.30);pointer-events:none;box-shadow:inset 0 -2px 5px rgba(0,0,0,.12)}
+#blizzard-temp-fill{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;border-radius:inherit;background:transparent!important;box-shadow:none!important;pointer-events:none;z-index:1}
+#blizzard-temp-value{position:relative;z-index:5;min-width:0;width:100%;margin:0;text-align:center;font-size:15px;line-height:1;font-weight:900;color:var(--blizzard-text,#111);text-shadow:0 1px 0 rgba(255,255,255,.35);pointer-events:none}
+</style>
 </head>
 <body>
 
@@ -14495,10 +14503,10 @@ if (!isBossAlive) {
         player.blizzardIdleTimer = moving ? 0 : (Number(player.blizzardIdleTimer) || 0) + dt;
         if (moving) {
             player.blizzardMoveTimer = (Number(player.blizzardMoveTimer) || 0) + dt;
-            // Depois de 5s de movimento contínuo, andar passa a resfriar Blizzard.
-            // Isso é independente da temperatura atual; não há mais aquecimento por movimento.
+            // Depois de 5s de movimento contínuo, andar passa a aquecer Blizzard.
+            // Isso é independente da temperatura atual.
             if (player.blizzardMoveTimer > 5) {
-                player.blizzardTemperature = clampBlizzardTemperature((Number(player.blizzardTemperature) || 20) - dt * 1.35);
+                player.blizzardTemperature = clampBlizzardTemperature((Number(player.blizzardTemperature) || 20) + dt * 1.35);
             }
         } else {
             player.blizzardMoveTimer = 0;
@@ -16254,9 +16262,8 @@ function getSeinSeinProtector(enemy) {
 
 function getEnemyDamageTakenMultiplier(enemy) {
     if (!enemy) return 1;
-    // Inimigos hipnotizados ficam temporariamente fora do combate do jogador:
-    // nenhum dano de fonte do jogador pode afetá-los enquanto o efeito durar.
-    if (isCurrentlyHypnotized(enemy)) return 0;
+    // Hipnotizados continuam vulneráveis a dano de fontes que não pertencem ao jogador.
+    // Fontes do jogador bloqueiam o alvo explicitamente em suas próprias rotinas de acerto.
     let mult = 1;
     if (Number(enemy.weakenTimer) > 0) mult *= 1.2;
     if (Number(enemy.curseTimer) > 0) mult *= 1.2;
@@ -16948,6 +16955,7 @@ function spawnEnemy() {
 
     let e = { x: ex, y: ey, type, hp: 0, maxHp: 0, speed: 0, baseDmg: 0, dmg: 0, size: 0, cd: 0, color: '', poison: { timer: 0, dmg: 0, tickCd: 0 }, slowTimer: 0, weakenTimer: 0, curseTimer: 0, burnTimer: 0, freezeTimer: 0, burnDmg: 0, speedBuffTimer: 0, soak: 0, shockTimer: 0, shockSemiTimer: 0, shockTick: 0, shockSemiTick: 0, shockDmg: 0, shockSemiDmg: 0, shockRate: 0.3, semiShockRate: 0.4, spawnBiome: window.currentMap, spawnWave, entryWave: spawnWave, stationary: false, poisonOnHit: 0, enemySkin: (window.currentMap === 4 && type === 'goblin') ? 'hunter' : null, fracturedOrigin: false, fractureMapId: null, skinSourceMapId: window.currentMap === 11 ? null : window.currentMap, pandaSummonTimer: 0, pandaSummoned: false, seinSein: false, seinAuraRadius: 115, samuraiAttackTimer: 0, samuraiAttackAngle: 0, samuraiAttackApplied: false, samuraiCd: 0, nunchakuAttackTimer: 0, nunchakuAttackAngle: 0, nunchakuAttackApplied: false, nunchakuCd: 0 };
     if (window.currentMap === 11) e.fracturedSkinType = getFracturedEnemySkinType(e);
+    if (type === 'ballon' && e.fracturedSkinType === 'metro_ballon') e.gangsterBalloon = true;
     
     if(type === 'basico') { e.hp = 30*mult; e.speed = 1.5; e.baseDmg = 5*mult; e.size = 12; e.color = '#e74c3c'; }
     if(type === 'velocista' || type === 'dancer') { e.hp = 15*mult; e.speed = 2.0; e.baseDmg = 3*mult; e.size = 10; e.color = '#f39c12'; } 
@@ -16978,7 +16986,7 @@ function spawnEnemy() {
     if(type === 'swamp_monster') { e.hp = 190*mult; e.speed = 0.82; e.baseDmg = 22*mult; e.size = 30; e.color = '#355f3a'; e.swampMonster = true; e.swampMonsterAttackCd = 0.9; }
     if(type === 'ice_statue') { e.hp = 150*mult; e.speed = 0; e.baseDmg = 8*mult; e.size = 22; e.color = '#b7d9e8'; e.stationary = true; e.snowEnemy = true; e.iceStatue = true; }
     if(type === 'deer_pilot') { e.hp = 28*mult; e.speed = 2.65; e.baseDmg = 7*mult; e.size = 11; e.color = '#dff7ff'; e.snowEnemy = true; e.deerPilot = true; }
-    if(type === 'ballon') { e.hp = 30*mult; e.speed = 1.5; e.baseDmg = 5*mult; e.size = 12; e.color = '#ff7675'; e.globalBalloon = true; e.breakIntoBasic = true; e.forceNormalOnDeath = true; }
+    if(type === 'ballon') { e.hp = 30*mult; e.speed = 1.5; e.baseDmg = 5*mult; e.size = 12; e.color = '#ff7675'; e.globalBalloon = true; e.breakIntoBasic = true; e.forceNormalOnDeath = true; e.gangsterBalloon = (window.currentMap === 6); }
     if(type === 'truck') { e.hp = 170*mult; e.speed = 0.55; e.baseDmg = 18*mult; e.size = 34; e.spriteSize = 28; e.color = '#576574'; e.globalTruck = true; e.mineImmune = true; e.truckDeathPending = false; e.truckExplosionTimer = 0; }
     if(type === 'worker') { e.hp = 38*mult; e.speed = 3.0; e.baseDmg = 14*mult; e.size = 13; e.color = '#d35400'; e.worker = true; }
     if(type === 'conehead') { e.hp = 85*mult; e.speed = 1.2; e.baseDmg = 8*mult; e.size = 16; e.color = '#e67e22'; e.conehead = true; e.isGlobalArmored = true; e.breakIntoBasic = false; }
@@ -17079,19 +17087,22 @@ function updateBlizzardTemperatureVisual() {
     const value = document.getElementById('blizzard-temp-value');
     if (!wrap || !fill || !value) return;
     const t = clampBlizzardTemperature(player.blizzardTemperature);
-    const pct = ((20 - t) / 80) * 100;
-    let thermo = '#fff8d6', fillColor = '#fff8d6';
-    if (t <= -60) { thermo = '#12345a'; fillColor = '#12345a'; }
-    else if (t <= -40) { thermo = '#2f75b5'; fillColor = '#2f75b5'; }
-    else if (t <= -20) { thermo = '#d9f2ff'; fillColor = '#bfe7ff'; }
-    else if (t <= 0) { thermo = '#f4f7fa'; fillColor = '#f4f7fa'; }
+    // A barra não representa progresso: ela fica sempre cheia e apenas muda de cor conforme a temperatura.
+    let thermo = '#fff8d6', fillColor = '#fff8d6', textColor = '#111';
+    if (t <= -60) { thermo = '#12345a'; fillColor = '#12345a'; textColor = '#fff'; }
+    else if (t <= -40) { thermo = '#2f75b5'; fillColor = '#2f75b5'; textColor = '#fff'; }
+    else if (t <= -20) { thermo = '#d9f2ff'; fillColor = '#d9f2ff'; textColor = '#17324d'; }
+    else if (t <= 0) { thermo = '#f4f7fa'; fillColor = '#f4f7fa'; textColor = '#111'; }
+    else if (t <= 10) { thermo = '#fffbe8'; fillColor = '#fffbe8'; textColor = '#111'; }
+    else { thermo = '#fff8d6'; fillColor = '#fff8d6'; textColor = '#111'; }
     wrap.style.setProperty('--blizzard-thermo', thermo);
     wrap.style.setProperty('--blizzard-fill', fillColor);
-    wrap.style.setProperty('--blizzard-text', t <= -60 ? '#ffffff' : '#111');
-    fill.style.width = `${Math.max(0, Math.min(100, pct)) * 0.78}%`;
+    wrap.style.setProperty('--blizzard-text', textColor);
+    fill.style.width = '100%';
     value.textContent = `${Math.round(t)}°C`;
     wrap.style.display = 'flex';
 }
+
 function getBlizzardAttackProfile() {
     const t = clampBlizzardTemperature(player?.blizzardTemperature ?? 20);
     if (t <= -60) return { tier:4, flakes:3, damageMult:2.05, slowChance:0.55, freezeChance:0.72, critChance:0.25, snowballChance:0.48 };
@@ -17422,7 +17433,19 @@ function updateEnemies(dt) {
         } else if (e.type === 'motorcycle') {
             const a=Math.atan2(targetY-e.y,targetX-e.x); nx += Math.cos(a)*currentSpeed*eSpeedMult*60*dt; ny += Math.sin(a)*currentSpeed*eSpeedMult*60*dt;
         } else if (e.type === 'conehead') {
-            const a=Math.atan2(targetY-e.y,targetX-e.x); nx += Math.cos(a)*currentSpeed*eSpeedMult*60*dt; ny += Math.sin(a)*currentSpeed*eSpeedMult*60*dt;
+            // Cabeça de Cone mantém sua proteção enquanto usa o comportamento de atirador.
+            // Ao perder a proteção, a rotina de morte abaixo transforma-o em Atirador normal.
+            e.cd = Math.max(0, (e.cd || 0) - 60 * dt);
+            if (e.cd <= 0 && player.invisTimer <= 0 && !isFrozen && !isHypnotized) {
+                const a = Math.atan2(targetY - e.y, targetX - e.x);
+                createProj(e.x, e.y, Math.cos(a) * 3, Math.sin(a) * 3, e.dmg, 60, false, 'enemy', {
+                    size: 6, sourceEnemyType: 'conehead'
+                });
+                e.cd = 100;
+            }
+            const a = Math.atan2(targetY-e.y, targetX-e.x);
+            nx += Math.cos(a)*currentSpeed*eSpeedMult*60*dt;
+            ny += Math.sin(a)*currentSpeed*eSpeedMult*60*dt;
         } else if (e.type === 'swordfish') {
             if (Number(e.swordfishPassCd || 0) > 0) e.swordfishPassCd = Math.max(0, e.swordfishPassCd - dt);
             const swordAngle = Math.atan2(targetY - e.y, targetX - e.x);
@@ -17894,7 +17917,7 @@ function updateEnemies(dt) {
                         spawnBiome: Number.isInteger(e.skinSourceMapId) ? e.skinSourceMapId : (e.type === 'deer_pilot' ? 2 : window.currentMap), spawnWave: e.entryWave || wave, entryWave: e.entryWave || wave,
                         skinSourceMapId: Number.isInteger(e.skinSourceMapId) ? e.skinSourceMapId : (e.type === 'deer_pilot' ? 2 : window.currentMap),
                         fracturedOrigin: !!e.fracturedOrigin, fractureMapId: Number.isInteger(e.fractureMapId) ? e.fractureMapId : null,
-                        skinOverride: (e.type === 'ballon' && Number.isInteger(e.skinSourceMapId) && e.skinSourceMapId === 6 && !e.fracturedOrigin) ? 'gangster' : null,
+                        skinOverride: (e.type === 'ballon' && e.gangsterBalloon) ? 'gangster' : null,
                         enemySkin: null, fracturedSkinType: null, resolvedFracturedSkinType: null, _skinTypeForEnemy: null
                     });
                 } else if (e.type === 'ice_statue') {
@@ -21113,7 +21136,7 @@ function spawnFractureEnemy(fracture, options = {}) {
     else if (type === 'ambulance') { e.speed=0.45; e.baseDmg=8*mult; e.size=34; e.spriteSize=28; e.color='#ecf0f1'; e.ambulance=true; e.ambulanceHealCd=5.5; e.ambulanceDeathPending=false; e.ambulanceExplosionTimer=0; e.mineImmune=true; }
     else if (type === 'police_car') { e.speed=0.62; e.baseDmg=16*mult; e.size=32; e.spriteSize=25; e.color='#2f3542'; e.policeCar=true; e.cd=90; e.policeCarDeathPending=false; e.policeCarExplosionTimer=0; e.mineImmune=true; }
     else if (type === 'motorcycle') { e.speed=3.0; e.baseDmg=12*mult; e.size=15; e.color='#34495e'; e.motorcycle=true; e.motorcycleArmor=true; }
-    else if (type === 'ballon') { e.speed=1.5; e.baseDmg=5*mult; e.size=12; e.color='#ff7675'; e.globalBalloon=true; e.breakIntoBasic=true; e.forceNormalOnDeath=false; }
+    else if (type === 'ballon') { e.speed=1.5; e.baseDmg=5*mult; e.size=12; e.color='#ff7675'; e.globalBalloon=true; e.breakIntoBasic=true; e.forceNormalOnDeath=false; e.gangsterBalloon = (e.fracturedSkinType === 'metro_ballon'); }
     else if (type === 'mummy') { e.speed=1.3; e.baseDmg=10*mult; e.size=13; e.color='#f5f6fa'; e.revives=1; }
     else if (type === 'explorer') { e.speed=1.4; e.baseDmg=6.5*mult; e.size=13; e.color='#b97735'; }
     else if (type === 'camel') { e.speed=0.9; e.baseDmg=12*mult; e.size=20; e.color='#c89f6a'; }
