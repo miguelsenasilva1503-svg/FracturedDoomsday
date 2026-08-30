@@ -10692,7 +10692,7 @@ function generateMapObstacles() {
             let kx = (Math.random()-0.5)*2800;
             let ky = (Math.random()-0.5)*2800;
             if(Math.abs(kx) < 120 && Math.abs(ky) < 120) kx += 220;
-            obstacles.push({ x: kx, y: ky, r: 34 + Math.random()*12, type: 'kelp' });
+            obstacles.push({ x: kx, y: ky, r: 34 + Math.random()*12, type: 'kelp', isWall: false });
         }
     }
 }
@@ -12544,22 +12544,20 @@ function fireWeapon(target) {
                 const cy = sy + Math.sin(angle) * step.dist;
                 createExplosion(cx, cy, step.radius * player.stats.rangeMult, Math.max(1, Math.round(finalDmg * step.mult)), step.color);
                 if (idx === 2) {
-                    const crackCount = 4;
-                    for (let i = 0; i < crackCount; i++) {
-                        const crackAngle = angle + (i - 1.5) * 0.16;
-                        const crackDist = 24 + i * 12;
-                        const px = cx + Math.cos(crackAngle) * crackDist;
-                        const py = cy + Math.sin(crackAngle) * crackDist;
-                        puddles.push({
-                            x: px,
-                            y: py,
-                            r: 26 + i * 2,
-                            life: 4.2,
-                            tick: 0,
-                            type: 'magma_crack',
-                            dmg: crackDmg
-                        });
-                    }
+                    // Uma única poça/rachadura de lava por explosão final.
+                    const crackAngle = angle;
+                    const crackDist = 34;
+                    const px = cx + Math.cos(crackAngle) * crackDist;
+                    const py = cy + Math.sin(crackAngle) * crackDist;
+                    puddles.push({
+                        x: px,
+                        y: py,
+                        r: 30,
+                        life: 4.2,
+                        tick: 0,
+                        type: 'magma_crack',
+                        dmg: crackDmg
+                    });
                 }
             });
             return;
@@ -18110,19 +18108,26 @@ function drawFractureDecorations(fracture) {
     const a = Number(fracture.angle) || 0;
     const ca = Math.cos(a), sa = Math.sin(a);
     for (const item of decor) {
-        if (!types.includes(item.type)) continue;
+        if (!item || !types.includes(item.type)) continue;
+        if (!Number.isFinite(item.x) || !Number.isFinite(item.y) || !Number.isFinite(item.size)) continue;
+        if (!isWorldVisible(item.x, item.y, Math.max(12, item.size))) continue;
         const dx = item.x - fracture.x;
         const dy = item.y - fracture.y;
         const localX = dx * ca + dy * sa;
         const localY = -dx * sa + dy * ca;
-        if (item.type === 'ice' || item.type === 'mud') {
-            drawFractureDecorPrimitive(item.type, localX, localY, item.size, item.seed);
-        } else {
-            drawMapElementSprite(ctx, getMapElementSpriteKey(item.type, item), localX, localY, item.size, {
-                rotate: item.rotate || 0,
-                flipX: !!item.flipX,
-                opacity: 0.92
-            });
+        try {
+            if (item.type === 'ice' || item.type === 'mud') {
+                drawFractureDecorPrimitive(item.type, localX, localY, item.size, item.seed);
+            } else {
+                const key = getMapElementSpriteKey(item.type, item);
+                if (key) drawMapElementSprite(ctx, key, localX, localY, item.size, {
+                    rotate: item.rotate || 0,
+                    flipX: !!item.flipX,
+                    opacity: 0.92
+                });
+            }
+        } catch (err) {
+            // Decoração inválida não pode derrubar a partida.
         }
     }
 }
@@ -18227,7 +18232,8 @@ function createFracture() {
     const decorations = [];
     const decorTypes = getFractureDecorTypes(mapId);
     if (decorTypes.length) {
-        const count = 3 + Math.floor(Math.random() * 4);
+        // Menos elementos decorativos por fratura para aliviar a renderização.
+        const count = 2 + Math.floor(Math.random() * 2);
         for (let i = 0; i < count; i++) {
             const type = decorTypes[Math.floor(Math.random() * decorTypes.length)];
             const localX = (Math.random() - 0.5) * length * 0.72;
@@ -18251,7 +18257,7 @@ function createFracture() {
         width,
         branch: 80 + Math.random() * 110,
         life: maxLife, maxLife,
-        spawnCount: 3 + Math.floor(Math.random() * 4),
+        spawnCount: 2 + Math.floor(Math.random() * 2),
         spawned: 0,
         spawnTimer: 0.8 + Math.random() * 0.9,
         decorations
@@ -18418,10 +18424,18 @@ function updateFractures(dt) {
     }
     for (let i = window.fractures.length - 1; i >= 0; i--) {
         const f = window.fractures[i];
+        if (!f || !Number.isFinite(f.x) || !Number.isFinite(f.y) || !Number.isFinite(f.life) || !Number.isFinite(f.spawnTimer)) {
+            window.fractures.splice(i, 1);
+            continue;
+        }
         f.life -= dt;
         f.spawnTimer -= dt;
         if (f.spawned < f.spawnCount && f.spawnTimer <= 0 && f.life > 3.2) {
-            if (spawnFractureEnemy(f)) f.spawned++;
+            try {
+                if (spawnFractureEnemy(f)) f.spawned++;
+            } catch (err) {
+                // Um spawn de fratura com erro não interrompe o game loop.
+            }
             f.spawnTimer = 1.7 + Math.random() * 1.0;
         }
         if (f.life <= 0 || (f.spawned >= f.spawnCount && f.life < 2.6)) window.fractures.splice(i, 1);
@@ -19929,9 +19943,15 @@ function draw() {
         }
         else if(p.type === 'grenade_barricade') {
             ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Number(p.extra?.wallAngle) || 0);
-            const w = 56, h = 26; ctx.fillStyle = '#3b4a5a'; ctx.strokeStyle = '#101820'; ctx.lineWidth = 3;
-            ctx.fillRect(-w/2, -h/2, w, h); ctx.strokeRect(-w/2, -h/2, w, h);
-            ctx.fillStyle = '#788897'; for (let k=-1;k<=1;k++) ctx.fillRect(-w/2+9+k*16,-h/2+5,10,6);
+            const w = 64, h = 34;
+            const img = window.__grenadeBarricadeImg || (window.__grenadeBarricadeImg = (() => { const im = new Image(); im.src = 'elements/barricade.png'; return im; })());
+            if (img.complete && img.naturalWidth) {
+                ctx.drawImage(img, -w / 2, -h / 2, w, h);
+            } else {
+                const fw = 56, fh = 26; ctx.fillStyle = '#3b4a5a'; ctx.strokeStyle = '#101820'; ctx.lineWidth = 3;
+                ctx.fillRect(-fw/2, -fh/2, fw, fh); ctx.strokeRect(-fw/2, -fh/2, fw, fh);
+                ctx.fillStyle = '#788897'; for (let k=-1;k<=1;k++) ctx.fillRect(-fw/2+9+k*16,-fh/2+5,10,6);
+            }
             ctx.restore();
         }
         else if(p.type === 'xilo_anvil') {
@@ -20895,7 +20915,7 @@ function updateMarineOxygen(dt) {
     }
 
     const uhc = !!pd.settings.ultraHardcore;
-    const drainPerSecond = uhc ? 1.50 : 0.90;
+    const drainPerSecond = uhc ? 0.75 : 0.45;
     const refillPerSecond = 10;
     if (nearKelp) {
         player.o2 = Math.min(player.o2Max, player.o2 + refillPerSecond * dt);
