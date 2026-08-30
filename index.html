@@ -2070,8 +2070,8 @@
         right: auto !important;
         bottom: 10px !important;
         width: 100% !important;
-        min-height: clamp(138px, 22vh, 250px);
-        max-height: min(36vh, 320px);
+        min-height: clamp(154px, 24vh, 270px);
+        max-height: min(40vh, 350px);
         margin: 0 !important;
         padding: 22px clamp(18px, 5vw, 72px) 20px clamp(190px, 24vw, 300px);
         display: flex;
@@ -2114,9 +2114,9 @@
     #overlay-tutorial-dialog .tutorial-dialog-hint { margin-top: 10px; }
     @media (max-width: 620px) {
         #overlay-tutorial-dialog .tutorial-dialog-box {
-            min-height: 132px;
-            max-height: min(40vh, 290px);
-            padding: 17px 14px 16px 145px;
+            min-height: 148px;
+            max-height: min(45vh, 325px);
+            padding: 18px 14px 20px 145px;
         }
         #overlay-tutorial-dialog .tutorial-dialog-sprite {
             left: 2px !important;
@@ -5083,9 +5083,17 @@ function getGachaRewardRenderData(rawText) {
     }
 
     const repeatedChar = text.match(/Repetido:\s*(.+?)\)?$/i);
-    const firstSpace = text.indexOf(' ');
-    const icon = firstSpace > 0 ? text.slice(0, firstSpace).trim() : '✨';
-    const rest = firstSpace > 0 ? text.slice(firstSpace + 1).trim() : text;
+    const leadingAmount = text.match(/^[+-]?\d+(?:[.,]\d+)?\s+/);
+    let icon = '';
+    let rest = text;
+    if (leadingAmount) {
+        // Recompensas simples vêm como '+50 Moedas', sem emoji separando ícone e valor.
+        rest = text;
+    } else {
+        const firstSpace = text.indexOf(' ');
+        icon = firstSpace > 0 ? text.slice(0, firstSpace).trim() : '';
+        rest = firstSpace > 0 ? text.slice(firstSpace + 1).trim() : text;
+    }
     const amountMatch = rest.match(/^[+-]?\d+(?:[.,]\d+)?/);
     const amount = amountMatch ? amountMatch[0] : '';
     let label = amount ? rest.slice(amount.length).trim() : rest;
@@ -5279,7 +5287,7 @@ document.addEventListener('visibilitychange', () => {
 window.addEventListener('blur', pauseMusicOnFocusLoss);
 window.addEventListener('focus', resumeMusicOnFocusGain);
 
-let pd = { coins: 500, gems: 50, evo: 40, sucatas: 0, nickname: null, tutorial: { stage: 'nickname', introShown: false, firstMatch: false, controlShown: false, levelupShown: false, finalShown: false, firstLossHandled: false, charsHandled: false, evolutionHandled: false, workshopSeen: false, workshopDialogShown: false, workshopFastyPending: false, sectionDialogs: { shop: false, pass: false, event: false, missions: false }, shopTabsSeen: [], dailyRewardTutorialSeen: false }, chars: { strike: { level: 1, slots: 2, chips: [null, null] } }, selectedChar: 'strike', passXp: 0, passLevel: 1, passClaimed: 0, passClaimedTiers: [], passRewardSeed: 0, passRewardCache: {}, passResetAt: 0, shopState: { lastRotation: 0, items: {} }, lastDaily: "", dailyWins: {date: "", count: 0}, vip: { activeUntil: 0, inventory: 0 }, hardcoreBans: { lastRotation: 0, chars: [] }, settings: { ...DEFAULT_SETTINGS }, trail: { target: null, fameLevel: 0 }, profile: { title: null, emblem: null }, events: { ruben: { claimed: false }, adam: { claimed: false } }, missMacaronLegacySeasonal: false, redeemedCodes: {}, missions: { date: '', list: [], weekly: { weekKey: '', mission: null }, rerolls: { date: '', used: 0 } }, passOverflowXp: 0, passOverflowBoxes: 0, chipsInventory: { hp: 1 }, chipCrafting: null, progressStats: { gamesStarted: 0, wins: 0, totalKills: 0, bossKills: 0, bestWave: 0 }, debug: { infiniteCoins: false, infiniteGems: false, infiniteEvo: false, infiniteScrap: false, unlockAllChars: false, infiniteChips: false, infiniteXp: false, infinitePassXp: false, allTitles: false, devUnlocked: false, devBaseState: null, mapRotationOverride: -1 } };
+let pd = { coins: 500, gems: 50, evo: 40, sucatas: 0, nickname: null, tutorial: { stage: 'nickname', introShown: false, firstMatch: false, controlShown: false, levelupShown: false, finalShown: false, firstLossHandled: false, charsHandled: false, evolutionHandled: false, chipHandled: false, workshopSeen: false, workshopDialogShown: false, workshopFastyPending: false, sectionDialogs: { shop: false, pass: false, event: false, missions: false }, shopTabsSeen: [], dailyRewardTutorialSeen: false }, chars: { strike: { level: 1, slots: 2, chips: [null, null] } }, selectedChar: 'strike', passXp: 0, passLevel: 1, passClaimed: 0, passClaimedTiers: [], passRewardSeed: 0, passRewardCache: {}, passResetAt: 0, shopState: { lastRotation: 0, items: {} }, lastDaily: "", dailyWins: {date: "", count: 0}, vip: { activeUntil: 0, inventory: 0 }, hardcoreBans: { lastRotation: 0, chars: [] }, settings: { ...DEFAULT_SETTINGS }, trail: { target: null, fameLevel: 0 }, profile: { title: null, emblem: null }, events: { ruben: { claimed: false }, adam: { claimed: false } }, missMacaronLegacySeasonal: false, redeemedCodes: {}, missions: { date: '', list: [], weekly: { weekKey: '', mission: null }, rerolls: { date: '', used: 0 } }, passOverflowXp: 0, passOverflowBoxes: 0, chipsInventory: { hp: 1 }, chipCrafting: null, progressStats: { gamesStarted: 0, wins: 0, totalKills: 0, bossKills: 0, bestWave: 0 }, debug: { infiniteCoins: false, infiniteGems: false, infiniteEvo: false, infiniteScrap: false, unlockAllChars: false, infiniteChips: false, infiniteXp: false, infinitePassXp: false, allTitles: false, devUnlocked: false, devBaseState: null, mapRotationOverride: -1 } };
 window.isHardcoreMode = false; window.lastGameOverWasLoss = false; window.gachaQueue = []; window.tempBoxData = null; window.currentMap = 0; window.currentDetailCharId = null; window.currentChipEquipSlot = null; window.debugInfiniteGems = false;
 
 const PD_TEMPLATE = JSON.parse(JSON.stringify(pd));
@@ -8756,6 +8764,7 @@ function finishFirstPowerupTutorial() {
     ], () => {
         pd.tutorial.stage = 'completed';
         save();
+        updatePauseQuitAvailability();
         isPaused = false;
         applyControlLayout();
         lastTime = performance.now();
@@ -8852,6 +8861,7 @@ function beginChipEquipTutorial() {
 function finishChipEquipTutorial() {
     if (!pd?.tutorial || pd.tutorial.stage !== 'force-chip-choice') return;
     hideTutorialPointer();
+    pd.tutorial.chipHandled = true;
     pd.tutorial.stage = 'completed';
     save();
     showTutorialDialog([
@@ -11555,8 +11565,8 @@ function rollLootBoxCharacterMedal(type) {
 }
 
 const LOOT_BOX_CHARACTER_RARITY_WEIGHTS = {
-    normal:    { seasonal: 2, common: 80, rare: 14, epic: 3, legendary: 0.8, mythic: 0.2 },
-    pacote:   { seasonal: 2, common: 80, rare: 14, epic: 3, legendary: 0.8, mythic: 0.2 },
+    normal:    { seasonal: 2, common: 75, rare: 19, epic: 3, legendary: 0.8, mythic: 0.2 },
+    pacote:   { seasonal: 2, common: 75, rare: 19, epic: 3, legendary: 0.8, mythic: 0.2 },
     metal:    { seasonal: 2, common: 40, rare: 30, epic: 17, legendary: 8, mythic: 3 },
     gold:     { seasonal: 2, common: 30, rare: 30, epic: 25, legendary: 10, mythic: 3 },
     chromium: { seasonal: 2, common: 20, rare: 28, epic: 28, legendary: 17, mythic: 5 }
@@ -11916,7 +11926,7 @@ function renderResolvedGachaItem(txt) {
     const title = data.title || 'Recompensa';
     const name = data.name || 'Recompensa';
     const amount = data.amount || '';
-    const resourceTypes = new Set(['coins','gems','evo','scrap','chip','medal']);
+    const resourceTypes = new Set(['coins','gems','evo','xp','scrap','chip','medal']);
     let visual = '';
     if (resourceTypes.has(data.resourceType)) {
         const sprite = resourceIcon(data.resourceType, 'gacha-item-resource-sprite');
@@ -13370,11 +13380,12 @@ function togglePauseView(view = 'menu') {
 function updatePauseQuitAvailability() {
     const quitBtn = document.getElementById('pause-quit-btn');
     if (!quitBtn) return;
-    const gamesStarted = Number(pd?.runStats?.gamesStarted) || 0;
-    const firstMatch = gamesStarted <= 1;
-    quitBtn.classList.toggle('hidden', firstMatch);
-    quitBtn.disabled = firstMatch;
-    quitBtn.title = firstMatch ? 'Sair da partida fica disponível a partir da segunda partida.' : '';
+    const gamesStarted = Number(pd?.progressStats?.gamesStarted) || 0;
+    const tutorialBasicsCompleted = !!(pd?.tutorial?.evolutionHandled && pd?.tutorial?.chipHandled);
+    const canQuit = tutorialBasicsCompleted || gamesStarted > 1;
+    quitBtn.classList.toggle('hidden', !canQuit);
+    quitBtn.disabled = !canQuit;
+    quitBtn.title = canQuit ? '' : 'Sair da partida fica disponível após concluir a evolução e equipar o primeiro chip.';
 }
 
 function togglePause() { 
@@ -13404,8 +13415,10 @@ function togglePause() {
     } 
 }
 function quitGame(isQuit) {
-    if (isQuit && (Number(pd?.runStats?.gamesStarted) || 0) <= 1) {
-        showAlert('Na primeira partida você precisa terminar a partida normalmente. A opção Sair ficará disponível a partir da segunda.');
+    const tutorialBasicsCompleted = !!(pd?.tutorial?.evolutionHandled && pd?.tutorial?.chipHandled);
+    const gamesStarted = Number(pd?.progressStats?.gamesStarted) || 0;
+    if (isQuit && !tutorialBasicsCompleted && gamesStarted <= 1) {
+        showAlert('Conclua a evolução e equipe o primeiro chip para liberar a opção Sair.');
         return;
     }
     const doQuit = () => {
@@ -23687,8 +23700,8 @@ setTimeout(() => maybeShowMapDestination(), 50);
 #overlay-tutorial-dialog .tutorial-dialog-box {
     left: 0 !important; right: 0 !important; bottom: 0 !important;
     width: 100% !important;
-    min-height: clamp(150px, 24vh, 250px) !important;
-    max-height: min(38vh, 320px) !important;
+    min-height: clamp(164px, 25vh, 275px) !important;
+    max-height: min(41vh, 350px) !important;
     padding-left: clamp(185px, 23vw, 310px) !important;
     padding-right: clamp(18px, 5vw, 70px) !important;
     transform: none !important;
