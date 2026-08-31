@@ -13399,7 +13399,17 @@ function getEnemyDamageTakenMultiplier(enemy) {
 }
 
 function createProj(x, y, vx, vy, dmg, life, isPlayer, type, extra={}) {
-    let size = extra.size || 4;
+    // Projéteis são criados por dezenas de fontes diferentes. Um único NaN/Infinity
+    // aqui pode contaminar o update inteiro e congelar a partida. Normalize tudo na entrada.
+    x = Number.isFinite(Number(x)) ? Number(x) : 0;
+    y = Number.isFinite(Number(y)) ? Number(y) : 0;
+    vx = Number.isFinite(Number(vx)) ? Number(vx) : 0;
+    vy = Number.isFinite(Number(vy)) ? Number(vy) : 0;
+    dmg = Number.isFinite(Number(dmg)) ? Math.max(0, Number(dmg)) : 0;
+    life = Number.isFinite(Number(life)) ? Math.max(0, Number(life)) : 1;
+    type = typeof type === 'string' && type ? type : 'normal';
+    extra = (extra && typeof extra === 'object') ? extra : {};
+    let size = Number.isFinite(Number(extra.size)) ? Math.max(0.1, Number(extra.size)) : 4;
     if (type === 'heavy' || type === 'tank') size = 8;
     else if (type === 'sniper') size = 3;
     else if (type === 'sword' || type === 'kayo_slash' || type === 'scythe' || type === 'shiv' || type === 'saw_throw' || type === 'shinobi' || type === 'shinobi_katana' || type === 'knighter_slash') size = 24;
@@ -13482,8 +13492,17 @@ function createProj(x, y, vx, vy, dmg, life, isPlayer, type, extra={}) {
     let bounces = sourceStats ? (sourceStats.bounce || 0) : 0;
     if(Number.isFinite(extra.bounces)) bounces = extra.bounces;
     if(type==='chess_piece' && extra.chessType === 'knight') bounces += 2;
-    const projectile = { x, y, vx, vy, dmg, life, isPlayer, size, type, pierce: Math.max(0, Math.floor(pierce || 0)), bounces, extra: { noHitFrames: 0, sourceChar: isPlayer ? (extra.sourceChar || pd.selectedChar) : extra.sourceChar, ...extra }, hitIds: new Set(), returnPhase: false, bounceCount: 0 };
+    const safeExtra = { noHitFrames: 0, sourceChar: isPlayer ? (extra.sourceChar || pd.selectedChar) : extra.sourceChar, ...extra };
+    const projectile = {
+        x, y, vx, vy, dmg, life, isPlayer: !!isPlayer, size, type,
+        pierce: Math.max(0, Math.floor(Number.isFinite(Number(pierce)) ? Number(pierce) : 0)),
+        bounces: Math.max(0, Math.floor(Number.isFinite(Number(bounces)) ? Number(bounces) : 0)),
+        extra: safeExtra, hitIds: new Set(), returnPhase: false, bounceCount: 0
+    };
     projectiles.push(projectile);
+    // Teto de segurança imediato: efeitos que criam vários projéteis não podem
+    // derrubar o frame inteiro por crescimento descontrolado.
+    if (projectiles.length > 500) projectiles.splice(0, projectiles.length - 500);
     return projectile;
 }
 
@@ -14272,6 +14291,7 @@ function updateEnemies(dt) {
         bucket.push(g);
     }
     for(let i = enemies.length - 1; i >= 0; i--) {
+        try {
         let e = enemies[i]; let d = dist(e, player);
         if (e.ambulanceDeathPending) { e.ambulanceExplosionTimer = Math.max(0,(e.ambulanceExplosionTimer||0)-dt); if(e.ambulanceExplosionTimer<=0){ createExplosion(e.x,e.y,95,0,'rgba(241,196,15,0.25)'); chargeRowanPurificationOnKill(e);blizzardCoolDownOnKill(e); enemies.splice(i,1); } continue; }
         if (e.policeCarDeathPending) { e.policeCarExplosionTimer = Math.max(0,(e.policeCarExplosionTimer||0)-dt); if(e.policeCarExplosionTimer<=0){ createExplosion(e.x,e.y,85,0,'rgba(231,76,60,0.35)'); chargeRowanPurificationOnKill(e);blizzardCoolDownOnKill(e); const sm=Math.max(0.25,(Number(e.maxHp)||155)/155); const mapId=Number.isInteger(e.fractureMapId)?e.fractureMapId:6; for(let k=0;k<3;k++){const a=Math.random()*Math.PI*2; enemies.push({x:e.x+Math.cos(a)*35,y:e.y+Math.sin(a)*35,type:'atirador',hp:20*sm,maxHp:20*sm,speed:1.2,baseDmg:8*sm,dmg:8*sm,size:14,cd:30,color:'#2980b9',poison:{timer:0,dmg:0,tickCd:0},slowTimer:0,weakenTimer:0,burnTimer:0,freezeTimer:0,burnDmg:0,spawnBiome:mapId,skinSourceMapId:mapId,fracturedOrigin:!!e.fracturedOrigin,fractureMapId:Number.isInteger(e.fractureMapId)?e.fractureMapId:null,enemySkin:null,fracturedSkinType:null,resolvedFracturedSkinType:null,_skinTypeForEnemy:null});} enemies.splice(i,1); } continue; }
@@ -14753,12 +14773,15 @@ function updateEnemies(dt) {
             }
             let a = Math.atan2(targetY - e.y, targetX - e.x); nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt; ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
         } else if((e.type === 'atirador' || e.type === 'elite' || e.type === 'elite_master') && attackTargetDistance < (e.type === 'atirador' ? 175 : (e.type === 'elite' ? 390 : 620)) && !isFrozen && !isHypnotized) {
-            e.cd -= 60 * dt; if(e.cd <= 0 && e.freezeTimer<=0) { 
-                let a = Math.atan2(targetY - e.y, targetX - e.x); 
-                let bSpd = e.type === 'elite_master' ? 7 : (e.type === 'elite' ? 5 : 3);
-                let pLife = e.type === 'elite_master' ? 90 : (e.type === 'elite' ? 80 : 60);
-                createProj(e.x, e.y, Math.cos(a)*bSpd, Math.sin(a)*bSpd, e.dmg, pLife, false, 'enemy', { hypnotized: isHypnotized, sourceEnemyType: e.type, targetEnemy: activeEnemyTarget || null }); 
-                e.cd = e.type === 'elite_master' ? 40 : (e.type === 'elite' ? 80 : 100); 
+            e.cd = Number.isFinite(Number(e.cd)) ? Number(e.cd) : 30;
+            e.cd -= 60 * dt;
+            if(e.cd <= 0 && e.freezeTimer<=0 && Number.isFinite(e.x) && Number.isFinite(e.y) && Number.isFinite(targetX) && Number.isFinite(targetY)) {
+                const a = Math.atan2(targetY - e.y, targetX - e.x);
+                const bSpd = e.type === 'elite_master' ? 7 : (e.type === 'elite' ? 5 : 3);
+                const pLife = e.type === 'elite_master' ? 90 : (e.type === 'elite' ? 80 : 60);
+                const shotDmg = Number.isFinite(Number(e.dmg)) ? Math.max(0, Number(e.dmg)) : 0;
+                createProj(e.x, e.y, Math.cos(a)*bSpd, Math.sin(a)*bSpd, shotDmg, pLife, false, 'enemy', { hypnotized: !!isHypnotized, sourceEnemyType: e.type, targetEnemy: activeEnemyTarget || null });
+                e.cd = e.type === 'elite_master' ? 40 : (e.type === 'elite' ? 80 : 100);
             }
         } else if(e.type === 'tanque' && attackTargetDistance < 200 && !isFrozen && !isHypnotized) {
             e.cd -= 60 * dt; if(e.cd <= 0 && e.freezeTimer<=0) { let a = Math.atan2(targetY - e.y, targetX - e.x); createProj(e.x, e.y, Math.cos(a)*2.5, Math.sin(a)*2.5, e.dmg*1.5, 70, false, 'heavy_enemy', { size: 18, hypnotized: isHypnotized, sourceEnemyType: e.type, targetEnemy: activeEnemyTarget || null }); e.cd = 150; }
@@ -15175,6 +15198,13 @@ function updateEnemies(dt) {
                 blizzardCoolDownOnKill(e);
                 createParticles(e.x, e.y, e.color); enemies.splice(i, 1);
             }
+        }
+        } catch (err) {
+            console.warn('Inimigo removido após erro de atualização:', err);
+            try {
+                if (Array.isArray(enemies) && enemies[i]) enemies.splice(i, 1);
+            } catch (_) {}
+            continue;
         }
     }
 }
@@ -15820,7 +15850,55 @@ function updateProjectiles(dt) {
     if (Array.isArray(projectiles)) projectiles = projectiles.filter(p => p && p.type !== 'bulb_bubble_legacy_removed' && p.type !== 'bulb_bubble_attached');
     updateBulbBubbles(dt);
     for(let i = projectiles.length - 1; i >= 0; i--) {
-        let p = projectiles[i]; p.life -= 60 * dt;
+        try {
+            let p = projectiles[i];
+            // Nunca permita que um projétil malformado interrompa todos os outros.
+            if (!p || typeof p !== 'object' || !Number.isFinite(p.x) || !Number.isFinite(p.y) || !Number.isFinite(p.vx) || !Number.isFinite(p.vy) || !Number.isFinite(p.life) || !Number.isFinite(p.dmg) || !Number.isFinite(p.size)) {
+                projectiles.splice(i, 1);
+                continue;
+            }
+            if (!p.extra || typeof p.extra !== 'object') p.extra = {};
+            if (!(p.hitIds instanceof Set)) p.hitIds = new Set();
+            p.life -= 60 * dt;
+
+            // Disparos inimigos genéricos precisam de um caminho simples e isolado.
+            // O bloco geral de projéteis contém muitos efeitos exclusivos do jogador;
+            // um erro em um desses efeitos não pode fazer o tiro comum do inimigo
+            // desaparecer antes de atingir o jogador.
+            if (!p.isPlayer && (p.type === 'enemy' || p.type === 'heavy_enemy')) {
+                p.x += p.vx * 60 * dt;
+                p.y += p.vy * 60 * dt;
+
+                if (Number.isFinite(p.x) && Number.isFinite(p.y) && player && player.hp > 0 && player.shieldTimer <= 0) {
+                    const hitRange = p.size + (Number(player.r) || 0);
+                    if (dist(p, player) < hitRange) {
+                        if (Math.random() > (player.stats?.dodgeChance || 0)) {
+                            const defMult = Math.max(0.1, (player.stats?.defMult || 1) - (player.stats?.dynamicDef || 0));
+                            const damage = Math.max(0, Number(p.dmg) || 0) * defMult;
+                            dealPlayerDamage(damage);
+                            addFloatingText(player.x, player.y, `-${Math.floor(damage)}`, '#e74c3c');
+                            if (p.type === 'heavy_enemy') {
+                                player.x += p.vx * 25;
+                                player.y += p.vy * 25;
+                                player.x = Math.max(-1480, Math.min(1480, player.x));
+                                player.y = Math.max(-1480, Math.min(1480, player.y));
+                            }
+                            if (player.hp <= 0) { triggerRevivePrompt(); return; }
+                        } else {
+                            addFloatingText(player.x, player.y, 'Esquiva!', '#3498db', 12);
+                        }
+                        projectiles.splice(i, 1);
+                        continue;
+                    }
+                }
+
+                if (p.life <= 0) {
+                    projectiles.splice(i, 1);
+                    continue;
+                }
+                continue;
+            }
+
         if (p.extra?.visualOnly) {
             if (p.life <= 0) projectiles.splice(i, 1);
             continue;
@@ -17224,6 +17302,13 @@ function updateProjectiles(dt) {
         }
         if(p.life <= 0 && (p.type === 'tornado' || p.type === 'magma_meteor' || p.type === 'big_grenade' || p.type === 'nucleon_shot')) { projectiles.splice(i, 1); continue; }
         else if(hit && p.type !== 'bomb' && p.type !== 'rocket' && p.type !== 'buster_rocket' && p.type !== 'chain_lightning' && p.type !== 'boomerang' && p.type !== 'tornado' && p.bounces <= 0 && p.type !== 'black_hole' && p.type !== 'big_grenade' && p.type !== 'nucleon_shot' && p.type !== 'microphone' && p.type !== 'yoyo' && p.pierce <= 0) projectiles.splice(i, 1);
+        } catch (err) {
+            // Falha isolada de um projétil não pode congelar a partida. Remova só
+            // a entidade problemática e siga processando as demais neste frame.
+            console.warn('Projétil removido após erro:', err);
+            projectiles.splice(i, 1);
+            continue;
+        }
     }
 }
 
@@ -19691,6 +19776,7 @@ function draw() {
     }
 
     projectiles.forEach(p => {
+        if (!p || typeof p !== 'object' || !Number.isFinite(p.x) || !Number.isFinite(p.y) || !Number.isFinite(p.vx) || !Number.isFinite(p.vy) || !Number.isFinite(p.size)) return;
         if (!isWorldVisible(p.x, p.y, p.size || p.r || 12)) return;
         const px = p.x;
         const py = p.y;
