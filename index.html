@@ -11011,9 +11011,33 @@ function triggerSpecial() {
 }
 
 let lastTime = 0;
+let runtimeErrorCount = 0;
+function recoverRuntimeState(err) {
+    runtimeErrorCount++;
+    console.error('Runtime protegido:', err);
+    // Remove somente entidades quebradas; não reinicia a partida nem perde o progresso.
+    if (Array.isArray(enemies)) enemies = enemies.filter(e => e && Number.isFinite(e.x) && Number.isFinite(e.y) && Number.isFinite(e.hp) && Number.isFinite(e.maxHp));
+    if (Array.isArray(projectiles)) projectiles = projectiles.filter(p => p && Number.isFinite(p.x) && Number.isFinite(p.y) && Number.isFinite(p.life));
+    if (Array.isArray(puddles) && puddles.length > 120) puddles.splice(0, puddles.length - 120);
+    if (Array.isArray(particles) && particles.length > 300) particles.splice(0, particles.length - 300);
+    if (Array.isArray(floatingTexts) && floatingTexts.length > 120) floatingTexts.splice(0, floatingTexts.length - 120);
+    if (runtimeErrorCount % 30 === 0) {
+        // Se algum estado externo corromper um frame repetidamente, o jogo continua
+        // em vez de entrar em um loop de erro consumindo CPU.
+        enemySpawnTimer = Math.max(Number.isFinite(enemySpawnTimer) ? enemySpawnTimer : 60, 60);
+    }
+}
 function loop(time) {
     if (hasConnectedGamepad() && isPlaying && !isPaused) { joyVec.x = gamepadMove.x; joyVec.y = gamepadMove.y; }
- if(!isPlaying) return; const dt = Math.min(0.05, Math.max(0, (time - lastTime) / 1000)); lastTime = time; try { if(!isPaused) { update(dt); draw(); } } catch (err) { console.error('Loop error:', err); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; } gameLoopId = requestAnimationFrame(loop); }
+    if(!isPlaying) return;
+    const dt = Math.min(0.05, Math.max(0, (time - lastTime) / 1000));
+    lastTime = time;
+    try { if(!isPaused) { update(dt); draw(); } } catch (err) {
+        recoverRuntimeState(err);
+        try { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; } catch (_) {}
+    }
+    gameLoopId = requestAnimationFrame(loop);
+}
 
 function triggerRevivePrompt() {
     // Bit possui exatamente 1 revive automático. Depois dele, a próxima morte
@@ -11888,9 +11912,44 @@ if (!isBossAlive) {
     let spawnRate = wave <= 3 ? baseSpawn : Math.max(minSpawn, baseSpawn - (wave - 3) * waveRed);
     spawnRate *= player.stats.enemySpawnMult;
     
-    if(enemySpawnTimer <= 0 && !isBossAlive && wave % 10 !== 0) { spawnEnemy(); enemySpawnTimer = spawnRate; }
+    if(enemySpawnTimer <= 0 && !isBossAlive && wave % 10 !== 0) {
+        const enemyCap = Math.min(180, 90 + Math.max(0, Number(wave) - 5) * 3);
+        if (enemies.length < enemyCap) spawnEnemy();
+        enemySpawnTimer = spawnRate;
+    }
+
+    // Sanitiza entidades antes dos loops pesados. Um único NaN/Infinity não
+    // pode contaminar o restante da partida.
+    if (Array.isArray(enemies)) {
+        for (let i = enemies.length - 1; i >= 0; i--) {
+            const e = enemies[i];
+            if (!e || !Number.isFinite(e.x) || !Number.isFinite(e.y) || !Number.isFinite(e.hp) || !Number.isFinite(e.maxHp)) enemies.splice(i, 1);
+        }
+    }
+    if (Array.isArray(projectiles)) {
+        for (let i = projectiles.length - 1; i >= 0; i--) {
+            const p = projectiles[i];
+            if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.y) || !Number.isFinite(p.life)) projectiles.splice(i, 1);
+        }
+        // Teto absoluto antes do loop de projéteis: evita uma cascata de
+        // ricochetes/explosões de consumir memória e CPU sem limite.
+        if (projectiles.length > 450) projectiles.splice(0, projectiles.length - 450);
+    }
+    if (Array.isArray(puddles) && puddles.length > 120) puddles.splice(0, puddles.length - 120);
+    if (Array.isArray(itemsMap) && itemsMap.length > 120) itemsMap.splice(0, itemsMap.length - 120);
 
     updateEnemies(dt);
+    // Spawns secundários (líder, gorila, carro, panda etc.) também passam pelo
+    // teto. Isso fecha a brecha que um único inimigo poderia usar para gerar
+    // uma cadeia infinita mesmo quando spawnEnemy() já estava limitado.
+    if (Array.isArray(enemies)) {
+        const enemyCapAfterUpdate = Math.min(180, 90 + Math.max(0, Number(wave) - 5) * 3);
+        if (enemies.length > enemyCapAfterUpdate) {
+            for (let i = enemies.length - 1; i >= 0 && enemies.length > enemyCapAfterUpdate; i--) {
+                if (!enemies[i]?.isBoss) enemies.splice(i, 1);
+            }
+        }
+    }
     updateAllies(dt); updateProjectiles(dt); updatePuddles(dt); updateGems(dt); updateParticles(dt); updateCaveVisionBursts(dt); updateMarineOxygen(dt); updateGameHud();
 }
 
@@ -13917,6 +13976,11 @@ function getSafeSpawnPoint(approxSize = 14, minPlayerDist = 220, attempts = 28) 
 }
 
 function spawnEnemy() {
+    // Limite de segurança contra runaway de entidades. O jogo é baseado em
+    // hordas, mas deixar centenas de inimigos ativos faz cada frame virar
+    // uma cadeia O(n²) de colisões, cura, separação e procura de alvos.
+    const enemyCap = Math.min(180, 90 + Math.max(0, Number(wave) - 5) * 3);
+    if (Array.isArray(enemies) && enemies.length >= enemyCap) return false;
     let spawn = getSafeSpawnPoint(24, 260);
     let ex = spawn.x; let ey = spawn.y;
     
@@ -14124,7 +14188,10 @@ function spawnEnemy() {
     if(type === 'leopard') { e.hp = 52*mult; e.speed = 1.6; e.baseDmg = 13*mult; e.size = 15; e.color = '#d4a017'; e.cd = 150; e.leopardHunter = true; }
     if(type === 'lumberjack') { e.hp = 150*mult; e.speed = 1.05; e.baseDmg = 24*mult; e.size = 20; e.color = '#795548'; e.cd = 150; e.lumberjack = true; }
 
-    e.dmg = e.baseDmg; e.maxHp = e.hp; enemies.push(e);
+    e.dmg = e.baseDmg; e.maxHp = e.hp;
+    if (!Array.isArray(enemies)) enemies = [];
+    enemies.push(e);
+    return e;
 }
 
 function isRowanFracturedEnemy(e) {
@@ -17241,7 +17308,13 @@ function updatePuddles(dt) {
 }
 
 function createExplosion(x, y, r, dmg, color='#e74c3c') {
-    if(!(pd.settings && pd.settings.noParticles)) particles.push({x, y, r:0, maxR:r, type:'expl', life: 1, color});
+    // Explosões são efeitos transitórios. Nunca deixe uma sequência de mortes
+    // (principalmente a partir da wave 5) acumular efeitos indefinidamente.
+    if(!(pd.settings && pd.settings.noParticles)) {
+        if (!Array.isArray(particles)) particles = [];
+        if (particles.length >= 300) particles.splice(0, Math.max(1, particles.length - 299));
+        particles.push({x, y, r:0, maxR:Number.isFinite(r) ? Math.max(0, r) : 0, type:'expl', life: 1, color});
+    }
     if (pd?.settings?.ultraHardcore && window.currentMap === 3 && Array.isArray(caveVisionBursts)) {
         caveVisionBursts.push({ x, y, r: Math.max(26, Number(r) || 0), life: Math.max(0.75, Math.min(2.2, 0.75 + (Number(r) || 0) / 120)) });
         if (caveVisionBursts.length > 24) caveVisionBursts.splice(0, caveVisionBursts.length - 24);
