@@ -138,6 +138,29 @@
 
 
 
+<style id="viciado-title-style">
+.title-viciado{
+    background:linear-gradient(105deg,#5b6570 0%,#f7f7f7 9%,#7d8792 18%,#ffffff 27%,#ff67c8 36%,#ffffff 45%,#6ed8ff 54%,#ffffff 63%,#a4abb4 72%,#ffffff 81%,#c78bff 90%,#6a7480 100%);
+    background-size:300% 100%;
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent !important;
+    -webkit-text-fill-color:transparent;
+    text-shadow:0 0 7px rgba(255,255,255,.38),0 0 15px rgba(124,215,255,.28);
+    animation:viciadoChromeShift 3.2s linear infinite;
+}
+@keyframes viciadoChromeShift{0%{background-position:0% 50%;}100%{background-position:300% 50%;}}
+.title-picker-viciado{
+    border-color:#d8dee6 !important;
+    background:linear-gradient(105deg,rgba(91,101,112,.42),rgba(255,255,255,.16),rgba(255,103,200,.18),rgba(110,216,255,.18),rgba(199,139,255,.18)) !important;
+    box-shadow:0 0 16px rgba(255,255,255,.16),inset 0 1px 0 rgba(255,255,255,.22) !important;
+}
+.title-picker-viciado.title-picker-current{box-shadow:0 0 0 1px rgba(255,255,255,.32),0 0 22px rgba(124,215,255,.25) !important;}
+.title-picker-current-text.title-viciado{font-size:1em;}
+#reward-code-input::placeholder{color:#8f99a6;opacity:1;}
+#reward-code-input:focus{border-color:rgba(241,196,15,.72) !important;box-shadow:0 0 0 3px rgba(241,196,15,.12);}
+</style>
+
 </head>
 <body>
 
@@ -236,7 +259,7 @@
             <div id="display-title" class="title-display hidden"></div>
             <button class="btn-play" onclick="showModeSelect()">Jogar</button>
             <div class="main-scoreboard">
-                <span class="label">Melhor Pontuação</span>
+                <span class="label">Melhor Wave</span>
                 <span class="value" id="display-best-score">0</span>
             </div>
         </div>
@@ -376,6 +399,21 @@
             <div class="settings-section-title">Jogabilidade</div>
             <div class="settings-grid">
                 <button class="btn-menu settings-option" onclick="toggleSetting('skipGacha')">Gacha Express: <br><span id="set-gacha" style="color:var(--btn-yellow)">Desativado</span></button>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <div class="settings-section-title">Recompensa</div>
+            <div class="settings-grid">
+                <div class="settings-card settings-card--wide">
+                    <div class="zoom-control">
+                        <div style="font-size:15px; font-weight:900; color:var(--btn-yellow); margin-bottom:7px;">Inserir código</div>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:stretch;">
+                            <input id="reward-code-input" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Digite aqui" aria-label="Código" style="flex:1 1 220px; min-width:0; padding:13px 14px; border-radius:12px; border:2px solid rgba(255,255,255,.16); background:rgba(0,0,0,.28); color:#fff; font-size:16px; font-weight:900; text-transform:uppercase; outline:none;" onkeydown="if(event.key === 'Enter') redeemRewardCode()">
+                            <button type="button" class="btn-action" style="flex:0 0 auto; margin:0; padding:12px 18px; font-size:15px;" onclick="redeemRewardCode()">Confirmar</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -4795,19 +4833,44 @@ function deactivateAdamMech() {
     player.weapon = 'adam';
 }
 
+const SPECIAL_TITLES = {
+    promo_viciado: 'Viciado'
+};
+const SPECIAL_TITLE_IDS = Object.keys(SPECIAL_TITLES);
+
+function isSpecialTitleUnlocked(titleId) {
+    if (titleId !== 'promo_viciado') return false;
+    return !!pd?.redeemedCodes?.BEST120;
+}
+
+function getTitleText(titleId) {
+    return CHARACTER_TITLES[titleId] || SPECIAL_TITLES[titleId] || '';
+}
+
+function applyTitleVisual(el, titleId) {
+    if (!el) return;
+    el.classList.toggle('title-viciado', titleId === 'promo_viciado');
+}
+
 function getTitleLabel(charId) {
-    return CHARACTER_TITLES[charId] || '';
+    return getTitleText(charId);
 }
 
 function getUnlockedTitles() {
     syncCharacterProgressState();
-    if (pd?.debug?.allTitles) return Object.keys(CHARACTER_TITLES);
-    return Object.keys(CHARACTER_TITLES).filter(id => (pd.chars?.[id]?.medals?.total || 0) >= CHARACTER_TITLE_THRESHOLD);
+    const unlocked = pd?.debug?.allTitles
+        ? Object.keys(CHARACTER_TITLES)
+        : Object.keys(CHARACTER_TITLES).filter(id => (pd.chars?.[id]?.medals?.total || 0) >= CHARACTER_TITLE_THRESHOLD);
+    for (const id of SPECIAL_TITLE_IDS) {
+        if (isSpecialTitleUnlocked(id) && !unlocked.includes(id)) unlocked.push(id);
+    }
+    return unlocked;
 }
 
 function getEquippedTitleText() {
     const titleId = pd?.profile?.title;
     if (!titleId) return '';
+    if (SPECIAL_TITLES[titleId]) return isSpecialTitleUnlocked(titleId) ? SPECIAL_TITLES[titleId] : '';
     if (!CHARACTER_TITLES[titleId]) return '';
     const ch = pd.chars?.[titleId];
     if (!pd?.debug?.allTitles && (!ch || !ch.medals || (ch.medals.total || 0) < CHARACTER_TITLE_THRESHOLD)) return '';
@@ -4818,6 +4881,8 @@ function updateTitleDisplay() {
     const el = document.getElementById('display-title');
     if (!el) return;
     const title = getEquippedTitleText();
+    const titleId = pd?.profile?.title || null;
+    applyTitleVisual(el, titleId);
     if (!title) {
         el.classList.add('hidden');
         el.innerHTML = '';
@@ -4833,7 +4898,9 @@ function renderTitlePicker() {
     if (!list || !current) return;
 
     const equipped = getEquippedTitleText();
-    current.innerHTML = equipped ? `Atual: <span style="color:var(--btn-yellow)">${escapeHtmlText(decodeHtmlEntities(equipped))}</span>` : 'Atual: <span style="color:#aaa">Nenhum</span>';
+    const equippedId = pd?.profile?.title || null;
+    const equippedClass = equippedId === 'promo_viciado' ? ' title-viciado' : '';
+    current.innerHTML = equipped ? `Atual: <span class="title-picker-current-text${equippedClass}">${escapeHtmlText(decodeHtmlEntities(equipped))}</span>` : 'Atual: <span style="color:#aaa">Nenhum</span>';
 
     const unlocked = getUnlockedTitles();
     list.innerHTML = '';
@@ -4855,8 +4922,11 @@ function renderTitlePicker() {
     unlocked.forEach(id => {
         const btn = document.createElement('button');
         const isCurrent = pd?.profile?.title === id;
-        btn.type = 'button'; btn.className = 'btn-menu title-picker-card' + (isCurrent ? ' title-picker-current' : '');
-        btn.textContent = CHARACTER_TITLES[id] || id;
+        btn.type = 'button'; btn.className = 'btn-menu title-picker-card' + (isCurrent ? ' title-picker-current' : '') + (id === 'promo_viciado' ? ' title-picker-viciado' : '');
+        btn.textContent = getTitleText(id) || id;
+        if (id === 'promo_viciado') {
+            btn.title = 'Título especial';
+        }
         btn.onclick = () => equipTitle(id);
         list.appendChild(btn);
     });
@@ -4906,7 +4976,9 @@ function makeAccountExportPayload() {
 
 function equipTitle(titleId) {
     syncCharacterProgressState();
-    if (titleId && (!CHARACTER_TITLES[titleId] || (pd.chars?.[titleId]?.medals?.total || 0) < CHARACTER_TITLE_THRESHOLD)) {
+    const specialUnlocked = titleId && SPECIAL_TITLES[titleId] && isSpecialTitleUnlocked(titleId);
+    const characterUnlocked = titleId && CHARACTER_TITLES[titleId] && (pd?.debug?.allTitles || ((pd.chars?.[titleId]?.medals?.total || 0) >= CHARACTER_TITLE_THRESHOLD));
+    if (titleId && !specialUnlocked && !characterUnlocked) {
         showAlert('Esse título ainda não foi desbloqueado.');
         return;
     }
@@ -4914,7 +4986,7 @@ function equipTitle(titleId) {
     save();
     updateNicknameDisplay();
     closeTitlePicker();
-    notify(titleId ? `Título equipado: ${CHARACTER_TITLES[titleId]}` : 'Título removido.');
+    notify(titleId ? `Título equipado: ${getTitleText(titleId)}` : 'Título removido.');
 }
 
 function bankRunMedals({ quit = false } = {}) {
@@ -5027,7 +5099,7 @@ function saveNickname() {
 function changeNickname() { const el = document.getElementById('nick-input'); if (el) { el.value = pd.nickname || ''; document.getElementById('overlay-nickname').classList.remove('hidden'); setTimeout(() => { try { el.focus(); el.select(); } catch (e) {} }, 0); } else { document.getElementById('overlay-nickname').classList.remove('hidden'); } }
 
 function getBestScoreValue() {
-    return 0;
+    return Math.max(0, Math.floor(Number(pd?.progressStats?.bestWave) || 0));
 }
 
 function updateBestScoreDisplay() {
@@ -5047,10 +5119,11 @@ function renderProfile() {
 
     const heroName = document.getElementById('profile-hero-name');
     if (heroName) heroName.textContent = nick;
+    const equippedTitleId = pd?.profile?.title || null;
     const heroTitle = document.getElementById('profile-hero-title');
-    if (heroTitle) heroTitle.textContent = equippedText ? equippedText : 'Sem título equipado';
+    if (heroTitle) { heroTitle.textContent = equippedText ? equippedText : 'Sem título equipado'; applyTitleVisual(heroTitle, equippedTitleId); }
     const currentTitle = document.getElementById('profile-current-title');
-    if (currentTitle) currentTitle.textContent = equippedText || 'Nenhum';
+    if (currentTitle) { currentTitle.textContent = equippedText || 'Nenhum'; applyTitleVisual(currentTitle, equippedTitleId); }
     const profileNick = document.getElementById('profile-nickname');
     if (profileNick) profileNick.textContent = nick;
     const profileScore = document.getElementById('profile-best-score');
@@ -5319,6 +5392,30 @@ function redeemRewardCode() {
     ensureRedeemedCodesState();
     const input = document.getElementById('reward-code-input');
     const code = String(input?.value || '').trim();
+    const normalizedCode = code.toUpperCase();
+
+    if (normalizedCode === 'BEST120') {
+        if (pd.redeemedCodes.BEST120) {
+            showAlert('Essa recompensa já foi resgatada nesta conta.');
+            return;
+        }
+        pd.redeemedCodes.BEST120 = true;
+        if (!pd.progressStats || typeof pd.progressStats !== 'object') {
+            pd.progressStats = { gamesStarted: 0, wins: 0, totalKills: 0, bossKills: 0, bestWave: 0 };
+        }
+        pd.progressStats.bestWave = Math.max(Number(pd.progressStats.bestWave) || 0, 120);
+        if (!pd.profile || typeof pd.profile !== 'object') pd.profile = { title: null, emblem: null };
+        pd.profile.title = 'promo_viciado';
+        save();
+        if (input) input.value = '';
+        updateNicknameDisplay();
+        renderProfile?.();
+        renderTitlePicker?.();
+        updateUI();
+        notify('Recompensa desbloqueada.');
+        return;
+    }
+
     if (code !== 'backupoverdog') {
         showAlert('Código de recompensa inválido.');
         return;
@@ -21152,57 +21249,68 @@ function gameOver(isQuit) {
     window.lastGameOverWasLoss = !isQuit;
     isPlaying = false; cancelAnimationFrame(gameLoopId); joyZone.style.display = 'none'; document.getElementById('btn-special').style.display = 'none';
 
+    const finalWave = Math.max(0, Math.floor(Number(wave) || 0));
     const medalsThisRun = Math.max(0, Math.floor(Number(pd.run?.medals) || 0));
 
     if (isQuit) bankRunMedals({ quit: true });
     else bankRunMedals({ quit: false });
 
-    let passXpGained = 0; let winText = "Vitória Diária: Cancelada (Quit)";
-    if(!isQuit) {
-        pd.progressStats.wins = (Number(pd.progressStats.wins) || 0) + 1;
-        if (window.isHardcoreMode)
-        if (pd.settings.ultraHardcore)
-        passXpGained = Math.floor(wave * (pd.settings.ultraHardcore ? 25 : (window.isHardcoreMode ? 20 : 10)) * player.stats.xpMult);
+    let passXpGained = 0;
+    let winText = isQuit ? 'Vitória Diária: Cancelada (Quit)' : 'Vitória Diária: Não ganha';
+
+    if (!isQuit) {
+        // Morte legítima conclui a run para fins de XP, melhor wave e vitória diária.
+        const xpPerWave = pd.settings.ultraHardcore ? 25 : (window.isHardcoreMode ? 20 : 10);
+        passXpGained = Math.floor(finalWave * xpPerWave * (Number(player?.stats?.xpMult) || 1));
         addPassXp(passXpGained);
 
         if (runChestCoins > 0) { pd.coins += runChestCoins; runCoins += runChestCoins; }
         if (runChestGems > 0) { pd.gems += runChestGems; runGems += runChestGems; }
         if (runChestScrap > 0) { pd.sucatas += runChestScrap; runScrap += runChestScrap; }
 
-        let today = new Date().toDateString();
-        if(pd.dailyWins.date !== today) { pd.dailyWins.date = today; pd.dailyWins.count = 0; }
+        // Mantém o contador diário real e exibe o resultado no Game Over.
+        const today = new Date().toDateString();
+        if (!pd.dailyWins || typeof pd.dailyWins !== 'object') pd.dailyWins = { date: '', count: 0 };
+        if (pd.dailyWins.date !== today) { pd.dailyWins.date = today; pd.dailyWins.count = 0; }
         const maxWins = 6;
-        if(pd.dailyWins.count < maxWins) {
-            pd.dailyWins.count++; winText = `Vitória Diária: Recompensas Adquiridas (${pd.dailyWins.count}/${maxWins})`;
+        if (pd.dailyWins.count < maxWins) {
+            pd.dailyWins.count++;
+            winText = `Vitória Diária: Recompensas Adquiridas (${pd.dailyWins.count}/${maxWins})`;
 
-            let q = [];
-            let cNorm = []; for(let i=0; i<3; i++) cNorm.push(buildBoxDropItem('normal'));
-            q.push({ type: 'box', boxType: 'normal', contents: cNorm });
-            let cPac = []; cPac.push(buildBoxDropItem('pacote'));
-            q.push({ type: 'box', boxType: 'pacote', contents: cPac });
-            if(isVIPActive() && Math.random() < 0.1) {
-                let cMetal = []; for(let i=0; i<6; i++) cMetal.push(buildBoxDropItem('metal'));
-                q.push({ type: 'box', boxType: 'metal', contents: cMetal });
-            }
+            const q = [];
+            // Vitória diária: exatamente 1 Caixa Normal + 1 Pacote.
+            // A Caixa de Metal tem uma chance independente de 10%, para qualquer jogador.
+            const normalContents = [];
+            for (let j = 0; j < boxPulls('normal'); j++) normalContents.push(buildBoxDropItem('normal'));
+            q.push({ type: 'box', boxType: 'normal', contents: normalContents });
+            q.push({ type: 'box', boxType: 'pacote', contents: [buildBoxDropItem('pacote')] });
+            if (Math.random() < 0.10) q.push(buildBoxQueue('metal'));
             for (const bossBoxType of (runBossBoxDrops.splice(0) || [])) q.push(buildBoxQueue(bossBoxType));
-            startGachaQueue(q);
-        } else { winText = `Vitória Diária: Limite Atingido (${maxWins}/${maxWins})`; const q = (runBossBoxDrops.splice(0) || []).map(buildBoxQueue); if (q.length) startGachaQueue(q); }
-    }
-    if (!isQuit) {
-        pd.missions.coins += runCoins || 0;
-        pd.progressStats.bestWave = Math.max(Number(pd.progressStats.bestWave) || 0, Math.max(0, wave));
+            if (q.length) startGachaQueue(q);
+        } else {
+            winText = `Vitória Diária: Limite Atingido (${maxWins}/${maxWins})`;
+            const q = (runBossBoxDrops.splice(0) || []).map(buildBoxQueue);
+            if (q.length) startGachaQueue(q);
+        }
     } else {
-        // Quitar invalida tudo que depende da conclusão da partida:
-        // medalhas da run, melhor wave e recursos vindos de baús.
+        // Sair voluntariamente invalida o progresso da run.
         runMedals = 0;
         runChestCoins = 0;
         runChestGems = 0;
         runChestScrap = 0;
     }
+
+    if (!isQuit) {
+        pd.missions.coins += runCoins || 0;
+        const accountBestWave = Math.max(0, Math.floor(Number(pd.progressStats?.bestWave) || 0));
+        // Uma run só pode melhorar o recorde; uma morte em wave menor jamais o reduz/substitui.
+        if (finalWave > accountBestWave) pd.progressStats.bestWave = finalWave;
+        else pd.progressStats.bestWave = accountBestWave;
+    }
     restoreGlitchSelectionIfNeeded();
     save();
 
-    document.getElementById('go-wave').innerHTML = `Waves Sobrevividas: ${wave}`; 
+    document.getElementById('go-wave').innerHTML = `Waves Sobrevividas: ${finalWave}`; 
     document.getElementById('go-xp').innerHTML = `<img class="resource-icon" src="elements/xp.png" alt=""> XP do Passe Ganho: ${passXpGained}`; 
     document.getElementById('go-coins').innerHTML = `<img class="resource-icon" src="elements/coin.png" alt=""> Moedas obtidas: <strong>${runCoins || 0}</strong>`;
     document.getElementById('go-gems').innerHTML = `<img class="resource-icon" src="elements/gems.png" alt=""> Gemas obtidas: <strong>${runGems || 0}</strong>`;
@@ -21212,6 +21320,7 @@ function gameOver(isQuit) {
     document.getElementById('overlay-gameover').classList.remove('hidden'); document.getElementById('game-hud').classList.add('hidden'); document.getElementById('exp-bar-container').classList.add('hidden');
     // O tutorial da primeira derrota começa somente depois de o jogador sair da tela de game over.
 }
+
 
 let runCoins = 0; let runGems = 0; let runScrap = 0; let runMedals = 0; let runChestCoins = 0; let runChestGems = 0; let runChestScrap = 0; let runBossBoxDrops = [];
 function returnToMenu() {
