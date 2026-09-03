@@ -1210,16 +1210,6 @@ Especialista em armamento pesado, Buster dispara foguetes devastadores que trans
 Um engenheiro excêntrico especializado em ferramentas perigosamente afiadas. Mr. Saw transforma o campo de batalha em uma oficina mortal, espalhando serras por todos os lados enquanto procura a próxima vítima azarada. Seus inimigos aprendem rapidamente que olhar para onde pisam é uma excelente ideia.
 
 “Cuidado com os dedos.”` },
-    rowan: { id: 'rowan', class: 'Tiro preciso', name: 'Rowan', rarity: 'epic', cost: 149, hp: 105, speed: 3.4, dmg: 15, fireRate: 68, range: 280, color: '#ff4fa3', weapon: 'rowan_shard', desc: `“Rowan não aceita perder sua melhor amiga para as Fraturas. Se existe uma maneira de trazê-la de volta, ele vai encontrá-la.”
-
-Um jovem determinado e leal que desenvolveu uma pistola laser especial capaz de purificar a contaminação das Fraturas. Depois que Nyla foi enganada por Echo e acabou contaminada, Rowan passou a usar sua arma não apenas para lutar, mas principalmente para tentar salvá-la. Ele acredita que, por trás da corrupção das Fraturas, sua melhor amiga ainda está lá — e fará o que for preciso para trazê-la de volta.
-
-“Você ainda está aí dentro. Eu sei que está.”` },
-    nyla: { id: 'nyla', class: 'Controle', name: 'Nyla', rarity: 'legendary', cost: 349, hp: 108, speed: 3.4, dmg: 19, fireRate: 68, range: 285, color: '#c56cf0', weapon: 'nyla_shard', desc: `“Echo prometeu realizar seu maior desejo. Ela só não sabia que o preço seria se tornar parte das Fraturas.”
-
-Uma mulher determinada que caiu em uma emboscada de Echo e acabou contaminada pelas Fraturas. Agora, Nyla carrega esse poder dentro de si, deixando sua aparência e comportamento cada vez mais marcados pela influência delas. Rowan, seu melhor amigo, se recusa a abandoná-la e tenta fazê-la perceber que seguir Echo não é realmente o que ela deseja.
-
-“Rowan... por que você ainda está tentando me salvar?”` },
     quarterback: { id: 'quarterback', class: 'Tanque', name: 'Quarterback', rarity: 'legendary', cost: 349, hp: 150, speed: 3.5, dmg: 20, fireRate: 70, range: 200, color: '#c0392b', weapon: 'quarterback', desc: `“Quarterback entrou na batalha achando que isso era uma final de campeonato. Honestamente, ninguém teve coragem de corrigir ele.”
 
 Um verdadeiro tanque humano equipado com proteção pesada e força brutal. Quarterback domina o combate de perto, avançando sem medo enquanto atropela qualquer inimigo azarado o suficiente pra ficar no caminho. Derrubar ele é difícil. Parar ele é pior ainda.
@@ -1446,12 +1436,6 @@ ESPECIAL: sua última explosão cria rachaduras de magma, inimigos que pisam nel
     yuuto: `Yuuto: dispara um coração que tem 15% de chance de PERFURAR e 25% de chance de HIPNOTIZAR inimigos.
 
 ESPECIAL: HIPNOTIZAR faz o inimigo atacar somente inimigos não hipnotizados por 10s (não funciona em colossos, bosses e mega bosses); enquanto estiver hipnotizado, ataques dos personagens não podem escolhê-lo nem causar dano nele.`,
-    rowan: `Rowan: dispara 3 projéteis dispersados.
-
-ESPECIAL: cada vez que derrota inimigos, sua barra de PURIFICAÇÃO enche. Quando está totalmente cheia, seu próximo ataque causa PURIFICAÇÃO nos inimigos atingidos.`,
-    nyla: `Nyla: dispara 3 estilhaços retos que se dispersam em menores, com 15% de chance de ENVENENAR.
-
-ESPECIAL: a cada fim de wave, invoca uma mini fratura que invoca de 1 a 2 inimigos aleatórios HIPNOTIZADOS permanentemente.`,
     blizzard: `Blizzard: dispara flocos de neve que podem LERDAR inimigos. Quanto mais baixa sua temperatura, mais fortes ficam seus ataques.
 
 20°C: dispara 1 floco de neve.
@@ -2731,7 +2715,6 @@ const SUMMARY_NOTES = {
     "HIPNOTIZAR": { color: "#ff6bb5", title: "HIPNOTIZAR", msg: "Quer dizer que o inimigo fica sob controle por 10s e passa a atacar somente inimigos não hipnotizados. Enquanto estiver hipnotizado, ataques dos personagens não podem escolhê-lo nem causar dano nele." },
     "HIPNOTIZADO": { color: "#ff6bb5", title: "HIPNOTIZAR", msg: "Quer dizer que o inimigo fica sob controle por 10s e passa a atacar somente inimigos não hipnotizados. Enquanto estiver hipnotizado, ataques dos personagens não podem escolhê-lo nem causar dano nele." },
     "HIPNOTIZADOS": { color: "#ff6bb5", title: "HIPNOTIZAR", msg: "Quer dizer que o inimigo fica sob controle por 10s e passa a atacar somente inimigos não hipnotizados. Enquanto estiver hipnotizado, ataques dos personagens não podem escolhê-lo nem causar dano nele." },
-    "PURIFICAÇÃO": { color: "#ff4fa3", title: "PURIFICAÇÃO", msg: "Quando a barra de Purificação de Rowan está cheia, seu próximo ataque pode purificar um inimigo Fraturado atingido, removendo a contaminação e eliminando-o instantaneamente. Não funciona em inimigos que não sejam Fraturados nem nos alvos resistentes à Purificação." },
     "BEBETIZAR": { color: "#8fe8d1", title: "BEBETIZAR", msg: "O ataque de Merlin reduz o tamanho de um inimigo elegível, deixa-o imóvel, reduz sua vida para até 15% da vida máxima e troca sua aparência pelo sprite de bebê. Não funciona em bosses, mega bosses e colossos." },
     "BEBETIZADO": { color: "#8fe8d1", title: "BEBETIZADO", msg: "É o estado aplicado por Merlin: o inimigo fica imóvel, com hitbox menor, pouca vida e com o mesmo sprite de bebê padronizado visualmente entre todos os inimigos." },
     "QUEIMAR": { color: "#e67e22", title: "QUEIMAR", msg: "Quer dizer que o inimigo passa a tomar dano com o tempo." },
@@ -3085,8 +3068,6 @@ const CHARACTER_TITLES = {
     mr_perfurant: 'Honra da Katana',
     buster: 'Foguetão',
     mrsaw: 'Segurança no trabalho',
-    rowan: 'Purificação',
-    nyla: 'Estilhaço',
     blizzard: 'Nevasca',
     quarterback: 'Toutchdown',
     seae: 'Na onda da maré',
@@ -3146,8 +3127,6 @@ const CHARACTER_SPRITES = {
     vovo_cookie: 'sprites/gma_cookie.png',
     joseph: 'sprites/joseph.png',
     kael: 'sprites/kael.png',
-    rowan: 'sprites/rowan.png',
-    nyla: 'sprites/nyla.png',
     blizzard: 'sprites/blizzard.png',
     quarterback: 'sprites/quarterback.png',
     pipi: 'sprites/pipi.png',
@@ -10669,7 +10648,7 @@ function startRunAfterShop() {
         x: 0, y: 0, r: (pd.selectedChar === 'hank' || pd.selectedChar === 'yeti' || pd.selectedChar === 'glace') ? 20 : ((pd.selectedChar === 'shiv' || pd.selectedChar === 'zippi') ? 10 : ((pd.selectedChar === 'kaisen' || pd.selectedChar === 'booboo' || pd.selectedChar === 'yoyo') ? 13 : (pd.selectedChar === 'eel' ? 15 : 15))), baseHp: initialBaseHp, hp: initialBaseHp, baseSpeed: charDef.speed, baseDmg: initialBaseDmg,
         baseFireRate: charDef.fireRate, baseRange: charDef.range, color: charDef.color, weapon: charDef.weapon, merlinAge: pd.selectedChar === 'merlin' ? 'old' : null, merlinBaseHp: pd.selectedChar === 'merlin' ? initialBaseHp : null, merlinPoisonChance: 0.15, merlinBabyChance: 0.15, merlinPacifierChance: 0, merlinAgeCooldown: 0, cyroPyroMode: pd.selectedChar === 'cyro_pyro' ? getCyroPyroMode() : null, gladiatorMode: pd.selectedChar === 'gladiator' ? (pd.chars?.gladiator?.mode || 'shooter') : null, gladiatorModeCooldown: 0, eolioPropellerSeq: 0, cd: 0, shieldTimer: 0,
         zombieTimer: 0, revived: false, elekCycle: false, dashTimer: 0, meleeCd: 0, boldShots: 0, boldReload: 0, boldAbilityTimer: 0, specCd: pd.selectedChar === 'ghoul' ? 20 : 0, commonAbilityCd: 0, hunterAbilityCd: 0, fastyAbilityTimer: 0, kayoChairReady: false, invisTimer: 0, ghoulPendingCd: 0, ninjiPendingCd: 0,
-        lastMoveAngle: 0, lastAimAngle: 0, sharkieAttackTimer: 0, sharkieDiveTimer: 0, sharkieDiveCooldown: 0, josephOllieCd: 0, josephOllieTimer: 0, josephOllieAngle: 0, josephOlliePendingCd: 0, josephOllieDetonate: false, sharkieAimAngle: 0, sharkieReverseAngle: 0, sharkieReverseX: 0, sharkieReverseY: 0, tenentCycle: 0, stormyCycle: 0, bulbMode: pd.selectedChar === 'bulb' ? Math.floor(Math.random() * 3) : null, bulbGasActiveUntil: 0, bulbGasCooldownUntil: 0, bulbGasAngle: 0, orbitalAngle: 0, popeyeSpinTimer: 0, popeyeSpinCooldown: 30, popeyeSpinUsed: true, popeyeSpinEndingFx: 0, shellTorpedoTimer: 0, shellTorpedoCooldown: pd.selectedChar === 'shell' ? 20 : 0, shellTorpedoTarget: null, shellTorpedoHitCd: 0, shellTorpedoDamageTick: 0, shellTorpedoWasActive: false, shellTorpedoExitTracked: false, grappleCooldown: 0, grappleCharging: false, grappleCharge: 0, grappleHookTimer: 0, grappleHookDuration: 0.28, grappleHookStartX: 0, grappleHookStartY: 0, grappleHookX: 0, grappleHookY: 0, grappleHookTargetX: 0, grappleHookTargetY: 0, grappleHookAngle: 0, grappleHookHitEnemy: null, grappleHookDamageApplied: false, grappleAttackTimer: 0, grappleAttackAngle: 0, boobooReturn: true, yoyoReady: true, yoyoOrbitActive: true, yoyoOrbitAngle: 0, yoyoOrbitTickCd: 0, pickedCards: [], revivesUsed: 0, qbBar: 0, qbShield: false, rowanPurificationBar: 0, rowanPurificationReady: false, nylaMiniFractureCount: 0, blizzardTemperature: 20, blizzardMoveTimer: 0, blizzardTier: 0, blizzardStormTick: 0, isDead: false, flexCombo: 0, flexReload: 0, ninjiDashCd: 0, shinobiDragonActive: false, shinobiDragonWavesLeft: 0, shinobiDragonCooldown: pd.selectedChar === 'shinobi' ? 20 : 0, shinobiDragonFireCd: 0, shinobiScytheCycle: 0, sterlingCharging: false, sterlingCharge: 0, sterlingAttackCd: 0, majorBriggsKills: 0, majorBriggsStage: 1,
+        lastMoveAngle: 0, lastAimAngle: 0, sharkieAttackTimer: 0, sharkieDiveTimer: 0, sharkieDiveCooldown: 0, josephOllieCd: 0, josephOllieTimer: 0, josephOllieAngle: 0, josephOlliePendingCd: 0, josephOllieDetonate: false, sharkieAimAngle: 0, sharkieReverseAngle: 0, sharkieReverseX: 0, sharkieReverseY: 0, tenentCycle: 0, stormyCycle: 0, bulbMode: pd.selectedChar === 'bulb' ? Math.floor(Math.random() * 3) : null, bulbGasActiveUntil: 0, bulbGasCooldownUntil: 0, bulbGasAngle: 0, orbitalAngle: 0, popeyeSpinTimer: 0, popeyeSpinCooldown: 30, popeyeSpinUsed: true, popeyeSpinEndingFx: 0, shellTorpedoTimer: 0, shellTorpedoCooldown: pd.selectedChar === 'shell' ? 20 : 0, shellTorpedoTarget: null, shellTorpedoHitCd: 0, shellTorpedoDamageTick: 0, shellTorpedoWasActive: false, shellTorpedoExitTracked: false, grappleCooldown: 0, grappleCharging: false, grappleCharge: 0, grappleHookTimer: 0, grappleHookDuration: 0.28, grappleHookStartX: 0, grappleHookStartY: 0, grappleHookX: 0, grappleHookY: 0, grappleHookTargetX: 0, grappleHookTargetY: 0, grappleHookAngle: 0, grappleHookHitEnemy: null, grappleHookDamageApplied: false, grappleAttackTimer: 0, grappleAttackAngle: 0, boobooReturn: true, yoyoReady: true, yoyoOrbitActive: true, yoyoOrbitAngle: 0, yoyoOrbitTickCd: 0, pickedCards: [], revivesUsed: 0, qbBar: 0, qbShield: false, blizzardTemperature: 20, blizzardMoveTimer: 0, blizzardTier: 0, blizzardStormTick: 0, isDead: false, flexCombo: 0, flexReload: 0, ninjiDashCd: 0, shinobiDragonActive: false, shinobiDragonWavesLeft: 0, shinobiDragonCooldown: pd.selectedChar === 'shinobi' ? 20 : 0, shinobiDragonFireCd: 0, shinobiScytheCycle: 0, sterlingCharging: false, sterlingCharge: 0, sterlingAttackCd: 0, majorBriggsKills: 0, majorBriggsStage: 1,
         adamScrap: 0, adamScrapVisualCounter: 0, adamMechActive: false, adamMechWavesLeft: 0, adamMechHpBonus: 0, adamMechSizeBonus: 0, adamBaseHpBeforeMech: null, adamBaseRBeforeMech: null,
         spartaCycle: 0, spartaNoDamageTimer: 0, spartaShieldActive: false, spartaAttackTimer: 0, spartaAttackMode: 'straight', spartaAttackRange: 0, spartaAttackWidth: 0, spartaAttackHalfAngle: 0, vesperFocusTimer: 0, vesperFocusActive: false, vesperFocusTimer: 0, vesperFocusActive: false,
         gooRevived: false, gooCloneSpawned: false, gooFullBaseHp: initialBaseHp, gooFullBaseDmg: initialBaseDmg, bitReviveTimer: 0, bitReviveFlashTimer: 0, bitReviveCount: 0, gooFullR: (pd.selectedChar === 'hank' || pd.selectedChar === 'yeti' || pd.selectedChar === 'glace') ? 20 : ((pd.selectedChar === 'shiv' || pd.selectedChar === 'zippi') ? 10 : ((pd.selectedChar === 'kaisen' || pd.selectedChar === 'booboo' || pd.selectedChar === 'yoyo') ? 13 : (pd.selectedChar === 'eel' ? 15 : 15))),
@@ -11425,7 +11404,6 @@ if (!isBossAlive) {
     gameTime += dt;
 
     if(waveTimer >= 20) {
-        if (pd.selectedChar === 'nyla') spawnNylaMiniFracture();
         wave++; waveTimer = 0; if(player.stats.waveBuff) player.hp = Math.min(player.hp + 20, player.baseHp * player.stats.maxHpMult); trackMissionProgress('waves', 1);
         if (pd.selectedChar === 'sparta') spawnSpartaLion();
         if(pd.selectedChar === 'adam' && player.adamMechWavesLeft > 0) {
@@ -12869,38 +12847,6 @@ function fireWeapon(target) {
             }
             return;
         }
-        if(w === 'nyla_shard') {
-            const total = 3 + Math.max(0, Math.floor(player.stats.extraProj || 0));
-            const spawnOffset = player.r + 8;
-            const lineSpacing = 7;
-            for (let k = 0; k < total; k++) {
-                const along = (k - (total - 1) / 2) * lineSpacing;
-                const sx = player.x + Math.cos(angle) * spawnOffset - Math.sin(angle) * along;
-                const sy = player.y + Math.sin(angle) * spawnOffset + Math.cos(angle) * along;
-                createProj(sx, sy, Math.cos(angle) * pSpd * 1.02, Math.sin(angle) * pSpd * 1.02, finalDmg, 58, true, 'nyla_shard', { size: 8, sourceChar: 'nyla', nylaPoisonChance: 0.15, splitDone: false, pierce: 0, noHitFrames: 0.08 });
-            }
-            return;
-        }
-        if(w === 'rowan_shard') {
-            const total = 3 + Math.max(0, Math.floor(player.stats.extraProj || 0));
-            const spread = 0.12;
-            const spawnOffset = player.r + 8;
-            const purificationReady = !!player.rowanPurificationReady || (Number(player.rowanPurificationBar) || 0) >= 1000;
-            for (let k = 0; k < total; k++) {
-                const off = (k - (total - 1) / 2) * spread;
-                const shotAngle = angle + off;
-                const sx = player.x + Math.cos(shotAngle) * spawnOffset;
-                const sy = player.y + Math.sin(shotAngle) * spawnOffset;
-                createProj(sx, sy, Math.cos(shotAngle) * pSpd * 1.05, Math.sin(shotAngle) * pSpd * 1.05, finalDmg, 58, true, 'rowan_shard', {
-                    size: 6, sourceChar: 'rowan', rowanPurification: purificationReady, noHitFrames: 0.08
-                });
-            }
-            if (purificationReady) {
-                player.rowanPurificationReady = false;
-                player.rowanPurificationBar = 0;
-            }
-            return;
-        }
         if(w === 'quarterback') {
             const total = 1 + Math.max(0, Math.floor(player.stats.extraProj || 0));
             const spawnOffset = player.r + 8;
@@ -13576,9 +13522,6 @@ function createProj(x, y, vx, vy, dmg, life, isPlayer, type, extra={}) {
     else if (type === 'wind_gust') size = 34;
     else if (type === 'tornado') size = 26;
     else if (type === 'quarterback') size = 14;
-    else if (type === 'rowan_shard') size = extra.size || 6;
-    else if (type === 'nyla_shard') size = extra.size || 8;
-    else if (type === 'nyla_shard_small') size = extra.size || 4.5;
     else if (type === 'blizzard_flake') size = extra.size || 7;
     else if (type === 'blizzard_snowball') size = extra.size || 16;
     else if (type === 'wrench') size = extra.size || 14;
@@ -14397,34 +14340,6 @@ function spawnEnemy() {
     return e;
 }
 
-function isRowanFracturedEnemy(e) {
-    if (!e) return false;
-    return !!e.fracturedOrigin || e.spawnBiome === 11 || window.currentMap === 11;
-}
-
-const ROWAN_PURIFICATION_IMMUNE_TYPES = new Set([
-    'boss', 'megaboss', 'colosso',
-    'crocodile', 'scorpion', 'spider', 'sarcophagus', 'ice_statue', 'stone_golem',
-    'leopard', 'gorilla', 'monkey', 'panda'
-]);
-
-function canRowanPurifyEnemy(e) {
-    if (!isRowanFracturedEnemy(e)) return false;
-    if (e.isBoss) return false;
-    return !ROWAN_PURIFICATION_IMMUNE_TYPES.has(String(e.type || '').toLowerCase());
-}
-
-function chargeRowanPurificationOnKill(e) {
-    if (!player || pd?.selectedChar !== 'rowan' || !e || e.lastHitSourceChar !== 'rowan' || e.rowanKillCounted) return;
-    e.rowanKillCounted = true;
-    player.rowanPurificationBar = Math.min(1000, (Number(player.rowanPurificationBar) || 0) + 100);
-    if (player.rowanPurificationBar >= 1000) {
-        player.rowanPurificationBar = 1000;
-        player.rowanPurificationReady = true;
-    }
-}
-
-
 function getBlizzardTier(temp) {
     const t = Number(temp);
     if (t <= -60) return 4;
@@ -14479,13 +14394,13 @@ function updateEnemies(dt) {
     for(let i = enemies.length - 1; i >= 0; i--) {
         try {
         let e = enemies[i]; let d = dist(e, player);
-        if (e.ambulanceDeathPending) { e.ambulanceExplosionTimer = Math.max(0,(e.ambulanceExplosionTimer||0)-dt); if(e.ambulanceExplosionTimer<=0){ createExplosion(e.x,e.y,95,0,'rgba(241,196,15,0.25)'); chargeRowanPurificationOnKill(e);blizzardCoolDownOnKill(e); enemies.splice(i,1); } continue; }
-        if (e.policeCarDeathPending) { e.policeCarExplosionTimer = Math.max(0,(e.policeCarExplosionTimer||0)-dt); if(e.policeCarExplosionTimer<=0){ createExplosion(e.x,e.y,85,0,'rgba(231,76,60,0.35)'); chargeRowanPurificationOnKill(e);blizzardCoolDownOnKill(e); const sm=Math.max(0.25,(Number(e.maxHp)||155)/155); const mapId=Number.isInteger(e.fractureMapId)?e.fractureMapId:6; for(let k=0;k<3;k++){const a=Math.random()*Math.PI*2; enemies.push({x:e.x+Math.cos(a)*35,y:e.y+Math.sin(a)*35,type:'atirador',hp:20*sm,maxHp:20*sm,speed:1.2,baseDmg:8*sm,dmg:8*sm,size:14,cd:30,color:'#2980b9',poison:{timer:0,dmg:0,tickCd:0},slowTimer:0,weakenTimer:0,burnTimer:0,freezeTimer:0,burnDmg:0,spawnBiome:mapId,skinSourceMapId:mapId,fracturedOrigin:!!e.fracturedOrigin,fractureMapId:Number.isInteger(e.fractureMapId)?e.fractureMapId:null,enemySkin:null,fracturedSkinType:null,resolvedFracturedSkinType:null,_skinTypeForEnemy:null});} enemies.splice(i,1); } continue; }
+        if (e.ambulanceDeathPending) { e.ambulanceExplosionTimer = Math.max(0,(e.ambulanceExplosionTimer||0)-dt); if(e.ambulanceExplosionTimer<=0){ createExplosion(e.x,e.y,95,0,'rgba(241,196,15,0.25)'); blizzardCoolDownOnKill(e); enemies.splice(i,1); } continue; }
+        if (e.policeCarDeathPending) { e.policeCarExplosionTimer = Math.max(0,(e.policeCarExplosionTimer||0)-dt); if(e.policeCarExplosionTimer<=0){ createExplosion(e.x,e.y,85,0,'rgba(231,76,60,0.35)'); blizzardCoolDownOnKill(e); const sm=Math.max(0.25,(Number(e.maxHp)||155)/155); const mapId=Number.isInteger(e.fractureMapId)?e.fractureMapId:6; for(let k=0;k<3;k++){const a=Math.random()*Math.PI*2; enemies.push({x:e.x+Math.cos(a)*35,y:e.y+Math.sin(a)*35,type:'atirador',hp:20*sm,maxHp:20*sm,speed:1.2,baseDmg:8*sm,dmg:8*sm,size:14,cd:30,color:'#2980b9',poison:{timer:0,dmg:0,tickCd:0},slowTimer:0,weakenTimer:0,burnTimer:0,freezeTimer:0,burnDmg:0,spawnBiome:mapId,skinSourceMapId:mapId,fracturedOrigin:!!e.fracturedOrigin,fractureMapId:Number.isInteger(e.fractureMapId)?e.fractureMapId:null,enemySkin:null,fracturedSkinType:null,resolvedFracturedSkinType:null,_skinTypeForEnemy:null});} enemies.splice(i,1); } continue; }
         if (e.truckDeathPending) {
             e.truckExplosionTimer = Math.max(0, (e.truckExplosionTimer || 0) - dt);
             if (e.truckExplosionTimer <= 0) {
                 resolveTruckDeathExplosion(e);
-                chargeRowanPurificationOnKill(e);blizzardCoolDownOnKill(e);
+                blizzardCoolDownOnKill(e);
                 enemies.splice(i, 1);
             }
             continue;
@@ -14494,7 +14409,7 @@ function updateEnemies(dt) {
             e.tourTruckExplosionTimer = Math.max(0, (e.tourTruckExplosionTimer || 0) - dt);
             if (e.tourTruckExplosionTimer <= 0) {
                 resolveTourTruckDeathExplosion(e);
-                chargeRowanPurificationOnKill(e);blizzardCoolDownOnKill(e);
+                blizzardCoolDownOnKill(e);
                 enemies.splice(i, 1);
             }
             continue;
@@ -15296,7 +15211,7 @@ function updateEnemies(dt) {
             // imediatamente e nunca executa revive, quebra de armadura, spawn em cadeia
             // ou qualquer outra rotina de morte do inimigo original.
             if (e.type === 'merlin_baby') {
-                chargeRowanPurificationOnKill(e);blizzardCoolDownOnKill(e);
+                blizzardCoolDownOnKill(e);
                 enemies.splice(i, 1);
                 enemiesKilled++;
                 continue;
@@ -15316,7 +15231,7 @@ function updateEnemies(dt) {
                         addFloatingText(player.x, player.y, 'Esquiva!', '#3498db', 12);
                     }
                 }
-                chargeRowanPurificationOnKill(e);blizzardCoolDownOnKill(e);
+                blizzardCoolDownOnKill(e);
                 enemies.splice(i, 1);
                 enemiesKilled++;
                 continue;
@@ -15455,7 +15370,7 @@ function updateEnemies(dt) {
                 if (pd.selectedChar === 'bulb' && Number(player.bulbMode) === 2) puddles.push({ x: e.x, y: e.y, r: 78, dmg: 0, life: 5, type: 'bulb_coral', tick: 0 });
                 if (Number(e.curseTimer) > 0) { const curseBlastDmg = Math.max(1, player.baseDmg * player.stats.dmgMult * 0.55); createExplosion(e.x, e.y, 68, curseBlastDmg, '#ff69b4'); }
                 if(player.stats.explodeHit) createExplosion(e.x, e.y, 60, player.baseDmg * 0.5);
-                chargeRowanPurificationOnKill(e);
+                
                 blizzardCoolDownOnKill(e);
                 createParticles(e.x, e.y, e.color); enemies.splice(i, 1);
             }
@@ -15967,8 +15882,6 @@ const SERRANO_CHARACTER_PROJECTILES = {
     mr_perfurant: ['mr_perfurant_slash'],
     buster: ['buster_rocket'],
     mrsaw: ['saw_throw'],
-    rowan: ['rowan_shard'],
-    nyla: ['nyla_shard'],
     blizzard: ['blizzard_flake', 'blizzard_snowball'],
     quarterback: ['quarterback'],
     seae: ['water_bubble', 'water_wave'],
@@ -16028,7 +15941,7 @@ function spawnSerranoRandomProjectile(x, y, dmg, excludedEnemy) {
         vinyl: 5.2, microphone: 5.4, lunch_ketchup: 5.3, lunch_mayo: 5.3, lunch_mustard: 5.3,
         bunniie_carrot: 5.4, energy_wave: 5, dart: 5, chess_piece: 5, wind_gust: 5.6, tornado: 4.2,
         nucleon_shot: 5, dagger: 7.5, lightning: 7.5, ivy_seed: 5.7, lance: 16, gladiator_slash: 1,
-        boomerang: 9, scythe: 1, mr_perfurant_slash: 1, buster_rocket: 12.5, saw_throw: 6, quarterback: 4.75, rowan_shard: 6.6, nyla_shard: 6.2,
+        boomerang: 9, scythe: 1, mr_perfurant_slash: 1, buster_rocket: 12.5, saw_throw: 6, quarterback: 4.75,
         gma_cookie: 5.6, cookie_tray: 5.2, kael_arrow: 6.2, kael_impact_arrow: 5.6, water_bubble: 5, water_wave: 7.5, blood_ball: 5, macaron: 5, macaron_big: 5.3, tea_cup: 5.2,
         laser: 20, ice_stake: 7.5, ice_dagger: 6, snowball: 4, yeti_punch: 7.5, echo_shot: 6.75,
         echo_bh_core: 5.25, graffit_can: 5.5, shinobi_fireball: 9, glitch_bugshot: 5.25, eel_lash: 16, shell_trident: 8.5,
@@ -17005,18 +16918,11 @@ function updateProjectiles(dt) {
                             const cherryMult = Math.max(1, Number(p.extra?.cherryMultiplier) || 2);
                             realDmg *= cherryMult;
                         }
-                        const rowanPurificationHit = p.type === 'rowan_shard' && p.extra?.rowanPurification && pd.selectedChar === 'rowan' && canRowanPurifyEnemy(e);
                         e.lastHitSourceChar = p.extra?.sourceChar || (p.isPlayer ? pd.selectedChar : e.lastHitSourceChar || null);
-                        if (rowanPurificationHit) {
-                            e.hp = 0;
-                            e.rowanPurified = true;
-                            addFloatingText(e.x, e.y - 10, 'PURIFICAÇÃO!', '#ff4fa3', 12);
-                            createParticles(e.x, e.y, '#ff4fa3');
-                        } else {
-                            e.hp -= realDmg * getEnemyDamageTakenMultiplier(e);
-                            addFloatingText(e.x, e.y, Math.floor(realDmg), '#fff');
-                            if(p.isPlayer) trackMissionDamage(realDmg);
-                        }
+                        e.hp -= realDmg * getEnemyDamageTakenMultiplier(e);
+                        addFloatingText(e.x, e.y, Math.floor(realDmg), '#fff');
+                        if(p.isPlayer) trackMissionDamage(realDmg);
+
 
                         if (p.type === 'hunter_ability_cartridge' && !p.extra?.splitDone) {
                             p.extra.splitDone=true;
@@ -17035,28 +16941,7 @@ function updateProjectiles(dt) {
                             createParticles(e.x, e.y, '#a5b1c2');
                         }
 
-                        if (p.type === 'nyla_shard' || p.type === 'nyla_shard_small') {
-                            const poisonChance = Math.max(0, Math.min(1, Number(p.extra?.nylaPoisonChance) || 0.15));
-                            if (Math.random() < poisonChance) {
-                                e.poison = { timer: 4, dmg: Math.max(1, realDmg * 0.30), tickCd: 0.3 };
-                                addFloatingText(e.x, e.y - 12, 'VENENO!', '#2ecc71', 11);
-                                createParticles(e.x, e.y, '#2ecc71');
-                            }
-                        }
 
-                        if (p.type === 'nyla_shard' && !p.extra?.splitDone) {
-                            p.extra.splitDone = true;
-                            const baseAngle = Math.atan2(p.vy, p.vx);
-                            const smallCount = 5;
-                            const smallSpeed = Math.max(3.8, Math.hypot(p.vx, p.vy) * 0.92);
-                            for (let j = 0; j < smallCount; j++) {
-                                const spread = (j - (smallCount - 1) / 2) * 0.24;
-                                const a = baseAngle + spread;
-                                const small = createProj(p.x, p.y, Math.cos(a) * smallSpeed, Math.sin(a) * smallSpeed, Math.max(1, p.dmg * 0.34), 38, true, 'nyla_shard_small', { size: 4.5, sourceChar: 'nyla', nylaPoisonChance: 0.15, splitDone: true, pierce: 0, noHitFrames: 0.08 });
-                                if (small?.hitIds && e) small.hitIds.add(e);
-                            }
-                            createParticles(p.x, p.y, '#c56cf0');
-                        }
 
                         if (p.type === 'bit_banana') {
                             const radius = Math.max(32, Number(p.extra?.explodeRadius) || 62);
@@ -17789,8 +17674,6 @@ function updatePuddles(dt) {
                     }
                 }
             }
-        } else if (p.type === 'nyla_fracture') {
-            // Visual-only mini Fracture created by Nyla at the end of each wave.
         } else if (p.type === 'magma_crack') {
             if (p.tick >= 0.35) {
                 p.tick = 0;
@@ -18858,13 +18741,14 @@ function getFractureBiomePool(mapId) {
         6: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','worker','conehead','motorcycle','police_car','ambulance','rocknrool','sounder','piano','singer','tour_truck','snow_walker','scorpion'],
         7: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','rocknrool','sounder','piano','singer','tour_truck','snow_walker','scorpion'],
         8: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','ninja','sein_sein','samurai','panda_suit','nunchaku','geisha','rocknrool','sounder','piano','singer','tour_truck','snow_walker','scorpion'],
-        9: ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','dancer','rocknrool','sounder','piano','singer','tour_truck'],
+        9: ['basico','velocista','dancer','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','rocknrool','sounder','piano','singer','tour_truck'],
         10:['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','ghost_fisher','swordfish','shark','triton','rocknrool','sounder','piano','singer','tour_truck','snow_walker','scorpion']
     };
     return [...new Set(byMap[Number(mapId)] || byMap[0])];
 }
 
 function getFracturedGlobalEnemyPool() {
+    // Inclui todos os tipos que possuem skin própria da Discoteca, permitindo suas skins naturais no Fraturado.
     const candidates = [
         'basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider',
         'cardboard_head','motorcycle_helmet','prism_head','truck','ballon','colosso','elite_master','lider_elite',
@@ -18877,9 +18761,8 @@ function getFracturedGlobalEnemyPool() {
 }
 
 function spawnFractureEnemy(fracture, options = {}) {
-    const nylaMini = !!options.nylaMini;
     if (!fracture) return false;
-    if (!nylaMini && (wave % 10 === 0 || enemies.some(e => e && e.isBoss))) return false;
+    if (wave % 10 === 0 || enemies.some(e => e && e.isBoss)) return false;
     const pool = getFractureBiomePool(fracture.mapId)
         .filter(t => getEnemyEntryWave(t, wave) <= wave);
     if (!pool.length) return false;
@@ -18971,26 +18854,6 @@ function spawnFractureEnemy(fracture, options = {}) {
     enemies.push(e);
     window.currentMap = oldMap;
     return e;
-}
-
-function spawnNylaMiniFracture() {
-    if (!player || pd?.selectedChar !== 'nyla') return;
-    puddles.push({ x: player.x, y: player.y, r: 30, life: 1.25, tick: 0, type: 'nyla_fracture', sourceChar: 'nyla' });
-    const fracture = { x: player.x, y: player.y, mapId: Math.floor(Math.random() * 11), angle: Math.random() * Math.PI * 2, length: 80, width: 52 };
-    const count = 1 + Math.floor(Math.random() * 2);
-    let spawnedCount = 0;
-    for (let i = 0; i < count; i++) {
-        const summoned = spawnFractureEnemy(fracture, { nylaMini: true });
-        if (!summoned) continue;
-        summoned.hypnotizedTimer = Infinity;
-        summoned.hypnotizedTick = 0;
-        summoned.hypnotizedSnapshot = { baseDmg: summoned.baseDmg, dmg: summoned.dmg, speed: summoned.speed, maxHp: summoned.maxHp, size: summoned.size, color: summoned.color };
-        summoned.nylaPermanentHypnosis = true;
-        spawnedCount++;
-        addFloatingText(summoned.x, summoned.y - 18, 'HIPNOTIZADO!', '#ff6bb5', 11);
-    }
-    if (spawnedCount > 0) createParticles(player.x, player.y, '#c56cf0');
-    player.nylaMiniFractureCount = (Number(player.nylaMiniFractureCount) || 0) + 1;
 }
 
 function updateFractures(dt) {
@@ -19299,34 +19162,6 @@ function draw() {
             ctx.fillStyle = 'rgba(116,185,255,0.28)';
             ctx.beginPath();
             ctx.arc(0, 0, 11, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
-        }
-        else if (p.type === 'nyla_fracture') {
-            ctx.save();
-            ctx.translate(p.x, p.y);
-            const pulse = 0.9 + Math.sin((gameTime || 0) * 9 + p.x * 0.01) * 0.08;
-            ctx.globalAlpha = Math.max(0, Math.min(1, p.life / 1.25));
-            ctx.shadowColor = '#c56cf0';
-            ctx.shadowBlur = 18;
-            ctx.strokeStyle = '#e6b8ff';
-            ctx.lineWidth = 4;
-            ctx.beginPath();
-            ctx.arc(0, 0, p.r * 0.72 * pulse, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.shadowBlur = 0;
-            ctx.strokeStyle = '#9b59b6';
-            ctx.lineWidth = 2;
-            for (let k = 0; k < 6; k++) {
-                const a = k * Math.PI / 3 + gameTime * 0.5;
-                ctx.beginPath();
-                ctx.moveTo(Math.cos(a) * 5, Math.sin(a) * 5);
-                ctx.lineTo(Math.cos(a) * p.r * 0.65, Math.sin(a) * p.r * 0.65);
-                ctx.stroke();
-            }
-            ctx.fillStyle = 'rgba(197,108,240,0.16)';
-            ctx.beginPath();
-            ctx.arc(0, 0, p.r * 0.82, 0, Math.PI * 2);
             ctx.fill();
             ctx.restore();
         }
@@ -20304,23 +20139,6 @@ function draw() {
             const stWidth = 62, stHeight = 10;
             const stFill = Math.max(0, Math.min(1, Number(player.sterlingCharge || 0)));
             drawRoundedBar(player.x - stWidth / 2, player.y - player.r - 20, stWidth, stHeight, stFill, '#f1c40f', '#fff2a8', '#ffffff', 'star', !!player.sterlingCharging);
-        }
-        if(pd.selectedChar === 'rowan') {
-            const rowanWidth = 58;
-            const rowanHeight = 9;
-            const rowanFill = Math.max(0, Math.min(1, Number(player.rowanPurificationBar || 0) / 1000));
-            ctx.fillStyle = '#111';
-            ctx.fillRect(player.x - rowanWidth / 2, player.y - player.r - 18, rowanWidth, rowanHeight);
-            ctx.fillStyle = '#ff4fa3';
-            ctx.fillRect(player.x - rowanWidth / 2, player.y - player.r - 18, rowanWidth * rowanFill, rowanHeight);
-            ctx.strokeStyle = player.rowanPurificationReady ? '#ffffff' : '#ffffff';
-            ctx.lineWidth = 1;
-            ctx.strokeRect(player.x - rowanWidth / 2, player.y - player.r - 18, rowanWidth, rowanHeight);
-            if (player.rowanPurificationReady) {
-                ctx.strokeStyle = '#ff4fa3';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(player.x - rowanWidth / 2 - 1, player.y - player.r - 19, rowanWidth + 2, rowanHeight + 2);
-            }
         }
         if(pd.selectedChar === 'adam') {
             const adamWidth = 62, adamHeight = 10;
@@ -21722,48 +21540,6 @@ function draw() {
                 }
                 ctx.fillStyle='#dff5ff'; ctx.beginPath(); ctx.arc(0,0,Math.max(1.4,r*.22),0,Math.PI*2); ctx.fill();
             }
-            ctx.restore();
-        }
-        else if(p.type === 'nyla_shard' || p.type === 'nyla_shard_small') {
-            ctx.save();
-            ctx.translate(p.x, p.y);
-            ctx.rotate(Math.atan2(p.vy, p.vx));
-            const r = Math.max(3, p.size || (p.type === 'nyla_shard' ? 8 : 4.5));
-            const big = p.type === 'nyla_shard';
-            ctx.shadowColor = '#c56cf0';
-            ctx.shadowBlur = big ? 16 : 9;
-            ctx.fillStyle = big ? '#d98cff' : '#efc8ff';
-            ctx.strokeStyle = '#6c3483';
-            ctx.lineWidth = big ? 2 : 1.2;
-            ctx.beginPath();
-            ctx.moveTo(r * (big ? 2.8 : 2.4), 0);
-            ctx.lineTo(-r * 0.9, -r * 0.62);
-            ctx.lineTo(-r * 1.25, 0);
-            ctx.lineTo(-r * 0.9, r * 0.62);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-            ctx.restore();
-        }
-        else if(p.type === 'rowan_shard') {
-            ctx.save();
-            ctx.translate(p.x, p.y);
-            ctx.rotate(Math.atan2(p.vy, p.vx));
-            const r = Math.max(4, p.size || 6);
-            ctx.shadowColor = '#ff4fa3';
-            ctx.shadowBlur = p.extra?.rowanPurification ? 18 : 10;
-            ctx.fillStyle = p.extra?.rowanPurification ? '#ffb6d9' : '#ff4fa3';
-            ctx.beginPath();
-            ctx.moveTo(r * 2.6, 0);
-            ctx.lineTo(-r * 1.15, -r * 0.58);
-            ctx.lineTo(-r * 1.6, 0);
-            ctx.lineTo(-r * 1.15, r * 0.58);
-            ctx.closePath();
-            ctx.fill();
-            ctx.shadowBlur = 0;
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
             ctx.restore();
         }
         else if(p.type === 'quarterback') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx)); ctx.shadowColor = '#8e44ad'; ctx.shadowBlur = 12; ctx.fillStyle = '#8e44ad'; ctx.beginPath(); if(ctx.ellipse) { ctx.ellipse(0, 0, p.size + 4, p.size * 0.55, 0, 0, Math.PI * 2); } else { ctx.scale(1.4, 0.75); ctx.arc(0, 0, p.size, 0, Math.PI * 2); } ctx.fill(); ctx.shadowBlur = 0; ctx.lineWidth = 2; ctx.strokeStyle = '#f5f6fa'; ctx.beginPath(); if(ctx.ellipse) { ctx.ellipse(0, 0, p.size + 4, p.size * 0.55, 0, 0, Math.PI * 2); } else { ctx.scale(1, 1); ctx.arc(0, 0, p.size, 0, Math.PI * 2); } ctx.stroke(); ctx.strokeStyle = '#2c2c54'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(-p.size + 2, 0); ctx.lineTo(p.size - 2, 0); ctx.stroke(); ctx.restore(); }
