@@ -3244,10 +3244,10 @@ const CHARACTER_SPRITES = {
     tenent: 'sprites/tenent.png',
     nox: 'sprites/nox.png',
     snapdragon: 'sprites/snapdragon.png',
-    izaque: 'izaque.png',
-    izaque_wolf: 'izaque_wolf.png',
-    izaque_cat: 'izaque_cat.png',
-    izaquewolfcat: 'izaquewolfcat.png',
+    izaque: 'sprites/izaque.png',
+    izaque_wolf: 'sprites/izaque_wolf.png',
+    izaque_cat: 'sprites/izaque_cat.png',
+    izaquewolfcat: 'sprites/izaquewolfcat.png',
     healy: 'sprites/healy.png',
     rex: 'sprites/rex.png',
     knighter: 'sprites/knighter.png',
@@ -10036,7 +10036,7 @@ function getSelectedSpecialConfig() {
         const form = player.izaqueForm || 'normal';
         const active = form === 'wolf' || form === 'cat' || form === 'wolfcat';
         const cd = Math.max(0, Number(player.izaqueSpecialCooldown || 0));
-        const label = '<img src="wolfcat.png" alt="" aria-hidden="true">';
+        const label = '<img src="elements/wolfcat.png" alt="" aria-hidden="true">';
         const title = form === 'wolfcat' ? `Lobogato ativo — ${Math.max(0, Number(player.izaqueHybridWavesLeft || 0))} waves` : (cd > 0 ? `Lobogato recarregando ${Math.ceil(cd)}s` : active ? 'Forma ativa' : 'Lobogato');
         return { type: 'izaque', label, title, ready: !active && cd <= 0 };
     }
@@ -14046,7 +14046,7 @@ function createProj(x, y, vx, vy, dmg, life, isPlayer, type, extra={}) {
     else if (type === 'blizzard_snowball') size = extra.size || 16;
     else if (type === 'wrench') size = extra.size || 14;
     else if (type === 'puddle' || type === 'slime') size = 6;
-    else if (type === 'grenade') size = 3;
+    else if (type === 'grenade' || type === 'grenade_fragment') size = 3;
     else if (type === 'big_grenade') size = extra.size || 12;
     else if (type === 'bomb' || type === 'buster_rocket') size = 5;
     else if (type === 'lance') size = extra.size || 7;
@@ -17209,6 +17209,15 @@ function updateProjectiles(dt) {
                 projectiles.splice(i, 1); continue;
             }
         }
+        else if (p.type === 'grenade_fragment') {
+            // Fragmentos visuais da Grenade têm uma rota própria: movimentam-se
+            // independentemente do pipeline de colisão/dano para evitar o anel
+            // congelado e impedir custo extra quando os 8 fragmentos surgem.
+            p.x += p.vx * 60 * dt;
+            p.y += p.vy * 60 * dt;
+            if (p.life <= 0) { projectiles.splice(i, 1); continue; }
+            continue;
+        }
         else if (p.extra?.visualOnly) {
             p.x += p.vx * 60 * dt; p.y += p.vy * 60 * dt;
             if (p.life <= 0) { projectiles.splice(i, 1); continue; }
@@ -18106,7 +18115,7 @@ function updateProjectiles(dt) {
             const count = 8, pSpd = 5 * player.stats.projSpdMult;
             for(let j=0; j<count; j++) {
                 const a = (Math.PI * 2 / count) * j;
-                createProj(p.x + Math.cos(a) * 10, p.y + Math.sin(a) * 10, Math.cos(a)*pSpd, Math.sin(a)*pSpd, 0, 22, false, 'grenade', { size: 3, sourceChar: 'grenade', visualOnly: true });
+                createProj(p.x + Math.cos(a) * 10, p.y + Math.sin(a) * 10, Math.cos(a)*pSpd, Math.sin(a)*pSpd, 0, 22, true, 'grenade_fragment', { size: 3, sourceChar: 'grenade', visualOnly: true, fragment: true });
             }
             createParticles(p.x, p.y, '#27ae60');
             projectiles.splice(i, 1);
@@ -21269,7 +21278,7 @@ function draw() {
             ctx.fillStyle='rgba(255,255,255,.62)'; ctx.beginPath(); ctx.ellipse(-r*.35,-r*.38,r*.22,r*.12,-.35,0,TAU); ctx.fill(); ctx.restore(); return true;
         }
 
-        if (type === 'big_grenade' || type === 'grenade') {
+        if (type === 'big_grenade' || type === 'grenade' || type === 'grenade_fragment') {
             ctx.save(); ctx.translate(px,py); ctx.rotate(ang); const big=type==='big_grenade'; const r=Math.max(big?10:6,r0*(big?1.20:1.30));
             ctx.shadowColor='rgba(39,174,96,.24)'; ctx.shadowBlur=big?6:3; const g=ctx.createRadialGradient(-r*.30,-r*.34,1,0,0,r); g.addColorStop(0,'#7fd56b'); g.addColorStop(.48,'#2faa61'); g.addColorStop(1,'#155d35');
             ctx.fillStyle=g; ctx.strokeStyle='#173d2a'; ctx.lineWidth=1.8; ctx.beginPath(); ctx.arc(0,0,r,0,TAU); ctx.fill(); ctx.stroke();
@@ -21758,7 +21767,7 @@ function draw() {
             ctx.fillStyle='rgba(255,255,255,.55)'; ctx.beginPath(); ctx.arc(-r*.30,-r*.32,r*.16,0,Math.PI*2); ctx.fill(); ctx.restore();
         }
         else if(p.type === 'bomb' || p.type === 'rocket' || p.type === 'buster_rocket') { ctx.fillStyle = '#2c3e50'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#e67e22'; ctx.beginPath(); ctx.arc(p.x + p.size/2, p.y - p.size/2, 2, 0, Math.PI*2); ctx.fill(); }
-        else if(p.type === 'grenade' || p.type === 'big_grenade') { ctx.fillStyle = '#27ae60'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); }
+        else if(p.type === 'grenade' || p.type === 'big_grenade' || p.type === 'grenade_fragment') { ctx.fillStyle = '#27ae60'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); }
         else if(p.type === 'cyro_iceball') {
             const r = p.size || 13;
             ctx.save();
@@ -22432,14 +22441,16 @@ function draw() {
                 ctx.strokeStyle = form === 'wolfcat' ? '#eadcff' : (form === 'wolf' ? '#c8ccff' : '#f2f2f2');
                 ctx.shadowColor = form === 'wolfcat' ? 'rgba(214,162,255,.95)' : 'rgba(255,255,255,.62)';
                 ctx.shadowBlur = form === 'wolfcat' ? 14 : 7;
+                ctx.lineWidth = Math.max(2.6, radius * 0.028);
+                // Uma única path com as 3 garras preserva o brilho e evita 3
+                // operações separadas de shadowBlur/beginPath por frame.
+                ctx.beginPath();
                 for (let claw = -1; claw <= 1; claw++) {
                     const off = claw * clawSpread;
-                    ctx.lineWidth = Math.max(2.6, radius * 0.028);
-                    ctx.beginPath();
                     ctx.moveTo(radius * .14, off * radius * .46);
                     ctx.quadraticCurveTo(len * .58, off * radius * .72, len, off * radius * 1.05);
-                    ctx.stroke();
                 }
+                ctx.stroke();
                 ctx.restore();
             } else if(p.type==='scythe'){
                 const h=radius*.18, len=radius*.78;
