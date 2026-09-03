@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<!-- FD PERFORMANCE OPTIMIZATION v1: derived-list caches, allocation-free hot paths, preserved visuals/content -->
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>FRACTURED DOOMSDAY</title>
@@ -1926,6 +1928,8 @@ const CARDS = [
     { id: 'shield', name: 'Escudo Level Up', desc: 'Imunidade tempor&aacute;ria', apply: (s) => player.shieldTimer = 300 },
     { id: 'cd', name: '-10% Cooldown', desc: 'Recarga mais r&aacute;pida', apply: (s) => s.fireRateMult *= 0.9 },
     { id: 'expl', name: 'Explos&atilde;o Leve', desc: 'Tiros explodem ao bater', apply: (s) => s.explodeHit = true },
+    { id: 'burn_chance', name: 'Chama', desc: '10% de chance de queimar', apply: (s) => s.burnChance = (s.burnChance || 0) + 0.10 },
+    { id: 'rotating_drum', name: 'Tambor girat&oacute;rio', desc: 'A cada 2s, dispara 6 balas em todas as dire&ccedil;&otilde;es', apply: (s) => { s.rotatingDrum = (s.rotatingDrum || 0) + 1; if (!Number.isFinite(s.rotatingDrumTimer)) s.rotatingDrumTimer = 2; } },
     { id: 'critChance', name: '+15% Chance Cr&iacute;tico', desc: 'Chance de dano duplo', apply: (s) => s.critChance += 0.15 },
     { id: 'critDmg', name: '+50% Dano Cr&iacute;tico', desc: 'Cr&iacute;ticos doem mais', apply: (s) => s.critDmg += 0.5 },
     { id: 'pierce', name: '+1 Perfura&ccedil;&atilde;o', desc: 'Atravessa 1 inimigo', apply: (s) => s.pierce += 1 },
@@ -1945,6 +1949,8 @@ const CARDS = [
     { id: 'tesla_turret', name: 'Tesla', desc: 'Disparo lento que lança um projétil elétrico grande e CHOCA inimigos.', apply: (s) => { allies.push({x: player.x, y: player.y, dmg: player.baseDmg * player.stats.dmgMult * 1.35, speed: 0, life: Infinity, cd: 0, isTurret: true, type: 'tesla'}); } },
     { id: 'crossbow_turret', name: 'Besta', desc: 'Dispara flechas PERFURANTES.', apply: (s) => { allies.push({x: player.x, y: player.y, dmg: player.baseDmg * player.stats.dmgMult * 0.9, speed: 0, life: Infinity, cd: 0, isTurret: true, type: 'crossbow', crossbowTurretFireRate: Math.max(0.35, Number(s.crossbowTurretFireRate) || 1)}); } },
     { id: 'burner_turret', name: 'Incendiária', desc: 'Dispara bolas de fogo que QUEIMAM inimigos.', apply: (s) => { allies.push({x: player.x, y: player.y, dmg: player.baseDmg * player.stats.dmgMult * 0.95, speed: 0, life: Infinity, cd: 0, isTurret: true, type: 'burner'}); } },
+    { id: 'white_flag', name: 'Bandeira Branca', desc: '-10% de Inimigos', apply: (s) => s.enemySpawnMult = (s.enemySpawnMult || 1) * 0.90 },
+    { id: 'boss_hunter', name: 'Caçador de Chefões', desc: '+Dano em Chefes', apply: (s) => s.bossDmgMult = (s.bossDmgMult || 1) * 1.50 },
     { id: 'orbital', name: '+1 Orbital', desc: 'Orbital em torno de você', apply: (s) => { s.orbitals = (s.orbitals || 0) + 1; } },
     { id: 'dodge', name: 'Esquiva', desc: '10% de chance de esquivar', apply: (s) => s.dodgeChance = (s.dodgeChance || 0) + 0.1 },
     { id: 'landmine', name: 'Mina Terrestre', desc: 'Invoca uma mina explosiva', apply: (s) => s.landmine = (s.landmine || 0) + 1 },
@@ -4915,7 +4921,8 @@ const CHARACTER_CREDITS = {
     snapdragon: 'Davi Tavares',
     sterling: 'Davi Tavares',
     serrano: 'Davi Tavares',
-    flex: 'Lucas._.ba12'
+    flex: 'Lucas._.ba12',
+    izaque: 'Izaque'
 };
 
 function renderCharacterSummary(id) {
@@ -7800,7 +7807,7 @@ function rerollMission(index) {
     notify('Missão trocada!');
 }
 
-function trackMissionProgress(kind, amount = 1, meta = {}) {
+function applyTrackedMissionProgress(kind, amount = 1, meta = {}) {
     ensureMissionState();
     let changed = false;
     pd.missions.list.forEach(m => {
@@ -7808,7 +7815,18 @@ function trackMissionProgress(kind, amount = 1, meta = {}) {
     });
     const weekly = getWeeklyMissionState();
     if (applyMissionProgress(weekly, kind, amount, meta)) changed = true;
-    if(changed) {
+    return changed;
+}
+
+function trackMissionProgress(kind, amount = 1, meta = {}) {
+    if (!amount || amount <= 0) return;
+    // Mission progress is run-scoped. It is committed only by a legitimate death.
+    if (isPlaying && !runMissionCommitInProgress) {
+        runMissionEvents.push({ kind, amount, meta: { ...meta } });
+        return;
+    }
+    const changed = applyTrackedMissionProgress(kind, amount, meta);
+    if (changed) {
         save();
         if(!document.getElementById('screen-missions').classList.contains('hidden')) renderMissions();
     }
@@ -7817,6 +7835,34 @@ function trackMissionProgress(kind, amount = 1, meta = {}) {
 function trackMissionDamage(amount) {
     if(!amount || amount <= 0) return;
     trackMissionProgress('damage', amount, { charId: pd.selectedChar });
+}
+
+function commitLegitimateRunProgress() {
+    if (runMissionCommitInProgress) return;
+    runMissionCommitInProgress = true;
+    let changed = false;
+    try {
+        for (const event of runMissionEvents) {
+            if (event && event.kind) {
+                if (applyTrackedMissionProgress(event.kind, event.amount, event.meta || {})) changed = true;
+            }
+        }
+        // Character-unlock/event missions derive their progress from these account stats.
+        if (!pd.progressStats || typeof pd.progressStats !== 'object') {
+            pd.progressStats = { gamesStarted: 0, wins: 0, totalKills: 0, bossKills: 0, bestWave: 0 };
+        }
+        pd.progressStats.gamesStarted = Math.max(0, Number(pd.progressStats.gamesStarted) || 0) + Math.max(0, Number(runProgressStats.gamesStarted) || 0);
+        pd.progressStats.totalKills = Math.max(0, Number(pd.progressStats.totalKills) || 0) + Math.max(0, Number(runProgressStats.totalKills) || 0);
+        pd.progressStats.bossKills = Math.max(0, Number(pd.progressStats.bossKills) || 0) + Math.max(0, Number(runProgressStats.bossKills) || 0);
+        for (const sectionId of Object.keys(EVENT_CHARACTER_PROGRESS || {})) {
+            if (typeof syncEventMissionCompletion === 'function') syncEventMissionCompletion(sectionId, false);
+        }
+        runMissionEvents = [];
+        runProgressStats = { gamesStarted: 0, totalKills: 0, bossKills: 0 };
+    } finally {
+        runMissionCommitInProgress = false;
+    }
+    if (changed && !document.getElementById('screen-missions')?.classList.contains('hidden')) renderMissions();
 }
 
 function showMissions() {
@@ -9496,6 +9542,8 @@ function getCardEmojiForUpgrade(id) {
         turret: 'elements/turret.png', magnet: 'elements/magnet.png', freeze_hit: 'elements/frost_toutch.png',
         bounce: 'elements/ricochet.png', mortar: 'elements/mortar.png', cannon_turret: 'elements/canon.png',
         tesla_turret: 'elements/tesla.png', crossbow_turret: 'elements/crossbow.png', burner_turret: 'elements/burner.png',
+        white_flag: 'elements/white_flag.png', boss_hunter: 'elements/skull.png',
+        burn_chance: 'elements/fire.png', rotating_drum: 'elements/cadence.png',
         orbital: 'elements/orbit.png', dodge: 'elements/dodge.png', push_card: 'elements/push.png', drone_card: 'elements/drone.png'
     };
     return map[id] || '';
@@ -10543,7 +10591,56 @@ joyZone?.addEventListener('pointerup', endJoyPointer);
 joyZone?.addEventListener('pointercancel', endJoyPointer);
 joyZone?.addEventListener('pointerleave', e => { if (touchId === e.pointerId && !joyZone.hasPointerCapture?.(e.pointerId)) endJoyPointer(e); });
 const dist = (a, b) => Math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2);
+const distXY = (ax, ay, bx, by) => Math.sqrt((ax-bx)*(ax-bx) + (ay-by)*(ay-by));
 const normalizeAngle = (a) => { while(a > Math.PI) a -= Math.PI*2; while(a < -Math.PI) a += Math.PI*2; return a; };
+
+/* FD PERFORMANCE CORE: caches only derived lookup lists. No gameplay data,
+   character summaries, projectile visuals, glow, particles or effects are removed. */
+const FDPerf = {
+    supportEnemyCount: -1,
+    seinProtectors: [],
+    pianoProtectors: [],
+    terrainObstacles: [],
+    blockingObstacles: [],
+    xiloWalls: [],
+    enemySeparationGrid: new Map(),
+    renderLeft: 0, renderRight: 0, renderTop: 0, renderBottom: 0
+};
+
+function refreshSupportEnemyCaches(force = false) {
+    if (!force && FDPerf.supportEnemyCount === enemies.length) return;
+    FDPerf.supportEnemyCount = enemies.length;
+    FDPerf.seinProtectors.length = 0;
+    FDPerf.pianoProtectors.length = 0;
+    for (const e of enemies) {
+        if (!e || e.hp <= 0) continue;
+        if (e.type === 'sein_sein') FDPerf.seinProtectors.push(e);
+        else if (e.type === 'piano') FDPerf.pianoProtectors.push(e);
+    }
+}
+
+function refreshCollisionCaches() {
+    FDPerf.terrainObstacles.length = 0;
+    FDPerf.blockingObstacles.length = 0;
+    for (const o of obstacles) {
+        if (!o) continue;
+        const type = o.type;
+        if (type === 'ice' || type === 'mud' || type === 'cacto') FDPerf.terrainObstacles.push(o);
+        if (type !== 'ice' && type !== 'mud' && type !== 'car' && type !== 'bamboo_spike') FDPerf.blockingObstacles.push(o);
+    }
+    FDPerf.xiloWalls.length = 0;
+    for (const wall of projectiles) {
+        if (!wall || !wall.extra?.isWall) continue;
+        if (wall.type === 'xilo_anvil' || wall.type === 'grenade_barricade') FDPerf.xiloWalls.push(wall);
+    }
+}
+
+function refreshRenderBounds() {
+    FDPerf.renderLeft = camera.x - RENDER_CULL_PAD;
+    FDPerf.renderRight = camera.x + cw + RENDER_CULL_PAD;
+    FDPerf.renderTop = camera.y - RENDER_CULL_PAD;
+    FDPerf.renderBottom = camera.y + ch + RENDER_CULL_PAD;
+}
 
 function isZippiCharacter() {
     return pd && pd.selectedChar === 'zippi' && typeof player !== 'undefined' && player && typeof player.zippiBubbleHp === 'number';
@@ -10753,6 +10850,7 @@ function quitGame(isQuit) {
         return;
     }
     const doQuit = () => {
+        if (isQuit) runRewardsInvalidated = true;
         document.getElementById('overlay-pause').classList.add('hidden');
         document.getElementById('btn-special').style.display='none';
         joyZone.style.display='none';
@@ -10826,7 +10924,11 @@ function startGame(isHardcore) {
 function startRunAfterShop() {
     // Cada início real de partida conta uma vez para definir a disponibilidade do botão Sair.
     if (!pd.progressStats || typeof pd.progressStats !== 'object') pd.progressStats = { gamesStarted: 0, wins: 0, totalKills: 0, bossKills: 0, bestWave: 0 };
-    pd.progressStats.gamesStarted = Math.max(0, Number(pd.progressStats.gamesStarted) || 0) + 1;
+    runProgressStats.gamesStarted = 1;
+    runMissionEvents = [];
+    runProgressStats.totalKills = 0;
+    runProgressStats.bossKills = 0;
+    runMissionCommitInProgress = false;
     save();
     document.getElementById('overlay-pregame-shop').classList.add('hidden'); showScreen(null); document.getElementById('game-hud').classList.remove('hidden'); document.getElementById('exp-bar-container').classList.remove('hidden');
     joyZone.style.display = 'none';
@@ -10847,7 +10949,7 @@ function startRunAfterShop() {
         bunniieHoles: [], bunniieTunnelCd: 0, bunniieTunnelGrace: 0, bunniieTunnelSeq: 0,
         inTotem: false, landmineTimer: 0, flameTimer: 0, flameReload: 0, flameTickCd: 0, flexTimer: 0, flexAngle: 0, flexLowHp: false, seaePuddleCd: 0, zippiBubbleHp: pd.selectedChar === 'zippi' ? 80 : 0, zippiBubbleMaxHp: pd.selectedChar === 'zippi' ? 80 : 0, zippiBubbleBroken: false,
         glitchMorphActive: false, glitchMorphWavesLeft: 0, glitchTransformAnimating: false, glitchTransformReverting: false, glitchTransformElapsed: 0, glitchTransformTimer: 0, glitchTransformPreviewId: 'glitch', glitchTransformFinalId: 'glitch', glitchTransformCycleIds: [], glitchMorphLevel: 1, glitchCurrentFormId: 'glitch', glitchOriginChar: pd.selectedChar === 'glitch' ? 'glitch' : null,
-        stats: { dmgMult: 1, maxHpMult: 1, speedMult: 1, fireRateMult: 1, rangeMult: 1, extraProj: 0, regen: 0, critChance: 0, critDmg: 2, pierce: 0, projSpdMult: 1, defMult: 1, vamp: 0, coinMult: 1, xpMult: 1, explodeHit: false, waveBuff: false, doubleShotChance: 0, dynamicDef: 0, magnetMult: 1, poisonChance: 0, freezeChance: 0, bounce: 0, enemySpawnMult: 1, bossDmgMult: 1, orbitals: 0, dodgeChance: charDef.baseDodge || 0, landmine: 0, pushChance: 0 }
+        stats: { dmgMult: 1, maxHpMult: 1, speedMult: 1, fireRateMult: 1, rangeMult: 1, extraProj: 0, regen: 0, critChance: 0, critDmg: 2, pierce: 0, projSpdMult: 1, defMult: 1, vamp: 0, coinMult: 1, xpMult: 1, explodeHit: false, burnChance: 0, rotatingDrum: 0, rotatingDrumTimer: 2, waveBuff: false, doubleShotChance: 0, dynamicDef: 0, magnetMult: 1, poisonChance: 0, freezeChance: 0, bounce: 0, enemySpawnMult: 1, bossDmgMult: 1, orbitals: 0, dodgeChance: charDef.baseDodge || 0, landmine: 0, pushChance: 0 }
     };
     if (pd.selectedChar === 'merlin') applyMerlinAgeStats('old', false);
     updateSpecialButtonUI();
@@ -10883,7 +10985,7 @@ function startRunAfterShop() {
     player.o2 = 100;
     player.o2Max = 100;
     
-    wave = 1; gameTime = 0; waveTimer = 0; enemySpawnTimer = 0; enemiesKilled = 0; inRunXp = 0; inRunLevel = 1; xpToNext = 100; runCoins = 0; runGems = 0; runScrap = 0; runMedals = 0; runChestCoins = 0; runChestGems = 0; runChestScrap = 0; runBossBoxDrops = [];
+    wave = 1; gameTime = 0; waveTimer = 0; enemySpawnTimer = 0; enemiesKilled = 0; inRunXp = 0; inRunLevel = 1; xpToNext = 100; runCoins = 0; runGems = 0; runScrap = 0; runMedals = 0; runChestCoins = 0; runChestGems = 0; runChestScrap = 0; runBossBoxDrops = []; runRewardsInvalidated = false;
     syncCharacterProgressState();
     pd.run = { charId: pd.selectedChar, medals: 0 };
     const runChar = ensureCharacterProgress(pd.selectedChar);
@@ -12000,7 +12102,7 @@ if (!isBossAlive) {
 
     let nx = player.x + dx * pSpeed; let ny = player.y + dy * pSpeed;
     if (!playerCanPassWalls()) {
-        obstacles.forEach(o => { if(o.type !== 'ice' && o.type !== 'mud' && o.type !== 'car' && o.type !== 'bamboo_spike' && dist({x:nx,y:ny}, o) < o.r + player.r) { nx = player.x; ny = player.y; } });
+        obstacles.forEach(o => { if(o.type !== 'ice' && o.type !== 'mud' && o.type !== 'car' && o.type !== 'bamboo_spike' && distXY(nx, ny, o.x, o.y) < o.r + player.r) { nx = player.x; ny = player.y; } });
     }
     player.x = Math.max(-1500, Math.min(1500, nx)); player.y = Math.max(-1500, Math.min(1500, ny));
     if (player.josephOllieDetonate) {
@@ -12042,6 +12144,7 @@ if (!isBossAlive) {
         }
         if(picked) {
             if(m.type === 'loot_box_drop') { runBossBoxDrops.push(normalizeBoxType(m.boxType)); addFloatingText(player.x, player.y, `${boxName(m.boxType)} coletada`, '#f1c40f'); } else if(m.type === 'chest') {
+                if (runRewardsInvalidated) { m.x = 99999; m.y = 99999; continue; }
                 if(Math.random() < 0.4) {
                     runChestGems += 2; addFloatingText(player.x, player.y, `+2 Gemas`, '#2ecc71');
                 } else if(Math.random() < 0.6) {
@@ -12346,6 +12449,7 @@ if (!isBossAlive) {
             }
         }
     }
+    updateRotatingDrum(dt);
     updateAllies(dt); updateProjectiles(dt); updatePuddles(dt); updateGems(dt); updateParticles(dt); updateCaveVisionBursts(dt); updateMarineOxygen(dt); updateGameHud();
 }
 
@@ -12358,7 +12462,7 @@ function moveIzaqueForwardToward(target, distance = 28) {
     let blocked = false;
     for (const o of obstacles) {
         if (!o || ['ice','mud','car','bamboo_spike','kelp'].includes(o.type)) continue;
-        if (dist({x:nx,y:ny}, o) < (Number(o.r)||0) + player.r) { blocked = true; break; }
+        if (distXY(nx, ny, o.x, o.y) < (Number(o.r)||0) + player.r) { blocked = true; break; }
     }
     if (!blocked) { player.x = nx; player.y = ny; }
 }
@@ -12413,6 +12517,24 @@ function registerIzaqueSlashHit(slash) {
         const target = enemies.find(e => e && e.hp > 0 && !isCurrentlyHypnotized(e));
         activateIzaqueForm('wolf');
         if (target) moveIzaqueForwardToward(target, 28);
+    }
+}
+
+function updateRotatingDrum(dt) {
+    if (!player || !player.stats) return;
+    const stacks = Math.max(0, Math.floor(Number(player.stats.rotatingDrum) || 0));
+    if (stacks <= 0) return;
+    if (!Number.isFinite(player.stats.rotatingDrumTimer)) player.stats.rotatingDrumTimer = 2;
+    player.stats.rotatingDrumTimer = Math.max(0, player.stats.rotatingDrumTimer - dt);
+    if (player.stats.rotatingDrumTimer > 0) return;
+    player.stats.rotatingDrumTimer += 2;
+    const speed = 5.2 * Math.max(0.5, Number(player.stats.projSpdMult) || 1);
+    const damage = Math.max(1, player.baseDmg * (Number(player.stats.dmgMult) || 1));
+    for (let stack = 0; stack < stacks; stack++) {
+        for (let i = 0; i < 6; i++) {
+            const angle = (Math.PI * 2 * i) / 6;
+            createProj(player.x, player.y, Math.cos(angle) * speed, Math.sin(angle) * speed, damage, 60, true, 'normal', { size: 5, sourceChar: pd.selectedChar, sourceAbility: 'rotating_drum' });
+        }
     }
 }
 
@@ -13864,8 +13986,9 @@ function fireWeapon(target) {
 
 function getSeinSeinProtector(enemy) {
     if (!enemy || enemy.hp <= 0) return null;
-    for (const protector of enemies) {
-        if (!protector || protector === enemy || protector.hp <= 0 || protector.type !== 'sein_sein') continue;
+    refreshSupportEnemyCaches();
+    for (const protector of FDPerf.seinProtectors) {
+        if (protector === enemy || protector.hp <= 0 || protector.type !== 'sein_sein') continue;
         const radius = Number(protector.seinAuraRadius) || 115;
         if (dist(protector, enemy) <= radius + (enemy.size || 0) * 0.15) return protector;
     }
@@ -13874,8 +13997,9 @@ function getSeinSeinProtector(enemy) {
 
 function getPianoProtector(enemy) {
     if (!enemy || enemy.hp <= 0) return null;
-    for (const pianist of enemies) {
-        if (!pianist || pianist === enemy || pianist.hp <= 0 || pianist.type !== 'piano') continue;
+    refreshSupportEnemyCaches();
+    for (const pianist of FDPerf.pianoProtectors) {
+        if (pianist === enemy || pianist.hp <= 0 || pianist.type !== 'piano') continue;
         const radius = Number(pianist.pianoAuraRadius) || 125;
         if (dist(pianist, enemy) <= radius + (enemy.size || 0) * 0.15) return pianist;
     }
@@ -14777,7 +14901,10 @@ function blizzardTakeDamageHeat() {
 }
 
 function updateEnemies(dt) {
-    const enemySeparationGrid = new Map();
+    refreshSupportEnemyCaches(true);
+    refreshCollisionCaches();
+    const enemySeparationGrid = FDPerf.enemySeparationGrid;
+    enemySeparationGrid.clear();
     const enemyGridCellSize = 128;
     for (let g = enemies.length - 1; g >= 0; g--) {
         const ge = enemies[g];
@@ -14934,7 +15061,15 @@ function updateEnemies(dt) {
         if(e.speedBuffTimer > 0) { e.speedBuffTimer -= dt; currentSpeed *= 1.5; }
         const pianoProtector = getPianoProtector(e);
         if (pianoProtector) currentSpeed *= 1.35;
-        let eSpeedMult = 1; obstacles.forEach(o => { if(o.type==='ice' && dist(e, o) < o.r + e.size) eSpeedMult = 1.5; if(o.type==='mud' && dist(e, o) < o.r + e.size) eSpeedMult = 0.5; if(o.type==='cacto') { let d2=dist(e,o); if(d2<o.r+e.size){ e.hp -= 30 * dt * getEnemyDamageTakenMultiplier(e); } } });
+        let eSpeedMult = 1;
+        for (const o of FDPerf.terrainObstacles) {
+            if (o.type === 'ice' && dist(e, o) < o.r + e.size) eSpeedMult = 1.5;
+            else if (o.type === 'mud' && dist(e, o) < o.r + e.size) eSpeedMult = 0.5;
+            else if (o.type === 'cacto') {
+                const d2 = dist(e, o);
+                if (d2 < o.r + e.size) e.hp -= 30 * dt * getEnemyDamageTakenMultiplier(e);
+            }
+        }
         const isFrozen = Number.isFinite(e.freezeTimer) && e.freezeTimer > 0;
         if(isFrozen) { e.freezeTimer -= dt; currentSpeed = 0; }
         const isStunned = Number.isFinite(e.stunTimer) && e.stunTimer > 0;
@@ -14999,21 +15134,20 @@ function updateEnemies(dt) {
             const candidateY = Math.max(-1480, Math.min(1480, e.y + push.vy * step));
             let blockedByWall = false;
             if (!e.globalBalloon) {
-                for (const obstacle of obstacles) {
-                    if (!obstacle || ['ice','mud','car','bamboo_spike','kelp'].includes(obstacle.type)) continue;
+                for (const obstacle of FDPerf.blockingObstacles) {
+                    if (!obstacle || (e.type === 'lumberjack' && obstacle.type === 'tree') || obstacle.type === 'kelp') continue;
                     const minDist = (Number(obstacle.r) || 0) + (Number(e.size) || 0);
-                    if (dist({ x: candidateX, y: candidateY }, obstacle) < minDist) {
+                    if (distXY(candidateX, candidateY, obstacle.x, obstacle.y) < minDist) {
                         blockedByWall = true;
                         break;
                     }
                 }
-                // Paredes temporárias do Xilo ficam em `projectiles`, então precisam de uma checagem própria.
+                // Paredes temporárias do Xilo ficam em uma lista filtrada, mantendo o mesmo comportamento.
                 if (!blockedByWall) {
-                    for (const wall of projectiles) {
-                        if (!wall || !['xilo_anvil','grenade_barricade'].includes(wall.type) || !wall.extra?.isWall) continue;
+                    for (const wall of FDPerf.xiloWalls) {
                         const wallRadius = Number.isFinite(wall.extra.wallRadius) ? wall.extra.wallRadius : 21;
                         const minDist = wallRadius + (Number(e.size) || 0) + 1;
-                        if (dist({ x: candidateX, y: candidateY }, wall) < minDist) {
+                        if (distXY(candidateX, candidateY, wall.x, wall.y) < minDist) {
                             blockedByWall = true;
                             break;
                         }
@@ -15454,11 +15588,10 @@ function updateEnemies(dt) {
         if (Math.abs(nx - prevX) > 0.01) e.facingLeft = nx < prevX;
 
         // Xilo's temporary anvil walls block passage, but never freeze an enemy inside them.
-        for (const wall of projectiles) {
-            if (!wall || !['xilo_anvil','grenade_barricade'].includes(wall.type) || !wall.extra?.isWall) continue;
+        for (const wall of FDPerf.xiloWalls) {
             const wallRadius = Number.isFinite(wall.extra.wallRadius) ? wall.extra.wallRadius : 21;
             const minD = wallRadius + (e.size || 0) + 1;
-            const dWall = dist({ x: nx, y: ny }, wall);
+            const dWall = distXY(nx, ny, wall.x, wall.y);
             if (dWall < minD) {
                 const fromWall = dWall > 0.01
                     ? Math.atan2(ny - wall.y, nx - wall.x)
@@ -15469,10 +15602,10 @@ function updateEnemies(dt) {
         }
 
         if (!e.globalBalloon) {
-    obstacles.forEach(o => {
-                if (e.type === 'lumberjack' && o.type === 'tree') return;
-                if(o.type !== 'ice' && o.type !== 'mud' && o.type !== 'car' && o.type !== 'bamboo_spike' && dist({x:nx,y:ny}, o) < o.r + e.size) { nx = e.x; ny = e.y; }
-            });
+            for (const o of FDPerf.blockingObstacles) {
+                if (e.type === 'lumberjack' && o.type === 'tree') continue;
+                if (distXY(nx, ny, o.x, o.y) < o.r + e.size) { nx = e.x; ny = e.y; break; }
+            }
         }
         e.x = Math.max(-1480, Math.min(1480, nx)); e.y = Math.max(-1480, Math.min(1480, ny));
 
@@ -15732,9 +15865,9 @@ function updateEnemies(dt) {
                     enemies.push({ x:e.x+10, y:e.y, type:'cardboard_head', hp:45*mult, maxHp:45*mult, speed:1.35, baseDmg:5*mult, dmg:5*mult, size:15, cd:0, color:'#b8793c', poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0, shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4, isGlobalArmored:true, breakIntoBasic:true, spawnBiome:camelSourceMap, skinSourceMapId:camelSourceMap, fracturedOrigin:camelFractured, fractureMapId:camelFractured ? camelSourceMap : null, enemySkin:null, fracturedSkinType:null, resolvedFracturedSkinType:null, _skinTypeForEnemy:null });
                 }
                 enemiesKilled++;
-                pd.progressStats.totalKills = (Number(pd.progressStats.totalKills) || 0) + 1;
+                runProgressStats.totalKills = Math.max(0, Number(runProgressStats.totalKills) || 0) + 1;
                 trackMissionProgress('kills', 1);
-                if(e.isBoss) { pd.progressStats.bossKills = (Number(pd.progressStats.bossKills) || 0) + 1; trackMissionProgress('bosses', 1); awardCharacterMedal(pd.selectedChar, e.type === 'megaboss' ? 8 : 5); const bossBoxType = rollBossBoxDropType(); if (bossBoxType) itemsMap.push({x:e.x,y:e.y,type:'loot_box_drop',r:20,boxType:bossBoxType}); }
+                if(e.isBoss) { runProgressStats.bossKills = Math.max(0, Number(runProgressStats.bossKills) || 0) + 1; trackMissionProgress('bosses', 1); awardCharacterMedal(pd.selectedChar, e.type === 'megaboss' ? 8 : 5); const bossBoxType = rollBossBoxDropType(); if (bossBoxType) itemsMap.push({x:e.x,y:e.y,type:'loot_box_drop',r:20,boxType:bossBoxType}); }
                 const eliteTypes = ['gigante','tanque','colosso','elite','elite_master','lider','lider_elite','megaboss'];
                 if(eliteTypes.includes(e.type)) trackMissionProgress('elite', 1);
                 trackMissionProgress('specific', 1, { enemyType: e.type });
@@ -15765,7 +15898,6 @@ function updateEnemies(dt) {
                 if (pd.selectedChar === 'graffit') addGraffitMark(e.x, e.y);
                 if (pd.selectedChar === 'bulb' && Number(player.bulbMode) === 2) puddles.push({ x: e.x, y: e.y, r: 78, dmg: 0, life: 5, type: 'bulb_coral', tick: 0 });
                 if (Number(e.curseTimer) > 0) { const curseBlastDmg = Math.max(1, player.baseDmg * player.stats.dmgMult * 0.55); createExplosion(e.x, e.y, 68, curseBlastDmg, '#ff69b4'); }
-                if(player.stats.explodeHit) createExplosion(e.x, e.y, 60, player.baseDmg * 0.5);
                 
                 blizzardCoolDownOnKill(e);
                 createParticles(e.x, e.y, e.color); enemies.splice(i, 1);
@@ -15986,7 +16118,7 @@ function updateAllies(dt) {
                         createProj(a.x, a.y, Math.cos(ang)*4, Math.sin(ang)*4, a.dmg, 60, true, 'pipisnowball', { size: 13, sourceChar: 'pipi', sourceType: 'penguin' });
                         a.cd = 0.95;
                     } else if (isKaisenDrone) { if(Math.random()<0.20) createProj(a.x,a.y,Math.cos(ang)*7,Math.sin(ang)*7,a.dmg*1.15,50,true,'laser',{size:3,sourceChar:'axel',axelDrone:true,zippiBurnChance:1}); else createProj(a.x,a.y,Math.cos(ang)*5.2,Math.sin(ang)*5.2,a.dmg,60,true,'normal',{size:4,sourceChar:'axel'}); a.cd=0.75; } else {
-                        createProj(a.x, a.y, Math.cos(ang)*4, Math.sin(ang)*4, a.dmg, 60, true, 'normal', { size: 4, sourceChar: 'drone', sourceType: 'drone' });
+                        createProj(a.x, a.y, Math.cos(ang)*6, Math.sin(ang)*6, a.dmg, 60, true, 'normal', { size: 4, sourceChar: 'drone', sourceType: 'drone' });
                         a.cd = 0.95;
                     }
                 } else {
@@ -16044,7 +16176,7 @@ function updateAllies(dt) {
                     else if (a.type === 'tesla') { createProj(a.x, a.y, Math.cos(ang)*5.0, Math.sin(ang)*5.0, a.dmg, 85, true, 'tesla_bolt', {size: 16, sourceChar:'tesla', shockDuration: 2.2, shockDamage: a.dmg * 0.12}); a.cd = 2.15; }
                     else if (a.type === 'crossbow') { createProj(a.x, a.y, Math.cos(ang)*6.5, Math.sin(ang)*6.5, a.dmg, 65, true, 'crossbow_bolt', {size: 6, sourceChar:'crossbow', pierce: 99}); a.cd = 0.95 * (a.crossbowTurretFireRate || 1); }
                     else if (a.type === 'burner') { createProj(a.x, a.y, Math.cos(ang)*5.2, Math.sin(ang)*5.2, a.dmg, 65, true, 'burner_fireball', {size: 10, sourceChar:'burner', burnDuration: 3.2, burnDamage: a.dmg * 0.35}); a.cd = 1.05; }
-                    else { createProj(a.x, a.y, Math.cos(ang)*6, Math.sin(ang)*6, a.dmg, 60, true, 'normal', { sourceChar: 'meekah' }); a.cd = 0.8; }
+                    else { createProj(a.x, a.y, Math.cos(ang)*8, Math.sin(ang)*8, a.dmg, 60, true, 'normal', { sourceChar: 'meekah' }); a.cd = 0.8; }
                 } else { a.cd -= dt; } 
             }
         } else if (a.type === 'stationary_saw') { 
@@ -16460,7 +16592,13 @@ function projectileHitsEnemy(p,e){
 
 function updateProjectiles(dt) {
     if (window.currentMap === 10 && pd.settings.ultraHardcore) dt *= 0.58;
-    if (Array.isArray(projectiles)) projectiles = projectiles.filter(p => p && p.type !== 'bulb_bubble_legacy_removed' && p.type !== 'bulb_bubble_attached');
+    if (Array.isArray(projectiles)) {
+        for (let i = projectiles.length - 1; i >= 0; i--) {
+            const p = projectiles[i];
+            if (!p || p.type === 'bulb_bubble_legacy_removed' || p.type === 'bulb_bubble_attached') projectiles.splice(i, 1);
+        }
+    }
+    refreshCollisionCaches();
     updateBulbBubbles(dt);
     for(let i = projectiles.length - 1; i >= 0; i--) {
         try {
@@ -17301,6 +17439,15 @@ function updateProjectiles(dt) {
                         }
                         let soakMult = 1 + (e.soak || 0) * 0.05;
                         realDmg *= soakMult;
+
+                        const genericBurnChance = Math.max(0, Math.min(1, Number(projStats.burnChance) || 0));
+                        if (genericBurnChance > 0 && Math.random() < genericBurnChance && e.hp > 0) {
+                            e.burnTimer = Math.max(Number(e.burnTimer) || 0, 3);
+                            e.burnDmg = Math.max(Number(e.burnDmg) || 0, Math.max(1, realDmg * 0.35));
+                        }
+                        if (projStats.explodeHit && p.type !== 'puddle' && p.type !== 'black_hole') {
+                            createExplosion(e.x, e.y, 60 * (Number(projStats.rangeMult) || 1), Math.max(1, realDmg * 0.5));
+                        }
 
                         if (p.type === 'cookie_tray' && !p.extra?.splitDone) {
                             // A bandeja causa 18 de dano e só depois se quebra em 6 biscoitos.
@@ -19459,11 +19606,12 @@ function updateFractures(dt) {
 
 const RENDER_CULL_PAD = 96;
 function isWorldVisible(x, y, radius = 0) {
-    const r = (Number.isFinite(radius) ? radius : 0) + RENDER_CULL_PAD;
-    return x + r >= camera.x && x - r <= camera.x + cw && y + r >= camera.y && y - r <= camera.y + ch;
+    const r = (Number.isFinite(radius) ? radius : 0);
+    return x + r >= FDPerf.renderLeft && x - r <= FDPerf.renderRight && y + r >= FDPerf.renderTop && y - r <= FDPerf.renderBottom;
 }
 
 function draw() {
+    refreshRenderBounds();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.globalAlpha = 1;
     ctx.clearRect(0, 0, cw, ch);
@@ -20229,7 +20377,8 @@ function draw() {
         } 
     });
     
-    projectiles.filter(p => p.type === 'black_hole' && isWorldVisible(p.x, p.y, p.size || 30)).forEach(p => {
+    for (const p of projectiles) {
+        if (p.type !== 'black_hole' || !isWorldVisible(p.x, p.y, p.size || 30)) continue;
         ctx.save();
         ctx.shadowColor = '#8e44ad';
         ctx.shadowBlur = 22;
@@ -20249,7 +20398,7 @@ function draw() {
         ctx.arc(p.x, p.y, p.size + 8, 0, Math.PI*2);
         ctx.stroke();
         ctx.restore();
-    });
+    }
 
     enemies.forEach(e => { 
         if (!isWorldVisible(e.x, e.y, e.size || 24)) return;
@@ -22900,6 +23049,7 @@ function updateGameHud(force = false) {
 }
 
 function gameOver(isQuit) {
+    if (runRewardsInvalidated) isQuit = true;
     window.lastGameOverWasLoss = !isQuit;
     isPlaying = false; cancelAnimationFrame(gameLoopId); joyZone.style.display = 'none'; document.getElementById('btn-special').style.display = 'none';
 
@@ -22947,11 +23097,18 @@ function gameOver(isQuit) {
             if (q.length) startGachaQueue(q);
         }
     } else {
-        // Sair voluntariamente invalida o progresso da run.
+        // Sair voluntariamente invalida toda recompensa temporária da run.
+        runRewardsInvalidated = true;
         runMedals = 0;
+        runCoins = 0;
+        runGems = 0;
+        runScrap = 0;
         runChestCoins = 0;
         runChestGems = 0;
         runChestScrap = 0;
+        runBossBoxDrops = [];
+        if (Array.isArray(itemsMap)) itemsMap = [];
+        if (Array.isArray(window.gachaQueue)) window.gachaQueue = [];
     }
 
     if (!isQuit) {
@@ -22960,6 +23117,13 @@ function gameOver(isQuit) {
         // Uma run só pode melhorar o recorde; uma morte em wave menor jamais o reduz/substitui.
         if (finalWave > accountBestWave) pd.progressStats.bestWave = finalWave;
         else pd.progressStats.bestWave = accountBestWave;
+        // Só agora, depois da morte legítima, confirma missões normais/semanais e progresso de desbloqueios.
+        commitLegitimateRunProgress();
+    } else {
+        // Quit nunca confirma progresso de missões nem estatísticas usadas em desbloqueios.
+        runMissionEvents = [];
+        runProgressStats = { gamesStarted: 0, totalKills: 0, bossKills: 0 };
+        runMissionCommitInProgress = false;
     }
     restoreGlitchSelectionIfNeeded();
     save();
@@ -22976,8 +23140,13 @@ function gameOver(isQuit) {
 }
 
 
-let runCoins = 0; let runGems = 0; let runScrap = 0; let runMedals = 0; let runChestCoins = 0; let runChestGems = 0; let runChestScrap = 0; let runBossBoxDrops = [];
+let runCoins = 0; let runGems = 0; let runScrap = 0; let runMedals = 0; let runChestCoins = 0; let runChestGems = 0; let runChestScrap = 0; let runBossBoxDrops = []; let runRewardsInvalidated = false; let runMissionEvents = []; let runProgressStats = { gamesStarted: 0, totalKills: 0, bossKills: 0 }; let runMissionCommitInProgress = false;
 function returnToMenu() {
+    runRewardsInvalidated = true;
+    runMissionEvents = []; runProgressStats = { gamesStarted: 0, totalKills: 0, bossKills: 0 }; runMissionCommitInProgress = false;
+    runMedals = 0; runCoins = 0; runGems = 0; runScrap = 0;
+    runChestCoins = 0; runChestGems = 0; runChestScrap = 0; runBossBoxDrops = [];
+    if (Array.isArray(window.gachaQueue)) window.gachaQueue = [];
     const shouldStartFirstLossTutorial = !!(window.lastGameOverWasLoss && pd?.tutorial && !pd.tutorial.firstLossHandled);
     restoreGlitchSelectionIfNeeded();
     document.getElementById('overlay-gameover').classList.add('hidden');
