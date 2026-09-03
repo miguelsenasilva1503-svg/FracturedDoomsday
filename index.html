@@ -705,8 +705,8 @@
             </div>
         </div>
         <div class="shop-section">
-            <h3>Oferta Vitalícia</h3>
-            <div id="shop-lifetime-offer" class="menu-grid shop-grid"></div>
+            <h3>Login de 7 Dias</h3>
+            <div id="shop-7day-login" class="menu-grid shop-grid"></div>
         </div>
     </div>
 
@@ -1072,7 +1072,12 @@ Uma espécie de ninja misterioso que encontrou as duas armas enquanto explorava 
 
 Um dragão falante que despertou em um lugar completamente desconhecido, sem saber onde fica sua terra natal. Curioso e determinado, Snapdragon viaja pelo mundo em busca de pistas sobre sua origem, conhecendo novos lugares e tentando descobrir onde realmente pertence. Apesar de não saber muito sobre seu passado, ele tem certeza de uma coisa: sua terra natal está em algum lugar por aí.
 
-“Eu sei que minha casa existe... só preciso descobrir onde!”` },
+“Eu sei que minha casa existe... só preciso descobrir onde!”` },    izaque: { id: 'izaque', class: 'Algoz', name: 'Izaque', rarity: 'legendary', cost: 349, hp: 115, speed: 3.7, dmg: 20, fireRate: 48, range: 165, color: '#8e44ad', weapon: 'izaque_claws', sortLast: true, desc: `“Izaque passou muito tempo tentando controlar o Lobogato. Até perceber que a criatura nunca quis ser controlada.”
+
+Um jovem que se tornou o portador do Lobogato, uma entidade misteriosa que combina os instintos e características de um lobo e de um gato. No início, Izaque acreditava que precisava dominar a criatura para controlar seu poder, mas com o tempo percebeu que o Lobogato queria algo diferente: lutar ao seu lado. A conexão entre os dois se tornou tão profunda que Izaque deixou de enxergar a entidade como uma força a ser controlada, passando a lutar em completa sintonia com ela.
+
+“Eu não controlo o Lobogato. Nós lutamos como um só.”` },
+
     healy: { id: 'healy', class: 'Suporte', name: 'Healy', rarity: 'epic', cost: 149, hp: 110, speed: 3.2, dmg: 15, fireRate: 60, range: 250, color: '#ff9ff3', weapon: 'syringe', desc: `“Healy jurou ajudar todo mundo. Pena que ela também adora testar invenções estranhas.”
 
 Uma curandeira energética que usa seringas especiais em combate, misturando suporte e confusão em doses perigosamente altas. Seus aliados se sentem seguros perto dela… geralmente.
@@ -1578,7 +1583,14 @@ Bate com seu sabre no chão criando uma área que causa STUN em inimigos
 Joga um de seus sabres que volta pra Nox`,
     snapdragon: `Snapdragon: morde inimigos e ao mesmo tempo dispara uma bola de fogo que QUEIMA inimigos
 
-ESPECIAL: ao usar seu botão, dispara uma rajada de fogo por 3s`,
+ESPECIAL: ao usar seu botão, dispara uma rajada de fogo por 3s`,    izaque: `Izaque: usa suas garras retráteis pra atacar em 180°
+
+ESPECIAL: quando ataca 8 vezes consecutivas sem errar ativa a forma lupina, seus slashes ficam mais lentos, mas mais fortes, ele também avança um pouco em direção ao inimigo antes de atacar. Essa forma dura 5s.
+
+ESPECIAL: quando fica 5s em movimento ativa a forma felina, seus slashes ficam mais rápidos, mas mais fracos e ganha um buff de velocidade. Essa forma dura 10s.
+
+ESPECIAL: ao ativar seu botão se transforma no Lobogato, um híbrido dos dois. Seus ataques ficam mais rápidos e fortes, ele dá investidas e ganha buff de velocidade. A forma dura 2 waves.`,
+
     healy: `Healy: dispara seringas que, ao colidirem, criam poças curadoras.
 
 ESPECIAL: nativamente, tem cura passiva.
@@ -3117,6 +3129,7 @@ const CHARACTER_TITLES = {
     tenent: 'General',
     nox: 'Sabre duplo',
     snapdragon: 'Dracônico',
+    izaque: 'Lobo Gato',
     healy: 'Hora da vacina',
     rex: 'Parei família, é máfia!',
     knighter: 'Beleza real',
@@ -3225,6 +3238,10 @@ const CHARACTER_SPRITES = {
     tenent: 'sprites/tenent.png',
     nox: 'sprites/nox.png',
     snapdragon: 'sprites/snapdragon.png',
+    izaque: 'izaque.png',
+    izaque_wolf: 'izaque_wolf.png',
+    izaque_cat: 'izaque_cat.png',
+    izaquewolfcat: 'izaquewolfcat.png',
     healy: 'sprites/healy.png',
     rex: 'sprites/rex.png',
     knighter: 'sprites/knighter.png',
@@ -3534,6 +3551,9 @@ const ALLY_ELEMENT_SPRITES = {
     turret: 'elements/turret.png',
     mortar: 'elements/mortar.png',
     cannon: 'elements/canon.png',
+    tesla: 'elements/tesla.png',
+    crossbow: 'elements/crossbow.png',
+    burner: 'elements/burner.png',
     drone: 'elements/drone.png',
     axel_drone: 'elements/axel_drone.png',
     landmine: ['elements/landmine.png', 'elements/mine.png', 'elements/minesweeper.png'],
@@ -3581,6 +3601,11 @@ function getDynamicCharacterSpriteId(id) {
         return 'flex_hammer';
     }
     if (id === 'shinobi' && typeof player !== 'undefined' && player && (player.shinobiDragonActive || player.shinobiDragonFormActive)) return 'dragon_shinobi';
+    if (id === 'izaque' && typeof player !== 'undefined' && player && player.izaqueForm) {
+        if (player.izaqueForm === 'wolf') return 'izaque_wolf';
+        if (player.izaqueForm === 'cat') return 'izaque_cat';
+        if (player.izaqueForm === 'wolfcat') return 'izaquewolfcat';
+    }
     return id;
 }
 
@@ -3907,6 +3932,12 @@ function resetMorphRuntimeState(charId) {
     player.adamMechSizeBonus = 0;
     player.adamBaseHpBeforeMech = null;
     player.adamBaseRBeforeMech = null;
+    player.izaqueForm = pd.selectedChar === 'izaque' ? 'normal' : null;
+    player.izaqueFormTimer = 0;
+    player.izaqueCombo = 0;
+    player.izaqueMovementTimer = 0;
+    player.izaqueSpecialCooldown = pd.selectedChar === 'izaque' ? 30 : 0;
+    player.izaqueHybridWavesLeft = 0;
     player.spartaCycle = 0;
     player.spartaNoDamageTimer = 0;
     player.spartaShieldActive = false;
@@ -5536,17 +5567,6 @@ function grantBackupOverdogReward() {
     return { selected, queue };
 }
 
-function grantNoxSnapdragonDaviReward() {
-    const unlocked = [];
-    for (const id of ['nox', 'snapdragon']) {
-        if (CHARACTERS?.[id] && !pd.chars?.[id]) {
-            pd.chars[id] = { level: 1, slots: 2, chips: [null, null] };
-            unlocked.push(CHARACTERS[id]);
-        }
-    }
-    return unlocked;
-}
-
 function redeemRewardCode() {
     ensureRedeemedCodesState();
     const input = document.getElementById('reward-code-input');
@@ -5555,27 +5575,43 @@ function redeemRewardCode() {
 
 
 
-    if (normalizedCode === 'NOXSNAPDRAGONDAVI') {
-        if (pd.redeemedCodes.noxsnapdragondavi) {
+    if (normalizedCode === 'IZAQUEIZAQUE') {
+        if (pd.redeemedCodes.izaqueizaque) {
             showAlert('Esse código já foi resgatado nesta conta.');
             return;
         }
-
-        const unlocked = grantNoxSnapdragonDaviReward();
-        pd.redeemedCodes.noxsnapdragondavi = true;
+        if (!pd.chars.izaque) pd.chars.izaque = { level: 1, slots: 2, chips: [null, null] };
+        pd.redeemedCodes.izaqueizaque = true;
         save();
         if (input) input.value = '';
-        renderChars?.();
-        renderShop?.();
-        updateUI();
+        renderChars?.(); renderShop?.(); updateUI();
+        notify(pd.chars.izaque ? 'Código resgatado: Izaque — Lobo Gato desbloqueado gratuitamente.' : 'Código resgatado.');
+        return;
+    }
 
-        if (unlocked.length === 2) {
-            notify('Código resgatado: Nox e Snapdragon desbloqueados gratuitamente.');
-        } else if (unlocked.length === 1) {
-            notify(`Código resgatado: ${unlocked[0].name} desbloqueado gratuitamente. O outro personagem já estava desbloqueado.`);
-        } else {
-            notify('Código resgatado: Nox e Snapdragon já estavam desbloqueados.');
+    if (normalizedCode === 'LAFRANCE') {
+        if (pd.redeemedCodes.lafrance) {
+            showAlert('Esse código já foi resgatado nesta conta.');
+            return;
         }
+        const rewards = [];
+        rewards.push('BOX::metal', 'BOX::gold');
+        if (!pd.chars.shinobi) {
+            pd.chars.shinobi = { level: 1, slots: 2, chips: [null, null] };
+            rewards.push('Shinobi');
+        } else {
+            pd.gems += 300;
+            rewards.push('300 gemas');
+        }
+        pd.redeemedCodes.lafrance = true;
+        save();
+        if (input) input.value = '';
+        renderChars?.(); renderShop?.(); updateUI();
+        const q = [];
+        const instant = rewards.filter(r => !r.startsWith('BOX::'));
+        if (instant.length) q.push({ type:'instant', title:'Código LAFRANCE', contents:instant });
+        rewards.filter(r => r === 'BOX::metal' || r === 'BOX::gold').forEach(r => q.push(buildBoxQueue(r.slice(5))));
+        if (q.length) startGachaQueue(q);
         return;
     }
 
@@ -6822,7 +6858,7 @@ function showShopSection(section, skipTutorial = false) {
     screen.scrollTop = 0;
 
     if (isShopTutorialBlockingPurchases()) {
-        screen.querySelectorAll(".shop-novo-overlay, #shop-bundles button, #shop-resources button, #shop-chips button, #shop-characters button, .promo-offer-btn, [onclick*=\'processBuyBundle\'], [onclick*=\'buyResource\'], [onclick*=\'buyChip\'], [onclick*=\'buyChar\'], [onclick*=\'buyPromoCharacterOffer\'], [onclick*=\'buyLifetimeOffer\'], [onclick*=\'clickNovoOverlay\'], [onclick*=\'buyVIP\']").forEach(el => {
+        screen.querySelectorAll(".shop-novo-overlay, #shop-bundles button, #shop-resources button, #shop-chips button, #shop-characters button, .promo-offer-btn, [onclick*=\'processBuyBundle\'], [onclick*=\'buyResource\'], [onclick*=\'buyChip\'], [onclick*=\'buyChar\'], [onclick*=\'buyPromoCharacterOffer\'], [onclick*=\'clickNovoOverlay\'], [onclick*=\'buyVIP\']").forEach(el => {
             if (el.closest('#daily-reward-container')) return;
             el.classList.add('shop-tutorial-locked');
             if ('disabled' in el) el.disabled = true;
@@ -7789,13 +7825,17 @@ function showMissions() {
 }
 
 function ensureShopState() {
-    if(!pd.shopState || typeof pd.shopState !== 'object') pd.shopState = { lastRotation: 0, items: {}, bundles: [], bundlesBadge: [], vipOfferDiscount: 0, lifetimeOfferClaimed: false };
+    if(!pd.shopState || typeof pd.shopState !== 'object') pd.shopState = { lastRotation: 0, items: {}, bundles: [], bundlesBadge: [], vipOfferDiscount: 0, login7: { startedAt: 0, claimedDays: [] } };
     if(typeof pd.shopState.lastRotation !== 'number') pd.shopState.lastRotation = 0;
     if(!Array.isArray(pd.shopState.bundles)) pd.shopState.bundles = [];
     if(!Array.isArray(pd.shopState.bundlesBadge)) pd.shopState.bundlesBadge = [];
     if (Array.isArray(pd.shopState.bundles) && Array.isArray(pd.shopState.bundlesBadge)) pd.shopState.bundles.forEach((b, i) => { if (b && pd.shopState.bundlesBadge[i] === false) b.xpViewed = true; });
     if(typeof pd.shopState.vipOfferDiscount !== 'number') pd.shopState.vipOfferDiscount = 0;
-    if(typeof pd.shopState.lifetimeOfferClaimed !== 'boolean') pd.shopState.lifetimeOfferClaimed = false;
+    if(!pd.shopState.login7 || typeof pd.shopState.login7 !== 'object') pd.shopState.login7 = { startedAt: 0, claimedDays: [] };
+    if (Object.prototype.hasOwnProperty.call(pd.shopState, 'lifetimeOfferClaimed')) delete pd.shopState.lifetimeOfferClaimed;
+    if(typeof pd.shopState.login7.startedAt !== 'number' || !Number.isFinite(pd.shopState.login7.startedAt)) pd.shopState.login7.startedAt = 0;
+    if(!Array.isArray(pd.shopState.login7.claimedDays)) pd.shopState.login7.claimedDays = [];
+    pd.shopState.login7.claimedDays = pd.shopState.login7.claimedDays.map(Number).filter(n => n >= 1 && n <= 7).filter((n,i,a)=>a.indexOf(n)===i).sort((a,b)=>a-b);
     if(!pd.shopState.items || typeof pd.shopState.items !== 'object') pd.shopState.items = {};
     const ensureArr = (key, len) => {
         if(!Array.isArray(pd.shopState.items[key])) pd.shopState.items[key] = [];
@@ -8571,36 +8611,47 @@ function renderShop() {
         vipBtn.innerHTML = `${resourceIcon('gems','inline-sprite-icon')} ${vipFinal}`;
     }
 
-    const lifetimeList = document.getElementById('shop-lifetime-offer');
-    if (lifetimeList) {
-        lifetimeList.innerHTML = '';
-        const alreadyClaimed = !!(pd.shopState && pd.shopState.lifetimeOfferClaimed);
-        const ownsZippi = !!pd.chars.zippi;
-
-        const card = document.createElement('div');
-        card.className = 'card-item rarity-mythic';
-        card.style.padding = '15px';
-        card.innerHTML = alreadyClaimed ? `
-            <div style="font-size:40px;">✅</div>
-            <h5>Pacote Vitalício</h5>
-            <p style="font-size:12px; color:#aaa;">Oferta já resgatada.</p>
-            <button style="padding:5px;font-size:12px;background:var(--gem)" type="button" disabled>RESGATADO</button>
-        ` : ownsZippi ? `
-            <div style="font-size:40px;">🛰️</div>
-            <h5>Pacote Vitalício</h5>
-            <p style="font-size:12px; color:#aaa;">Como você já tem o Zippi, resgate 1 gema e 1 caixa comum.</p>
-            <button style="padding:5px;font-size:12px;background:var(--gem)" type="button" onclick="buyLifetimeOffer()">RESGATAR</button>
-        ` : `
-            <div style="font-size:40px;">🛰️</div>
-            <h5>Pacote Vitalício</h5>
-            <p style="font-size:12px; color:#aaa;">Resgate grátis: Necro, 100 gemas e 3 caixas de metal.</p>
-            <button style="padding:5px;font-size:12px;background:var(--gem)" type="button" onclick="buyLifetimeOffer()">RESGATAR</button>
-        `;
-        if (alreadyClaimed) {
-            card.style.opacity = '0.75';
-            card.style.filter = 'grayscale(0.15)';
+    const login7List = document.getElementById('shop-7day-login');
+    if (login7List) {
+        ensureShopState();
+        const state = pd.shopState.login7;
+        const now = Date.now();
+        const hasStarted = state.startedAt > 0;
+        const elapsedDays = hasStarted ? Math.floor(Math.max(0, now - state.startedAt) / (24 * 60 * 60 * 1000)) + 1 : 1;
+        const availableDay = hasStarted ? Math.min(7, elapsedDays) : 1;
+        const claimed = new Set(state.claimedDays || []);
+        const rewards = [
+            { day: 1, html: `${resourceIcon('coins','inline-sprite-icon')} 1k de moedas`, type: 'coins' },
+            { day: 2, html: `${resourceIcon('evo','inline-sprite-icon')} 1k de Evo`, type: 'evo' },
+            { day: 3, html: `${resourceIcon('scrap','inline-sprite-icon')} 500 sucatas`, type: 'scrap' },
+            { day: 4, html: `${resourceIcon('gems','inline-sprite-icon')} 30 gemas`, type: 'gems' },
+            { day: 5, html: `<img class="inline-sprite-icon" src="elements/crossbow.png" alt=""> Chip Besta`, type: 'crossbow_chip' },
+            { day: 6, html: `<img class="inline-sprite-icon" src="elements/steel_box.png" alt=""> Caixa de Metal`, type: 'metal_box' },
+            { day: 7, html: `<img class="inline-sprite-icon" src="sprites/necro.png" alt=""> Necro gratuito`, type: 'necro' }
+        ];
+        login7List.innerHTML = '';
+        rewards.forEach(r => {
+            const card = document.createElement('div');
+            const isClaimed = claimed.has(r.day);
+            const unlocked = r.day <= availableDay;
+            card.className = `card-item ${isClaimed ? 'rarity-common' : (unlocked ? 'rarity-legendary' : 'rarity-epic')}`;
+            card.style.padding = '12px';
+            const status = isClaimed ? 'RESGATADO' : (!hasStarted && r.day === 1 ? 'INICIAR LOGIN' : (unlocked ? 'RESGATAR' : `EM ${r.day-availableDay} DIA(S)`));
+            const disabled = isClaimed || !unlocked;
+            const nextAt = hasStarted && r.day === availableDay && !isClaimed ? state.startedAt + (r.day-1) * 24 * 60 * 60 * 1000 : 0;
+            const remaining = nextAt > now ? nextAt - now : 0;
+            const timerText = (!disabled && remaining === 0 && r.day > 1) ? 'Disponível agora' : (r.day > availableDay && hasStarted ? `Libera em ${Math.ceil((state.startedAt + (r.day-1)*86400000 - now)/3600000)}h` : '');
+            card.innerHTML = `<div style="font-size:16px;font-weight:900;color:var(--btn-yellow)">DIA ${r.day}</div><div style="margin:7px 0;font-size:14px;font-weight:900">${r.html}</div><div style="font-size:11px;color:#aaa;min-height:15px">${timerText}</div><button type="button" style="padding:7px 9px;font-size:11px;background:${isClaimed ? '#555' : '#2ecc71'}" ${disabled ? 'disabled' : ''} onclick="claim7DayLoginReward(${r.day})">${status}</button>`;
+            if (isClaimed) { card.style.opacity = '0.68'; card.style.filter = 'grayscale(0.15)'; }
+            if (!isClaimed && unlocked) { card.style.boxShadow = '0 0 0 2px rgba(241,196,15,.18), 0 8px 20px rgba(0,0,0,.25)'; }
+            login7List.appendChild(card);
+        });
+        if (claimed.size >= 7) {
+            const done = document.createElement('div');
+            done.style.cssText = 'grid-column:1/-1;text-align:center;color:#7CFFB1;font-weight:900;padding:8px;';
+            done.textContent = 'Login de 7 dias concluído.';
+            login7List.appendChild(done);
         }
-        lifetimeList.appendChild(card);
     }
     showShopSection(currentShopSection || 'offers');
 }
@@ -9144,47 +9195,35 @@ function buyVIP() {
     });
 }
 
-function buyLifetimeOffer() {
+function claim7DayLoginReward(day) {
     if (blockShopTutorialInteraction()) return;
-    if (pd.shopState && pd.shopState.lifetimeOfferClaimed) {
-        showAlert("Essa oferta vitalícia já foi resgatada.");
-        return;
+    ensureShopState();
+    const login7 = pd.shopState.login7;
+    const d = Math.max(1, Math.min(7, Math.floor(Number(day) || 0)));
+    if (login7.claimedDays.includes(d)) { showAlert('Essa recompensa já foi resgatada.'); return; }
+    const now = Date.now();
+    if (!login7.startedAt) login7.startedAt = now;
+    const unlockAt = login7.startedAt + (d - 1) * 24 * 60 * 60 * 1000;
+    if (now < unlockAt) { showAlert(`O dia ${d} ainda não foi liberado.`); return; }
+    if (d > 1 && !login7.claimedDays.includes(d - 1)) { showAlert('Você precisa resgatar o dia anterior primeiro.'); return; }
+
+    const queues = [];
+    const instant = [];
+    if (d === 1) { pd.coins += 1000; instant.push('1.000 Moedas'); }
+    if (d === 2) { pd.evo += 1000; instant.push('1.000 Evo'); }
+    if (d === 3) { pd.sucatas += 500; instant.push('500 Sucatas'); }
+    if (d === 4) { pd.gems += 30; instant.push('30 Gemas'); }
+    if (d === 5) { pd.chipsInventory = pd.chipsInventory || {}; pd.chipsInventory.crossbow_turret_chip = (Number(pd.chipsInventory.crossbow_turret_chip) || 0) + 1; instant.push('Chip Besta'); }
+    if (d === 6) queues.push(buildBoxQueue('metal'));
+    if (d === 7) {
+        if (!pd.chars.necro) { pd.chars.necro = { level: 1, slots: 2, chips: [null, null] }; instant.push('Necro'); }
+        else instant.push('Necro já desbloqueado');
     }
-
-    const rewards = [];
-    if (!pd.chars.necro) {
-        pd.chars.necro = { level: 1, slots: 2, chips: [null, null] };
-        pd.gems += 100;
-        rewards.push("Necro", "100 gemas", "3 caixas de metal");
-        for (let i = 0; i < 3; i++) {
-            rewards.push(`BOX::metal`);
-        }
-    } else {
-        pd.gems += 1;
-        rewards.push("1 gema", "1 caixa comum");
-        rewards.push("BOX::normal");
-    }
-
-    if(!pd.shopState || typeof pd.shopState !== 'object') pd.shopState = { lastRotation: 0, items: {}, bundles: [], bundlesBadge: [], vipOfferDiscount: 0, lifetimeOfferClaimed: false };
-    pd.shopState.lifetimeOfferClaimed = true;
-    save();
-    updateUI();
-    renderShop();
-
-    const queue = [];
-    const instant = rewards.filter(r => !r.startsWith("BOX::"));
-    if (instant.length) queue.push({ type: 'instant', title: 'Oferta Vitalícia', contents: instant.map(r => `🎉 ${r}`) });
-    rewards.filter(r => r.startsWith("BOX::metal")).forEach(() => {
-        const c = [];
-        for (let i = 0; i < 6; i++) c.push(buildBoxDropItem('metal'));
-        queue.push({ type: 'box', boxType: 'metal', contents: c });
-    });
-    rewards.filter(r => r === "BOX::normal").forEach(() => {
-        const c = [];
-        for (let i = 0; i < 3; i++) c.push(buildBoxDropItem('normal'));
-        queue.push({ type: 'box', boxType: 'normal', contents: c });
-    });
-    if (queue.length) startGachaQueue(queue);
+    if (instant.length) queues.unshift({ type:'instant', title:`Login de 7 Dias — Dia ${d}`, contents:instant });
+    login7.claimedDays.push(d);
+    login7.claimedDays = [...new Set(login7.claimedDays)].sort((a,b)=>a-b);
+    save(); updateUI(); renderChars?.(); renderShop();
+    if (queues.length) startGachaQueue(queues); else notify(`Dia ${d} resgatado.`);
 }
 
 function activateVIP() {
@@ -9945,6 +9984,14 @@ function getSelectedSpecialConfig() {
         const active = (player.popeyeSpinTimer || 0) > 0;
         return { type: 'popeye', label: '<img src="elements/spinach.png" alt="" aria-hidden="true">', title: active ? 'Espinafre ativo' : ((player.popeyeSpinCooldown || 0) > 0 ? `Espinafre recarregando ${Math.ceil(Math.max(0, player.popeyeSpinCooldown || 0))}s` : 'Comer espinafre'), ready: !active && (player.popeyeSpinCooldown || 0) <= 0 };
     }
+    if (pd.selectedChar === 'izaque') {
+        const form = player.izaqueForm || 'normal';
+        const active = form === 'wolf' || form === 'cat' || form === 'wolfcat';
+        const cd = Math.max(0, Number(player.izaqueSpecialCooldown || 0));
+        const label = '<img src="wolfcat.png" alt="" aria-hidden="true">';
+        const title = form === 'wolfcat' ? `Lobogato ativo — ${Math.max(0, Number(player.izaqueHybridWavesLeft || 0))} waves` : (cd > 0 ? `Lobogato recarregando ${Math.ceil(cd)}s` : active ? 'Forma ativa' : 'Lobogato');
+        return { type: 'izaque', label, title, ready: !active && cd <= 0 };
+    }
     if (pd.selectedChar === 'snapdragon') {
         const active = (player.snapdragonFlameTimer || 0) > 0;
         const cd = Math.max(0, Number(player.snapdragonFlameCooldown || 0));
@@ -10145,6 +10192,7 @@ function updateSpecialButtonUI(force = false) {
     const isJosephActive = cfg.type === 'joseph' && (player.josephOllieTimer || 0) > 0;
     const isShinobiActive = cfg.type === 'shinobi' && (player.shinobiDragonActive || player.shinobiDragonFormActive);
     const isSnapdragonActive = cfg.type === 'snapdragon' && (player.snapdragonFlameTimer || 0) > 0;
+    const isIzaqueActive = cfg.type === 'izaque' && ['wolf','cat','wolfcat'].includes(player.izaqueForm);
     const isGlitchActive = cfg.type === 'glitch' && !!player.glitchTransformAnimating;
     const isSterling = cfg.type === 'sterling';
     const isGrapple = cfg.type === 'grapple';
@@ -10163,6 +10211,7 @@ function updateSpecialButtonUI(force = false) {
         : isGrapple ? Math.max(0, Number(player.grappleCooldown || 0))
         : cfg.type === 'merlin' ? Math.max(0, Number(player.merlinAgeCooldown || 0))
         : cfg.type === 'snapdragon' ? Math.max(0, Number(player.snapdragonFlameCooldown || 0))
+        : cfg.type === 'izaque' ? Math.max(0, Number(player.izaqueSpecialCooldown || 0))
         : (cfg.type === 'common_ability' && pd?.selectedChar === 'hunter') ? Math.max(0, Number(player.hunterAbilityCd || 0))
         : cfg.type === 'common_ability' ? Math.max(0, Number(player.commonAbilityCd || 0)) : 0;
 
@@ -10174,6 +10223,7 @@ function updateSpecialButtonUI(force = false) {
         : cfg.type === 'popeye' ? ((player.popeyeSpinTimer || 0) > 0)
         : cfg.type === 'shell' ? ((player.shellTorpedoTimer || 0) > 0)
         : isSnapdragonActive ? true
+        : isIzaqueActive ? true
         : isGrapple ? ((player.grappleHookTimer || 0) > 0) : false;
 
     const shouldShowCooldown = !activeState && !isSterlingCharging && !isGrappleCharging && cooldownValue > 0;
@@ -10789,7 +10839,7 @@ function startRunAfterShop() {
     player = {
         x: 0, y: 0, r: (pd.selectedChar === 'hank' || pd.selectedChar === 'snapdragon' || pd.selectedChar === 'yeti' || pd.selectedChar === 'glace') ? 20 : ((pd.selectedChar === 'shiv' || pd.selectedChar === 'zippi') ? 10 : ((pd.selectedChar === 'kaisen' || pd.selectedChar === 'booboo' || pd.selectedChar === 'yoyo') ? 13 : (pd.selectedChar === 'eel' ? 15 : 15))), baseHp: initialBaseHp, hp: initialBaseHp, baseSpeed: charDef.speed, baseDmg: initialBaseDmg,
         baseFireRate: charDef.fireRate, baseRange: charDef.range, color: charDef.color, weapon: charDef.weapon, merlinAge: pd.selectedChar === 'merlin' ? 'old' : null, merlinBaseHp: pd.selectedChar === 'merlin' ? initialBaseHp : null, merlinPoisonChance: 0.15, merlinBabyChance: 0.15, merlinPacifierChance: 0, merlinAgeCooldown: 0, cyroPyroMode: pd.selectedChar === 'cyro_pyro' ? getCyroPyroMode() : null, gladiatorMode: pd.selectedChar === 'gladiator' ? (pd.chars?.gladiator?.mode || 'shooter') : null, gladiatorModeCooldown: 0, eolioPropellerSeq: 0, cd: 0, shieldTimer: 0,
-        zombieTimer: 0, revived: false, elekCycle: false, dashTimer: 0, meleeCd: 0, boldShots: 0, boldReload: 0, boldAbilityTimer: 0, specCd: pd.selectedChar === 'ghoul' ? 20 : 0, commonAbilityCd: 0, hunterAbilityCd: 0, tenentAbilityCooldown: 0, fastyAbilityTimer: 0, kayoChairReady: false, invisTimer: 0, ghoulPendingCd: 0, ninjiPendingCd: 0,
+        zombieTimer: 0, revived: false, elekCycle: false, dashTimer: 0, meleeCd: 0, izaqueForm: pd.selectedChar === 'izaque' ? 'normal' : null, izaqueFormTimer: 0, izaqueCombo: 0, izaqueMovementTimer: 0, izaqueSpecialCooldown: pd.selectedChar === 'izaque' ? 30 : 0, izaqueHybridWavesLeft: 0, boldShots: 0, boldReload: 0, boldAbilityTimer: 0, specCd: pd.selectedChar === 'ghoul' ? 20 : 0, commonAbilityCd: 0, hunterAbilityCd: 0, tenentAbilityCooldown: 0, fastyAbilityTimer: 0, kayoChairReady: false, invisTimer: 0, ghoulPendingCd: 0, ninjiPendingCd: 0,
         lastMoveAngle: 0, lastAimAngle: 0, sharkieAttackTimer: 0, sharkieDiveTimer: 0, sharkieDiveCooldown: 0, josephOllieCd: 0, josephOllieTimer: 0, josephOllieAngle: 0, josephOlliePendingCd: 0, josephOllieDetonate: false, sharkieAimAngle: 0, sharkieReverseAngle: 0, sharkieReverseX: 0, sharkieReverseY: 0, tenentCycle: 0, tenentAbilityActiveBullets: 0, stormyCycle: 0, bulbMode: pd.selectedChar === 'bulb' ? Math.floor(Math.random() * 3) : null, bulbGasActiveUntil: 0, bulbGasCooldownUntil: 0, bulbGasAngle: 0, orbitalAngle: 0, popeyeSpinTimer: 0, popeyeSpinCooldown: 30, popeyeSpinUsed: true, popeyeSpinEndingFx: 0, shellTorpedoTimer: 0, shellTorpedoCooldown: pd.selectedChar === 'shell' ? 20 : 0, shellTorpedoTarget: null, shellTorpedoHitCd: 0, shellTorpedoDamageTick: 0, shellTorpedoWasActive: false, shellTorpedoExitTracked: false, grappleCooldown: 0, grappleCharging: false, grappleCharge: 0, grappleHookTimer: 0, grappleHookDuration: 0.28, grappleHookStartX: 0, grappleHookStartY: 0, grappleHookX: 0, grappleHookY: 0, grappleHookTargetX: 0, grappleHookTargetY: 0, grappleHookAngle: 0, grappleHookHitEnemy: null, grappleHookDamageApplied: false, grappleAttackTimer: 0, grappleAttackAngle: 0, boobooReturn: true, yoyoReady: true, yoyoOrbitActive: true, yoyoOrbitAngle: 0, yoyoOrbitTickCd: 0, pickedCards: [], revivesUsed: 0, qbBar: 0, qbShield: false, blizzardTemperature: 20, blizzardMoveTimer: 0, blizzardTier: 0, blizzardStormTick: 0, isDead: false, flexCombo: 0, flexReload: 0, ninjiDashCd: 0, shinobiDragonActive: false, shinobiDragonWavesLeft: 0, shinobiDragonCooldown: pd.selectedChar === 'shinobi' ? 20 : 0, shinobiDragonFireCd: 0, shinobiScytheCycle: 0, sterlingCharging: false, sterlingCharge: 0, sterlingAttackCd: 0, majorBriggsKills: 0, majorBriggsStage: 1, noxSpecialTimer: 10, noxSpecialIndex: 0, noxBoomerangActive: false, snapdragonFlameTimer: 0, snapdragonFlameCooldown: 30, snapdragonFlameActive: false, snapdragonFlameFireCd: 0,
         adamScrap: 0, adamScrapVisualCounter: 0, adamMechActive: false, adamMechWavesLeft: 0, adamMechHpBonus: 0, adamMechSizeBonus: 0, adamBaseHpBeforeMech: null, adamBaseRBeforeMech: null,
         spartaCycle: 0, spartaNoDamageTimer: 0, spartaShieldActive: false, spartaAttackTimer: 0, spartaAttackMode: 'straight', spartaAttackRange: 0, spartaAttackWidth: 0, spartaAttackHalfAngle: 0, vesperFocusTimer: 0, vesperFocusActive: false, vesperFocusTimer: 0, vesperFocusActive: false, grenadeAbilityActive: false, grenadeAbilityCooldown: 0, chickbotAbilityActive: false, chickbotAbilityCooldown: 0, chickbotAbilityChicksRemaining: 0,
@@ -11157,6 +11207,23 @@ function triggerSpecial() {
     player.specialTriggerLockUntil = now + 120;
     const cfg = getSelectedSpecialConfig();
     if (!cfg) return;
+    if (cfg.type === 'izaque') {
+        if ((player.izaqueSpecialCooldown || 0) > 0 || ['wolf','cat','wolfcat'].includes(player.izaqueForm)) {
+            updateSpecialButtonUI(true);
+            return;
+        }
+        player.izaqueForm = 'wolfcat';
+        player.izaqueHybridWavesLeft = 2;
+        player.izaqueSpecialCooldown = 0;
+        player.izaqueCombo = 0;
+        player.izaqueMovementTimer = 0;
+        const target = getCommonAbilityTarget(900);
+        if (target) moveIzaqueForwardToward(target, 38);
+        addFloatingText(player.x, player.y - 34, 'LOBOGATO!', '#d6a2ff', 19);
+        createParticles(player.x, player.y, '#d6a2ff');
+        updateSpecialButtonUI(true);
+        return;
+    }
     if (cfg.type === 'snapdragon') {
         if ((player.snapdragonFlameTimer || 0) > 0 || (player.snapdragonFlameCooldown || 0) > 0) { updateSpecialButtonUI(true); return; }
         player.snapdragonFlameTimer = 3;
@@ -11534,6 +11601,8 @@ function fireNoxSpecial() {
 
 function update(dt) {
     if(player.isDead) return;
+    updateIzaqueForm(dt);
+    if (pd?.selectedChar === 'izaque') updateSpecialButtonUI();
 
     if (pd?.selectedChar === 'snapdragon') {
         if ((player.snapdragonFlameTimer || 0) > 0) { player.snapdragonFlameTimer=Math.max(0,player.snapdragonFlameTimer-dt); player.snapdragonFlameActive=player.snapdragonFlameTimer>0; if(player.snapdragonFlameTimer<=0) player.snapdragonFlameCooldown=30; }
@@ -11597,6 +11666,10 @@ if (!isBossAlive) {
 
     if(waveTimer >= 20) {
         wave++; waveTimer = 0; if(player.stats.waveBuff) player.hp = Math.min(player.hp + 20, player.baseHp * player.stats.maxHpMult); trackMissionProgress('waves', 1);
+        if (pd.selectedChar === 'izaque' && player.izaqueForm === 'wolfcat') {
+            player.izaqueHybridWavesLeft = Math.max(0, (player.izaqueHybridWavesLeft || 0) - 1);
+            if (player.izaqueHybridWavesLeft <= 0) endIzaqueForm();
+        }
         if (pd.selectedChar === 'sparta') spawnSpartaLion();
         if(pd.selectedChar === 'adam' && player.adamMechWavesLeft > 0) {
             player.adamMechWavesLeft--;
@@ -11893,6 +11966,15 @@ if (!isBossAlive) {
     ) ? 1.35 : 1;
     let fastyAbilitySpeedMult = (pd.selectedChar === 'fasty' && (player.fastyAbilityTimer || 0) > 0) ? 1.8 : 1;
     let pSpeed = player.baseSpeed * player.stats.speedMult * mapSpeedMult * totemSpd * vesperMobilityMult * josephWallBoost * fastyAbilitySpeedMult * 60 * dt;
+    if (pd.selectedChar === 'izaque') {
+        const form = player.izaqueForm || 'normal';
+        if (form === 'cat') pSpeed *= 1.38;
+        if (form === 'wolfcat') pSpeed *= 1.42;
+        const moving = Math.hypot(dx, dy) > 0.05 && form === 'normal';
+        if (moving) player.izaqueMovementTimer = (Number(player.izaqueMovementTimer) || 0) + dt;
+        else if (form === 'normal') player.izaqueMovementTimer = 0;
+        if (form === 'normal' && player.izaqueMovementTimer >= 5) activateIzaqueForm('cat');
+    }
     if (window.currentMap === 10 && pd.settings.ultraHardcore) pSpeed *= 0.58;
     
     if (pd.selectedChar === 'joseph' && (player.josephOllieTimer || 0) > 0) {
@@ -12267,6 +12349,73 @@ if (!isBossAlive) {
     updateAllies(dt); updateProjectiles(dt); updatePuddles(dt); updateGems(dt); updateParticles(dt); updateCaveVisionBursts(dt); updateMarineOxygen(dt); updateGameHud();
 }
 
+function moveIzaqueForwardToward(target, distance = 28) {
+    if (!player || pd?.selectedChar !== 'izaque' || !target) return;
+    const a = Math.atan2(target.y - player.y, target.x - player.x);
+    const nx = Math.max(-1500, Math.min(1500, player.x + Math.cos(a) * distance));
+    const ny = Math.max(-1500, Math.min(1500, player.y + Math.sin(a) * distance));
+    if (playerCanPassWalls()) { player.x = nx; player.y = ny; return; }
+    let blocked = false;
+    for (const o of obstacles) {
+        if (!o || ['ice','mud','car','bamboo_spike','kelp'].includes(o.type)) continue;
+        if (dist({x:nx,y:ny}, o) < (Number(o.r)||0) + player.r) { blocked = true; break; }
+    }
+    if (!blocked) { player.x = nx; player.y = ny; }
+}
+
+function activateIzaqueForm(form) {
+    if (!player || pd?.selectedChar !== 'izaque') return;
+    player.izaqueForm = form;
+    player.izaqueCombo = 0;
+    player.izaqueMovementTimer = 0;
+    player.izaqueFormTimer = form === 'wolf' ? 5 : (form === 'cat' ? 10 : 0);
+    if (form === 'wolfcat') {
+        player.izaqueFormTimer = 0;
+        player.izaqueHybridWavesLeft = 2;
+        player.izaqueSpecialCooldown = 0;
+    }
+    const labels = { wolf: 'FORMA LOBO!', cat: 'FORMA GATO!', wolfcat: 'LOBOGATO!' };
+    const colors = { wolf: '#aab4ff', cat: '#ffd1e8', wolfcat: '#d6a2ff' };
+    addFloatingText(player.x, player.y - 34, labels[form] || 'FORMA!', colors[form] || '#fff', 17);
+    createParticles(player.x, player.y, colors[form] || '#fff');
+    updateSpecialButtonUI(true);
+}
+
+function endIzaqueForm() {
+    if (!player || pd?.selectedChar !== 'izaque') return;
+    const wasHybrid = player.izaqueForm === 'wolfcat';
+    player.izaqueForm = 'normal';
+    player.izaqueFormTimer = 0;
+    player.izaqueHybridWavesLeft = 0;
+    player.izaqueCombo = 0;
+    player.izaqueMovementTimer = 0;
+    if (wasHybrid) player.izaqueSpecialCooldown = 40;
+    updateSpecialButtonUI(true);
+}
+
+function updateIzaqueForm(dt) {
+    if (!player || pd?.selectedChar !== 'izaque') return;
+    if ((player.izaqueSpecialCooldown || 0) > 0 && player.izaqueForm !== 'wolfcat') {
+        player.izaqueSpecialCooldown = Math.max(0, player.izaqueSpecialCooldown - dt);
+    }
+    const form = player.izaqueForm || 'normal';
+    if (form === 'wolf' || form === 'cat') {
+        player.izaqueFormTimer = Math.max(0, (Number(player.izaqueFormTimer) || 0) - dt);
+        if (player.izaqueFormTimer <= 0) endIzaqueForm();
+    }
+}
+
+function registerIzaqueSlashHit(slash) {
+    if (!player || pd?.selectedChar !== 'izaque' || !slash?.extra || slash.extra.izaqueHitTracked) return;
+    slash.extra.izaqueHitTracked = true;
+    player.izaqueCombo = Math.max(0, Number(player.izaqueCombo) || 0) + 1;
+    if ((player.izaqueCombo || 0) >= 8 && (player.izaqueForm || 'normal') === 'normal') {
+        const target = enemies.find(e => e && e.hp > 0 && !isCurrentlyHypnotized(e));
+        activateIzaqueForm('wolf');
+        if (target) moveIzaqueForwardToward(target, 28);
+    }
+}
+
 function fireWeapon(target) {
     // Nenhuma arma dispara sem um alvo detectado nem contra inimigos hipnotizados.
     if(!target || isCurrentlyHypnotized(target)) return;
@@ -12278,6 +12427,12 @@ function fireWeapon(target) {
     
     let dynHpRatio = player.hp / (player.baseHp * player.stats.maxHpMult);
     player.cd = player.baseFireRate * player.stats.fireRateMult * (w==='power_shot'? (1 - (1 - dynHpRatio)*0.9) : 1) * ((pd.selectedChar === 'zippi' && player.zippiBubbleHp <= 0) ? 0.88 : 1);
+    if (pd.selectedChar === 'izaque') {
+        const form = player.izaqueForm || 'normal';
+        if (form === 'wolf') player.cd *= 1.55;
+        else if (form === 'cat') player.cd *= 0.55;
+        else if (form === 'wolfcat') player.cd *= 0.48;
+    }
     
     let isCrit = false;
     let finalDmg = baseDmg * (player.graffitAtkMult || 1);
@@ -12289,13 +12444,19 @@ function fireWeapon(target) {
     } else {
         finalDmg = baseDmg * (player.graffitAtkMult || 1);
     }
+    if (pd.selectedChar === 'izaque') {
+        const form = player.izaqueForm || 'normal';
+        if (form === 'wolf') finalDmg *= 1.85;
+        else if (form === 'cat') finalDmg *= 0.70;
+        else if (form === 'wolfcat') finalDmg *= 2.05;
+    }
 
     let pSpd = 5 * player.stats.projSpdMult;
     if(w === 'energy_wave' && player.invisTimer > 0) pSpd *= 1.5;
 
     const execFire = () => {
         let aimTarget = target;
-        const swingWeapon = ['sword','scythe','mr_perfurant_slash','knighter_sword','shinobi_katana'].includes(w);
+        const swingWeapon = ['sword','scythe','mr_perfurant_slash','knighter_sword','shinobi_katana','izaque_claws'].includes(w);
         if (swingWeapon) {
             const swingRange = Math.max(90, player.baseRange * player.stats.rangeMult * 1.18);
             let best = null, bestD = Infinity;
@@ -13284,6 +13445,21 @@ function fireWeapon(target) {
             return;
         }
         
+        if (w === 'izaque_claws' && pd.selectedChar === 'izaque') {
+            const form = player.izaqueForm || 'normal';
+            const slashRadius = Math.max(82, player.baseRange * player.stats.rangeMult * (form === 'wolfcat' ? 1.08 : 1.0));
+            const swingDuration = form === 'wolf' ? 30 : (form === 'cat' ? 11 : (form === 'wolfcat' ? 12 : 18));
+            const advance = form === 'wolf' ? 28 : (form === 'wolfcat' ? 38 : 0);
+            if (advance > 0 && aimTarget) moveIzaqueForwardToward(aimTarget, advance);
+            const slashDmg = finalDmg;
+            createProj(player.x, player.y, 0, 0, slashDmg, swingDuration, true, 'izaque_slash', {
+                size: 22, sourceChar: 'izaque', hitShape: 'slash', attackAngle: angle, targetRef: aimTarget,
+                swingStart: -Math.PI * 0.5, swingEnd: Math.PI * 0.5,
+                swingRadius: slashRadius, swingDuration, hitRadius: form === 'wolfcat' ? 24 : 21,
+                izaqueForm: form, izaqueComboTracked: false, izaqueHitTracked: false
+            });
+            return;
+        }
         if (w === 'nox_lasers' && pd.selectedChar === 'nox') {
             // Dois golpes rápidos; a recarga forçada começa somente após o segundo golpe.
             const slashRadius = Math.max(78, player.baseRange * player.stats.rangeMult * 0.82);
@@ -15865,7 +16041,7 @@ function updateAllies(dt) {
                     let ang = Math.atan2(target.y - a.y, target.x - a.x); 
                     if(a.type === 'mortar') { createProj(a.x, a.y, Math.cos(ang)*4, Math.sin(ang)*4, a.dmg, 60, true, 'bomb', { tx: target.x, ty: target.y, sourceChar:'mortar' }); a.cd = 2.0; }
                     else if (a.type === 'cannon') { createProj(a.x, a.y, Math.cos(ang)*5, Math.sin(ang)*5, a.dmg, 60, true, 'cannon_ball', {size: 8, sourceChar:'cannon'}); a.cd = 1.5; }
-                    else if (a.type === 'tesla') { createProj(a.x, a.y, Math.cos(ang)*3.2, Math.sin(ang)*3.2, a.dmg, 85, true, 'tesla_bolt', {size: 16, sourceChar:'tesla', shockDuration: 2.2, shockDamage: a.dmg * 0.12}); a.cd = 2.15; }
+                    else if (a.type === 'tesla') { createProj(a.x, a.y, Math.cos(ang)*5.0, Math.sin(ang)*5.0, a.dmg, 85, true, 'tesla_bolt', {size: 16, sourceChar:'tesla', shockDuration: 2.2, shockDamage: a.dmg * 0.12}); a.cd = 2.15; }
                     else if (a.type === 'crossbow') { createProj(a.x, a.y, Math.cos(ang)*6.5, Math.sin(ang)*6.5, a.dmg, 65, true, 'crossbow_bolt', {size: 6, sourceChar:'crossbow', pierce: 99}); a.cd = 0.95 * (a.crossbowTurretFireRate || 1); }
                     else if (a.type === 'burner') { createProj(a.x, a.y, Math.cos(ang)*5.2, Math.sin(ang)*5.2, a.dmg, 65, true, 'burner_fireball', {size: 10, sourceChar:'burner', burnDuration: 3.2, burnDamage: a.dmg * 0.35}); a.cd = 1.05; }
                     else { createProj(a.x, a.y, Math.cos(ang)*6, Math.sin(ang)*6, a.dmg, 60, true, 'normal', { sourceChar: 'meekah' }); a.cd = 0.8; }
@@ -16264,7 +16440,7 @@ function updateBulbBubbles(dt) {
     }
 }
 
-const PLAYER_SLASH_TYPES = new Set(['scythe','mr_perfurant_slash','knighter_slash','gladiator_slash','shinobi','shinobi_katana','shiv','nox_slash_a','nox_slash_b']);
+const PLAYER_SLASH_TYPES = new Set(['scythe','mr_perfurant_slash','knighter_slash','gladiator_slash','shinobi','shinobi_katana','shiv','nox_slash_a','nox_slash_b','izaque_slash']);
 
 function projectileHitsEnemy(p,e){
     if(!p||!e)return false;const ex=p.extra||{};const dx=e.x-p.x,dy=e.y-p.y;
@@ -16906,7 +17082,7 @@ function updateProjectiles(dt) {
         const extra = p.extra || {};
         let hitObstacle = false;
         obstacles.forEach(o => { if(o.type !== 'ice' && o.type !== 'mud' && o.type !== 'car' && o.type !== 'bamboo_spike' && dist(p, o) < o.r + p.size) hitObstacle = true; });
-        if(hitObstacle && p.type !== 'lumber_axe' && p.type !== 'lance' && p.type !== 'ghost_fishing_line' && p.type !== 'sword' && p.type !== 'scythe' && p.type !== 'gladiator_slash' && p.type !== 'knighter_slash' && p.type !== 'nox_slash_a' && p.type !== 'nox_slash_b' && p.type !== 'nox_cleave' && p.type !== 'snapdragon_bite' && p.type !== 'shinobi' && p.type !== 'shinobi_fireball' && p.type !== 'boomerang' && p.type !== 'wind_gust' && p.type !== 'tornado' && p.type !== 'energy_wave' && p.type !== 'water_wave' && p.type !== 'beezy_honey' && p.type !== 'beezy_bee' && p.type !== 'shell_trident' && p.type !== 'geisha_gong' && p.type !== 'yoyo') { 
+        if(hitObstacle && p.type !== 'lumber_axe' && p.type !== 'lance' && p.type !== 'ghost_fishing_line' && p.type !== 'sword' && p.type !== 'scythe' && p.type !== 'gladiator_slash' && p.type !== 'knighter_slash' && p.type !== 'nox_slash_a' && p.type !== 'nox_slash_b' && p.type !== 'izaque_slash' && p.type !== 'nox_cleave' && p.type !== 'snapdragon_bite' && p.type !== 'shinobi' && p.type !== 'shinobi_fireball' && p.type !== 'boomerang' && p.type !== 'wind_gust' && p.type !== 'tornado' && p.type !== 'energy_wave' && p.type !== 'water_wave' && p.type !== 'beezy_honey' && p.type !== 'beezy_bee' && p.type !== 'shell_trident' && p.type !== 'geisha_gong' && p.type !== 'yoyo') { 
             if(p.type === 'echo_bh_core') { spawnEchoBlackHole(p.x, p.y, p.extra); }
             if(p.type === 'blood_ball' && (extra.size || 0) === 10) { for(let j=0; j<boxPulls('normal'); j++) { let a = Math.PI*2/3 * j; createProj(p.x, p.y, Math.cos(a)*3, Math.sin(a)*3, p.dmg*0.4, 30, true, 'blood_ball', {size: 4}); } }
             if(p.type === 'rocket') { createExplosion(p.x, p.y, 80 * player.stats.rangeMult, p.dmg); projectiles.splice(i, 1); continue; }
@@ -17035,6 +17211,7 @@ function updateProjectiles(dt) {
                 slashDmg *= getEnemyDamageTakenMultiplier(enemy);
                 enemy.hp -= slashDmg;
                 enemy.lastHitSourceChar = p.extra?.sourceChar || pd.selectedChar;
+                if (p.type === 'izaque_slash' && pd?.selectedChar === 'izaque') registerIzaqueSlashHit(p);
                 if ((p.type === 'shinobi_katana' || p.type === 'shinobi') && pd?.selectedChar === 'shinobi') {
                     applyShinobiMark(enemy, slashDmg);
                 }
@@ -17060,7 +17237,10 @@ function updateProjectiles(dt) {
                 ex.missionDamage = 0;
             }
             // p.life já foi decrementado no início de updateProjectiles().
-            if (p.life <= 0) { projectiles.splice(i, 1); }
+            if (p.life <= 0) {
+                if (p.type === 'izaque_slash' && pd?.selectedChar === 'izaque' && !p.extra?.izaqueHitTracked && (player.izaqueForm || 'normal') === 'normal') player.izaqueCombo = 0;
+                projectiles.splice(i, 1);
+            }
             continue;
         }
         if(p.isPlayer) {
@@ -19939,7 +20119,9 @@ function draw() {
                 ctx.restore();
             } else if (a.type === 'mortar' || a.type === 'cannon' || a.ref === 'meekah_turret' || (a.isTurret && a.type !== 'speaker')) {
                 const scale = getSceneScale();
-                const bodyType = a.type === 'mortar' ? 'mortar' : (a.type === 'cannon' ? 'cannon' : 'turret');
+                const bodyType = ['mortar','cannon','tesla','crossbow','burner'].includes(String(a.type || '').toLowerCase())
+                    ? String(a.type).toLowerCase()
+                    : 'turret';
                 ctx.save();
                 ctx.globalAlpha = 0.98;
                 ctx.translate(a.x, a.y);
@@ -22087,13 +22269,30 @@ function draw() {
             const g=ctx.createLinearGradient(0,0,len,0);g.addColorStop(0,'#fff');g.addColorStop(.48,'#bdf5ff');g.addColorStop(1,'#54d8ff');ctx.strokeStyle=g;ctx.lineWidth=Math.max(4,radius*.045);ctx.beginPath();ctx.moveTo(radius*.10,0);ctx.lineTo(len,0);ctx.stroke();
             ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=Math.max(1.5,radius*.012);ctx.beginPath();ctx.arc(0,0,radius*.97,start,end,false);ctx.stroke();ctx.restore();
         }
-        else if(p.type === 'scythe' || p.type === 'gladiator_slash' || p.type === 'knighter_slash' || p.type === 'mr_perfurant_slash' || p.type === 'shinobi' || p.type === 'shinobi_katana' || p.type === 'shiv') {
+        else if(p.type === 'izaque_slash' || p.type === 'scythe' || p.type === 'gladiator_slash' || p.type === 'knighter_slash' || p.type === 'mr_perfurant_slash' || p.type === 'shinobi' || p.type === 'shinobi_katana' || p.type === 'shiv') {
             const ex=p.extra||{}; const base=Number.isFinite(ex.attackAngle)?ex.attackAngle:Math.atan2(p.vy,p.vx);
             const dur=Math.max(1,Number(ex.swingDuration)||18); const t=Math.min(1,Math.max(0,(dur-p.life)/dur));
             const ease=t; const start=Number.isFinite(ex.swingStart)?ex.swingStart:-Math.PI*.66; const end=Number.isFinite(ex.swingEnd)?ex.swingEnd:Math.PI*.66;
             const swing=base+start+(end-start)*ease; const radius=Math.max(34,Number(ex.swingRadius)||82); const alpha=.25+.75*Math.sin(Math.PI*t);
             ctx.save(); ctx.translate(player.x,player.y); ctx.rotate(swing); ctx.globalAlpha=alpha; ctx.lineCap='round'; ctx.lineJoin='round';
-            if(p.type==='scythe'){
+            if(p.type==='izaque_slash') {
+                const form = p.extra?.izaqueForm || 'normal';
+                const len = radius * (form === 'wolf' ? .94 : (form === 'wolfcat' ? .98 : .84));
+                const clawSpread = form === 'cat' ? 0.16 : 0.13;
+                ctx.save();
+                ctx.strokeStyle = form === 'wolfcat' ? '#eadcff' : (form === 'wolf' ? '#c8ccff' : '#f2f2f2');
+                ctx.shadowColor = form === 'wolfcat' ? 'rgba(214,162,255,.95)' : 'rgba(255,255,255,.62)';
+                ctx.shadowBlur = form === 'wolfcat' ? 14 : 7;
+                for (let claw = -1; claw <= 1; claw++) {
+                    const off = claw * clawSpread;
+                    ctx.lineWidth = Math.max(2.6, radius * 0.028);
+                    ctx.beginPath();
+                    ctx.moveTo(radius * .14, off * radius * .46);
+                    ctx.quadraticCurveTo(len * .58, off * radius * .72, len, off * radius * 1.05);
+                    ctx.stroke();
+                }
+                ctx.restore();
+            } else if(p.type==='scythe'){
                 const h=radius*.18, len=radius*.78;
                 ctx.strokeStyle='#303840'; ctx.lineWidth=Math.max(4,radius*.07); ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(h,0); ctx.stroke();
                 ctx.fillStyle='#dfeaf0'; ctx.strokeStyle='#53616b'; ctx.lineWidth=2;
