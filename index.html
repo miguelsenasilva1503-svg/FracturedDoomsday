@@ -5536,6 +5536,17 @@ function grantBackupOverdogReward() {
     return { selected, queue };
 }
 
+function grantNoxSnapdragonDaviReward() {
+    const unlocked = [];
+    for (const id of ['nox', 'snapdragon']) {
+        if (CHARACTERS?.[id] && !pd.chars?.[id]) {
+            pd.chars[id] = { level: 1, slots: 2, chips: [null, null] };
+            unlocked.push(CHARACTERS[id]);
+        }
+    }
+    return unlocked;
+}
+
 function redeemRewardCode() {
     ensureRedeemedCodesState();
     const input = document.getElementById('reward-code-input');
@@ -5544,7 +5555,31 @@ function redeemRewardCode() {
 
 
 
-    if (code !== 'backupoverdog') {
+    if (normalizedCode === 'NOXSNAPDRAGONDAVI') {
+        if (pd.redeemedCodes.noxsnapdragondavi) {
+            showAlert('Esse código já foi resgatado nesta conta.');
+            return;
+        }
+
+        const unlocked = grantNoxSnapdragonDaviReward();
+        pd.redeemedCodes.noxsnapdragondavi = true;
+        save();
+        if (input) input.value = '';
+        renderChars?.();
+        renderShop?.();
+        updateUI();
+
+        if (unlocked.length === 2) {
+            notify('Código resgatado: Nox e Snapdragon desbloqueados gratuitamente.');
+        } else if (unlocked.length === 1) {
+            notify(`Código resgatado: ${unlocked[0].name} desbloqueado gratuitamente. O outro personagem já estava desbloqueado.`);
+        } else {
+            notify('Código resgatado: Nox e Snapdragon já estavam desbloqueados.');
+        }
+        return;
+    }
+
+    if (normalizedCode !== 'BACKUPOVERDOG') {
         showAlert('Código de recompensa inválido.');
         return;
     }
