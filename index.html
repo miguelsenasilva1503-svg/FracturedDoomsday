@@ -1978,18 +1978,44 @@ function getCharByDisplayName(displayName) {
 }
 
 function getGachaRewardRenderData(rawText) {
-    if (rawText && typeof rawText === 'object' && rawText.type === 'medal') {
-        const character = CHARACTERS?.[rawText.charId];
-        const name = character?.name ? decodeHtmlEntities(character.name) : 'Personagem';
-        const amount = Math.max(1, Math.floor(Number(rawText.amount) || 1));
-        return {
-            type: 'resource',
-            icon: '',
-            resourceType: 'medal',
-            title: 'Medalhas',
-            name: name,
-            amount: `+${amount}`
-        };
+    if (rawText && typeof rawText === 'object') {
+        if (rawText.type === 'medal') {
+            const character = CHARACTERS?.[rawText.charId];
+            const name = character?.name ? decodeHtmlEntities(character.name) : 'Personagem';
+            const amount = Math.max(1, Math.floor(Number(rawText.amount) || 1));
+            return {
+                type: 'resource',
+                icon: '',
+                resourceType: 'medal',
+                title: 'Medalhas',
+                name: name,
+                amount: `+${amount}`
+            };
+        }
+        if (rawText.type === 'resource' && rawText.resourceType) {
+            const resourceNames = {
+                coins: 'Moedas',
+                gems: 'Gemas',
+                evo: 'Pontos Evo',
+                xp: 'XP do Passe',
+                scrap: 'Sucatas',
+                chip: 'Chip',
+                medal: 'Medalhas'
+            };
+            const resourceType = String(rawText.resourceType).toLowerCase();
+            const amountNumber = Number(rawText.amount);
+            const safeAmount = Number.isFinite(amountNumber) ? Math.max(0, amountNumber) : 0;
+            const amount = safeAmount === Math.floor(safeAmount) ? Math.floor(safeAmount) : safeAmount;
+            const name = rawText.name || rawText.title || resourceNames[resourceType] || resourceType;
+            return {
+                type: 'resource',
+                icon: '',
+                resourceType,
+                title: 'Recompensa',
+                name: resourceNames[resourceType] || name,
+                amount: amount ? `+${formatCompactNumber(amount)}` : ''
+            };
+        }
     }
     const text = String(rawText || '').trim();
     const charMatch = text.match(/NOVO PERSONAGEM:\s*(.+?)(?:!|\(|$)/i);
@@ -2030,18 +2056,38 @@ function getGachaRewardRenderData(rawText) {
     let label = amount ? rest.slice(amount.length).trim() : rest;
     label = label.replace(/^\+/, '').trim();
     if (!label) label = 'Recompensa';
+    const normalizedResourceLabels = {
+        coins: 'Moedas',
+        gems: 'Gemas',
+        evo: 'Pontos Evo',
+        scrap: 'Sucatas',
+        xp: 'XP do Passe',
+        chip: 'Chip',
+        medal: 'Medalhas'
+    };
+    const normalizedLabel = label
+        .replace(/^coins$/i, 'Moedas')
+        .replace(/^gems$/i, 'Gemas')
+        .replace(/^evo$/i, 'Pontos Evo')
+        .replace(/^scrap$/i, 'Sucatas')
+        .replace(/^xp$/i, 'XP do Passe')
+        .replace(/^chip$/i, 'Chip')
+        .replace(/^medal$/i, 'Medalhas');
     const resourceType =
-        /moedas?/i.test(label) ? 'coins' :
-        /gemas?/i.test(label) ? 'gems' :
-        /evo|pontos? evo/i.test(label) ? 'evo' :
-        /sucatas?/i.test(label) ? 'scrap' :
-        /xp|passe/i.test(label) ? 'xp' : /chip/i.test(label) || icon === '💽' || icon === '🧩' ? 'chip' : /medal/i.test(label) || icon === '🏅' ? 'medal' : '';
+        /moedas?/i.test(normalizedLabel) || /^coins$/i.test(label) ? 'coins' :
+        /gemas?/i.test(normalizedLabel) || /^gems$/i.test(label) ? 'gems' :
+        /evo|pontos? evo/i.test(normalizedLabel) || /^evo$/i.test(label) ? 'evo' :
+        /sucatas?/i.test(normalizedLabel) || /^scrap$/i.test(label) ? 'scrap' :
+        /xp|passe/i.test(normalizedLabel) || /^xp$/i.test(label) ? 'xp' :
+        /chip/i.test(normalizedLabel) || /^chip$/i.test(label) || icon === '💽' || icon === '🧩' ? 'chip' :
+        /medal/i.test(normalizedLabel) || /^medal$/i.test(label) || icon === '🏅' ? 'medal' : '';
+    const displayLabel = normalizedResourceLabels[resourceType] || normalizedLabel;
     return {
         type: 'resource',
         icon,
         resourceType,
-        title: repeatedChar ? 'Recompensa repetida' : label,
-        name: repeatedChar ? label : label.replace(/\s*\(.*\)$/, '').trim(),
+        title: repeatedChar ? 'Recompensa repetida' : displayLabel,
+        name: repeatedChar ? displayLabel : displayLabel.replace(/\s*\(.*\)$/, '').trim(),
         amount: amount ? `+${amount.replace(/^\+/, '')}` : ''
     };
 }
@@ -8939,7 +8985,8 @@ function renderRewardText(txt) {
         if (txt.type === 'medal') return renderResourceRewardText(`🏅 +${Math.max(1, Math.floor(Number(txt.amount) || 1))} Medalhas (${CHARACTERS?.[txt.charId]?.name || 'Personagem'})`);
         if (txt.type === 'resource' && txt.resourceType) {
             const amount = Number.isFinite(Number(txt.amount)) ? `+${Number(txt.amount)}` : '';
-            const name = txt.name || txt.title || 'Recompensa';
+            const resourceNames = { coins:'Moedas', gems:'Gemas', evo:'Pontos Evo', xp:'XP do Passe', scrap:'Sucatas', medal:'Medalhas', chip:'Chip' };
+            const name = resourceNames[txt.resourceType] || txt.name || txt.title || 'Recompensa';
             if (['coins','gems','evo','xp','scrap','medal','chip'].includes(txt.resourceType)) {
                 return `${resourceIcon(txt.resourceType, 'inline-sprite-icon')} ${amount} ${escapeHtmlText(name)}`.trim();
             }
@@ -9303,10 +9350,10 @@ function buildPassRewardQueue(reward, tier, vipActive = false) {
     const instant = [];
     const view = getPassRewardView(tier, vipActive);
     (view.rewards || []).forEach(item => {
-        if (item.type === 'coins') { pd.coins += item.amount; instant.push(`${resourceIcon('coins')} +${formatCompactNumber(item.amount)} Moedas`); }
-        else if (item.type === 'evo') { pd.evo += item.amount; instant.push(`${resourceIcon('evo')} +${formatCompactNumber(item.amount)} Pontos Evo`); }
-        else if (item.type === 'gems') { pd.gems += item.amount; instant.push(`${resourceIcon('gems')} +${formatCompactNumber(item.amount)} Gemas`); }
-        else if (item.type === 'scrap') { pd.sucatas += item.amount; instant.push(`${resourceIcon('scrap')} +${formatCompactNumber(item.amount)} Sucatas`); }
+        if (item.type === 'coins') { pd.coins += item.amount; instant.push({ type:'resource', resourceType:'coins', amount:item.amount }); }
+        else if (item.type === 'evo') { pd.evo += item.amount; instant.push({ type:'resource', resourceType:'evo', amount:item.amount }); }
+        else if (item.type === 'gems') { pd.gems += item.amount; instant.push({ type:'resource', resourceType:'gems', amount:item.amount }); }
+        else if (item.type === 'scrap') { pd.sucatas += item.amount; instant.push({ type:'resource', resourceType:'scrap', amount:item.amount }); }
         else if (item.type === 'box') {
             for (let i = 0; i < item.amount; i++) {
                 const c = []; const pulls = boxPulls(item.kind);
