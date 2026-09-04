@@ -3649,14 +3649,14 @@ const ALLY_ELEMENT_SPRITES = {
     burner: 'elements/burner.png',
     drone: 'elements/drone.png',
     axel_drone: 'elements/axel_drone.png',
-    landmine: ['elements/landmine.png', 'elements/mine.png', 'elements/minesweeper.png'],
-    minesweeper: 'elements/minesweeper.png',
+    landmine: 'elements/minesweeper.png',
     chick: 'sprites/chick.png',
     totem: 'elements/totem.png',
     ivy_vine: 'elements/vine.png',
     ivy_flower: 'elements/flower.png',
     tea_table: 'elements/tea_table.png',
-    oven: 'elements/oven.png'
+    oven: 'elements/oven.png',
+    grenade_barricade: 'elements/barricade.png'
 };
 
 const ALLY_ELEMENT_SPRITE_CACHE = new Map();
@@ -9987,7 +9987,7 @@ function getCommonAbilityTarget(maxRange = 1100) {
 
 function triggerCommonCharacterAbility(id) {
     // Habilidades também ficam bloqueadas no Sandbox.
-    if (sandboxMode) return false;
+    if (sandboxMode || runShootingDisabled) return false;
     const cfg = COMMON_ABILITY_CONFIGS?.[id];
     const lvl = Number(pd?.chars?.[id]?.level) || 0;
     if (!player || !cfg || lvl < 5 || (player.commonAbilityCd || 0) > 0) return false;
@@ -10160,7 +10160,7 @@ function bindSpecialButton(btn) {
     if (!btn) return;
     const handlePress = (e) => {
         if (e) { e.preventDefault(); e.stopPropagation(); }
-        if (sandboxMode) return;
+        if (sandboxMode || runShootingDisabled) return;
         const cfg = getSelectedSpecialConfig();
         if (!isPlaying || isPaused || !player || !cfg) return;
         if (cfg.type === 'grapple') {
@@ -10381,8 +10381,10 @@ function updateSpecialButtonUI(force = false) {
 
     btnSpecial.hidden = false;
     btnSpecial.style.display = 'flex';
-    btnSpecial.disabled = false;
-    btnSpecial.style.pointerEvents = 'auto';
+    const shootingLocked = !!runShootingDisabled;
+    btnSpecial.disabled = shootingLocked;
+    btnSpecial.style.pointerEvents = shootingLocked ? 'none' : 'auto';
+    btnSpecial.classList.toggle('shooting-disabled', shootingLocked);
     btnSpecial.classList.toggle('charging', isSterlingCharging || isGrappleCharging);
     btnSpecial.classList.toggle('sterling-special', isSterling);
     btnSpecial.classList.toggle('grapple-special', isGrapple);
@@ -10403,7 +10405,7 @@ function updateSpecialButtonUI(force = false) {
 
     btnSpecial.title = cfg.title;
     btnSpecial.classList.toggle('cooling', activeState || shouldShowCooldown);
-    btnSpecial.style.opacity = (activeState || shouldShowCooldown) ? '0.55' : '1';
+    btnSpecial.style.opacity = shootingLocked ? '0.45' : ((activeState || shouldShowCooldown) ? '0.55' : '1');
 
     const gpHint = document.getElementById('gamepad-special-hint');
     if (gpHint) {
@@ -11087,7 +11089,7 @@ function startRunAfterShop() {
     player.o2 = 100;
     player.o2Max = 100;
     
-    runEnemyUndetectable = false; sandboxPersistentEntities = []; wave = 1; gameTime = 0; waveTimer = 0; enemySpawnTimer = 0; enemiesKilled = 0; inRunXp = 0; inRunLevel = 1; xpToNext = 100; runCoins = 0; runGems = 0; runScrap = 0; runMedals = 0; runChestCoins = 0; runChestGems = 0; runChestScrap = 0; runBossBoxDrops = []; runRewardsInvalidated = false;
+    runEnemyUndetectable = false; runShootingDisabled = false; sandboxPersistentEntities = []; sandboxHasSavedWorld = false; sandboxSavedWorld = null; sandboxSaveSeq = 0; wave = 1; gameTime = 0; waveTimer = 0; enemySpawnTimer = 0; enemiesKilled = 0; inRunXp = 0; inRunLevel = 1; xpToNext = 100; runCoins = 0; runGems = 0; runScrap = 0; runMedals = 0; runChestCoins = 0; runChestGems = 0; runChestScrap = 0; runBossBoxDrops = []; runRewardsInvalidated = false;
     syncCharacterProgressState();
     pd.run = { charId: pd.selectedChar, medals: 0 };
     const runChar = ensureCharacterProgress(pd.selectedChar);
@@ -11409,7 +11411,7 @@ function releaseGrappleHook(){if(!player||!player.grappleCharging)return;const c
 function updateGrappleHook(dt){if(!player||pd.selectedChar!=='grapple')return false;player.grappleAttackTimer=Math.max(0,(player.grappleAttackTimer||0)-dt);if(player.grappleCharging){player.grappleCharge=Math.min(1,(player.grappleCharge||0)+dt/1.25);updateChargeButtonVisuals();}if((player.grappleHookTimer||0)<=0)return false;player.grappleHookTimer=Math.max(0,player.grappleHookTimer-dt);const pr=1-player.grappleHookTimer/.28;player.grappleHookX=player.grappleHookStartX+(player.grappleHookTargetX-player.grappleHookStartX)*pr;player.grappleHookY=player.grappleHookStartY+(player.grappleHookTargetY-player.grappleHookStartY)*pr;if(player.grappleHookTimer<=0){player.x=player.grappleHookTargetX;player.y=player.grappleHookTargetY;player.shieldTimer=60;const e=player.grappleHookHitEnemy;if(e?.hp>0&&!player.grappleHookDamageApplied&&!isCurrentlyHypnotized(e)){const d=Math.max(1,player.baseDmg*player.stats.dmgMult*1.15);e.hp-=d;e.lastHitSourceChar='grapple';addFloatingText(e.x,e.y,`${Math.floor(d)}`,'#9b59b6');player.grappleHookDamageApplied=true;}updateSpecialButtonUI();}return true;}
 function triggerSpecial() {
     // Nenhuma habilidade/especial pode ser ativada durante o Sandbox.
-    if (sandboxMode) return;
+    if (sandboxMode || runShootingDisabled) return;
     if(!player) return;
     const now = performance.now();
     if ((player.specialTriggerLockUntil || 0) > now) return;
@@ -11817,7 +11819,11 @@ let sandboxOriginalSelection = null;
 let sandboxOriginalMap = 0;
 let sandboxOriginalHardcore = false;
 let sandboxOriginalUHC = false;
-let sandboxSettings = { difficulty: 'classic', o2: false, fractures: false, meteors: false };
+let sandboxSettings = { difficulty: 'classic', o2: false, fractures: false, meteors: false, shooting: true };
+let sandboxHasSavedWorld = false;
+let sandboxSavedWorld = null;
+let sandboxSaveSeq = 0;
+let runShootingDisabled = false;
 let sandboxMeteorTimer = 0;
 let sandboxWallsSuppressed = false;
 let sandboxAutoSpawnEnabled = true;
@@ -12118,6 +12124,75 @@ function handleSandboxButton() {
     else openSandboxMenu();
 }
 
+function sandboxRegisterPersistentEntity(entity, kind) {
+    if (!entity || !kind) return entity;
+    if (!entity.sandboxSaveId) entity.sandboxSaveId = ++sandboxSaveSeq;
+    entity.sandboxSaveKind = kind;
+    if (!sandboxPersistentEntities.includes(entity)) sandboxPersistentEntities.push(entity);
+    return entity;
+}
+function sandboxCollectSavedWorld() {
+    if (!sandboxSavePosition) return null;
+    const arrays = [
+        ['enemy', enemies], ['xp', xpGems], ['item', itemsMap], ['ally', allies], ['obstacle', obstacles], ['projectile', projectiles]
+    ];
+    const entities = [];
+    const seen = new Set();
+    for (const [kind, arr] of arrays) {
+        if (!Array.isArray(arr)) continue;
+        for (const e of arr) {
+            if (!e || !e.sandbox || !e.sandboxSaveId || seen.has(e.sandboxSaveId)) continue;
+            if (!sandboxPersistentEntities.includes(e)) continue;
+            seen.add(e.sandboxSaveId);
+            try { entities.push({ id:e.sandboxSaveId, kind, data:JSON.parse(JSON.stringify(e)) }); } catch (_) {}
+        }
+    }
+    return {
+        map: Number.isInteger(window.currentMap) ? window.currentMap : 0,
+        border: Number(sandboxMapHalfSize) || 1500,
+        player: { x:Number(player?.x)||0, y:Number(player?.y)||0 },
+        entities
+    };
+}
+function sandboxRestoreSavedWorld() {
+    if (!sandboxHasSavedWorld || !sandboxSavedWorld) return false;
+    window.currentMap = Number.isInteger(sandboxSavedWorld.map) ? sandboxSavedWorld.map : 0;
+    sandboxMapHalfSize = Math.max(300, Math.min(3000, Number(sandboxSavedWorld.border) || 1500));
+    const ids = new Set((sandboxSavedWorld.entities || []).map(e => e.id));
+    const strip = arr => Array.isArray(arr) ? arr.filter(e => !e?.sandboxSaveId || !ids.has(e.sandboxSaveId)) : arr;
+    enemies = strip(enemies); xpGems = strip(xpGems); itemsMap = strip(itemsMap); allies = strip(allies); obstacles = strip(obstacles); projectiles = strip(projectiles);
+    const restored = [];
+    for (const snap of (sandboxSavedWorld.entities || [])) {
+        if (!snap?.data) continue;
+        let e;
+        try { e = JSON.parse(JSON.stringify(snap.data)); } catch (_) { continue; }
+        e.sandbox = true;
+        e.sandboxSaveId = snap.id;
+        e.sandboxSaveKind = snap.kind;
+        if (snap.kind === 'enemy') enemies.push(e);
+        else if (snap.kind === 'xp') xpGems.push(e);
+        else if (snap.kind === 'item') itemsMap.push(e);
+        else if (snap.kind === 'ally') allies.push(e);
+        else if (snap.kind === 'obstacle') obstacles.push(e);
+        else if (snap.kind === 'projectile') projectiles.push(e);
+        else continue;
+        restored.push(e);
+    }
+    sandboxPersistentEntities = restored;
+    sandboxPlacedElements = restored.filter(e => e.sandboxSaveKind === 'obstacle');
+    if (player) {
+        player.x = Math.max(-sandboxMapHalfSize, Math.min(sandboxMapHalfSize, Number(sandboxSavedWorld.player?.x) || 0));
+        player.y = Math.max(-sandboxMapHalfSize, Math.min(sandboxMapHalfSize, Number(sandboxSavedWorld.player?.y) || 0));
+    }
+    if (typeof syncMapSelectUI === 'function') syncMapSelectUI();
+    return true;
+}
+function sandboxSaveCurrentWorld() {
+    if (!sandboxSavePosition) { sandboxHasSavedWorld = false; sandboxSavedWorld = null; return; }
+    const snap = sandboxCollectSavedWorld();
+    if (snap) { sandboxSavedWorld = snap; sandboxHasSavedWorld = true; }
+}
+
 function activateSandbox() {
     if (!sandboxAvailable()) return;
     sandboxMarkInvalidRun();
@@ -12129,24 +12204,34 @@ function activateSandbox() {
     sandboxOriginalUHC = !!pd?.settings?.ultraHardcore;
     sandboxMeteorTimer = 0;
     sandboxSettings.difficulty = pd.settings?.ultraHardcore ? 'uhc' : (window.isHardcoreMode ? 'hardcore' : 'classic');
-    sandboxSettings.o2 = false;
-    sandboxSettings.fractures = false;
-    sandboxSettings.meteors = false;
+    const restoringSavedWorld = sandboxHasSavedWorld && sandboxSavePosition && !!sandboxSavedWorld;
+    if (!restoringSavedWorld) {
+        sandboxSettings.o2 = false;
+        sandboxSettings.fractures = false;
+        sandboxSettings.meteors = false;
+        sandboxSettings.shooting = true;
+    }
     sandboxAutoSpawnEnabled = true;
     sandboxEraserActive = false;
     sandboxMapHalfSize = 1500;
     sandboxEnemyUndetectable = false;
-    if (!sandboxSavePosition) sandboxPersistentEntities = [];
     sandboxSelectedSpawn = null; sandboxSelectedSpawnData = null; sandboxSelectedSpawnIcon = ''; sandboxSelectedSpawnLabel = ''; sandboxSelectedSpawnKind = '';
     sandboxForceHypnosisForNextEnemy = false; sandboxLastHypnoToggleAt = 0;
     sandboxLastSpawnAction = { key:'', at:0 };
     joyVec.x = 0; joyVec.y = 0;
     grappleAimVec.x = 0; grappleAimVec.y = 0;
     inputState.up = inputState.down = inputState.left = inputState.right = inputState.special = false;
-    sandboxClearRunEntities();
-    sandboxResetToPlains();
-    obstacles = [];
-    player.x = 0; player.y = 0;
+    if (restoringSavedWorld) {
+        sandboxClearRunEntities();
+        sandboxWallsSuppressed = true;
+        sandboxRestoreSavedWorld();
+    } else {
+        sandboxPersistentEntities = [];
+        sandboxClearRunEntities();
+        sandboxResetToPlains();
+        obstacles = [];
+        player.x = 0; player.y = 0;
+    }
     const sandboxLevel = Math.max(1, Math.min(10, Number(pd?.chars?.[pd.selectedChar]?.level) || 1));
     try { applyCharacterLoadout(pd.selectedChar, sandboxLevel, { keepHpRatio: false }); } catch (_) {}
     player.stats = SANDBOX_BASE_STATS();
@@ -12166,6 +12251,7 @@ function deactivateSandbox() {
     if (!sandboxMode) { closeSandboxMenu(); return; }
     const restoreMap = Number.isInteger(sandboxOriginalMap) ? sandboxOriginalMap : 0;
     const restoreId = sandboxOriginalSelection || pd?.selectedChar;
+    sandboxSaveCurrentWorld();
     sandboxMode = false;
     // Entidades criadas no Sandbox continuam ou são removidas conforme a configuração de salvar posição.
     const sandboxRefs = new Set(sandboxPersistentEntities);
@@ -12177,9 +12263,12 @@ function deactivateSandbox() {
         obstacles = (obstacles || []).filter(e => !sandboxRefs.has(e));
         sandboxPersistentEntities = [];
         sandboxPlacedElements = [];
+        sandboxHasSavedWorld = false;
+        sandboxSavedWorld = null;
     } else {
         for (const e of sandboxRefs) if (e) e.sandbox = false;
     }
+    runShootingDisabled = sandboxSettings.shooting === false;
     runEnemyUndetectable = !!sandboxEnemyUndetectable;
     sandboxMenuOpen = false;
     sandboxWallsSuppressed = false;
@@ -12385,6 +12474,7 @@ function renderSandboxMenu() {
                     <button class="sandbox-small-btn" type="button" data-sandbox-action="setting" data-sandbox-setting="meteors">Meteoros: <span id="sandbox-meteors-status" class="sandbox-setting-state"></span></button>
                     <button class="sandbox-small-btn" type="button" data-sandbox-action="setting" data-sandbox-setting="undetectable">InDetecção: <span id="sandbox-undetect-status" class="sandbox-setting-state"></span></button>
                     <button class="sandbox-small-btn" type="button" data-sandbox-action="setting" data-sandbox-setting="savePosition">Salvar posição: <span id="sandbox-save-position-status" class="sandbox-setting-state"></span></button>
+                    <button class="sandbox-small-btn" type="button" data-sandbox-action="setting" data-sandbox-setting="shooting">Atirar: <span id="sandbox-shooting-status" class="sandbox-setting-state"></span></button>
                 </div>
             </div>
             <div class="sandbox-control-card">
@@ -12444,7 +12534,7 @@ function getSandboxDifficultyLabel() {
 }
 function updateSandboxControlsUI() {
     const d = document.getElementById('sandbox-difficulty-status'); if (d) d.textContent = `Atual: ${getSandboxDifficultyLabel()}`;
-    const states = [['o2', sandboxSettings.o2], ['fractures', sandboxSettings.fractures], ['meteors', sandboxSettings.meteors], ['undetect', sandboxEnemyUndetectable], ['save-position', sandboxSavePosition]];
+    const states = [['o2', sandboxSettings.o2], ['fractures', sandboxSettings.fractures], ['meteors', sandboxSettings.meteors], ['undetect', sandboxEnemyUndetectable], ['save-position', sandboxSavePosition], ['shooting', sandboxSettings.shooting]];
     for (const [key, enabled] of states) {
         const el = document.getElementById(`sandbox-${key}-status`);
         if (!el) continue;
@@ -12465,9 +12555,10 @@ function setSandboxDifficulty(mode) {
 }
 function adjustSandboxMapBorder(delta){ if(!sandboxMode) return; const n=Math.max(300,Math.min(3000,sandboxMapHalfSize + (Number(delta)||0))); sandboxMapHalfSize=n; if(player){ player.x=Math.max(-n,Math.min(n,player.x)); player.y=Math.max(-n,Math.min(n,player.y)); } updateSandboxControlsUI(); notify(`Borda do mapa: ${n}`); }
 function toggleSandboxSetting(key) {
-    if (!sandboxMode || !['o2','fractures','meteors','undetectable','savePosition'].includes(key)) return;
+    if (!sandboxMode || !['o2','fractures','meteors','undetectable','savePosition','shooting'].includes(key)) return;
     if (key === 'undetectable') { sandboxEnemyUndetectable = !sandboxEnemyUndetectable; updateSandboxControlsUI(); return; }
     if (key === 'savePosition') { sandboxSavePosition = !sandboxSavePosition; updateSandboxControlsUI(); return; }
+    if (key === 'shooting') { sandboxSettings.shooting = !sandboxSettings.shooting; updateSandboxControlsUI(); return; }
     sandboxSettings[key] = !sandboxSettings[key];
     if (key === 'meteors') sandboxMeteorTimer = sandboxSettings.meteors ? 0.35 : 0;
     updateSandboxControlsUI();
@@ -12592,7 +12683,7 @@ function sandboxSpawnEnemy(type, skin, direct=false) {
         notify('Esse inimigo não pôde ser invocado.');
         return false;
     }
-    sandboxPersistentEntities.push(spawned);
+    sandboxRegisterPersistentEntity(spawned, 'enemy');
     notify(`${sandboxEnemyButtonLabel(type, skin, null)} invocado.`);
     return true;
 }
@@ -12681,9 +12772,11 @@ function sandboxElementEntries() {
         {group:'xp', key:'xp_large', name:'XP Grande', icon:'elements/xp.png'},
         ...['normal','metal','gold','chromium'].map(type => ({group:'map', key:`box_drop_${type}`, name:`Caixa ${boxName(type)}`, icon:boxSprite(type)})),
         ...Object.entries(MAP_ELEMENT_SPRITES)
-            .filter(([key]) => key !== 'treasure_chest')
+            .filter(([key]) => key !== 'treasure_chest' && !['bunniie_hole','adam_scrap_scrap','adam_scrap_config'].includes(key))
             .map(([key,path]) => ({group:'map', key, name:key.replaceAll('_',' '), icon:Array.isArray(path) ? path[0] : path})),
+        {group:'ability', key:'grenade_barricade', name:'Barricada do Grenade', icon:'elements/barricade.png'},
         ...Object.entries(ALLY_ELEMENT_SPRITES)
+            .filter(([key]) => key !== 'grenade_barricade')
             .map(([key,path]) => ({group:'ally', key, name:key.replaceAll('_',' '), icon:Array.isArray(path) ? path[0] : path}))
     ];
     const seen = new Set();
@@ -12703,30 +12796,24 @@ function sandboxSpawnElement(group, key, direct=false) {
     const x = Number(player.x) || 0, y = Number(player.y) || 0;
 
 
-    if (group === 'secret' && key === 'invisible_wall') { const obj={x,y,r:38,type:'sandbox_invisible_wall',isWall:true,sandbox:true,invisibleWall:true}; obstacles.push(obj); sandboxPlacedElements.push(obj); sandboxPersistentEntities.push(obj); notify('Invisi-parede colocada.'); return true; }
+    if (group === 'secret' && key === 'invisible_wall') { const obj={x,y,r:38,type:'sandbox_invisible_wall',isWall:true,sandbox:true,invisibleWall:true}; obstacles.push(obj); sandboxPlacedElements.push(obj); sandboxRegisterPersistentEntity(obj, 'obstacle'); notify('Invisi-parede colocada.'); return true; }
 
     if (group === 'xp') {
-        const obj = {x,y,val:key === 'xp_large' ? 25 : 5, sandbox:true}; xpGems.push(obj); sandboxPersistentEntities.push(obj);
+        const obj = {x,y,val:key === 'xp_large' ? 25 : 5, sandbox:true}; xpGems.push(obj); sandboxRegisterPersistentEntity(obj, 'xp');
         notify('XP invocado.');
         return true;
     }
 
     if (group === 'map' && key.startsWith('box_drop_')) {
         const boxType = normalizeBoxType(key.slice('box_drop_'.length));
-        const obj = {x,y,type:'loot_box_drop',boxType,r:22,sandbox:true}; itemsMap.push(obj); sandboxPersistentEntities.push(obj);
+        const obj = {x,y,type:'loot_box_drop',boxType,r:22,sandbox:true}; itemsMap.push(obj); sandboxRegisterPersistentEntity(obj, 'item');
         notify(`Caixa ${boxName(boxType)} invocada.`);
         return true;
     }
 
     if (group === 'map' && key === 'treasure_chest') {
-        const obj = {x,y,type:'chest',r:15,sandbox:true}; itemsMap.push(obj); sandboxPersistentEntities.push(obj);
+        const obj = {x,y,type:'chest',r:15,sandbox:true}; itemsMap.push(obj); sandboxRegisterPersistentEntity(obj, 'item');
         notify('Baú de Tesouro invocado.');
-        return true;
-    }
-
-    if (group === 'map' && (key === 'adam_scrap_scrap' || key === 'adam_scrap_config')) {
-        const obj = {x,y,type:'scrap',r:10,amount:1,spriteVariant:key === 'adam_scrap_config' ? 1 : 0,sandbox:true}; itemsMap.push(obj); sandboxPersistentEntities.push(obj);
-        notify(`${key === 'adam_scrap_config' ? 'Config' : 'Sucata'} invocada.`);
         return true;
     }
 
@@ -12735,6 +12822,16 @@ function sandboxSpawnElement(group, key, direct=false) {
             stone:'rock', cactus:'cacto', tree:'tree', volcano:'volcano', bamboo:'bamboo', spike_bamboo:'bamboo_spike',
             soundbox:'speaker', shroom:'shroom', kelp:'kelp'
         };
+        if (['side_car','front_car','behind_car'].includes(key)) {
+            const ax = Math.abs(x), ay = Math.abs(y);
+            let vx=0, vy=0;
+            if (ax >= ay) { vx = x >= 0 ? -8 : 8; vy = 0; }
+            else { vx = 0; vy = y >= 0 ? -8 : 8; }
+            const obj = {x,y,vx,vy,r:30,type:'car',life:999999,sandbox:true};
+            obstacles.push(obj); sandboxRegisterPersistentEntity(obj, 'obstacle');
+            notify(`${key.replaceAll('_',' ')} colocado.`);
+            return true;
+        }
         const type = obstacleTypeMap[key];
         if (!type) return false;
         const rMap = { rock:28, cacto:24, tree:34, volcano:42, bamboo:30, bamboo_spike:24, speaker:40, shroom:24, kelp:34 };
@@ -12742,24 +12839,57 @@ function sandboxSpawnElement(group, key, direct=false) {
         if (type === 'kelp') obj.isWall = false;
         if (type === 'volcano') obj.timer = 99;
         if (type === 'speaker') obj.cd = 0;
-        obstacles.push(obj); sandboxPersistentEntities.push(obj);
+        obstacles.push(obj); sandboxRegisterPersistentEntity(obj, 'obstacle');
         notify(`${key.replaceAll('_',' ')} invocado.`);
         return true;
     }
 
+    if (group === 'ability' && key === 'grenade_barricade') {
+        const wall = {
+            x, y, vx:0, vy:0, type:'grenade_barricade', isPlayer:true, sandbox:true, sandboxSaveId:null,
+            life:15, size:26, dmg:0, extra:{sourceChar:'grenade', abilityShot:true, isWall:true, wallLife:15, wallRadius:26, wallAngle:Number(player.lastAimAngle)||0}
+        };
+        projectiles.push(wall);
+        sandboxRegisterPersistentEntity(wall, 'projectile');
+        notify('Barricada invocada.');
+        return true;
+    }
+
     if (group === 'ally' && Object.prototype.hasOwnProperty.call(ALLY_ELEMENT_SPRITES, key)) {
-        // Cria a estrutura esperada pelo renderer normal de aliados. O sprite/modelo
-        // usado é o mesmo já existente no jogo; não há marcador ou CSS alternativo.
-        const turretLike = ['turret','mortar','cannon','tesla','crossbow','burner'].includes(key);
+        if (key === 'ivy_vine') {
+            if (typeof spawnIvyVine === 'function') spawnIvyVine(x, y);
+            const spawned = allies[allies.length - 1];
+            if (spawned) { spawned.sandbox = true; spawned.sandboxSaveId = null; sandboxRegisterPersistentEntity(spawned, 'ally'); }
+            notify('Trepadeira da Ivy invocada.');
+            return !!spawned;
+        }
+        if (key === 'ivy_flower') {
+            const ox = player.x, oy = player.y;
+            player.x = x; player.y = y;
+            try { if (typeof spawnIvyFlower === 'function') spawnIvyFlower(); } finally { player.x = ox; player.y = oy; }
+            const spawned = allies[allies.length - 1];
+            if (spawned) { spawned.sandbox = true; spawned.sandboxSaveId = null; sandboxRegisterPersistentEntity(spawned, 'ally'); }
+            notify('Flor da Ivy invocada.');
+            return !!spawned;
+        }
+        if (key === 'tea_table') {
+            const ox = player.x, oy = player.y;
+            player.x = x; player.y = y;
+            try { if (typeof spawnMissMacaronTeaTable === 'function') spawnMissMacaronTeaTable(); } finally { player.x = ox; player.y = oy; }
+            const spawned = allies[allies.length - 1];
+            if (spawned) { spawned.sandbox = true; sandboxRegisterPersistentEntity(spawned, 'ally'); }
+            notify('Mesa de chá invocada.');
+            return !!spawned;
+        }
         const ally = {
             x, y, type:key, sandbox:true, sourceChar:'sandbox', ref:`sandbox_${key}`,
-            r: key === 'tea_table' ? 32 : 14, radius: key === 'tea_table' ? 185 : undefined,
+            r: key === 'tea_table' ? 32 : (key === 'oven' ? 22 : 14), radius: key === 'tea_table' ? 140 : undefined,
             cd:0, dmg:Math.max(1, Number(player.baseDmg) || 1), speed:0,
-            life:Infinity, isTurret:turretLike
+            life:Infinity, isTurret:['turret','mortar','cannon','tesla','crossbow','burner','oven'].includes(key)
         };
         if (key === 'chick') ally.facingLeft = !!playerFacingLeft;
-        if (key === 'drone') ally.variant = 'default';
-        allies.push(ally); sandboxPersistentEntities.push(ally);
+        if (key === 'drone') ally.variant = 'axel_drone';
+        allies.push(ally); sandboxRegisterPersistentEntity(ally, 'ally');
         notify(`${key.replaceAll('_',' ')} invocado.`);
         return true;
     }
@@ -13652,7 +13782,7 @@ function updateRotatingDrum(dt) {
 function fireWeapon(target) {
     // O Sandbox congela toda a simulação ofensiva: o jogador pode andar, mas
     // não pode disparar armas enquanto estiver nesse modo.
-    if (sandboxMode) return;
+    if (sandboxMode || runShootingDisabled) return;
     // Nenhuma arma dispara sem um alvo detectado nem contra inimigos hipnotizados.
     if(!target || isCurrentlyHypnotized(target)) return;
     const w = player.weapon; 
@@ -17207,7 +17337,7 @@ function updateAllies(dt) {
             if(!a.wanderAngle) a.wanderAngle = Math.random() * Math.PI * 2;
             a.wanderAngle += dt * 0.8;
 
-            const isKaisenDrone = a.type === 'drone' && a.variant === 'kaisen';
+            const isKaisenDrone = a.type === 'drone' && (a.variant === 'kaisen' || a.variant === 'axel_drone');
             const orbitRadius = isKaisenDrone ? 42 : (a.type === 'drone' ? 50 : 90);
             const targetX = player.x + Math.cos(a.wanderAngle) * orbitRadius;
             const targetY = player.y + Math.sin(a.wanderAngle) * orbitRadius;
@@ -17413,6 +17543,9 @@ function updateAllies(dt) {
             }
         } else if (a.type === 'ivy_flower') {
             a.pulse = (a.pulse || 0) + dt * 2;
+        } else if (a.type === 'oven') {
+            // Forno é um elemento estático real: não possui IA própria no jogo.
+            a.cd = 0;
         } else if (a.type === 'ivy_vine') {
             if (!a.trappedIds) a.trappedIds = new Set();
             const vineRadius = a.radius || 160;
@@ -21372,7 +21505,7 @@ function draw() {
             }
         } else if(a.type === 'drone') {
 
-            const droneSpriteType = a.variant === 'kaisen' ? 'axel_drone' : 'drone';
+            const droneSpriteType = (a.variant === 'kaisen' || a.variant === 'axel_drone') ? 'axel_drone' : 'drone';
             if (!drawElementSprite(ctx, a.x, a.y, droneSpriteType, 46, { flipX: Boolean(a.facingLeft) })) {
                 ctx.fillStyle = '#bdc3c7'; ctx.beginPath(); ctx.arc(a.x, a.y, 14, 0, Math.PI*2); ctx.fill();
                 ctx.fillStyle = '#e74c3c'; ctx.beginPath(); ctx.arc(a.x, a.y+2, 9, 0, Math.PI*2); ctx.fill();
@@ -21531,6 +21664,11 @@ function draw() {
             ctx.restore();
             }
             ctx.restore();
+        } else if (a.type === 'ivy_vine') {
+            const vineSize = Math.max(72, (a.radius || 120) * 0.55);
+            drawElementSprite(ctx, a.x, a.y, 'ivy_vine', vineSize);
+        } else if (a.type === 'oven') {
+            drawElementSprite(ctx, a.x, a.y, 'oven', 52 * getSceneScale());
         } else if (a.type === 'giant_zombie') {
             const zr = (a.size || 30) * 0.9;
             ctx.fillStyle = '#8e44ad'; ctx.beginPath(); ctx.arc(a.x, a.y, zr, 0, Math.PI*2); ctx.fill();
