@@ -451,6 +451,48 @@ html.sandbox-pc .sandbox-tool-hotkey{display:block}.sandbox-tool-state{position:
 @keyframes vingathronHeartShieldPulse{from{opacity:.72;transform:scale(.97);}to{opacity:1;transform:scale(1.03);}}
 @media(max-width:620px){.vingathron-heart-bar{width:84px;height:48px;}.vingathron-heart{width:58px;height:47px;}.vingathron-heart-count{font-size:9px;}}
 </style>
+<style id="general-ui-fixes-v4">
+/* Oficina: todas as cartas de personagem usam a mesma estrutura/tamanho. */
+#screen-trail #trail-options{display:grid !important;grid-template-columns:repeat(auto-fit,minmax(250px,1fr)) !important;align-items:stretch !important;gap:16px !important;width:min(1000px,100%) !important;max-width:1000px !important;margin:18px auto 0 !important;}
+#screen-trail #trail-options .trail-focus-card{width:100% !important;max-width:none !important;min-height:335px !important;height:100% !important;margin:0 !important;}
+#screen-trail .trail-focus-card .trail-focus-badge{flex:0 0 86px !important;}
+#screen-trail .trail-focus-card .trail-focus-head{min-height:102px !important;}
+#screen-trail .trail-focus-card .trail-focus-copy{min-width:0 !important;}
+#screen-trail .trail-focus-card .trail-focus-title{overflow-wrap:anywhere !important;}
+#screen-trail .trail-focus-card .trail-focus-actions{margin-top:auto !important;}
+
+/* Seleção de mapa: preview sempre quadrado fixo, nome obrigatoriamente embaixo. */
+#overlay-map-destination .map-destination-grid{display:grid !important;grid-template-columns:repeat(3,minmax(0,230px)) !important;justify-content:center !important;align-items:start !important;gap:16px !important;max-width:100% !important;width:100% !important;overflow:hidden !important;}
+#overlay-map-destination .map-destination-card{width:100% !important;min-width:0 !important;max-width:230px !important;min-height:0 !important;height:auto !important;display:flex !important;flex-direction:column !important;align-items:stretch !important;justify-content:flex-start !important;overflow:hidden !important;white-space:normal !important;}
+#overlay-map-destination .map-destination-card canvas{width:100% !important;height:206px !important;min-height:206px !important;max-height:206px !important;aspect-ratio:auto !important;flex:0 0 206px !important;}
+#overlay-map-destination .map-destination-name{position:static !important;width:100% !important;display:block !important;white-space:normal !important;overflow-wrap:anywhere !important;text-align:center !important;margin:10px 0 2px !important;line-height:1.15 !important;}
+@media(max-width:800px){#overlay-map-destination .map-destination-grid{grid-template-columns:repeat(2,minmax(0,230px)) !important;gap:10px !important;}#overlay-map-destination .map-destination-card canvas{height:150px !important;min-height:150px !important;max-height:150px !important;flex-basis:150px !important;}}
+@media(max-width:500px){#overlay-map-destination .map-destination-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important;}#overlay-map-destination .map-destination-card{max-width:none !important;}#overlay-map-destination .map-destination-card canvas{height:auto !important;min-height:0 !important;max-height:none !important;aspect-ratio:1/1 !important;flex-basis:auto !important;}}
+
+/* Perfil: o botão de personagem substitui o X e define a arte exibida. */
+#overlay-profile .profile-character-card{width:112px !important;min-width:112px !important;height:112px !important;margin:0 !important;padding:8px !important;border-radius:20px !important;display:flex !important;flex-direction:column !important;justify-content:center !important;align-items:center !important;gap:2px !important;overflow:hidden !important;background:linear-gradient(145deg,rgba(255,255,255,.10),rgba(255,255,255,.035)) !important;box-shadow:0 12px 25px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.10) !important;}
+#overlay-profile .profile-character-sprite{width:70px !important;height:58px !important;display:flex !important;align-items:center !important;justify-content:center !important;overflow:hidden !important;}
+#overlay-profile .profile-character-sprite img{width:100% !important;height:100% !important;object-fit:contain !important;display:block !important;filter:drop-shadow(0 5px 8px rgba(0,0,0,.35));}
+#overlay-profile .profile-character-card-name{font-size:12px !important;font-weight:900 !important;line-height:1 !important;white-space:nowrap !important;overflow:hidden !important;text-overflow:ellipsis !important;max-width:96px !important;}
+#overlay-profile .profile-character-card-hint{font-size:7px !important;color:#b9c4d0 !important;line-height:1 !important;text-transform:uppercase !important;letter-spacing:.05em !important;text-align:center !important;}
+.profile-character-picker-box{width:min(1000px,94vw) !important;max-width:1000px !important;max-height:90vh !important;overflow:hidden !important;display:flex !important;flex-direction:column !important;}
+.profile-character-picker-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex:0 0 auto;padding-bottom:12px;}
+.profile-picker-back{width:auto !important;min-width:120px !important;margin:0 !important;padding:10px 14px !important;font-size:13px !important;}
+.profile-character-picker-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;overflow-y:auto;overflow-x:hidden;padding:4px 2px 12px;contain:layout paint style;}
+.profile-character-picker-card{min-width:0;min-height:130px;padding:10px 7px;border-radius:16px;border:2px solid rgba(255,255,255,.12);background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.025));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:#fff;cursor:pointer;box-shadow:0 8px 18px rgba(0,0,0,.18);}
+.profile-character-picker-card.selected{box-shadow:0 0 0 2px rgba(46,204,113,.75),0 10px 22px rgba(0,0,0,.24) !important;}
+.profile-character-picker-card img{width:82px;height:58px;object-fit:contain;display:block;}
+.profile-character-picker-card strong{font-size:13px;line-height:1.05;text-align:center;max-width:100%;overflow-wrap:anywhere;}
+.profile-character-picker-card span{font-size:9px;color:#b9c4d0;text-transform:uppercase;text-align:center;}
+
+/* Chips: remover blur/efeitos caros e reduzir trabalho de pintura. */
+#overlay-chips-inventory,#overlay-chips-equip{backdrop-filter:none !important;-webkit-backdrop-filter:none !important;background:rgba(0,0,0,.78) !important;}
+#overlay-chips-inventory .popup-box,#overlay-chips-equip .popup-box{backdrop-filter:none !important;-webkit-backdrop-filter:none !important;box-shadow:0 14px 34px rgba(0,0,0,.42) !important;contain:layout paint style !important;}
+#overlay-chips-inventory .menu-grid,#overlay-chips-equip .menu-grid{contain:layout paint style !important;content-visibility:auto !important;}
+#overlay-chips-inventory .chip-card,#overlay-chips-equip .chip-card{box-shadow:0 5px 10px rgba(0,0,0,.20) !important;background:linear-gradient(180deg,#163a16,#0b180b) !important;background-image:none !important;transition:none !important;}
+#overlay-chips-inventory .chip-card::before,#overlay-chips-inventory .chip-card::after,#overlay-chips-equip .chip-card::before,#overlay-chips-equip .chip-card::after{display:none !important;}
+#overlay-chips-inventory .chip-card:hover,#overlay-chips-equip .chip-card:hover{transform:none !important;}
+</style>
 </head>
 <body>
 
@@ -503,12 +545,21 @@ html.sandbox-pc .sandbox-tool-hotkey{display:block}.sandbox-tool-state{position:
 <div id="overlay-profile" class="overlay hidden" style="z-index: 9996;">
     <div class="popup-box profile-box">
         <div class="profile-hero">
+            <button id="profile-character-card" class="profile-character-card rarity-common" type="button" onclick="openProfileCharacterPicker()" title="Escolher personagem do perfil">
+                <span id="profile-character-sprite" class="profile-character-sprite"></span>
+                <span id="profile-character-card-name" class="profile-character-card-name">Strike</span>
+                <span class="profile-character-card-hint">Personagem do perfil</span>
+            </button>
             <div class="profile-hero-copy">
                 <div class="profile-kicker">PERFIL DO JOGADOR</div>
                 <h2 id="profile-hero-name">Jogador</h2>
                 <div id="profile-hero-title" class="profile-hero-title">Sem título equipado</div>
             </div>
-            <button class="profile-close" onclick="closeProfile()">✕</button>
+            <button id="profile-character-card" class="profile-character-card" type="button" onclick="openProfileCharacterPicker()" title="Escolher personagem do perfil">
+                <span id="profile-character-sprite" class="profile-character-sprite"></span>
+                <span id="profile-character-card-name" class="profile-character-card-name">Strike</span>
+                <span class="profile-character-card-hint">Personagem do perfil</span>
+            </button>
         </div>
         <div class="profile-summary">
             <div class="profile-stat profile-stat--accent"><span class="label">Melhor Wave</span><span class="value" id="profile-best-score">0</span></div>
@@ -519,6 +570,19 @@ html.sandbox-pc .sandbox-tool-hotkey{display:block}.sandbox-tool-state{position:
             <button class="btn-menu" onclick="changeNickname()">Alterar Nome</button>
             <button class="btn-menu" onclick="changeTitle()">Gerenciar Títulos</button>
         </div>
+    </div>
+</div>
+
+<div id="overlay-profile-character-picker" class="overlay hidden" style="z-index: 9997;">
+    <div class="popup-box profile-character-picker-box">
+        <div class="profile-character-picker-head">
+            <div>
+                <div class="profile-kicker">PERSONAGEM DO PERFIL</div>
+                <h2 style="margin:4px 0 0;">Escolha seu personagem</h2>
+            </div>
+            <button class="btn-menu profile-picker-back" type="button" onclick="closeProfileCharacterPicker()">Voltar</button>
+        </div>
+        <div id="profile-character-picker-list" class="profile-character-picker-list"></div>
     </div>
 </div>
 
@@ -839,8 +903,8 @@ html.sandbox-pc .sandbox-tool-hotkey{display:block}.sandbox-tool-state{position:
 
 <div id="screen-chars" class="screen scrollable hidden">
 
-    <button class="btn-top-corner btn-back" onclick="showScreen('screen-main')"><span aria-hidden="true">×</span><span class="sr-only">Voltar</span></button>
-    <h2 style="margin-top: 40px;">Seus Personagens</h2>
+    <button id="chars-back-btn" class="btn-top-corner btn-back" onclick="handleCharsBack()"><span aria-hidden="true">×</span><span class="sr-only">Voltar</span></button>
+    <h2 id="chars-screen-title" style="margin-top: 40px;">Seus Personagens</h2>
     
     <div style="text-align: center; margin-bottom: 10px;">
         <button class="btn-action chips-glass-btn" type="button" onclick="showChipsInventory()"><img src="elements/chip.png" alt="Chip"> <span>Ver Meus Chips</span></button>
@@ -2646,7 +2710,7 @@ document.addEventListener('visibilitychange', () => {
 window.addEventListener('blur', pauseMusicOnFocusLoss);
 window.addEventListener('focus', resumeMusicOnFocusGain);
 
-let pd = { coins: 500, gems: 50, evo: 40, sucatas: 0, nickname: null, tutorial: { stage: 'nickname', introShown: false, firstMatch: false, controlShown: false, levelupShown: false, finalShown: false, firstLossHandled: false, charsHandled: false, evolutionHandled: false, chipHandled: false, workshopSeen: false, workshopDialogShown: false, workshopFastyPending: false, sectionDialogs: { shop: false, pass: false, event: false, missions: false }, shopTabsSeen: [], dailyRewardTutorialSeen: false }, chars: { strike: { level: 1, slots: 2, chips: [null, null] } }, selectedChar: 'strike', favoriteChars: [], passXp: 0, passLevel: 1, passClaimed: 0, passClaimedTiers: [], passRewardSeed: 0, passRewardCache: {}, passResetAt: 0, shopState: { lastRotation: 0, items: {} }, lastDaily: "", dailyWins: {date: "", count: 0}, vip: { activeUntil: 0, inventory: 0 }, hardcoreBans: { lastRotation: 0, chars: [] }, settings: { ...DEFAULT_SETTINGS }, trail: { target: null, fameLevel: 0 }, profile: { title: null, emblem: null }, events: { ruben: { claimed: false }, adam: { claimed: false } }, missMacaronLegacySeasonal: false, redeemedCodes: {}, missions: { date: '', list: [], weekly: { weekKey: '', mission: null }, rerolls: { date: '', used: 0 } }, passOverflowXp: 0, passOverflowBoxes: 0, chipsInventory: { hp: 1 }, chipCrafting: null, progressStats: { gamesStarted: 0, wins: 0, totalKills: 0, bossKills: 0, bestWave: 0 }, debug: { infiniteCoins: false, infiniteGems: false, infiniteEvo: false, infiniteScrap: false, unlockAllChars: false, infiniteChips: false, infiniteXp: false, infinitePassXp: false, allTitles: false, sandbox: false, devUnlocked: false, devBaseState: null, mapRotationOverride: -1 } };
+let pd = { coins: 500, gems: 50, evo: 40, sucatas: 0, nickname: null, tutorial: { stage: 'nickname', introShown: false, firstMatch: false, controlShown: false, levelupShown: false, finalShown: false, firstLossHandled: false, charsHandled: false, evolutionHandled: false, chipHandled: false, workshopSeen: false, workshopDialogShown: false, workshopFastyPending: false, sectionDialogs: { shop: false, pass: false, event: false, missions: false }, shopTabsSeen: [], dailyRewardTutorialSeen: false }, chars: { strike: { level: 1, slots: 2, chips: [null, null] } }, selectedChar: 'strike', favoriteChars: [], passXp: 0, passLevel: 1, passClaimed: 0, passClaimedTiers: [], passRewardSeed: 0, passRewardCache: {}, passResetAt: 0, shopState: { lastRotation: 0, items: {} }, lastDaily: "", dailyWins: {date: "", count: 0}, vip: { activeUntil: 0, inventory: 0 }, hardcoreBans: { lastRotation: 0, chars: [] }, settings: { ...DEFAULT_SETTINGS }, trail: { target: null, fameLevel: 0 }, profile: { title: null, emblem: null, character: 'strike' }, events: { ruben: { claimed: false }, adam: { claimed: false } }, missMacaronLegacySeasonal: false, redeemedCodes: {}, missions: { date: '', list: [], weekly: { weekKey: '', mission: null }, rerolls: { date: '', used: 0 } }, passOverflowXp: 0, passOverflowBoxes: 0, chipsInventory: { hp: 1 }, chipCrafting: null, progressStats: { gamesStarted: 0, wins: 0, totalKills: 0, bossKills: 0, bestWave: 0 }, debug: { infiniteCoins: false, infiniteGems: false, infiniteEvo: false, infiniteScrap: false, unlockAllChars: false, infiniteChips: false, infiniteXp: false, infinitePassXp: false, allTitles: false, sandbox: false, devUnlocked: false, devBaseState: null, mapRotationOverride: -1 } };
 window.isHardcoreMode = false; window.lastGameOverWasLoss = false; window.gachaQueue = []; window.tempBoxData = null; window.currentMap = 0; window.currentDetailCharId = null; window.currentChipEquipSlot = null; window.debugInfiniteGems = false;
 window.characterTestMode = false; window.characterTestSaveSnapshot = null; window.characterTestCharId = null;
 
@@ -2866,8 +2930,10 @@ function normalizeSaveData(rawSave) {
         next.missMacaronLegacySeasonal = !!next.missMacaronLegacySeasonal;
     }
 
-    if (!next.profile || typeof next.profile !== 'object') next.profile = { title: null };
+    if (!next.profile || typeof next.profile !== 'object') next.profile = { title: null, emblem: null, character: 'strike' };
     if (typeof next.profile.title === 'undefined') next.profile.title = null;
+    if (typeof next.profile.emblem === 'undefined') next.profile.emblem = null;
+    if (!next.profile.character || !CHARACTERS?.[next.profile.character] || !next.chars?.[next.profile.character]) next.profile.character = 'strike';
     if (!next.events || typeof next.events !== 'object') next.events = {};
     for (const id of Object.keys(EVENT_CHARACTER_PROGRESS)) {
         const key = EVENT_MISSION_SAVE_KEYS[id];
@@ -3006,8 +3072,10 @@ function load() {
     if (!pd.chars || typeof pd.chars !== 'object') pd.chars = {};
     if (!pd.chars.strike) pd.chars.strike = { level: 1, slots: 2, chips: [null, null] };
 
-    if (!pd.profile || typeof pd.profile !== 'object') pd.profile = { title: null };
+    if (!pd.profile || typeof pd.profile !== 'object') pd.profile = { title: null, emblem: null, character: 'strike' };
     if (typeof pd.profile.title === 'undefined') pd.profile.title = null;
+    if (typeof pd.profile.emblem === 'undefined') pd.profile.emblem = null;
+    if (!pd.profile.character || !CHARACTERS?.[pd.profile.character] || !pd.chars?.[pd.profile.character]) pd.profile.character = 'strike';
     if (!pd.events || typeof pd.events !== 'object') pd.events = {};
     for (const id of Object.keys(EVENT_CHARACTER_PROGRESS)) {
         const key = EVENT_MISSION_SAVE_KEYS[id];
@@ -5694,6 +5762,61 @@ function renderProfile() {
     const profileScore = document.getElementById('profile-best-score');
     if (profileScore) profileScore.textContent = bestScore;
     if (titleCount) titleCount.textContent = String(unlocked.length);
+
+    const validProfileChar = (pd?.profile?.character && CHARACTERS?.[pd.profile.character] && pd.chars?.[pd.profile.character]) ? pd.profile.character : 'strike';
+    if (pd?.profile?.character !== validProfileChar) { pd.profile.character = validProfileChar; save(); }
+    const profileChar = CHARACTERS[validProfileChar];
+    const spriteEl = document.getElementById('profile-character-sprite');
+    const nameEl = document.getElementById('profile-character-card-name');
+    const cardEl = document.getElementById('profile-character-card');
+    if (spriteEl && profileChar) spriteEl.innerHTML = getCharacterSpriteMarkup(validProfileChar, 'hero') || getCharacterSpriteMarkup(validProfileChar, 'menu');
+    if (nameEl && profileChar) nameEl.textContent = getCharacterDisplayName(validProfileChar);
+    if (cardEl && profileChar) cardEl.className = `profile-character-card rarity-${profileChar.rarity}`;
+}
+
+function openProfileCharacterPicker() {
+    if (isTutorialProfileLocked()) return;
+    window.profileCharacterPickMode = true;
+    document.getElementById('overlay-profile')?.classList.add('hidden');
+    const chipsBtn = document.querySelector('#screen-chars > div[style*="text-align: center"]');
+    if (chipsBtn) chipsBtn.classList.add('hidden');
+    const filterBar = document.querySelector('#screen-chars .filter-bar');
+    if (filterBar) filterBar.classList.add('hidden');
+    const title = document.getElementById('chars-screen-title');
+    if (title) title.textContent = 'Escolha o personagem do perfil';
+    const back = document.getElementById('chars-back-btn');
+    if (back) back.setAttribute('aria-label', 'Voltar ao perfil');
+    renderChars();
+    showScreen('screen-chars');
+}
+
+function closeProfileCharacterPicker() {
+    window.profileCharacterPickMode = false;
+    const chipsBtn = document.querySelector('#screen-chars > div[style*="text-align: center"]');
+    if (chipsBtn) chipsBtn.classList.remove('hidden');
+    const filterBar = document.querySelector('#screen-chars .filter-bar');
+    if (filterBar) filterBar.classList.remove('hidden');
+    const title = document.getElementById('chars-screen-title');
+    if (title) title.textContent = 'Seus Personagens';
+    renderProfile();
+    showScreen('screen-main');
+    document.getElementById('overlay-profile')?.classList.remove('hidden');
+}
+
+function setProfileCharacter(id) {
+    if (!id || !CHARACTERS?.[id] || !pd?.chars?.[id]) return;
+    if (!pd.profile || typeof pd.profile !== 'object') pd.profile = { title: null, emblem: null, character: 'strike' };
+    pd.profile.character = id;
+    save();
+    closeProfileCharacterPicker();
+}
+
+function handleCharsBack() {
+    if (window.profileCharacterPickMode) {
+        closeProfileCharacterPicker();
+        return;
+    }
+    showScreen('screen-main');
 }
 
 function isTutorialProfileLocked() {
@@ -5965,21 +6088,6 @@ function redeemRewardCode() {
     const normalizedCode = code.toUpperCase();
 
 
-
-    if (normalizedCode === 'IZAQUEIZAQUE') {
-        if (pd.redeemedCodes.izaqueizaque) {
-            showAlert('Esse código já foi resgatado nesta conta.');
-            return;
-        }
-        if (!pd.chars.izaque) pd.chars.izaque = { level: 1, slots: 2, chips: [null, null] };
-        pd.redeemedCodes.izaqueizaque = true;
-        save();
-        if (input) input.value = '';
-        renderChars?.(); renderShop?.(); updateUI();
-        notify(pd.chars.izaque ? 'Código resgatado: Izaque — Lobo Gato desbloqueado gratuitamente.' : 'Código resgatado.');
-        return;
-    }
-
     if (normalizedCode === 'LAFRANCE') {
         if (pd.redeemedCodes.lafrance) {
             showAlert('Esse código já foi resgatado nesta conta.');
@@ -6003,6 +6111,21 @@ function redeemRewardCode() {
         if (instant.length) q.push({ type:'instant', title:'Código LAFRANCE', contents:instant });
         rewards.filter(r => r === 'BOX::metal' || r === 'BOX::gold').forEach(r => q.push(buildBoxQueue(r.slice(5))));
         if (q.length) startGachaQueue(q);
+        return;
+    }
+
+    if (normalizedCode === 'DEV321@D321') {
+        ensureDevDebugState();
+        if (pd.debug.devUnlocked) {
+            showAlert('Dev Tools já estão desbloqueadas nesta conta.');
+            if (input) input.value = '';
+            return;
+        }
+        pd.debug.devUnlocked = true;
+        save();
+        if (input) input.value = '';
+        updateSettingsUI();
+        notify('Dev Tools desbloqueadas!');
         return;
     }
 
@@ -7329,7 +7452,7 @@ function showScreen(id) {
     };
     if (tutorialAllowed[tutorialStage] && id !== null && !tutorialAllowed[tutorialStage].includes(id)) return;
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-    ['custom-popup', 'overlay-mode-select', 'overlay-map-destination', 'overlay-pregame-shop', 'overlay-book', 'overlay-title-picker', 'overlay-profile'].forEach(overlayId => {
+    ['custom-popup', 'overlay-mode-select', 'overlay-map-destination', 'overlay-pregame-shop', 'overlay-book', 'overlay-title-picker', 'overlay-profile', 'overlay-profile-character-picker'].forEach(overlayId => {
         const overlay = document.getElementById(overlayId);
         if (overlay && id !== overlayId) overlay.classList.add('hidden');
     });
@@ -8458,7 +8581,7 @@ function renderChars() {
     const declarationIndex = new Map(Object.keys(CHARACTERS).map((id, index) => [id, index]));
 
     const filtered = Object.values(CHARACTERS).filter(c =>
-        !isCharacterHiddenForUnownedView(c.id) && (cls === 'all' || c.class === cls)
+        !!pd.chars?.[c.id] && !isCharacterHiddenForUnownedView(c.id) && (window.profileCharacterPickMode || cls === 'all' || c.class === cls)
     );
 
     const rarityAsc = (a, b) => {
@@ -8506,7 +8629,13 @@ function renderChars() {
             html += `<p style="color:#aaa;font-size:12px;">Não possuído</p><div style="color:#bbb;font-size:12px;font-weight:bold;margin-top:5px;">Toque para ver detalhes</div>`;
         }
 
-        div.onclick = () => showCharDetail(c.id);
+        div.onclick = () => {
+            if (window.profileCharacterPickMode) {
+                setProfileCharacter(c.id);
+                return;
+            }
+            showCharDetail(c.id);
+        };
         div.innerHTML = html;
         div.dataset.charId = c.id;
         list.appendChild(div);
@@ -10386,7 +10515,7 @@ function renderTrail() {
             const progressLabel = `${Math.floor(pct)}% concluído`;
             html += `<div class="trail-focus-card rarity-legendary">
                 <div class="trail-focus-head">
-                    <div class="trail-focus-badge">${badge || '<span style="font-size:34px;">🔰</span>'}</div>
+                    <div class="trail-focus-badge">${isPatente ? (badge || '<img class="ui-sprite-icon" style="width:34px;height:34px;" src="elements/medal.png" alt="Medalha">') : getCharacterCardEmoji(CHARACTERS[pd.trail.target.id])}</div>
                     <div class="trail-focus-copy">
                         <div class="trail-focus-kicker">Oficina em foco</div>
                         <h3 class="trail-focus-title">${title}</h3>
