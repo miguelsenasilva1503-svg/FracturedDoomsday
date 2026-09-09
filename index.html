@@ -22184,7 +22184,7 @@ function drawEquippedPetCompanion(){
     const cache=window.__petImageCache||(window.__petImageCache={}); const src=data.sprite;
     let img=cache[src];
     if(!img){ img=new Image(); img.decoding='async'; img.loading='eager'; img.src=new URL(src, document.baseURI).href; cache[src]=img; }
-    const size=Math.max(30,Math.min(52,player.r*1.18));
+    const size=Math.max(58,Math.min(92,player.r*2.05));
     const ratio=(img.naturalWidth>0&&img.naturalHeight>0)?img.naturalWidth/img.naturalHeight:1;
     const w=ratio>=1?size:size*ratio;
     const h=ratio>=1?size/ratio:size;
@@ -28804,17 +28804,17 @@ window.openPetShop=openPetShop;
 }
 
 /* Pet artwork gets a wider presentation box; contain prevents vertical squashing. */
-#screen-pets .pet-selected-visual { width:118px !important; height:82px !important; }
-#screen-pets .pet-selected-visual img { width:112px !important; height:78px !important; object-fit:contain !important; }
-#screen-pets .pet-inventory-card img { width:86px !important; height:66px !important; object-fit:contain !important; }
-#screen-pets .pet-fusion-picker-visual { width:82px !important; height:66px !important; }
-#screen-pets .pet-fusion-picker-visual img { width:76px !important; height:62px !important; object-fit:contain !important; }
-.pet-roulette-item img { width:76px !important; height:58px !important; object-fit:contain !important; }
-.pet-reward-reveal .gacha-drop-sprite img { width:104px !important; height:78px !important; object-fit:contain !important; }
+#screen-pets .pet-selected-visual { width:170px !important; height:120px !important; }
+#screen-pets .pet-selected-visual img { width:164px !important; height:114px !important; object-fit:contain !important; }
+#screen-pets .pet-inventory-card img { width:118px !important; height:92px !important; object-fit:contain !important; }
+#screen-pets .pet-fusion-picker-visual { width:118px !important; height:92px !important; }
+#screen-pets .pet-fusion-picker-visual img { width:112px !important; height:88px !important; object-fit:contain !important; }
+.pet-roulette-item img { width:96px !important; height:74px !important; object-fit:contain !important; }
+.pet-reward-reveal .gacha-drop-sprite img { width:142px !important; height:108px !important; object-fit:contain !important; }
 @media(max-width:700px){
-    #screen-pets .pet-selected-visual { width:88px !important; height:66px !important; }
-    #screen-pets .pet-selected-visual img { width:84px !important; height:62px !important; }
-    #screen-pets .pet-inventory-card img { width:72px !important; height:56px !important; }
+    #screen-pets .pet-selected-visual { width:116px !important; height:88px !important; }
+    #screen-pets .pet-selected-visual img { width:110px !important; height:84px !important; }
+    #screen-pets .pet-inventory-card img { width:92px !important; height:72px !important; }
     #screen-pets .pet-fusion-picker-visual { width:70px !important; height:56px !important; }
     #screen-pets .pet-fusion-picker-visual img { width:66px !important; height:52px !important; }
     .pet-roulette-item img { width:68px !important; height:52px !important; }
