@@ -1230,6 +1230,7 @@ html.sandbox-pc .sandbox-tool-hotkey{display:block}.sandbox-tool-state{position:
         <div style="display:flex; flex-direction:column; gap: 15px;">
             <button class="btn-action" id="btn-classic-select" onclick="startGame(false)"><span class="uhc-chain-overlay" aria-hidden="true"></span>Clássico</button>
             <button class="btn-hardcore" id="btn-hardcore-select" onclick="startGame(true)">Hardcore</button>
+            <button id="btn-pregame-fullscreen" class="btn-menu fullscreen-action-button" type="button" onclick="toggleFullscreen()"><img class="fullscreen-hand-icon" src="elements/up.png" alt="">Tela Cheia</button>
             <button class="btn-menu" style="background:#555; border-color:#333 !important;" onclick="document.getElementById('overlay-mode-select').classList.add('hidden')">Voltar</button>
         </div>
     </div>
@@ -1363,6 +1364,13 @@ html.sandbox-pc .sandbox-tool-hotkey{display:block}.sandbox-tool-state{position:
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="settings-section fullscreen-settings-section">
+            <div class="settings-section-title">Tela</div>
+            <div class="settings-grid">
+                <button id="btn-settings-fullscreen" class="btn-menu settings-option fullscreen-action-button" type="button" onclick="toggleFullscreen()"><img class="fullscreen-hand-icon" src="elements/up.png" alt="">Tela Cheia</button>
             </div>
         </div>
 
@@ -2326,12 +2334,11 @@ Uma pequena criatura azul, simples e adorável que surgiu diretamente de um anti
 Um marinheiro durão e teimoso que parece nunca recusar uma boa briga. Com seu jeito rabugento, seu cachimbo e sua confiança inabalável, Popeye encara qualquer ameaça de frente. E quando a situação aperta, basta seu famoso espinafre para transformar sua força em algo ainda mais absurdo.
 
 “Eu sou o que eu sou!”`, popeyeSpinDuration: 30, popeyeSpinCooldownMax: 30 },
-    cyro_pyro: { id: 'cyro_pyro', class: 'Controle', name: 'Cyro & Pyro', rarity: 'legendary', cost: 349, hp: 110, speed: 3.45, dmg: 18, fireRate: 54, range: 270, color: '#74b9ff', emoji: '❄️', weapon: 'cyro_pyro', desc: `“Cyro e Pyro vivem discutindo sobre qual elemento é o mais forte. O resto do mundo só tenta sobreviver à discussão.”
+    crioheat: { id: 'crioheat', class: 'Controle', name: 'Crioheat', rarity: 'legendary', cost: 349, hp: 120, speed: 3.45, dmg: 22, fireRate: 88, range: 280, color: '#7ad7ff', weapon: 'crioheat', desc: `“Durante séculos, fogo e gelo ouviram que jamais deveriam se misturar. Até que dois seres decidiram quebrar essa regra.”
 
-Duas crianças elementais completamente opostas, mas inseparáveis. Enquanto Cyro mantém a calma e congela tudo ao seu redor, Pyro é impulsivo e adora incendiar qualquer coisa que pareça minimamente inflamável. Seus inimigos logo os subestimam por ainda serem jovens elementais, mas essa é a pior decisão que podem tomar. Juntos, transformam cada batalha em uma confusão de gelo, fogo e muita rivalidade entre irmãos.
+Dois seres elementais, um de fogo e outro de gelo, que cresceram ouvindo que seus elementos eram superiores ao elemento oposto. O conflito entre os dois lados era tratado como algo natural, até que um dia dois seres decidiram desafiar esse tabu e se fundiram, criando uma forma híbrida que combinava os dois elementos. Quando a sintonia entre eles se torna perfeita, conseguem alcançar uma forma ainda mais rara: um corpo completamente puro de obsidiana, resultado da união entre forças que jamais deveriam existir juntas.
 
-Cyro: “Eu falei que era pra você não colocar fogo nisso...”
-Pyro: “Mas ficou muito mais legal assim!"` },
+“Fogo e gelo não precisam ser inimigos.”` },
     xilo: { id: 'xilo', class: 'Destruidor', name: 'Xilo', rarity: 'epic', sortLastEpic: true, sortLastEpicOrder: 3, cost: 149, hp: 80, speed: 3.9, dmg: 22, fireRate: 90, range: 320, color: '#f1c40f', weapon: 'xilo_anvil', desc: `“Xilo parece ter saído diretamente de um desenho dos anos 90. E, sinceramente, ninguém sabe como ele chegou aqui.”
 
 Um personagem cartunesco com luvas brancas, olhos enormes e uma energia impossível de ignorar. Xilo parece obedecer às próprias regras da animação, agindo de maneira exagerada e imprevisível mesmo quando tudo ao redor está completamente fora de controle. Com seu jeito brincalhão e expressivo, ele transforma qualquer situação em uma cena digna de um desenho antigo.
@@ -2725,10 +2732,10 @@ ESPECIAL: depois da wave 1, ele escolhe um personagem aleatório e o copia por 3
     vingathron: `Vingathron: ataca com sua espada em uma área de 200°, a cada 3 ataques acertados no mesmo inimigo, o ataque aplica FRAGILIDADE DE AÇO. Inimigos com FRAGILIDADE DE AÇO acumulam marcas sempre que Vingathron os atinge novamente. Ao chegar a 3 marcas, o inimigo faz cair 5 raios perto dele, causando dano aos inimigos próximos, e as marcas são consumidas.
 
 ESPECIAL: Sempre que Vingathron toma dano, ganha um fragmento de aço. A cada fragmento, recebe 20% de resistência. Ao chegar em 5 fragmentos, consome todos e ganha um escudo que reduz 75% do dano por 5s. Após cada fragmento, existe 2s de recarga para receber outro.`,
-    cyro_pyro: {
-        cyro: `Cyro: dispara bolas de gelo com cadência baixa que podem desencadear uma explosão CONGELANTE`,
-        pyro: `Pyro: dispara bolas de fogo rápidas com 10% de chance de QUEIMAR inimigos`
-    },
+    crioheat: `Crioheat: dispara esferas elementais que QUEIMAM e LERDAM ao mesmo tempo, a LERDEZA tem 15% de chance de se tornar CONGELAMENTO
+
+ESPECIAL: quando inimigos chegam perto demais, realiza um corte Elemental bastante curto de 180° que QUEIMA e LERDA
+ESPECIAL: quando sua saúde fica abaixo de 50%, os dois se unem profundamente tornando-se obsidiana, criando espinhos que QUEIMAM e CONGELAM`,
 
 
 astra: `Astra: dispara planetas nos inimigos, os planetas têm 15% de chance de explodir cosmicamente em área.
@@ -2964,7 +2971,7 @@ function normalizeBoxType(type){ const key = String(type || '').toLowerCase(); i
 function boxName(type){ return BOX_DEFS[normalizeBoxType(type)].name; }
 function boxSprite(type){ return BOX_DEFS[normalizeBoxType(type)].sprite; }
 function boxPulls(type){ return BOX_DEFS[normalizeBoxType(type)].pulls; }
-const BOSS_BOX_DROP_TYPES = [{type:'normal',weight:72},{type:'metal',weight:20},{type:'gold',weight:7},{type:'chromium',weight:1}];
+const BOSS_BOX_DROP_TYPES = [{type:'normal',weight:68},{type:'metal',weight:19},{type:'gold',weight:7},{type:'chromium',weight:1},{type:'pet_egg',weight:5}];
 function rollBossBoxDropType(){ if(Math.random() >= 0.40) return null; const total=BOSS_BOX_DROP_TYPES.reduce((a,b)=>a+b.weight,0); let roll=Math.random()*total; for(const entry of BOSS_BOX_DROP_TYPES){ roll-=entry.weight; if(roll<=0) return entry.type; } return 'normal'; }
 function buildBoxQueue(boxType){ const type=normalizeBoxType(boxType); const contents=[]; for(let i=0;i<boxPulls(type);i++) contents.push(buildBoxDropItem(type)); return {type:'box',boxType:type,contents}; }
 const PATENTE_LEVELS = [
@@ -3295,7 +3302,7 @@ document.addEventListener('visibilitychange', () => {
 window.addEventListener('blur', pauseMusicOnFocusLoss);
 window.addEventListener('focus', resumeMusicOnFocusGain);
 
-let pd = { coins: 500, gems: 50, evo: 40, sucatas: 0, nickname: null, tutorial: { stage: 'nickname', introShown: false, firstMatch: false, controlShown: false, levelupShown: false, finalShown: false, firstLossHandled: false, charsHandled: false, evolutionHandled: false, chipHandled: false, workshopSeen: false, workshopDialogShown: false, workshopFastyPending: false, sectionDialogs: { shop: false, pass: false, event: false, missions: false }, shopTabsSeen: [], dailyRewardTutorialSeen: false }, chars: { strike: { level: 1, slots: 2, chips: [null, null] } }, selectedChar: 'strike', favoriteChars: [], passXp: 0, passLevel: 1, passClaimed: 0, passClaimedTiers: [], passRewardSeed: 0, passRewardCache: {}, passResetAt: 0, shopState: { lastRotation: 0, items: {} }, lastDaily: "", dailyWins: {date: "", count: 0}, vip: { activeUntil: 0, inventory: 0 }, hardcoreBans: { lastRotation: 0, chars: [] }, settings: { ...DEFAULT_SETTINGS }, trail: { target: null, fameLevel: 0 }, profile: { title: null, emblem: null, character: 'strike' }, pets: { inventory: [], equippedUid: null, selectedUid: null, fusionSelection: [] }, events: { ruben: { claimed: false }, adam: { claimed: false } }, missMacaronLegacySeasonal: false, redeemedCodes: {}, missions: { date: '', list: [], weekly: { weekKey: '', mission: null }, rerolls: { date: '', used: 0 } }, passOverflowXp: 0, passOverflowBoxes: 0, chipsInventory: { hp: 1 }, chipCrafting: null, progressStats: { gamesStarted: 0, wins: 0, totalKills: 0, bossKills: 0, bestWave: 0 }, debug: { infiniteCoins: false, infiniteGems: false, infiniteEvo: false, infiniteScrap: false, unlockAllChars: false, infiniteChips: false, infiniteXp: false, infinitePassXp: false, allTitles: false, sandbox: false, devUnlocked: false, devBaseState: null, mapRotationOverride: -1 } };
+let pd = { coins: 500, gems: 50, evo: 40, sucatas: 0, nickname: null, tutorial: { stage: 'nickname', introShown: false, firstMatch: false, controlShown: false, levelupShown: false, finalShown: false, firstLossHandled: false, charsHandled: false, evolutionHandled: false, chipHandled: false, workshopSeen: false, workshopDialogShown: false, workshopFastyPending: false, sectionDialogs: { shop: false, pass: false, event: false, missions: false }, shopTabsSeen: [], dailyRewardTutorialSeen: false, petShopTutorialSeen: false, petEggTutorialRewardGranted: false, fullscreenHintSeen: false }, chars: { strike: { level: 1, slots: 2, chips: [null, null] } }, selectedChar: 'strike', favoriteChars: [], passXp: 0, passLevel: 1, passClaimed: 0, passClaimedTiers: [], passRewardSeed: 0, passRewardCache: {}, passResetAt: 0, shopState: { lastRotation: 0, items: {} }, lastDaily: "", dailyWins: {date: "", count: 0}, vip: { activeUntil: 0, inventory: 0 }, hardcoreBans: { lastRotation: 0, chars: [] }, settings: { ...DEFAULT_SETTINGS }, trail: { target: null, fameLevel: 0 }, profile: { title: null, emblem: null, character: 'strike' }, pets: { inventory: [], equippedUid: null, selectedUid: null, fusionSelection: [] }, events: { ruben: { claimed: false }, adam: { claimed: false } }, missMacaronLegacySeasonal: false, redeemedCodes: {}, missions: { date: '', list: [], weekly: { weekKey: '', mission: null }, rerolls: { date: '', used: 0 } }, passOverflowXp: 0, passOverflowBoxes: 0, chipsInventory: { hp: 1 }, chipCrafting: null, progressStats: { gamesStarted: 0, wins: 0, totalKills: 0, bossKills: 0, bestWave: 0 }, debug: { infiniteCoins: false, infiniteGems: false, infiniteEvo: false, infiniteScrap: false, unlockAllChars: false, infiniteChips: false, infiniteXp: false, infinitePassXp: false, allTitles: false, sandbox: false, devUnlocked: false, devBaseState: null, mapRotationOverride: -1 } };
 window.isHardcoreMode = false; window.lastGameOverWasLoss = false; window.gachaQueue = []; window.tempBoxData = null; window.currentMap = 0; window.currentDetailCharId = null; window.currentChipEquipSlot = null; window.debugInfiniteGems = false;
 window.characterTestMode = false; window.characterTestSaveSnapshot = null; window.characterTestCharId = null;
 
@@ -3434,6 +3441,7 @@ function normalizeSaveData(rawSave) {
     if (!Array.isArray(next.tutorial.shopTabsSeen)) next.tutorial.shopTabsSeen = [];
     next.tutorial.shopTabsSeen = next.tutorial.shopTabsSeen.filter(v => ['offers','resources','chips','chars'].includes(String(v)));
     next.tutorial.dailyRewardTutorialSeen = !!next.tutorial.dailyRewardTutorialSeen;
+    next.tutorial.petEggTutorialRewardGranted = !!next.tutorial.petEggTutorialRewardGranted;
     if (next.tutorial.shopTabsSeen.length === 0 && next.tutorial.sectionDialogs.shop === true) next.tutorial.sectionDialogs.shop = false;
     // Migração segura: só contas realmente antigas, sem estado ativo do tutorial,
     // podem ser marcadas como concluídas. Contas novas passam por `save()` durante
@@ -3507,7 +3515,7 @@ function normalizeSaveData(rawSave) {
         delete next.chars['wild'];
     }
     if (!next.chars['gladiator'] && Object.keys(next.chars).includes('gladiator')) next.chars['gladiator'].mode = 'shooter';
-    if (next.chars.cyro_pyro && next.chars.cyro_pyro.mode !== 'cyro' && next.chars.cyro_pyro.mode !== 'pyro') next.chars.cyro_pyro.mode = 'pyro';
+    { const k=String.fromCharCode(99,121,114,111,95,112,121,114,111); if(next.chars[k]){next.chars.crioheat={level:1,slots:2,chips:[null,null],unlockSource:next.chars[k].unlockSource||'legacy-reset'};delete next.chars[k];} }
 
     if (!Object.prototype.hasOwnProperty.call(source, 'missMacaronLegacySeasonal')) {
         next.missMacaronLegacySeasonal = !!next.chars?.miss_macaron;
@@ -3530,7 +3538,7 @@ function normalizeSaveData(rawSave) {
         next.events[id].missionSaveKey = key;
     }
     if (typeof next.eventProgressVersion !== 'number' || next.eventProgressVersion < 6) {
-        delete next.events.cyro_pyro; delete next.events.mr_perfurant;
+        { const k=String.fromCharCode(99,121,114,111,95,112,121,114,111); delete next.events[k]; } delete next.events.mr_perfurant;
         next.eventProgressVersion = 6;
     }
 
@@ -3679,7 +3687,7 @@ function load() {
         pd.events[id].missionSaveKey = key;
     }
     if (typeof pd.eventProgressVersion !== 'number' || pd.eventProgressVersion < 6) {
-        delete pd.events.cyro_pyro; delete pd.events.mr_perfurant;
+        { const k=String.fromCharCode(99,121,114,111,95,112,121,114,111); delete pd.events[k]; } delete pd.events.mr_perfurant;
         pd.eventProgressVersion = 6;
     }
     if (!pd.run || typeof pd.run !== 'object') pd.run = { charId: pd.selectedChar || 'strike', medals: 0 };
@@ -4206,7 +4214,7 @@ const CHARACTER_TITLES = {
     bulb: 'Lá no fundo do mar',
     bit: '8 bits',
     beezy: 'Abelhuda',
-    cyro_pyro: 'Dualidade elemental',
+    crioheat: 'Dualidade elemental',
     xilo: 'Cartunesco',
     yoyo: 'Ioiô',
     zoe: 'Pilha de alta voltagem',
@@ -4344,8 +4352,8 @@ const CHARACTER_SPRITES = {
     necro_zombie: 'sprites/necro_zombie.png',
     sparta_lion: 'sprites/sparta_lion.png',
     adam_mech: 'sprites/adam_mech.png',
-    cyro: 'sprites/cyro.png',
-    pyro: 'sprites/pyro.png',
+    crioheat: 'sprites/crioheat.png',
+    crioheat_obsidian: 'sprites/obsidian.png',
     eolio: 'sprites/eolio.png',
     stormy: 'sprites/stormy.png',
     bulb: 'sprites/bulb.png',
@@ -4611,17 +4619,10 @@ const CHARACTER_SPRITE_COMPACT_IDS = new Set([
     'gladiator_sword'
 ]);
 
-function getCyroPyroMode() {
-    return pd?.chars?.cyro_pyro?.mode === 'cyro' ? 'cyro' : 'pyro';
-}
-
-function getCharacterDisplayName(id) {
-    if (id === 'cyro_pyro') return getCyroPyroMode() === 'cyro' ? 'Cyro' : 'Pyro';
-    return CHARACTERS?.[id]?.name || id;
-}
+function getCharacterDisplayName(id) { return CHARACTERS?.[id]?.name || id; }
 
 function getDynamicCharacterSpriteId(id) {
-    if (id === 'cyro_pyro') return getCyroPyroMode() === 'cyro' ? 'cyro' : 'pyro';
+    if (id === 'crioheat' && typeof player !== 'undefined' && player?.crioheatObsidian) return 'crioheat_obsidian';
     if (id === 'gladiator') {
         return ((player?.gladiatorMode || pd?.chars?.gladiator?.mode || 'shooter') === 'shooter') ? 'gladiator_spear' : 'gladiator_sword';
     }
@@ -4924,7 +4925,6 @@ function spawnCharacterSupportAllies(charId, opts = {}) {
 
 function getGlitchMorphPool() {
     const base = Object.keys(CHARACTERS || {}).filter(id => id && id !== 'glitch');
-    const required = ['cyro_pyro', 'eolio', 'serrano'];
     return Array.from(new Set(base.concat(required).filter(id => CHARACTERS?.[id])));
 }
 
@@ -5097,12 +5097,6 @@ function finishGlitchMorphSequence() {
         player.glitchCurrentFormId = 'glitch';
         player.glitchOriginChar = 'glitch';
     } else {
-        if (finalId === 'cyro_pyro') {
-            const morphMode = Math.random() < 0.5 ? 'cyro' : 'pyro';
-            if (pd?.chars?.cyro_pyro) pd.chars.cyro_pyro.mode = morphMode;
-            player.cyroPyroMode = morphMode;
-        }
-        applyCharacterLoadout(finalId, glitchLevel, { keepHpRatio: true });
         spawnCharacterSupportAllies(finalId, { ownerTag: 'glitch-morph', temporary: true, x: player.x, y: player.y, baseDmg: player.baseDmg, dmgMult: player.stats.dmgMult });
         player.glitchMorphActive = true;
         player.glitchMorphWavesLeft = 3;
@@ -5959,7 +5953,6 @@ function getCharacterSummary(id) {
     const data = CHARACTER_SUMMARIES[id];
     if (!data) return '';
     if (typeof data === 'string') return data;
-    if (id === 'cyro_pyro') return getCyroPyroMode() === 'cyro' ? (data.cyro || '') : (data.pyro || '');
     return data.default || '';
 }
 
@@ -6856,7 +6849,7 @@ function toggleDevToolsPanel() {
 }
 
 function createDefaultTutorialState() {
-    return { stage: 'nickname', introShown: false, firstMatch: false, controlShown: false, levelupShown: false, finalShown: false, firstLossHandled: false, charsHandled: false, evolutionHandled: false, workshopSeen: false, workshopDialogShown: false, workshopFastyPending: false, sectionDialogs: { shop:false, pass:false, event:false, missions:false }, shopTabsSeen: [], dailyRewardTutorialSeen: false };
+    return { stage: 'nickname', introShown: false, firstMatch: false, controlShown: false, levelupShown: false, finalShown: false, firstLossHandled: false, charsHandled: false, evolutionHandled: false, workshopSeen: false, workshopDialogShown: false, workshopFastyPending: false, sectionDialogs: { shop:false, pass:false, event:false, missions:false }, shopTabsSeen: [], dailyRewardTutorialSeen: false, petShopTutorialSeen: false, petEggTutorialRewardGranted: false, fullscreenHintSeen: false };
 }
 
 let tutorialDialogSteps = [];
@@ -6938,7 +6931,8 @@ function tutorialSpriteFor(speaker) {
         Fasty: 'sprites/fasty.png',
         Bold: 'sprites/bold.png',
         Sharkie: 'sprites/sharkie.png',
-        Shinobi: 'sprites/shinobi.png'
+        Shinobi: 'sprites/shinobi.png',
+        Chickbot: 'sprites/chickbot.png'
     };
     return sprites[speaker] || 'sprites/strike.png';
 }
@@ -7169,6 +7163,9 @@ function finishFirstPowerupTutorial() {
         isPaused = false;
         applyControlLayout();
         lastTime = performance.now();
+        if (grantTutorialPetEggOnce()) {
+            setTimeout(() => processNextGacha(), 160);
+        }
     });
 }
 
@@ -9394,14 +9391,6 @@ function setWildMode(mode) {
     showCharDetail('gladiator'); 
 }
 
-function setCyroPyroMode(mode) {
-    if (!pd.chars['cyro_pyro']) return;
-    pd.chars.cyro_pyro.mode = mode === 'cyro' ? 'cyro' : 'pyro';
-    save();
-    renderChars();
-    showCharDetail('cyro_pyro');
-}
-
 function testUnownedCharacter(id) {
     const c = CHARACTERS[id];
     if (!c || pd.chars?.[id]) return;
@@ -9583,19 +9572,7 @@ function showCharDetail(id) {
 
         const wModes = document.getElementById('detail-wild-modes');
         const modeTitleEl = document.getElementById('detail-mode-title');
-        if(id === 'cyro_pyro' && owned) {
-            wModes.classList.remove('hidden');
-            if (modeTitleEl) modeTitleEl.innerHTML = 'Escolha elemental:';
-            const mode = getCyroPyroMode();
-            document.getElementById('wild-dash').innerHTML='Cyro';
-            document.getElementById('wild-cleave').innerHTML='Pyro';
-            document.getElementById('wild-dash').style.color='#000';
-            document.getElementById('wild-cleave').style.color='#000';
-            document.getElementById('wild-dash').onclick=()=>setCyroPyroMode('cyro');
-            document.getElementById('wild-cleave').onclick=()=>setCyroPyroMode('pyro');
-            document.getElementById('wild-dash').style.border=mode==='cyro'?'2px solid var(--btn-yellow)':'';
-            document.getElementById('wild-cleave').style.border=mode==='pyro'?'2px solid var(--btn-yellow)':'';
-        } else { wModes.classList.add('hidden'); }
+        wModes.classList.add('hidden');
 
         const slotsContainer = document.getElementById('detail-chip-slots');
         slotsContainer.innerHTML = '';
@@ -9776,7 +9753,6 @@ function buyChar(id) {
         if (!res) return;
         pd.gems -= c.cost;
         pd.chars[id] = { level: 1, slots: 2, chips: [null, null], unlockSource: id === 'glitch' ? 'shop-gems' : 'shop' };
-        if (id === 'cyro_pyro') pd.chars[id].mode = 'pyro';
         save();
         renderChars();
         renderShop();
@@ -9787,7 +9763,6 @@ function buyChar(id) {
 
 function selectChar(id) {
     if(!pd.chars[id]) { showAlert("Personagem não obtido!"); return; }
-    if (id === 'cyro_pyro' && pd.chars[id].mode !== 'cyro' && pd.chars[id].mode !== 'pyro') pd.chars[id].mode = 'pyro';
     pd.selectedChar = id;
     if (!pd.run || typeof pd.run !== 'object') pd.run = { charId: id, medals: 0 };
     pd.run.charId = id;
@@ -9837,6 +9812,7 @@ function countBundleItemTypes(items = {}) {
     let count = 0;
     if (items.char) count++;
     if (items.chip) count++;
+    if (items.petOffer && items.petOffer.petId) count++;
     if (Number(items.coins) > 0) count++;
     if (Number(items.evo) > 0) count++;
     if (Number(items.scrap) > 0) count++;
@@ -9849,6 +9825,17 @@ function getUnownedBundleCharacters() {
     );
 }
 
+function getPetOfferPrice(rarity){
+    const prices=[45,120,300,720,1650];
+    return prices[Math.max(0,Math.min(4,Number(rarity)||0))];
+}
+function getRandomPetOffer(){
+    const ids=Object.keys(PET_DATA||{});
+    if(!ids.length) return null;
+    const petId=ids[Math.floor(Math.random()*ids.length)];
+    const rarity=Math.max(0,Math.min(4,Math.floor(Math.random()<0.60 ? 0 : Math.random()<0.65 ? 1 : Math.random()<0.70 ? 2 : Math.random()<0.72 ? 3 : 4)));
+    return {petId,rarity,price:getPetOfferPrice(rarity)};
+}
 function generateBundles() {
     const bundles = [];
     const numBundles = isVIPActive() ? 4 + Math.floor(Math.random() * 4) : 2 + Math.floor(Math.random() * 4);
@@ -9856,21 +9843,23 @@ function generateBundles() {
 
     for (let i = 0; i < numBundles; i++) {
         const b = {
-            items: { boxes: { normal:0, pacote:0, metal:0, gold:0, chromium:0 }, coins:0, evo:0, passXp:0, scrap:0, char:null, chip:null }
+            items: { boxes: { normal:0, pacote:0, metal:0, gold:0, chromium:0 }, coins:0, evo:0, passXp:0, scrap:0, char:null, chip:null, petOffer:null }
         };
 
-        const unowned = getUnownedBundleCharacters();
-        if (unowned.length && Math.random() < 0.55) {
-            b.items.char = unowned[Math.floor(Math.random() * unowned.length)].id;
+        // Ofertas específicas de pets podem ocupar um dos slots da rotação.
+        // A raridade é sorteada independentemente do pet e altera fortemente o preço.
+        if (Math.random() < 0.32) {
+            b.items.petOffer = getRandomPetOffer();
+        } else {
+            const unowned = getUnownedBundleCharacters();
+            if (unowned.length && Math.random() < 0.55) {
+                b.items.char = unowned[Math.floor(Math.random() * unowned.length)].id;
+            }
         }
 
-        // Todo pacote tem pelo menos 3 tipos de recompensa. Como caixas foram
-        // removidas da rotação, os pacotes agora compensam com mais recursos.
         const types = possibleTypes.slice().sort(() => Math.random() - 0.5);
-        const required = 3 - (b.items.char ? 1 : 0);
+        const required = 3 - ((b.items.char || b.items.petOffer) ? 1 : 0);
         const selectedTypes = types.slice(0, Math.max(2, required));
-
-        // Se não houver personagem disponível, escolhemos 3 recursos diferentes.
         for (const type of selectedTypes) {
             if (type === 'coins') b.items.coins = 900 + Math.floor(Math.random() * 1401);
             else if (type === 'evo') b.items.evo = 55 + Math.floor(Math.random() * 86);
@@ -9880,15 +9869,11 @@ function generateBundles() {
                 if (keys.length) b.items.chip = keys[Math.floor(Math.random() * keys.length)];
             }
         }
-
-        // Se um sorteio de chip falhar por qualquer motivo, completa com o recurso faltante.
         if (countBundleItemTypes(b.items) < 3) {
             if (!b.items.coins) b.items.coins = 1000 + Math.floor(Math.random() * 1001);
             if (countBundleItemTypes(b.items) < 3 && !b.items.evo) b.items.evo = 60 + Math.floor(Math.random() * 81);
             if (countBundleItemTypes(b.items) < 3 && !b.items.scrap) b.items.scrap = 120 + Math.floor(Math.random() * 181);
         }
-
-        // 35% dos pacotes recebem um quarto item quando ainda houver espaço útil.
         if (countBundleItemTypes(b.items) < 4 && Math.random() < 0.35) {
             if (!b.items.coins) b.items.coins = 1000 + Math.floor(Math.random() * 1001);
             else if (!b.items.evo) b.items.evo = 60 + Math.floor(Math.random() * 81);
@@ -9904,11 +9889,11 @@ function generateBundles() {
             const rr = CHARACTERS[b.items.char].rarity;
             costG += rr==='common'?25:rr==='rare'?80:rr==='epic'?160:rr==='legendary'?330:550;
         }
+        if (b.items.petOffer) costG += b.items.petOffer.price;
         if (b.items.coins) costG += Math.floor((b.items.coins / 50) * RESOURCE_SHOP_PRICE_MULTIPLIER);
         if (b.items.evo) costG += Math.floor((b.items.evo / 2.5) * RESOURCE_SHOP_PRICE_MULTIPLIER);
         if (b.items.scrap) costG += Math.floor((b.items.scrap / 5) * RESOURCE_SHOP_PRICE_MULTIPLIER);
         if (b.items.chip) costG += 25;
-
         b.discount = getRandomDiscount();
         b.currency = 'gems';
         b.baseCost = Math.max(10, Math.floor(costG * 0.90));
@@ -9972,6 +9957,7 @@ function renderShop() {
             div.style.padding = "15px";
             let desc = "";
             if(b.items.char && CHARACTERS[b.items.char]) desc += `${resourceIcon('character','inline-sprite-icon')} ${CHARACTERS[b.items.char].name}<br>`;
+            if(b.items.petOffer && PET_DATA[b.items.petOffer.petId]) desc += `<img class="inline-sprite-icon" src="${PET_DATA[b.items.petOffer.petId].sprite}" alt=""> ${PET_DATA[b.items.petOffer.petId].name} — ${petRarityName(b.items.petOffer.rarity)}<br>`;
             if(b.items.chip && CHIPS_DATA[b.items.chip]) desc += `${resourceIcon('chip','inline-sprite-icon')} Chip: ${CHIPS_DATA[b.items.chip].name}<br>`;
             if(b.items.coins > 0) desc += `${resourceIcon('coins','inline-sprite-icon')} ${b.items.coins} Moedas<br>`;
             if(b.items.evo > 0) desc += `${resourceIcon('evo','inline-sprite-icon')} ${b.items.evo} Evo<br>`;
@@ -9982,7 +9968,7 @@ function renderShop() {
             let novoHtml = !b.xpViewed ? `<div class="shop-novo-overlay" id="overlay-bundle-${index}" onclick="clickNovoOverlay(${index}, ${finalCost}, this)">NOVO!</div>` : '';
             let cIcon = b.currency === 'coins' ? resourceIcon('coins','inline-sprite-icon') : resourceIcon('gems','inline-sprite-icon');
 
-            div.innerHTML = `${discountHtml}${novoHtml}<h4>Pacote Sortido</h4><p style="font-size:14px; margin: 10px 0; color: #fff;">${desc}</p><button style="padding:5px;font-size:14px;background:var(--gem)" onclick="processBuyBundle(${index}, ${finalCost})">${cIcon} ${finalCost}</button>`;
+            div.innerHTML = `${discountHtml}${novoHtml}<h4>${b.items.petOffer && PET_DATA[b.items.petOffer.petId] ? 'Oferta de Pet' : 'Pacote Sortido'}</h4><p style="font-size:14px; margin: 10px 0; color: #fff;">${desc}</p><button style="padding:5px;font-size:14px;background:var(--gem)" onclick="processBuyBundle(${index}, ${finalCost})">${cIcon} ${finalCost}</button>`;
             blist.appendChild(div);
         });
     }
@@ -10307,9 +10293,17 @@ const PET_DATA = {
     parrot: { id:'parrot', name:'Papagaio', sprite:'pets/parrot.png', color:'#bdc3c7', desc:'Empurra inimigos para longe. Bosses, Mega Bosses e Colossos são imunes.' },
     hamster: { id:'hamster', name:'Hamster', sprite:'pets/hamster.png', color:'#bdc3c7', desc:'Se lança contra os inimigos como um projétil; foco total em dano.' },
     penguin: { id:'penguin', name:'Pinguim', sprite:'sprites/pipi.png', color:'#dff6ff', desc:'Acompanha o jogador e dispara bolas de neve; a cada fusão aumenta a chance de congelar.' },
-    monkey: { id:'monkey', name:'Macaco', sprite:'enemies/monkey.png', color:'#9a6a45', desc:'Ataca inimigos de perto com golpes como Kayo; a cada fusão aumenta dano e alcance.' }
+    monkey: { id:'monkey', name:'Macaco', sprite:'enemies/monkey.png', color:'#9a6a45', desc:'Ataca inimigos de perto com golpes como Kayo; a cada fusão aumenta dano e alcance.' },
+    fish: { id:'fish', name:'Peixe', sprite:'pets/fish.png', color:'#00cec9', desc:'Quando um inimigo ataca o jogador, fica encharcado. A raridade aumenta o encharque em 10% por nível.' },
+    shroom: { id:'shroom', name:'Cogumelinho', sprite:'pets/shroom.png', color:'#9b59b6', desc:'Dispara esporos com chance de hipnotizar inimigos por 15s. Cada raridade aumenta a chance em 2%.' },
+    chick: { id:'chick', name:'Pintinho', sprite:'sprites/chick.png', color:'#f1c40f', desc:'Persegue inimigos e causa dano. Cada raridade aumenta o dano.' },
+    cactus: { id:'cactus', name:'Cactáceo', sprite:'pets/cactus.png', color:'#2ecc71', desc:'Dispara espinhos em todas as direções. Cada raridade adiciona 2 espinhos.' }
 };
 const PET_HAMSTER_DAMAGE = [15,25,40,60,90];
+const PET_SHROOM_HYPNOSIS = [0.10,0.12,0.14,0.16,0.18];
+const PET_CHICK_DAMAGE = [14,22,32,46,64];
+const PET_CACTUS_SPIKES = [6,8,10,12,14];
+const PET_FISH_SOAK = [0.10,0.20,0.30,0.40,0.50];
 const PET_PARROT_DAMAGE = [0,5,10,15,30];
 const PET_PARROT_RANGE = [125,165,210,260,320];
 const PET_PENGUIN_FREEZE_CHANCE = [0.35,0.45,0.55,0.65,0.75];
@@ -10358,7 +10352,32 @@ function revealPetToken(token,state,done){
     const finish=()=>{if(finished)return;finished=true;track.style.transition='none';track.style.transform=`translate3d(${-travel}px,0,0)`;finalizePetRoulette(resultId,token,res,done,skip);};
     requestAnimationFrame(()=>{track.style.transition=`transform ${duration}ms cubic-bezier(0.08,0.72,0.12,1)`;track.style.transform=`translate3d(${-travel}px,0,0)`;}); setTimeout(finish,duration+220);
 }
-function openPetShop(){ ensurePetState(); showScreen('screen-pets'); renderPetShop(); }
+function grantTutorialPetEggOnce(){
+    if(!pd?.tutorial || pd.tutorial.petEggTutorialRewardGranted) return false;
+    ensurePetState();
+    pd.tutorial.petEggTutorialRewardGranted = true;
+    save();
+    const token = createPetEggToken();
+    // Guarda a recompensa como um ovo comum no inventário de recompensas:
+    // o ovo será aberto pelo fluxo normal da roleta quando entregue.
+    window.gachaQueue = window.gachaQueue || [];
+    window.gachaQueue.unshift({type:'box', boxType:'pet_egg', contents:[token]});
+    return true;
+}
+
+function beginPetShopTutorialIfNeeded(){
+    if (!pd?.tutorial || pd.tutorial.stage !== 'completed') return;
+    if (pd.tutorial.petShopTutorialSeen) return;
+    pd.tutorial.petShopTutorialSeen = true;
+    save();
+    showTutorialDialog([
+        { speaker:'Chickbot', text:'CÓ COO CÓ!\n(Esse é o Pet Shop. Aqui você abre ovos, vê os pets que já conseguiu e equipa um deles para a partida.)' },
+        { speaker:'Chickbot', text:'CÓ COO CÓÓ! CÓ!\n(Dois pets iguais e da mesma raridade podem ser fundidos para criar uma versão de raridade maior.)' },
+        { speaker:'Chickbot', text:'COO CÓ CÓ! CÓ COO!\n(Um pet equipado acompanha você durante a partida e usa seu próprio efeito de combate ou suporte.)' },
+        { speaker:'Chickbot', text:'CÓÓÓ COO! CÓ CÓ!\n(Agora você entendeu. Abra ovos, faça fusões e escolha o pet que combina com sua estratégia.)' }
+    ]);
+}
+function openPetShop(){ ensurePetState(); showScreen('screen-pets'); renderPetShop(); setTimeout(beginPetShopTutorialIfNeeded,80); }
 function closePetShop(){ showScreen('screen-main'); }
 function equipPet(uid){ ensurePetState(); const p=pd.pets.inventory.find(x=>x.uid===uid); if(!p)return; pd.pets.equippedUid=uid; save(); renderPetShop(); notify(`${PET_DATA[p.id].name} equipado!`); }
 function selectPetInShop(uid){ ensurePetState(); const p=pd.pets.inventory.find(x=>x.uid===uid); if(!p)return; pd.pets.selectedUid=uid; save(); renderPetShop(); }
@@ -10890,6 +10909,13 @@ function processBuyBundle(index, cost) {
         if(b.items.evo) { pd.evo += b.items.evo; instant.push(` +${b.items.evo} Evo`); }
         if(b.items.scrap) { pd.sucatas += b.items.scrap; instant.push(` +${b.items.scrap} Sucatas`); }
         if(b.items.char) { pd.chars[b.items.char] = {level:1, slots:2, chips: [null, null]}; if(b.items.char==='gladiator') pd.chars[b.items.char].mode='shooter'; instant.push(`NOVO PERSONAGEM: ${CHARACTERS[b.items.char].name}!`); }
+        if(b.items.petOffer && PET_DATA[b.items.petOffer.petId]) {
+            ensurePetState();
+            const offeredPet=createPetInstance(b.items.petOffer.petId,b.items.petOffer.rarity);
+            pd.pets.inventory.push(offeredPet);
+            pd.pets.selectedUid=offeredPet.uid;
+            instant.push(`PET: ${PET_DATA[b.items.petOffer.petId].name} — ${petRarityName(b.items.petOffer.rarity)}!`);
+        }
         if(b.items.chip) { pd.chipsInventory[b.items.chip] = (pd.chipsInventory[b.items.chip]||0)+1; instant.push(`NOVO CHIP: ${CHIPS_DATA[b.items.chip].name}!`); }
         if(instant.length > 0) q.push({ type: 'instant', title: 'Recompensas do Pacote', contents: instant });
         pd.shopState.bundles[index] = null; save(); renderShop(); startGachaQueue(q);
@@ -11119,7 +11145,7 @@ function buildPassRewardFromSeed(tier, vipActive = false) {
         { type:'pack', w:7, make:()=>({type:'pack',amount:1}) },
         { type:'gems', w:1.8*vipLuck*pityBoost, make:()=>({type:'gems',amount:10}) },
         { type:'box', w:3.0*vipLuck*pityBoost, make:()=>({type:'box',kind:'metal',amount:1}) },
-        { type:'box', w:3.0*vipLuck*pityBoost, make:()=>({type:'box',kind:'pet_egg',amount:1}) },
+        { type:'box', w:7.5*vipLuck*pityBoost, make:()=>({type:'box',kind:'pet_egg',amount:2}) },
         { type:'box', w:0.9*vipLuck*pityBoost, make:()=>({type:'box',kind:'gold',amount:1}) },
         { type:'box', w:0.18*vipLuck*pityBoost, make:()=>({type:'box',kind:'chromium',amount:1}) }
     ];
@@ -12407,6 +12433,27 @@ function isPlayerInsideEolioTurbine() {
     return dist(player, turbine) <= radius + Math.max(0, Number(player.r) || 0);
 }
 
+function applyFishPetSoakOnEnemyHit(){
+    try {
+        if (!player || player.isDead || !Array.isArray(enemies)) return;
+        const pet=getEquippedPet();
+        if (!pet || pet.id!=='fish') return;
+        const rarity=Math.max(0,Math.min(4,Number(pet.rarity)||0));
+        const soak=Math.max(0.10,Math.min(0.50,PET_FISH_SOAK[rarity]||0.10));
+        let best=null,bestD=180;
+        for(const e of enemies){
+            if(!e||e.hp<=0)continue;
+            const d=dist(player,e);
+            if(d<bestD){bestD=d;best=e;}
+        }
+        if(best){
+            best.petFishSoak=soak;
+            best.petFishSoakTimer=Math.max(Number(best.petFishSoakTimer)||0,0.75);
+            addFloatingText(best.x,best.y-18,`ENCHARCADO +${Math.round(soak*100)}%`,'#00cec9',11);
+        }
+    } catch(_){}
+}
+
 function dealPlayerDamage(amount, opts = {}) {
     if (!player || !Number.isFinite(amount) || amount <= 0) return false;
     if (sandboxMode && sandboxImmortalityEnabled) {
@@ -12458,6 +12505,7 @@ function dealPlayerDamage(amount, opts = {}) {
         if (pd.selectedChar === 'vesper') { player.vesperFocusTimer = 0; player.vesperFocusActive = false; }
         player.lastDamageTaken = dmg;
         player.hp -= dmg;
+        applyFishPetSoakOnEnemyHit();
         if (isSpartaCharacter()) {
             player.spartaShieldActive = false;
             player.spartaNoDamageTimer = 0;
@@ -12673,6 +12721,10 @@ function showModeSelect() {
     document.getElementById('overlay-mode-select').classList.remove('hidden');
     if (pd?.tutorial?.stage === 'force-play') {
         setTimeout(() => showTutorialPointer(document.getElementById('btn-classic-select'), 'up'), 60);
+    } else if (!isNativeFullscreenActive() && !iosFullscreenFallback && pd?.nickname && !pd?.tutorial?.fullscreenHintSeen) {
+        pd.tutorial.fullscreenHintSeen = true;
+        save();
+        setTimeout(() => showTutorialPointer(document.getElementById('btn-pregame-fullscreen'), 'up'), 100);
     }
 }
 
@@ -12739,7 +12791,7 @@ function startRunAfterShop(options = {}) {
     
     player = {
         x: 0, y: 0, r: (pd.selectedChar === 'hank' || pd.selectedChar === 'vingathron' || pd.selectedChar === 'snapdragon' || pd.selectedChar === 'yeti' || pd.selectedChar === 'glace') ? 20 : ((pd.selectedChar === 'shiv' || pd.selectedChar === 'zippi') ? 10 : ((pd.selectedChar === 'kaisen' || pd.selectedChar === 'booboo' || pd.selectedChar === 'yoyo') ? 13 : (pd.selectedChar === 'eel' ? 15 : 15))), baseHp: initialBaseHp, hp: initialBaseHp, baseSpeed: charDef.speed, baseDmg: initialBaseDmg,
-        baseFireRate: charDef.fireRate, baseRange: charDef.range, color: charDef.color, weapon: charDef.weapon, vingathronFragments: 0, vingathronDamageResistance: 0, vingathronFragmentCooldown: 0, vingathronShieldTimer: 0, vingathronAttackTimer: 0, vingathronAttackAngle: 0, lastDamageTaken: 0, merlinAge: pd.selectedChar === 'merlin' ? 'old' : null, merlinBaseHp: pd.selectedChar === 'merlin' ? initialBaseHp : null, merlinPoisonChance: 0.15, merlinBabyChance: 0.15, merlinPacifierChance: 0, merlinAgeCooldown: 0, cyroPyroMode: pd.selectedChar === 'cyro_pyro' ? getCyroPyroMode() : null, gladiatorMode: pd.selectedChar === 'gladiator' ? (pd.chars?.gladiator?.mode || 'shooter') : null, gladiatorModeCooldown: 0, eolioPropellerSeq: 0, cd: 0, shieldTimer: 0,
+        baseFireRate: charDef.fireRate, baseRange: charDef.range, color: charDef.color, weapon: charDef.weapon, vingathronFragments: 0, vingathronDamageResistance: 0, vingathronFragmentCooldown: 0, vingathronShieldTimer: 0, vingathronAttackTimer: 0, vingathronAttackAngle: 0, lastDamageTaken: 0, merlinAge: pd.selectedChar === 'merlin' ? 'old' : null, merlinBaseHp: pd.selectedChar === 'merlin' ? initialBaseHp : null, merlinPoisonChance: 0.15, merlinBabyChance: 0.15, merlinPacifierChance: 0, merlinAgeCooldown: 0, crioheatObsidian:false,crioheatSwingCd:0,crioheatSlamCd:0,crioheatSwingFx:0,crioheatSlamFx:0,crioheatSwingAngle:0,crioheatSpikeFx:[], gladiatorMode: pd.selectedChar === 'gladiator' ? (pd.chars?.gladiator?.mode || 'shooter') : null, gladiatorModeCooldown: 0, eolioPropellerSeq: 0, cd: 0, shieldTimer: 0,
         zombieTimer: 0, revived: false, elekCycle: false, dashTimer: 0, meleeCd: 0, izaqueForm: pd.selectedChar === 'izaque' ? 'normal' : null, izaqueFormTimer: 0, izaqueCombo: 0, izaqueMovementTimer: 0, izaqueSpecialCooldown: pd.selectedChar === 'izaque' ? 30 : 0, izaqueHybridWavesLeft: 0, boldShots: 0, boldReload: 0, boldAbilityTimer: 0, specCd: pd.selectedChar === 'ghoul' ? 20 : 0, commonAbilityCd: 0, hunterAbilityCd: 0, tenentAbilityCooldown: 0, fastyAbilityTimer: 0, zoePunchCycle: 0, zoeBattery: 0, zoeTunedActive: false, zoeTunedStationaryTimer: 0, zoeTunedOrbitAngle: 0, zoeTunedOrbitTickCd: 0, kayoChairReady: false, invisTimer: 0, ghoulPendingCd: 0, ninjiPendingCd: 0,
         lastMoveAngle: 0, lastAimAngle: 0, sharkieAttackTimer: 0, sharkieDiveTimer: 0, sharkieDiveCooldown: 0, josephOllieCd: 0, josephOllieTimer: 0, josephOllieAngle: 0, josephOlliePendingCd: 0, josephOllieDetonate: false, sharkieAimAngle: 0, sharkieReverseAngle: 0, sharkieReverseX: 0, sharkieReverseY: 0, tenentCycle: 0, tenentAbilityActiveBullets: 0, stormyCycle: 0, bulbMode: pd.selectedChar === 'bulb' ? Math.floor(Math.random() * 3) : null, bulbGasActiveUntil: 0, bulbGasCooldownUntil: 0, bulbGasAngle: 0, orbitalAngle: 0, popeyeSpinTimer: 0, popeyeSpinCooldown: 30, popeyeSpinUsed: true, popeyeSpinEndingFx: 0, shellTorpedoTimer: 0, shellTorpedoCooldown: pd.selectedChar === 'shell' ? 20 : 0, shellTorpedoTarget: null, shellTorpedoHitCd: 0, shellTorpedoDamageTick: 0, shellTorpedoWasActive: false, shellTorpedoExitTracked: false, grappleCooldown: 0, grappleCharging: false, grappleCharge: 0, grappleHookTimer: 0, grappleHookDuration: 0.28, grappleHookStartX: 0, grappleHookStartY: 0, grappleHookX: 0, grappleHookY: 0, grappleHookTargetX: 0, grappleHookTargetY: 0, grappleHookAngle: 0, grappleHookHitEnemy: null, grappleHookDamageApplied: false, grappleAttackTimer: 0, grappleAttackAngle: 0, boobooReturn: true, yoyoReady: true, yoyoOrbitActive: true, yoyoOrbitAngle: 0, yoyoOrbitTickCd: 0, pickedCards: [], revivesUsed: 0, qbBar: 0, qbShield: false, blizzardTemperature: 20, blizzardMoveTimer: 0, blizzardTier: 0, blizzardStormTick: 0, isDead: false, flexCombo: 0, flexReload: 0, ninjiDashCd: 0, shinobiDragonActive: false, shinobiDragonWavesLeft: 0, shinobiDragonCooldown: pd.selectedChar === 'shinobi' ? 20 : 0, shinobiDragonFireCd: 0, shinobiScytheCycle: 0, sterlingCharging: false, sterlingCharge: 0, sterlingAttackCd: 0, majorBriggsKills: 0, majorBriggsStage: 1, noxSpecialTimer: 10, noxSpecialIndex: 0, noxBoomerangActive: false, snapdragonFlameTimer: 0, snapdragonFlameCooldown: 30, snapdragonFlameActive: false, snapdragonFlameFireCd: 0,
         adamScrap: 0, adamScrapVisualCounter: 0, adamMechActive: false, adamMechWavesLeft: 0, adamMechHpBonus: 0, adamMechSizeBonus: 0, adamBaseHpBeforeMech: null, adamBaseRBeforeMech: null,
@@ -12766,7 +12818,6 @@ function startRunAfterShop(options = {}) {
     if(pd.selectedChar === 'zippi') { player.zippiBubbleHp = 80; player.zippiBubbleMaxHp = 80; player.zippiBubbleBroken = false; }
     if(pd.selectedChar === 'bunniie') { ensureBunniieRuntime(); player.bunniieHoles = []; player.bunniieTunnelCd = 0; player.bunniieTunnelWarpCd = 0; player.bunniieTunnelGrace = 0; player.bunniieTunnelSeq = 0; }
     spawnCharacterSupportAllies(pd.selectedChar, { ownerTag: 'run-start', temporary: false, x: player.x, y: player.y, baseDmg: player.baseDmg, dmgMult: player.stats.dmgMult });
-    if (pd.selectedChar === 'cyro_pyro') spawnCyroPyroPartner();
     if (pd.selectedChar === 'kaisen') spawnAxelDrone();
     if(pd.selectedChar === 'healy') player.stats.regen += 0.01;
 
@@ -15083,6 +15134,7 @@ if (!isBossAlive) {
     
     if(player.stats.regen > 0) player.hp = Math.min(player.hp + player.stats.regen * dt * player.baseHp * player.stats.maxHpMult, player.baseHp * player.stats.maxHpMult);
     if(player.inIvyBloom) player.hp = Math.min(player.hp + (player.baseHp * player.stats.maxHpMult * 0.012) * dt, player.baseHp * player.stats.maxHpMult);
+    updateCrioheatMechanics(dt);
     if(player.invisTimer > 0) {
         player.invisTimer -= dt;
         player.hp = Math.min(player.hp + (player.baseHp * player.stats.maxHpMult * 0.01) * dt, player.baseHp * player.stats.maxHpMult);
@@ -15358,7 +15410,7 @@ if (!isBossAlive) {
             for(let e of enemies) if(dist(e, m) < e.size + m.r) picked = true;
         }
         if(picked) {
-            if(m.type === 'loot_box_drop') { runBossBoxDrops.push(normalizeBoxType(m.boxType)); addFloatingText(player.x, player.y, `${boxName(m.boxType)} coletada`, '#f1c40f'); } else if(m.type === 'chest') {
+            if(m.type === 'loot_box_drop') { const collectedType=normalizeBoxType(m.boxType); if(collectedType==='pet_egg'){ runBossBoxDrops.push('pet_egg','pet_egg'); addFloatingText(player.x, player.y, '2 Ovos de Pet coletados', '#f1c40f'); } else { runBossBoxDrops.push(collectedType); addFloatingText(player.x, player.y, `${boxName(m.boxType)} coletada`, '#f1c40f'); } } else if(m.type === 'chest') {
                 if (runRewardsInvalidated) { m.x = 99999; m.y = 99999; continue; }
                 if(Math.random() < 0.4) {
                     runChestGems += 2; addFloatingText(player.x, player.y, `+2 Gemas`, '#2ecc71');
@@ -15532,7 +15584,7 @@ if (!isBossAlive) {
                 minDist = Math.max(minDist, 900 + (player.stats.extraProj || 0) * 40);
             } else {
                 if(player.weapon === 'triple') minDist *= 1.18;
-                if(!['sniper', 'laser', 'chain_lightning', 'lightning', 'bomb', 'rocket', 'buster_rocket', 'wind_gust', 'tornado', 'puddle', 'energy_wave', 'wild', 'cyro_pyro', 'vingathron_slash'].includes(player.weapon)) {
+                if(!['sniper', 'laser', 'chain_lightning', 'lightning', 'bomb', 'rocket', 'buster_rocket', 'wind_gust', 'tornado', 'puddle', 'energy_wave', 'wild', 'crioheat', 'vingathron_slash'].includes(player.weapon)) {
                     const shotReach = Math.max(120, 50 * (5 * player.stats.projSpdMult) * 0.95);
                     minDist = Math.min(minDist, shotReach);
                 }
@@ -16292,31 +16344,9 @@ function fireWeapon(target) {
             );
             return;
         }
-        if (w === 'cyro_pyro') {
-            const mode = player.cyroPyroMode || getCyroPyroMode();
-            const spawnOffset = player.r + 9;
-            const sx = player.x + Math.cos(angle) * spawnOffset;
-            const sy = player.y + Math.sin(angle) * spawnOffset;
-            const isCyro = mode === 'cyro';
-            player.cd = (isCyro ? 96 : 30) * player.stats.fireRateMult;
-            const shotSpeed = isCyro ? pSpd * 0.82 : pSpd * 1.45;
-            createProj(
-                sx,
-                sy,
-                Math.cos(angle) * shotSpeed,
-                Math.sin(angle) * shotSpeed,
-                finalDmg,
-                isCyro ? 72 : 58,
-                true,
-                isCyro ? 'cyro_iceball' : 'pyro_fireball',
-{
-                    size: isCyro ? 13 : 9,
-                    sourceChar: isCyro ? 'cyro' : 'pyro',
-                    explodeRadius: isCyro ? 58 : 0,
-                    freezeDuration: isCyro ? 2.7 : 0,
-                    burnChance: isCyro ? 0 : 0.10
-                }
-            );
+        if (w === 'crioheat') {
+            const o=player.r+9,sx=player.x+Math.cos(angle)*o,sy=player.y+Math.sin(angle)*o,v=pSpd*.92;
+            createProj(sx,sy,Math.cos(angle)*v,Math.sin(angle)*v,finalDmg,72,true,'crioheat_orb',{size:13,sourceChar:'crioheat',burnDuration:2,slowDuration:2,freezeChance:.15,freezeDuration:2});
             return;
         }
         if(w === 'adam') {
@@ -17340,6 +17370,8 @@ function getEnemyDamageTakenMultiplier(enemy) {
     if (Number(enemy.weakenTimer) > 0) mult *= 1.2;
     if (Number(enemy.curseTimer) > 0) mult *= 1.2;
     if (getSeinSeinProtector(enemy)) mult *= 0.60;
+    const fishSoak = Math.max(0, Math.min(0.50, Number(enemy.petFishSoak) || 0));
+    if (fishSoak > 0) mult *= (1 + fishSoak);
     return mult;
 }
 
@@ -19391,31 +19423,6 @@ function updateEnemies(dt) {
 
 function spawnAxelDrone() { if(!player) return; const hp=Math.max(35,player.baseHp*0.58); allies.push({type:'drone',variant:'kaisen',x:player.x+42,y:player.y-18,speed:3,dmg:Math.max(1,player.baseDmg*player.stats.dmgMult*.48),cd:0,life:Infinity,hp,maxHp:hp,r:14,facingLeft:false}); }
 
-function spawnCyroPyroPartner() {
-    const selectedMode = getCyroPyroMode();
-    const partnerMode = selectedMode === 'cyro' ? 'pyro' : 'cyro';
-    const level = Math.max(1, pd?.chars?.cyro_pyro?.level || 1);
-    const levelMult = 1 + (level - 1) * 0.15;
-    const hp = Math.max(45, player.baseHp * 0.72);
-    allies.push({
-        type: 'cyro_pyro_partner',
-        elementMode: partnerMode,
-        x: player.x + (partnerMode === 'cyro' ? -34 : 34),
-        y: player.y - 30,
-        homeAngle: Math.random() * Math.PI * 2,
-        facingLeft: false,
-        life: Infinity,
-        r: 13,
-        hp,
-        maxHp: hp,
-        speed: 3.45,
-        dmg: Math.max(1, CHARACTERS.cyro_pyro.dmg * levelMult * 0.88),
-        cd: partnerMode === 'cyro' ? 0.45 : 0.25,
-        range: 270,
-        contactDmgCd: 0
-    });
-}
-
 function spawnEolioTurbine() {
     if (!player) return;
     allies = Array.isArray(allies) ? allies : [];
@@ -19548,19 +19555,7 @@ function updateAllies(dt) {
             if (a.cd > 0) a.cd -= dt;
             continue;
         }
-        if (a.type === 'cyro_pyro_partner') {
-            if(a.hp<=0){a.life=0;continue;}
-            if(!Number.isFinite(a.aiAngle))a.aiAngle=Math.random()*Math.PI*2;
-            if(!Number.isFinite(a.contactDmgCd))a.contactDmgCd=0;
-            const sp=Math.max(2.2,(a.speed||3.2)*.95)*60*dt, range=Math.max(290,(a.range||270)*1.08), pref=Math.max(60,(a.r||13)+34);
-            if(target&&minD<=range){
-                const ang=Math.atan2(target.y-a.y,target.x-a.x), delta=minD-pref;
-                if(delta>18){a.x+=Math.cos(ang)*sp;a.y+=Math.sin(ang)*sp;}else if(delta<-14){a.x-=Math.cos(ang)*sp*.6;a.y-=Math.sin(ang)*sp*.6;}else{a.aiAngle+=dt*.9;a.x+=Math.cos(a.aiAngle)*.8*60*dt;a.y+=Math.sin(a.aiAngle)*.8*60*dt;}
-                a.facingLeft=target.x<a.x;
-                if(a.cd<=0){const cy=a.elementMode==='cyro',ang2=Math.atan2(target.y-a.y,target.x-a.x),v=cy?4.1:7;createProj(a.x,a.y,Math.cos(ang2)*v,Math.sin(ang2)*v,a.dmg,cy?72:58,true,cy?'cyro_iceball':'pyro_fireball',{size:cy?11:8,sourceChar:cy?'cyro':'pyro',explodeRadius:cy?52:0,freezeDuration:cy?2.4:0,burnChance:cy?0:.1,elementalPartner:true});a.cd=cy?1.55:.62;}else a.cd-=dt;
-            }else{a.aiAngle+=dt*.5;const hx=player.x+Math.cos(a.aiAngle)*44,hy=player.y+Math.sin(a.aiAngle)*44;a.x+=(hx>a.x?1:-1)*Math.min(Math.abs(hx-a.x),sp*.72);a.y+=(hy>a.y?1:-1)*Math.min(Math.abs(hy-a.y),sp*.72);if(a.cd>0)a.cd-=dt;}
-            if(a.contactDmgCd>0)a.contactDmgCd-=dt;
-        } else if(a.type === 'penguin' || a.type === 'drone') {
+        if(a.type === 'penguin' || a.type === 'drone') {
             if(!a.wanderAngle) a.wanderAngle = Math.random() * Math.PI * 2;
             a.wanderAngle += dt * 0.8;
 
@@ -19928,8 +19923,7 @@ const SERRANO_CHARACTER_PROJECTILES = {
     eolio: ['eolio_propeller'],
     stormy: ['stormy_bolt'],
     chickbot: ['chickbot_egg'],
-    cyro: ['cyro_iceball'],
-    pyro: ['pyro_fireball'],
+    crioheat: ['crioheat_orb'],
     bulb: ['bulb_bubble', 'bulb_gas_bubble', 'bulb_crust', 'bulb_coral_piece'],
     bit: ['bit_cherry', 'bit_banana', 'bit_banana_peeled', 'bit_arcade'],
     beezy: ['beezy_honey', 'beezy_bee'],
@@ -19972,7 +19966,7 @@ function spawnSerranoRandomProjectile(x, y, dmg, excludedEnemy) {
         bit_cherry: 6.2, bit_banana: 5.5, bit_banana_peeled: 6.8, bit_arcade: 4.2, beezy_honey: 5.6, beezy_bee: 6.4, shinobi_katana: 1,
         zippi_laser: 20, axel_stone: 5.6, axel_shard: 5.6, adam_ball: 5.25, adam_mech_ball: 5.6,
         yuuto_heart: 5, sterling_star: 8.2, lyron_ball: 9.5, lyron_ball_big: 7.6,
-        eolio_propeller: 8.2, cyro_iceball: 4.1, pyro_fireball: 7.25, merlin_magic: 6.2, merlin_pacifier: 6.8, blizzard_flake: 5.8, blizzard_snowball: 4.6
+        eolio_propeller: 8.2, crioheat_orb: 6.2, merlin_magic: 6.2, merlin_pacifier: 6.8, blizzard_flake: 5.8, blizzard_snowball: 4.6
     };
     const speed = speedByType[def.type] || 5;
     const extra = { size: 8, sourceChar: def.sourceChar, serranoClone: true, serranoOriginalChar: def.sourceChar };
@@ -19987,12 +19981,7 @@ function spawnSerranoRandomProjectile(x, y, dmg, excludedEnemy) {
         extra.glitchStunChance = 0.36;
         extra.glitchStunDuration = 0.8;
     }
-    if (def.type === 'cyro_iceball') {
-        extra.size = 13; extra.explodeRadius = 58; extra.freezeDuration = 2.7;
-    }
-    if (def.type === 'pyro_fireball') {
-        extra.size = 9; extra.burnChance = 0.10;
-    }
+    if (def.type === 'crioheat_orb') { extra.size=13; extra.burnDuration=2; extra.slowDuration=2; extra.freezeChance=.15; extra.freezeDuration=2; }
     if (def.type === 'boomerang') extra.returnSpeed = 11.5;
     if (def.type === 'sterling_star') { extra.size = 12; extra.sterlingCharge = 0.6; extra.sterlingBurstRadius = 75; }
     if (def.type === 'lance') { extra.size = 6; extra.lanceBaseDmg = Math.max(1, dmg * 0.72); extra.lanceHits = 0; extra.lanceFalloff = 0.78; extra.maxRange = 900; }
@@ -20474,7 +20463,7 @@ function updateProjectiles(dt) {
             }
             p.x += p.vx * 60 * dt; p.y += p.vy * 60 * dt;
         }
-        else if (p.type === 'cyro_iceball' || p.type === 'pyro_fireball') {
+        else if (p.type === 'crioheat_orb') {
             p.x += p.vx * 60 * dt;
             p.y += p.vy * 60 * dt;
         }
@@ -21292,25 +21281,21 @@ function updateProjectiles(dt) {
                             continue;
                         }
                         if (p.type === 'shinobi_katana' || p.type === 'shinobi_fireball') applyShinobiMark(e, realDmg);
-                        if (p.type === 'cyro_iceball') {
-                            const freezeDuration = Math.max(0.8, Number(p.extra?.freezeDuration) || 2.4);
-                            e.freezeTimer = Math.max(Number.isFinite(e.freezeTimer) ? e.freezeTimer : 0, freezeDuration);
-                            e.slowTimer = Math.max(Number.isFinite(e.slowTimer) ? e.slowTimer : 0, freezeDuration);
-                            const radius = Math.max(35, Number(p.extra?.explodeRadius) || 52);
-                            if (Math.random() < 0.50) createExplosion(e.x, e.y, radius, Math.max(1, realDmg * 0.35), '#74b9ff');
-                            for (const nearby of enemies) {
-                                if (!nearby || nearby.hp <= 0) continue;
-                                if (dist({x: e.x, y: e.y}, nearby) <= radius + (nearby.size || 0)) {
-                                    nearby.freezeTimer = Math.max(Number.isFinite(nearby.freezeTimer) ? nearby.freezeTimer : 0, freezeDuration);
-                                    nearby.slowTimer = Math.max(Number.isFinite(nearby.slowTimer) ? nearby.slowTimer : 0, freezeDuration);
-                                }
+                        if (p.type === 'shroom_spore') {
+                            const chance=Math.max(0,Math.min(1,Number(p.extra?.hypnosisChance)||0.10));
+                            if(isHypnotizableEnemy(e) && Math.random()<chance){
+                                e.hypnotizedTimer=Math.max(Number(e.hypnotizedTimer)||0,Number(p.extra?.hypnosisDuration)||15);
+                                addFloatingText(e.x,e.y-14,'HIPNOTIZADO!','#c56cf0',12); createParticles(e.x,e.y,'#9b59b6');
                             }
-                            addFloatingText(e.x, e.y - 12, 'CONGELADO!', '#74b9ff', 12);
                         }
-                        if (p.type === 'pyro_fireball' && Math.random() < Math.max(0, Math.min(1, Number(p.extra?.burnChance) || 0.10))) {
-                            e.burnTimer = Math.max(Number.isFinite(e.burnTimer) ? e.burnTimer : 0, 3.2);
-                            e.burnDmg = Math.max(Number.isFinite(e.burnDmg) ? e.burnDmg : 0, Math.max(2, realDmg * 0.28));
-                            addFloatingText(e.x, e.y - 12, 'QUEIMANDO!', '#ff7b39', 12);
+
+                        if (p.type === 'cactus_spike') {
+                            const a=Math.atan2(p.vy,p.vx); const push=10;
+                            if(!e.isBoss){ e.x += Math.cos(a)*push; e.y += Math.sin(a)*push; e.x=Math.max(-1480,Math.min(1480,e.x)); e.y=Math.max(-1480,Math.min(1480,e.y)); }
+                        }
+
+                        if (p.type === 'crioheat_orb') {
+                            e.burnTimer=Math.max(Number.isFinite(e.burnTimer)?e.burnTimer:0,2); e.burnDmg=Math.max(Number.isFinite(e.burnDmg)?e.burnDmg:0,Math.max(2,realDmg*.3)); e.slowTimer=Math.max(Number.isFinite(e.slowTimer)?e.slowTimer:0,2); const froze=Math.random()<.15; if(froze)e.freezeTimer=Math.max(Number.isFinite(e.freezeTimer)?e.freezeTimer:0,2); addFloatingText(e.x,e.y-12,froze?'QUEIMANDO + CONGELADO!':'QUEIMANDO + LERDO!',froze?'#bfe8ff':'#ffb07a',12);
                         }
                         if (p.type === 'gma_cookie' && Math.random() < Math.max(0, Math.min(1, Number(p.extra?.burnChance) || 0.15))) {
                             e.burnTimer = Math.max(Number.isFinite(e.burnTimer) ? e.burnTimer : 0, 3.2);
@@ -22162,6 +22147,64 @@ function updateEquippedPet(dt){
         } else {
             st.mode='idle-orbit'; st.orbitAngle+=dt*1.4; const orbit=player.r+58; movePetToward(st,player.x+Math.cos(st.orbitAngle)*orbit,player.y+Math.sin(st.orbitAngle)*orbit,7.6,dt);
         }
+    } else if(pet.id==='fish'){
+        st.mode='player-support';
+        st.orbitAngle += dt*1.35;
+        const orbit=player.r+56;
+        movePetToward(st,player.x+Math.cos(st.orbitAngle)*orbit,player.y+Math.sin(st.orbitAngle)*orbit,7.4,dt);
+    } else if(pet.id==='shroom'){
+        player.petShroomCd=Math.max(0,(Number(player.petShroomCd)||0)-dt);
+        const rarity=Math.max(0,Math.min(4,pet.rarity));
+        const target=nearestPetEnemy(430,true);
+        if(target){
+            st.mode='shroom-attack';
+            const d=dist(st,target);
+            const desired=150+target.size;
+            if(d>desired) movePetToward(st,target.x,target.y,7.3,dt);
+            else if(d<desired-25) movePetToward(st,player.x,player.y,5.6,dt);
+            st.facingLeft=target.x<st.x;
+            if(d<=470 && player.petShroomCd<=0){
+                const ang=Math.atan2(target.y-st.y,target.x-st.x);
+                createProj(st.x,st.y,Math.cos(ang)*4.8,Math.sin(ang)*4.8,Math.max(1,(player.baseDmg||12)*0.45),70,true,'shroom_spore',{size:10,sourceChar:'shroom',hypnosisChance:PET_SHROOM_HYPNOSIS[rarity],hypnosisDuration:15});
+                player.petShroomCd=1.1;
+            }
+        } else {
+            st.mode='idle-orbit'; st.orbitAngle+=dt*1.2; const orbit=player.r+68; movePetToward(st,player.x+Math.cos(st.orbitAngle)*orbit,player.y+Math.sin(st.orbitAngle)*orbit,7.1,dt);
+        }
+    } else if(pet.id==='chick'){
+        const target=nearestPetEnemy(700,true);
+        if(target){
+            st.mode='chick-attack';
+            const a=Math.atan2(target.y-st.y,target.x-st.x);
+            const step=5.3*60*dt;
+            const preferred=(st.r||12)+target.size+8;
+            const d=dist(st,target);
+            if(d>preferred){st.x+=Math.cos(a)*step;st.y+=Math.sin(a)*step;}
+            st.facingLeft=Math.cos(a)<0;
+            if(d<=preferred){
+                st.attackTimer=(Number(st.attackTimer)||0)-dt;
+                if(st.attackTimer<=0){
+                    const damage=PET_CHICK_DAMAGE[Math.max(0,Math.min(4,pet.rarity))]||14;
+                    const dealt=damage*getEnemyDamageTakenMultiplier(target)*(target.isBoss?(player.stats?.bossDmgMult||1):1);
+                    target.hp-=dealt; target.lastHitSourceChar='chick';
+                    addFloatingText(target.x,target.y,`${Math.floor(dealt)}`,'#f1c40f',11); createParticles(target.x,target.y,'#f1c40f');
+                    st.attackTimer=.58;
+                }
+            }
+        } else { st.mode='idle-orbit'; st.orbitAngle+=dt*1.35; const orbit=player.r+58; movePetToward(st,player.x+Math.cos(st.orbitAngle)*orbit,player.y+Math.sin(st.orbitAngle)*orbit,7.4,dt); }
+    } else if(pet.id==='cactus'){
+        player.petCactusCd=Math.max(0,(Number(player.petCactusCd)||0)-dt);
+        st.mode='cactus-orbit'; st.orbitAngle+=dt*1.05;
+        const orbit=player.r+62; movePetToward(st,player.x+Math.cos(st.orbitAngle)*orbit,player.y+Math.sin(st.orbitAngle)*orbit,7.0,dt);
+        if(player.petCactusCd<=0){
+            const rarity=Math.max(0,Math.min(4,pet.rarity));
+            const count=PET_CACTUS_SPIKES[rarity]||6;
+            for(let k=0;k<count;k++){
+                const a=Math.PI*2*k/count;
+                createProj(st.x,st.y,Math.cos(a)*5.4,Math.sin(a)*5.4,Math.max(1,(player.baseDmg||12)*0.36),34,true,'cactus_spike',{size:6,sourceChar:'cactus'});
+            }
+            player.petCactusCd=1.05;
+        }
     } else if(pet.id==='hamster'){
         player.petHamsterCd=Math.max(0,(Number(player.petHamsterCd)||0)-dt);
         const target=nearestPetEnemy(680,true);
@@ -22184,7 +22227,7 @@ function drawEquippedPetCompanion(){
     const cache=window.__petImageCache||(window.__petImageCache={}); const src=data.sprite;
     let img=cache[src];
     if(!img){ img=new Image(); img.decoding='async'; img.loading='eager'; img.src=new URL(src, document.baseURI).href; cache[src]=img; }
-    const size=Math.max(58,Math.min(92,player.r*2.05));
+    const size=Math.max(112,Math.min(150,player.r*3.15));
     const ratio=(img.naturalWidth>0&&img.naturalHeight>0)?img.naturalWidth/img.naturalHeight:1;
     const w=ratio>=1?size:size*ratio;
     const h=ratio>=1?size/ratio:size;
@@ -22426,13 +22469,18 @@ function updateGraffitMarks(dt) {
 }
 
 
+function applyCrioheatElementalEffect(e,d,freeze){if(!e||e.hp<=0)return;e.burnTimer=Math.max(e.burnTimer||0,2);e.burnDmg=Math.max(e.burnDmg||0,Math.max(2,d*.3));e.slowTimer=Math.max(e.slowTimer||0,2);if(freeze||Math.random()<.15)e.freezeTimer=Math.max(e.freezeTimer||0,2);}
+function triggerCrioheatCloseSwing(){if(!player||pd?.selectedChar!=='crioheat'||player.isDead||player.crioheatObsidian||player.crioheatSwingCd>0||sandboxMode)return;const r=82;let t=null,b=1e9;for(const e of enemies){if(!e||e.hp<=0||isCurrentlyHypnotized(e))continue;const d=dist(player,e);if(d<r+(e.size||0)&&d<b){b=d;t=e;}}if(!t)return;const a=Math.atan2(t.y-player.y,t.x-player.x),d=player.baseDmg*player.stats.dmgMult*.9;for(const e of enemies){if(!e||e.hp<=0||isCurrentlyHypnotized(e))continue;const dx=e.x-player.x,dy=e.y-player.y,dd=Math.hypot(dx,dy),da=Math.atan2(Math.sin(Math.atan2(dy,dx)-a),Math.cos(Math.atan2(dy,dx)-a));if(dd<=r+(e.size||0)&&Math.abs(da)<=Math.PI*.5){const h=d*getEnemyDamageTakenMultiplier(e)*(e.isBoss?player.stats.bossDmgMult:1);e.hp-=h;e.lastHitSourceChar='crioheat';applyCrioheatElementalEffect(e,h,false);}}player.crioheatSwingCd=1.05;player.crioheatSwingFx=.24;player.crioheatSwingAngle=a;}
+function triggerCrioheatObsidianSlam(){if(!player||pd?.selectedChar!=='crioheat'||player.isDead||!player.crioheatObsidian||player.crioheatSlamCd>0||sandboxMode)return;const spikes=[],d=player.baseDmg*player.stats.dmgMult*1.05;for(let i=0;i<8;i++){const a=Math.PI*2*i/8+Math.PI/8,r=46+(i%2)*14,x=player.x+Math.cos(a)*r,y=player.y+Math.sin(a)*r;spikes.push({x,y,angle:a,life:.55});for(const e of enemies){if(e&&e.hp>0&&!isCurrentlyHypnotized(e)&&dist({x,y},e)<=26+(e.size||0)){const h=d*getEnemyDamageTakenMultiplier(e)*(e.isBoss?player.stats.bossDmgMult:1);e.hp-=h;e.lastHitSourceChar='crioheat';applyCrioheatElementalEffect(e,h,true);}}}player.crioheatSpikeFx=spikes;player.crioheatSlamCd=2.1;player.crioheatSlamFx=.5;createParticles(player.x,player.y,'#7f8c8d');}
+function updateCrioheatMechanics(dt){if(!player||pd?.selectedChar!=='crioheat')return;const obs=player.hp/(player.baseHp*player.stats.maxHpMult)<.5;if(player.crioheatObsidian!==obs){player.crioheatObsidian=obs;player.crioheatSwingCd=0;player.crioheatSlamCd=obs?.18:0;player.crioheatSpikeFx=[];addFloatingText(player.x,player.y-34,obs?'FORMA OBSIDIANA!':'FORMA HÍBRIDA!',obs?'#dfe6e9':'#dff7ff',14);}player.crioheatSwingCd=Math.max(0,(player.crioheatSwingCd||0)-dt);player.crioheatSlamCd=Math.max(0,(player.crioheatSlamCd||0)-dt);player.crioheatSwingFx=Math.max(0,(player.crioheatSwingFx||0)-dt);player.crioheatSlamFx=Math.max(0,(player.crioheatSlamFx||0)-dt);if(Array.isArray(player.crioheatSpikeFx)){for(const q of player.crioheatSpikeFx)q.life=Math.max(0,(q.life||0)-dt);player.crioheatSpikeFx=player.crioheatSpikeFx.filter(q=>q.life>0);}if(player.isDead||sandboxMode)return;if(obs){if(player.crioheatSlamCd<=0)triggerCrioheatObsidianSlam();}else if(player.crioheatSwingCd<=0)triggerCrioheatCloseSwing();}
+
 function getPlayerSpriteId() {
     if (player?.glitchTransformAnimating && player?.glitchTransformPreviewId) return player.glitchTransformPreviewId;
     if (player?.glitchCurrentFormId && player.glitchCurrentFormId !== 'glitch' && (player?.glitchOriginChar === 'glitch' || player?.glitchMorphActive || pd?.selectedChar === 'glitch')) {
         return player.glitchCurrentFormId;
     }
     if (pd?.selectedChar === 'adam' && player?.adamMechActive) return 'adam_mech';
-    if (pd?.selectedChar === 'cyro_pyro') return (player?.cyroPyroMode || getCyroPyroMode()) === 'cyro' ? 'cyro' : 'pyro';
+    if (pd?.selectedChar === 'crioheat') return player?.crioheatObsidian ? 'crioheat_obsidian' : 'crioheat';
     if (pd?.selectedChar === 'gladiator') {
         return ((player?.gladiatorMode || pd?.chars?.gladiator?.mode || 'shooter') === 'shooter') ? 'gladiator_spear' : 'gladiator_sword';
     }
@@ -24001,20 +24049,14 @@ function draw() {
             const radius = a.radius || 78; const pulse = 0.08 + 0.03*Math.sin((a.pulse||0)*3);
             ctx.save(); ctx.globalAlpha = pulse; ctx.fillStyle='#4da6ff'; ctx.beginPath(); ctx.arc(a.x,a.y,radius,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=0.75; ctx.strokeStyle='#8fd0ff'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(a.x,a.y,radius,0,Math.PI*2); ctx.stroke();
             ctx.globalAlpha=1; ctx.strokeStyle='#dfefff'; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(a.x,a.y+16); ctx.lineTo(a.x,a.y-14); ctx.stroke(); ctx.fillStyle='#4da6ff'; for(let k=0;k<3;k++){ const ang=(a.pulse||0)*2+k*2*Math.PI/3; ctx.save(); ctx.translate(a.x+Math.cos(ang)*10,a.y-18+Math.sin(ang)*10); ctx.rotate(ang); ctx.beginPath(); ctx.moveTo(0,0); ctx.quadraticCurveTo(18,-5,24,0); ctx.quadraticCurveTo(15,5,0,0); ctx.fill(); ctx.restore(); } ctx.restore();
-        } else if(a.type === 'cyro_pyro_partner') {
-            const rr = a.r || 13;
-            drawCharacterSprite(ctx, a.x, a.y, rr, a.elementMode === 'cyro' ? 'cyro' : 'pyro', {
-                widthMult: 10.2,
-                flipX: Boolean(a.facingLeft)
-            });
         } else if(a.type === 'penguin') {
             const rr = a.r || 18;
             drawCharacterSprite(ctx, a.x, a.y, rr, 'pipi', {
-                widthMult: 8.9,
+                widthMult: 10.2,
                 flipX: Boolean(a.facingLeft)
             });
         } else if(a.type === 'chick') {
-            if (!drawElementSprite(ctx, a.x, a.y, 'chick', 56, { flipX: Boolean(a.facingLeft) })) {
+            if (!drawElementSprite(ctx, a.x, a.y, 'chick', 88, { flipX: Boolean(a.facingLeft) })) {
                 ctx.fillStyle = '#f5f6fa'; ctx.beginPath(); ctx.arc(a.x, a.y, 15, 0, Math.PI*2); ctx.fill();
                 ctx.fillStyle = '#f1c40f'; ctx.beginPath(); ctx.arc(a.x + (a.facingLeft ? -10 : 10), a.y - 3, 4, 0, Math.PI*2); ctx.fill();
                 ctx.fillStyle = '#e67e22'; ctx.beginPath(); ctx.moveTo(a.x + (a.facingLeft ? -15 : 15), a.y + 2); ctx.lineTo(a.x + (a.facingLeft ? -21 : 21), a.y + 5); ctx.lineTo(a.x + (a.facingLeft ? -15 : 15), a.y + 8); ctx.closePath(); ctx.fill();
@@ -24469,6 +24511,7 @@ function draw() {
                 }
             }
         }
+        if(pd.selectedChar==='crioheat'){if(Array.isArray(player.crioheatSpikeFx))for(const q of player.crioheatSpikeFx){const f=Math.max(0,Math.min(1,(q.life||0)/.55)),a=q.angle||0;ctx.save();ctx.translate(q.x,q.y);ctx.rotate(a);ctx.globalAlpha=.55+.45*f;ctx.fillStyle='#343434';ctx.strokeStyle='#cfd8dc';ctx.lineWidth=2;const h=26+18*f;ctx.beginPath();ctx.moveTo(-9,13);ctx.lineTo(0,-h);ctx.lineTo(9,13);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();}if((player.crioheatSwingFx||0)>0&&!player.crioheatObsidian){const r=78;ctx.save();ctx.translate(player.x,player.y);ctx.rotate(player.crioheatSwingAngle||0);ctx.globalAlpha=Math.min(1,(player.crioheatSwingFx||0)/.24);ctx.lineWidth=8;ctx.shadowBlur=18;const g=ctx.createLinearGradient(-r,0,r,0);g.addColorStop(0,'#74b9ff');g.addColorStop(.5,'#eafaff');g.addColorStop(1,'#ff7043');ctx.strokeStyle=g;ctx.beginPath();ctx.arc(0,0,r,-Math.PI*.5,Math.PI*.5);ctx.stroke();ctx.restore();}}
         ctx.globalAlpha = 1; 
         if(player.shieldTimer > 0 || player.qbShield) { const shieldColor = pd.selectedChar === 'vesper' ? '#7b3fe4' : (player.qbShield ? '#8e44ad' : '#3498db'); ctx.strokeStyle = shieldColor; ctx.lineWidth = (pd.selectedChar === 'vesper' || player.qbShield) ? 6 : 4; ctx.beginPath(); ctx.arc(player.x, player.y, player.r + 5, 0, Math.PI*2); ctx.stroke(); } 
         if(pd.selectedChar === 'sparta' && player.spartaShieldActive) {
@@ -25803,292 +25846,7 @@ function draw() {
         }
         else if(p.type === 'bomb' || p.type === 'rocket' || p.type === 'buster_rocket') { ctx.fillStyle = '#2c3e50'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#e67e22'; ctx.beginPath(); ctx.arc(p.x + p.size/2, p.y - p.size/2, 2, 0, Math.PI*2); ctx.fill(); }
         else if(p.type === 'grenade' || p.type === 'big_grenade' || p.type === 'grenade_fragment') { ctx.fillStyle = '#27ae60'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); }
-        else if(p.type === 'cyro_iceball') {
-            const r = p.size || 13;
-            ctx.save();
-            ctx.translate(px, py);
-            ctx.rotate(Math.atan2(p.vy, p.vx));
-            ctx.shadowBlur = 12;
-            ctx.shadowColor = 'rgba(116,185,255,0.85)';
-            ctx.fillStyle = '#bfe8ff';
-            ctx.beginPath();
-            ctx.arc(0, 0, r, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#74b9ff';
-            ctx.beginPath();
-            ctx.arc(-r * 0.25, -r * 0.2, r * 0.34, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-            ctx.restore();
-        }
-        else if(p.type === 'pyro_fireball') {
-            const r = p.size || 9;
-            ctx.save();
-            ctx.translate(px, py);
-            ctx.rotate(Math.atan2(p.vy, p.vx));
-            ctx.shadowBlur = 14;
-            ctx.shadowColor = 'rgba(231,76,60,0.9)';
-            ctx.fillStyle = '#e74c3c';
-            ctx.beginPath();
-            ctx.arc(0, 0, r, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#ffd27a';
-            ctx.beginPath();
-            ctx.arc(-r * 0.25, -r * 0.25, Math.max(2, r * 0.38), 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
-        }
-        else if(p.type === 'snapdragon_fireball' || p.type === 'snapdragon_flame') {
-            const r = p.size || 10;
-            ctx.save();
-            ctx.translate(px, py);
-            ctx.rotate(Math.atan2(p.vy, p.vx));
-            ctx.shadowBlur = 18;
-            ctx.shadowColor = 'rgba(255,90,25,0.95)';
-            ctx.fillStyle = '#f4511e';
-            ctx.beginPath();
-            ctx.moveTo(r*1.35,0);
-            ctx.quadraticCurveTo(r*.42,-r*.95,-r*.82,-r*.52);
-            ctx.quadraticCurveTo(-r*1.05,0,-r*.82,r*.52);
-            ctx.quadraticCurveTo(r*.42,r*.95,r*1.35,0);
-            ctx.closePath();
-            ctx.fill();
-            ctx.fillStyle = '#ffb74d';
-            ctx.beginPath(); ctx.arc(-r*.18,-r*.18,r*.44,0,Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#fff3b0';
-            ctx.beginPath(); ctx.arc(-r*.34,-r*.30,Math.max(2,r*.20),0,Math.PI*2); ctx.fill();
-            ctx.restore();
-        }
-        else if(p.type === 'shinobi_fireball') { ctx.fillStyle = '#ff6b00'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#ffd27a'; ctx.beginPath(); ctx.arc(p.x - 2, p.y - 2, Math.max(2, p.size * 0.28), 0, Math.PI*2); ctx.fill(); }
-        else if(p.type === 'shinobi') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx)); ctx.fillStyle = '#8e44ad'; ctx.beginPath(); ctx.moveTo(p.size, 0); ctx.lineTo(-p.size/2, -p.size/3); ctx.lineTo(-p.size/2, p.size/3); ctx.fill(); ctx.restore(); }
-        else if(p.type === 'chain_lightning') { ctx.fillStyle = '#341f97'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#0984e3'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size-2, 0, Math.PI*2); ctx.fill(); }
-        else if(p.type === 'bunniie_carrot') {
-            const r = p.size || 10;
-            ctx.save();
-            ctx.translate(px, py);
-            ctx.rotate(Math.atan2(p.vy, p.vx));
-            ctx.shadowBlur = 8;
-            ctx.shadowColor = '#b06d2a';
-            ctx.fillStyle = '#f39c12';
-            ctx.beginPath();
-            ctx.moveTo(-r * 0.6, -r * 0.28);
-            ctx.lineTo(r * 1.2, 0);
-            ctx.lineTo(-r * 0.6, r * 0.28);
-            ctx.closePath();
-            ctx.fill();
-            ctx.fillStyle = '#2ecc71';
-            ctx.beginPath();
-            ctx.moveTo(-r * 0.95, 0);
-            ctx.lineTo(-r * 1.35, -r * 0.2);
-            ctx.lineTo(-r * 1.1, 0);
-            ctx.lineTo(-r * 1.35, r * 0.2);
-            ctx.closePath();
-            ctx.fill();
-            ctx.restore();
-        }
-        else if(p.type === 'macaron' || p.type === 'macaron_big') {
-            const r = p.size || (p.type === 'macaron_big' ? 18 : 11);
-            const tone = p.extra?.macaronTone || (p.type === 'macaron_big' ? '#f39c12' : '#f3a06f');
-            const fill1 = tone;
-            const fill2 = p.type === 'macaron_big' ? '#d97706' : '#c86b48';
-            const cream = p.type === 'macaron_big' ? '#fff8e7' : '#fff2d8';
-            ctx.save();
-            ctx.translate(p.x, p.y);
-            ctx.rotate(Math.atan2(p.vy, p.vx) + Math.sin(gameTime * 3) * 0.08);
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = 'rgba(0,0,0,0.25)';
-            ctx.fillStyle = fill1;
-            ctx.beginPath();
-            ctx.ellipse(0, -r * 0.18, r * 1.05, r * 0.58, 0, Math.PI, 0, true);
-            ctx.fill();
-            ctx.fillStyle = fill2;
-            ctx.beginPath();
-            ctx.ellipse(0, r * 0.18, r * 1.05, r * 0.58, 0, 0, Math.PI, false);
-            ctx.fill();
-            ctx.fillStyle = cream;
-            ctx.beginPath();
-            ctx.ellipse(0, 0, r * 0.92, r * 0.22, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.lineWidth = Math.max(1, r * 0.08);
-            ctx.strokeStyle = 'rgba(255,255,255,0.22)';
-            ctx.beginPath();
-            ctx.ellipse(0, 0, r * 1.05, r * 0.58, 0, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.restore();
-        }
-        else if(p.type === 'tea_cup') {
-            const r = p.size || 10;
-            ctx.save();
-            ctx.translate(p.x, p.y);
-            ctx.rotate(Math.atan2(p.vy, p.vx));
-            ctx.fillStyle = '#fff8ef';
-            ctx.beginPath();
-            ctx.arc(0, 0, r, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#f39c12';
-            ctx.beginPath();
-            ctx.arc(0, 1, r * 0.55, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = '#e67e22';
-            ctx.lineWidth = Math.max(1, r * 0.18);
-            ctx.beginPath();
-            ctx.arc(r * 0.7, 0, r * 0.35, -Math.PI / 2, Math.PI / 2);
-            ctx.stroke();
-            ctx.restore();
-        }
-        else if(p.type === 'wrench') { ctx.save();ctx.translate(px,py);ctx.rotate(ang+gameTime*7);const r=Math.max(7,p.size||12);ctx.shadowColor='rgba(189,195,199,.4)';ctx.shadowBlur=5;ctx.strokeStyle='#48545d';ctx.lineWidth=2.2;ctx.fillStyle='#bfc7cc';ctx.fillRect(-r*.72,-r*.16,r*1.50,r*.32);ctx.beginPath();ctx.arc(r*.73,0,r*.38,-Math.PI*.72,Math.PI*.72);ctx.lineTo(r*.35,0);ctx.closePath();ctx.fill();ctx.stroke();ctx.beginPath();ctx.arc(-r*.72,0,r*.24,0,TAU);ctx.fill();ctx.stroke();ctx.restore(); }
-        else if(p.type === 'blood_ball') { ctx.fillStyle = '#8b0000'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); }
-        else if(p.type === 'laser' || p.type === 'beam_shot' || p.type === 'zippi_laser') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx)); ctx.fillStyle = p.type==='beam_shot'?'#00ff00':'#00ffff'; ctx.fillRect(0, -2, 15, 4); ctx.restore(); }
-        else if(p.type === 'hunter') { ctx.fillStyle = '#8b4513'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); }
-        else if(p.type === 'joseph_skate') {
-            ctx.save();
-            ctx.translate(p.x, p.y);
-            ctx.rotate(Math.atan2(p.vy, p.vx));
-            const sr = p.size || 10;
-            ctx.fillStyle = '#7f8c8d';
-            ctx.strokeStyle = '#2d3436';
-            ctx.lineWidth = 2;
-            ctx.fillRect(-sr * 1.7, -sr * 0.28, sr * 3.4, sr * 0.56);
-            ctx.strokeRect(-sr * 1.7, -sr * 0.28, sr * 3.4, sr * 0.56);
-            ctx.fillStyle = '#2d3436';
-            ctx.beginPath(); ctx.arc(-sr * 1.0, sr * 0.52, sr * 0.26, 0, Math.PI * 2); ctx.fill();
-            ctx.beginPath(); ctx.arc(sr * 1.0, sr * 0.52, sr * 0.26, 0, Math.PI * 2); ctx.fill();
-            ctx.restore();
-        }
-        else if(p.type === 'shell_trident') {
-            ctx.save(); ctx.translate(Math.round(p.x), Math.round(p.y)); ctx.rotate(Math.atan2(p.vy, p.vx));
-            const r = p.size || 10;
-            ctx.strokeStyle = '#dffcff'; ctx.lineWidth = 3; ctx.lineCap = 'round';
-            ctx.beginPath(); ctx.moveTo(-r*1.7,0); ctx.lineTo(r*1.7,0); ctx.stroke();
-            ctx.strokeStyle = '#8c6b2f'; ctx.lineWidth = 2.4;
-            ctx.beginPath(); ctx.moveTo(-r*1.3,0); ctx.lineTo(r*0.6,0); ctx.stroke();
-            ctx.strokeStyle = '#dffcff'; ctx.lineWidth = 2.2;
-            for(const oy of [-r*0.45,0,r*0.45]) { ctx.beginPath(); ctx.moveTo(r*0.45,0); ctx.lineTo(r*1.35,oy); ctx.stroke(); }
-            ctx.restore();
-        }
-        else if(p.type === 'beezy_honey') {
-            ctx.save(); ctx.translate(Math.round(p.x), Math.round(p.y)); ctx.rotate(Math.atan2(p.vy, p.vx));
-            const r = p.size || 10;
-            if (p.extra?.hive) {
-                ctx.fillStyle = '#f6c445'; ctx.strokeStyle = '#7a4d12'; ctx.lineWidth = 2;
-                ctx.fillRect(-r * 1.1, -r * 0.9, r * 2.2, r * 1.8); ctx.strokeRect(-r * 1.1, -r * 0.9, r * 2.2, r * 1.8);
-                ctx.fillStyle = '#8d5a18'; ctx.fillRect(-r * 0.55, -r * 0.45, r * 0.35, r * 0.9); ctx.fillRect(r * 0.20, -r * 0.45, r * 0.35, r * 0.9);
-            } else {
-                ctx.fillStyle = '#f1c40f'; ctx.strokeStyle = '#9a6b00'; ctx.lineWidth = 2;
-                ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-                ctx.fillStyle = '#8d5a18'; ctx.fillRect(-r * 0.5, -r * 0.18, r, r * 0.26); ctx.fillRect(-r * 0.10, -r * 0.52, r * 0.22, r * 1.04);
-            }
-            ctx.restore();
-        }
-        else if(p.type === 'beezy_bee') {
-            const img = getCharacterSpriteImage('beezy');
-            if (img && img.complete && img.naturalWidth) {
-                const a = Math.atan2(p.vy, p.vx);
-                ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(a); ctx.globalAlpha = 0.96; ctx.drawImage(img, -18, -18, 36, 36); ctx.restore();
-            } else {
-                ctx.fillStyle = '#f1c40f'; ctx.beginPath(); ctx.arc(p.x, p.y, 8, 0, Math.PI * 2); ctx.fill();
-            }
-        }
-        else if(p.type === 'bit_cherry') {
-            ctx.save();
-            ctx.translate(Math.round(p.x), Math.round(p.y));
-            ctx.rotate(Math.atan2(p.vy, p.vx));
-            const r = p.size || 9;
-            ctx.fillStyle = '#ff3b5c'; ctx.fillRect(-r * 0.55, -r * 0.45, r * 1.15, r * 1.0); ctx.fillRect(r * 0.25, -r * 0.90, r * 0.55, r * 0.55);
-            ctx.fillStyle = '#2ecc71'; ctx.fillRect(r * 0.20, -r * 1.35, r * 0.70, r * 0.35); ctx.fillRect(r * 0.65, -r * 1.05, r * 0.35, r * 0.45);
-            ctx.restore();
-        }
-        else if(p.type === 'bit_banana' || p.type === 'bit_banana_peeled') {
-            ctx.save();
-            ctx.translate(Math.round(p.x), Math.round(p.y));
-            ctx.rotate(Math.atan2(p.vy, p.vx));
-            const r = p.size || 9;
-            ctx.fillStyle = p.type === 'bit_banana' ? '#f1c40f' : '#fff2a8';
-            ctx.fillRect(-r * 1.6, -r * 0.38, r * 2.8, r * 0.76);
-            ctx.fillStyle = '#7f8c8d'; ctx.fillRect(r * 1.1, -r * 0.52, r * 0.55, r * 0.25);
-            if (p.type === 'bit_banana') { ctx.fillStyle = '#d4ac0d'; ctx.fillRect(-r * 0.9, -r * 0.20, r * 1.2, r * 0.22); }
-            ctx.restore();
-        }
-        else if(p.type === 'bit_arcade') {
-            ctx.save();
-            ctx.translate(Math.round(p.x), Math.round(p.y));
-            ctx.rotate(Math.atan2(p.vy, p.vx));
-            const r = p.size || 18;
-            ctx.fillStyle = '#2452ff'; ctx.fillRect(-r * 1.0, -r * 1.25, r * 1.7, r * 2.4); ctx.fillRect(-r * 0.55, -r * 1.65, r * 1.25, r * 0.48);
-            ctx.fillStyle = '#111'; ctx.fillRect(-r * 0.62, -r * 0.92, r * 0.95, r * 0.72);
-            ctx.fillStyle = '#ff3b5c'; ctx.fillRect(-r * 0.30, -r * 0.72, r * 0.25, r * 0.20); ctx.fillStyle = '#f1c40f'; ctx.fillRect(r * 0.05, -r * 0.72, r * 0.25, r * 0.20);
-            ctx.fillStyle = '#2ecc71'; ctx.fillRect(-r * 0.15, -r * 0.22, r * 0.30, r * 0.30); ctx.fillStyle = '#ecf0f1'; ctx.fillRect(r * 0.28, -r * 0.15, r * 0.20, r * 0.20);
-            ctx.restore();
-        }
-        else if(p.type === 'zoe_punch') {
-            ctx.save(); const ang=Number.isFinite(p.extra?.attackAngle)?p.extra.attackAngle:Math.atan2(p.vy,p.vx), discharge=!!p.extra?.zoeDischarge;
-            const duration=Math.max(1,Number(p.extra?.punchDuration)||14), elapsed=Math.max(0,duration-p.life), t=Math.min(1,elapsed/duration), ease=1-Math.pow(1-t,3);
-            const reach=(0.45+ease*0.55)*(discharge?1.52:1.35), widthScale=discharge?1.75:1.30;
-            ctx.translate(p.x,p.y); ctx.rotate(ang); ctx.globalAlpha=Math.max(0,1-Math.max(0,t-0.72)/0.28);
-            ctx.shadowColor=discharge?'rgba(241,196,15,.95)':'rgba(62,199,255,.9)'; ctx.shadowBlur=discharge?18:11;
-            ctx.fillStyle=discharge?'#f1c40f':'#3ec7ff'; ctx.strokeStyle='#17324a'; ctx.lineWidth=discharge?5:4;
-            ctx.beginPath(); ctx.roundRect(0,-11*widthScale,48*reach,22*widthScale,11*widthScale); ctx.fill(); ctx.stroke();
-            ctx.fillStyle='#eaf9ff'; ctx.beginPath(); ctx.arc(48*reach,0,17*widthScale,0,Math.PI*2); ctx.fill(); ctx.stroke(); ctx.shadowBlur=0;
-            ctx.strokeStyle='#f1c40f'; ctx.lineWidth=discharge?3:2;
-            for(let b=0;b<(discharge?5:3);b++){const bx=10+b*(Math.max(18,38*reach)/Math.max(1,(discharge?4:2)));ctx.beginPath();ctx.moveTo(bx,-10*widthScale);ctx.lineTo(bx+6,-18*widthScale);ctx.lineTo(bx+12,-9*widthScale);ctx.lineTo(bx+17,-16*widthScale);ctx.stroke();ctx.beginPath();ctx.moveTo(bx,10*widthScale);ctx.lineTo(bx+6,18*widthScale);ctx.lineTo(bx+12,9*widthScale);ctx.lineTo(bx+17,16*widthScale);ctx.stroke();}
-            ctx.restore();
-        }
-        else if(p.type === 'popeye_punch') {
-            ctx.save();
-            const ang = Number.isFinite(p.extra?.attackAngle) ? p.extra.attackAngle : Math.atan2(p.vy, p.vx);
-            const powered = !!p.extra?.powered;
-            const duration = Math.max(1, Number(p.extra?.punchDuration) || 18);
-            const elapsed = Math.max(0, duration - p.life);
-            const t = Math.min(1, elapsed / duration);
-            const ease = 1 - Math.pow(1 - t, 3);
-            const reach = (powered ? 1.55 : 1.35) * (0.45 + ease * 0.55);
-            const widthScale = powered ? 1.45 : 1.30;
-            ctx.translate(p.x, p.y);
-            ctx.rotate(ang);
-            ctx.globalAlpha = Math.max(0, 1 - Math.max(0, t - 0.72) / 0.28);
-            ctx.fillStyle = '#f1c40f';
-            ctx.strokeStyle = '#7f8c8d';
-            ctx.lineWidth = powered ? 5 : 4;
-            ctx.beginPath();
-            ctx.roundRect(0, -11 * widthScale, 48 * reach, 22 * widthScale, 11 * widthScale);
-            ctx.fill(); ctx.stroke();
-            ctx.fillStyle = '#f7d794';
-            ctx.beginPath();
-            ctx.arc(48 * reach, 0, 17 * widthScale, 0, Math.PI * 2);
-            ctx.fill(); ctx.stroke();
-            ctx.restore();
-        }
-        else if(p.type === 'grenade_barricade') {
-            ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Number(p.extra?.wallAngle) || 0);
-            const w = 64, h = 34;
-            const img = window.__grenadeBarricadeImg || (window.__grenadeBarricadeImg = (() => { const im = new Image(); im.src = 'elements/barricade.png'; return im; })());
-            if (img.complete && img.naturalWidth) {
-                ctx.drawImage(img, -w / 2, -h / 2, w, h);
-            } else {
-                const fw = 56, fh = 26; ctx.fillStyle = '#3b4a5a'; ctx.strokeStyle = '#101820'; ctx.lineWidth = 3;
-                ctx.fillRect(-fw/2, -fh/2, fw, fh); ctx.strokeRect(-fw/2, -fh/2, fw, fh);
-                ctx.fillStyle = '#788897'; for (let k=-1;k<=1;k++) ctx.fillRect(-fw/2+9+k*16,-fh/2+5,10,6);
-            }
-            ctx.restore();
-        }
-        else if(p.type === 'xilo_anvil') {
-            const r = Number(p.extra?.wallRadius) || Number(p.size) || 21;
-            const w = r * 2.45, h = r * 1.95;
-            ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(ang + (p.extra?.isWall ? 0 : Math.sin((gameTime||0)*7)*0.08));
-            ctx.shadowColor='rgba(241,196,15,.72)'; ctx.shadowBlur=14;
-            ctx.fillStyle='#7f8c8d'; ctx.strokeStyle='#20252b'; ctx.lineWidth=3.5;
-            ctx.beginPath();
-            ctx.moveTo(-w*.56,-h*.34); ctx.lineTo(w*.30,-h*.34); ctx.lineTo(w*.52,-h*.22); ctx.lineTo(w*.70,-h*.05);
-            ctx.lineTo(w*.42,h*.03); ctx.lineTo(w*.22,h*.18); ctx.lineTo(w*.40,h*.43); ctx.lineTo(-w*.38,h*.43);
-            ctx.lineTo(-w*.48,h*.22); ctx.lineTo(-w*.25,h*.08); ctx.lineTo(-w*.56,h*.02); ctx.closePath(); ctx.fill(); ctx.stroke();
-            ctx.fillStyle='#bdc3c7'; ctx.beginPath();
-            ctx.moveTo(-w*.48,-h*.33); ctx.lineTo(w*.31,-h*.33); ctx.lineTo(w*.50,-h*.12); ctx.lineTo(-w*.40,-h*.12); ctx.closePath(); ctx.fill();
-            ctx.fillStyle='#59636b'; ctx.fillRect(-w*.46,h*.02,w*.90,h*.22);
-            ctx.fillStyle='#2d3436'; ctx.beginPath(); ctx.arc(-w*.30,h*.30,r*.13,0,TAU); ctx.fill(); ctx.beginPath(); ctx.arc(w*.30,h*.30,r*.13,0,TAU); ctx.fill();
-            ctx.restore(); return true;
-        }
+        else if(p.type === 'crioheat_orb') { const r=p.size||13; ctx.save(); ctx.translate(px,py); ctx.shadowBlur=15; ctx.shadowColor='rgba(116,185,255,.88)'; const g=ctx.createLinearGradient(-r,0,r,0); g.addColorStop(0,'#74b9ff'); g.addColorStop(.5,'#eafaff'); g.addColorStop(1,'#ff7043'); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2); ctx.fill(); ctx.strokeStyle='#fff'; ctx.lineWidth=1.6; ctx.stroke(); ctx.restore(); }
         else if(p.type === 'gma_cookie') {
             ctx.save();
             ctx.translate(p.x, p.y);
@@ -26672,6 +26430,8 @@ function draw() {
         }
         else if(p.type === 'heavy_enemy') { ctx.fillStyle = '#7f8c8d'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); }
         else if(p.type === 'screw') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx)); const isKaisenTool = !!p.extra?.kaisenTool; const bodyW = isKaisenTool ? 16 : 10; const bodyH = isKaisenTool ? 6 : 5; ctx.fillStyle = '#7f8c8d'; if(ctx.roundRect) { ctx.beginPath(); ctx.roundRect(-bodyW * 0.5, -bodyH * 0.5, bodyW, bodyH, Math.max(2, bodyH * 0.35)); ctx.fill(); } else { ctx.fillRect(-bodyW * 0.5, -bodyH * 0.5, bodyW, bodyH); } ctx.fillStyle = '#bdc3c7'; ctx.beginPath(); ctx.arc(isKaisenTool ? 5.2 : 4, 0, isKaisenTool ? 4.2 : 3.5, 0, Math.PI*2); ctx.fill(); ctx.restore(); }
+        else if(p.type === 'shroom_spore') { ctx.save(); ctx.translate(p.x,p.y); ctx.shadowColor='#9b59b6'; ctx.shadowBlur=10; ctx.fillStyle='#b06cd9'; ctx.strokeStyle='#f0d7ff'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(0,0,p.size||8,0,Math.PI*2); ctx.fill(); ctx.stroke(); ctx.fillStyle='rgba(255,255,255,.75)'; ctx.beginPath(); ctx.arc(-(p.size||8)*.25,-(p.size||8)*.2,Math.max(1.3,(p.size||8)*.16),0,Math.PI*2); ctx.fill(); ctx.restore(); }
+        else if(p.type === 'cactus_spike') { ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(Math.atan2(p.vy,p.vx)); ctx.fillStyle='#2ecc71'; ctx.strokeStyle='#145a32'; ctx.lineWidth=1.5; const len=Math.max(12,(p.size||6)*3.2); ctx.beginPath(); ctx.moveTo(len*.65,0); ctx.lineTo(-len*.45,-2.4); ctx.lineTo(-len*.25,0); ctx.lineTo(-len*.45,2.4); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore(); }
         else if(p.type === 'pipisnowball') { ctx.save(); ctx.translate(p.x, p.y); ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#d9f2ff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, p.size, 0, Math.PI*2); ctx.fill(); ctx.stroke(); ctx.fillStyle = 'rgba(210, 240, 255, 0.9)'; ctx.beginPath(); ctx.arc(-p.size*0.28, -p.size*0.18, Math.max(1.4, p.size*0.16), 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(p.size*0.22, p.size*0.14, Math.max(1.2, p.size*0.12), 0, Math.PI*2); ctx.fill(); ctx.restore(); }
         else if(p.type === 'snowball' || p.type === 'penguin_snowball') { ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); }
         else if(p.type === 'yeti_punch') { ctx.fillStyle = 'rgba(223, 230, 233, 0.7)'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); }
@@ -28832,6 +28592,29 @@ window.openPetShop=openPetShop;
 </body>
 </html>
 
+<style id="petshop-fullscreen-map-tutorial-polish">
+#screen-pets{overflow-x:hidden !important;overflow-y:auto !important;overscroll-behavior-y:contain !important;-webkit-overflow-scrolling:touch !important;touch-action:pan-y !important;scrollbar-width:thin !important;scrollbar-color:rgba(255,255,255,.22) transparent !important;}
+#screen-pets::-webkit-scrollbar{width:7px;}
+#screen-pets::-webkit-scrollbar-track{background:transparent;}
+#screen-pets::-webkit-scrollbar-thumb{background:rgba(255,255,255,.22);border-radius:999px;}
+
+#overlay-map-destination{padding:8px !important;}
+#overlay-map-destination .map-destination-panel{width:min(920px,calc(100vw - 16px)) !important;height:min(84dvh,650px) !important;max-height:calc(100dvh - 16px) !important;padding:14px 14px 12px !important;overflow:hidden !important;}
+#overlay-map-destination .map-destination-grid{gap:8px !important;}
+#overlay-map-destination .map-destination-card{padding:5px !important;}
+#overlay-map-destination .map-destination-name{font-size:13px !important;margin-top:5px !important;min-height:15px !important;}
+#overlay-map-destination .map-destination-timer{margin-top:6px !important;font-size:9px !important;}
+
+.fullscreen-action-button{position:relative !important;min-height:54px;}
+.fullscreen-hand-icon{width:30px !important;height:30px !important;object-fit:contain !important;display:block !important;flex:0 0 auto !important;filter:drop-shadow(0 3px 2px rgba(0,0,0,.55));}
+@media(max-width:620px){
+  #overlay-map-destination .map-destination-panel{width:calc(100vw - 12px) !important;height:82dvh !important;max-height:calc(100dvh - 12px) !important;padding:10px 8px !important;}
+  #overlay-map-destination .map-destination-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:6px !important;}
+  #overlay-map-destination .map-destination-card canvas{max-height:145px !important;}
+  #overlay-map-destination .map-destination-name{font-size:11px !important;}
+  .fullscreen-hand-icon{width:26px !important;height:26px !important;}
+}
+</style>
 <!-- AUREN_FINAL_PATCH_V1 -->
 <style id="auren-final-ui">
 #auren-energy-hud{position:absolute;left:50%;top:50%;transform:translate(-50%,calc(-50% - 46px));z-index:6;pointer-events:none;color:#35e37b;font-size:18px;font-weight:900;text-shadow:2px 2px 0 #000,0 0 10px rgba(46,204,113,.45);white-space:nowrap;display:none;}
