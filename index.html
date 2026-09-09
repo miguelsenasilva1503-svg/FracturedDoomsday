@@ -1902,6 +1902,16 @@ Uma mulher que adora sua jaqueta de cereja e carrega uma poderosa disparadora ca
 Especialista em destruição pesada, Hank domina áreas inteiras usando o poder bruto do seu tanque. Seus disparos explosivos afastam qualquer inimigo imprudente o suficiente pra chegar perto. Ele trata toda batalha como se fosse uma operação militar séria… mesmo derrubando paredes sem querer.
 
 “Isso foi estratégico! Acho.”` },
+    cowbew: { id: 'cowbew', class: 'Xerife', name: 'Cowbew', rarity: 'common', cost: 29, hp: 100, speed: 3.5, dmg: 15, fireRate: 58, range: 250, color: '#b8864b', weapon: 'cowbew_revolver', desc: `“Cowbew não precisa ser o mais rápido do Oeste. Só precisa sacar antes de você.”
+
+Um caubói habilidoso e confiante que percorre as terras do Oeste em busca de aventuras. Acostumado com duelos, estradas empoeiradas e situações perigosas, Cowbew mantém a calma mesmo quando tudo parece estar prestes a dar errado. Para ele, não existe problema que não possa ser resolvido com coragem, precisão e um bom senso de aventura.
+
+“Você escolheu a cidade errada pra arrumar confusão.”` },
+    chronos: { id: 'chronos', class: 'Controle', name: 'Chronos', rarity: 'legendary', sortLast: true, cost: 349, hp: 105, speed: 3.4, dmg: 18, fireRate: 62, range: 300, color: '#7d5fff', weapon: 'chronos_temporal', desc: `“Chronos nunca está atrasado. Para ele, o tempo é que está adiantado.”
+
+Um poderoso mago temporal capaz de manipular o fluxo do tempo ao seu redor. Com seus conhecimentos sobre as forças temporais, Chronos consegue desacelerar o próprio tempo, tornando tudo ao seu redor muito mais lento. Misterioso e extremamente confiante, ele trata o tempo como uma ferramenta que aprendeu a dominar.
+
+“O tempo está sob meu controle.”` },
     bold: { id: 'bold', class: 'Tiro preciso', name: 'Bold', rarity: 'rare', cost: 79, hp: 110, speed: 3.2, dmg: 5, fireRate: 15, range: 280, color: '#16a085', weapon: 'machinegun', desc: `“Bold acredita que ‘recuar’ é só uma palavra inventada por covardes.”
 
 Um militar agressivo equipado com uma metralhadora pesada capaz de encher o campo de balas em segundos. Rival direto de Strike, Bold prefere resolver qualquer discussão atirando primeiro, perguntando depois… e às vezes nunca perguntando.
@@ -2343,6 +2353,18 @@ Um enorme golem feito de gelo maciço, com um corpo pesado e uma força impressi
 
 “Frio demais pra você?”` },
 
+
+astra: { id: 'astra', class: 'Destruidor', name: 'Astra', rarity: 'epic', cost: 149, hp: 110, speed: 3.35, dmg: 18, fireRate: 64, range: 285, color: '#8e44ad', weapon: 'astra_planets', desc: `“Astra passou a vida protegendo o cosmos. Ela só não esperava acabar protegendo um planeta em ruínas.”
+
+Uma poderosa guardiã do cosmos que, durante uma batalha contra uma ameaça desconhecida, foi arremessada para longe e acabou caindo na Terra. Ao chegar, encontrou um mundo completamente diferente do que conhecia, tomado pelas Fraturas e pelas criaturas que surgiram delas. Agora, Astra precisa descobrir como voltar para casa enquanto enfrenta o caos que tomou conta do planeta.
+
+“Se este mundo está em perigo... então eu também vou protegê-lo.”` },
+
+auren: { id:'auren', class:'Destruidor', name:'Auren', rarity:'legendary', sortLast:true, cost:349, hp:108, speed:3.45, dmg:18, fireRate:62, range:300, color:'#2ecc71', weapon:'auren_life', desc:`“Auren não aprendeu a controlar a energia vital. Ele simplesmente nasceu com ela.”
+
+Um homem misterioso conhecido como o Dono da Energia Vital, capaz de sentir e manipular a força que existe dentro de todos os seres vivos. Para Auren, a energia vital não é apenas uma fonte de poder, mas uma parte essencial da própria existência. Sua conexão com essa força é tão profunda que poucos conseguem compreender até onde seus poderes realmente podem chegar.
+
+“A vida está em todos nós... e eu consigo senti-la.”` },
 };
 const CHARACTER_SUMMARIES = {
     merlin: `Merlin: dispara uma magia teleguiada que tem 15% de chance de ENVENENAR e 15% de chance de BEBETIZAR. Quando esse efeito é aplicado, o inimigo fica BEBETIZADO.
@@ -2431,6 +2453,12 @@ HABILIDADE: Fasty calça seus sapatos de corrida e corre muito rápido por 5s (3
     hank: `Hank: dispara projéteis pesados com grande presença no campo.
 
 HABILIDADE: Hank carrega seu tanque com um míssil destrutivo (20s de recarga).`,
+    cowbew: `Cowbew: dispara 3 projéteis dispersados.
+
+HABILIDADE: Cowbew saca seu revólver e dispara 5 ondas de 3 tiros dispersados (25s de recarga).`,
+    chronos: `Chronos: dispara fragmentos temporais em inimigos.
+
+ESPECIAL: tem 15% de chance de aplicar DISTORÇÃO TEMPORAL.`,
     cherry: `Cherry: dispara projéteis que empurram inimigos.
 
 HABILIDADE: Cherry carrega triplamente seu canhão portátil lançando 3 balas com baixa dispersão (15s de recarga).`,
@@ -2702,6 +2730,14 @@ ESPECIAL: Sempre que Vingathron toma dano, ganha um fragmento de aço. A cada fr
         pyro: `Pyro: dispara bolas de fogo rápidas com 10% de chance de QUEIMAR inimigos`
     },
 
+
+astra: `Astra: dispara planetas nos inimigos, os planetas têm 15% de chance de explodir cosmicamente em área.
+
+ESPECIAL: a cada acerto cria uma orbital envolta do inimigo, essas orbitais dão dano em outros inimigos (limite de 10 orbitais por inimigo)`,
+
+auren: `Auren: dispara esferas de energia vital que têm 15% de chance de causar DANO CRÍTICO
+
+ESPECIAL: conforme mata inimigos, ganha energia vital, ela pode servir pra comprar power ups ao acessar seu botão, ela funciona igual uma loja, cada vez que toma dano perde energia vital`,
 };
 
 const CHIPS_DATA = {
@@ -3781,12 +3817,14 @@ const SUMMARY_NOTES = {
     "ELETRIFICAÇÃO": { color: "#f1c40f", title: "ELETRIFICAÇÃO", msg: "O inimigo fica eletrificado por 3s, perde velocidade e passa a ser cercado por 3 orbitais elétricas que causam dano aos inimigos que passam por elas." },
     "ELETRIFICADO": { color: "#f1c40f", title: "ELETRIFICAÇÃO", msg: "O inimigo fica eletrificado por 3s, perde velocidade e passa a ser cercado por 3 orbitais elétricas que causam dano aos inimigos que passam por elas." },
     "FRAGILIDADE DE AÇO": { color: "#a5b1c2", title: "FRAGILIDADE DE AÇO", msg: "Estado aplicado por Vingathron após 3 ataques acertados no mesmo inimigo. Enquanto o estado existir, novos ataques de Vingathron adicionam marcas; ao atingir 3 marcas, 5 raios caem perto do inimigo, ferindo também outros inimigos próximos, e as marcas são consumidas." },
+    "DISTORÇÃO TEMPORAL": { color: "#b47cff", title: "DISTORÇÃO TEMPORAL", msg: "O inimigo fica sob distorção temporal por 3s. Durante esse período, seus movimentos, ataques, projéteis e habilidades de invocação acontecem mais lentamente." },
     "RICOCHETEADAS": { color: "#9ad6ff", title: "RICOCHETEADAS", msg: "Quer dizer que as enguias já quicaram e passam a usar a chance dobrada de CHOCAR." },
 };
 
 const SUMMARY_HIGHLIGHTS = Object.keys(SUMMARY_NOTES).sort((a, b) => b.length - a.length);
 // Termos do Merlin permanecem explicitamente clicáveis no Summary.
 for (const merlinTerm of ['BEBETIZADO','BEBETIZAR']) { if (!SUMMARY_HIGHLIGHTS.includes(merlinTerm)) SUMMARY_HIGHLIGHTS.push(merlinTerm); }
+if (!SUMMARY_HIGHLIGHTS.includes('DISTORÇÃO TEMPORAL')) SUMMARY_HIGHLIGHTS.push('DISTORÇÃO TEMPORAL');
 
 const SUGARABLE_ENEMY_TYPES = new Set(['basico', 'atirador', 'gigante', 'tanque', 'lider', 'elite', 'curandeiro']);
 const SUGAR_IMMUNE_ENEMY_TYPES = new Set(['boss', 'megaboss', 'colosso', 'elite_master', 'lider_elite']);
@@ -4163,6 +4201,7 @@ const CHARACTER_TITLES = {
     shinobi: 'Dragão Samurai',
     glitch: 'Bugado',
     vingathron: 'Retaliador de aço',
+    chronos: 'Paralisia Temporal',
     stormy: 'Tempestuoso',
     bulb: 'Lá no fundo do mar',
     bit: '8 bits',
@@ -4172,6 +4211,9 @@ const CHARACTER_TITLES = {
     yoyo: 'Ioiô',
     zoe: 'Pilha de alta voltagem',
     glace: 'Entrou numa fria',
+
+astra: 'Cósmica',
+    auren: 'Dono da energia vital',
 };
 
 function isCharacterHiddenForUnownedView(id) { return false; }
@@ -4271,6 +4313,8 @@ const CHARACTER_SPRITES = {
     bunniie: 'sprites/bunniie.png',
 
     hank: 'sprites/hank.png',
+    cowbew: 'sprites/cowbew.png',
+    chronos: 'sprites/chronos.png',
     hunter: 'sprites/hunter.png',
     pit: 'sprites/pit.png',
     ruben: 'sprites/ruben.png',
@@ -4313,6 +4357,10 @@ const CHARACTER_SPRITES = {
     zoe: 'sprites/zoe.png',
     glace: 'sprites/glace.png',
     popeye: 'sprites/popeye.png'
+,
+astra: 'sprites/astra.png',
+
+auren: 'sprites/auren.png',
 };
 
 const ENEMY_SPRITES = {
@@ -4749,9 +4797,21 @@ function getElementSpriteImage(type) {
 
 function drawElementSprite(ctx, x, y, type, size = 18, opts = {}) {
     const img = getElementSpriteImage(type);
-    if (!img || !img.complete || !img.naturalWidth) return false;
-    const w = Math.max(8, Number(size) || 18) * (opts.scaleX || 1);
-    const h = Math.max(8, Number(size) || 18) * (opts.scaleY || 1);
+    if (!img || !img.complete || !img.naturalWidth || !img.naturalHeight) return false;
+    const base = Math.max(8, Number(size) || 18);
+    const ratio = img.naturalWidth / img.naturalHeight;
+    const hasExplicitScale = Number.isFinite(opts.scaleX) || Number.isFinite(opts.scaleY);
+    let w = base, h = base;
+    if (hasExplicitScale) {
+        w = base * (Number.isFinite(opts.scaleX) ? opts.scaleX : 1);
+        h = base * (Number.isFinite(opts.scaleY) ? opts.scaleY : 1);
+    } else if (ratio >= 1) {
+        w = base;
+        h = base / ratio;
+    } else {
+        h = base;
+        w = base * ratio;
+    }
     ctx.save();
     ctx.translate(x, y);
     if (opts.rotate) ctx.rotate(opts.rotate);
@@ -4905,6 +4965,9 @@ function resetMorphRuntimeState(charId) {
     player.specCd = 0;
     player.commonAbilityCd = 0;
     player.fastyAbilityTimer = 0;
+    player.cowbewAbilityWavesLeft = 0;
+    player.cowbewAbilityWaveTimer = 0;
+    player.cowbewAbilityWaveInterval = 0.13;
     player.invisTimer = 0;
     player.ghoulPendingCd = 0;
     player.ninjiPendingCd = 0;
@@ -5654,7 +5717,8 @@ const STATUS_EFFECT_SPRITES = {
     curse: 'elements/curse.png',
     speed: 'elements/speed.png',
     zoe_electrified: 'elements/eletrified.png',
-    steel_fragility: 'elements/scrap.png'
+    steel_fragility: 'elements/scrap.png',
+    temporal_distortion: 'elements/clock.png'
 };
 const STATUS_EFFECT_IMAGES = {};
 Object.entries(STATUS_EFFECT_SPRITES).forEach(([key, src]) => {
@@ -5682,6 +5746,7 @@ function getEnemyStatusIndicators(e) {
     if (e.weakenTimer > 0) indicators.push({ key: 'weaken', color: '#dfe6e9' });
     if (e.curseTimer > 0) indicators.push({ key: 'curse', color: '#ff69b4' });
     if (e.speedBuffTimer > 0) indicators.push({ key: 'speed', color: '#f1c40f' });
+    if ((Number(e.timeDistortionTimer) || 0) > 0) indicators.push({ key: 'temporal_distortion', color: '#b47cff' });
     if (getSeinSeinProtector(e)) indicators.push({ key: 'sein_shield', icon: '🛡️', color: '#74b9ff' });
     if (e.soak > 0) indicators.push({ key: 'soak', icon: '💧', color: '#00e5ff' });
     const shinobiMarks = Math.max(0, Math.min(5, Number(e.shinobiMarks) || 0));
@@ -5944,13 +6009,16 @@ const CHARACTER_CREDITS = {
     flex: 'Lucas._.ba12',
     izaque: 'Izaque',
     vingathron: 'Pietro Macário'
+,
+chronos: 'Juan Kaleby',
+    auren: 'Juan Kaleby',
 };
 
 function renderCharacterSummary(id) {
     let text = getCharacterSummary(id);
     const el = document.getElementById('detail-summary');
     if (!el) return;
-    const commonAbilityIds = new Set(['strike', 'fasty', 'hank', 'cherry', 'bold', 'bombman', 'kayo', 'grenade', 'vesper', 'sharkie', 'chickbot', 'shiv', 'critik', 'pit', 'ruben', 'hunter', 'tenent', 'rex']);
+    const commonAbilityIds = new Set(['strike', 'fasty', 'hank', 'cowbew', 'cherry', 'bold', 'bombman', 'kayo', 'grenade', 'vesper', 'sharkie', 'chickbot', 'shiv', 'critik', 'pit', 'ruben', 'hunter', 'tenent', 'rex']);
     const charLevel = Number(pd?.chars?.[id]?.level) || 0;
     if (commonAbilityIds.has(id) && charLevel < 5) {
         text = String(text || '').replace(/\n?HABILIDADE:[^\n]*(?:\n|$)/i, '');
@@ -6681,6 +6749,30 @@ function redeemRewardCode() {
         if (instant.length) q.push({ type:'instant', title:'Código LAFRANCE', contents:instant });
         rewards.filter(r => r === 'BOX::metal' || r === 'BOX::gold').forEach(r => q.push(buildBoxQueue(r.slice(5))));
         if (q.length) startGachaQueue(q);
+        return;
+    }
+
+    if (normalizedCode === 'CHRONOSAURENKALEBY') {
+        const alreadyChronos = !!pd.chars.chronos;
+        const alreadyAuren = !!pd.chars.auren;
+        if (pd.redeemedCodes.chronosaurenkaleby) {
+            showAlert('Esse código já foi resgatado nesta conta.');
+            if (input) input.value = '';
+            return;
+        }
+        if (!alreadyChronos) pd.chars.chronos = { level: 1, slots: 2, chips: [null, null] };
+        if (!alreadyAuren) pd.chars.auren = { level: 1, slots: 2, chips: [null, null] };
+        pd.redeemedCodes.chronosaurenkaleby = true;
+        save();
+        if (input) input.value = '';
+        renderChars?.();
+        renderShop?.();
+        updateUI();
+        const unlocked = [];
+        if (!alreadyChronos) unlocked.push('Chronos');
+        if (!alreadyAuren) unlocked.push('Auren');
+        if (unlocked.length) notify(`${unlocked.join(' e ')} desbloqueado(s) gratuitamente!`);
+        else notify('Chronos e Auren já estavam desbloqueados.');
         return;
     }
 
@@ -9443,7 +9535,7 @@ function showCharDetail(id) {
         const abilityStatEl = document.getElementById('detail-ability-stat');
         const abilityLabelEl = document.getElementById('detail-ability-label');
         const abilityDmgEl = document.getElementById('detail-ability-dmg');
-        const damageAbilityIds = ['strike','hank','bold','bombman','kayo','power','vesper','shiv','critik','pit','ruben','hunter','tenent'];
+        const damageAbilityIds = ['strike','hank','cowbew','bold','bombman','kayo','power','vesper','shiv','critik','pit','ruben','hunter','tenent'];
         const hasAbilityStat = owned && lvl >= 5 && id !== 'chessy' && damageAbilityIds.includes(id);
         if (statsEl) statsEl.classList.toggle('has-ability', hasAbilityStat);
         if (abilityStatEl) abilityStatEl.classList.toggle('hidden', !hasAbilityStat);
@@ -9451,6 +9543,7 @@ function showCharDetail(id) {
             let abilityDamageMult = 1;
             if (id === 'strike') abilityDamageMult = 1.35;
             else if (id === 'hank') abilityDamageMult = 1.30;
+            else if (id === 'cowbew') abilityDamageMult = 15;
             else if (id === 'bombman') abilityDamageMult = 2;
             else if (id === 'kayo') abilityDamageMult = 1.15;
             else if (id === 'vesper') abilityDamageMult = 3;
@@ -10212,10 +10305,18 @@ const PET_DATA = {
     dog: { id:'dog', name:'Cachorro', sprite:'pets/dog.png', color:'#bdc3c7', desc:'Coleta XP para o jogador e recebe bônus de coleta conforme a raridade.' },
     cat: { id:'cat', name:'Gato', sprite:'pets/cat.png', color:'#bdc3c7', desc:'Ao morrer pela primeira vez na run, revive o jogador e desaparece. A raridade define o escudo.' },
     parrot: { id:'parrot', name:'Papagaio', sprite:'pets/parrot.png', color:'#bdc3c7', desc:'Empurra inimigos para longe. Bosses, Mega Bosses e Colossos são imunes.' },
-    hamster: { id:'hamster', name:'Hamster', sprite:'pets/hamster.png', color:'#bdc3c7', desc:'Se lança contra os inimigos como um projétil; foco total em dano.' }
+    hamster: { id:'hamster', name:'Hamster', sprite:'pets/hamster.png', color:'#bdc3c7', desc:'Se lança contra os inimigos como um projétil; foco total em dano.' },
+    penguin: { id:'penguin', name:'Pinguim', sprite:'sprites/pipi.png', color:'#dff6ff', desc:'Acompanha o jogador e dispara bolas de neve; a cada fusão aumenta a chance de congelar.' },
+    monkey: { id:'monkey', name:'Macaco', sprite:'enemies/monkey.png', color:'#9a6a45', desc:'Ataca inimigos de perto com golpes como Kayo; a cada fusão aumenta dano e alcance.' }
 };
 const PET_HAMSTER_DAMAGE = [15,25,40,60,90];
 const PET_PARROT_DAMAGE = [0,5,10,15,30];
+const PET_PARROT_RANGE = [125,165,210,260,320];
+const PET_PENGUIN_FREEZE_CHANCE = [0.35,0.45,0.55,0.65,0.75];
+const PET_PENGUIN_SLOW_CHANCE = [0.25,0.30,0.35,0.40,0.45];
+const PET_MONKEY_DAMAGE = [12,20,30,45,65];
+const PET_MONKEY_RANGE = [0.36,0.43,0.50,0.58,0.68];
+const PET_MONKEY_COOLDOWN = [0.74,0.68,0.62,0.56,0.50];
 const PET_CAT_SHIELD = [0,1,2,3,5];
 const PET_DOG_XP_MULT = [0,0.3,0.6,0.9,1.2];
 function petRarityName(r){ return PET_RARITY_LABELS[PET_RARITIES[Math.max(0,Math.min(4,Number(r)||0))]] || 'Comum'; }
@@ -11449,6 +11550,7 @@ const COMMON_ABILITY_CONFIGS = {
     strike: { label: '<img src="elements/cadence.png" alt="" aria-hidden="true">', title: 'Habilidade — Tiro Perfurante', cooldown: 10 },
     fasty: { label: '<img src="elements/speed.png" alt="" aria-hidden="true">', title: 'Habilidade — Boost de Velocidade', cooldown: 30 },
     hank: { label: '<img src="elements/missle.png" alt="" aria-hidden="true">', title: 'Habilidade — Míssil', cooldown: 20 },
+    cowbew: { label: '<img src="elements/cadence.png" alt="" aria-hidden="true">', title: 'Habilidade — Rajada do Xerife', cooldown: 25 },
     cherry: { label: '<img src="elements/push.png" alt="" aria-hidden="true">', title: 'Habilidade — Rajada Pesada', cooldown: 15 },
     power: { label: '<img src="elements/cadence.png" alt="" aria-hidden="true">', title: 'Habilidade — 5 Balas de Fogo', cooldown: 10 },
     bold: { label: '<img src="elements/more_bullets.png" alt="" aria-hidden="true">', title: 'Habilidade — Rajada Contínua', cooldown: 25 },
@@ -11483,12 +11585,27 @@ function getCommonAbilityTarget(maxRange = 1100) {
     return best;
 }
 
+function fireCowbewAbilityWave(angle, finalDmg, pSpd, sx, sy) {
+    if (!player) return;
+    const spread = 0.14;
+    const speed = pSpd * 1.05;
+    const damage = Math.max(1, finalDmg);
+    const life = Math.ceil((player.baseRange * player.stats.rangeMult * 1.20) / Math.max(1, speed)) + 18;
+    for (let i = 0; i < 3; i++) {
+        const shotAngle = angle + (i - 1) * spread;
+        createProj(sx, sy, Math.cos(shotAngle) * speed, Math.sin(shotAngle) * speed, damage, life, true, 'normal', {
+            size: 6, sourceChar: 'cowbew', abilityShot: true
+        });
+    }
+}
+
 function triggerCommonCharacterAbility(id) {
     // Habilidades também ficam bloqueadas no Sandbox.
     if (sandboxMode || runShootingDisabled) return false;
     const cfg = COMMON_ABILITY_CONFIGS?.[id];
     const lvl = Number(pd?.chars?.[id]?.level) || 0;
-    if (!player || !cfg || lvl < 5 || (player.commonAbilityCd || 0) > 0) return false;
+    const minAbilityLevel = 5;
+    if (!player || !cfg || lvl < minAbilityLevel || (player.commonAbilityCd || 0) > 0) return false;
     if (id === 'grenade' && player.grenadeAbilityActive) return false;
 
     if (id === 'fasty') {
@@ -11569,6 +11686,14 @@ function triggerCommonCharacterAbility(id) {
         player.grenadeAbilityActive = true;
         player.commonAbilityCd = 0;
         addFloatingText(player.x, player.y - 34, 'BARRICADA!', '#d8b4ff', 16);
+    } else if (id === 'cowbew') {
+        player.cowbewAbilityWavesLeft = 5;
+        player.cowbewAbilityWaveTimer = 0;
+        player.cowbewAbilityWaveInterval = 0.13;
+        // A primeira onda é disparada imediatamente; as outras 4 são espaçadas no tempo.
+        fireCowbewAbilityWave(angle, finalDmg, pSpd, sx, sy);
+        player.cowbewAbilityWavesLeft = 4;
+        addFloatingText(player.x, player.y - 34, 'RAJADA DO XERIFE!', '#d8b4ff', 15);
     } else if (id === 'strike') {
 
         createProj(sx, sy, Math.cos(angle) * pSpd * 1.08, Math.sin(angle) * pSpd * 1.08, finalDmg * 1.35, 120, true, 'strike_ability', {
@@ -11655,7 +11780,9 @@ function getSelectedSpecialConfig() {
         return { type: 'common_ability', label: COMMON_ABILITY_CONFIGS.grenade?.label || '<img src="elements/barricade.png" alt="" aria-hidden="true">', title: active ? 'Barricada ativa' : (cd > 0 ? `Habilidade — Barricada — recarregando ${Math.ceil(cd)}s` : (COMMON_ABILITY_CONFIGS.grenade?.title || 'Habilidade — Barricada')), ready: !active && cd <= 0 };
     }
     const commonAbility = COMMON_ABILITY_CONFIGS?.[pd.selectedChar];
-    if (commonAbility && (Number(pd?.chars?.[pd.selectedChar]?.level) || 0) >= 5) {
+    const commonAbilityLevel = Number(pd?.chars?.[pd.selectedChar]?.level) || 0;
+    const commonAbilityMinLevel = 5;
+    if (commonAbility && commonAbilityLevel >= commonAbilityMinLevel) {
         return { type: 'common_ability', label: commonAbility.label, title: (player.commonAbilityCd || 0) > 0 ? `${commonAbility.title} — recarregando ${Math.ceil(player.commonAbilityCd)}s` : commonAbility.title, ready: (player.commonAbilityCd || 0) <= 0 };
     }
     return null;
@@ -11664,9 +11791,10 @@ function getSelectedSpecialConfig() {
 function bindSpecialButton(btn) {
     if (!btn) return;
     const handlePress = (e) => {
+        const cfg = getSelectedSpecialConfig();
+        if (cfg?.type === 'auren_shop') return;
         if (e) { e.preventDefault(); e.stopPropagation(); }
         if (sandboxMode || runShootingDisabled) return;
-        const cfg = getSelectedSpecialConfig();
         if (!isPlaying || isPaused || !player || !cfg) return;
         if (cfg.type === 'grapple') {
             grappleAimPointerId = e?.pointerId ?? null;
@@ -11711,6 +11839,12 @@ function bindSpecialButton(btn) {
     });
     btn.addEventListener('click', (e) => {
         const cfg = getSelectedSpecialConfig();
+        if (cfg?.type === 'auren_shop') {
+            e.preventDefault();
+            e.stopPropagation();
+            triggerSpecial();
+            return;
+        }
         if (cfg && (cfg.type === 'sterling' || cfg.type === 'grapple')) {
             e.preventDefault(); e.stopPropagation(); return;
         }
@@ -14995,6 +15129,24 @@ if (!isBossAlive) {
         player.specCd = Math.max(0, player.specCd - dt);
     }
     if(player.commonAbilityCd > 0) player.commonAbilityCd = Math.max(0, player.commonAbilityCd - dt);
+    if (pd?.selectedChar === 'cowbew' && player && player.cowbewAbilityWavesLeft > 0) {
+        player.cowbewAbilityWaveTimer = Math.max(0, (Number(player.cowbewAbilityWaveTimer) || 0) - dt);
+        if (player.cowbewAbilityWaveTimer <= 0) {
+            const waveTarget = getCommonAbilityTarget();
+            const waveAngle = waveTarget
+                ? Math.atan2(waveTarget.y - player.y, waveTarget.x - player.x)
+                : (Number.isFinite(player.lastAimAngle) ? player.lastAimAngle : (Number.isFinite(player.lastMoveAngle) ? player.lastMoveAngle : 0));
+            const wavePSpd = 5 * player.stats.projSpdMult;
+            const waveDmg = Math.max(1, player.baseDmg * player.stats.dmgMult);
+            const waveOffset = player.r + 10;
+            const waveSx = player.x + Math.cos(waveAngle) * waveOffset;
+            const waveSy = player.y + Math.sin(waveAngle) * waveOffset;
+            fireCowbewAbilityWave(waveAngle, waveDmg, wavePSpd, waveSx, waveSy);
+            player.lastAimAngle = waveAngle;
+            player.cowbewAbilityWavesLeft -= 1;
+            player.cowbewAbilityWaveTimer = player.cowbewAbilityWavesLeft > 0 ? (player.cowbewAbilityWaveInterval || 0.13) : 0;
+        }
+    }
     if(player.kayoChairFxTimer > 0) player.kayoChairFxTimer = Math.max(0, player.kayoChairFxTimer - dt);
     if(player.boldAbilityTimer > 0) player.boldAbilityTimer = Math.max(0, player.boldAbilityTimer - dt);
     if(player.fastyAbilityTimer > 0) player.fastyAbilityTimer = Math.max(0, player.fastyAbilityTimer - dt);
@@ -16745,6 +16897,19 @@ function fireWeapon(target) {
             createProj(sx,sy,Math.cos(angle)*pSpd*1.18,Math.sin(angle)*pSpd*1.18,finalDmg,82,true,'snapdragon_fireball',{size:12,sourceChar:'snapdragon',burnDuration:3,maxRange:player.baseRange*player.stats.rangeMult*1.40});
             player.cd=Math.max(48,Math.round(player.baseFireRate*player.stats.fireRateMult)); return;
         }
+        if(w === 'cowbew_revolver') {
+            const spread = 0.14;
+            const speed = pSpd * 1.05;
+            const life = Math.ceil((player.baseRange * player.stats.rangeMult * 1.20) / Math.max(1, speed)) + 18;
+            for (let i = 0; i < 3; i++) {
+                const shotAngle = angle + (i - 1) * spread;
+                createProj(player.x, player.y, Math.cos(shotAngle) * speed, Math.sin(shotAngle) * speed, finalDmg, life, true, 'normal', {
+                    size: 6, sourceChar: 'cowbew'
+                });
+            }
+            return;
+        }
+
         if(w === 'triple') { 
             const stage = (player.tenentCycle % 3) + 1;
             player.tenentCycle = stage % 3;
@@ -17997,7 +18162,7 @@ function spawnEnemy(forcedType = null, forcedPoint = null, spriteOverride = null
     
     if(!sandboxMode && pd.settings.ultraHardcore && window.currentMap === 4 && type === 'gigante') type = 'monster_tree';
 
-    let e = { x: ex, y: ey, type, hp: 0, maxHp: 0, speed: 0, baseDmg: 0, dmg: 0, size: 0, cd: 0, color: '', poison: { timer: 0, dmg: 0, tickCd: 0 }, slowTimer: 0, weakenTimer: 0, curseTimer: 0, burnTimer: 0, freezeTimer: 0, burnDmg: 0, speedBuffTimer: 0, soak: 0, shockTimer: 0, shockSemiTimer: 0, shockTick: 0, shockSemiTick: 0, shockDmg: 0, shockSemiDmg: 0, shockRate: 0.3, semiShockRate: 0.4, spawnBiome: window.currentMap, spawnWave, entryWave: spawnWave, stationary: false, poisonOnHit: 0, enemySkin: (window.currentMap === 4 && type === 'goblin') ? 'hunter' : null, fracturedOrigin: false, fractureMapId: null, skinSourceMapId: window.currentMap === 11 ? null : window.currentMap, pandaSummonTimer: 0, pandaSummoned: false, seinSein: false, seinAuraRadius: 115, samuraiAttackTimer: 0, samuraiAttackAngle: 0, samuraiAttackApplied: false, samuraiCd: 0, nunchakuAttackTimer: 0, nunchakuAttackAngle: 0, nunchakuAttackApplied: false, nunchakuCd: 0,
+    let e = { x: ex, y: ey, type, hp: 0, maxHp: 0, speed: 0, baseDmg: 0, dmg: 0, size: 0, cd: 0, color: '', poison: { timer: 0, dmg: 0, tickCd: 0 }, slowTimer: 0, timeDistortionTimer:0, weakenTimer: 0, curseTimer: 0, burnTimer: 0, freezeTimer: 0, burnDmg: 0, speedBuffTimer: 0, soak: 0, shockTimer: 0, shockSemiTimer: 0, shockTick: 0, shockSemiTick: 0, shockDmg: 0, shockSemiDmg: 0, shockRate: 0.3, semiShockRate: 0.4, spawnBiome: window.currentMap, spawnWave, entryWave: spawnWave, stationary: false, poisonOnHit: 0, enemySkin: (window.currentMap === 4 && type === 'goblin') ? 'hunter' : null, fracturedOrigin: false, fractureMapId: null, skinSourceMapId: window.currentMap === 11 ? null : window.currentMap, pandaSummonTimer: 0, pandaSummoned: false, seinSein: false, seinAuraRadius: 115, samuraiAttackTimer: 0, samuraiAttackAngle: 0, samuraiAttackApplied: false, samuraiCd: 0, nunchakuAttackTimer: 0, nunchakuAttackAngle: 0, nunchakuAttackApplied: false, nunchakuCd: 0,
         piano: false, pianoAuraRadius: 125, singer: false, singerOrbitAngle: 0, singerOrbitRadius: 28, singerOrbitSpeed: 3.4, singerMicCd: 0, singerMicHitPlayer: false,
         sounder: false, sounderAttackCd: 1.55, sounderAttackTimer: 0, sounderAttackRadius: 0, sounderAttackDuration: 0.62, sounderAttackHitTargets: [], sounderAttackHitPlayer: false,
         rocker: false, tourTruck: false, isColossal: false, tourTruckDeathPending: false, tourTruckExplosionTimer: 0 };
@@ -18125,6 +18290,11 @@ function blizzardTakeDamageHeat() {
     if (!player || pd?.selectedChar !== 'blizzard') return;
     const currentBlizzardTemp = Number.isFinite(Number(player.blizzardTemperature)) ? Number(player.blizzardTemperature) : 20;
     player.blizzardTemperature = clampBlizzardTemperature(currentBlizzardTemp + 6);
+}
+
+function getEnemyTemporalActionDt(enemy, dt) {
+    const scale = (enemy && Number(enemy.timeDistortionTimer) > 0) ? 0.5 : 1;
+    return dt * scale;
 }
 
 function updateEnemies(dt) {
@@ -18317,7 +18487,7 @@ function updateEnemies(dt) {
         }
         
         let ivySlowMult = e.ivySlowTimer > 0 ? 0.18 : 1; if(e.ivySlowTimer > 0) e.ivySlowTimer -= dt;
-        let currentSpeed = (e.slowTimer > 0 ? e.speed * 0.5 : e.speed) * ivySlowMult; if(e.slowTimer > 0) e.slowTimer -= dt;
+        let currentSpeed = (e.slowTimer > 0 ? e.speed * 0.5 : e.speed) * ivySlowMult * getEnemyTemporalScale(e); if(e.slowTimer > 0) e.slowTimer -= dt;
         if(e.zoeElectrifiedTimer > 0) currentSpeed *= (Number(e.zoeElectrifiedSpeedMult) || 0.60);
         if (window.currentMap === 10 && pd.settings.ultraHardcore) currentSpeed *= 0.58;
         if (e.merlinBabyTimer > 0) currentSpeed = 0;
@@ -18345,7 +18515,7 @@ function updateEnemies(dt) {
         const isHypnotized = e.sandboxForcedHypnosis ? isCurrentlyHypnotized(e) : (e.hypnotizedTimer > 0 && e.type !== 'boss' && e.type !== 'megaboss' && e.type !== 'colosso');
         const hypSnapshot = isHypnotized ? (e.hypnotizedSnapshot || null) : null;
         if (e.type === 'panda_suit' && !e.pandaSummoned && e.hp > 0 && !isFrozen && !isHypnotized) {
-            e.pandaSummonTimer = Math.max(0, e.pandaSummonTimer - dt);
+            e.pandaSummonTimer = Math.max(0, e.pandaSummonTimer - getEnemyTemporalActionDt(e, dt));
             if (e.pandaSummonTimer <= 0) {
                 e.pandaSummoned = true;
                 const pandaEntry = Math.max(16, Number(e.entryWave) || 16);
@@ -18507,7 +18677,7 @@ function updateEnemies(dt) {
             nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt; ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
             if (dist({x:nx,y:ny}, player) <= e.size + player.r + 2 && player.invisTimer <= 0) { e.workerConverted = true; e.hp = 0; }
         } else if (e.type === 'ambulance') {
-            e.ambulanceHealCd = Math.max(0, (e.ambulanceHealCd || 0) - dt);
+            e.ambulanceHealCd = Math.max(0, (e.ambulanceHealCd || 0) - getEnemyTemporalActionDt(e, dt));
             if (e.ambulanceHealCd <= 0 && !isFrozen) {
                 e.ambulanceHealCd = 5.5;
                 if (isHypnotized) {
@@ -18541,7 +18711,7 @@ function updateEnemies(dt) {
         } else if (e.type === 'conehead') {
             // Cabeça de Cone mantém sua proteção enquanto usa o comportamento de atirador.
             // Ao perder a proteção, a rotina de morte abaixo transforma-o em Atirador normal.
-            e.cd = Math.max(0, (e.cd || 0) - 60 * dt);
+            e.cd = Math.max(0, (e.cd || 0) - 60 * getEnemyTemporalActionDt(e, dt));
             if (e.cd <= 0 && player.invisTimer <= 0 && !isFrozen && (!isHypnotized || !!hypTarget)) {
                 const a = Math.atan2(targetY - e.y, targetX - e.x);
                 createProj(e.x, e.y, Math.cos(a) * 3, Math.sin(a) * 3, e.dmg, 60, false, 'enemy', {
@@ -18553,7 +18723,7 @@ function updateEnemies(dt) {
             nx += Math.cos(a)*currentSpeed*eSpeedMult*60*dt;
             ny += Math.sin(a)*currentSpeed*eSpeedMult*60*dt;
         } else if (e.type === 'swordfish') {
-            if (Number(e.swordfishPassCd || 0) > 0) e.swordfishPassCd = Math.max(0, e.swordfishPassCd - dt);
+            if (Number(e.swordfishPassCd || 0) > 0) e.swordfishPassCd = Math.max(0, e.swordfishPassCd - getEnemyTemporalActionDt(e, dt));
             const swordAngle = Math.atan2(targetY - e.y, targetX - e.x);
             nx += Math.cos(swordAngle) * currentSpeed * eSpeedMult * 60 * dt;
             ny += Math.sin(swordAngle) * currentSpeed * eSpeedMult * 60 * dt;
@@ -18573,7 +18743,7 @@ function updateEnemies(dt) {
             nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt;
             ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
         } else if (e.type === 'triton') {
-            e.spawnCd = Math.max(0, (Number(e.spawnCd) || 0) - dt);
+            e.spawnCd = Math.max(0, (Number(e.spawnCd) || 0) - getEnemyTemporalActionDt(e, dt));
             if (e.spawnCd <= 0 && !isFrozen && !isHypnotized) {
                 e.spawnCd = 20;
                 const sharkCount = 2;
@@ -18601,8 +18771,8 @@ function updateEnemies(dt) {
             nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt;
             ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
         } else if (e.type === 'samurai') {
-            e.samuraiCd = Math.max(0, (e.samuraiCd || 0) - dt);
-            e.samuraiAttackTimer = Math.max(0, (e.samuraiAttackTimer || 0) - dt);
+            e.samuraiCd = Math.max(0, (e.samuraiCd || 0) - getEnemyTemporalActionDt(e, dt));
+            e.samuraiAttackTimer = Math.max(0, (e.samuraiAttackTimer || 0) - getEnemyTemporalActionDt(e, dt));
             if (e.samuraiAttackTimer > 0 && !e.samuraiAttackApplied && player.invisTimer <= 0 && !isFrozen && !isHypnotized) {
                 const range = Math.max(120, (e.size || 15) * 7.0);
                 if (dist(e, player) <= range + player.r) {
@@ -18631,8 +18801,8 @@ function updateEnemies(dt) {
             nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt;
             ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
         } else if (e.type === 'nunchaku') {
-            e.nunchakuCd = Math.max(0, (e.nunchakuCd || 0) - dt);
-            e.nunchakuAttackTimer = Math.max(0, (e.nunchakuAttackTimer || 0) - dt);
+            e.nunchakuCd = Math.max(0, (e.nunchakuCd || 0) - getEnemyTemporalActionDt(e, dt));
+            e.nunchakuAttackTimer = Math.max(0, (e.nunchakuAttackTimer || 0) - getEnemyTemporalActionDt(e, dt));
             if (e.nunchakuAttackTimer > 0 && !e.nunchakuAttackApplied && player.invisTimer <= 0 && !isFrozen && !isHypnotized) {
                 const range = Math.max(105, (e.size || 15) * 6.2);
                 if (dist(e, player) <= range + player.r) {
@@ -18657,16 +18827,16 @@ function updateEnemies(dt) {
             nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt;
             ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
         } else if (e.type === 'rocknrool') {
-            e.cd = Math.max(0, (e.cd || 0) - dt);
+            e.cd = Math.max(0, (e.cd || 0) - getEnemyTemporalActionDt(e, dt));
             if (e.cd <= 0 && player.invisTimer <= 0 && !isFrozen && (!isHypnotized || !!hypTarget)) {
                 const a = Math.atan2(targetY - e.y, targetX - e.x);
                 createProj(e.x, e.y, Math.cos(a) * 4.5, Math.sin(a) * 4.5, e.dmg, 88, false, 'rock_note', { size:10, pushDistance:74, sourceEnemy:e, sourceEnemyType:e.type, hypnotized:!!isHypnotized, targetEnemy:activeEnemyTarget||null });
                 e.cd = 1.9;
             }
         } else if (e.type === 'sounder') {
-            e.sounderAttackCd = Math.max(0, (e.sounderAttackCd || 0) - dt);
+            e.sounderAttackCd = Math.max(0, (e.sounderAttackCd || 0) - getEnemyTemporalActionDt(e, dt));
             if (e.sounderAttackTimer > 0) {
-                e.sounderAttackTimer = Math.max(0, e.sounderAttackTimer - dt);
+                e.sounderAttackTimer = Math.max(0, e.sounderAttackTimer - getEnemyTemporalActionDt(e, dt));
                 const duration = Math.max(0.1, Number(e.sounderAttackDuration) || 0.62);
                 const progress = Math.max(0, Math.min(1, 1 - e.sounderAttackTimer / duration));
                 e.sounderAttackRadius = 18 + 225 * progress;
@@ -18715,7 +18885,7 @@ function updateEnemies(dt) {
         } else if (e.type === 'tour_truck') {
             const a = Math.atan2(targetY - e.y, targetX - e.x); nx += Math.cos(a)*currentSpeed*eSpeedMult*60*dt; ny += Math.sin(a)*currentSpeed*eSpeedMult*60*dt;
         } else if (e.type === 'geisha') {
-            e.cd = Math.max(0, (e.cd || 0) - dt);
+            e.cd = Math.max(0, (e.cd || 0) - getEnemyTemporalActionDt(e, dt));
             if (e.cd <= 0 && player.invisTimer <= 0 && !isFrozen && (!isHypnotized || !!hypTarget)) {
                 const a = Math.atan2(targetY - e.y, targetX - e.x);
                 createProj(e.x, e.y, Math.cos(a) * 4.4, Math.sin(a) * 4.4, 0, 90, false, 'geisha_gong', { size: 11, pushDistance: 85, sourceEnemy: e, sourceEnemyType:e.type, hypnotized:!!isHypnotized, targetEnemy:activeEnemyTarget||null });
@@ -18796,8 +18966,8 @@ function updateEnemies(dt) {
             }
             let a = Math.atan2(targetY - e.y, targetX - e.x); nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt; ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
         } else if(e.type === 'stone_golem' && player.invisTimer <= 0 && !isFrozen && !isHypnotized) {
-            e.golemAttackCd = Math.max(0, (e.golemAttackCd || 0) - dt);
-            e.golemAttackTimer = Math.max(0, (e.golemAttackTimer || 0) - dt);
+            e.golemAttackCd = Math.max(0, (e.golemAttackCd || 0) - getEnemyTemporalActionDt(e, dt));
+            e.golemAttackTimer = Math.max(0, (e.golemAttackTimer || 0) - getEnemyTemporalActionDt(e, dt));
 
             if (e.golemAttackTimer > 0 && !e.golemAttackApplied) {
                 const attackRange = Math.max(150, (e.size || 30) * 5.2);
@@ -18831,11 +19001,16 @@ function updateEnemies(dt) {
                 ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
             }
         } else if(e.type === 'boss' && player.invisTimer <= 0 && !isFrozen && (!isHypnotized || !!hypTarget)) {
-            e.cd -= 60 * dt; if(e.cd <= 0) { for(let j=0; j<8; j++) { let a = (Math.PI / 4) * j; createProj(e.x, e.y, Math.cos(a)*3, Math.sin(a)*3, e.dmg, 80, false, 'enemy', { hypnotized: isHypnotized, sourceEnemyType: e.type }); } e.cd = 150; }
+            e.cd -= 60 * dt; if(e.cd <= 0) {
+                const burstTarget = isHypnotized ? getHypnosisTarget(e) : null;
+                const burstHyp = !!isHypnotized;
+                for(let j=0; j<8; j++) { let a = (Math.PI / 4) * j; createProj(e.x, e.y, Math.cos(a)*3, Math.sin(a)*3, e.dmg, 80, false, 'enemy', { hypnotized: burstHyp, sourceEnemy: e, sourceEnemyType: e.type, targetEnemy: burstTarget }); }
+                e.cd = 150;
+            }
             let a = Math.atan2(targetY - e.y, targetX - e.x); nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt; ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
         } else if(e.type === 'crocodile' && player.invisTimer <= 0 && !isFrozen && !isHypnotized) {
-            e.crocodileDashTimer = Math.max(0, (e.crocodileDashTimer || 0) - dt);
-            e.cd = Math.max(0, (e.cd || 0) - 60 * dt);
+            e.crocodileDashTimer = Math.max(0, (e.crocodileDashTimer || 0) - getEnemyTemporalActionDt(e, dt));
+            e.cd = Math.max(0, (e.cd || 0) - 60 * getEnemyTemporalActionDt(e, dt));
             if (e.crocodileDashTimer <= 0) {
                 const a = Math.atan2(targetY - e.y, targetX - e.x);
                 const dashDistance = 150;
@@ -18867,9 +19042,11 @@ function updateEnemies(dt) {
             }
             let a = Math.atan2(targetY - e.y, targetX - e.x); nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt; ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
         } else if(e.type === 'megaboss' && player.invisTimer <= 0 && !isFrozen && (!isHypnotized || !!hypTarget)) {
-            e.cd -= 60 * dt; e.dashCd -= dt; e.orbitalCd = (e.orbitalCd || 0) - dt;
+            e.cd -= 60 * dt; e.dashCd -= dt; e.orbitalCd = (e.orbitalCd || 0) - getEnemyTemporalActionDt(e, dt);
             if(e.cd <= 0) { 
-                for(let j=0; j<16; j++) { let a = (Math.PI / 8) * j + gameTime; createProj(e.x, e.y, Math.cos(a)*4, Math.sin(a)*4, e.dmg, 80, false, 'enemy', { hypnotized: isHypnotized, sourceEnemy: e, sourceEnemyType: e.type, targetEnemy: activeEnemyTarget || null }); } 
+                const burstTarget = isHypnotized ? getHypnosisTarget(e) : null;
+                const burstHyp = !!isHypnotized;
+                for(let j=0; j<16; j++) { let a = (Math.PI / 8) * j + gameTime; createProj(e.x, e.y, Math.cos(a)*4, Math.sin(a)*4, e.dmg, 80, false, 'enemy', { hypnotized: burstHyp, sourceEnemy: e, sourceEnemyType: e.type, targetEnemy: burstTarget }); } 
                 e.cd = 100; 
                 let ang = Math.random() * Math.PI * 2;
                 enemies.push(inheritHypnosis(e, { x: e.x + Math.cos(ang)*100, y: e.y + Math.sin(ang)*100, type: 'velocista', hp: 50, maxHp: 50, speed: 2.2, baseDmg: e.dmg*0.5, dmg: e.dmg*0.5, size: 10, cd: 0, color: '#f39c12', poison: {timer:0,dmg:0}, slowTimer: 0, weakenTimer: 0, burnTimer: 0, freezeTimer: 0, soak: 0 }));
@@ -18967,7 +19144,7 @@ function updateEnemies(dt) {
         if(isHypnotized && hypTarget && hypTarget.hp > 0) {
             const hypDist = dist(e, hypTarget);
             const hypHitRange = e.size + hypTarget.size + 4;
-            e.hypAttackCd = Math.max(0, (e.hypAttackCd || 0) - dt);
+            e.hypAttackCd = Math.max(0, (e.hypAttackCd || 0) - getEnemyTemporalActionDt(e, dt));
             if(hypDist <= hypHitRange && e.hypAttackCd <= 0) {
                 const hypDmg = Math.max(1, e.dmg);
                 hypTarget.hp -= hypDmg;
@@ -18982,7 +19159,7 @@ function updateEnemies(dt) {
         // continuam impedidos de causar dano direto ao hipnotizado.
         if (!isHypnotized && activeEnemyTarget && activeEnemyTarget.hp > 0 && isCurrentlyHypnotized(activeEnemyTarget)) {
             const hypHitRange = e.size + activeEnemyTarget.size + 4;
-            e.hypAttackCd = Math.max(0, (e.hypAttackCd || 0) - dt);
+            e.hypAttackCd = Math.max(0, (e.hypAttackCd || 0) - getEnemyTemporalActionDt(e, dt));
             if (attackTargetDistance <= hypHitRange && e.hypAttackCd <= 0) {
                 const targetDmg = Math.max(1, e.dmg);
                 activeEnemyTarget.hp -= targetDmg;
@@ -19758,7 +19935,10 @@ const SERRANO_CHARACTER_PROJECTILES = {
     beezy: ['beezy_honey', 'beezy_bee'],
     shinobi: ['shinobi_katana', 'shinobi_fireball'],
     popeye: ['popeye_punch'],
-    zoe: ['zoe_punch']
+    zoe: ['zoe_punch'],
+    monkey: ['monkey_punch']
+,
+auren: ['auren_life_orb'],
 };
 
 const SERRANO_SLASH_SOURCE_CHARS = new Set(['kayo', 'gladiator', 'shinobi', 'scythe', 'mr_perfurant', 'knighter']);
@@ -19892,19 +20072,20 @@ function projectileHitsEnemy(p,e){
     return Math.hypot(dx,dy)<p.size+e.size;
 }
 
-function enemyProjectileHitsWall(p) {
+function enemyProjectileHitsWall(p, wallProjectiles = null) {
     if (!p || p.isPlayer) return false;
     const radius = Math.max(1, Number(p.size) || 2);
     const x = Number(p.x), y = Number(p.y);
     if (!Number.isFinite(x) || !Number.isFinite(y)) return false;
-    // Terreno passável (gelo/lama/poças) continua sem bloquear projéteis.
-    for (const o of obstacles || []) {
+    const obstacleList = (typeof FDPerf !== 'undefined' && Array.isArray(FDPerf.blockingObstacles))
+        ? FDPerf.blockingObstacles
+        : (obstacles || []);
+    for (const o of obstacleList) {
         if (!o || !Number.isFinite(o.x) || !Number.isFinite(o.y) || !Number.isFinite(o.r)) continue;
-        if (['ice','mud','car','bamboo_spike','kelp'].includes(o.type)) continue;
         if (distXY(x, y, o.x, o.y) <= o.r + radius) return true;
     }
-    // Paredes de habilidades também bloqueiam tiros inimigos.
-    for (const w of projectiles || []) {
+    const walls = wallProjectiles || projectiles || [];
+    for (const w of walls) {
         if (!w || w === p || !w.extra?.isWall) continue;
         const wr = Number(w.extra?.wallRadius) || Number(w.size) || 21;
         if (Number.isFinite(w.x) && Number.isFinite(w.y) && distXY(x, y, w.x, w.y) <= wr + radius) return true;
@@ -19922,6 +20103,14 @@ function updateProjectiles(dt) {
     }
     refreshCollisionCaches();
     updateBulbBubbles(dt);
+
+    // Cache das paredes 1x por frame. Antes, cada projétil inimigo percorria
+    // toda a lista de projéteis procurando paredes, causando O(P²).
+    const wallProjectiles = [];
+    for (const w of projectiles) {
+        if (w?.extra?.isWall) wallProjectiles.push(w);
+    }
+
     for(let i = projectiles.length - 1; i >= 0; i--) {
         try {
             let p = projectiles[i];
@@ -19932,6 +20121,17 @@ function updateProjectiles(dt) {
             }
             if (!p.extra || typeof p.extra !== 'object') p.extra = {};
             if (!(p.hitIds instanceof Set)) p.hitIds = new Set();
+            // Projéteis disparados por inimigos afetados por Distorção Temporal
+            // ficam lentos imediatamente, mesmo se já estavam em voo.
+            if (!p.isPlayer && p.extra?.sourceEnemy) {
+                const distorted = Number(p.extra.sourceEnemy.timeDistortionTimer) > 0;
+                const prevDistorted = !!p.extra.__temporalProjectileSlowed;
+                if (distorted && !prevDistorted) {
+                    p.vx *= 0.5; p.vy *= 0.5; p.extra.__temporalProjectileSlowed = true;
+                } else if (!distorted && prevDistorted) {
+                    p.vx *= 2; p.vy *= 2; p.extra.__temporalProjectileSlowed = false;
+                }
+            }
             if (p.extra?.hitShape === 'slash') {
                 const ex = p.extra;
                 if (Number(ex.delay) > 0) {
@@ -19966,20 +20166,27 @@ function updateProjectiles(dt) {
             // O bloco geral de projéteis contém muitos efeitos exclusivos do jogador;
             // um erro em um desses efeitos não pode fazer o tiro comum do inimigo
             // desaparecer antes de atingir o jogador.
-            if (!p.isPlayer && (p.type === 'enemy' || p.type === 'heavy_enemy')) {
+            const isFastEnemyBallistic = !p.isPlayer && !!p.extra?.sourceEnemyType && p.type !== 'lumber_axe' && p.type !== 'lance' && p.type !== 'ghost_fishing_line' && p.type !== 'wind_gust' && p.type !== 'tornado';
+            if (isFastEnemyBallistic) {
                 p.x += p.vx * 60 * dt;
                 p.y += p.vy * 60 * dt;
-                if (enemyProjectileHitsWall(p)) {
+                if (obstacles.length && enemyProjectileHitsWall(p, wallProjectiles)) {
                     createParticles(p.x, p.y, '#e74c3c');
                     projectiles.splice(i, 1);
                     continue;
                 }
-                const enemyHit = tryEnemyProjectileHitEnemy(p);
-                if (enemyHit) {
+                if (p.extra?.hypnotized || isCurrentlyHypnotized(p.extra?.sourceEnemy)) {
+                    const enemyHit = tryEnemyProjectileHitEnemy(p);
+                    if (enemyHit) {
+                        projectiles.splice(i, 1);
+                        continue;
+                    }
+                }
+
+                if (p.x < -1650 || p.x > 1650 || p.y < -1650 || p.y > 1650 || p.life <= 0) {
                     projectiles.splice(i, 1);
                     continue;
                 }
-
                 if (Number.isFinite(p.x) && Number.isFinite(p.y) && player && player.hp > 0 && player.shieldTimer <= 0) {
                     const hitRange = p.size + (Number(player.r) || 0);
                     if (dist(p, player) < hitRange) {
@@ -19988,11 +20195,25 @@ function updateProjectiles(dt) {
                             const damage = Math.max(0, Number(p.dmg) || 0) * defMult;
                             dealPlayerDamage(damage);
                             addFloatingText(player.x, player.y, `-${Math.floor(damage)}`, '#e74c3c');
+                            if (p.type === 'snowball_slow') {
+                                player.snowSlowTimer = Math.max(Number(player.snowSlowTimer) || 0, Number(p.extra?.slowDuration) || 0.6);
+                                addFloatingText(player.x, player.y - 16, 'LERDEZA!', '#74b9ff', 12);
+                            }
+                            if (p.type === 'rock_note') {
+                                const push = Number(p.extra?.pushDistance) || 74, a = Math.atan2(p.vy, p.vx);
+                                player.x = Math.max(-1480, Math.min(1480, player.x + Math.cos(a) * push));
+                                player.y = Math.max(-1480, Math.min(1480, player.y + Math.sin(a) * push));
+                                createParticles(player.x, player.y, '#ff4d88');
+                            } else if (p.type === 'geisha_gong') {
+                                const push = Math.max(20, Number(p.extra?.pushDistance) || 85), a = Math.atan2(p.vy, p.vx);
+                                player.x = Math.max(-1480, Math.min(1480, player.x + Math.cos(a) * push));
+                                player.y = Math.max(-1480, Math.min(1480, player.y + Math.sin(a) * push));
+                                addFloatingText(player.x, player.y - 18, 'EMPURRÃO!', '#f5c6ff', 12);
+                                createParticles(player.x, player.y, '#d98cff');
+                            }
                             if (p.type === 'heavy_enemy') {
-                                player.x += p.vx * 25;
-                                player.y += p.vy * 25;
-                                player.x = Math.max(-1480, Math.min(1480, player.x));
-                                player.y = Math.max(-1480, Math.min(1480, player.y));
+                                player.x = Math.max(-1480, Math.min(1480, player.x + p.vx * 25));
+                                player.y = Math.max(-1480, Math.min(1480, player.y + p.vy * 25));
                             }
                             if (player.hp <= 0) { triggerRevivePrompt(); return; }
                         } else {
@@ -20012,7 +20233,10 @@ function updateProjectiles(dt) {
 
         // Todo projétil disparado por inimigo segue a regra de hipnose:
         // normal -> atinge hipnotizados; hipnotizado -> atinge não hipnotizados.
-        if (p.extra?.sourceEnemyType) {
+        // Apenas projéteis disparados por inimigos hipnotizados precisam procurar
+        // outro inimigo. Tiros normais nunca podem atingir inimigos e, portanto,
+        // não devem fazer uma varredura completa de `enemies` a cada frame.
+        if (p.extra?.sourceEnemyType && (p.extra?.hypnotized || isCurrentlyHypnotized(p.extra?.sourceEnemy))) {
             const targetEnemy = tryEnemyProjectileHitEnemy(p);
             if (targetEnemy) {
                 hit = true;
@@ -20649,7 +20873,7 @@ function updateProjectiles(dt) {
         }
 
         // Qualquer projétil inimigo que tenha se movido contra uma parede desaparece antes de causar dano.
-        if (!p.isPlayer && enemyProjectileHitsWall(p)) {
+        if (!p.isPlayer && enemyProjectileHitsWall(p, wallProjectiles)) {
             createParticles(p.x, p.y, '#e74c3c');
             projectiles.splice(i, 1);
             continue;
@@ -20771,6 +20995,26 @@ function updateProjectiles(dt) {
 
                     if(p.type !== 'puddle' && p.type !== 'black_hole') { 
                         const projStats = p.extra?.sourceStats || player.stats; let realDmg = p.dmg * (e.isBoss ? projStats.bossDmgMult : 1);
+
+                        if (p.type === 'astra_planet' && p.extra?.astraPlanet) {
+                            const applied = Math.max(1, realDmg * getEnemyDamageTakenMultiplier(e));
+                            e.hp -= applied;
+                            e.lastHitSourceChar = 'astra';
+                            addFloatingText(e.x, e.y, Math.floor(applied), '#d8b2ff', 11);
+                            if (p.isPlayer) trackMissionDamage(applied);
+                            window.createAstraOrbital?.(e, p.extra.planetType, realDmg);
+                            if (Math.random() < 0.15) {
+                                const cosmicRadius = Math.max(52, 68 * (player?.stats?.rangeMult || 1));
+                                const cosmicDamage = Math.max(1, realDmg * 0.58);
+                                createExplosion(e.x, e.y, cosmicRadius, cosmicDamage, '#9b59b6');
+                                createParticles(e.x, e.y, '#d08cff');
+                                addFloatingText(e.x, e.y - 16, 'DESCARGA CÓSMICA!', '#d08cff', 11);
+                            }
+                            p.hitIds.add(e);
+                            p.life = 0;
+                            projectiles.splice(i, 1);
+                            continue;
+                        }
 
                         // Bulb Bubble has its own collision pipeline. It must not pass through
                         // the generic damage block below, otherwise the bubble state and damage
@@ -20973,6 +21217,13 @@ function updateProjectiles(dt) {
                         e.hp -= realDmg * getEnemyDamageTakenMultiplier(e);
                         addFloatingText(e.x, e.y, Math.floor(realDmg), '#fff');
                         if(p.isPlayer) trackMissionDamage(realDmg);
+                        if (p.type === 'chronos_fragment' && p.extra?.chronosProc && e.hp > 0) {
+                            if (Math.random() < 0.15) {
+                                e.timeDistortionTimer = Math.max(Number(e.timeDistortionTimer) || 0, 3);
+                                addFloatingText(e.x, e.y - 16, 'DISTORÇÃO TEMPORAL!', '#b47cff', 11);
+                                createParticles(e.x, e.y, '#b47cff');
+                            }
+                        }
 
 
                         if (p.type === 'hunter_ability_cartridge' && !p.extra?.splitDone) {
@@ -21291,7 +21542,7 @@ function updateProjectiles(dt) {
                     }
                     if(p.type === 'ice_dagger') { if(Math.random()<0.10) e.freezeTimer = 2; else if(Math.random()<0.10) e.slowTimer = 3; }
                     if(p.type === 'ice_stake') { if(Math.random()<0.10) e.freezeTimer = 2; if(Math.random()<0.10) e.slowTimer = 3; }
-                    if(p.type === 'pipisnowball') { if(Math.random()<0.25) e.slowTimer = 2.5; if(Math.random()<0.35) e.freezeTimer = 2.25; }
+                    if(p.type === 'pipisnowball') { const freezeChance=Number.isFinite(Number(p.extra?.freezeChance))?Math.max(0,Math.min(1,Number(p.extra.freezeChance))):0.35; const slowChance=Number.isFinite(Number(p.extra?.slowChance))?Math.max(0,Math.min(1,Number(p.extra.slowChance))):0.25; if(Math.random()<slowChance) e.slowTimer = Math.max(Number(e.slowTimer)||0,2.5); if(Math.random()<freezeChance) e.freezeTimer = Math.max(Number(e.freezeTimer)||0,2.25); }
                     if(p.type === 'snowball' || p.type === 'yeti_punch' || p.type === 'penguin_snowball') { if(Math.random()<0.25) e.freezeTimer = 2; }
                     if(p.type === 'penguin_snowball') { if(Math.random()<0.25) e.slowTimer = 2.5; if(Math.random()<0.40) e.freezeTimer = 2.5; }
                     if(p.type === 'chess_piece' && p.extra.chessType === 'queen' && Math.random()<0.50) e.weakenTimer = 3;
@@ -21857,9 +22108,60 @@ function updateEquippedPet(dt){
         else { st.mode='player-orbit'; st.orbitAngle += dt*1.3; const orbit=player.r+44; movePetToward(st,player.x+Math.cos(st.orbitAngle)*orbit,player.y+Math.sin(st.orbitAngle)*orbit-4,7.4,dt); }
     } else if(pet.id==='parrot'){
         player.petParrotCd=Math.max(0,(Number(player.petParrotCd)||0)-dt);
-        const target=nearestPetEnemy(125,false);
+        const petRange=PET_PARROT_RANGE[Math.max(0,Math.min(4,pet.rarity))]||125;
+        const target=nearestPetEnemy(petRange,false);
         if(target){ st.mode='parrot-attack'; const d=movePetToward(st,target.x,target.y,9.8,dt); if(d<target.size+20 && player.petParrotCd<=0){ const a=Math.atan2(target.y-st.y,target.x-st.x); target.x+=Math.cos(a)*115; target.y+=Math.sin(a)*115; clampPetToArena(target); const dmg=PET_PARROT_DAMAGE[pet.rarity]||0; if(dmg>0){target.hp=Math.max(0,target.hp-dmg*getEnemyDamageTakenMultiplier(target));addFloatingText(target.x,target.y,`${Math.floor(dmg)}`,'#e74c3c');} player.petParrotCd=1.15; createParticles(target.x,target.y,'#ff7675'); } }
         else { st.mode='idle-orbit'; st.orbitAngle += dt*1.8; const orbit=player.r+55; movePetToward(st,player.x+Math.cos(st.orbitAngle)*orbit,player.y+Math.sin(st.orbitAngle)*orbit,7.5,dt); }
+    } else if(pet.id==='penguin'){
+        player.petPenguinCd=Math.max(0,(Number(player.petPenguinCd)||0)-dt);
+        const rarity=Math.max(0,Math.min(4,pet.rarity));
+        const target=nearestPetEnemy(380+rarity*55,true);
+        if(target){
+            st.mode='penguin-attack';
+            const d=dist(st,target);
+            const desired=115+target.size;
+            if(d>desired) movePetToward(st,target.x,target.y,8.4,dt);
+            else if(d<desired-22) movePetToward(st,player.x,player.y,5.6,dt);
+            st.facingLeft=target.x<st.x;
+            if(d<=420+rarity*55 && player.petPenguinCd<=0){
+                const ang=Math.atan2(target.y-st.y,target.x-st.x);
+                createProj(st.x,st.y,Math.cos(ang)*4,Math.sin(ang)*4,Math.max(1,Number(pet.dmg)||10),60,true,'pipisnowball',{size:13,sourceChar:'pipi',sourceType:'penguin_pet',freezeChance:PET_PENGUIN_FREEZE_CHANCE[rarity],slowChance:PET_PENGUIN_SLOW_CHANCE[rarity]});
+                player.petPenguinCd=0.95;
+            }
+        } else {
+            st.mode='idle-orbit'; st.orbitAngle+=dt*1.25; const orbit=player.r+72; movePetToward(st,player.x+Math.cos(st.orbitAngle)*orbit,player.y+Math.sin(st.orbitAngle)*orbit,7.3,dt);
+        }
+    } else if(pet.id==='monkey'){
+        player.petMonkeyCd=Math.max(0,(Number(player.petMonkeyCd)||0)-dt);
+        const rarity=Math.max(0,Math.min(4,pet.rarity));
+        const target=nearestPetEnemy(230+rarity*35,true);
+        if(target){
+            st.mode='monkey-attack';
+            const d=dist(st,target);
+            const reach=Math.max(44,player.baseRange*player.stats.rangeMult*PET_MONKEY_RANGE[rarity]);
+            const desired=reach+target.size*.55;
+            if(d>desired*0.82) movePetToward(st,target.x,target.y,10.2,dt);
+            st.facingLeft=target.x<st.x;
+            if(d<=desired && player.petMonkeyCd<=0){
+                const angle=Math.atan2(target.y-st.y,target.x-st.x);
+                const damage=PET_MONKEY_DAMAGE[rarity];
+                createProj(st.x,st.y,0,0,0,12,true,'monkey_punch',{sourceChar:'monkey',attackAngle:angle,punchDuration:12,capsuleLength:reach,hitRadius:11,visualOnly:true});
+                const forwardRange=reach;
+                for(const e of enemies){
+                    if(!e||e.hp<=0||isCurrentlyHypnotized(e))continue;
+                    const dx=e.x-st.x,dy=e.y-st.y;
+                    const forward=dx*Math.cos(angle)+dy*Math.sin(angle);
+                    if(forward<-6||forward>forwardRange)continue;
+                    const lateral=Math.abs(dx*(-Math.sin(angle))+dy*Math.cos(angle));
+                    if(lateral>11+(e.size||0)*0.35)continue;
+                    const dealt=Math.max(1,damage)*getEnemyDamageTakenMultiplier(e);
+                    e.hp-=dealt; e.lastHitSourceChar='monkey'; addFloatingText(e.x,e.y,`${Math.floor(dealt)}`,'#f1c40f',11); createParticles(e.x,e.y,'#c08b5a');
+                }
+                player.petMonkeyCd=PET_MONKEY_COOLDOWN[rarity];
+            }
+        } else {
+            st.mode='idle-orbit'; st.orbitAngle+=dt*1.4; const orbit=player.r+58; movePetToward(st,player.x+Math.cos(st.orbitAngle)*orbit,player.y+Math.sin(st.orbitAngle)*orbit,7.6,dt);
+        }
     } else if(pet.id==='hamster'){
         player.petHamsterCd=Math.max(0,(Number(player.petHamsterCd)||0)-dt);
         const target=nearestPetEnemy(680,true);
@@ -21882,11 +22184,14 @@ function drawEquippedPetCompanion(){
     const cache=window.__petImageCache||(window.__petImageCache={}); const src=data.sprite;
     let img=cache[src];
     if(!img){ img=new Image(); img.decoding='async'; img.loading='eager'; img.src=new URL(src, document.baseURI).href; cache[src]=img; }
-    const size=Math.max(24,Math.min(46,player.r*1.05));
+    const size=Math.max(30,Math.min(52,player.r*1.18));
+    const ratio=(img.naturalWidth>0&&img.naturalHeight>0)?img.naturalWidth/img.naturalHeight:1;
+    const w=ratio>=1?size:size*ratio;
+    const h=ratio>=1?size/ratio:size;
     ctx.save();
     ctx.globalAlpha=.98;
     ctx.shadowColor='rgba(0,0,0,.55)'; ctx.shadowBlur=9;
-    if(img.complete&&img.naturalWidth>0)ctx.drawImage(img,st.x-size/2,st.y-size/2,size,size);
+    if(img.complete&&img.naturalWidth>0)ctx.drawImage(img,st.x-w/2,st.y-h/2,w,h);
     else { ctx.fillStyle=data.color; ctx.beginPath(); ctx.arc(st.x,st.y,size*.32,0,Math.PI*2); ctx.fill(); }
     ctx.restore();
 }
@@ -24500,6 +24805,7 @@ function draw() {
         }
         if(pd.selectedChar === 'blizzard') { drawBlizzardThermometer(player.x - 31, player.y - player.r - 20, 70, player.blizzardTemperature); }
         if(pd.selectedChar === 'zoe') { drawZoeBattery(player.x + player.r + 18, player.y - player.r - 8, player.zoeBattery, player.zoeTunedActive); }
+        if(pd.selectedChar === 'auren') { drawAurenEnergyHud(); }
     }
     if(player.hp > 0 && player.invisTimer > 0 && !player.isDead) { ctx.globalAlpha = 0.3; drawShape(ctx, player.x, player.y, player.r, 'circle', player.color, false, getPlayerSpriteId()); ctx.globalAlpha = 1; }
 
@@ -24603,6 +24909,50 @@ function draw() {
         const ang = Math.atan2(p.vy, p.vx);
         const TAU = Math.PI * 2;
 
+        // Renderização nativa dos projéteis exclusivos de Chronos/Auren.
+        // Isso evita depender da ordem dos wrappers adicionados pelos patches finais.
+        if (type === 'chronos_fragment') {
+            // Renderer leve: evita gradientes/shadows/12 subcaminhos por projétil a cada frame.
+            const rr = Math.max(4, r0);
+            ctx.save();
+            ctx.translate(px, py);
+            ctx.rotate(ang);
+            ctx.fillStyle = '#9a68e6';
+            ctx.strokeStyle = '#f7edff';
+            ctx.lineWidth = Math.max(1.2, rr * .14);
+            ctx.beginPath(); ctx.arc(0, 0, rr, 0, TAU); ctx.fill(); ctx.stroke();
+            ctx.strokeStyle = '#e6d5ff';
+            ctx.lineWidth = Math.max(1, rr * .10);
+            ctx.beginPath(); ctx.arc(0, 0, rr * .60, 0, TAU); ctx.stroke();
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath(); ctx.arc(-rr*.28, -rr*.30, Math.max(1.2, rr*.16), 0, TAU); ctx.fill();
+            ctx.strokeStyle = '#32134f';
+            ctx.lineWidth = Math.max(1.1, rr*.10);
+            ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(rr*.48,0); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-rr*.08,-rr*.42); ctx.stroke();
+            ctx.restore();
+            return true;
+        }
+
+        if (type === 'auren_life_orb') {
+            // Renderer leve para permitir muitos disparos sem criar gradientes por frame.
+            const rr = Math.max(4, r0);
+            const crit = !!p.extra?.aurenCritical;
+            ctx.save();
+            ctx.translate(px, py);
+            ctx.fillStyle = crit ? '#d8d64b' : '#20b965';
+            ctx.strokeStyle = crit ? '#fff7b0' : '#d5ffe5';
+            ctx.lineWidth = Math.max(1, rr*.14);
+            ctx.beginPath(); ctx.arc(0, 0, rr, 0, TAU); ctx.fill(); ctx.stroke();
+            ctx.strokeStyle = crit ? '#fff3a0' : '#a8f5c0';
+            ctx.lineWidth = Math.max(.8, rr*.09);
+            ctx.beginPath(); ctx.ellipse(0, 0, rr*.64, rr*.24, 0, 0, TAU); ctx.stroke();
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath(); ctx.arc(-rr*.28, -rr*.30, Math.max(1.2, rr*.17), 0, TAU); ctx.fill();
+            ctx.restore();
+            return true;
+        }
+
         const drawBullet = (scale = 1, casing = false) => {
             const r=r0*scale, len=Math.max(15,r*3.0), body=Math.max(4.8,r*1.05);
             ctx.save();ctx.translate(px,py);ctx.rotate(ang);ctx.shadowColor='rgba(0,0,0,.42)';ctx.shadowBlur=5;
@@ -24614,89 +24964,33 @@ function draw() {
             ctx.fillStyle=metal;ctx.fillRect(-len*.10,-body*.26,len*.18,body*.52);ctx.fillStyle='rgba(255,255,255,.72)';ctx.beginPath();ctx.ellipse(len*.15,-body*.18,len*.12,body*.10,0,0,TAU);ctx.fill();ctx.restore();
         };
 
-        // PROJÉTEIS INIMIGOS REMASTERIZADOS — mesma leitura dos modelos existentes, sempre em vermelho.
+        // Rota ultra-leve para qualquer projétil inimigo comum.
+        // Boss/Mega Boss podem criar 8/16 projéteis de uma vez; não devemos executar
+        // gradientes, shadows ou dezenas de paths por cada tiro a cada frame.
         if (!p.isPlayer && p.extra?.sourceEnemyType) {
             const enemyType = String(p.extra.sourceEnemyType || '').toLowerCase();
-            const enemyRed = '#e74c3c', enemyRedDark = '#7f1d1d', enemyRedHot = '#ff6b5b';
-
-            // Atirador / Elite / Elite Master: bala com o mesmo design-base do Strike, avermelhada.
-            if (enemyType === 'atirador' || enemyType === 'elite' || enemyType === 'elite_master' || enemyType === 'police_car' || enemyType === 'conehead' || type === 'enemy') {
-                const r = r0 * (enemyType === 'elite_master' ? 1.22 : enemyType === 'elite' ? 1.10 : 1);
-                const len = Math.max(16, r * 3.0), body = Math.max(5, r * 1.05);
-                ctx.save(); ctx.translate(px,py); ctx.rotate(ang);
-                ctx.shadowColor='rgba(231,76,60,.82)'; ctx.shadowBlur=10;
-                ctx.fillStyle=enemyRedDark;
-                if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(-len*.52,-body*.48,len*.45,body*.96,body*.22); ctx.fill(); }
-                else ctx.fillRect(-len*.52,-body*.48,len*.45,body*.96);
-                ctx.fillStyle=enemyRedHot; ctx.strokeStyle='#4b1111'; ctx.lineWidth=Math.max(1,r*.10);
-                ctx.beginPath(); ctx.moveTo(-len*.18,-body*.47); ctx.lineTo(len*.18,-body*.47); ctx.quadraticCurveTo(len*.52,-body*.18,len*.62,0); ctx.quadraticCurveTo(len*.52,body*.18,len*.18,body*.47); ctx.lineTo(-len*.18,body*.47); ctx.closePath(); ctx.fill(); ctx.stroke();
-                ctx.fillStyle='#b91c1c'; ctx.fillRect(-len*.10,-body*.26,len*.18,body*.52);
-                ctx.fillStyle='rgba(255,235,235,.82)'; ctx.beginPath(); ctx.ellipse(len*.15,-body*.18,len*.12,body*.10,0,0,TAU); ctx.fill();
-                ctx.restore(); return true;
-            }
-
-            // Tanque: mesma família da bala da Cherry, avermelhada.
+            const rr = Math.max(3, r0);
+            ctx.save();
+            ctx.translate(px, py);
+            ctx.rotate(ang);
+            ctx.fillStyle = enemyType === 'tanque' || type === 'heavy_enemy' ? '#d6453d' : '#e74c3c';
+            ctx.strokeStyle = '#641313';
+            ctx.lineWidth = Math.max(1, rr*.12);
             if (enemyType === 'tanque' || type === 'heavy_enemy') {
-                const r = Math.max(10, r0 * 1.45);
-                ctx.save(); ctx.translate(px,py); ctx.rotate(ang);
-                ctx.shadowColor='rgba(231,76,60,.85)'; ctx.shadowBlur=14;
-                const g=ctx.createRadialGradient(-r*.34,-r*.34,1,0,0,r*1.08);
-                g.addColorStop(0,'#ffd0c8'); g.addColorStop(.30,'#ff6b5b'); g.addColorStop(.72,enemyRed); g.addColorStop(1,enemyRedDark);
-                ctx.fillStyle=g; ctx.strokeStyle='#4b1111'; ctx.lineWidth=2.2; ctx.beginPath(); ctx.arc(0,0,r,0,TAU); ctx.fill(); ctx.stroke();
-                ctx.fillStyle='rgba(255,245,243,.72)'; ctx.beginPath(); ctx.arc(-r*.30,-r*.30,r*.16,0,TAU); ctx.fill();
-                ctx.strokeStyle='rgba(127,29,29,.75)'; ctx.lineWidth=1.4; ctx.beginPath(); ctx.arc(0,0,r*.56,0,TAU); ctx.stroke();
-                ctx.restore(); return true;
+                ctx.beginPath(); ctx.arc(0,0,rr*1.35,0,TAU); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = '#ffb0a8';
+                ctx.beginPath(); ctx.arc(-rr*.34,-rr*.34,Math.max(1.2,rr*.18),0,TAU); ctx.fill();
+            } else {
+                const len = Math.max(12, rr*2.8), body = Math.max(4, rr*.9);
+                if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(-len*.55,-body*.5,len,body,body*.22); ctx.fill(); ctx.stroke(); }
+                else { ctx.fillRect(-len*.55,-body*.5,len,body); ctx.strokeRect(-len*.55,-body*.5,len,body); }
+                ctx.fillStyle = '#ff8c80';
+                ctx.beginPath(); ctx.arc(len*.16,0,Math.max(1.2,rr*.22),0,TAU); ctx.fill();
             }
-
-            // Andarilho de Neve: bola de neve do Pipis, avermelhada.
-            if (enemyType === 'snow_walker' || type === 'snowball_slow') {
-                const r = Math.max(7, r0 * 1.25);
-                ctx.save(); ctx.translate(px,py); ctx.rotate(ang);
-                ctx.shadowColor='rgba(231,76,60,.78)'; ctx.shadowBlur=11;
-                const g=ctx.createRadialGradient(-r*.34,-r*.38,1,0,0,r*1.1); g.addColorStop(0,'#ffe1dc'); g.addColorStop(.38,'#ff8174'); g.addColorStop(1,enemyRedDark);
-                ctx.fillStyle=g; ctx.strokeStyle='#641313'; ctx.lineWidth=1.8; ctx.beginPath(); ctx.arc(0,0,r,0,TAU); ctx.fill(); ctx.stroke();
-                for(let k=0;k<5;k++){ const a=k*TAU/5+0.25; ctx.strokeStyle='rgba(255,205,200,.58)'; ctx.lineWidth=1.2; ctx.beginPath(); ctx.moveTo(Math.cos(a)*r*.20,Math.sin(a)*r*.20); ctx.lineTo(Math.cos(a)*r*.72,Math.sin(a)*r*.72); ctx.stroke(); }
-                ctx.restore(); return true;
-            }
-
-            // Lamacento: bola de lama avermelhada, diferente da bola de neve.
-            if (enemyType === 'mudded' || enemyType === 'sludgy' || type === 'mud_ball') {
-                const r=Math.max(7,r0*1.15); ctx.save(); ctx.translate(px,py); ctx.rotate(ang); ctx.shadowColor='rgba(192,57,43,.85)'; ctx.shadowBlur=10;
-                ctx.fillStyle='#c0392b'; ctx.strokeStyle='#5a1712'; ctx.lineWidth=1.8; ctx.beginPath();
-                ctx.moveTo(r*1.15,0); ctx.bezierCurveTo(r*.78,-r*.88,-r*.05,-r*.98,-r*.78,-r*.32); ctx.bezierCurveTo(-r*1.14,.02,-r*.70,r*.86,.12,r*.72); ctx.bezierCurveTo(r*.68,r*.62,r*1.04,r*.34,r*1.15,0); ctx.closePath(); ctx.fill(); ctx.stroke();
-                ctx.fillStyle='#ef6b5e'; ctx.beginPath(); ctx.arc(-r*.32,-r*.34,r*.18,0,TAU); ctx.fill(); ctx.fillStyle='#8d241b'; ctx.beginPath(); ctx.arc(r*.25,r*.22,r*.13,0,TAU); ctx.fill();
-                ctx.restore(); return true;
-            }
-
-            // Goblin: pedra pequena no mesmo desenho da dispersão do Axel, avermelhada.
-            if (enemyType === 'goblin' || type === 'goblin_stone') {
-                const r=Math.max(4,r0*.95); ctx.save(); ctx.translate(px,py); ctx.rotate(ang); ctx.shadowColor='rgba(231,76,60,.72)'; ctx.shadowBlur=8; ctx.fillStyle='#b52b23'; ctx.strokeStyle='#4a120f'; ctx.lineWidth=1.2;
-                ctx.beginPath(); ctx.moveTo(r*1.02,0); ctx.lineTo(r*.42,-r*.78); ctx.lineTo(-r*.50,-r*.66); ctx.lineTo(-r*.92,-r*.10); ctx.lineTo(-r*.46,r*.68); ctx.lineTo(r*.46,r*.58); ctx.closePath(); ctx.fill(); ctx.stroke();
-                ctx.fillStyle='#ef6b5e'; ctx.beginPath(); ctx.arc(-r*.26,-r*.28,r*.19,0,TAU); ctx.fill(); ctx.beginPath(); ctx.arc(r*.26,r*.20,r*.11,0,TAU); ctx.fill(); ctx.restore(); return true;
-            }
-
-            // Caçador da floresta: usa a bala do Strike, avermelhada.
-            if (enemyType === 'hunter' || type === 'hunter') {
-                drawBullet(0.92, false);
-                return true;
-            }
-
-            // Gueixa / Roqueiro: uma única onda sonora vermelha, com anéis concêntricos preenchidos.
-            if (enemyType === 'geisha' || enemyType === 'rocknrool' || type === 'geisha_gong' || type === 'rock_note') {
-                const r=Math.max(8,r0*1.9); const pulse=1+Math.sin((gameTime||0)*10+(p.extra?.phase||0))*0.05;
-                ctx.save(); ctx.translate(px,py); ctx.rotate(ang); ctx.scale(pulse,1);
-                ctx.shadowColor='rgba(231,76,60,.9)'; ctx.shadowBlur=15; ctx.fillStyle='rgba(231,76,60,.78)'; ctx.strokeStyle='#8f1e18'; ctx.lineWidth=2;
-                ctx.beginPath(); ctx.ellipse(0,0,r*1.65,r*.78,0,0,TAU); ctx.fill(); ctx.stroke();
-                ctx.fillStyle='#ff8a7d'; ctx.beginPath(); ctx.ellipse(0,0,r*.92,r*.42,0,0,TAU); ctx.fill();
-                ctx.strokeStyle='rgba(255,210,205,.78)'; ctx.lineWidth=1.4; ctx.beginPath(); ctx.ellipse(0,0,r*.48,r*.22,0,0,TAU); ctx.stroke();
-                ctx.restore(); return true;
-            }
-
-            // Pescador Fantasma: linha/gancho estilizado em vermelho.
-            if (enemyType === 'ghost_fisher' || type === 'ghost_fishing_line') {
-                const len=Math.max(18,r0*4.4); ctx.save();ctx.translate(px,py);ctx.rotate(ang);ctx.strokeStyle='#e74c3c';ctx.shadowColor='rgba(231,76,60,.82)';ctx.shadowBlur=9;ctx.lineWidth=Math.max(2,r0*.35);ctx.beginPath();ctx.moveTo(-len*.62,0);ctx.quadraticCurveTo(-len*.05,-r0*1.2,len*.45,0);ctx.stroke();ctx.fillStyle='#ff8a7d';ctx.beginPath();ctx.arc(len*.52,0,r0*.48,0,TAU);ctx.fill();ctx.restore();return true;
-            }
+            ctx.restore();
+            return true;
         }
+
 
         // Tenent: duas balas grandes teleguiadas.
         if (type === 'tenent_ability') { drawBullet(1.85, false); return true; }
@@ -25387,11 +25681,32 @@ function draw() {
         return false;
     }
 
+
+    // ASTRA — orbitais planetárias nos inimigos atingidos.
+    for (const host of (enemies || [])) {
+        if (!host || host.hp <= 0 || !Array.isArray(host.astraOrbitals) || !host.astraOrbitals.length) continue;
+        if (!isWorldVisible(host.x, host.y, (host.size || 14) + 70)) continue;
+        for (const orb of host.astraOrbitals) {
+            const ox = host.x + Math.cos(orb.angle) * orb.radius;
+            const oy = host.y + Math.sin(orb.angle) * orb.radius;
+            ctx.save();
+            ctx.globalAlpha = 0.9;
+            ctx.strokeStyle = 'rgba(201,140,255,.28)';
+            ctx.lineWidth = 1.3;
+            ctx.beginPath(); ctx.arc(host.x, host.y, orb.radius, 0, Math.PI * 2); ctx.stroke();
+                window.drawAstraPlanet(ctx, ox, oy, 6.2, orb.planet, orb.angle * 0.6);
+            ctx.restore();
+        }
+    }
     projectiles.forEach(p => {
         if (!p || typeof p !== 'object' || !Number.isFinite(p.x) || !Number.isFinite(p.y) || !Number.isFinite(p.vx) || !Number.isFinite(p.vy)) return; if (!Number.isFinite(p.size)) p.size = 4;
         if (!isWorldVisible(p.x, p.y, p.size || p.r || 12)) return;
         const px = p.x;
         const py = p.y;
+        if (p.type === 'astra_planet') {
+            window.drawAstraPlanet?.(ctx, px, py, Math.max(7, Number(p.size) || 10), p.extra?.planetType, Math.atan2(p.vy, p.vx));
+            return;
+        }
         if (drawPolishedProjectileModel(ctx, p, px, py)) return;
         if (p.type === 'merlin_magic' || p.type === 'merlin_pacifier') {
             const r = p.size || (p.type === 'merlin_pacifier' ? 12 : 11);
@@ -26942,6 +27257,710 @@ syncMenuMusic();
 applyMusicVolume();
 setTimeout(() => maybeShowMapDestination(), 50);
 
+
+
+/* Consolidated character patches: Astra, Chronos and Auren */
+(function(){
+    'use strict';
+
+    // Dados de cada planeta. Eles não alteram dano, velocidade ou outros stats.
+    const ASTRA_PLANETS = ['terra', 'marte', 'saturno', 'urano'];
+    let astraPlanetCycle = 0;
+
+    function astraPlanetLabel(type){
+        return ({terra:'Terra', marte:'Marte', saturno:'Saturno', urano:'Urano'})[type] || 'Terra';
+    }
+
+    function drawAstraPlanet(ctx, x, y, radius, type, rotation = 0) {
+        const r = Math.max(3, Number(radius) || 8);
+        const kind = ASTRA_PLANETS.includes(type) ? type : 'terra';
+        const TAU = Math.PI * 2;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(rotation);
+        ctx.shadowColor = 'rgba(190,120,255,.85)';
+        ctx.shadowBlur = 10;
+
+        if (kind === 'saturno') {
+            ctx.strokeStyle = 'rgba(246,225,171,.92)';
+            ctx.lineWidth = Math.max(2, r * .24);
+            ctx.beginPath();
+            ctx.ellipse(0, 0, r * 1.65, r * .53, -0.18, 0, TAU);
+            ctx.stroke();
+        }
+
+        const grad = ctx.createRadialGradient(-r*.32, -r*.34, Math.max(1, r*.08), 0, 0, r*1.08);
+        if (kind === 'terra') {
+            grad.addColorStop(0, '#d9fbff'); grad.addColorStop(.35, '#4dc3ff'); grad.addColorStop(.72, '#2670c9'); grad.addColorStop(1, '#123c7a');
+        } else if (kind === 'marte') {
+            grad.addColorStop(0, '#ffcfb4'); grad.addColorStop(.34, '#e8754c'); grad.addColorStop(.72, '#a83c28'); grad.addColorStop(1, '#5e2018');
+        } else if (kind === 'saturno') {
+            grad.addColorStop(0, '#fff3c7'); grad.addColorStop(.42, '#d7bd78'); grad.addColorStop(.75, '#a98c51'); grad.addColorStop(1, '#5e4a2d');
+        } else {
+            grad.addColorStop(0, '#e4fbff'); grad.addColorStop(.4, '#75d7e9'); grad.addColorStop(.72, '#4b8bc4'); grad.addColorStop(1, '#28517d');
+        }
+
+        ctx.fillStyle = grad;
+        ctx.strokeStyle = 'rgba(255,255,255,.72)';
+        ctx.lineWidth = Math.max(1, r*.10);
+        ctx.beginPath(); ctx.arc(0,0,r,0,TAU); ctx.fill(); ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        if (kind === 'terra') {
+            ctx.fillStyle = 'rgba(57,180,96,.78)';
+            ctx.beginPath(); ctx.ellipse(-r*.20,-r*.10,r*.34,r*.20,-.25,0,TAU); ctx.fill();
+            ctx.beginPath(); ctx.ellipse(r*.25,r*.19,r*.26,r*.14,.22,0,TAU); ctx.fill();
+        } else if (kind === 'marte') {
+            ctx.fillStyle = 'rgba(98,29,19,.42)';
+            ctx.beginPath(); ctx.arc(-r*.24,r*.10,r*.12,0,TAU); ctx.fill();
+            ctx.beginPath(); ctx.arc(r*.22,-r*.18,r*.08,0,TAU); ctx.fill();
+            ctx.beginPath(); ctx.arc(r*.05,r*.30,r*.10,0,TAU); ctx.fill();
+        } else if (kind === 'saturno') {
+            ctx.strokeStyle = 'rgba(113,83,43,.42)';
+            ctx.lineWidth = Math.max(1,r*.09);
+            ctx.beginPath(); ctx.arc(0,0,r*.65,0,TAU); ctx.stroke();
+        } else {
+            ctx.strokeStyle = 'rgba(235,255,255,.58)';
+            ctx.lineWidth = Math.max(1,r*.08);
+            ctx.beginPath(); ctx.arc(0,0,r*.62,Math.PI*1.08,Math.PI*1.82); ctx.stroke();
+        }
+
+        ctx.fillStyle = 'rgba(255,255,255,.78)';
+        ctx.beginPath(); ctx.arc(-r*.30,-r*.30,Math.max(1.2,r*.15),0,TAU); ctx.fill();
+        ctx.restore();
+    }
+
+    function getAstraOrbitalBaseRadius(enemy) {
+        const size = Math.max(8, Number(enemy?.size) || 12);
+        // O anel sempre começa além da borda do inimigo e cresce proporcionalmente ao alvo.
+        return Math.max(34, size * 1.55 + 14);
+    }
+
+    function createAstraOrbital(enemy, planetType, baseDamage) {
+        if (!enemy || enemy.hp <= 0) return;
+        if (!Array.isArray(enemy.astraOrbitals)) enemy.astraOrbitals = [];
+        if (enemy.astraOrbitals.length >= 10) return;
+        const index = enemy.astraOrbitals.length;
+        const baseRadius = getAstraOrbitalBaseRadius(enemy);
+        enemy.astraOrbitals.push({
+            planet: ASTRA_PLANETS.includes(planetType) ? planetType : 'terra',
+            angle: (Math.PI * 2 / 10) * index + Math.random() * .18,
+            radius: baseRadius + index * 4.5,
+            speed: 1.35 + (index % 3) * .10,
+            damageCd: .18 + (index % 4) * .025,
+            dmg: Math.max(1, Number(baseDamage) * .22)
+        });
+        createParticles(enemy.x, enemy.y, '#b56cff');
+    }
+
+    function updateAstraOrbitals(dt) {
+        if (!Array.isArray(enemies)) return;
+        const clampedDt = Math.min(.05, Math.max(0, Number(dt) || 0));
+
+        for (const host of enemies) {
+            if (!host || host.hp <= 0 || !Array.isArray(host.astraOrbitals) || !host.astraOrbitals.length) continue;
+
+            const baseRadius = getAstraOrbitalBaseRadius(host);
+            let damageChecks = 0;
+            const maxChecksThisFrame = Math.min(2, host.astraOrbitals.length);
+
+            for (let i = 0; i < host.astraOrbitals.length; i++) {
+                const orb = host.astraOrbitals[i];
+                orb.angle += orb.speed * clampedDt;
+
+                // Mantém as orbitais afastadas do corpo mesmo em inimigos enormes.
+                const desiredRadius = baseRadius + i * 4.5;
+                const currentRadius = Number(orb.radius) || desiredRadius;
+                orb.radius = currentRadius + (desiredRadius - currentRadius) * Math.min(1, clampedDt * 12);
+
+                orb.damageCd = Math.max(0, (Number(orb.damageCd) || 0) - clampedDt);
+                if (damageChecks >= maxChecksThisFrame || orb.damageCd > 0) continue;
+
+                const ox = host.x + Math.cos(orb.angle) * orb.radius;
+                const oy = host.y + Math.sin(orb.angle) * orb.radius;
+                const hitRadius = 11;
+                let didHit = false;
+
+                for (const other of enemies) {
+                    if (!other || other === host || other.hp <= 0 || isCurrentlyHypnotized(other)) continue;
+                    const otherSize = Math.max(8, Number(other.size) || 12);
+                    const dx = ox - other.x, dy = oy - other.y;
+                    const maxD = hitRadius + otherSize;
+                    if (dx * dx + dy * dy > maxD * maxD) continue;
+
+                    const dealt = Math.max(1, Number(orb.dmg) || 1) * getEnemyDamageTakenMultiplier(other);
+                    other.hp -= dealt;
+                    other.lastHitSourceChar = 'astra';
+                    addFloatingText(other.x, other.y, Math.floor(dealt), '#c98cff', 10);
+                    trackMissionDamage(dealt);
+                    didHit = true;
+                }
+
+                // Não penaliza o host a cada frame; a orbital só volta a procurar alvos depois do intervalo.
+                orb.damageCd = didHit ? .30 : .16;
+                damageChecks++;
+            }
+        }
+    }
+
+    // Reaproveita o renderer de ataque, mas intercepta somente a arma da Astra.
+    const previousFireWeapon = fireWeapon;
+    fireWeapon = function(target) {
+        if (!player || pd?.selectedChar !== 'astra') return previousFireWeapon(target);
+        if (sandboxMode || runShootingDisabled) return;
+        if (!target || isCurrentlyHypnotized(target)) return;
+
+        const dToT = dist(player, target);
+        const totemDmg = player.inTotem ? 1.2 : 1;
+        const finalDmg = player.baseDmg * player.stats.dmgMult * totemDmg * (player.graffitAtkMult || 1);
+        let pSpd = 5 * player.stats.projSpdMult;
+        const angle = Math.atan2(target.y - player.y, target.x - player.x);
+        player.lastAimAngle = angle;
+        player.cd = player.baseFireRate * player.stats.fireRateMult;
+        pSpd *= 1.06;
+
+        const planet = ASTRA_PLANETS[astraPlanetCycle++ % ASTRA_PLANETS.length];
+        const life = Math.ceil((player.baseRange * player.stats.rangeMult * 1.28) / Math.max(1, pSpd)) + 18;
+        createProj(
+            player.x + Math.cos(angle) * (player.r + 8),
+            player.y + Math.sin(angle) * (player.r + 8),
+            Math.cos(angle) * pSpd,
+            Math.sin(angle) * pSpd,
+            finalDmg,
+            life,
+            true,
+            'astra_planet',
+            { size: 10, sourceChar: 'astra', planetType: planet, astraPlanet: true, pierce: 0 }
+        );
+    };
+    window.fireWeapon = fireWeapon;
+
+    // Habilidade de colisão da Astra: dano normal + chance de descarga cósmica + orbital.
+    // Renderer procedural para os quatro planetas.
+    const originalDrawPolished = typeof drawPolishedProjectileModel === 'function' ? drawPolishedProjectileModel : null;
+    if (originalDrawPolished) {
+        drawPolishedProjectileModel = function(ctx, p, px, py) {
+            if (p?.type === 'astra_planet') {
+                drawAstraPlanet(ctx, px, py, Math.max(7, Number(p.size) || 10), p.extra?.planetType, Math.atan2(p.vy, p.vx));
+                return true;
+            }
+            return originalDrawPolished(ctx, p, px, py);
+        };
+        window.drawPolishedProjectileModel = drawPolishedProjectileModel;
+    }
+
+    window.drawAstraPlanet = drawAstraPlanet;
+    window.createAstraOrbital = createAstraOrbital;
+    window.updateAstraOrbitals = updateAstraOrbitals;
+    updateAstraOrbitals._astraInstalled = true;
+
+    // A atualização das orbitais é anexada no início do updateEnemies existente.
+    if (typeof updateEnemies === 'function' && !updateEnemies._astraWrapped) {
+        const prevUpdateEnemies = updateEnemies;
+        updateEnemies = function(dt) {
+            updateAstraOrbitals(dt);
+            return prevUpdateEnemies(dt);
+        };
+        updateEnemies._astraWrapped = true;
+        window.updateEnemies = updateEnemies;
+    }
+
+    // Atualiza a área de personagens se ela já estiver montada.
+    try { renderChars?.(); } catch (_) {}
+})();
+
+(function(){
+    'use strict';
+
+    // Ensure the title/summary/sprite additions survive even if this patch is loaded
+    // after the main catalogs are initialized.
+    const TEMPORAL_SCALE = 0.5;
+    const TEMPORAL_DURATION = 3;
+
+    function getTemporalScale(enemy){
+        return enemy && Number(enemy.timeDistortionTimer) > 0 ? TEMPORAL_SCALE : 1;
+    }
+    window.getEnemyTemporalScale = getTemporalScale;
+
+    // Extend the enemy initialization/reset path without duplicating the whole engine.
+    const originalSpawnEnemy = window.spawnEnemy;
+    if (typeof originalSpawnEnemy === 'function' && !originalSpawnEnemy.__chronosWrapped) {
+        window.spawnEnemy = function(...args){
+            const result = originalSpawnEnemy.apply(this,args);
+            try {
+                const e = enemies?.[enemies.length-1];
+                if (e && typeof e.timeDistortionTimer !== 'number') e.timeDistortionTimer = 0;
+            } catch(_){}
+            return result;
+        };
+        window.spawnEnemy.__chronosWrapped = true;
+        if (typeof spawnEnemy === 'function') spawnEnemy = window.spawnEnemy;
+    }
+
+    // Chronos projectile drawing: temporal shards.
+    function drawChronosFragment(ctx,x,y,r,rotation=0){
+        const rr=Math.max(4,Number(r)||8), TAU=Math.PI*2;
+        ctx.save(); ctx.translate(x,y); ctx.rotate(rotation);
+        ctx.shadowColor='rgba(180,120,255,.92)'; ctx.shadowBlur=Math.max(8,rr*1.25);
+        const face=ctx.createRadialGradient(-rr*.28,-rr*.32,1,0,0,rr*1.15);
+        face.addColorStop(0,'#fffaff'); face.addColorStop(.32,'#d9bdff'); face.addColorStop(.72,'#9a68e6'); face.addColorStop(1,'#4b247e');
+        ctx.fillStyle=face; ctx.strokeStyle='#f7edff'; ctx.lineWidth=Math.max(1.2,rr*.15);
+        ctx.beginPath(); ctx.arc(0,0,rr,0,TAU); ctx.fill(); ctx.stroke();
+        ctx.shadowBlur=0;
+        ctx.strokeStyle='rgba(255,255,255,.88)'; ctx.lineWidth=Math.max(1,rr*.075);
+        for(let i=0;i<12;i++){
+            const a=i*Math.PI/6, r1=rr*.70, r2=rr*(i%3===0?.90:.82);
+            ctx.beginPath(); ctx.moveTo(Math.cos(a)*r1,Math.sin(a)*r1); ctx.lineTo(Math.cos(a)*r2,Math.sin(a)*r2); ctx.stroke();
+        }
+        // Ponteiros contrastantes, como um pequeno relógio real.
+        ctx.strokeStyle='#32134f'; ctx.lineCap='round'; ctx.lineJoin='round';
+        ctx.lineWidth=Math.max(1.4,rr*.12); ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-rr*.10,-rr*.48); ctx.stroke();
+        ctx.lineWidth=Math.max(1.1,rr*.08); ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(rr*.46,rr*.08); ctx.stroke();
+        ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(0,0,Math.max(1.4,rr*.13),0,TAU); ctx.fill();
+        ctx.strokeStyle='rgba(255,255,255,.34)'; ctx.lineWidth=Math.max(.8,rr*.05);
+        ctx.beginPath(); ctx.arc(0,0,rr*.58,0,TAU); ctx.stroke();
+        ctx.restore();
+    }
+    window.drawChronosFragment=drawChronosFragment;
+
+    // Re-wrap projectile rendering only for the new type.
+    const oldPolished = window.drawPolishedProjectileModel;
+    if (typeof oldPolished === 'function' && !oldPolished.__chronosWrapped) {
+        const wrapped=function(ctx,p,px,py){
+            if(p?.type==='chronos_fragment'){
+                drawChronosFragment(ctx,px,py,Math.max(7,Number(p.size)||8),Math.atan2(p.vy,p.vx));
+                return true;
+            }
+            return oldPolished(ctx,p,px,py);
+        };
+        wrapped.__chronosWrapped=true;
+        window.drawPolishedProjectileModel=wrapped;
+        if (typeof drawPolishedProjectileModel==='function') drawPolishedProjectileModel=wrapped;
+    }
+
+    // Extend the existing fireWeapon wrapper (Astra already owns the last wrapper).
+    const oldFire = window.fireWeapon || fireWeapon;
+    if (typeof oldFire === 'function' && !oldFire.__chronosWrapped) {
+        const wrapped=function(target){
+            if(!player || pd?.selectedChar!=='chronos') return oldFire(target);
+            if(sandboxMode || runShootingDisabled || !target || isCurrentlyHypnotized(target)) return;
+            const angle=Math.atan2(target.y-player.y,target.x-player.x);
+            player.lastAimAngle=angle;
+            player.cd=player.baseFireRate*player.stats.fireRateMult;
+            const dmg=Math.max(1,player.baseDmg*player.stats.dmgMult*(player.graffitAtkMult||1));
+            const spd=Math.max(5,5.4*player.stats.projSpdMult);
+            createProj(
+                player.x+Math.cos(angle)*(player.r+8), player.y+Math.sin(angle)*(player.r+8),
+                Math.cos(angle)*spd, Math.sin(angle)*spd, dmg,
+                Math.ceil((player.baseRange*player.stats.rangeMult*1.25)/Math.max(1,spd))+16,
+                true,'chronos_fragment',
+                {size:9,sourceChar:'chronos',temporalFragment:true,pierce:0}
+            );
+        };
+        wrapped.__chronosWrapped=true;
+        window.fireWeapon=wrapped;
+        fireWeapon=wrapped;
+    }
+
+    // Apply Chronos' 15% proc at the normal projectile collision point.
+    // This is inserted through a lightweight wrapper around the global collision loop
+    // by marking the projectile; the main pipeline consumes the marker below.
+    const chronoHitHandler = function(enemy, projectile, realDmg){
+        if(!enemy || !projectile || projectile.type!=='chronos_fragment') return false;
+        enemy.timeDistortionTimer=Math.max(Number(enemy.timeDistortionTimer)||0,TEMPORAL_DURATION);
+        addFloatingText(enemy.x,enemy.y-16,'DISTORÇÃO TEMPORAL!','#b47cff',11);
+        createParticles(enemy.x,enemy.y,'#b47cff');
+        return true;
+    };
+    window.applyChronosTemporalDistortion=chronoHitHandler;
+
+    // Patch the collision source once. The generic damage block is stable and already
+    // handles all projectile bookkeeping, so only the proc is special-cased.
+    // O desacelerador do Chronos é aplicado dentro do loop nativo de updateProjectiles();
+    // nenhuma segunda varredura de projectiles é feita por frame.
+
+    // Make the actual collision pipeline recognize Chronos before generic cleanup.
+    // It is done by patching projectile creation: a Chronos projectile carries a
+    // callback marker consumed by the collision loop's existing generic damage path.
+    const originalCreateProj=window.createProj || createProj;
+    if(typeof originalCreateProj==='function' && !originalCreateProj.__chronosWrapped){
+        const wrapped=function(x,y,vx,vy,dmg,life,isPlayer,type,extra={}){
+            const ex={...(extra||{})};
+            if(type==='chronos_fragment') ex.chronosProc=true;
+            const proj=originalCreateProj(x,y,vx,vy,dmg,life,isPlayer,type,ex);
+            return proj;
+        };
+        wrapped.__chronosWrapped=true;
+        window.createProj=wrapped;
+        createProj=wrapped;
+    }
+
+    // A desaceleração de inimigos já é aplicada diretamente pelo núcleo de updateEnemies.
+    // Não envolvemos a função novamente para evitar chamadas aninhadas a cada frame.
+
+    // Add the status icon if the core function was already compiled before this patch.
+    if(typeof getEnemyStatusIndicators==='function' && !getEnemyStatusIndicators.__chronosWrapped){
+        const originalIndicators=getEnemyStatusIndicators;
+        const wrapped=function(e){
+            const list=originalIndicators(e)||[];
+            if(Number(e?.timeDistortionTimer)>0 && !list.some(x=>x?.key==='temporal_distortion')) list.push({key:'temporal_distortion',color:'#b47cff'});
+            return list;
+        };
+        wrapped.__chronosWrapped=true;
+        getEnemyStatusIndicators=wrapped;
+        window.getEnemyStatusIndicators=wrapped;
+    }
+
+    // Astra: include Stars and Meteors in her projectile cycle.
+    try {
+        if(typeof drawAstraPlanet==='function'){
+            const oldDrawAstra=drawAstraPlanet;
+            window.drawAstraPlanet=function(ctx,x,y,radius,type,rotation=0){
+                const rr=Math.max(3,Number(radius)||8);
+                if(type==='estrela'){
+                    ctx.save(); ctx.translate(x,y); ctx.rotate(rotation);
+                    ctx.shadowColor='rgba(255,238,150,.95)'; ctx.shadowBlur=13; ctx.fillStyle='#fff1a8'; ctx.strokeStyle='#fffdf0'; ctx.lineWidth=Math.max(1,rr*.10);
+                    ctx.beginPath();
+                    for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5, rad=(i%2===0?rr:rr*.42); const px=Math.cos(a)*rad,py=Math.sin(a)*rad; i===0?ctx.moveTo(px,py):ctx.lineTo(px,py);} ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore(); return;
+                }
+                if(type==='meteoro'){
+                    ctx.save(); ctx.translate(x,y); ctx.rotate(rotation);
+                    const tail=rr*2.0; const grad=ctx.createLinearGradient(-tail,0,rr,0); grad.addColorStop(0,'rgba(255,170,70,0)'); grad.addColorStop(.55,'rgba(255,170,70,.45)'); grad.addColorStop(1,'#ffb36b');
+                    ctx.shadowColor='rgba(255,120,60,.9)'; ctx.shadowBlur=12; ctx.fillStyle=grad; ctx.beginPath(); ctx.moveTo(-tail,0); ctx.lineTo(rr*.15,-rr*.62); ctx.lineTo(rr,0); ctx.lineTo(rr*.18,rr*.72); ctx.closePath(); ctx.fill();
+                    ctx.fillStyle='#9b6a4a'; ctx.strokeStyle='#ffd1a6'; ctx.lineWidth=Math.max(1,rr*.10); ctx.beginPath(); ctx.arc(rr*.2,0,rr*.72,0,Math.PI*2); ctx.fill(); ctx.stroke(); ctx.restore(); return;
+                }
+                return oldDrawAstra(ctx,x,y,radius,type,rotation);
+            };
+            window.drawAstraPlanet = window.drawAstraPlanet;
+            drawAstraPlanet = window.drawAstraPlanet;
+        }
+        if(typeof ASTRA_PLANETS !== 'undefined') {
+            // ASTRA_PLANETS is const inside the earlier patch scope and cannot be changed here.
+            // Override the actual cycle through a dedicated celestial sequence in fireWeapon.
+            let celestialIndex=0;
+            const oldFW=window.fireWeapon;
+            if(typeof oldFW==='function' && !oldFW.__astraCelestialWrapped){
+                const wrappedFW=function(target){
+                    if(!player || pd?.selectedChar!=='astra') return oldFW(target);
+                    // Recreate Astra's shot with the six visual types while preserving its old stats.
+                    if(sandboxMode || runShootingDisabled || !target || isCurrentlyHypnotized(target)) return;
+                    const angle=Math.atan2(target.y-player.y,target.x-player.x);
+                    player.lastAimAngle=angle; player.cd=player.baseFireRate*player.stats.fireRateMult;
+                    const finalDmg=player.baseDmg*player.stats.dmgMult*(player.graffitAtkMult||1);
+                    const pSpd=5*player.stats.projSpdMult*1.06;
+                    const celestial=['terra','marte','saturno','urano','estrela','meteoro'][celestialIndex++%6];
+                    const life=Math.ceil((player.baseRange*player.stats.rangeMult*1.28)/Math.max(1,pSpd))+18;
+                    createProj(player.x+Math.cos(angle)*(player.r+8),player.y+Math.sin(angle)*(player.r+8),Math.cos(angle)*pSpd,Math.sin(angle)*pSpd,finalDmg,life,true,'astra_planet',{size:10,sourceChar:'astra',planetType:celestial,astraPlanet:true,pierce:0});
+                };
+                wrappedFW.__astraCelestialWrapped=true;
+                window.fireWeapon=wrappedFW; fireWeapon=wrappedFW;
+            }
+        }
+    } catch(_){}
+
+    try { renderChars?.(); } catch(_){}
+})();
+
+(function(){
+'use strict';
+
+const AUREN_COSTS={
+    dmg:8,hp:10,flatHp:10,spd:8,atkSpd:12,proj:18,range:8,regen:12,shield:24,cd:15,expl:22,
+    burn_chance:18,rotating_drum:32,critChance:16,critDmg:14,pierce:20,projSpd:9,def:12,vamp:15,xpGen:7,
+    waveBuff:16,allStats:25,double:22,turret:55,magnet:9,freeze_hit:28,bounce:26,mortar:48,cannon_turret:42,
+    tesla_turret:70,crossbow_turret:44,burner_turret:50,white_flag:20,boss_hunter:35,orbital:18,dodge:16,landmine:30,
+    push_card:14,drone_card:38
+};
+const AUREN_FALLBACK_COST=20;
+
+function ensureAurenRuntime(){
+    if(!player) return;
+    if(!Number.isFinite(Number(player.aurenLifeEnergy))) player.aurenLifeEnergy=0;
+    if(!Number.isFinite(Number(player.aurenRerollCost)) || Number(player.aurenRerollCost)<15) player.aurenRerollCost=15;
+    if(!Array.isArray(player.aurenShopDeck)) player.aurenShopDeck=[];
+}
+window.ensureAurenRuntime=ensureAurenRuntime;
+
+function aurenEnergyForEnemy(enemy){
+    if(!enemy) return 0;
+    const t=String(enemy.type||'').toLowerCase();
+    const one=['basico','basic','velocist','velocista','kamikaze','shooter','atirador'];
+    const two=['gigante','giant','tanque','tank','elite_shooter','elite','lider','leader','truck','caminhoneiro','tour_truck'];
+    const three=['boss','master_elite_shooter','elite_master','elite_leader','lider_elite','colosso','colossum'];
+    const excludedDiversos=new Set(['cardboard_head','cardboard','motorcycle_helmet','helmet','prism_head','prism','ballon','ballonero']);
+    if(t==='megaboss'||t==='mega_boss'||enemy.isMegaBoss) return 5;
+    if(three.includes(t)) return 3;
+    if(two.includes(t)) return 2;
+    if(one.includes(t)) return 1;
+    if(excludedDiversos.has(t)) return 0;
+    return 2;
+}
+window.aurenEnergyForEnemy=aurenEnergyForEnemy;
+
+function grantAurenEnergyFromKill(enemy){
+    if(!player || pd?.selectedChar!=='auren') return;
+    const amount=aurenEnergyForEnemy(enemy);
+    if(amount<=0) return;
+    ensureAurenRuntime();
+    player.aurenLifeEnergy += amount;
+    addFloatingText(player.x,player.y-player.r-30,`+${amount} ENERGIA VITAL`,'#35e37b',11);
+}
+window.grantAurenEnergyFromKill=grantAurenEnergyFromKill;
+
+function drawAurenEnergyHud(){
+    if(!player || pd?.selectedChar!=='auren' || player.isDead || player.hp<=0) return;
+    ensureAurenRuntime();
+    const ctx2=ctx;
+    ctx2.save();
+    ctx2.textAlign='center';ctx2.textBaseline='middle';
+    ctx2.font='900 18px Roboto,sans-serif';
+    ctx2.fillStyle='#35e37b';ctx2.shadowColor='rgba(46,204,113,.5)';ctx2.shadowBlur=8;ctx2.shadowOffsetX=2;ctx2.shadowOffsetY=2;
+    ctx2.fillText(String(Math.max(0,Math.floor(player.aurenLifeEnergy))),player.x,player.y-player.r-27);
+    ctx2.restore();
+}
+window.drawAurenEnergyHud=drawAurenEnergyHud;
+
+// Add Auren to the status/power-up UI without touching the existing card definitions.
+function aurenCardCost(card){return Math.max(1,Math.floor(Number(AUREN_COSTS?.[card?.id])||AUREN_FALLBACK_COST));}
+function chooseAurenCards(excludeIds=[]){
+    const excluded=new Set(Array.isArray(excludeIds)?excludeIds:[]);
+    const eligible=Array.isArray(CARDS)?CARDS.filter(c=>c&&c.id&&typeof c.apply==='function'&&!excluded.has(c.id)):[];
+    const pool=eligible.slice();
+    for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+    const chosen=[];
+    for(const c of pool){
+        if(chosen.some(x=>x.id===c.id)) continue;
+        chosen.push(c);
+        if(chosen.length>=3) break;
+    }
+    return chosen;
+}
+
+function getAurenOverlay(){
+    let root=document.getElementById('auren-shop-overlay');
+    if(root) return root;
+    root=document.createElement('div');root.id='auren-shop-overlay';
+    root.innerHTML=`<div class="auren-shop-panel" role="dialog" aria-modal="true" aria-label="Loja de energia vital">
+      <div class="auren-shop-head"><h2 class="auren-shop-title">Energia Vital</h2><div style="display:flex;align-items:center;gap:10px"><span class="auren-shop-energy" id="auren-shop-energy">0</span><button type="button" class="auren-shop-close" id="auren-shop-close" aria-label="Fechar">×</button></div></div>
+      <div class="auren-shop-sub">Compre power ups usando sua Energia Vital. Cada melhoria é adicionada aos seus power ups da partida.</div>
+      <div class="auren-shop-cards" id="auren-shop-cards"></div>
+      <div class="auren-shop-bottom"><button type="button" class="auren-reroll-btn" id="auren-reroll-btn"></button><span class="auren-reroll-info">Cada rerrolagem dobra o custo.</span></div>
+    </div>`;
+    document.body.appendChild(root);
+    root.addEventListener('click',e=>{if(e.target===root)closeAurenShop();});
+    root.querySelector('#auren-shop-close').addEventListener('click',closeAurenShop);
+    root.querySelector('#auren-reroll-btn').addEventListener('click',rerollAurenShop);
+    return root;
+}
+
+function renderAurenShop(){
+    ensureAurenRuntime();
+    const root=getAurenOverlay(), cardsEl=root.querySelector('#auren-shop-cards'), energyEl=root.querySelector('#auren-shop-energy'), rr=root.querySelector('#auren-reroll-btn');
+    energyEl.textContent=Math.max(0,Math.floor(player.aurenLifeEnergy));
+    let deck=Array.isArray(player.aurenShopDeck)&&player.aurenShopDeck.length===3?player.aurenShopDeck:chooseAurenCards();
+    // Garante três cartas distintas na vitrine.
+    const unique=[];
+    for(const c of (deck||[])){ if(c && !unique.some(x=>x.id===c.id)) unique.push(c); }
+    if(unique.length<3){
+        for(const c of chooseAurenCards(unique.map(x=>x.id))){ if(!unique.some(x=>x.id===c.id)) unique.push(c); if(unique.length>=3) break; }
+    }
+    deck=unique.slice(0,3);
+    player.aurenShopDeck=deck;
+    cardsEl.innerHTML=deck.map(card=>{
+        const cost=aurenCardCost(card),icon=getUpgradeCardIconMarkup(card.id);
+        const can=player.aurenLifeEnergy>=cost;
+        return `<div class="auren-buy-card">
+          <div class="auren-buy-icon">${icon||''}</div><div class="auren-buy-name">${escapeHtmlText(decodeHtmlEntities(card.name||'Melhoria'))}</div>
+          <div class="auren-buy-desc">${escapeHtmlText(decodeHtmlEntities(card.desc||''))}</div>
+          <div class="auren-buy-cost">${cost} ENERGIA VITAL</div>
+          <button type="button" class="auren-buy-btn" data-card-id="${escapeHtmlAttr(card.id)}" ${can?'':'disabled'}>COMPRAR</button>
+        </div>`;
+    }).join('');
+    cardsEl.querySelectorAll('[data-card-id]').forEach(btn=>btn.addEventListener('click',()=>buyAurenCard(btn.dataset.cardId)));
+    const rerollCost=Math.max(15,Math.floor(Number(player.aurenRerollCost)||15));
+    rr.textContent=`RERROLL ${rerollCost} ENERGIA`;
+    rr.disabled=player.aurenLifeEnergy<rerollCost;
+}
+
+function openAurenShop(){
+    if(!isPlaying||!player||pd?.selectedChar!=='auren') return;
+    ensureAurenRuntime();
+    player.aurenShopOpen=true;
+    if(!isPaused){isPaused=true;joyZone.style.display='none';}
+    renderAurenShop();
+    getAurenOverlay().classList.add('visible');
+    updateSpecialButtonUI(true);
+}
+function closeAurenShop(){
+    const root=document.getElementById('auren-shop-overlay');
+    if(root) root.classList.remove('visible');
+    if(player) player.aurenShopOpen=false;
+    if(isPlaying){isPaused=false;applyControlLayout();lastTime=performance.now();updateSpecialButtonUI(true);}
+}
+function buyAurenCard(cardId){
+    if(!player||pd?.selectedChar!=='auren') return;
+    ensureAurenRuntime();
+    const card=CARDS.find(c=>c?.id===cardId);
+    if(!card) return;
+    const cost=aurenCardCost(card);
+    if(player.aurenLifeEnergy<cost){notify('Energia vital insuficiente.');return;}
+    player.aurenLifeEnergy-=cost;
+    try{card.apply(player.stats);player.pickedCards.push(card.name);}catch(err){player.aurenLifeEnergy+=cost;console.error('Falha ao aplicar power up do Auren:',err);notify('Não foi possível aplicar a melhoria.');return;}
+    // Substitui somente a carta comprada por outra que não esteja na vitrine.
+    const currentIds=(player.aurenShopDeck||[]).filter(c=>c&&c.id!==card.id).map(c=>c.id);
+    const replacementPool=chooseAurenCards(currentIds);
+    const replacement=replacementPool.find(c=>!currentIds.includes(c.id)&&c.id!==card.id);
+    const nextDeck=(player.aurenShopDeck||[]).filter(c=>c&&c.id!==card.id);
+    if(replacement) nextDeck.push(replacement);
+    player.aurenShopDeck=nextDeck.slice(0,3);
+    createParticles(player.x,player.y,'#35e37b');
+    addFloatingText(player.x,player.y-player.r-28,`-${cost} ENERGIA`,'#35e37b',11);
+    renderAurenShop();
+}
+function rerollAurenShop(){
+    if(!player||pd?.selectedChar!=='auren')return;
+    ensureAurenRuntime();
+    const cost=Math.max(15,Math.floor(Number(player.aurenRerollCost)||15));
+    if(player.aurenLifeEnergy<cost){notify('Energia vital insuficiente para rerrolar.');return;}
+    player.aurenLifeEnergy-=cost;
+    player.aurenRerollCost=cost*2;
+    player.aurenShopDeck=chooseAurenCards();
+    renderAurenShop();
+}
+window.openAurenShop=openAurenShop;window.closeAurenShop=closeAurenShop;window.buyAurenCard=buyAurenCard;window.rerollAurenShop=rerollAurenShop;
+
+// Add Auren's action button.
+const prevSelectedSpecial=window.getSelectedSpecialConfig||getSelectedSpecialConfig;
+if(typeof prevSelectedSpecial==='function'&&!prevSelectedSpecial.__aurenWrapped){
+    const wrapped=function(){
+        if(pd?.selectedChar==='auren'&&player) return {type:'auren_shop',label:'<img src="elements/leaf.png" alt="" aria-hidden="true">',title:'Energia Vital',ready:true};
+        return prevSelectedSpecial();
+    };
+    wrapped.__aurenWrapped=true;window.getSelectedSpecialConfig=wrapped;getSelectedSpecialConfig=wrapped;
+}
+
+const prevTrigger=window.triggerSpecial||triggerSpecial;
+let aurenLastOpenMs=0;
+if(typeof prevTrigger==='function'&&!prevTrigger.__aurenWrapped){
+    const wrapped=function(){
+        const cfg=getSelectedSpecialConfig?.();
+        if(cfg?.type==='auren_shop'){
+            const now=performance.now();
+            if(now-aurenLastOpenMs<280) return;
+            aurenLastOpenMs=now;
+            openAurenShop();
+            return;
+        }
+        return prevTrigger();
+    };
+    wrapped.__aurenWrapped=true;window.triggerSpecial=wrapped;triggerSpecial=wrapped;
+}
+
+// Auren attack: green life-energy spheres with exactly 15% critical chance.
+const prevFire=window.fireWeapon||fireWeapon;
+function fireAurenWeapon(target){
+    if(!player||pd?.selectedChar!=='auren'||sandboxMode||runShootingDisabled||!target||isCurrentlyHypnotized(target))return;
+    const angle=Math.atan2(target.y-player.y,target.x-player.x);
+    player.lastAimAngle=angle;
+    const baseDmg=player.baseDmg*player.stats.dmgMult*(player.graffitAtkMult||1);
+    const crit=Math.random()<0.15;
+    const dmg=crit?baseDmg*Math.max(2,Number(player.stats.critDmg)||2):baseDmg;
+    const spd=5*player.stats.projSpdMult;
+    player.cd=player.baseFireRate*player.stats.fireRateMult;
+    createProj(player.x+Math.cos(angle)*(player.r+8),player.y+Math.sin(angle)*(player.r+8),Math.cos(angle)*spd,Math.sin(angle)*spd,dmg,Math.ceil((player.baseRange*player.stats.rangeMult)/Math.max(1,spd))+18,true,'auren_life_orb',{size:10,sourceChar:'auren',aurenCritical:crit,pierce:0});
+}
+if(typeof prevFire==='function'&&!prevFire.__aurenWrapped){
+    const wrapped=function(target){if(pd?.selectedChar==='auren')return fireAurenWeapon(target);return prevFire(target);};
+    wrapped.__aurenWrapped=true;window.fireWeapon=wrapped;fireWeapon=wrapped;
+}
+
+// Draw Auren projectile without altering the engine's other projectile visuals.
+const prevProjectilePainter=window.drawPolishedProjectileModel;
+if(typeof prevProjectilePainter==='function'&&!prevProjectilePainter.__aurenWrapped){
+    const wrapped=function(drawCtx,p,x,y){
+        if(p?.type==='auren_life_orb'){
+            const r=Math.max(4,Number(p.size)||9),TAU=Math.PI*2,crit=!!p.extra?.aurenCritical;
+            drawCtx.save();drawCtx.translate(x,y);
+            drawCtx.shadowColor=crit?'rgba(255,241,118,.95)':'rgba(46,204,113,.92)';drawCtx.shadowBlur=crit?17:12;
+            const g=drawCtx.createRadialGradient(-r*.32,-r*.38,1,0,0,r*1.08);
+            g.addColorStop(0,crit?'#fff7b0':'#d5ffe5');g.addColorStop(.28,crit?'#eaf28c':'#72f0a1');g.addColorStop(.72,crit?'#c9cf42':'#20b965');g.addColorStop(1,crit?'#7d8320':'#087a40');
+            drawCtx.fillStyle=g;drawCtx.strokeStyle='#eafff1';drawCtx.lineWidth=Math.max(1,r*.12);drawCtx.beginPath();drawCtx.arc(0,0,r,0,TAU);drawCtx.fill();drawCtx.stroke();
+            drawCtx.shadowBlur=0;
+            drawCtx.strokeStyle=crit?'rgba(255,255,220,.88)':'rgba(229,255,239,.78)';drawCtx.lineWidth=Math.max(.8,r*.065);
+            drawCtx.beginPath();drawCtx.arc(0,0,r*.68,0,TAU);drawCtx.stroke();
+            for(let k=0;k<2;k++){const a=(gameTime||0)*(k?-.9:.75)+k*Math.PI;drawCtx.save();drawCtx.rotate(a);drawCtx.strokeStyle=crit?'rgba(255,243,133,.86)':'rgba(184,255,210,.82)';drawCtx.lineWidth=Math.max(.8,r*.06);drawCtx.beginPath();drawCtx.ellipse(0,0,r*.55,r*.18,0,0,TAU);drawCtx.stroke();drawCtx.restore();}
+            drawCtx.fillStyle='rgba(255,255,255,.88)';drawCtx.beginPath();drawCtx.arc(-r*.28,-r*.30,Math.max(1.4,r*.18),0,TAU);drawCtx.fill();drawCtx.restore();return true;
+        }
+        return prevProjectilePainter(drawCtx,p,x,y);
+    };
+    wrapped.__aurenWrapped=true;window.drawPolishedProjectileModel=wrapped;drawPolishedProjectileModel=wrapped;
+}
+
+// Auren energy loss: 2 Energy Vital per damage event actually applied.
+const prevDealDamage=window.dealPlayerDamage||dealPlayerDamage;
+if(typeof prevDealDamage==='function'&&!prevDealDamage.__aurenWrapped){
+    const wrapped=function(amount,opts={}){
+        const wasAuren=pd?.selectedChar==='auren'&&player;
+        const beforeHp=wasAuren?Number(player.hp):0;
+        const result=prevDealDamage(amount,opts);
+        if(wasAuren&&Number(player.hp)<beforeHp){
+            ensureAurenRuntime();
+            player.aurenLifeEnergy=Math.max(0,player.aurenLifeEnergy-2);
+            addFloatingText(player.x,player.y-player.r-28,'-2 ENERGIA','#ff7675',11);
+        }
+        return result;
+    };
+    wrapped.__aurenWrapped=true;window.dealPlayerDamage=wrapped;dealPlayerDamage=wrapped;
+}
+
+// Paint the number in the existing player HUD pass.
+const originalDrawPlayer=window.drawPlayer;
+if(typeof originalDrawPlayer==='function'&&!originalDrawPlayer.__aurenWrapped){
+    const wrapped=function(...args){const out=originalDrawPlayer.apply(this,args);try{drawAurenEnergyHud();}catch(_){}return out;};wrapped.__aurenWrapped=true;window.drawPlayer=wrapped;drawPlayer=wrapped;
+}
+
+// If drawPlayer is not exposed, inject the draw call into the existing HUD routine by
+// wrapping the main game renderer once it is available.
+const mainDrawCandidates=['drawGame','renderGame','drawScene'];
+for(const name of mainDrawCandidates){
+    const fn=window[name];
+    if(typeof fn==='function'&&!fn.__aurenWrapped){
+        const wrapped=function(...args){const out=fn.apply(this,args);try{drawAurenEnergyHud();}catch(_){}return out;};wrapped.__aurenWrapped=true;window[name]=wrapped;try{eval(`${name}=window[name]`);}catch(_){}break;
+    }
+}
+
+// Update runtime count and shop visibility each frame without introducing a second loop.
+const prevUpdateSpecial=window.updateSpecialButtonUI||updateSpecialButtonUI;
+if(typeof prevUpdateSpecial==='function'&&!prevUpdateSpecial.__aurenWrapped){
+    const wrapped=function(force=false){const out=prevUpdateSpecial(force);if(player&&pd?.selectedChar==='auren'){ensureAurenRuntime();if(player.aurenShopOpen && force)renderAurenShop();}return out;};wrapped.__aurenWrapped=true;window.updateSpecialButtonUI=wrapped;updateSpecialButtonUI=wrapped;
+}
+
+// Integração mínima do ganho de Energia Vital: mantém a detecção de mortes do Auren
+// sem varrer o array de inimigos várias vezes por projétil/frame.
+if(typeof grantAurenEnergyFromKill==='function' && typeof updateEnemies==='function' && !updateEnemies.__aurenKillWrapped){
+    const originalUpdateEnemies=updateEnemies;
+    const wrappedUpdateEnemies=function(dt){
+        const tracking=pd?.selectedChar==='auren' && Array.isArray(enemies);
+        const snapshots=tracking ? enemies.slice() : null;
+        const out=originalUpdateEnemies(dt);
+        if(tracking && snapshots?.length){
+            const aliveSet=new Set(enemies);
+            for(const enemy of snapshots){
+                if(!enemy || enemy.__aurenKillHandled || aliveSet.has(enemy)) continue;
+                const validDeath=Number(enemy.hp)<=0 || enemy.truckDeathPending || enemy.tourTruckDeathPending || enemy.ambulanceDeathPending || enemy.policeCarDeathPending;
+                if(validDeath){ enemy.__aurenKillHandled=true; grantAurenEnergyFromKill(enemy); }
+            }
+        }
+        return out;
+    };
+    wrappedUpdateEnemies.__aurenKillWrapped=true;
+    updateEnemies=wrappedUpdateEnemies;
+    window.updateEnemies=wrappedUpdateEnemies;
+}
+
+try{renderChars?.();}catch(_){}
+})();
+
 </script>
 
 <style id="tutorial-dialog-final-polish">
@@ -27771,5 +28790,78 @@ const oldUpdateUI=window.updateUI;window.updateUI=function(){oldUpdateUI?.();};
 window.openPetShop=openPetShop;
 })();
 </script>
+<style id="cowbew-pet-sprite-fix">
+/* Common abilities are unlocked at level 5, including Cowbew. */
+#screen-char-detail #detail-ability-stat.hidden,
+#screen-char-detail #detail-ability-stat[hidden],
+#screen-char-detail #detail-summary.hidden { display:none !important; }
+
+/* Preserve the natural aspect ratio of the chick sprite in its ability button. */
+#btn-special .btn-special-label img[src*="sprites/chick.png"] {
+    width:56px !important;
+    height:40px !important;
+    object-fit:contain !important;
+}
+
+/* Pet artwork gets a wider presentation box; contain prevents vertical squashing. */
+#screen-pets .pet-selected-visual { width:118px !important; height:82px !important; }
+#screen-pets .pet-selected-visual img { width:112px !important; height:78px !important; object-fit:contain !important; }
+#screen-pets .pet-inventory-card img { width:86px !important; height:66px !important; object-fit:contain !important; }
+#screen-pets .pet-fusion-picker-visual { width:82px !important; height:66px !important; }
+#screen-pets .pet-fusion-picker-visual img { width:76px !important; height:62px !important; object-fit:contain !important; }
+.pet-roulette-item img { width:76px !important; height:58px !important; object-fit:contain !important; }
+.pet-reward-reveal .gacha-drop-sprite img { width:104px !important; height:78px !important; object-fit:contain !important; }
+@media(max-width:700px){
+    #screen-pets .pet-selected-visual { width:88px !important; height:66px !important; }
+    #screen-pets .pet-selected-visual img { width:84px !important; height:62px !important; }
+    #screen-pets .pet-inventory-card img { width:72px !important; height:56px !important; }
+    #screen-pets .pet-fusion-picker-visual { width:70px !important; height:56px !important; }
+    #screen-pets .pet-fusion-picker-visual img { width:66px !important; height:52px !important; }
+    .pet-roulette-item img { width:68px !important; height:52px !important; }
+}
+</style>
+
+
+<!-- ASTRA_AND_TITLE_FIX_V1 -->
+
+
+
+<!-- CHRONOS_TEMPORAL_PATCH_V1 -->
+
+
+</body>
+</html>
+
+<!-- AUREN_FINAL_PATCH_V1 -->
+<style id="auren-final-ui">
+#auren-energy-hud{position:absolute;left:50%;top:50%;transform:translate(-50%,calc(-50% - 46px));z-index:6;pointer-events:none;color:#35e37b;font-size:18px;font-weight:900;text-shadow:2px 2px 0 #000,0 0 10px rgba(46,204,113,.45);white-space:nowrap;display:none;}
+#auren-shop-overlay{position:fixed;inset:0;z-index:24000;background:rgba(0,0,0,.86);backdrop-filter:blur(7px);display:none;align-items:center;justify-content:center;padding:18px;}
+#auren-shop-overlay.visible{display:flex;}
+.auren-shop-panel{width:min(96vw,980px);max-height:92vh;overflow:auto;background:linear-gradient(180deg,rgba(27,41,35,.99),rgba(10,22,17,.99));border:3px solid rgba(46,204,113,.72);border-radius:26px;padding:20px;box-shadow:0 22px 60px rgba(0,0,0,.7),0 0 28px rgba(46,204,113,.16);position:relative;}
+.auren-shop-head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 2px 16px;border-bottom:1px solid rgba(255,255,255,.10);}
+.auren-shop-title{margin:0;color:#65f58f;font-size:30px;text-shadow:2px 2px 0 #000;}
+.auren-shop-energy{font-size:20px;font-weight:900;color:#35e37b;white-space:nowrap;}
+.auren-shop-close{width:46px;height:46px;min-width:46px;padding:0;font-size:26px;background:#7f1d1d;border:2px solid #b02a2a !important;border-radius:14px;}
+.auren-shop-sub{color:#cfe8d8;font-size:13px;text-align:center;margin:14px 0 6px;}
+.auren-shop-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:16px;}
+.auren-buy-card{background:linear-gradient(180deg,rgba(37,57,47,.98),rgba(17,31,24,.98));border:2px solid rgba(46,204,113,.28);border-radius:20px;padding:15px;min-height:240px;display:flex;flex-direction:column;gap:9px;text-align:left;box-shadow:0 14px 26px rgba(0,0,0,.32);}
+.auren-buy-card:hover{border-color:rgba(46,204,113,.72);transform:translateY(-3px);}
+.auren-buy-icon{width:54px;height:54px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.07);border-radius:14px;border:1px solid rgba(255,255,255,.10);}
+.auren-buy-icon img{width:46px;height:46px;object-fit:contain;display:block;}
+.auren-buy-name{font-size:18px;font-weight:900;color:#fff;}
+.auren-buy-desc{font-size:13px;line-height:1.35;color:#d8e7de;flex:1;}
+.auren-buy-cost{font-size:14px;font-weight:900;color:#65f58f;margin-top:2px;}
+.auren-buy-btn{width:100%;padding:11px 12px;font-size:13px;background:#1f9d55;border:2px solid #167a40 !important;border-radius:999px;}
+.auren-buy-btn:disabled{opacity:.42;cursor:not-allowed;filter:none;transform:none;box-shadow:0 5px 0 rgba(0,0,0,.3);}
+.auren-shop-bottom{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:16px;flex-wrap:wrap;}
+.auren-reroll-btn{background:#3498db;border:2px solid #217dbb !important;padding:12px 18px;font-size:14px;border-radius:999px;}
+.auren-reroll-btn:disabled{opacity:.42;cursor:not-allowed;filter:none;transform:none;}
+.auren-reroll-info{font-size:13px;font-weight:900;color:#d4e0d8;}
+@media(max-width:760px){.auren-shop-cards{grid-template-columns:1fr;}.auren-shop-panel{padding:15px;}.auren-shop-title{font-size:24px}.auren-buy-card{min-height:190px;}}
+</style>
+
+
+
+
 </body>
 </html>
