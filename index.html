@@ -6478,41 +6478,54 @@ function isTutorialBaseBlockingStage() {
 }
 
 function isTutorialClickAllowed(target) {
-    // Tutorial concluído = bloqueio global desligado. Isso é deliberado: qualquer
-    // overlay/popup aberto depois do tutorial deve continuar com seus próprios cliques.
+    // Tutorial concluído = bloqueio global desligado.
     if (!isTutorialBaseBlockingStage() || !target) return true;
-    const el = target.closest?.('button,a,[role="button"],input,select,textarea');
-    if (!el) return true; // canvas/joystick/gameplay continuam utilizáveis
 
-    // O próprio diálogo do tutorial e seu ponteiro precisam receber o toque.
-    if (el.closest('#overlay-tutorial-dialog')) return true;
-    if (el.closest('#tutorial-pointer')) return true;
-
-    // Controles críticos/legítimos que podem surgir durante a sequência obrigatória.
-    // Eles nunca devem ser vítimas do bloqueador global, evitando softlocks.
-    if (el.closest('#custom-popup')) return true;
-    if (el.id === 'gacha-continue-btn') return true;
-    if (el.closest('#overlay-gameover')) return true;
-    if (el.id === 'btn-main-fullscreen' || el.id === 'btn-settings-fullscreen') return true;
-    if (el.closest('#joystick-zone') || el.id === 'btn-special' || el.id === 'btn-pause') return true;
+    /*
+     * HARD ALLOW-LIST: estes são controles que o fluxo obrigatório realmente
+     * precisa conseguir tocar. O teste vem antes de qualquer filtro por
+     * tagName porque vários deles são DIVs/cards com onclick próprio.
+     */
+    const requiredSelectors = [
+        '#overlay-tutorial-dialog',
+        '#tutorial-pointer',
+        '#custom-popup',
+        '#gacha-continue-btn',
+        '#btn-classic-select',
+        '#overlay-gameover',
+        '#btn-main-fullscreen',
+        '#btn-settings-fullscreen',
+        '#joystick-zone',
+        '#btn-special',
+        '#btn-pause'
+    ];
+    for (const selector of requiredSelectors) {
+        try { if (target.closest?.(selector)) return true; } catch (_) {}
+    }
 
     const stage = pd?.tutorial?.stage;
     const allowedByStage = {
-        // Tutorial específico de Personagens: pode entrar em Personagens e tocar no card do Strike.
+        'force-play': '#screen-main .btn-play',
         'force-characters': '#screen-main .emoji-nav-chars, #screen-chars .card-item[data-char-id="strike"]',
-        // Tutorial do card: o card do Strike e a própria tela de detalhes ficam liberados.
-        'force-strike-card': '#screen-chars .card-item[data-char-id="strike"], #screen-char-detail, #screen-char-detail .btn-back',
-        // Tutorial de evolução: somente a evolução é necessária nesta etapa.
+        'force-strike-card': '#screen-chars .card-item[data-char-id="strike"], #screen-char-detail .btn-back',
         'evolve-strike': '#screen-char-detail #detail-btn-evolve, #screen-char-detail .btn-back',
-        // Tutorial do chip: o slot indicado e o fechamento da seleção ficam liberados.
         'force-chip-slot': '#screen-char-detail #detail-chip-slots .chip-slot, #overlay-chips-equip .btn-back, #overlay-chips-equip [data-action="close"]',
-        // Tutorial da escolha do chip: o chip indicado é clicável.
         'force-chip-choice': '#overlay-chips-equip .chip-card[data-tutorial-chip="hp"]',
-        // Tutorial da Oficina.
         'force-fasty': '#trail-content .card-button'
     };
+
     const selector = allowedByStage[stage];
-    return !!selector && !!el.closest(selector);
+    if (selector) {
+        try { if (target.closest?.(selector)) return true; } catch (_) {}
+    }
+
+    // Se não é sequer um controle interativo, não há motivo para bloquear o evento.
+    const el = target.closest?.('button,a,[role="button"],input,select,textarea');
+    if (!el) return true;
+
+    // O resto permanece bloqueado durante as etapas obrigatórias para evitar
+    // que o jogador abandone a sequência e crie estados incompletos.
+    return false;
 }
 
 document.addEventListener('click', (event) => {
@@ -28648,8 +28661,9 @@ window.openPetShop=openPetShop;
 <!-- CHRONOS_TEMPORAL_PATCH_V1 -->
 
 
-</body>
-</html>
+
+
+
 
 <style id="petshop-fullscreen-map-tutorial-polish">
 #screen-pets{overflow-x:hidden !important;overflow-y:auto !important;overscroll-behavior-y:contain !important;-webkit-overflow-scrolling:touch !important;touch-action:pan-y !important;scrollbar-width:thin !important;scrollbar-color:rgba(255,255,255,.22) transparent !important;}
@@ -28705,8 +28719,9 @@ window.openPetShop=openPetShop;
 
 
 
-</body>
-</html>
+
+
+
 
 <style id="bugfix-crioheat-fullscreen-pointer-v2">
 .tutorial-pointer-right{transform:none;}
@@ -28784,3 +28799,139 @@ window.openPetShop=openPetShop;
   #screen-main #btn-main-fullscreen .fullscreen-frame-icon{width:26px !important;height:26px !important;flex-basis:26px !important;}
 }
 </style>
+
+
+<!-- FINAL TUTORIAL INPUT/VIEWPORT REPAIR -->
+<style id="final-tutorial-input-viewport-repair">
+/* O tutorial escurece a tela, mas não pode virar uma camada física sobre os botões. */
+#overlay-tutorial-dialog{
+    position:fixed !important;
+    inset:0 !important;
+    width:100vw !important;
+    height:100dvh !important;
+    min-height:100svh !important;
+    margin:0 !important;
+    padding:0 !important;
+    overflow:hidden !important;
+    display:flex !important;
+    align-items:flex-end !important;
+    justify-content:stretch !important;
+    pointer-events:none !important;
+    touch-action:none !important;
+    z-index:12000 !important;
+}
+#overlay-tutorial-dialog.hidden{display:none !important;}
+#overlay-tutorial-dialog:not(.hidden){display:flex !important;}
+#overlay-tutorial-dialog .tutorial-dialog-box{
+    pointer-events:auto !important;
+    touch-action:manipulation !important;
+    position:absolute !important;
+    left:clamp(7px,2vw,24px) !important;
+    right:clamp(7px,2vw,24px) !important;
+    bottom:max(8px,env(safe-area-inset-bottom)) !important;
+    width:auto !important;
+    max-width:none !important;
+    min-height:clamp(142px,22dvh,250px) !important;
+    max-height:min(42dvh,330px) !important;
+    height:auto !important;
+    margin:0 !important;
+    box-sizing:border-box !important;
+    padding:clamp(12px,2dvh,22px) clamp(14px,3vw,34px) clamp(12px,2dvh,20px) clamp(110px,17vw,245px) !important;
+    display:flex !important;
+    align-items:center !important;
+    gap:clamp(10px,2vw,20px) !important;
+    overflow:hidden !important;
+    z-index:12001 !important;
+    cursor:pointer !important;
+}
+#overlay-tutorial-dialog .tutorial-dialog-sprite{
+    pointer-events:none !important;
+    position:absolute !important;
+    left:clamp(10px,3vw,42px) !important;
+    bottom:max(7px,env(safe-area-inset-bottom)) !important;
+    width:clamp(82px,13vw,165px) !important;
+    height:clamp(82px,13vw,165px) !important;
+    max-width:28vw !important;
+    max-height:28vw !important;
+}
+#overlay-tutorial-dialog .tutorial-dialog-copy{
+    pointer-events:auto !important;
+    min-width:0 !important;
+    min-height:0 !important;
+    width:100% !important;
+    max-height:100% !important;
+    overflow:auto !important;
+    overscroll-behavior:contain !important;
+    -webkit-overflow-scrolling:touch !important;
+}
+#overlay-tutorial-dialog .tutorial-dialog-text{
+    max-height:min(24dvh,190px) !important;
+    overflow:auto !important;
+    overflow-wrap:anywhere !important;
+    word-break:break-word !important;
+}
+#overlay-tutorial-dialog .tutorial-dialog-hint{margin-top:9px !important;padding-bottom:2px !important;}
+
+@media(max-width:620px){
+    #overlay-tutorial-dialog{height:100dvh !important;min-height:100svh !important;}
+    #overlay-tutorial-dialog .tutorial-dialog-box{
+        left:6px !important;right:6px !important;
+        bottom:max(7px,env(safe-area-inset-bottom)) !important;
+        min-height:132px !important;max-height:46dvh !important;
+        padding:12px 10px 12px 106px !important;gap:7px !important;
+        border-radius:20px !important;
+    }
+    #overlay-tutorial-dialog .tutorial-dialog-sprite{
+        left:8px !important;bottom:max(7px,env(safe-area-inset-bottom)) !important;
+        width:88px !important;height:88px !important;max-width:none !important;max-height:none !important;
+    }
+    #overlay-tutorial-dialog .tutorial-dialog-text{
+        max-height:25dvh !important;font-size:clamp(14px,4vw,17px) !important;line-height:1.38 !important;
+    }
+    #overlay-tutorial-dialog .tutorial-dialog-speaker{font-size:clamp(16px,5vw,20px) !important;margin-bottom:5px !important;}
+    #overlay-tutorial-dialog .tutorial-dialog-hint{font-size:10px !important;margin-top:6px !important;}
+}
+@media(max-height:520px) and (orientation:landscape){
+    #overlay-tutorial-dialog .tutorial-dialog-box{min-height:108px !important;max-height:48dvh !important;padding:8px 10px 8px 92px !important;}
+    #overlay-tutorial-dialog .tutorial-dialog-sprite{left:7px !important;width:74px !important;height:74px !important;}
+    #overlay-tutorial-dialog .tutorial-dialog-text{max-height:27dvh !important;}
+}
+</style>
+<script id="final-tutorial-input-viewport-repair-js">
+(function(){
+    'use strict';
+
+    function bindTutorialDialogBox(){
+        const overlay=document.getElementById('overlay-tutorial-dialog');
+        const box=overlay?.querySelector('.tutorial-dialog-box');
+        if(!box || box.dataset.tutorialClickBound==='1') return;
+        box.dataset.tutorialClickBound='1';
+        box.addEventListener('click', function(event){
+            event.stopPropagation();
+            if(typeof window.advanceTutorialDialog==='function') window.advanceTutorialDialog(event);
+        }, false);
+    }
+
+    function positionTutorialViewport(){
+        const overlay=document.getElementById('overlay-tutorial-dialog');
+        if(overlay && !overlay.classList.contains('hidden')){
+            overlay.style.height='100dvh';
+            overlay.style.minHeight='100svh';
+        }
+        bindTutorialDialogBox();
+        if(typeof window.positionTutorialPointer==='function'){
+            try{ window.positionTutorialPointer(); }catch(_){}
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', positionTutorialViewport, {once:true});
+    window.addEventListener('resize', positionTutorialViewport, {passive:true});
+    window.addEventListener('orientationchange', positionTutorialViewport, {passive:true});
+    if(window.visualViewport) window.visualViewport.addEventListener('resize', positionTutorialViewport, {passive:true});
+    setTimeout(positionTutorialViewport,0);
+    setTimeout(positionTutorialViewport,150);
+})();
+</script>
+
+</body>
+</html>
