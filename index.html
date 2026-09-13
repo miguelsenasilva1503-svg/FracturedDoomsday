@@ -12450,9 +12450,22 @@ function loop(time) {
     if(!isPlaying) return;
     const dt = Math.min(0.05, Math.max(0, (time - lastTime) / 1000));
     lastTime = time;
-    try { if(!isPaused) { update(dt); draw(); } else if (sandboxMode) { draw(); } } catch (err) {
+    if (!isPaused) {
+        // Atualização e renderização ficam isoladas. Um erro em uma entidade,
+        // habilidade ou sistema de gameplay não pode impedir o draw do frame.
+        try { update(dt); } catch (err) { recoverRuntimeState(err); }
+    }
+    try {
+        if (!isPaused || sandboxMode) draw();
+    } catch (err) {
         recoverRuntimeState(err);
-        try { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; } catch (_) {}
+        try {
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.globalAlpha = 1;
+            ctx.clearRect(0, 0, cw, ch);
+            ctx.fillStyle = '#111';
+            ctx.fillRect(0, 0, cw, ch);
+        } catch (_) {}
     }
     gameLoopId = requestAnimationFrame(loop);
 }
