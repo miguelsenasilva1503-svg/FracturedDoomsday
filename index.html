@@ -1054,16 +1054,25 @@ html.sandbox-pc .sandbox-tool-hotkey{display:block}.sandbox-tool-state{position:
 .promo-offer-btn:hover{color:#111 !important;}
 </style>
 <style id="menu-resource-height-fix">
-#screen-main .main-top-row{position:absolute !important;left:50% !important;top:18px !important;transform:translateX(-50%) !important;width:auto !important;z-index:30 !important;margin:0 !important;}
-#screen-main .main-resources{transform:none !important;margin:0 !important;}
-#screen-main .main-center{padding-top:4px !important;}
+#screen-main .main-top-row{position:relative !important;left:auto !important;top:auto !important;transform:none !important;width:100% !important;z-index:2 !important;margin:0 !important;min-height:68px !important;padding-top:2px !important;display:flex !important;align-items:flex-start !important;justify-content:center !important;}
+#screen-main .main-resources{transform:none !important;margin:0 auto !important;position:relative !important;top:auto !important;}
+#screen-main .main-center{padding-top:10px !important;}
 </style>
 <style id="char-detail-resource-counter-style">
 #detail-resource-counter{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center;margin:5px 0 8px;}
 #detail-resource-counter .resource{padding:4px 10px;font-size:13px;min-height:30px;}
 #detail-resource-counter .resource-icon{width:19px;height:19px;object-fit:contain;}
 </style>
-<style id="event-season-ui-fix">.event-season-hero{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:14px;}.event-season-hero h4{margin:0;font-size:22px;color:var(--btn-yellow);}.event-season-hero p{margin:6px 0 0;color:#d9e2ea;}.event-claim-wrap{display:flex;justify-content:center;margin-top:14px;}</style></head>
+<style id="event-season-ui-fix">.event-season-hero{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:14px;}.event-season-hero h4{margin:0;font-size:22px;color:var(--btn-yellow);}.event-season-hero p{margin:6px 0 0;color:#d9e2ea;}.event-claim-wrap{display:flex;justify-content:center;margin-top:14px;}</style><style id="fullscreen-settings-final-fix">
+#screen-main .btn-main-fullscreen{display:none !important;}
+#screen-settings .fullscreen-corner-btn{position:relative !important;width:72px !important;min-width:72px !important;height:82px !important;min-height:82px !important;margin:8px auto 0 !important;padding:4px 2px !important;border-radius:18px !important;display:flex !important;flex-direction:column !important;align-items:center !important;justify-content:center !important;gap:2px !important;background:rgba(255,255,255,.075) !important;border:1px solid rgba(255,255,255,.22) !important;box-shadow:0 12px 28px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.12) !important;color:#fff !important;font-size:11px !important;font-weight:900 !important;text-transform:uppercase !important;line-height:1 !important;overflow:hidden !important;}
+#screen-settings .fullscreen-corner-btn .fs-corner{position:absolute !important;width:15px !important;height:15px !important;pointer-events:none !important;}
+#screen-settings .fullscreen-corner-btn .fs-corner.tl{left:7px !important;top:7px !important;border-left:3px solid currentColor !important;border-top:3px solid currentColor !important;}
+#screen-settings .fullscreen-corner-btn .fs-corner.tr{right:7px !important;top:7px !important;border-right:3px solid currentColor !important;border-top:3px solid currentColor !important;}
+#screen-settings .fullscreen-corner-btn .fs-corner.bl{left:7px !important;bottom:7px !important;border-left:3px solid currentColor !important;border-bottom:3px solid currentColor !important;}
+#screen-settings .fullscreen-corner-btn .fs-corner.br{right:7px !important;bottom:7px !important;border-right:3px solid currentColor !important;border-bottom:3px solid currentColor !important;}
+#screen-settings .fullscreen-corner-btn .fs-label{position:relative !important;z-index:1 !important;margin-top:36px !important;font-size:11px !important;line-height:1 !important;white-space:nowrap !important;}
+</style></head>
 <body>
 
 <div id="notif"></div>
@@ -1163,7 +1172,6 @@ html.sandbox-pc .sandbox-tool-hotkey{display:block}.sandbox-tool-state{position:
 <div id="screen-main" class="screen">
     <button class="btn-top-corner btn-profile floating-main-btn" onclick="openProfile()"><img src="elements/profile.png" alt=""><span>Perfil</span></button>
     <button class="btn-top-corner btn-settings floating-main-btn" onclick="showScreen('screen-settings')"><img src="elements/config.png" alt=""><span>Config</span></button>
-    <button class="btn-top-corner btn-main-fullscreen fullscreen-corner-btn floating-main-btn" type="button" onclick="toggleFullscreen()"><span class="fs-corner tl"></span><span class="fs-corner tr"></span><span class="fs-corner bl"></span><span class="fs-corner br"></span><span class="fs-label">Tela Cheia</span></button>
 
     <div class="main-menu-shell">
         <div class="main-top-row">
@@ -1276,6 +1284,10 @@ html.sandbox-pc .sandbox-tool-hotkey{display:block}.sandbox-tool-state{position:
         <div class="settings-hero">
             <h2 style="margin-top: 0;">Configurações</h2>
             <p>Configurações de controle e acessibilidade.</p>
+            <button class="fullscreen-corner-btn" type="button" onclick="toggleFullscreen()" aria-label="Tela Cheia">
+                <span class="fs-corner tl"></span><span class="fs-corner tr"></span><span class="fs-corner bl"></span><span class="fs-corner br"></span>
+                <span class="fs-label">Tela Cheia</span>
+            </button>
         </div>
 
         <div class="settings-section">
@@ -8286,7 +8298,7 @@ const EVENT_CHARACTER_PROGRESS = {
     ]}
 };
 const EVENT_PROMOS=[
-{id:'nox',label:'Nox',oldCost:349,promoCost:79,level10Cost:899,rarity:'legendary'},{id:'astra',label:'Astra',oldCost:149,promoCost:79,level10Cost:659,rarity:'epic'},{id:'vingathron',label:'Vingathron',oldCost:569,promoCost:149,level10Cost:1009,rarity:'mythic'},{id:'cowbew',label:'Cowbew',oldCost:29,promoCost:9,rarity:'common'},{id:'zoe',label:'Zoe',oldCost:149,promoCost:29,rarity:'epic'},{id:'yoyo',label:'Yoyo',oldCost:149,promoCost:79,rarity:'epic'},{id:'mestre_do_fogo',label:'Mestre do Fogo',oldCost:349,promoCost:149,rarity:'legendary'},{id:'ignite',label:'Ignite',oldCost:349,promoCost:149,rarity:'legendary'},{id:'cyro_pyro',label:'Crioheat',oldCost:349,promoCost:149,rarity:'legendary'},{id:'chronos',label:'Chronos',oldCost:349,promoCost:79,rarity:'legendary'},{id:'snapdragon',label:'Snapdragon',oldCost:349,promoCost:79,rarity:'legendary'},{id:'izaque',label:'Izaque',oldCost:349,promoCost:79,rarity:'legendary'},{id:'auren',label:'Auren',oldCost:349,promoCost:79,rarity:'legendary'},{id:'blizzard',label:'Blizzard',oldCost:569,promoCost:349,rarity:'mythic'}
+{id:'nox',label:'Nox',oldCost:349,promoCost:79,level10Cost:899,rarity:'legendary'},{id:'astra',label:'Astra',oldCost:149,promoCost:79,level10Cost:659,rarity:'epic'},{id:'vingathron',label:'Vingathron',oldCost:569,promoCost:149,level10Cost:1009,rarity:'mythic'},{id:'cowbew',label:'Cowbew',oldCost:29,promoCost:9,rarity:'common'},{id:'zoe',label:'Zoe',oldCost:149,promoCost:29,rarity:'epic'},{id:'yoyo',label:'Yoyo',oldCost:149,promoCost:79,rarity:'epic'},{id:'mestre_do_fogo',label:'Mestre do Fogo',oldCost:349,promoCost:149,rarity:'legendary'},{id:'ignite',label:'Ignite',oldCost:349,promoCost:149,rarity:'legendary'},{id:'cyro_pyro',label:'Crioheat',oldCost:349,promoCost:149,rarity:'legendary'},{id:'chronos',label:'Chronos',oldCost:349,promoCost:79,rarity:'legendary'},{id:'snapdragon',label:'Snapdragon',oldCost:349,promoCost:79,rarity:'legendary'},{id:'izaque',label:'Izaque',oldCost:349,promoCost:79,rarity:'legendary'},{id:'auren',label:'Auren',oldCost:349,promoCost:79,rarity:'legendary'},{id:'blizzard',label:'Blizzard',oldCost:569,promoCost:349,rarity:'mythic'},{id:'zippi',label:'Zippi',oldCost:149,promoCost:79,rarity:'epic'},{id:'sterling',label:'Sterling',oldCost:349,promoCost:149,rarity:'legendary'}
 ];
 function ensureEventState(){
     if(!pd.events||typeof pd.events!=='object')pd.events={};
