@@ -1048,6 +1048,15 @@ html.sandbox-pc .sandbox-tool-hotkey{display:block}.sandbox-tool-state{position:
 .fullscreen-corner-btn .fs-label{position:relative;z-index:1;}
 .fullscreen-corner-btn:active .fs-corner{opacity:.72;}
 </style>
+
+<style id="promo-offer-contrast-fix">
+.promo-offer-btn{color:#111 !important;text-shadow:none !important;background:#2ecc71 !important;border-color:#219653 !important;}
+.promo-offer-btn:hover{color:#111 !important;}
+</style>
+<style id="menu-resource-height-fix">
+#screen-main .top-bar{transform:translateY(-8px);margin-bottom:12px !important;}
+#screen-main .top-bar + *{margin-top:0 !important;}
+</style>
 </head>
 <body>
 
@@ -2931,7 +2940,7 @@ const CARDS = [
     { id: 'drone_card', name: 'Drone Aliado', desc: 'Invoca um drone que atira', apply: (s) => { allies.push({x: player.x, y: player.y, dmg: player.baseDmg * player.stats.dmgMult * 0.5, speed: 2.8, life: Infinity, cd: 0, isTurret: false, type: 'drone', followX: 20, followY: -20}); } }
 ];
 
-const MAPS = ["Planície", "Deserto", "Nevasca", "Caverna", "Floresta", "Pântano", "Metrópole", "Ígneo", "Bambuzal", "Discoteca", "Palácio Marinho", "Fraturado", "Chroma Key"];
+const MAPS = ["Planície", "Deserto", "Nevasca", "Caverna", "Floresta", "Pântano", "Metrópole", "Ígneo", "Bambuzal", "Discoteca", "Palácio Marinho", "Fraturado", "Chroma Key", "Base Lunar"];
 
 const UHC_MODIFIERS = {
     "Planície": { night: true },
@@ -2945,7 +2954,8 @@ const UHC_MODIFIERS = {
     "Bambuzal": { night: true, bambooSpikes: true },
     "Discoteca": { night: true, strongPushBoxes: true, dancersSpawn: 6 },
     "Palácio Marinho": { night: true, underwater: true, oxygenDrain: 1, uhcSpeedMult: 0.58 },
-    "Fraturado": { night: true, fractures: true }
+    "Fraturado": { night: true, fractures: true },
+    "Base Lunar": { night: true, lunarGravity: true }
 };
 
 const ENEMY_TYPES = ["Básico", "Gigante", "Tanque", "Boss", "Ninja", "Kamikaze", "Líder", "Colosso", "Elite Master", "Líder Elite", "Caixa de papelão", "Capacete", "Cabeça de prisma"];
@@ -7604,7 +7614,7 @@ function updateSettingsUI(syncSlider = true) {
     const devMapStatus = document.getElementById('dev-map-rotation-status');
     if (devMapSelect) {
         if (!devMapSelect.options.length) {
-            devMapSelect.innerHTML = '<option value="-1">Rotação automática</option>' + MAPS.map((name, index) => ({name,index})).filter(m => m.index < 12).map(m => `<option value="${m.index}">${m.name}</option>`).join('');
+            devMapSelect.innerHTML = '<option value="-1">Rotação automática</option>' + MAPS.map((name, index) => ({name,index})).filter(m => m.index < 14).map(m => `<option value="${m.index}">${m.name}</option>`).join('');
         }
         const override = Number.isInteger(Number(pd?.debug?.mapRotationOverride)) ? Number(pd.debug.mapRotationOverride) : -1;
         devMapSelect.value = (override >= -1 && override < MAPS.length) ? String(override) : '-1';
@@ -7662,7 +7672,7 @@ function getSelectedMapIndex() {
 function getDestinationChoices() {
     const bucket = getMapChoiceBucket();
     const seed = `destinations:${bucket}`;
-    return shuffleWithSeed(MAPS.map((name, index) => index).filter(index => index < 12), seed).slice(0, 3);
+    return shuffleWithSeed(MAPS.map((name, index) => index).filter(index => index < 12 || index === 13), seed).slice(0, 3);
 }
 
 function drawDestinationPreview(canvas, mapId) {
@@ -12543,7 +12553,7 @@ function updatePauseQuitAvailability() {
     // A primeira partida não pode ser abandonada. A partir da segunda partida,
     // o botão fica disponível normalmente.
     const gamesStarted = Math.max(0, Number(pd?.progressStats?.gamesStarted) || 0);
-    const canQuit = gamesStarted >= 2;
+    const canQuit = !!window.characterTestMode || gamesStarted >= 2;
     quitBtn.classList.toggle('hidden', !canQuit);
     quitBtn.disabled = !canQuit;
     if (canQuit) quitBtn.removeAttribute('title');
@@ -12676,7 +12686,7 @@ function startRunAfterShop(options = {}) {
     
     player = {
         x: 0, y: 0, r: (pd.selectedChar === 'hank' || pd.selectedChar === 'vingathron' || pd.selectedChar === 'snapdragon' || pd.selectedChar === 'yeti' || pd.selectedChar === 'glace') ? 20 : ((pd.selectedChar === 'shiv' || pd.selectedChar === 'zippi') ? 10 : ((pd.selectedChar === 'kaisen' || pd.selectedChar === 'booboo' || pd.selectedChar === 'yoyo') ? 13 : (pd.selectedChar === 'eel' ? 15 : 15))), baseHp: initialBaseHp, hp: initialBaseHp, baseSpeed: charDef.speed, baseDmg: initialBaseDmg,
-        baseFireRate: charDef.fireRate, baseRange: charDef.range, color: charDef.color, weapon: charDef.weapon, vingathronFragments: 0, vingathronDamageResistance: 0, vingathronFragmentCooldown: 0, vingathronShieldTimer: 0, vingathronAttackTimer: 0, vingathronAttackAngle: 0, lastDamageTaken: 0, merlinAge: pd.selectedChar === 'merlin' ? 'old' : null, merlinBaseHp: pd.selectedChar === 'merlin' ? initialBaseHp : null, merlinPoisonChance: 0.15, merlinBabyChance: 0.15, merlinPacifierChance: 0, merlinAgeCooldown: 0, crioheatObsidian: false, gladiatorMode: pd.selectedChar === 'gladiator' ? (pd.chars?.gladiator?.mode || 'shooter') : null, gladiatorModeCooldown: 0, eolioPropellerSeq: 0, cd: 0, shieldTimer: 0,
+        baseFireRate: charDef.fireRate, baseRange: charDef.range, color: charDef.color, weapon: charDef.weapon, lunarSlideVx: 0, lunarSlideVy: 0, vingathronFragments: 0, vingathronDamageResistance: 0, vingathronFragmentCooldown: 0, vingathronShieldTimer: 0, vingathronAttackTimer: 0, vingathronAttackAngle: 0, lastDamageTaken: 0, merlinAge: pd.selectedChar === 'merlin' ? 'old' : null, merlinBaseHp: pd.selectedChar === 'merlin' ? initialBaseHp : null, merlinPoisonChance: 0.15, merlinBabyChance: 0.15, merlinPacifierChance: 0, merlinAgeCooldown: 0, crioheatObsidian: false, gladiatorMode: pd.selectedChar === 'gladiator' ? (pd.chars?.gladiator?.mode || 'shooter') : null, gladiatorModeCooldown: 0, eolioPropellerSeq: 0, cd: 0, shieldTimer: 0,
         zombieTimer: 0, revived: false, elekCycle: false, dashTimer: 0, meleeCd: 0, izaqueForm: pd.selectedChar === 'izaque' ? 'normal' : null, izaqueFormTimer: 0, izaqueCombo: 0, izaqueMovementTimer: 0, izaqueSpecialCooldown: pd.selectedChar === 'izaque' ? 30 : 0, izaqueHybridWavesLeft: 0, boldShots: 0, boldReload: 0, boldAbilityTimer: 0, specCd: pd.selectedChar === 'ghoul' ? 20 : 0, commonAbilityCd: 0, hunterAbilityCd: 0, tenentAbilityCooldown: 0, fastyAbilityTimer: 0, zoePunchCycle: 0, zoeBattery: 0, zoeTunedActive: false, zoeTunedStationaryTimer: 0, zoeTunedOrbitAngle: 0, zoeTunedOrbitTickCd: 0, kayoChairReady: false, invisTimer: 0, ghoulPendingCd: 0, ninjiPendingCd: 0,
         lastMoveAngle: 0, lastAimAngle: 0, sharkieAttackTimer: 0, sharkieDiveTimer: 0, sharkieDiveCooldown: 0, josephOllieCd: 0, josephOllieTimer: 0, josephOllieAngle: 0, josephOlliePendingCd: 0, josephOllieDetonate: false, sharkieAimAngle: 0, sharkieReverseAngle: 0, sharkieReverseX: 0, sharkieReverseY: 0, tenentCycle: 0, tenentAbilityActiveBullets: 0, stormyCycle: 0, bulbMode: pd.selectedChar === 'bulb' ? Math.floor(Math.random() * 3) : null, bulbGasActiveUntil: 0, bulbGasCooldownUntil: 0, bulbGasAngle: 0, orbitalAngle: 0, popeyeSpinTimer: 0, popeyeSpinCooldown: 30, popeyeSpinUsed: true, popeyeSpinEndingFx: 0, shellTorpedoTimer: 0, shellTorpedoCooldown: pd.selectedChar === 'shell' ? 20 : 0, shellTorpedoTarget: null, shellTorpedoHitCd: 0, shellTorpedoDamageTick: 0, shellTorpedoWasActive: false, shellTorpedoExitTracked: false, grappleCooldown: 0, grappleCharging: false, grappleCharge: 0, grappleHookTimer: 0, grappleHookDuration: 0.28, grappleHookStartX: 0, grappleHookStartY: 0, grappleHookX: 0, grappleHookY: 0, grappleHookTargetX: 0, grappleHookTargetY: 0, grappleHookAngle: 0, grappleHookHitEnemy: null, grappleHookDamageApplied: false, grappleAttackTimer: 0, grappleAttackAngle: 0, boobooReturn: true, yoyoReady: true, yoyoOrbitActive: true, yoyoOrbitAngle: 0, yoyoOrbitTickCd: 0, pickedCards: [], revivesUsed: 0, qbBar: 0, qbShield: false, blizzardTemperature: 20, blizzardMoveTimer: 0, blizzardTier: 0, blizzardStormTick: 0, isDead: false, flexCombo: 0, flexReload: 0, ninjiDashCd: 0, shinobiDragonActive: false, shinobiDragonWavesLeft: 0, shinobiDragonCooldown: pd.selectedChar === 'shinobi' ? 20 : 0, shinobiDragonFireCd: 0, shinobiScytheCycle: 0, sterlingCharging: false, sterlingCharge: 0, sterlingAttackCd: 0, majorBriggsKills: 0, majorBriggsStage: 1, noxSpecialTimer: 10, noxSpecialIndex: 0, noxBoomerangActive: false, snapdragonFlameTimer: 0, snapdragonFlameCooldown: 30, snapdragonFlameActive: false, snapdragonFlameFireCd: 0,
         adamScrap: 0, adamScrapVisualCounter: 0, adamMechActive: false, adamMechWavesLeft: 0, adamMechHpBonus: 0, adamMechSizeBonus: 0, adamBaseHpBeforeMech: null, adamBaseRBeforeMech: null,
@@ -15248,7 +15258,34 @@ if (!isBossAlive) {
 
     if (pd.selectedChar === 'shinobi' && (player.shinobiDragonActive || player.shinobiDragonFormActive)) pSpeed *= 1.35;
 
-    let nx = player.x + dx * pSpeed; let ny = player.y + dy * pSpeed;
+    let nx, ny;
+    if (window.currentMap === 13 && !shellTorpedoActive && player.dashTimer <= 0 && !(player.josephOllieTimer > 0)) {
+        const targetVX = dx * (pSpeed / Math.max(dt, 0.0001));
+        const targetVY = dy * (pSpeed / Math.max(dt, 0.0001));
+        const hasInput = Math.hypot(dx, dy) > 0.05;
+        if (hasInput) {
+            const steer = Math.min(1, 7.5 * dt);
+            player.lunarSlideVx += (targetVX - player.lunarSlideVx) * steer;
+            player.lunarSlideVy += (targetVY - player.lunarSlideVy) * steer;
+        } else {
+            const friction = Math.pow(0.90, dt * 60);
+            player.lunarSlideVx *= friction;
+            player.lunarSlideVy *= friction;
+        }
+        const maxSlide = Math.max(1, pSpeed / Math.max(dt, 0.0001)) * 1.06;
+        const slideMag = Math.hypot(player.lunarSlideVx, player.lunarSlideVy);
+        if (slideMag > maxSlide) {
+            const scale = maxSlide / slideMag;
+            player.lunarSlideVx *= scale;
+            player.lunarSlideVy *= scale;
+        }
+        nx = player.x + player.lunarSlideVx * dt;
+        ny = player.y + player.lunarSlideVy * dt;
+    } else {
+        if (window.currentMap !== 13) { player.lunarSlideVx = 0; player.lunarSlideVy = 0; }
+        nx = player.x + dx * pSpeed;
+        ny = player.y + dy * pSpeed;
+    }
     if (!playerCanPassWalls()) {
         obstacles.forEach(o => { if(o.type !== 'ice' && o.type !== 'mud' && o.type !== 'car' && o.type !== 'bamboo_spike' && distXY(nx, ny, o.x, o.y) < o.r + player.r) { nx = player.x; ny = player.y; } });
     }
@@ -22538,6 +22575,7 @@ let bambuzalTexturePattern = null;
 let swampTexturePattern = null;
 let discoTexturePattern = null;
 let fracturedTexturePattern = null;
+let lunarTexturePattern = null;
 
 function getMetroTexturePattern() {
     if (metroTexturePattern) return metroTexturePattern;
@@ -22850,6 +22888,52 @@ function drawFracturedTextureRect(x, y, w, h) {
     ctx.fillRect(x, y, w, h);
 }
 
+function getLunarTexturePattern() {
+    if (lunarTexturePattern) return lunarTexturePattern;
+    const tile = document.createElement('canvas');
+    tile.width = 260; tile.height = 260;
+    const g = tile.getContext('2d');
+    const grad = g.createLinearGradient(0,0,260,260);
+    grad.addColorStop(0,'#73777c');
+    grad.addColorStop(0.5,'#5e6268');
+    grad.addColorStop(1,'#4a4e54');
+    g.fillStyle = grad;
+    g.fillRect(0,0,260,260);
+    let seed = 918273;
+    const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+    // Microtextura de pó e pedras.
+    for(let i=0;i<170;i++){
+        const x=rnd()*260, y=rnd()*260, r=.7+rnd()*2.8;
+        g.fillStyle = rnd()>0.5 ? 'rgba(210,214,218,.10)' : 'rgba(18,21,24,.16)';
+        g.beginPath(); g.arc(x,y,r,0,Math.PI*2); g.fill();
+    }
+    // Crateras grandes, com borda levantada e centro sombreado.
+    for(let i=0;i<18;i++){
+        const x=rnd()*260, y=rnd()*260, r=6+rnd()*20;
+        const rg=g.createRadialGradient(x-r*.2,y-r*.18,r*.15,x,y,r);
+        rg.addColorStop(0,'rgba(34,37,41,.42)');
+        rg.addColorStop(.55,'rgba(49,53,58,.26)');
+        rg.addColorStop(.78,'rgba(183,188,193,.10)');
+        rg.addColorStop(1,'rgba(14,16,18,0)');
+        g.fillStyle=rg; g.beginPath(); g.arc(x,y,r,0,Math.PI*2); g.fill();
+        g.strokeStyle='rgba(218,222,226,.10)'; g.lineWidth=1.5;
+        g.beginPath(); g.arc(x,y,r*.76,0,Math.PI*2); g.stroke();
+    }
+    // Pequenos riscos de regolito.
+    for(let i=0;i<30;i++){
+        const x=rnd()*260,y=rnd()*260;
+        g.strokeStyle=rnd()>0.5?'rgba(235,238,240,.07)':'rgba(15,17,19,.10)';
+        g.lineWidth=1;
+        g.beginPath(); g.moveTo(x,y); g.lineTo(x+(rnd()-.5)*18,y+(rnd()-.5)*8); g.stroke();
+    }
+    lunarTexturePattern = ctx.createPattern(tile,'repeat');
+    return lunarTexturePattern;
+}
+function drawLunarTextureRect(x,y,w,h){
+    ctx.fillStyle = getLunarTexturePattern() || '#5b5f65';
+    ctx.fillRect(x,y,w,h);
+}
+
 function getFractureMapTexture(mapId) {
     switch (Number(mapId)) {
         case 0: return getPlainsGrassPattern();
@@ -22863,6 +22947,7 @@ function getFractureMapTexture(mapId) {
         case 8: return getBambuzalTexturePattern();
         case 9: return getDiscoTexturePattern();
         case 10: return getMarineTexturePattern();
+        case 13: return getLunarTexturePattern();
         default: return getFracturedTexturePattern();
     }
 }
@@ -22879,6 +22964,7 @@ function getFractureDecorTypes(mapId) {
         case 8: return ['bamboo'];
         case 9: return ['speaker'];
         case 10: return ['kelp'];
+        case 13: return [];
         default: return [];
     }
 }
@@ -23282,6 +23368,8 @@ function draw() {
         drawMarineTextureRect(camera.x, camera.y, cw, ch);
     } else if (window.currentMap === 11) {
         drawFracturedTextureRect(camera.x, camera.y, cw, ch);
+    } else if (window.currentMap === 13) {
+        drawLunarTextureRect(camera.x, camera.y, cw, ch);
     } else if (window.currentMap === 12) {
         ctx.fillStyle = '#9fe3a2';
         ctx.fillRect(camera.x, camera.y, cw, ch);
