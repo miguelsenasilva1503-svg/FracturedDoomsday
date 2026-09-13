@@ -1054,10 +1054,16 @@ html.sandbox-pc .sandbox-tool-hotkey{display:block}.sandbox-tool-state{position:
 .promo-offer-btn:hover{color:#111 !important;}
 </style>
 <style id="menu-resource-height-fix">
-#screen-main .top-bar{transform:translateY(-18px);margin-bottom:2px !important;}
-#screen-main .top-bar + *{margin-top:0 !important;}
+#screen-main .main-top-row{position:absolute !important;left:50% !important;top:18px !important;transform:translateX(-50%) !important;width:auto !important;z-index:30 !important;margin:0 !important;}
+#screen-main .main-resources{transform:none !important;margin:0 !important;}
+#screen-main .main-center{padding-top:4px !important;}
 </style>
-</head>
+<style id="char-detail-resource-counter-style">
+#detail-resource-counter{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center;margin:5px 0 8px;}
+#detail-resource-counter .resource{padding:4px 10px;font-size:13px;min-height:30px;}
+#detail-resource-counter .resource-icon{width:19px;height:19px;object-fit:contain;}
+</style>
+<style id="event-season-ui-fix">.event-season-hero{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:14px;}.event-season-hero h4{margin:0;font-size:22px;color:var(--btn-yellow);}.event-season-hero p{margin:6px 0 0;color:#d9e2ea;}.event-claim-wrap{display:flex;justify-content:center;margin-top:14px;}</style></head>
 <body>
 
 <div id="notif"></div>
@@ -1502,6 +1508,7 @@ html.sandbox-pc .sandbox-tool-hotkey{display:block}.sandbox-tool-state{position:
                 <div id="detail-sprite" class="detail-sprite hidden"></div>
             </div>
 
+            <div id="detail-resource-counter" class="char-detail-resource-counter hidden"></div>
             <div class="char-detail-stats">
                 <div class="char-detail-stat">
                     <div class="char-detail-stat-icon"><img src="elements/damage.png" alt="Dano"></div>
@@ -1655,47 +1662,18 @@ html.sandbox-pc .sandbox-tool-hotkey{display:block}.sandbox-tool-state{position:
 
 <div id="screen-event" class="screen scrollable hidden">
     <button class="btn-top-corner btn-back" onclick="showScreen('screen-main')"><span aria-hidden="true">×</span><span class="sr-only">Voltar</span></button>
-    <h2 style="margin-top: 40px;">Evento ⭐</h2>
-    <p style="text-align:center; color:#ddd; margin: 0 0 12px 0;">Complete desafios especiais para liberar Popeye, Shell, Grapple e acessar a loja sazonal.</p>
-
+    <h2 style="margin-top:40px;">Eventos — Nova Temporada</h2>
+    <p style="text-align:center;color:#ddd;margin:0 0 12px;">Complete desafios especiais de Nox, Astra e Vingathron e acesse a loja sazonal.</p>
     <div class="shop-tabs event-tabs">
-        <button class="btn-menu shop-tab active" data-section="popeye" onclick="showEventSection('popeye')"><span class="tab-label">Popeye</span></button>
-        <button class="btn-menu shop-tab" data-section="shell" onclick="showEventSection('shell')"><span class="tab-label">Shell</span></button>
-        <button class="btn-menu shop-tab" data-section="grapple" onclick="showEventSection('grapple')"><span class="tab-label">Grapple</span></button>
+        <button class="btn-menu shop-tab active" data-section="nox" onclick="showEventSection('nox')"><span class="tab-label">Nox</span></button>
+        <button class="btn-menu shop-tab" data-section="astra" onclick="showEventSection('astra')"><span class="tab-label">Astra</span></button>
+        <button class="btn-menu shop-tab" data-section="vingathron" onclick="showEventSection('vingathron')"><span class="tab-label">Vingathron</span></button>
         <button class="btn-menu shop-tab" data-section="store" onclick="showEventSection('store')"><img class="tab-sprite-icon" src="elements/shop.png" alt=""><span class="tab-label">Loja sazonal</span></button>
     </div>
-
-    <div id="event-section-popeye" class="shop-section shop-panel">
-        <h3>Popeye</h3>
-        <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:14px;">
-            <div class="event-hero-card"><img class="char-sprite char-sprite--hero" src="sprites/popeye.png" alt="" aria-hidden="true"><div><h4 style="margin:0; font-size:22px; color:var(--btn-yellow);">Popeye</h4><p style="margin:6px 0 0; color:#d9e2ea;">20 missões especiais. O progresso é salvo separadamente.</p></div></div>
-            <div class="event-progress-pill"><span id="event-popeye-count">0</span>/20 concluídas</div>
-            <button id="event-popeye-claim" class="btn-action" onclick="claimEventCharacter('popeye')">🎁 Resgatar Popeye</button>
-        </div>
-        <div id="event-popeye-list" class="menu-grid shop-grid"></div>
-    </div>
-    <div id="event-section-shell" class="shop-section shop-panel hidden">
-        <h3>Shell</h3>
-        <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:14px;">
-            <div class="event-hero-card"><img class="char-sprite char-sprite--hero" src="sprites/shell.png" alt="" aria-hidden="true"><div><h4 style="margin:0; font-size:22px; color:var(--btn-yellow);">Shell</h4><p style="margin:6px 0 0; color:#d9e2ea;">20 missões especiais. O progresso é salvo separadamente.</p></div></div>
-            <div class="event-progress-pill"><span id="event-shell-count">0</span>/20 concluídas</div>
-            <button id="event-shell-claim" class="btn-action" onclick="claimEventCharacter('shell')">🎁 Resgatar Shell</button>
-        </div>
-        <div id="event-shell-list" class="menu-grid shop-grid"></div>
-    </div>
-    <div id="event-section-grapple" class="shop-section shop-panel hidden">
-        <h3>Grapple</h3>
-        <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:14px;">
-            <div class="event-hero-card"><img class="char-sprite char-sprite--hero" src="sprites/grapple.png" alt="" aria-hidden="true"><div><h4 style="margin:0; font-size:22px; color:var(--btn-yellow);">Grapple</h4><p style="margin:6px 0 0; color:#d9e2ea;">20 missões especiais. O progresso é salvo separadamente.</p></div></div>
-            <div class="event-progress-pill"><span id="event-grapple-count">0</span>/20 concluídas</div>
-            <button id="event-grapple-claim" class="btn-action" onclick="claimEventCharacter('grapple')">🎁 Resgatar Grapple</button>
-        </div>
-        <div id="event-grapple-list" class="menu-grid shop-grid"></div>
-    </div>
-    <div id="event-section-store" class="shop-section shop-panel hidden">
-        <h3>Loja sazonal</h3>
-        <div class="shop-section" style="margin-top:0;"><h3>Personagens em promoção</h3><div id="event-promo-list" class="menu-grid shop-grid"></div></div>
-    </div>
+    <div id="event-section-nox" class="shop-section shop-panel"><h3>Nox</h3><div class="event-season-hero"><div class="event-hero-card"><img class="char-sprite char-sprite--hero" src="sprites/nox.png" alt=""><div><h4>Nox</h4><p>20 missões especiais. O progresso é exclusivo do Nox.</p></div></div><div class="event-progress-pill"><span id="event-nox-count">0</span>/20 concluídas</div></div><div id="event-nox-list" class="menu-grid shop-grid"></div><div class="event-claim-wrap"><button id="event-nox-claim" class="btn-action" type="button" onclick="claimEventCharacter('nox')">Resgatar Nox</button></div></div>
+    <div id="event-section-astra" class="shop-section shop-panel hidden"><h3>Astra</h3><div class="event-season-hero"><div class="event-hero-card"><img class="char-sprite char-sprite--hero" src="sprites/astra.png" alt=""><div><h4>Astra</h4><p>15 missões especiais. O progresso é exclusivo da Astra.</p></div></div><div class="event-progress-pill"><span id="event-astra-count">0</span>/15 concluídas</div></div><div id="event-astra-list" class="menu-grid shop-grid"></div><div class="event-claim-wrap"><button id="event-astra-claim" class="btn-action" type="button" onclick="claimEventCharacter('astra')">Resgatar Astra</button></div></div>
+    <div id="event-section-vingathron" class="shop-section shop-panel hidden"><h3>Vingathron</h3><div class="event-season-hero"><div class="event-hero-card"><img class="char-sprite char-sprite--hero" src="sprites/vingathron.png" alt=""><div><h4>Vingathron</h4><p>22 missões especiais. O progresso é exclusivo do Vingathron.</p></div></div><div class="event-progress-pill"><span id="event-vingathron-count">0</span>/22 concluídas</div></div><div id="event-vingathron-list" class="menu-grid shop-grid"></div><div class="event-claim-wrap"><button id="event-vingathron-claim" class="btn-action" type="button" onclick="claimEventCharacter('vingathron')">Resgatar Vingathron</button></div></div>
+    <div id="event-section-store" class="shop-section shop-panel hidden"><h3>Loja sazonal</h3><div class="shop-section" style="margin-top:0;"><h3>Personagens em promoção</h3><div id="event-promo-list" class="menu-grid shop-grid"></div></div></div>
 </div>
 
 <div id="screen-pass" class="screen scrollable hidden">
@@ -3169,7 +3147,7 @@ function renderGachaRevealHtml(rawText) {
 
 const DEFAULT_KEYBINDS = { up: 'w', down: 's', left: 'a', right: 'd', special: 'p', pause: 'escape' };
 const DEFAULT_INITIAL_ZOOM = (('ontouchstart' in window) || navigator.maxTouchPoints > 0) ? 0.65 : 1;
-const DEFAULT_SETTINGS = { skipGacha: false, controlMode: 'auto', joystickSize: 120, ultraHardcore: false, uhcDark: false, noParticles: false, showCombatText: true, showHpBar: false, screenZoom: DEFAULT_INITIAL_ZOOM, musicVolume: 0.7, mapChoice: -1, mapChoiceBucket: -1, menuMusic: 'sea_awaits', casualMusic: 'marine_journey', keybinds: { ...DEFAULT_KEYBINDS } };
+const DEFAULT_SETTINGS = { skipGacha: false, controlMode: 'auto', joystickSize: 120, ultraHardcore: false, uhcDark: false, noParticles: false, showCombatText: true, showHpBar: false, screenZoom: DEFAULT_INITIAL_ZOOM, musicVolume: 0.7, mapChoice: -1, mapChoiceBucket: -1, menuMusic: 'legacy_awaits', casualMusic: 'roguish_journey', keybinds: { ...DEFAULT_KEYBINDS } };
 
 const MUSIC_OPTIONS = {
     menu: {
@@ -3232,21 +3210,21 @@ function setMusicVolume(value) {
     applyMusicVolume();
 }
 function getSelectedMenuMusicKey() {
-    const key = String(pd?.settings?.menuMusic || 'sea_awaits');
-    return Object.prototype.hasOwnProperty.call(MUSIC_OPTIONS.menu, key) ? key : 'sea_awaits';
+    const key = String(pd?.settings?.menuMusic || 'legacy_awaits');
+    return Object.prototype.hasOwnProperty.call(MUSIC_OPTIONS.menu, key) ? key : 'legacy_awaits';
 }
 function getSelectedCasualMusicKey() {
-    const key = String(pd?.settings?.casualMusic || 'marine_journey');
-    return Object.prototype.hasOwnProperty.call(MUSIC_OPTIONS.casual, key) ? key : 'marine_journey';
+    const key = String(pd?.settings?.casualMusic || 'roguish_journey');
+    return Object.prototype.hasOwnProperty.call(MUSIC_OPTIONS.casual, key) ? key : 'roguish_journey';
 }
 function resolveMusicSource(trackKey) {
     if (trackKey === 'menu') return MUSIC_OPTIONS.menu[getSelectedMenuMusicKey()];
     if (trackKey === 'classic' || trackKey === 'hardcore') return MUSIC_OPTIONS.casual[getSelectedCasualMusicKey()];
-    return MUSIC_TRACKS[trackKey] || MUSIC_OPTIONS.menu.sea_awaits;
+    return MUSIC_TRACKS[trackKey] || MUSIC_OPTIONS.menu.legacy_awaits;
 }
 function getMusicTrackLabel(trackKey) {
-    if (trackKey === 'menu') return MUSIC_LABELS[getSelectedMenuMusicKey()] || 'Sea Awaits';
-    if (trackKey === 'classic' || trackKey === 'hardcore') return MUSIC_LABELS[getSelectedCasualMusicKey()] || 'Marine Journey';
+    if (trackKey === 'menu') return MUSIC_LABELS[getSelectedMenuMusicKey()] || 'Legacy Awaits';
+    if (trackKey === 'classic' || trackKey === 'hardcore') return MUSIC_LABELS[getSelectedCasualMusicKey()] || 'Roguish Journey';
     return trackKey === 'ultraHardcore' ? 'Fatal Finale' : (MUSIC_LABELS[trackKey] || trackKey);
 }
 async function playMusic(trackKey = 'menu') {
@@ -3268,14 +3246,14 @@ async function playMusic(trackKey = 'menu') {
     }
 }
 function setMenuMusic(value) {
-    const key = Object.prototype.hasOwnProperty.call(MUSIC_OPTIONS.menu, value) ? value : 'sea_awaits';
+    const key = Object.prototype.hasOwnProperty.call(MUSIC_OPTIONS.menu, value) ? value : 'legacy_awaits';
     pd.settings.menuMusic = key;
     save();
     updateSettingsUI(false);
     if (currentMusicKey === 'menu') playMusic('menu');
 }
 function setCasualMusic(value) {
-    const key = Object.prototype.hasOwnProperty.call(MUSIC_OPTIONS.casual, value) ? value : 'marine_journey';
+    const key = Object.prototype.hasOwnProperty.call(MUSIC_OPTIONS.casual, value) ? value : 'roguish_journey';
     pd.settings.casualMusic = key;
     save();
     updateSettingsUI(false);
@@ -3714,8 +3692,13 @@ function load() {
     pd.passXp = Math.max(0, Number(pd.passXp) || 0);
     pd.passClaimed = Number(pd.passClaimed) || 0;
     if (typeof pd.settings.musicVolume !== 'number' || !isFinite(pd.settings.musicVolume)) pd.settings.musicVolume = 0.7;
-    if (!Object.prototype.hasOwnProperty.call(MUSIC_OPTIONS.menu, pd.settings.menuMusic)) pd.settings.menuMusic = 'sea_awaits';
-    if (!Object.prototype.hasOwnProperty.call(MUSIC_OPTIONS.casual, pd.settings.casualMusic)) pd.settings.casualMusic = 'marine_journey';
+    if (!pd.settings.musicDefaultsRestoredV2) {
+        if (pd.settings.menuMusic === 'sea_awaits') pd.settings.menuMusic = 'legacy_awaits';
+        if (pd.settings.casualMusic === 'marine_journey') pd.settings.casualMusic = 'roguish_journey';
+        pd.settings.musicDefaultsRestoredV2 = true;
+    }
+    if (!Object.prototype.hasOwnProperty.call(MUSIC_OPTIONS.menu, pd.settings.menuMusic)) pd.settings.menuMusic = 'legacy_awaits';
+    if (!Object.prototype.hasOwnProperty.call(MUSIC_OPTIONS.casual, pd.settings.casualMusic)) pd.settings.casualMusic = 'roguish_journey';
     if (typeof pd.settings.uhcDark === 'undefined') pd.settings.uhcDark = false;
     if (typeof pd.settings.noParticles === 'undefined') pd.settings.noParticles = false;
     if (!['auto','mobile','pc','gamepad'].includes(pd.settings.controlMode)) pd.settings.controlMode = 'auto';
@@ -8288,990 +8271,49 @@ function updateUI() {
 }
 checkChipCrafting();
 
-let currentEventSection = 'popeye';
-
-const EVENT_MISSION_SAVE_KEYS = {
-    popeye: 'popeye_missions_v1',
-    shell: 'shell_missions_v1',
-    grapple: 'grapple_missions_v1'
-};
-
+let currentEventSection = 'nox';
+const EVENT_SEASON_ID = 'season_turn_2026_09';
+const EVENT_MISSION_SAVE_KEYS = { nox:'nox_missions_v2', astra:'astra_missions_v2', vingathron:'vingathron_missions_v2' };
 const EVENT_CHARACTER_PROGRESS = {
-    popeye: { id: 'popeye', label: 'Popeye', sprite: 'popeye', goal: 16, missions: [
-        { id: 'p1', title: 'Primeira luta', desc: 'Inicie 1 partida.', stat: 'gamesStarted', goal: 1 },
-        { id: 'p2', title: 'Espinafre a postos', desc: 'Inicie 3 partidas.', stat: 'gamesStarted', goal: 3 },
-        { id: 'p3', title: 'Soco certeiro', desc: 'Derrote 100 inimigos.', stat: 'totalKills', goal: 100 },
-        { id: 'p4', title: 'Força do marinheiro', desc: 'Derrote 250 inimigos.', stat: 'totalKills', goal: 250 },
-        { id: 'p6', title: 'Sem recuar', desc: 'Alcance wave 8.', stat: 'bestWave', goal: 8 },
-        { id: 'p7', title: 'Mais espinafre', desc: 'Alcance wave 12.', stat: 'bestWave', goal: 12 },
-        { id: 'p8', title: 'Caçador de chefes', desc: 'Derrote 2 Bosses.', stat: 'bossKills', goal: 2 },
-        { id: 'p9', title: 'Olha a pancada', desc: 'Derrote 500 inimigos.', stat: 'totalKills', goal: 500 },
-        { id: 'p11', title: 'Força bruta', desc: 'Alcance wave 16.', stat: 'bestWave', goal: 16 },
-        { id: 'p12', title: 'Contra os grandões', desc: 'Derrote 5 Bosses.', stat: 'bossKills', goal: 5 },
-        { id: 'p13', title: 'Aço nos punhos', desc: 'Derrote 900 inimigos.', stat: 'totalKills', goal: 900 },
-        { id: 'p15', title: 'Sem parar', desc: 'Alcance wave 20.', stat: 'bestWave', goal: 20 },
-        { id: 'p16', title: 'Maré de pancadas', desc: 'Derrote 1.300 inimigos.', stat: 'totalKills', goal: 1300 },
-        { id: 'p17', title: 'Mais uma luta', desc: 'Inicie 10 partidas.', stat: 'gamesStarted', goal: 10 },
-        { id: 'p18', title: 'Derruba chefões', desc: 'Derrote 8 Bosses.', stat: 'bossKills', goal: 8 },
-        { id: 'p19', title: 'Força máxima', desc: 'Alcance wave 26.', stat: 'bestWave', goal: 26 },
+    nox:{id:'nox',label:'Nox',sprite:'nox',goal:20,missions:[
+        {id:'n1',title:'Entrada nas sombras',desc:'Inicie 1 partida com Nox.',stat:'games',goal:1},{id:'n2',title:'Caçada noturna',desc:'Inicie 3 partidas com Nox.',stat:'games',goal:3},{id:'n3',title:'Lâminas velozes',desc:'Derrote 75 inimigos com Nox.',stat:'kills',goal:75},{id:'n4',title:'Dança de sabres',desc:'Derrote 200 inimigos com Nox.',stat:'kills',goal:200},{id:'n5',title:'Passos silenciosos',desc:'Alcance wave 8 com Nox.',stat:'bestWave',goal:8},{id:'n6',title:'No coração da noite',desc:'Alcance wave 12 com Nox.',stat:'bestWave',goal:12},{id:'n7',title:'Primeiro chefão',desc:'Derrote 1 Boss com Nox.',stat:'bosses',goal:1},{id:'n8',title:'Sabres incansáveis',desc:'Derrote 350 inimigos com Nox.',stat:'kills',goal:350},{id:'n9',title:'Dupla lâmina',desc:'Inicie 8 partidas com Nox.',stat:'games',goal:8},{id:'n10',title:'Trevas profundas',desc:'Alcance wave 16 com Nox.',stat:'bestWave',goal:16},{id:'n11',title:'Caçador de colossos',desc:'Derrote 3 Bosses com Nox.',stat:'bosses',goal:3},{id:'n12',title:'Corte perfeito',desc:'Derrote 550 inimigos com Nox.',stat:'kills',goal:550},{id:'n13',title:'Sem deixar rastros',desc:'Alcance wave 20 com Nox.',stat:'bestWave',goal:20},{id:'n14',title:'A noite continua',desc:'Inicie 15 partidas com Nox.',stat:'games',goal:15},{id:'n15',title:'Executor',desc:'Derrote 800 inimigos com Nox.',stat:'kills',goal:800},{id:'n16',title:'Quatro sombras',desc:'Derrote 5 Bosses com Nox.',stat:'bosses',goal:5},{id:'n17',title:'Cidade adormecida',desc:'Alcance wave 24 com Nox.',stat:'bestWave',goal:24},{id:'n18',title:'Sabres sem fim',desc:'Derrote 1.100 inimigos com Nox.',stat:'kills',goal:1100},{id:'n19',title:'Algoz da temporada',desc:'Derrote 8 Bosses com Nox.',stat:'bosses',goal:8},{id:'n20',title:'No auge da escuridão',desc:'Alcance wave 28 com Nox.',stat:'bestWave',goal:28}
     ]},
-    shell: { id: 'shell', label: 'Shell', sprite: 'shell', goal: 16, missions: [
-        { id: 's1', title: 'Rei dos mares', desc: 'Inicie 1 partida.', stat: 'gamesStarted', goal: 1 },
-        { id: 's2', title: 'Sob a concha', desc: 'Inicie 3 partidas.', stat: 'gamesStarted', goal: 3 },
-        { id: 's3', title: 'Torpedo lançado', desc: 'Derrote 100 inimigos.', stat: 'totalKills', goal: 100 },
-        { id: 's4', title: 'Maré de combate', desc: 'Derrote 250 inimigos.', stat: 'totalKills', goal: 250 },
-        { id: 's6', title: 'Profundezas', desc: 'Alcance wave 8.', stat: 'bestWave', goal: 8 },
-        { id: 's7', title: 'Mar aberto', desc: 'Alcance wave 12.', stat: 'bestWave', goal: 12 },
-        { id: 's8', title: 'Caçador de monstros', desc: 'Derrote 2 Bosses.', stat: 'bossKills', goal: 2 },
-        { id: 's9', title: 'Onda após onda', desc: 'Derrote 500 inimigos.', stat: 'totalKills', goal: 500 },
-        { id: 's11', title: 'Mar profundo', desc: 'Alcance wave 16.', stat: 'bestWave', goal: 16 },
-        { id: 's12', title: 'Abate de chefões', desc: 'Derrote 5 Bosses.', stat: 'bossKills', goal: 5 },
-        { id: 's13', title: 'Fúria do oceano', desc: 'Derrote 900 inimigos.', stat: 'totalKills', goal: 900 },
-        { id: 's15', title: 'Sem naufragar', desc: 'Alcance wave 20.', stat: 'bestWave', goal: 20 },
-        { id: 's16', title: 'Torpedo imparável', desc: 'Derrote 1.300 inimigos.', stat: 'totalKills', goal: 1300 },
-        { id: 's17', title: 'Partidas no oceano', desc: 'Inicie 10 partidas.', stat: 'gamesStarted', goal: 10 },
-        { id: 's18', title: 'Predador do mar', desc: 'Derrote 8 Bosses.', stat: 'bossKills', goal: 8 },
-        { id: 's19', title: 'Reino dos mares', desc: 'Alcance wave 26.', stat: 'bestWave', goal: 26 },
+    astra:{id:'astra',label:'Astra',sprite:'astra',goal:15,missions:[
+        {id:'a1',title:'Olhar para o cosmos',desc:'Inicie 1 partida com Astra.',stat:'games',goal:1},{id:'a2',title:'Órbita inicial',desc:'Derrote 100 inimigos com Astra.',stat:'kills',goal:100},{id:'a3',title:'Guardião estelar',desc:'Alcance wave 8 com Astra.',stat:'bestWave',goal:8},{id:'a4',title:'Mundos em movimento',desc:'Inicie 4 partidas com Astra.',stat:'games',goal:4},{id:'a5',title:'Constelação ofensiva',desc:'Derrote 300 inimigos com Astra.',stat:'kills',goal:300},{id:'a6',title:'Além da atmosfera',desc:'Alcance wave 12 com Astra.',stat:'bestWave',goal:12},{id:'a7',title:'Explosão cósmica',desc:'Derrote 2 Bosses com Astra.',stat:'bosses',goal:2},{id:'a8',title:'Chuva planetária',desc:'Derrote 500 inimigos com Astra.',stat:'kills',goal:500},{id:'a9',title:'Órbita completa',desc:'Inicie 8 partidas com Astra.',stat:'games',goal:8},{id:'a10',title:'Espaço profundo',desc:'Alcance wave 16 com Astra.',stat:'bestWave',goal:16},{id:'a11',title:'Protetora do cosmos',desc:'Derrote 4 Bosses com Astra.',stat:'bosses',goal:4},{id:'a12',title:'Tempestade de estrelas',desc:'Derrote 800 inimigos com Astra.',stat:'kills',goal:800},{id:'a13',title:'Além das estrelas',desc:'Alcance wave 22 com Astra.',stat:'bestWave',goal:22},{id:'a14',title:'Sistema completo',desc:'Inicie 14 partidas com Astra.',stat:'games',goal:14},{id:'a15',title:'Cósmica',desc:'Derrote 1.200 inimigos com Astra.',stat:'kills',goal:1200}
     ]},
-    grapple: { id: 'grapple', label: 'Grapple', sprite: 'grapple', goal: 16, missions: [
-        { id: 'g1', title: 'Primeiro gancho', desc: 'Inicie 1 partida.', stat: 'gamesStarted', goal: 1 },
-        { id: 'g2', title: 'Mira firme', desc: 'Inicie 3 partidas.', stat: 'gamesStarted', goal: 3 },
-        { id: 'g3', title: 'Gancho certeiro', desc: 'Derrote 100 inimigos.', stat: 'totalKills', goal: 100 },
-        { id: 'g4', title: 'Puxão devastador', desc: 'Derrote 250 inimigos.', stat: 'totalKills', goal: 250 },
-        { id: 'g6', title: 'Alcance máximo', desc: 'Alcance wave 8.', stat: 'bestWave', goal: 8 },
-        { id: 'g7', title: 'Caçador aéreo', desc: 'Alcance wave 12.', stat: 'bestWave', goal: 12 },
-        { id: 'g8', title: 'Laçada de chefões', desc: 'Derrote 2 Bosses.', stat: 'bossKills', goal: 2 },
-        { id: 'g9', title: 'Chuva de ganchos', desc: 'Derrote 500 inimigos.', stat: 'totalKills', goal: 500 },
-        { id: 'g11', title: 'Movimento perfeito', desc: 'Alcance wave 16.', stat: 'bestWave', goal: 16 },
-        { id: 'g12', title: 'Laço lendário', desc: 'Derrote 5 Bosses.', stat: 'bossKills', goal: 5 },
-        { id: 'g13', title: 'Caçador de ondas', desc: 'Derrote 900 inimigos.', stat: 'totalKills', goal: 900 },
-        { id: 'g15', title: 'Sem perder o alvo', desc: 'Alcance wave 20.', stat: 'bestWave', goal: 20 },
-        { id: 'g16', title: 'Gancho brutal', desc: 'Derrote 1.300 inimigos.', stat: 'totalKills', goal: 1300 },
-        { id: 'g17', title: 'Mais uma puxada', desc: 'Inicie 10 partidas.', stat: 'gamesStarted', goal: 10 },
-        { id: 'g18', title: 'Caça aos chefões', desc: 'Derrote 8 Bosses.', stat: 'bossKills', goal: 8 },
-        { id: 'g19', title: 'Ponto de ancoragem', desc: 'Alcance wave 26.', stat: 'bestWave', goal: 26 },
+    vingathron:{id:'vingathron',label:'Vingathron',sprite:'vingathron',goal:22,missions:[
+        {id:'v1',title:'Coração de aço',desc:'Inicie 1 partida com Vingathron.',stat:'games',goal:1},{id:'v2',title:'Espada pesada',desc:'Derrote 60 inimigos com Vingathron.',stat:'kills',goal:60},{id:'v3',title:'Muralha viva',desc:'Alcance wave 8 com Vingathron.',stat:'bestWave',goal:8},{id:'v4',title:'Fragilidade de aço',desc:'Inicie 4 partidas com Vingathron.',stat:'games',goal:4},{id:'v5',title:'Lâmina implacável',desc:'Derrote 180 inimigos com Vingathron.',stat:'kills',goal:180},{id:'v6',title:'Aço contra tudo',desc:'Alcance wave 12 com Vingathron.',stat:'bestWave',goal:12},{id:'v7',title:'Primeiro estrondo',desc:'Derrote 1 Boss com Vingathron.',stat:'bosses',goal:1},{id:'v8',title:'Marca após marca',desc:'Derrote 350 inimigos com Vingathron.',stat:'kills',goal:350},{id:'v9',title:'Retaliador',desc:'Alcance wave 16 com Vingathron.',stat:'bestWave',goal:16},{id:'v10',title:'Cinco partidas',desc:'Inicie 7 partidas com Vingathron.',stat:'games',goal:7},{id:'v11',title:'Queda dos gigantes',desc:'Derrote 3 Bosses com Vingathron.',stat:'bosses',goal:3},{id:'v12',title:'Golpe do trovão',desc:'Derrote 550 inimigos com Vingathron.',stat:'kills',goal:550},{id:'v13',title:'Aço profundo',desc:'Alcance wave 20 com Vingathron.',stat:'bestWave',goal:20},{id:'v14',title:'Espada veterana',desc:'Inicie 12 partidas com Vingathron.',stat:'games',goal:12},{id:'v15',title:'Tempestade de aço',desc:'Derrote 800 inimigos com Vingathron.',stat:'kills',goal:800},{id:'v16',title:'Raio de guerra',desc:'Derrote 5 Bosses com Vingathron.',stat:'bosses',goal:5},{id:'v17',title:'Guardião de ferro',desc:'Alcance wave 24 com Vingathron.',stat:'bestWave',goal:24},{id:'v18',title:'Aço sem fim',desc:'Derrote 1.100 inimigos com Vingathron.',stat:'kills',goal:1100},{id:'v19',title:'Mestre da espada',desc:'Inicie 18 partidas com Vingathron.',stat:'games',goal:18},{id:'v20',title:'Relâmpago final',desc:'Derrote 8 Bosses com Vingathron.',stat:'bosses',goal:8},{id:'v21',title:'Retaliador supremo',desc:'Alcance wave 28 com Vingathron.',stat:'bestWave',goal:28},{id:'v22',title:'Vingathron',desc:'Derrote 1.500 inimigos com Vingathron.',stat:'kills',goal:1500}
     ]}
 };
-const EVENT_PROMOS = [
-    { id: 'popeye', label: 'Popeye', oldCost: 349, promoCost: 149, level10Cost: 899, rarity: 'legendary' },
-    { id: 'shell', label: 'Shell', oldCost: 349, promoCost: 149, level10Cost: 899, rarity: 'legendary' },
-    { id: 'grapple', label: 'Grapple', oldCost: 349, promoCost: 149, level10Cost: 899, rarity: 'legendary' },
-    { id: 'merlin', label: 'Merlin', oldCost: 349, promoCost: 149, level10Cost: 899, rarity: 'legendary' },
-    { id: 'bit', label: 'Bit', oldCost: 149, promoCost: 79, rarity: 'epic' },
-    { id: 'beezy', label: 'Beezzy', oldCost: 149, promoCost: 79, rarity: 'epic' },
-    { id: 'glace', label: 'Glace', oldCost: 349, promoCost: 149, rarity: 'legendary' },
-    { id: 'seae', label: 'Seae', oldCost: 349, promoCost: 149, rarity: 'legendary' },
-    { id: 'eel', label: 'Eel', oldCost: 349, promoCost: 149, rarity: 'legendary' },
-    { id: 'bulb', label: 'Bulb', oldCost: 149, promoCost: 79, rarity: 'epic' }
+const EVENT_PROMOS=[
+{id:'nox',label:'Nox',oldCost:349,promoCost:79,level10Cost:899,rarity:'legendary'},{id:'astra',label:'Astra',oldCost:149,promoCost:79,level10Cost:659,rarity:'epic'},{id:'vingathron',label:'Vingathron',oldCost:569,promoCost:149,level10Cost:1009,rarity:'mythic'},{id:'cowbew',label:'Cowbew',oldCost:29,promoCost:9,rarity:'common'},{id:'zoe',label:'Zoe',oldCost:149,promoCost:29,rarity:'epic'},{id:'yoyo',label:'Yoyo',oldCost:149,promoCost:79,rarity:'epic'},{id:'mestre_do_fogo',label:'Mestre do Fogo',oldCost:349,promoCost:149,rarity:'legendary'},{id:'ignite',label:'Ignite',oldCost:349,promoCost:149,rarity:'legendary'},{id:'cyro_pyro',label:'Crioheat',oldCost:349,promoCost:149,rarity:'legendary'},{id:'chronos',label:'Chronos',oldCost:349,promoCost:79,rarity:'legendary'},{id:'snapdragon',label:'Snapdragon',oldCost:349,promoCost:79,rarity:'legendary'},{id:'izaque',label:'Izaque',oldCost:349,promoCost:79,rarity:'legendary'},{id:'auren',label:'Auren',oldCost:349,promoCost:79,rarity:'legendary'},{id:'blizzard',label:'Blizzard',oldCost:569,promoCost:349,rarity:'mythic'}
 ];
-
-function getEventBaseSnapshot() {
-    const stats = pd?.progressStats || {};
-    const snapshot = {};
-    const keys = new Set();
-    Object.values(EVENT_CHARACTER_PROGRESS).forEach(section => {
-        (section.missions || []).forEach(m => keys.add(m.stat));
-    });
-    keys.forEach(key => { snapshot[key] = Math.max(0, Math.floor(Number(stats[key]) || 0)); });
-    return snapshot;
-}
-function ensureEventState() {
-    if (!pd.events || typeof pd.events !== 'object') pd.events = {};
-    for (const id of Object.keys(EVENT_CHARACTER_PROGRESS)) {
-        const key = EVENT_MISSION_SAVE_KEYS[id];
-        if (!pd.events[id] || typeof pd.events[id] !== 'object') pd.events[id] = { claimed:false, baseStats:null, missionSaveKey:key, completedIds:[] };
-        const state = pd.events[id];
-        if (typeof state.claimed === 'undefined') state.claimed = false;
-        if (typeof state.baseStats === 'undefined') state.baseStats = null;
-        if (!Array.isArray(state.completedIds)) state.completedIds = [];
-        state.completedIds = state.completedIds.filter(mid => EVENT_CHARACTER_PROGRESS[id].missions.some(m => m.id === mid));
-        state.missionSaveKey = key;
+function ensureEventState(){
+    if(!pd.events||typeof pd.events!=='object')pd.events={};
+    for(const id of Object.keys(EVENT_CHARACTER_PROGRESS)){
+        const key=EVENT_MISSION_SAVE_KEYS[id];
+        const needsReset=!pd.events[id]||pd.events[id].eventSeasonId!==EVENT_SEASON_ID||pd.events[id].missionSaveKey!==key;
+        if(needsReset)pd.events[id]={claimed:false,eventSeasonId:EVENT_SEASON_ID,missionSaveKey:key,completedIds:[],progress:{games:0,kills:0,bosses:0,bestWave:0}};
+        const state=pd.events[id];
+        if(!state.progress||typeof state.progress!=='object')state.progress={games:0,kills:0,bosses:0,bestWave:0};
+        for(const k of ['games','kills','bosses','bestWave'])state.progress[k]=Math.max(0,Math.floor(Number(state.progress[k])||0));
+        state.completedIds=Array.isArray(state.completedIds)?state.completedIds.filter(mid=>EVENT_CHARACTER_PROGRESS[id].missions.some(m=>m.id===mid)):[];
+        state.eventSeasonId=EVENT_SEASON_ID;state.missionSaveKey=key;
     }
 }
-function ensureEventSectionSnapshot(sectionId) {
-    ensureEventState();
-    const section = pd.events?.[sectionId];
-    if (!section) return;
-    if (!section.baseStats || typeof section.baseStats !== 'object') { section.baseStats = getEventBaseSnapshot(); save(); }
-    syncEventMissionCompletion(sectionId, false);
-}
-function getEventStatsValue(sectionId, stat) {
-    ensureEventState();
-    const stats = pd?.progressStats || {};
-    const current = Math.max(0, Math.floor(Number(stats[stat]) || 0));
-    const base = Math.max(0, Math.floor(Number(pd.events?.[sectionId]?.baseStats?.[stat]) || 0));
-    return Math.max(0, current - base);
-}
-function syncEventMissionCompletion(sectionId, saveNow = true) {
-    ensureEventState();
-    const section = EVENT_CHARACTER_PROGRESS[sectionId];
-    const state = pd.events?.[sectionId];
-    if (!section || !state) return false;
-    const before = state.completedIds.length;
-    const completed = new Set(state.completedIds);
-    for (const mission of section.missions) {
-        if (!completed.has(mission.id) && getEventStatsValue(sectionId, mission.stat) >= mission.goal) completed.add(mission.id);
-    }
-    state.completedIds = section.missions.map(m => m.id).filter(id => completed.has(id));
-    const changed = state.completedIds.length !== before;
-    if (changed && saveNow) save();
-    return changed;
-}
-function getEventCompletedCount(sectionId) {
-    ensureEventState();
-    ensureEventSectionSnapshot(sectionId);
-    syncEventMissionCompletion(sectionId, true);
-    const section = EVENT_CHARACTER_PROGRESS[sectionId];
-    const completed = new Set(pd.events?.[sectionId]?.completedIds || []);
-    return section ? section.missions.filter(m => completed.has(m.id)).length : 0;
-}
-function getEventMissionArt(sectionId) {
-    const section = EVENT_CHARACTER_PROGRESS[sectionId];
-    if (!section?.sprite) return '';
-    return getCharacterSpriteMarkup(section.sprite, 'menu').replace(
-        'class="char-sprite char-sprite--menu"',
-        'class="char-sprite event-mission-sprite" style="width:96px;height:54px;margin:0;object-fit:contain;"'
-    );
-}
-function renderEventMissionCard(sectionId, mission) {
-    const section = EVENT_CHARACTER_PROGRESS[sectionId];
-    ensureEventSectionSnapshot(sectionId);
-    const completed = new Set(pd.events?.[sectionId]?.completedIds || []);
-    const done = completed.has(mission.id);
-    const current = Math.min(getEventStatsValue(sectionId, mission.stat), mission.goal);
-    const art = getEventMissionArt(sectionId) || `<div class="${sectionId === 'adam' ? 'event-graffit-ball' : 'event-major-icon'}" aria-hidden="true"></div>`;
-    return `<div class="mission-card event-mission-card ${done ? 'event-mission-done' : 'event-mission-lock'} ${done ? 'completed' : ''}">
-        <div class="event-mission-head">
-            ${art}
-            <div class="event-mission-copy">
-                <div class="mission-title">${escapeHtmlText(decodeHtmlEntities(mission.title))}</div>
-                <div class="mission-desc">${escapeHtmlText(decodeHtmlEntities(mission.desc))}</div>
-            </div>
-        </div>
-        <div class="mission-meta">
-            <span>Progresso: <strong>${current}/${mission.goal}</strong></span>
-            <span>Status: <strong>${done ? 'Concluída' : 'Em andamento'}</strong></span>
-        </div>
-        <div class="mission-progress"><div class="mission-progress-fill ${done ? 'done' : ''}" style="width:${Math.min(100, (current / mission.goal) * 100)}%"></div></div>
-    </div>`;
-}
-
-function getPromoBallColor(promo) {
-    const c = CHARACTERS[promo.id];
-    return c?.color || ({ common: '#3498db', rare: '#5dade2', epic: '#9b59b6', legendary: '#f1c40f', mythic: '#ff4d4d', seasonal: '#f39c12' }[promo.rarity] || '#8e44ad');
-}
-function darkenHexColor(hex, factor = 0.28) {
-    const match = /^#([0-9a-f]{6})$/i.exec(String(hex || '').trim());
-    if (!match) return 'rgb(40, 40, 40)';
-    const num = parseInt(match[1], 16);
-    const r = Math.max(0, Math.min(255, Math.round(((num >> 16) & 255) * (1 - factor))));
-    const g = Math.max(0, Math.min(255, Math.round(((num >> 8) & 255) * (1 - factor))));
-    const b = Math.max(0, Math.min(255, Math.round((num & 255) * (1 - factor))));
-    return `rgb(${r}, ${g}, ${b})`;
-}
-function renderPromoBall(promo) {
-    const sprite = getCharacterSpriteMarkup(promo.id, 'promo');
-    if (sprite) return sprite;
-    const ballColor = getPromoBallColor(promo);
-    const darker = darkenHexColor(ballColor, 0.36);
-    return `<div class="promo-offer-ball" style="background: radial-gradient(circle at 30% 28%, rgba(255,255,255,0.42), rgba(255,255,255,0.10) 48%), linear-gradient(180deg, ${ballColor}, ${darker});"></div>`;
-}
-function renderEventPromoOfferCard(promo, mode) {
-    const c = CHARACTERS[promo.id];
-    if (!c) return '';
-    const owned = !!pd.chars[promo.id];
-    const currentLevel = Number(pd.chars?.[promo.id]?.level) || 0;
-    if (owned) return '';
-    if (mode === 'level10' && currentLevel >= 10) return '';
-    const art = getCharacterSpriteMarkup(promo.id, 'promo') || renderPromoBall(promo);
-    if (mode === 'level10') {
-        return `<div class="card-item rarity-${promo.rarity} promo-offer-card">
-            ${art}
-            <div class="promo-offer-title">${escapeHtmlText(decodeHtmlEntities(promo.label))} Lv. 10</div>
-            <div class="promo-offer-sub">Já vem no nível máximo.</div>
-            <div class="promo-offer-price"><span class="promo-offer-new">${promo.level10Cost} gemas</span></div>
-            <button class="btn-action promo-offer-btn" type="button" onclick="event.stopPropagation(); buyPromoCharacterOffer('${promo.id}', ${promo.level10Cost}, 10)">Comprar no máximo</button>
-        </div>`;
-    }
-    return `<div class="card-item rarity-${promo.rarity} promo-offer-card">
-        ${art}
-        <div class="promo-offer-title">${escapeHtmlText(decodeHtmlEntities(promo.label))}</div>
-        <div class="promo-offer-sub">Oferta normal do evento.</div>
-        <div class="promo-offer-price"><span class="promo-offer-old">${promo.oldCost} gemas</span><span class="promo-offer-new">${promo.promoCost} gemas</span></div>
-        <button class="btn-action promo-offer-btn" type="button" onclick="event.stopPropagation(); buyPromoCharacterOffer('${promo.id}', ${promo.promoCost}, 1)">Comprar personagem</button>
-    </div>`;
-}
-function renderEventPromoCard(promo) {
-    const c = CHARACTERS[promo.id];
-    if (!c) return '';
-    const owned = !!pd.chars[promo.id];
-    const currentLevel = Number(pd.chars?.[promo.id]?.level) || 0;
-    const cards = [];
-    if (!owned) cards.push(renderEventPromoOfferCard(promo, 'regular'));
-    if (promo.level10Cost && currentLevel < 10) cards.push(renderEventPromoOfferCard(promo, 'level10'));
-    return cards.join('');
-}
-function renderEvents() {
-    ensureEventState();
-    const promoList = document.getElementById('event-promo-list');
-    for (const sectionId of Object.keys(EVENT_CHARACTER_PROGRESS)) {
-        const section = EVENT_CHARACTER_PROGRESS[sectionId];
-        const sectionLocked = false;
-        document.querySelectorAll(`#screen-event .shop-tab[data-section=\"${sectionId}\"]`).forEach(btn => btn.classList.toggle('hidden', sectionLocked));
-        const sectionPanel = document.getElementById(`event-section-${sectionId}`);
-        if (sectionPanel) sectionPanel.classList.toggle('hidden', sectionLocked);
-        if (sectionLocked && currentEventSection === sectionId) currentEventSection = 'popeye';
-        // Every event section gets its own snapshot before progress is evaluated.
-        // This prevents a newly-added section from inheriting the account's lifetime stats as completed missions.
-        ensureEventSectionSnapshot(sectionId);
-        const list = document.getElementById(`event-${sectionId}-list`);
-        const count = document.getElementById(`event-${sectionId}-count`);
-        const claim = document.getElementById(`event-${sectionId}-claim`);
-        const done = getEventCompletedCount(sectionId);
-        if (count) count.textContent = String(done);
-        if (claim) {
-            const ready = done >= section.goal;
-            claim.disabled = !ready || !!pd.events[sectionId].claimed;
-            claim.textContent = pd.events[sectionId].claimed ? '✅ Resgatado' : `🎁 Resgatar ${section.label}`;
-        }
-        if (list) list.innerHTML = section.missions.map(m => renderEventMissionCard(sectionId, m)).join('');
-    }
-    if (promoList) promoList.innerHTML = EVENT_PROMOS.map(renderEventPromoCard).join('');
-    if (!EVENT_CHARACTER_PROGRESS[currentEventSection]) currentEventSection = 'popeye';
-    showEventSection(currentEventSection);
-}
-function showEventSection(section) {
-    currentEventSection = section;
-    ensureEventSectionSnapshot(section);
-    document.querySelectorAll('#screen-event .shop-panel').forEach(el => el.classList.add('hidden'));
-    const target = document.getElementById(`event-section-${section}`);
-    if (target) target.classList.remove('hidden');
-    document.querySelectorAll('#screen-event .shop-tab').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.section === section);
-    });
-}
-function claimEventCharacter(sectionId) {
-    ensureEventState();
-    const section = EVENT_CHARACTER_PROGRESS[sectionId];
-    if (!section) return;
-    syncEventMissionCompletion(sectionId, true);
-    const done = getEventCompletedCount(sectionId);
-    if (done < section.goal) {
-        showAlert(`Faltam mais ${section.goal - done} missões.`);
-        return;
-    }
-    if (pd.events[sectionId].claimed) {
-        showAlert('Recompensa já resgatada.');
-        return;
-    }
-    pd.events[sectionId].claimed = true;
-    pd.chars[section.id] = pd.chars[section.id] || { level: 1, slots: 2, chips: [null, null] };
-    save();
-    renderEvents();
-    renderShop();
-    renderChars?.();
-    startGachaQueue([{ type: 'instant', title: 'Evento concluído', contents: [`NOVO PERSONAGEM: ${section.label}!`] }]);
-    notify(`${section.label} liberado!`);
-}
-function buyPromoCharacterOffer(id, cost, targetLevel = 1) {
-    if (blockShopTutorialInteraction()) return;
-    const c = CHARACTERS[id];
-    if (!c) return;
-    if (id === 'fasty') {
-        buyChar('fasty');
-        return;
-    }
-    const owned = !!pd.chars[id];
-    const currentLevel = Number(pd.chars?.[id]?.level) || 0;
-    const isMaxOffer = Number(targetLevel) >= 10;
-    const safeCost = Number(cost);
-    if (!Number.isFinite(safeCost) || safeCost <= 0) return;
-    if (!isMaxOffer && owned) {
-        showAlert('Você já possui esse personagem.');
-        return;
-    }
-    if (isMaxOffer && currentLevel >= 10) {
-        showAlert('Esse personagem já está no nível máximo.');
-        return;
-    }
-    if (pd.gems < safeCost) {
-        showAlert('Gemas insuficientes!');
-        return;
-    }
-    const label = isMaxOffer ? `${c.name} nível 10` : c.name;
-    showConfirm('Quer comprar essa oferta?', `Deseja comprar ${label} por ${safeCost} gemas?`, (res) => {
-        if(!res) return;
-        pd.gems -= safeCost;
-        if (!owned) pd.chars[id] = { level: 1, slots: 2, chips: [null, null] };
-        if (isMaxOffer) {
-            pd.chars[id].level = Math.max(Number(pd.chars[id].level) || 1, 10);
-        }
-        save();
-        renderShop();
-        renderEvents();
-        renderChars?.();
-        showCharDetail?.(id);
-        startGachaQueue([{ type: 'instant', title: 'Você ganhou!', contents: [`NOVO PERSONAGEM: ${c.name}!`] }]);
-    });
-}
-
-const MISSION_TEMPLATES = [
-    { kind: 'kills', label: (n) => `Mate ${n} inimigos`, min: 60, max: 180, reward: 100 },
-    { kind: 'waves', label: (n) => `Sobreviva ${n} waves`, min: 3, max: 10, reward: 100 },
-    { kind: 'games', label: (n) => `Jogue ${n} partidas`, min: 2, max: 6, reward: 100 },
-    { kind: 'bosses', label: (n) => `Derrote ${n} Bosses`, min: 1, max: 4, reward: 200 },
-    { kind: 'elite', label: (n) => `Mate ${n} inimigos Elite+`, min: 8, max: 24, reward: 200 },
-    { kind: 'specific', label: (n, meta) => `Mate ${n} ${enemyMissionName(meta.enemyType)}`, min: 8, max: 30, reward: 200 },
-    { kind: 'damage', label: (n, meta) => `Cause ${n} de dano com ${characterMissionName(meta.charId)}`, min: 1500, max: 7000, reward: 300 },
-    { kind: 'damage', label: (n, meta) => `Cause ${n} de dano com ${characterMissionName(meta.charId)}`, min: 3000, max: 10000, reward: 300 },
-    { kind: 'specific', label: (n, meta) => `Elimine ${n} ${enemyMissionName(meta.enemyType)}`, min: 12, max: 36, reward: 300 },
-    { kind: 'kills', label: (n) => `Mate ${n} inimigos sem parar`, min: 120, max: 300, reward: 300 }
-];
-
-const WEEKLY_MISSION_TEMPLATES = [
-    { kind: 'kills', label: (n) => `Derrote ${n} inimigos`, min: 900, max: 1800, rewards: [{ type: 'coins', amount: 4500 }] },
-    { kind: 'waves', label: (n) => `Sobreviva ${n} waves`, min: 16, max: 28, rewards: [{ type: 'box', kind: 'normal', amount: 2 }] },
-    { kind: 'games', label: (n) => `Jogue ${n} partidas`, min: 10, max: 18, rewards: [{ type: 'evo', amount: 120 }] },
-    { kind: 'bosses', label: (n) => `Derrote ${n} Bosses`, min: 4, max: 8, rewards: [{ type: 'box', kind: 'metal', amount: 1 }] },
-    { kind: 'elite', label: (n) => `Mate ${n} inimigos Elite+`, min: 35, max: 70, rewards: [{ type: 'coins', amount: 2500 }, { type: 'box', kind: 'normal', amount: 1 }] },
-    { kind: 'specific', label: (n, meta) => `Elimine ${n} ${enemyMissionName(meta.enemyType)}`, min: 35, max: 70, rewards: [{ type: 'scrap', amount: 120 }] },
-    { kind: 'damage', label: (n, meta) => `Cause ${n} de dano com ${characterMissionName(meta.charId)}`, min: 30000, max: 90000, rewards: [{ type: 'box', kind: 'metal', amount: 1 }] },
-    { kind: 'waves', label: (n) => `Sobreviva ${n} waves`, min: 20, max: 30, rewards: [{ type:'box', kind:'gold', amount:1 }] },
-    { kind: 'damage', label: (n, meta) => `Cause ${n} de dano com ${characterMissionName(meta.charId)}`, min: 45000, max: 120000, rewards: [{ type:'box', kind:'chromium', amount:1 }] },
-    { kind: 'games', label: (n) => `Jogue ${n} partidas`, min: 12, max: 20, rewards: [{ type:'box', kind:'pacote', amount:2 }] },
-    { kind: 'kills', label: (n) => `Derrote ${n} inimigos`, min: 1000, max: 1800, rewards: [{ type:'box', kind:'pet_egg', amount:1 }] },
-    { kind: 'waves', label: (n) => `Sobreviva ${n} waves`, min: 20, max: 32, rewards: [{ type:'box', kind:'pet_egg', amount:2 }] }
-];
-
-function enemyMissionName(type) {
-    const map = {
-        ninja: 'ninjas',
-        velocista: 'velocistas',
-        dancer: 'velocistas dançarinos',
-        velocista_dancarino: 'velocistas dançarinos',
-        atirador: 'atiradores',
-        kamikaze: 'kamikazes',
-        gigante: 'gigantes',
-        tanque: 'tanques',
-        curandeiro: 'curandeiros',
-        elite: 'inimigos Elite',
-        elite_master: 'Elite Masters',
-        lider: 'líderes',
-        lider_elite: 'líderes Elite',
-        boss: 'Bosses',
-        megaboss: 'Mega Bosses',
-        rocknrool: 'roqueiros',
-        sounder: 'sonoplastas',
-        piano: 'pianistas',
-        singer: 'cantores',
-        tour_truck: 'caminhões de tour'
-    };
-    return map[type] || 'inimigos';
-}
-
-function characterMissionName(id) {
-    const c = CHARACTERS[id];
-    return c ? c.name : 'personagem';
-}
-
-function executeVesperAttack(target, angle, finalDmg, pSpd) {
-    if (!target || !player) return;
-
-    const focusActive = !!player.vesperFocusActive;
-    const range = Math.max(160, player.baseRange * player.stats.rangeMult * (focusActive ? 1.24 : 1));
-    const attackCd = Math.max(30, Math.round(52 * player.stats.fireRateMult));
-
-    const baseDmg = Math.max(1, finalDmg * (focusActive ? 1.15 : 1));
-    const critDmg = Math.max(1, Math.round(baseDmg * Math.max(1, player.stats.critDmg || 2)));
-    const isCrit = !focusActive && Math.random() < 0.35;
-    const damage = isCrit ? critDmg : baseDmg;
-    const pierce = focusActive
-        ? 9999
-        : (isCrit ? Math.max(1, 1 + Math.floor(player.stats.extraProj || 0)) : 0);
-
-    player.cd = attackCd;
-    player.lastAimAngle = angle;
-
-    createProj(
-        player.x,
-        player.y,
-        Math.cos(angle) * pSpd,
-        Math.sin(angle) * pSpd,
-        damage,
-        Math.ceil(range / Math.max(1, pSpd)) + 12,
-        true,
-        'arrow',
-{
-            size: 8,
-            pierce,
-            sourceChar: 'vesper',
-            vesperFocusPierce: focusActive,
-            sourceStats: {
-                ...player.stats,
-                critChance: 0,
-                pierce,
-                critDmg: Math.max(1, player.stats.critDmg || 2)
-            }
-        }
-    );
-}
-
-function executePopeyeAttack(target, angle, finalDmg, pSpd) {
-    if(!target||!player)return;const powered=(player.popeyeSpinTimer||0)>0;
-    const range=Math.max(46,player.baseRange*player.stats.rangeMult*(powered?.58:.48));
-    const damage=Math.max(1,finalDmg*(powered?1:.90));
-    player.cd=Math.max(28,Math.round(58*player.stats.fireRateMult));player.lastAimAngle=angle;
-    const punchLife=14;createProj(player.x,player.y,0,0,0,punchLife,true,'popeye_punch',{size:10,sourceChar:'popeye',attackAngle:angle,powered,punchDuration:punchLife,capsuleLength:range,hitRadius:12,visualOnly:true});
-    for(const e of enemies){if(!e||e.hp<=0)continue;const dx=e.x-player.x,dy=e.y-player.y,forward=dx*Math.cos(angle)+dy*Math.sin(angle);if(forward<-6||forward>range)continue;const lateral=Math.abs(dx*(-Math.sin(angle))+dy*Math.cos(angle));if(lateral>12+(e.size||0)*.35)continue;
-        const dealt=Math.max(1,Math.round(damage));e.hp-=dealt*getEnemyDamageTakenMultiplier(e);e.lastHitSourceChar='popeye';addFloatingText(e.x,e.y,`${dealt}`,'#f1c40f');trackMissionDamage(dealt);
-        const pushChance=powered?1:.15;if(Math.random()<pushChance){const isHeavy=e.type==='gigante'||e.type==='tanque',immune=e.type==='truck'||e.isBoss||e.type==='megaboss'||e.type==='colosso',pushPower=powered?9*.48:(5.5*.65),pushDuration=powered?.34:.27;e.popeyePush={vx:Math.cos(angle),vy:Math.sin(angle),speed:isHeavy?pushPower*.48:pushPower,remaining:pushDuration,powered,collisionDamage:powered,collisionImmune:immune,hitTargets:new Set(),explodeOnEnd:powered,sourceChar:'popeye'};}
-    }
-}
-
-function addZoeBattery(amount) {
-    if (!player || pd.selectedChar !== 'zoe') return;
-    const old = Math.max(0, Math.min(100, Number(player.zoeBattery) || 0));
-    const next = Math.min(100, old + Math.max(0, Number(amount) || 0));
-    player.zoeBattery = next;
-    if (next >= 100 && old < 100 && !player.zoeTunedActive) {
-        player.zoeTunedActive = true;
-        player.zoeTunedStationaryTimer = 0;
-        player.zoeTunedOrbitTickCd = 0;
-        addFloatingText(player.x, player.y - 34, 'ALTA VOLTAGEM!', '#f1c40f', 15);
-        createParticles(player.x, player.y, '#f1c40f');
-    }
-}
-
-function endZoeTunedState() {
-    if (!player) return;
-    player.zoeTunedActive = false;
-    player.zoeTunedStationaryTimer = 0;
-    player.zoeTunedOrbitTickCd = 0;
-}
-
-function updateZoeBattery(dt, moving) {
-    if (!player || pd.selectedChar !== 'zoe') return;
-    player.zoeBattery = Math.max(0, Math.min(100, Number(player.zoeBattery) || 0));
-    if (player.zoeBattery >= 100 && !player.zoeTunedActive) {
-        player.zoeTunedActive = true;
-        player.zoeTunedStationaryTimer = 0;
-        addFloatingText(player.x, player.y - 34, 'ALTA VOLTAGEM!', '#f1c40f', 15);
-    }
-    if (!player.zoeTunedActive) return;
-    if (moving) {
-        player.zoeTunedStationaryTimer = 0;
-    } else {
-        player.zoeTunedStationaryTimer = Math.max(0, Number(player.zoeTunedStationaryTimer) || 0) + dt;
-        if (player.zoeTunedStationaryTimer >= 3) {
-            endZoeTunedState();
-            return;
-        }
-    }
-    player.zoeBattery = Math.max(0, player.zoeBattery - 10 * dt);
-    if (player.zoeBattery <= 0) endZoeTunedState();
-}
-
-function applyZoeElectrified(enemy, duration = 3, orbitDmg = 4) {
-    if (!enemy || enemy.hp <= 0 || isCurrentlyHypnotized(enemy)) return false;
-    const wasActive = (Number(enemy.zoeElectrifiedTimer) || 0) > 0;
-    const safeDuration = Math.max(0, Number(duration) || 0);
-    const safeOrbitDmg = Math.max(1, Number(orbitDmg) || 1);
-
-    // Estado próprio do inimigo, como QUEIMADURA/CHOQUE: duração, multiplicador
-    // de velocidade e dados das três orbitais ficam presos ao alvo eletrificado.
-    enemy.zoeElectrifiedTimer = Math.max(Number(enemy.zoeElectrifiedTimer) || 0, safeDuration);
-    enemy.zoeElectrifiedSpeedMult = 0.60;
-    enemy.zoeElectrifiedOrbitDmg = Math.max(Number(enemy.zoeElectrifiedOrbitDmg) || 0, safeOrbitDmg);
-    enemy.zoeElectrifiedOrbitRadius = Math.max(30, (Number(enemy.size) || 10) + 30);
-    enemy.zoeElectrifiedOrbitAngle = Number.isFinite(Number(enemy.zoeElectrifiedOrbitAngle))
-        ? Number(enemy.zoeElectrifiedOrbitAngle)
-        : Math.random() * Math.PI * 2;
-    enemy.zoeElectrifiedTick = 0;
-
-    if (!wasActive) {
-        addFloatingText(enemy.x, enemy.y - 18, 'ELETRIFICADO!', '#f1c40f', 12);
-        createParticles(enemy.x, enemy.y, '#f1c40f');
-    }
-    return true;
-}
-
-function executeZoeAttack(target, angle, finalDmg, pSpd) {
-    if (!player) return;
-    // Três socos normais; o soco seguinte é a descarga elétrica.
-    const cycle = Math.max(0, Math.min(3, Number(player.zoePunchCycle) || 0));
-    const discharge = cycle === 3;
-    const range = Math.max(46, player.baseRange * player.stats.rangeMult * (discharge ? 0.58 : 0.48));
-    const damage = Math.max(1, finalDmg * (discharge ? 1.0 : 0.90));
-    player.cd = Math.max(28, Math.round(58 * player.stats.fireRateMult));
-    player.lastAimAngle = angle;
-    player.zoePunchCycle = (cycle + 1) % 4;
-    const punchLife = discharge ? 15 : 14;
-    createProj(player.x, player.y, 0, 0, 0, punchLife, true, 'zoe_punch', {
-        size: discharge ? 15 : 10, sourceChar: 'zoe', attackAngle: angle,
-        punchDuration: punchLife, capsuleLength: range, hitRadius: discharge ? 20 : 12,
-        visualOnly: true, zoeDischarge: discharge
-    });
-    let hitCount = 0;
-    for (const e of enemies) {
-        if (!e || e.hp <= 0 || isCurrentlyHypnotized(e)) continue;
-        const dx = e.x - player.x, dy = e.y - player.y;
-        const forward = dx * Math.cos(angle) + dy * Math.sin(angle);
-        if (forward < -6 || forward > range) continue;
-        const lateral = Math.abs(dx * (-Math.sin(angle)) + dy * Math.cos(angle));
-        const lateralBase = discharge ? 22 : 12;
-        if (lateral > lateralBase + (e.size || 0) * (discharge ? 0.50 : 0.35)) continue;
-        const dealt = Math.max(1, Math.round(damage));
-        e.hp -= dealt * getEnemyDamageTakenMultiplier(e);
-        e.lastHitSourceChar = 'zoe';
-        addFloatingText(e.x, e.y, `${dealt}`, '#f1c40f');
-        trackMissionDamage(dealt); hitCount++;
-        if (discharge) {
-            const pushPower = (e.type === 'gigante' || e.type === 'tanque' || e.type === 'colosso') ? 2.8 : 5.8;
-            e.popeyePush = { vx: Math.cos(angle), vy: Math.sin(angle), speed: pushPower, remaining: 0.32,
-                powered: false, collisionDamage: false, collisionImmune: true, hitTargets: new Set(), explodeOnEnd: false, sourceChar: 'zoe' };
-            applyZoeElectrified(e, 3, Math.max(1, player.baseDmg * player.stats.dmgMult * 0.22));
-        } else createParticles(e.x, e.y, '#3ec7ff');
-    }
-    if (hitCount > 0) addZoeBattery(discharge ? 9 : 3);
-}
-
-function executeKayoChairAttack(target, angle, finalDmg) {
-    if (!player) return;
-    const range = Math.max(220, player.baseRange * player.stats.rangeMult * 1.48);
-    const damage = Math.max(1, finalDmg * 1.15);
-    const attackCd = Math.max(15, Math.round(15 * 60));
-    player.cd = Math.max(30, Math.round(46 * player.stats.fireRateMult));
-    player.commonAbilityCd = 15;
-    player.lastAimAngle = angle;
-    player.kayoChairReady = false;
-    player.kayoChairFxTimer = 0.42;
-    player.kayoChairFxAngle = angle;
-    for (const e of enemies) {
-        if (!e || e.hp <= 0 || isCurrentlyHypnotized(e)) continue;
-        const dx = e.x - player.x, dy = e.y - player.y;
-        const forward = dx * Math.cos(angle) + dy * Math.sin(angle);
-        if (forward < -10 || forward > range) continue;
-        const lateral = Math.abs(dx * -Math.sin(angle) + dy * Math.cos(angle));
-        const hitWidth = 46 + (e.size || 0) * 0.40;
-        if (lateral <= hitWidth) {
-            const dealt = damage * getEnemyDamageTakenMultiplier(e);
-            e.hp -= dealt;
-            e.lastHitSourceChar = 'kayo';
-            e.stunTimer = Math.max(Number(e.stunTimer) || 0, e.isBoss ? 2 : 4);
-            addFloatingText(e.x, e.y, `${Math.floor(dealt)}`, '#d8b4ff');
-            addFloatingText(e.x, e.y - 18, 'STUN!', '#d8b4ff', 14);
-            createParticles(e.x, e.y, '#d8b4ff');
-        }
-    }
-    addFloatingText(player.x, player.y - 34, 'CADEIRA!', '#d8b4ff', 16);
-    createParticles(player.x, player.y, '#d8b4ff');
-    updateSpecialButtonUI();
-}
-
-function executeKayoAttack(target, angle, finalDmg, pSpd) {
-    if (!target || !player) return;
-    const range=Math.max(44,player.baseRange*player.stats.rangeMult*0.36);
-    const damage=Math.max(1,finalDmg*0.82);
-    const attackCd=Math.max(24,Math.round(44*player.stats.fireRateMult));
-    player.cd=attackCd;player.lastAimAngle=angle;
-    createProj(player.x,player.y,0,0,0,12,true,'sword',{sourceChar:'kayo',attackAngle:angle,punchDuration:12,capsuleLength:range,hitRadius:11,visualOnly:true});
-    for(const e of enemies){
-        if(!e||e.hp<=0)continue;const dx=e.x-player.x,dy=e.y-player.y;
-        const forward=dx*Math.cos(angle)+dy*Math.sin(angle);if(forward<-6||forward>range)continue;
-        const lateral=Math.abs(dx*(-Math.sin(angle))+dy*Math.cos(angle));if(lateral>11+(e.size||0)*0.35)continue;
-        const dealt=Math.max(1,Math.round(damage));e.hp-=dealt*getEnemyDamageTakenMultiplier(e);e.lastHitSourceChar='kayo';addFloatingText(e.x,e.y,`${dealt}`,'#f1c40f');trackMissionDamage(dealt);
-        if(Math.random()<0.10){e.burnTimer=3;e.burnDmg=Math.max(e.burnDmg||0,Math.max(1,damage*.5));}
-    }
-}
-
-function getMajorBriggsWeaponStage(killCount = 0) {
-    const kills = Math.max(0, Math.floor(Number(killCount) || 0));
-    if (kills >= 60) return 6;
-    if (kills >= 48) return 5;
-    if (kills >= 36) return 4;
-    if (kills >= 24) return 3;
-    if (kills >= 12) return 2;
-    return 1;
-}
-
-function missionRewardByGoal(goal, kind) {
-    if(kind === 'damage' || goal >= 3000) return 300;
-    if(goal >= 120 || goal >= 8 && kind === 'bosses') return 200;
-    if(goal >= 24 || kind === 'specific') return 200;
-    return 100;
-}
-
-function missionRewardPool(kind, goal) {
-    if(kind === 'damage') return 300;
-    if(kind === 'bosses' || kind === 'elite' || kind === 'specific' && goal >= 18) return 200;
-    if(goal >= 120) return 300;
-    if(goal >= 60) return 100;
-    return 100;
-}
-
-function missionKey(m) {
-    return [m.weekly ? 'weekly' : 'daily', m.kind, m.goal, m.rewardXp, m.meta?.charId || '', m.meta?.enemyType || ''].join('|');
-}
-
-function getOwnedCharacterIds() {
-    if(!pd || !pd.chars || typeof pd.chars !== 'object') return [];
-    return Object.keys(pd.chars).filter(id => pd.chars[id]);
-}
-
-function getOwnedDamageCharacterIds() {
-    const owned = getOwnedCharacterIds();
-    return owned.length ? owned : ['strike'];
-}
-
-function generateMissionTemplate(usedKeys = new Set(), allowHard = true) {
-    let attempts = 0;
-    while(attempts++ < 60) {
-        const t = MISSION_TEMPLATES[Math.floor(Math.random() * MISSION_TEMPLATES.length)];
-        const minGoal = t.kind === 'bosses' ? 1 : t.min;
-        const maxGoal = t.kind === 'bosses' ? 4 : t.max;
-        const goal = Math.floor(minGoal + Math.random() * (maxGoal - minGoal + 1));
-        const meta = {};
-        if(t.kind === 'damage') {
-            const dmgChars = getOwnedDamageCharacterIds();
-            meta.charId = dmgChars[Math.floor(Math.random() * dmgChars.length)];
-        } else if(t.kind === 'specific') {
-            const enemyPool = ['velocista','atirador','kamikaze','gigante','tanque','curandeiro','elite','lider','boss'];
-            meta.enemyType = enemyPool[Math.floor(Math.random() * enemyPool.length)];
-        }
-        const rewardXp = t.reward;
-        const mission = {
-            kind: t.kind,
-            goal,
-            progress: 0,
-            rewardXp,
-            completed: false,
-            claimed: false,
-            meta,
-            title: t.label(goal, meta),
-            description: missionDescription(t.kind, goal, meta)
-        };
-        const key = missionKey(mission);
-        if(!usedKeys.has(key)) {
-            usedKeys.add(key);
-            return mission;
-        }
-    }
-    return null;
-}
-
-function missionDescription(kind, goal, meta) {
-    if(kind === 'kills') return `Derrote ${goal} inimigos durante as partidas do dia.`;
-    if(kind === 'waves') return `Sobreviva a ${goal} waves em qualquer modo.`;
-    if(kind === 'games') return `Entre em ${goal} partidas.`;
-    if(kind === 'bosses') return `Elimine ${goal} Bosses.`;
-    if(kind === 'elite') return `Mate ${goal} inimigos Elite ou superiores.`;
-    if(kind === 'specific') return `Elimine ${goal} ${enemyMissionName(meta.enemyType)}.`;
-    if(kind === 'damage') return `Cause ${goal} de dano usando ${characterMissionName(meta.charId)}.`;
-    return `Complete ${goal} ações.`;
-}
-
-function getWeekKey(date = new Date()) {
-    const d = new Date(date);
-    d.setHours(0, 0, 0, 0);
-    const day = (d.getDay() + 6) % 7;
-    d.setDate(d.getDate() - day);
-    return d.toISOString().slice(0, 10);
-}
-
-function describeMissionRewardItem(item) {
-    if (!item) return '';
-    if (item.type === 'coins') return `${item.amount} Moedas`;
-    if (item.type === 'evo') return `${item.amount} Evo`;
-    if (item.type === 'gems') return `${item.amount} Gemas`;
-    if (item.type === 'scrap') return `${item.amount} Sucatas`;
-    if (item.type === 'box') return `${item.amount}x ${boxName(item.kind)}`;
-    return '';
-}
-
-function createMissionRewardQueue(items = []) {
-    const queue = [];
-    const instant = [];
-    (items || []).forEach(item => {
-        if (!item) return;
-        if (item.type === 'coins') { pd.coins += item.amount; instant.push(` +${item.amount} Moedas`); }
-        else if (item.type === 'evo') { pd.evo += item.amount; instant.push(` +${item.amount} Pontos Evo`); }
-        else if (item.type === 'gems') { pd.gems += item.amount; instant.push(` +${item.amount} Gemas`); }
-        else if (item.type === 'scrap') { pd.sucatas += item.amount; instant.push(` +${item.amount} Sucatas`); }
-        else if (item.type === 'box') {
-            for (let i = 0; i < item.amount; i++) {
-                const c = [];
-                const pulls = boxPulls(item.kind);
-                for (let j = 0; j < pulls; j++) c.push(buildBoxDropItem(item.kind));
-                queue.push({ type: 'box', boxType: item.kind, contents: c });
-            }
-        }
-    });
-    if (instant.length) queue.unshift({ type: 'instant', title: 'Recompensa Semanal', contents: instant });
-    return queue;
-}
-
-function createWeeklyMission() {
-    const base = WEEKLY_MISSION_TEMPLATES[Math.floor(Math.random() * WEEKLY_MISSION_TEMPLATES.length)];
-    const goal = Math.floor(base.min + Math.random() * (base.max - base.min + 1));
-    const meta = {};
-    if (base.kind === 'damage') {
-        const dmgChars = getOwnedDamageCharacterIds();
-        meta.charId = dmgChars[Math.floor(Math.random() * dmgChars.length)];
-    } else if (base.kind === 'specific') {
-        const enemyPool = ['velocista','atirador','kamikaze','gigante','tanque','curandeiro','elite','lider','boss'];
-        meta.enemyType = enemyPool[Math.floor(Math.random() * enemyPool.length)];
-    }
-    return {
-        weekly: true,
-        kind: base.kind,
-        goal,
-        progress: 0,
-        rewardXp: 500,
-        claimed: false,
-        meta,
-        bonusRewards: Array.isArray(base.rewards) ? base.rewards.map(r => ({ ...r })) : [],
-        title: base.label(goal, meta),
-        description: `${base.label(goal, meta)}. Recompensa semanal: 500 XP + ${base.rewards.map(describeMissionRewardItem).filter(Boolean).join(' + ')}`
-    };
-}
-
-function getMissionRewardSummary(m) {
-    if (!m) return '';
-    if (m.weekly) {
-        const bonus = (m.bonusRewards || []).map(describeMissionRewardItem).filter(Boolean).join(' + ');
-        return bonus ? `500 XP + ${bonus}` : '500 XP';
-    }
-    return `${m.rewardXp} XP`;
-}
-
-function getMissionRewardXp(m) {
-    return m && m.weekly ? 500 : (Number(m?.rewardXp) || 0);
-}
-
-function applyMissionProgress(m, kind, amount = 1, meta = {}) {
-    if (!m || m.claimed || m.kind !== kind) return false;
-    if (m.kind === 'damage' && m.meta?.charId && meta.charId && m.meta.charId !== meta.charId) return false;
-    if (m.kind === 'specific' && m.meta?.enemyType && meta.enemyType && m.meta.enemyType !== meta.enemyType) return false;
-    m.progress = Math.min(m.goal, (m.progress || 0) + amount);
-    if (m.progress >= m.goal) m.completed = true;
-    return true;
-}
-
-function getWeeklyMissionState() {
-    const weekKey = getWeekKey();
-    if (!pd.missions.weekly || typeof pd.missions.weekly !== 'object') pd.missions.weekly = { weekKey: '', mission: null };
-    if (pd.missions.weekly.weekKey !== weekKey || !pd.missions.weekly.mission) {
-        pd.missions.weekly.weekKey = weekKey;
-        pd.missions.weekly.mission = createWeeklyMission();
-    }
-    return pd.missions.weekly.mission;
-}
-
-function getDailyRerollState() {
-    const today = new Date().toDateString();
-    if (!pd.missions.rerolls || typeof pd.missions.rerolls !== 'object') pd.missions.rerolls = { date: today, used: 0 };
-    if (pd.missions.rerolls.date !== today) {
-        pd.missions.rerolls.date = today;
-        pd.missions.rerolls.used = 0;
-    }
-    if (typeof pd.missions.rerolls.used !== 'number' || !isFinite(pd.missions.rerolls.used)) pd.missions.rerolls.used = 0;
-    return pd.missions.rerolls;
-}
-
-function addPassXp(amount) {
-    const gained = pd?.debug?.infinitePassXp ? 999999999 : Math.max(0, Math.floor(Number(amount) || 0));
-    if (!gained) return 0;
-    pd.passXp += gained;
-    return 0;
-}
-
-function collectOverflowBoxes() {
-    const count = Math.floor(Number(pd.passOverflowBoxes) || 0);
-    if (count <= 0) return;
-    const q = [];
-    pd.passOverflowBoxes = 0;
-    for (let i = 0; i < count; i++) {
-        const c = [];
-        for (let j = 0; j < 3; j++) c.push(buildBoxDropItem('normal'));
-        q.push({ type: 'box', boxType: 'normal', contents: c });
-    }
-    save();
-    renderPass();
-    if (q.length) startGachaQueue(q);
-}
-
-function ensureMissionState() {
-    const today = new Date().toDateString();
-    if(!pd.missions || typeof pd.missions !== 'object') pd.missions = { date: today, list: [], weekly: { weekKey: '', mission: null }, rerolls: { date: today, used: 0 } };
-    if(pd.missions.date !== today) {
-        pd.missions.date = today;
-        pd.missions.list = [];
-    }
-    if(!Array.isArray(pd.missions.list)) pd.missions.list = [];
-
-    if(!pd.missions.weekly || typeof pd.missions.weekly !== 'object') pd.missions.weekly = { weekKey: '', mission: null };
-    if(!pd.missions.rerolls || typeof pd.missions.rerolls !== 'object') pd.missions.rerolls = { date: today, used: 0 };
-
-    const ownedDamageChars = new Set(getOwnedDamageCharacterIds());
-    pd.missions.list = pd.missions.list.map(m => {
-        if(m && m.kind === 'damage' && m.meta) {
-            if(!m.meta.charId || !ownedDamageChars.has(m.meta.charId)) {
-                m.meta.charId = getOwnedDamageCharacterIds()[0] || 'strike';
-                m.title = missionDescription(m.kind, m.goal, m.meta);
-                m.description = missionDescription(m.kind, m.goal, m.meta);
-            }
-        }
-        return m;
-    });
-
-    let targetCount = 5;
-    const used = new Set(pd.missions.list.map(missionKey));
-    while(pd.missions.list.length < targetCount) {
-        const m = generateMissionTemplate(used);
-        if(!m) break;
-        pd.missions.list.push(m);
-    }
-    if(pd.missions.list.length > targetCount) pd.missions.list.length = targetCount;
-
-    getWeeklyMissionState();
-    getDailyRerollState();
-}
-
-function renderMissions() {
-    ensureMissionState();
-    const list = document.getElementById('missions-list');
-    if(!list) return;
-    list.innerHTML = '';
-
-    const weekly = getWeeklyMissionState();
-    const rerolls = getDailyRerollState();
-    const total = pd.missions.list.length;
-    const completed = pd.missions.list.filter(m => m.claimed).length;
-    const header = document.createElement('div');
-    header.className = 'card-item';
-    header.style.gridColumn = '1 / -1';
-    header.innerHTML = `<h4 style="margin:0 0 6px 0; color:var(--btn-yellow);">Missões</h4><p style="margin:0; color:#ddd;">${completed}/${total} coletadas • ${total} diárias disponíveis • ${Math.max(0, 2 - rerolls.used)}/2 trocas hoje</p>`;
-    list.appendChild(header);
-
-    const weeklyCard = document.createElement('div');
-    const weeklyDone = weekly.progress >= weekly.goal;
-    weeklyCard.className = `mission-card ${weeklyDone ? 'completed' : ''} ${weekly.claimed ? 'claimed' : ''}`;
-    const weeklyPct = Math.min(100, (weekly.progress / weekly.goal) * 100);
-    weeklyCard.style.gridColumn = '1 / -1';
-    weeklyCard.innerHTML = `
-        <div class="mission-title">⭐ Missão Semanal</div>
-        <div class="mission-desc">${weekly.description}</div>
-        <div class="mission-meta">
-            <span>Progresso: <strong>${Math.floor(weekly.progress)}/${weekly.goal}</strong></span>
-            <span>Recompensa: <strong>${getMissionRewardSummary(weekly)}</strong></span>
-        </div>
-        <div class="mission-progress"><div class="mission-progress-fill ${weeklyDone ? 'done' : ''}" style="width:${weeklyPct}%"></div></div>
-        <div class="mission-actions">
-            ${weekly.claimed ? `<button class="btn-menu mission-claim done" disabled>Coletada</button>` : weeklyDone ? `<button class="btn-menu mission-claim" onclick="collectMissionReward('weekly')">Coletar</button>` : `<button class="btn-menu mission-claim" disabled style="opacity:0.55;">Em andamento</button>`}
-        </div>
-    `;
-    list.appendChild(weeklyCard);
-
-    pd.missions.list.forEach((m, idx) => {
-        const card = document.createElement('div');
-        const done = m.progress >= m.goal;
-        card.className = `mission-card ${done ? 'completed' : ''} ${m.claimed ? 'claimed' : ''}`;
-        const pct = Math.min(100, (m.progress / m.goal) * 100);
-        card.innerHTML = `
-            <div class="mission-title">${m.title}</div>
-            <div class="mission-desc">${m.description}</div>
-            <div class="mission-meta">
-                <span>Progresso: <strong>${Math.floor(m.progress)}/${m.goal}</strong></span>
-                <span>Recompensa: <strong>${getMissionRewardSummary(m)}</strong></span>
-            </div>
-            <div class="mission-progress"><div class="mission-progress-fill ${done ? 'done' : ''}" style="width:${pct}%"></div></div>
-            <div class="mission-actions" style="display:flex; gap:10px; flex-wrap:wrap;">
-                ${m.claimed ? `<button class="btn-menu mission-claim done" disabled>Coletado</button>` : done ? `<button class="btn-menu mission-claim" onclick="collectMissionReward(${idx})">Coletar</button>` : `<button class="btn-menu mission-claim" disabled style="opacity:0.55;">Em andamento</button>`}
-                ${(m.claimed || done || rerolls.used >= 2) ? '' : `<button class="btn-menu mission-claim" style="background:#7f8c8d; border-color:#2c3e50 !important;" onclick="rerollMission(${idx})">Trocar</button>`}
-            </div>
-        `;
-        list.appendChild(card);
-    });
-}
-function collectMissionReward(index) {
-    ensureMissionState();
-    if(index === 'weekly') {
-        const m = getWeeklyMissionState();
-        if(!m || m.claimed || m.progress < m.goal) return;
-        m.claimed = true;
-        const overflowBoxes = addPassXp(500);
-        const q = createMissionRewardQueue(m.bonusRewards || []);
-        save();
-        renderMissions();
-        renderPass();
-        showScreen('screen-pass');
-        if (q.length) startGachaQueue(q);
-        notify(`+500 XP do Passe${overflowBoxes ? ` • +${overflowBoxes} caixa(s) acumulada(s)` : ''}`);
-        return;
-    }
-    const m = pd.missions.list[index];
-    if(!m || m.claimed || m.progress < m.goal) return;
-    m.claimed = true;
-    const overflowBoxes = addPassXp(m.rewardXp);
-    save();
-    renderMissions();
-    renderPass();
-    showScreen('screen-pass');
-    notify(`+${m.rewardXp} XP do Passe${overflowBoxes ? ` • +${overflowBoxes} caixa(s) acumulada(s)` : ''}`);
-}
-
-function rerollMission(index) {
-    ensureMissionState();
-    const rerolls = getDailyRerollState();
-    if (rerolls.used >= 2) {
-        showAlert('Você já trocou suas missões duas vezes hoje.');
-        return;
-    }
-    const current = pd.missions.list[index];
-    if (!current || current.claimed) return;
-
-    const used = new Set(pd.missions.list.map((m, i) => i === index ? null : missionKey(m)).filter(Boolean));
-    let next = null;
-    for (let i = 0; i < 60; i++) {
-        const candidate = generateMissionTemplate(used);
-        if (candidate) { next = candidate; break; }
-    }
-    if (!next) {
-        showAlert('Não foi possível trocar essa missão agora.');
-        return;
-    }
-    pd.missions.list[index] = next;
-    rerolls.used++;
-    save();
-    renderMissions();
-    notify('Missão trocada!');
-}
-
-function applyTrackedMissionProgress(kind, amount = 1, meta = {}) {
-    ensureMissionState();
-    let changed = false;
-    pd.missions.list.forEach(m => {
-        if (applyMissionProgress(m, kind, amount, meta)) changed = true;
-    });
-    const weekly = getWeeklyMissionState();
-    if (applyMissionProgress(weekly, kind, amount, meta)) changed = true;
-    return changed;
-}
-
-function trackMissionProgress(kind, amount = 1, meta = {}) {
-    if (!amount || amount <= 0) return;
-    // Mission progress is run-scoped. It is committed only by a legitimate death.
-    if (isPlaying && !runMissionCommitInProgress) {
-        runMissionEvents.push({ kind, amount, meta: { ...meta } });
-        return;
-    }
-    const changed = applyTrackedMissionProgress(kind, amount, meta);
-    if (changed) {
-        save();
-        if(!document.getElementById('screen-missions').classList.contains('hidden')) renderMissions();
-    }
-}
-
+function getEventStatsValue(sectionId,stat){ensureEventState();return Math.max(0,Math.floor(Number(pd.events?.[sectionId]?.progress?.[stat])||0));}
+function syncEventMissionCompletion(sectionId,saveNow=true){ensureEventState();const section=EVENT_CHARACTER_PROGRESS[sectionId],state=pd.events?.[sectionId];if(!section||!state)return false;const before=state.completedIds.length,done=new Set(state.completedIds);for(const m of section.missions)if(!done.has(m.id)&&getEventStatsValue(sectionId,m.stat)>=m.goal)done.add(m.id);state.completedIds=section.missions.map(m=>m.id).filter(id=>done.has(id));const changed=state.completedIds.length!==before;if(changed&&saveNow)save();return changed;}
+function getEventCompletedCount(sectionId){ensureEventState();syncEventMissionCompletion(sectionId,false);return pd.events?.[sectionId]?.completedIds?.length||0;}
+function getEventMissionArt(sectionId){const sec=EVENT_CHARACTER_PROGRESS[sectionId];if(!sec?.sprite)return '';return getCharacterSpriteMarkup(sec.sprite,'menu').replace('class="char-sprite char-sprite--menu"','class="char-sprite event-mission-sprite" style="width:96px;height:54px;margin:0;object-fit:contain;"');}
+function renderEventMissionCard(sectionId,mission){const sec=EVENT_CHARACTER_PROGRESS[sectionId];const done=new Set(pd.events?.[sectionId]?.completedIds||[]).has(mission.id),current=Math.min(getEventStatsValue(sectionId,mission.stat),mission.goal),art=getEventMissionArt(sectionId)||'';return `<div class="mission-card event-mission-card ${done?'event-mission-done':'event-mission-lock'} ${done?'completed':''}"><div class="event-mission-head">${art}<div class="event-mission-copy"><div class="mission-title">${escapeHtmlText(decodeHtmlEntities(mission.title))}</div><div class="mission-desc">${escapeHtmlText(decodeHtmlEntities(mission.desc))}</div></div></div><div class="mission-meta"><span>Progresso: <strong>${current}/${mission.goal}</strong></span><span>Status: <strong>${done?'Concluída':'Em andamento'}</strong></span></div><div class="mission-progress"><div class="mission-progress-fill ${done?'done':''}" style="width:${Math.min(100,(current/mission.goal)*100)}%"></div></div></div>`;}
+function getPromoBallColor(promo){const c=CHARACTERS[promo.id];return c?.color||({common:'#3498db',rare:'#5dade2',epic:'#9b59b6',legendary:'#f1c40f',mythic:'#ff4d4d',seasonal:'#f39c12'}[promo.rarity]||'#8e44ad');}
+function darkenHexColor(hex,factor=.28){const m=/^#([0-9a-f]{6})$/i.exec(String(hex||'').trim());if(!m)return'rgb(40,40,40)';const num=parseInt(m[1],16);return`rgb(${Math.max(0,Math.min(255,Math.round(((num>>16)&255)*(1-factor))))}, ${Math.max(0,Math.min(255,Math.round(((num>>8)&255)*(1-factor))))}, ${Math.max(0,Math.min(255,Math.round((num&255)*(1-factor))))})`;}
+function renderPromoBall(promo){const sprite=getCharacterSpriteMarkup(promo.id,'promo');if(sprite)return sprite;const c=getPromoBallColor(promo),darker=darkenHexColor(c,.36);return`<div class="promo-offer-ball" style="background:radial-gradient(circle at 30% 28%,rgba(255,255,255,.42),rgba(255,255,255,.10) 48%),linear-gradient(180deg,${c},${darker});"></div>`;}
+function renderEventPromoOfferCard(promo,mode){const c=CHARACTERS[promo.id];if(!c)return'';const owned=!!pd.chars[promo.id],lvl=Number(pd.chars?.[promo.id]?.level)||0;if(owned||(mode==='level10'&&lvl>=10))return'';const art=getCharacterSpriteMarkup(promo.id,'promo')||renderPromoBall(promo);if(mode==='level10')return`<div class="card-item rarity-${promo.rarity} promo-offer-card">${art}<div class="promo-offer-title">${escapeHtmlText(decodeHtmlEntities(promo.label))} Lv. 10</div><div class="promo-offer-sub">Já vem no nível máximo.</div><div class="promo-offer-price"><span class="promo-offer-new">${promo.level10Cost} gemas</span></div><button class="btn-action promo-offer-btn" type="button" onclick="event.stopPropagation(); buyPromoCharacterOffer('${promo.id}',${promo.level10Cost},10)">Comprar no máximo</button></div>`;return`<div class="card-item rarity-${promo.rarity} promo-offer-card">${art}<div class="promo-offer-title">${escapeHtmlText(decodeHtmlEntities(promo.label))}</div><div class="promo-offer-sub">Oferta normal do evento.</div><div class="promo-offer-price"><span class="promo-offer-old">${promo.oldCost} gemas</span><span class="promo-offer-new">${promo.promoCost} gemas</span></div><button class="btn-action promo-offer-btn" type="button" onclick="event.stopPropagation(); buyPromoCharacterOffer('${promo.id}',${promo.promoCost},1)">Comprar personagem</button></div>`;}
+function renderEventPromoCard(promo){const c=CHARACTERS[promo.id];if(!c)return'';const owned=!!pd.chars[promo.id],lvl=Number(pd.chars?.[promo.id]?.level)||0;const cards=[];if(!owned)cards.push(renderEventPromoOfferCard(promo,'regular'));if(promo.level10Cost&&lvl<10)cards.push(renderEventPromoOfferCard(promo,'level10'));return cards.join('');}
+function renderEvents(){ensureEventState();const promoList=document.getElementById('event-promo-list');for(const id of Object.keys(EVENT_CHARACTER_PROGRESS)){const sec=EVENT_CHARACTER_PROGRESS[id],list=document.getElementById(`event-${id}-list`),count=document.getElementById(`event-${id}-count`),claim=document.getElementById(`event-${id}-claim`);const done=getEventCompletedCount(id);if(count)count.textContent=String(done);if(claim){const ready=done>=sec.goal;claim.disabled=!ready||!!pd.events[id].claimed;claim.textContent=pd.events[id].claimed?'Resgatado':`Resgatar ${sec.label}`;}if(list)list.innerHTML=sec.missions.map(m=>renderEventMissionCard(id,m)).join('');}if(promoList)promoList.innerHTML=EVENT_PROMOS.map(renderEventPromoCard).join('');if(!EVENT_CHARACTER_PROGRESS[currentEventSection]&&currentEventSection!=='store')currentEventSection='nox';showEventSection(currentEventSection);}
+function showEventSection(section){currentEventSection=section;document.querySelectorAll('#screen-event .shop-panel').forEach(el=>el.classList.add('hidden'));const target=document.getElementById(`event-section-${section}`);if(target)target.classList.remove('hidden');document.querySelectorAll('#screen-event .shop-tab').forEach(btn=>btn.classList.toggle('active',btn.dataset.section===section));}
+function claimEventCharacter(sectionId){ensureEventState();const sec=EVENT_CHARACTER_PROGRESS[sectionId];if(!sec)return;syncEventMissionCompletion(sectionId,true);const done=getEventCompletedCount(sectionId);if(done<sec.goal){showAlert(`Faltam mais ${sec.goal-done} missões.`);return;}if(pd.events[sectionId].claimed)return;const charId=sec.id;if(!pd.chars[charId])pd.chars[charId]={level:1,slots:2,chips:[null,null]};pd.events[sectionId].claimed=true;save();renderEvents();notify(`${sec.label} liberado!`);}
 function trackMissionDamage(amount) {
     if(!amount || amount <= 0) return;
     trackMissionProgress('damage', amount, { charId: pd.selectedChar });
@@ -9587,6 +8629,8 @@ function showCharDetail(id) {
         document.getElementById('detail-hp').innerHTML = `${Math.floor(displayHp * statMult)}${bonusHp > 0 ? ` <span style="color:var(--btn-green)">(+${Math.floor(bonusHp)})</span>` : ""}`;
 
         document.getElementById('detail-lvl').innerHTML = owned ? `${lvl}/10` : `0/10`;
+        const detailResourceEl=document.getElementById('detail-resource-counter');
+        if(detailResourceEl){ detailResourceEl.classList.remove('hidden'); if(owned){ detailResourceEl.innerHTML=`<div class="resource"><img class="resource-icon" src="elements/coin.png" alt="">${formatCompactNumber(pd.coins||0)}</div><div class="resource"><img class="resource-icon" src="elements/evo.png" alt="">${formatCompactNumber(pd.evo||0)}</div>`; } else { detailResourceEl.innerHTML=`<div class="resource res-gem"><img class="resource-icon" src="elements/gem.png" alt="">${formatCompactNumber(pd.gems||0)}</div>`; } }
         const speedEl = document.getElementById('detail-speed');
         const speedBarsEl = document.getElementById('detail-speed-bars');
         if (speedEl) {
@@ -10357,7 +9401,6 @@ const PET_DATA = {
     penguin: { id:'penguin', name:'Pinguim', sprite:'sprites/pipi.png', color:'#dff6ff', desc:'Acompanha o jogador e dispara bolas de neve; a cada fusão aumenta a chance de congelar.' },
     monkey: { id:'monkey', name:'Macaco', sprite:'enemies/monkey.png', color:'#9a6a45', desc:'Ataca inimigos de perto com golpes como Kayo; a cada fusão aumenta dano e alcance.' },
     tiny_egg: { id:'tiny_egg', name:'Ovinho', sprite:'pets/tiny_egg.png', color:'#fff3c4', desc:'Regenera a vida do jogador a cada 3s; a raridade aumenta a cura.' },
-    lobster: { id:'lobster', name:'Lagosta', sprite:'pets/lobster.png', color:'#e74c3c', desc:'Fica em um ponto próximo e atrai levemente inimigos; alguns inimigos podem nascer com a habilidade Lobster.' },
     rocky: { id:'rocky', name:'Pedregoso', sprite:'pets/rocky.png', color:'#7f8c8d', desc:'Enfraquece a movimentação de inimigos que acertam o jogador; a raridade aumenta a lentidão.' },
     fish: { id:'fish', name:'Peixe', sprite:'pets/fish.png', color:'#74b9ff', desc:'Encharca inimigos que atacam o jogador; a raridade aumenta o encharcamento.' },
     cactus: { id:'cactus', name:'Cactáceo', sprite:'pets/cactus.png', color:'#2ecc71', desc:'Dispara espinhos em todas as direções; a raridade aumenta a quantidade de espinhos.' },
@@ -10374,8 +9417,6 @@ const PET_MONKEY_COOLDOWN = [0.74,0.68,0.62,0.56,0.50];
 const PET_CAT_SHIELD = [0,1,2,3,5];
 const PET_DOG_XP_MULT = [0,0.3,0.6,0.9,1.2];
 const PET_TINY_EGG_HEAL = [2,3,4,5,6];
-const PET_LOBSTER_SKILL_CHANCE = [0.15,0.20,0.25,0.30,0.35];
-const PET_LOBSTER_ATTRACTION_RADIUS = [430,455,480,505,530];
 const PET_ROCKY_SLOW = [0.18,0.24,0.30,0.36,0.42];
 const PET_FISH_SOAK = [0.08,0.13,0.18,0.23,0.28];
 const PET_CACTUS_SPIKES = [6,8,10,12,14];
@@ -12875,7 +11916,7 @@ function startRunAfterShop(options = {}) {
     player.o2 = 100;
     player.o2Max = 100;
     
-    runEnemyUndetectable = false; runShootingDisabled = false; if(typeof player!=='undefined'&&player){player.petTinyEggCd=3;player.petLobsterMoveCd=0;player.petRockySlowFactor=0;} sandboxAutoSpawnEnabled = true; sandboxPersistentEntities = []; sandboxHasSavedWorld = false; sandboxSavedWorld = null; sandboxSaveSeq = 0; wave = 1; gameTime = 0; waveTimer = 0; enemySpawnTimer = 0; enemiesKilled = 0; inRunXp = 0; inRunLevel = 1; xpToNext = 100; runCoins = 0; runGems = 0; runScrap = 0; runMedals = 0; runChestCoins = 0; runChestGems = 0; runChestScrap = 0; runBossBoxDrops = []; runRewardsInvalidated = characterTest;
+    runEnemyUndetectable = false; runShootingDisabled = false; if(typeof player!=='undefined'&&player){player.petTinyEggCd=3;player.petRockySlowFactor=0;} sandboxAutoSpawnEnabled = true; sandboxPersistentEntities = []; sandboxHasSavedWorld = false; sandboxSavedWorld = null; sandboxSaveSeq = 0; wave = 1; gameTime = 0; waveTimer = 0; enemySpawnTimer = 0; enemiesKilled = 0; inRunXp = 0; inRunLevel = 1; xpToNext = 100; runCoins = 0; runGems = 0; runScrap = 0; runMedals = 0; runChestCoins = 0; runChestGems = 0; runChestScrap = 0; runBossBoxDrops = []; runRewardsInvalidated = characterTest;
     syncCharacterProgressState();
     pd.run = { charId: pd.selectedChar, medals: 0 };
     const runChar = ensureCharacterProgress(pd.selectedChar);
@@ -18478,12 +17519,6 @@ function updateEnemies(dt) {
         if(typeof e.semiShockRate !== 'number') e.semiShockRate = 0.4;
         if(typeof e.hypnotizedTimer !== 'number') e.hypnotizedTimer = 0;
         if(typeof e.merlinBabyTimer !== 'number') e.merlinBabyTimer = 0;
-        if(typeof e.lobsterSkillRolled !== 'boolean') e.lobsterSkillRolled = false;
-        const equippedPetForEnemy = getEquippedPet();
-        if(!e.lobsterSkillRolled){
-            e.lobsterSkillRolled = true;
-            if(equippedPetForEnemy?.id === 'lobster' && Math.random() < (PET_LOBSTER_SKILL_CHANCE[Math.max(0,Math.min(4,equippedPetForEnemy.rarity))]||0.15)) e.lobsterSkill = true;
-        }
         if(typeof e.pandaSummonTimer !== 'number') e.pandaSummonTimer = (e.type === 'panda_suit' ? 10 : 0);
         if(typeof e.pandaSummoned !== 'boolean') e.pandaSummoned = false;
         if(e.merlinBabyTimer > 0) {
@@ -18674,18 +17709,13 @@ function updateEnemies(dt) {
         if (isHypnotized && hypSnapshot && Number.isFinite(hypSnapshot.dmg)) {
             e.dmg = hypSnapshot.dmg;
         }
-        let lobsterTargetPet = equippedPetForEnemy?.id === 'lobster' ? equippedPetForEnemy : null;
-        let lobsterTargetState = null;
-        if(e.lobsterSkill && lobsterTargetPet){ const ls=getPetMoveState(lobsterTargetPet); lobsterTargetState=ls||null; }
-        let targetX = lobsterTargetState ? lobsterTargetState.x : ((player.invisTimer > 0 || sandboxEnemyUndetectable || runEnemyUndetectable) ? e.x : player.x); let targetY = lobsterTargetState ? lobsterTargetState.y : ((player.invisTimer > 0 || sandboxEnemyUndetectable || runEnemyUndetectable) ? e.y : player.y);
+        let targetX = ((player.invisTimer > 0 || sandboxEnemyUndetectable || runEnemyUndetectable) ? e.x : player.x); let targetY = ((player.invisTimer > 0 || sandboxEnemyUndetectable || runEnemyUndetectable) ? e.y : player.y);
         const hypTarget = isHypnotized ? getHypnosisTarget(e) : null;
         // Inimigos normais podem detectar e priorizar um inimigo hipnotizado.
         // O hipnotizado passa a ser tratado como alvo real dos inimigos, mas continua
         // protegido contra dano direto do jogador/aliados pelas rotinas de projéteis do player.
         const enemyNoticeTarget = !isHypnotized ? getNearestHypnotizedEnemy(e) : null;
-        if(lobsterTargetState){
-            targetX=lobsterTargetState.x; targetY=lobsterTargetState.y;
-        } else if (isHypnotized && hypTarget) {
+        if (isHypnotized && hypTarget) {
             targetX = hypTarget.x;
             targetY = hypTarget.y;
         } else if (enemyNoticeTarget) {
@@ -22333,82 +21363,6 @@ function updateEquippedPet(dt){
             if(player.hp>before) addFloatingText(player.x,player.y-30,`+${Math.floor(player.hp-before)} HP`,'#2ecc71',12);
             player.petTinyEggCd=3;
         }
-    } else if(pet.id==='lobster'){
-        player.petLobsterMoveCd=Math.max(0,(Number(player.petLobsterMoveCd)||0)-dt);
-        if(player.petLobsterMoveCd<=0 || Math.hypot(st.x-player.x,st.y-player.y)<70){
-            const a=Math.random()*Math.PI*2, r=90+Math.random()*190;
-            st.wanderX=player.x+Math.cos(a)*r; st.wanderY=player.y+Math.sin(a)*r; st.wanderTimer=5+Math.random()*7; player.petLobsterMoveCd=st.wanderTimer;
-        }
-        st.wanderTimer=Math.max(0,(Number(st.wanderTimer)||0)-dt);
-        st.mode='lure'; movePetToward(st,st.wanderX,st.wanderY,5.0,dt);
-        const attraction=PET_LOBSTER_ATTRACTION_RADIUS[pet.rarity]||430;
-        for(const e of enemies){
-            if(!e||e.hp<=0)continue;
-            const d=dist(e,st);
-            if(d>attraction || d<24) continue;
-            const pull=(0.10+0.02*pet.rarity)*(1-d/attraction);
-            const a=Math.atan2(st.y-e.y,st.x-e.x);
-            e.x += Math.cos(a)*pull*60*dt; e.y += Math.sin(a)*pull*60*dt;
-        }
-    } else if(pet.id==='rocky'){
-        const rarity=Math.max(0,Math.min(4,pet.rarity));
-        const slow=PET_ROCKY_SLOW[rarity]||0.18;
-        st.mode='player-orbit'; st.orbitAngle += dt*1.15; const orbit=player.r+62; movePetToward(st,player.x+Math.cos(st.orbitAngle)*orbit,player.y+Math.sin(st.orbitAngle)*orbit,7.0,dt);
-        player.petRockySlowFactor=slow;
-    } else if(pet.id==='fish'){
-        const rarity=Math.max(0,Math.min(4,pet.rarity));
-        st.mode='player-orbit'; st.orbitAngle+=dt*1.25; const orbit=player.r+58; movePetToward(st,player.x+Math.cos(st.orbitAngle)*orbit,player.y+Math.sin(st.orbitAngle)*orbit,7.2,dt);
-    } else if(pet.id==='cactus'){
-        player.petCactusCd=Math.max(0,(Number(player.petCactusCd)||0)-dt);
-        const rarity=Math.max(0,Math.min(4,pet.rarity));
-        st.mode='idle-orbit'; st.orbitAngle+=dt*0.9; const orbit=player.r+68; movePetToward(st,player.x+Math.cos(st.orbitAngle)*orbit,player.y+Math.sin(st.orbitAngle)*orbit,7.0,dt);
-        if(player.petCactusCd<=0){
-            const count=PET_CACTUS_SPIKES[rarity]||6;
-            for(let k=0;k<count;k++){ const a=(Math.PI*2*k/count); createProj(st.x,st.y,Math.cos(a)*4.8,Math.sin(a)*4.8,Math.max(2,player.baseDmg*player.stats.dmgMult*0.16),58,true,'pet_cactus_spike',{size:7,sourceChar:'cactus_pet',abilityShot:true,pierce:0}); }
-            player.petCactusCd=2.2; createParticles(st.x,st.y,'#2ecc71');
-        }
-    } else if(pet.id==='shroom'){
-        player.petShroomCd=Math.max(0,(Number(player.petShroomCd)||0)-dt);
-        const rarity=Math.max(0,Math.min(4,pet.rarity));
-        const target=nearestPetEnemy(620,true);
-        if(target){
-            st.mode='shroom-attack'; movePetToward(st,target.x,target.y,6.8,dt);
-            if(player.petShroomCd<=0){ const ang=Math.atan2(target.y-st.y,target.x-st.x); createProj(st.x,st.y,Math.cos(ang)*4.2,Math.sin(ang)*4.2,Math.max(2,player.baseDmg*player.stats.dmgMult*0.12),62,true,'pet_shroom_spore',{size:8,sourceChar:'shroom_pet',abilityShot:true,hypnotizeChance:PET_SHROOM_HYPNO[rarity]||0.10}); player.petShroomCd=1.65; }
-        } else { st.mode='idle-orbit'; st.orbitAngle+=dt*1.15; const orbit=player.r+64; movePetToward(st,player.x+Math.cos(st.orbitAngle)*orbit,player.y+Math.sin(st.orbitAngle)*orbit,7.0,dt); }
-    } else if(pet.id==='dog'){
-        let best=null,bd=Infinity;
-        for(const g of xpGems){ if(!g)continue; const d=dist(g,st); if(d<bd && d<430){bd=d;best=g;} }
-        if(best){ st.mode='xp'; const d=movePetToward(st,best.x,best.y,7.8,dt); if(d<player.r+12){ const bonus=PET_DOG_XP_MULT[pet.rarity]||0; const val=best.val*(1+bonus); inRunXp += pd?.debug?.infiniteXp ? Math.max(val,xpToNext) : val; addFloatingText(best.x,best.y,`+${Math.floor(val)} XP`,'#f1c40f',10); const idx=xpGems.indexOf(best); if(idx>=0)xpGems.splice(idx,1); if(inRunXp>=xpToNext) triggerLevelUp(); } }
-        else { st.wanderTimer-=dt; if(st.wanderTimer<=0 || Math.hypot(st.wanderX-st.x,st.wanderY-st.y)<28){ st.wanderTimer=1.0+Math.random()*2.2; st.wanderAngle=Math.random()*Math.PI*2; const wanderRadius=260+Math.random()*520; st.wanderX=st.x+Math.cos(st.wanderAngle)*wanderRadius; st.wanderY=st.y+Math.sin(st.wanderAngle)*wanderRadius; } st.mode='wander'; movePetToward(st,st.wanderX,st.wanderY,5.6,dt); }
-    } else if(pet.id==='cat'){
-        const target=nearestPetEnemy(700,true);
-        if(target){ st.mode='enemy-orbit'; st.orbitAngle += dt*(1.25+pet.rarity*.08); const orbit=Math.max(target.size+50,76); const tx=target.x+Math.cos(st.orbitAngle)*orbit,ty=target.y+Math.sin(st.orbitAngle)*orbit; movePetToward(st,tx,ty,8.2,dt); }
-        else { st.mode='player-orbit'; st.orbitAngle += dt*1.3; const orbit=player.r+44; movePetToward(st,player.x+Math.cos(st.orbitAngle)*orbit,player.y+Math.sin(st.orbitAngle)*orbit-4,7.4,dt); }
-    } else if(pet.id==='parrot'){
-        player.petParrotCd=Math.max(0,(Number(player.petParrotCd)||0)-dt);
-        const petRange=PET_PARROT_RANGE[Math.max(0,Math.min(4,pet.rarity))]||125;
-        const target=nearestPetEnemy(petRange,false);
-        if(target){ st.mode='parrot-attack'; const d=movePetToward(st,target.x,target.y,9.8,dt); if(d<target.size+20 && player.petParrotCd<=0){ const a=Math.atan2(target.y-st.y,target.x-st.x); target.x+=Math.cos(a)*115; target.y+=Math.sin(a)*115; clampPetToArena(target); const dmg=PET_PARROT_DAMAGE[pet.rarity]||0; if(dmg>0){target.hp=Math.max(0,target.hp-dmg*getEnemyDamageTakenMultiplier(target));addFloatingText(target.x,target.y,`${Math.floor(dmg)}`,'#e74c3c');} player.petParrotCd=1.15; createParticles(target.x,target.y,'#ff7675'); } }
-        else { st.mode='idle-orbit'; st.orbitAngle += dt*1.8; const orbit=player.r+55; movePetToward(st,player.x+Math.cos(st.orbitAngle)*orbit,player.y+Math.sin(st.orbitAngle)*orbit,7.5,dt); }
-    } else if(pet.id==='penguin'){
-        player.petPenguinCd=Math.max(0,(Number(player.petPenguinCd)||0)-dt);
-        const rarity=Math.max(0,Math.min(4,pet.rarity));
-        const target=nearestPetEnemy(380+rarity*55,true);
-        if(target){
-            st.mode='penguin-attack';
-            const d=dist(st,target);
-            const desired=115+target.size;
-            if(d>desired) movePetToward(st,target.x,target.y,8.4,dt);
-            else if(d<desired-22) movePetToward(st,player.x,player.y,5.6,dt);
-            st.facingLeft=target.x<st.x;
-            if(d<=420+rarity*55 && player.petPenguinCd<=0){
-                const ang=Math.atan2(target.y-st.y,target.x-st.x);
-                createProj(st.x,st.y,Math.cos(ang)*4,Math.sin(ang)*4,Math.max(1,Number(pet.dmg)||10),60,true,'pipisnowball',{size:13,sourceChar:'pipi',sourceType:'penguin_pet',freezeChance:PET_PENGUIN_FREEZE_CHANCE[rarity],slowChance:PET_PENGUIN_SLOW_CHANCE[rarity]});
-                player.petPenguinCd=0.95;
-            }
-        } else {
-            st.mode='idle-orbit'; st.orbitAngle+=dt*1.25; const orbit=player.r+72; movePetToward(st,player.x+Math.cos(st.orbitAngle)*orbit,player.y+Math.sin(st.orbitAngle)*orbit,7.3,dt);
-        }
     } else if(pet.id==='monkey'){
         player.petMonkeyCd=Math.max(0,(Number(player.petMonkeyCd)||0)-dt);
         const rarity=Math.max(0,Math.min(4,pet.rarity));
@@ -25422,12 +24376,12 @@ function draw() {
             ctx.fillStyle='#ff8c42'; ctx.beginPath(); ctx.moveTo(-r*1.05,0); ctx.lineTo(-r*1.70,-r*.32); ctx.lineTo(-r*1.35,0); ctx.lineTo(-r*1.70,r*.32); ctx.closePath(); ctx.fill(); ctx.restore(); return true;
         }
 
-        // Kayo/Popeye: punho humano com trajetória curta e proporções reais.
-        if ((type==='sword'&&source==='kayo')||type==='popeye_punch') {
+        // Kayo/Popeye/Macaco: punho humano com trajetória curta e proporções reais.
+        if ((type==='sword'&&source==='kayo')||type==='popeye_punch'||type==='monkey_punch') {
             ctx.save();const a=Number.isFinite(p.extra?.attackAngle)?p.extra.attackAngle:ang,dur=Math.max(1,Number(p.extra?.punchDuration)||12),t=Math.min(1,Math.max(0,(dur-p.life)/dur)),ease=1-Math.pow(1-t,3),maxReach=Number(p.extra?.capsuleLength)||(type==='popeye_punch'?44:42),reach=maxReach*(.10+.90*ease),r=Math.max(8,Number(p.extra?.hitRadius)||10);
             ctx.translate(p.x,p.y);ctx.rotate(a);ctx.globalAlpha=Math.max(.12,1-Math.max(0,t-.80)/.20);ctx.shadowColor='rgba(0,0,0,.28)';ctx.shadowBlur=5;
-            ctx.strokeStyle='#6c4630';ctx.lineWidth=2;ctx.fillStyle='#d99b6c';ctx.beginPath();ctx.moveTo(3,-r*.52);ctx.quadraticCurveTo(reach*.52,-r*.62,reach*.72,-r*.32);ctx.lineTo(reach*.72,r*.32);ctx.quadraticCurveTo(reach*.52,r*.62,3,r*.52);ctx.closePath();ctx.fill();ctx.stroke();
-            const fx=reach;ctx.fillStyle=type==='popeye_punch'?'#f4c18b':'#e8b07b';ctx.beginPath();ctx.arc(fx,0,r,0,TAU);ctx.fill();ctx.stroke();ctx.strokeStyle='#9a6848';ctx.lineWidth=1.1;for(let k=-1;k<=1;k++){ctx.beginPath();ctx.moveTo(fx-r*.42,r*.18+k*r*.28);ctx.lineTo(fx+r*.20,r*.08+k*r*.28);ctx.stroke();}ctx.restore();return true;
+            const monkeyPunch=(type==='monkey_punch'); ctx.strokeStyle=monkeyPunch?'#6c4630':'#6c4630';ctx.lineWidth=2;ctx.fillStyle=monkeyPunch?'#9b633e':'#d99b6c';ctx.beginPath();ctx.moveTo(3,-r*.52);ctx.quadraticCurveTo(reach*.52,-r*.62,reach*.72,-r*.32);ctx.lineTo(reach*.72,r*.32);ctx.quadraticCurveTo(reach*.52,r*.62,3,r*.52);ctx.closePath();ctx.fill();ctx.stroke();
+            const fx=reach;ctx.fillStyle=type==='monkey_punch'?'#b97948':(type==='popeye_punch'?'#f4c18b':'#e8b07b');ctx.beginPath();ctx.arc(fx,0,r,0,TAU);ctx.fill();ctx.stroke();ctx.strokeStyle='#9a6848';ctx.lineWidth=1.1;for(let k=-1;k<=1;k++){ctx.beginPath();ctx.moveTo(fx-r*.42,r*.18+k*r*.28);ctx.lineTo(fx+r*.20,r*.08+k*r*.28);ctx.stroke();}ctx.restore();return true;
         }
 
         // Nox: especial de cone com a mesma leitura visual do golpe de martelo do Flex.
@@ -29075,7 +28029,7 @@ html.sandbox-pc #sandbox-tool-cluster .sandbox-tool-hotkey{display:block !import
 <script>
 (function(){
     const style=document.createElement('style');style.textContent=`
-#screen-pets{overflow:hidden;padding:18px 20px 20px;}
+#screen-pets{overflow-y:auto !important;overflow-x:hidden !important;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:18px 20px 20px;}
 #screen-pets .pet-shop-top{position:relative;display:flex;align-items:center;justify-content:center;min-height:48px;flex:0 0 auto;}
 #screen-pets .pet-shop-top .btn-back{position:absolute;left:0;top:0;}
 #screen-pets .pet-selected-card{display:grid;grid-template-columns:100px minmax(0,1fr) auto;align-items:center;gap:16px;max-width:900px;width:100%;margin:8px auto 14px;padding:14px;border:3px solid #bdc3c7;border-radius:20px;background:rgba(43,43,64,.9);}
@@ -29152,16 +28106,16 @@ window.openPetShop=openPetShop;
 
 /* Pet artwork gets a wider presentation box; contain prevents vertical squashing. */
 #screen-pets .pet-selected-visual { width:160px !important; height:108px !important; }
-#screen-pets .pet-selected-visual img { width:150px !important; height:100px !important; object-fit:contain !important; }
-#screen-pets .pet-inventory-card img { width:128px !important; height:92px !important; object-fit:contain !important; }
+#screen-pets .pet-selected-visual img { width:132px !important; height:90px !important; object-fit:contain !important; }
+#screen-pets .pet-inventory-card img { width:112px !important; height:82px !important; object-fit:contain !important; }
 #screen-pets .pet-fusion-picker-visual { width:112px !important; height:88px !important; }
-#screen-pets .pet-fusion-picker-visual img { width:104px !important; height:82px !important; object-fit:contain !important; }
-.pet-roulette-item img { width:104px !important; height:82px !important; object-fit:contain !important; }
-.pet-reward-reveal .gacha-drop-sprite img { width:138px !important; height:104px !important; object-fit:contain !important; }
+#screen-pets .pet-fusion-picker-visual img { width:92px !important; height:74px !important; object-fit:contain !important; }
+.pet-roulette-item img { width:92px !important; height:74px !important; object-fit:contain !important; }
+.pet-reward-reveal .gacha-drop-sprite img { width:122px !important; height:94px !important; object-fit:contain !important; }
 @media(max-width:700px){
     #screen-pets .pet-selected-visual { width:120px !important; height:90px !important; }
-    #screen-pets .pet-selected-visual img { width:114px !important; height:84px !important; }
-    #screen-pets .pet-inventory-card img { width:108px !important; height:80px !important; }
+    #screen-pets .pet-selected-visual img { width:106px !important; height:78px !important; }
+    #screen-pets .pet-inventory-card img { width:94px !important; height:72px !important; }
     #screen-pets .pet-fusion-picker-visual { width:88px !important; height:72px !important; }
     #screen-pets .pet-fusion-picker-visual img { width:82px !important; height:68px !important; }
     .pet-roulette-item img { width:92px !important; height:72px !important; }
@@ -29309,7 +28263,10 @@ html > #overlay-tutorial-dialog > .tutorial-dialog-box{
 #overlay-tutorial-dialog{position:fixed !important;inset:0 !important;width:100vw !important;height:100dvh !important;min-height:100vh !important;z-index:120000 !important;visibility:visible !important;}
 #overlay-tutorial-dialog .tutorial-dialog-box{position:fixed !important;left:0 !important;right:0 !important;bottom:max(0px,env(safe-area-inset-bottom)) !important;width:100vw !important;min-height:clamp(180px,30dvh,320px) !important;max-height:min(52dvh,420px) !important;height:auto !important;z-index:120001 !important;visibility:visible !important;}
 #overlay-tutorial-dialog .tutorial-dialog-sprite,#overlay-tutorial-dialog .tutorial-dialog-copy{visibility:visible !important;}
-.btn-main-fullscreen{top:72px !important;right:20px !important;min-width:138px !important;min-height:46px !important;padding:8px 16px !important;z-index:16 !important;}
+.btn-main-fullscreen{top:112px !important;right:20px !important;left:auto !important;width:72px !important;min-width:72px !important;height:82px !important;min-height:82px !important;padding:4px 2px !important;z-index:41 !important;}
+.btn-main-fullscreen .fs-corner{width:13px !important;height:13px !important;}
+.btn-main-fullscreen .fs-label{font-size:11px !important;line-height:1 !important;white-space:nowrap !important;}
+#screen-settings .fullscreen-corner-btn{margin:10px auto 0 !important;width:min(300px,100%) !important;}
 .daily-reward-glass.daily-reward-claimed{opacity:.72;cursor:default;filter:saturate(.65);}
-@media(max-width:620px){.btn-main-fullscreen{top:68px !important;right:14px !important;min-width:118px !important;min-height:42px !important;}#overlay-tutorial-dialog .tutorial-dialog-box{min-height:170px !important;max-height:56dvh !important;}}
+@media(max-width:620px){.btn-main-fullscreen{top:112px !important;right:14px !important;width:68px !important;min-width:68px !important;height:78px !important;min-height:78px !important;}#overlay-tutorial-dialog .tutorial-dialog-box{min-height:170px !important;max-height:56dvh !important;}}
 </style>
