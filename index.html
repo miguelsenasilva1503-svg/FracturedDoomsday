@@ -2318,12 +2318,13 @@ Uma pequena criatura azul, simples e adorável que surgiu diretamente de um anti
 Um marinheiro durão e teimoso que parece nunca recusar uma boa briga. Com seu jeito rabugento, seu cachimbo e sua confiança inabalável, Popeye encara qualquer ameaça de frente. E quando a situação aperta, basta seu famoso espinafre para transformar sua força em algo ainda mais absurdo.
 
 “Eu sou o que eu sou!”`, popeyeSpinDuration: 30, popeyeSpinCooldownMax: 30 },
-    cyro_pyro: { id: 'cyro_pyro', class: 'Controle', name: 'Cyro & Pyro', rarity: 'legendary', cost: 349, hp: 110, speed: 3.45, dmg: 18, fireRate: 54, range: 270, color: '#74b9ff', emoji: '❄️', weapon: 'cyro_pyro', desc: `“Cyro e Pyro vivem discutindo sobre qual elemento é o mais forte. O resto do mundo só tenta sobreviver à discussão.”
+    cyro_pyro: { id: 'cyro_pyro', class: 'Controle', name: 'Crioheat', rarity: 'legendary', cost: 349, hp: 110, speed: 3.45, dmg: 18, fireRate: 54, range: 270, color: '#8fdcff', weapon: 'crioheat', desc: `### Crioheat
 
-Duas crianças elementais completamente opostas, mas inseparáveis. Enquanto Cyro mantém a calma e congela tudo ao seu redor, Pyro é impulsivo e adora incendiar qualquer coisa que pareça minimamente inflamável. Seus inimigos logo os subestimam por ainda serem jovens elementais, mas essa é a pior decisão que podem tomar. Juntos, transformam cada batalha em uma confusão de gelo, fogo e muita rivalidade entre irmãos.
+“Durante séculos, fogo e gelo ouviram que jamais deveriam se misturar. Até que dois seres decidiram quebrar essa regra.”
 
-Cyro: “Eu falei que era pra você não colocar fogo nisso...”
-Pyro: “Mas ficou muito mais legal assim!"` },
+Dois seres elementais, um de fogo e outro de gelo, que cresceram ouvindo que seus elementos eram superiores ao elemento oposto. O conflito entre os dois lados era tratado como algo natural, até que um dia dois seres decidiram desafiar esse tabu e se fundiram, criando uma forma híbrida que combinava os dois elementos. Quando a sintonia entre eles se torna perfeita, conseguem alcançar uma forma ainda mais rara: um corpo completamente puro de obsidiana, resultado da união entre forças que jamais deveriam existir juntas.
+
+“Fogo e gelo não precisam ser inimigos.”` },
     xilo: { id: 'xilo', class: 'Destruidor', name: 'Xilo', rarity: 'epic', sortLastEpic: true, sortLastEpicOrder: 3, cost: 149, hp: 80, speed: 3.9, dmg: 22, fireRate: 90, range: 320, color: '#f1c40f', weapon: 'xilo_anvil', desc: `“Xilo parece ter saído diretamente de um desenho dos anos 90. E, sinceramente, ninguém sabe como ele chegou aqui.”
 
 Um personagem cartunesco com luvas brancas, olhos enormes e uma energia impossível de ignorar. Xilo parece obedecer às próprias regras da animação, agindo de maneira exagerada e imprevisível mesmo quando tudo ao redor está completamente fora de controle. Com seu jeito brincalhão e expressivo, ele transforma qualquer situação em uma cena digna de um desenho antigo.
@@ -2717,10 +2718,9 @@ ESPECIAL: depois da wave 1, ele escolhe um personagem aleatório e o copia por 3
     vingathron: `Vingathron: ataca com sua espada em uma área de 200°, a cada 3 ataques acertados no mesmo inimigo, o ataque aplica FRAGILIDADE DE AÇO. Inimigos com FRAGILIDADE DE AÇO acumulam marcas sempre que Vingathron os atinge novamente. Ao chegar a 3 marcas, o inimigo faz cair 5 raios perto dele, causando dano aos inimigos próximos, e as marcas são consumidas.
 
 ESPECIAL: Sempre que Vingathron toma dano, ganha um fragmento de aço. A cada fragmento, recebe 20% de resistência. Ao chegar em 5 fragmentos, consome todos e ganha um escudo que reduz 75% do dano por 5s. Após cada fragmento, existe 2s de recarga para receber outro.`,
-    cyro_pyro: {
-        cyro: `Cyro: dispara bolas de gelo com cadência baixa que podem desencadear uma explosão CONGELANTE`,
-        pyro: `Pyro: dispara bolas de fogo rápidas com 10% de chance de QUEIMAR inimigos`
-    },
+    cyro_pyro: `Crioheat: dispara uma esfera de fogo e gelo que QUEIMA e LERDA inimigos, com 15% de chance de CONGELAR.
+
+ESPECIAL: quando sua vida fica abaixo de 50%, entra na forma OBSIDIANA. Nessa forma, além das esferas, dispara dois espinhos PERFURANTES que causam mais dano, podem QUEIMAR e têm 15% de chance de CONGELAR. Os espinhos não aplicam LERDADO.`,
 
 
 astra: `Astra: dispara planetas nos inimigos, os planetas têm 15% de chance de explodir cosmicamente em área.
@@ -3499,7 +3499,6 @@ function normalizeSaveData(rawSave) {
         delete next.chars['wild'];
     }
     if (!next.chars['gladiator'] && Object.keys(next.chars).includes('gladiator')) next.chars['gladiator'].mode = 'shooter';
-    if (next.chars.cyro_pyro && next.chars.cyro_pyro.mode !== 'cyro' && next.chars.cyro_pyro.mode !== 'pyro') next.chars.cyro_pyro.mode = 'pyro';
 
     if (!Object.prototype.hasOwnProperty.call(source, 'missMacaronLegacySeasonal')) {
         next.missMacaronLegacySeasonal = !!next.chars?.miss_macaron;
@@ -3522,7 +3521,6 @@ function normalizeSaveData(rawSave) {
         next.events[id].missionSaveKey = key;
     }
     if (typeof next.eventProgressVersion !== 'number' || next.eventProgressVersion < 6) {
-        delete next.events.cyro_pyro; delete next.events.mr_perfurant;
         next.eventProgressVersion = 6;
     }
 
@@ -3670,7 +3668,6 @@ function load() {
         pd.events[id].missionSaveKey = key;
     }
     if (typeof pd.eventProgressVersion !== 'number' || pd.eventProgressVersion < 6) {
-        delete pd.events.cyro_pyro; delete pd.events.mr_perfurant;
         pd.eventProgressVersion = 6;
     }
     if (!pd.run || typeof pd.run !== 'object') pd.run = { charId: pd.selectedChar || 'strike', medals: 0 };
@@ -4334,8 +4331,8 @@ const CHARACTER_SPRITES = {
     necro_zombie: 'sprites/necro_zombie.png',
     sparta_lion: 'sprites/sparta_lion.png',
     adam_mech: 'sprites/adam_mech.png',
-    cyro: 'sprites/cyro.png',
-    pyro: 'sprites/pyro.png',
+    crioheat: 'sprites/crioheat.png',
+    obsidian: 'sprites/obsidian.png',
     eolio: 'sprites/eolio.png',
     stormy: 'sprites/stormy.png',
     bulb: 'sprites/bulb.png',
@@ -4601,17 +4598,20 @@ const CHARACTER_SPRITE_COMPACT_IDS = new Set([
     'gladiator_sword'
 ]);
 
-function getCyroPyroMode() {
-    return pd?.chars?.cyro_pyro?.mode === 'cyro' ? 'cyro' : 'pyro';
+function isCrioheatObsidianForm() {
+    if (pd?.selectedChar !== 'cyro_pyro' || !player) return false;
+    const maxHp = Math.max(1, Number(player.baseHp || 0) * Number(player.stats?.maxHpMult || 1));
+    const active = Number(player.hp || 0) < maxHp * 0.5;
+    player.crioheatObsidian = active;
+    return active;
 }
 
 function getCharacterDisplayName(id) {
-    if (id === 'cyro_pyro') return getCyroPyroMode() === 'cyro' ? 'Cyro' : 'Pyro';
     return CHARACTERS?.[id]?.name || id;
 }
 
 function getDynamicCharacterSpriteId(id) {
-    if (id === 'cyro_pyro') return getCyroPyroMode() === 'cyro' ? 'cyro' : 'pyro';
+    if (id === 'cyro_pyro') return isCrioheatObsidianForm() ? 'obsidian' : 'crioheat';
     if (id === 'gladiator') {
         return ((player?.gladiatorMode || pd?.chars?.gladiator?.mode || 'shooter') === 'shooter') ? 'gladiator_spear' : 'gladiator_sword';
     }
@@ -4914,7 +4914,7 @@ function spawnCharacterSupportAllies(charId, opts = {}) {
 
 function getGlitchMorphPool() {
     const base = Object.keys(CHARACTERS || {}).filter(id => id && id !== 'glitch');
-    const required = ['cyro_pyro', 'eolio', 'serrano'];
+    const required = ['eolio', 'serrano'];
     return Array.from(new Set(base.concat(required).filter(id => CHARACTERS?.[id])));
 }
 
@@ -5087,11 +5087,6 @@ function finishGlitchMorphSequence() {
         player.glitchCurrentFormId = 'glitch';
         player.glitchOriginChar = 'glitch';
     } else {
-        if (finalId === 'cyro_pyro') {
-            const morphMode = Math.random() < 0.5 ? 'cyro' : 'pyro';
-            if (pd?.chars?.cyro_pyro) pd.chars.cyro_pyro.mode = morphMode;
-            player.cyroPyroMode = morphMode;
-        }
         applyCharacterLoadout(finalId, glitchLevel, { keepHpRatio: true });
         spawnCharacterSupportAllies(finalId, { ownerTag: 'glitch-morph', temporary: true, x: player.x, y: player.y, baseDmg: player.baseDmg, dmgMult: player.stats.dmgMult });
         player.glitchMorphActive = true;
@@ -5949,7 +5944,6 @@ function getCharacterSummary(id) {
     const data = CHARACTER_SUMMARIES[id];
     if (!data) return '';
     if (typeof data === 'string') return data;
-    if (id === 'cyro_pyro') return getCyroPyroMode() === 'cyro' ? (data.cyro || '') : (data.pyro || '');
     return data.default || '';
 }
 
@@ -6715,6 +6709,21 @@ function redeemRewardCode() {
     const code = String(input?.value || '').trim();
     const normalizedCode = code.toUpperCase();
 
+    // Código de desenvolvimento: desbloqueia as Dev Tools pela caixa normal de códigos.
+    if (normalizedCode === 'DEV321@D321') {
+        ensureDevDebugState();
+        if (pd.debug.devUnlocked) {
+            showAlert('Dev Tools já estão desbloqueadas nesta conta.');
+            if (input) input.value = '';
+            return;
+        }
+        pd.debug.devUnlocked = true;
+        save();
+        if (input) input.value = '';
+        updateSettingsUI();
+        notify('Dev Tools desbloqueadas!');
+        return;
+    }
 
     if (normalizedCode === 'LAFRANCE') {
         if (pd.redeemedCodes.lafrance) {
@@ -9383,13 +9392,6 @@ function setWildMode(mode) {
     showCharDetail('gladiator'); 
 }
 
-function setCyroPyroMode(mode) {
-    if (!pd.chars['cyro_pyro']) return;
-    pd.chars.cyro_pyro.mode = mode === 'cyro' ? 'cyro' : 'pyro';
-    save();
-    renderChars();
-    showCharDetail('cyro_pyro');
-}
 
 function testUnownedCharacter(id) {
     const c = CHARACTERS[id];
@@ -9572,19 +9574,7 @@ function showCharDetail(id) {
 
         const wModes = document.getElementById('detail-wild-modes');
         const modeTitleEl = document.getElementById('detail-mode-title');
-        if(id === 'cyro_pyro' && owned) {
-            wModes.classList.remove('hidden');
-            if (modeTitleEl) modeTitleEl.innerHTML = 'Escolha elemental:';
-            const mode = getCyroPyroMode();
-            document.getElementById('wild-dash').innerHTML='Cyro';
-            document.getElementById('wild-cleave').innerHTML='Pyro';
-            document.getElementById('wild-dash').style.color='#000';
-            document.getElementById('wild-cleave').style.color='#000';
-            document.getElementById('wild-dash').onclick=()=>setCyroPyroMode('cyro');
-            document.getElementById('wild-cleave').onclick=()=>setCyroPyroMode('pyro');
-            document.getElementById('wild-dash').style.border=mode==='cyro'?'2px solid var(--btn-yellow)':'';
-            document.getElementById('wild-cleave').style.border=mode==='pyro'?'2px solid var(--btn-yellow)':'';
-        } else { wModes.classList.add('hidden'); }
+        wModes.classList.add('hidden');
 
         const slotsContainer = document.getElementById('detail-chip-slots');
         slotsContainer.innerHTML = '';
@@ -9765,7 +9755,6 @@ function buyChar(id) {
         if (!res) return;
         pd.gems -= c.cost;
         pd.chars[id] = { level: 1, slots: 2, chips: [null, null], unlockSource: id === 'glitch' ? 'shop-gems' : 'shop' };
-        if (id === 'cyro_pyro') pd.chars[id].mode = 'pyro';
         save();
         renderChars();
         renderShop();
@@ -9776,7 +9765,6 @@ function buyChar(id) {
 
 function selectChar(id) {
     if(!pd.chars[id]) { showAlert("Personagem não obtido!"); return; }
-    if (id === 'cyro_pyro' && pd.chars[id].mode !== 'cyro' && pd.chars[id].mode !== 'pyro') pd.chars[id].mode = 'pyro';
     pd.selectedChar = id;
     if (!pd.run || typeof pd.run !== 'object') pd.run = { charId: id, medals: 0 };
     pd.run.charId = id;
@@ -12688,7 +12676,7 @@ function startRunAfterShop(options = {}) {
     
     player = {
         x: 0, y: 0, r: (pd.selectedChar === 'hank' || pd.selectedChar === 'vingathron' || pd.selectedChar === 'snapdragon' || pd.selectedChar === 'yeti' || pd.selectedChar === 'glace') ? 20 : ((pd.selectedChar === 'shiv' || pd.selectedChar === 'zippi') ? 10 : ((pd.selectedChar === 'kaisen' || pd.selectedChar === 'booboo' || pd.selectedChar === 'yoyo') ? 13 : (pd.selectedChar === 'eel' ? 15 : 15))), baseHp: initialBaseHp, hp: initialBaseHp, baseSpeed: charDef.speed, baseDmg: initialBaseDmg,
-        baseFireRate: charDef.fireRate, baseRange: charDef.range, color: charDef.color, weapon: charDef.weapon, vingathronFragments: 0, vingathronDamageResistance: 0, vingathronFragmentCooldown: 0, vingathronShieldTimer: 0, vingathronAttackTimer: 0, vingathronAttackAngle: 0, lastDamageTaken: 0, merlinAge: pd.selectedChar === 'merlin' ? 'old' : null, merlinBaseHp: pd.selectedChar === 'merlin' ? initialBaseHp : null, merlinPoisonChance: 0.15, merlinBabyChance: 0.15, merlinPacifierChance: 0, merlinAgeCooldown: 0, cyroPyroMode: pd.selectedChar === 'cyro_pyro' ? getCyroPyroMode() : null, gladiatorMode: pd.selectedChar === 'gladiator' ? (pd.chars?.gladiator?.mode || 'shooter') : null, gladiatorModeCooldown: 0, eolioPropellerSeq: 0, cd: 0, shieldTimer: 0,
+        baseFireRate: charDef.fireRate, baseRange: charDef.range, color: charDef.color, weapon: charDef.weapon, vingathronFragments: 0, vingathronDamageResistance: 0, vingathronFragmentCooldown: 0, vingathronShieldTimer: 0, vingathronAttackTimer: 0, vingathronAttackAngle: 0, lastDamageTaken: 0, merlinAge: pd.selectedChar === 'merlin' ? 'old' : null, merlinBaseHp: pd.selectedChar === 'merlin' ? initialBaseHp : null, merlinPoisonChance: 0.15, merlinBabyChance: 0.15, merlinPacifierChance: 0, merlinAgeCooldown: 0, crioheatObsidian: false, gladiatorMode: pd.selectedChar === 'gladiator' ? (pd.chars?.gladiator?.mode || 'shooter') : null, gladiatorModeCooldown: 0, eolioPropellerSeq: 0, cd: 0, shieldTimer: 0,
         zombieTimer: 0, revived: false, elekCycle: false, dashTimer: 0, meleeCd: 0, izaqueForm: pd.selectedChar === 'izaque' ? 'normal' : null, izaqueFormTimer: 0, izaqueCombo: 0, izaqueMovementTimer: 0, izaqueSpecialCooldown: pd.selectedChar === 'izaque' ? 30 : 0, izaqueHybridWavesLeft: 0, boldShots: 0, boldReload: 0, boldAbilityTimer: 0, specCd: pd.selectedChar === 'ghoul' ? 20 : 0, commonAbilityCd: 0, hunterAbilityCd: 0, tenentAbilityCooldown: 0, fastyAbilityTimer: 0, zoePunchCycle: 0, zoeBattery: 0, zoeTunedActive: false, zoeTunedStationaryTimer: 0, zoeTunedOrbitAngle: 0, zoeTunedOrbitTickCd: 0, kayoChairReady: false, invisTimer: 0, ghoulPendingCd: 0, ninjiPendingCd: 0,
         lastMoveAngle: 0, lastAimAngle: 0, sharkieAttackTimer: 0, sharkieDiveTimer: 0, sharkieDiveCooldown: 0, josephOllieCd: 0, josephOllieTimer: 0, josephOllieAngle: 0, josephOlliePendingCd: 0, josephOllieDetonate: false, sharkieAimAngle: 0, sharkieReverseAngle: 0, sharkieReverseX: 0, sharkieReverseY: 0, tenentCycle: 0, tenentAbilityActiveBullets: 0, stormyCycle: 0, bulbMode: pd.selectedChar === 'bulb' ? Math.floor(Math.random() * 3) : null, bulbGasActiveUntil: 0, bulbGasCooldownUntil: 0, bulbGasAngle: 0, orbitalAngle: 0, popeyeSpinTimer: 0, popeyeSpinCooldown: 30, popeyeSpinUsed: true, popeyeSpinEndingFx: 0, shellTorpedoTimer: 0, shellTorpedoCooldown: pd.selectedChar === 'shell' ? 20 : 0, shellTorpedoTarget: null, shellTorpedoHitCd: 0, shellTorpedoDamageTick: 0, shellTorpedoWasActive: false, shellTorpedoExitTracked: false, grappleCooldown: 0, grappleCharging: false, grappleCharge: 0, grappleHookTimer: 0, grappleHookDuration: 0.28, grappleHookStartX: 0, grappleHookStartY: 0, grappleHookX: 0, grappleHookY: 0, grappleHookTargetX: 0, grappleHookTargetY: 0, grappleHookAngle: 0, grappleHookHitEnemy: null, grappleHookDamageApplied: false, grappleAttackTimer: 0, grappleAttackAngle: 0, boobooReturn: true, yoyoReady: true, yoyoOrbitActive: true, yoyoOrbitAngle: 0, yoyoOrbitTickCd: 0, pickedCards: [], revivesUsed: 0, qbBar: 0, qbShield: false, blizzardTemperature: 20, blizzardMoveTimer: 0, blizzardTier: 0, blizzardStormTick: 0, isDead: false, flexCombo: 0, flexReload: 0, ninjiDashCd: 0, shinobiDragonActive: false, shinobiDragonWavesLeft: 0, shinobiDragonCooldown: pd.selectedChar === 'shinobi' ? 20 : 0, shinobiDragonFireCd: 0, shinobiScytheCycle: 0, sterlingCharging: false, sterlingCharge: 0, sterlingAttackCd: 0, majorBriggsKills: 0, majorBriggsStage: 1, noxSpecialTimer: 10, noxSpecialIndex: 0, noxBoomerangActive: false, snapdragonFlameTimer: 0, snapdragonFlameCooldown: 30, snapdragonFlameActive: false, snapdragonFlameFireCd: 0,
         adamScrap: 0, adamScrapVisualCounter: 0, adamMechActive: false, adamMechWavesLeft: 0, adamMechHpBonus: 0, adamMechSizeBonus: 0, adamBaseHpBeforeMech: null, adamBaseRBeforeMech: null,
@@ -12715,7 +12703,6 @@ function startRunAfterShop(options = {}) {
     if(pd.selectedChar === 'zippi') { player.zippiBubbleHp = 80; player.zippiBubbleMaxHp = 80; player.zippiBubbleBroken = false; }
     if(pd.selectedChar === 'bunniie') { ensureBunniieRuntime(); player.bunniieHoles = []; player.bunniieTunnelCd = 0; player.bunniieTunnelWarpCd = 0; player.bunniieTunnelGrace = 0; player.bunniieTunnelSeq = 0; }
     spawnCharacterSupportAllies(pd.selectedChar, { ownerTag: 'run-start', temporary: false, x: player.x, y: player.y, baseDmg: player.baseDmg, dmgMult: player.stats.dmgMult });
-    if (pd.selectedChar === 'cyro_pyro') spawnCyroPyroPartner();
     if (pd.selectedChar === 'kaisen') spawnAxelDrone();
     if(pd.selectedChar === 'healy') player.stats.regen += 0.01;
 
@@ -16241,31 +16228,24 @@ function fireWeapon(target) {
             );
             return;
         }
-        if (w === 'cyro_pyro') {
-            const mode = player.cyroPyroMode || getCyroPyroMode();
+        if (w === 'crioheat') {
+            const obsidian = isCrioheatObsidianForm();
             const spawnOffset = player.r + 9;
             const sx = player.x + Math.cos(angle) * spawnOffset;
             const sy = player.y + Math.sin(angle) * spawnOffset;
-            const isCyro = mode === 'cyro';
-            player.cd = (isCyro ? 96 : 30) * player.stats.fireRateMult;
-            const shotSpeed = isCyro ? pSpd * 0.82 : pSpd * 1.45;
-            createProj(
-                sx,
-                sy,
-                Math.cos(angle) * shotSpeed,
-                Math.sin(angle) * shotSpeed,
-                finalDmg,
-                isCyro ? 72 : 58,
-                true,
-                isCyro ? 'cyro_iceball' : 'pyro_fireball',
-{
-                    size: isCyro ? 13 : 9,
-                    sourceChar: isCyro ? 'cyro' : 'pyro',
-                    explodeRadius: isCyro ? 58 : 0,
-                    freezeDuration: isCyro ? 2.7 : 0,
-                    burnChance: isCyro ? 0 : 0.10
+            player.cd = 54 * player.stats.fireRateMult;
+            const shotSpeed = pSpd * 1.05;
+            createProj(sx, sy, Math.cos(angle) * shotSpeed, Math.sin(angle) * shotSpeed, finalDmg, 72, true, 'crioheat_orb', {
+                size: 13, sourceChar: 'cyro_pyro', burnChance: 1, slowDuration: 1.6, freezeChance: 0.15, freezeDuration: 2.5
+            });
+            if (obsidian) {
+                for (const off of [-0.12, 0.12]) {
+                    const a = angle + off;
+                    createProj(sx, sy, Math.cos(a) * shotSpeed * 1.08, Math.sin(a) * shotSpeed * 1.08, finalDmg * 1.15, 78, true, 'obsidian_spike', {
+                        size: 9, sourceChar: 'cyro_pyro', pierce: 99, burnChance: 1, freezeChance: 0.15, freezeDuration: 2.5
+                    });
                 }
-            );
+            }
             return;
         }
         if(w === 'adam') {
@@ -17360,6 +17340,8 @@ function createProj(x, y, vx, vy, dmg, life, isPlayer, type, extra={}) {
     else if (type === 'beezy_bee') size = extra.size || 9;
     else if (type === 'shell_trident') size = extra.size || 9;
     else if (type === 'axel_shard') size = extra.size || 5;
+    else if (type === 'crioheat_orb') size = extra.size || 13;
+    else if (type === 'obsidian_spike') size = extra.size || 9;
     else if (type === 'hank_ability_missile') size = extra.size || 10;
     else if (type === 'hunter_ability_cartridge') size = extra.size || 11;
     else if (type === 'hunter_ability_pellet') size = extra.size || 4.5;
@@ -19340,31 +19322,6 @@ function updateEnemies(dt) {
 
 function spawnAxelDrone() { if(!player) return; const hp=Math.max(35,player.baseHp*0.58); allies.push({type:'drone',variant:'kaisen',x:player.x+42,y:player.y-18,speed:3,dmg:Math.max(1,player.baseDmg*player.stats.dmgMult*.48),cd:0,life:Infinity,hp,maxHp:hp,r:14,facingLeft:false}); }
 
-function spawnCyroPyroPartner() {
-    const selectedMode = getCyroPyroMode();
-    const partnerMode = selectedMode === 'cyro' ? 'pyro' : 'cyro';
-    const level = Math.max(1, pd?.chars?.cyro_pyro?.level || 1);
-    const levelMult = 1 + (level - 1) * 0.15;
-    const hp = Math.max(45, player.baseHp * 0.72);
-    allies.push({
-        type: 'cyro_pyro_partner',
-        elementMode: partnerMode,
-        x: player.x + (partnerMode === 'cyro' ? -34 : 34),
-        y: player.y - 30,
-        homeAngle: Math.random() * Math.PI * 2,
-        facingLeft: false,
-        life: Infinity,
-        r: 13,
-        hp,
-        maxHp: hp,
-        speed: 3.45,
-        dmg: Math.max(1, CHARACTERS.cyro_pyro.dmg * levelMult * 0.88),
-        cd: partnerMode === 'cyro' ? 0.45 : 0.25,
-        range: 270,
-        contactDmgCd: 0
-    });
-}
-
 function spawnEolioTurbine() {
     if (!player) return;
     allies = Array.isArray(allies) ? allies : [];
@@ -19497,19 +19454,7 @@ function updateAllies(dt) {
             if (a.cd > 0) a.cd -= dt;
             continue;
         }
-        if (a.type === 'cyro_pyro_partner') {
-            if(a.hp<=0){a.life=0;continue;}
-            if(!Number.isFinite(a.aiAngle))a.aiAngle=Math.random()*Math.PI*2;
-            if(!Number.isFinite(a.contactDmgCd))a.contactDmgCd=0;
-            const sp=Math.max(2.2,(a.speed||3.2)*.95)*60*dt, range=Math.max(290,(a.range||270)*1.08), pref=Math.max(60,(a.r||13)+34);
-            if(target&&minD<=range){
-                const ang=Math.atan2(target.y-a.y,target.x-a.x), delta=minD-pref;
-                if(delta>18){a.x+=Math.cos(ang)*sp;a.y+=Math.sin(ang)*sp;}else if(delta<-14){a.x-=Math.cos(ang)*sp*.6;a.y-=Math.sin(ang)*sp*.6;}else{a.aiAngle+=dt*.9;a.x+=Math.cos(a.aiAngle)*.8*60*dt;a.y+=Math.sin(a.aiAngle)*.8*60*dt;}
-                a.facingLeft=target.x<a.x;
-                if(a.cd<=0){const cy=a.elementMode==='cyro',ang2=Math.atan2(target.y-a.y,target.x-a.x),v=cy?4.1:7;createProj(a.x,a.y,Math.cos(ang2)*v,Math.sin(ang2)*v,a.dmg,cy?72:58,true,cy?'cyro_iceball':'pyro_fireball',{size:cy?11:8,sourceChar:cy?'cyro':'pyro',explodeRadius:cy?52:0,freezeDuration:cy?2.4:0,burnChance:cy?0:.1,elementalPartner:true});a.cd=cy?1.55:.62;}else a.cd-=dt;
-            }else{a.aiAngle+=dt*.5;const hx=player.x+Math.cos(a.aiAngle)*44,hy=player.y+Math.sin(a.aiAngle)*44;a.x+=(hx>a.x?1:-1)*Math.min(Math.abs(hx-a.x),sp*.72);a.y+=(hy>a.y?1:-1)*Math.min(Math.abs(hy-a.y),sp*.72);if(a.cd>0)a.cd-=dt;}
-            if(a.contactDmgCd>0)a.contactDmgCd-=dt;
-        } else if(a.type === 'penguin' || a.type === 'drone') {
+        if (a.type === 'penguin' || a.type === 'drone') {
             if(!a.wanderAngle) a.wanderAngle = Math.random() * Math.PI * 2;
             a.wanderAngle += dt * 0.8;
 
@@ -19877,8 +19822,7 @@ const SERRANO_CHARACTER_PROJECTILES = {
     eolio: ['eolio_propeller'],
     stormy: ['stormy_bolt'],
     chickbot: ['chickbot_egg'],
-    cyro: ['cyro_iceball'],
-    pyro: ['pyro_fireball'],
+    cyro_pyro: ['crioheat_orb', 'obsidian_spike'],
     bulb: ['bulb_bubble', 'bulb_gas_bubble', 'bulb_crust', 'bulb_coral_piece'],
     bit: ['bit_cherry', 'bit_banana', 'bit_banana_peeled', 'bit_arcade'],
     beezy: ['beezy_honey', 'beezy_bee'],
@@ -19921,7 +19865,7 @@ function spawnSerranoRandomProjectile(x, y, dmg, excludedEnemy) {
         bit_cherry: 6.2, bit_banana: 5.5, bit_banana_peeled: 6.8, bit_arcade: 4.2, beezy_honey: 5.6, beezy_bee: 6.4, shinobi_katana: 1,
         zippi_laser: 20, axel_stone: 5.6, axel_shard: 5.6, adam_ball: 5.25, adam_mech_ball: 5.6,
         yuuto_heart: 5, sterling_star: 8.2, lyron_ball: 9.5, lyron_ball_big: 7.6,
-        eolio_propeller: 8.2, cyro_iceball: 4.1, pyro_fireball: 7.25, merlin_magic: 6.2, merlin_pacifier: 6.8, blizzard_flake: 5.8, blizzard_snowball: 4.6
+        eolio_propeller: 8.2, crioheat_orb: 5.3, obsidian_spike: 6.4, merlin_magic: 6.2, merlin_pacifier: 6.8, blizzard_flake: 5.8, blizzard_snowball: 4.6
     };
     const speed = speedByType[def.type] || 5;
     const extra = { size: 8, sourceChar: def.sourceChar, serranoClone: true, serranoOriginalChar: def.sourceChar };
@@ -19936,11 +19880,11 @@ function spawnSerranoRandomProjectile(x, y, dmg, excludedEnemy) {
         extra.glitchStunChance = 0.36;
         extra.glitchStunDuration = 0.8;
     }
-    if (def.type === 'cyro_iceball') {
-        extra.size = 13; extra.explodeRadius = 58; extra.freezeDuration = 2.7;
+    if (def.type === 'crioheat_orb') {
+        extra.size = 13; extra.burnChance = 1; extra.slowDuration = 1.6; extra.freezeChance = 0.15; extra.freezeDuration = 2.5;
     }
-    if (def.type === 'pyro_fireball') {
-        extra.size = 9; extra.burnChance = 0.10;
+    if (def.type === 'obsidian_spike') {
+        extra.size = 9; extra.pierce = 99; extra.burnChance = 1; extra.freezeChance = 0.15; extra.freezeDuration = 2.5;
     }
     if (def.type === 'boomerang') extra.returnSpeed = 11.5;
     if (def.type === 'sterling_star') { extra.size = 12; extra.sterlingCharge = 0.6; extra.sterlingBurstRadius = 75; }
@@ -20423,7 +20367,7 @@ function updateProjectiles(dt) {
             }
             p.x += p.vx * 60 * dt; p.y += p.vy * 60 * dt;
         }
-        else if (p.type === 'cyro_iceball' || p.type === 'pyro_fireball') {
+        else if (p.type === 'crioheat_orb' || p.type === 'obsidian_spike') {
             p.x += p.vx * 60 * dt;
             p.y += p.vy * 60 * dt;
         }
@@ -21241,25 +21185,26 @@ function updateProjectiles(dt) {
                             continue;
                         }
                         if (p.type === 'shinobi_katana' || p.type === 'shinobi_fireball') applyShinobiMark(e, realDmg);
-                        if (p.type === 'cyro_iceball') {
-                            const freezeDuration = Math.max(0.8, Number(p.extra?.freezeDuration) || 2.4);
-                            e.freezeTimer = Math.max(Number.isFinite(e.freezeTimer) ? e.freezeTimer : 0, freezeDuration);
-                            e.slowTimer = Math.max(Number.isFinite(e.slowTimer) ? e.slowTimer : 0, freezeDuration);
-                            const radius = Math.max(35, Number(p.extra?.explodeRadius) || 52);
-                            if (Math.random() < 0.50) createExplosion(e.x, e.y, radius, Math.max(1, realDmg * 0.35), '#74b9ff');
-                            for (const nearby of enemies) {
-                                if (!nearby || nearby.hp <= 0) continue;
-                                if (dist({x: e.x, y: e.y}, nearby) <= radius + (nearby.size || 0)) {
-                                    nearby.freezeTimer = Math.max(Number.isFinite(nearby.freezeTimer) ? nearby.freezeTimer : 0, freezeDuration);
-                                    nearby.slowTimer = Math.max(Number.isFinite(nearby.slowTimer) ? nearby.slowTimer : 0, freezeDuration);
-                                }
+                        if (p.type === 'crioheat_orb' || p.type === 'obsidian_spike') {
+                            const freezeChance = Math.max(0, Math.min(1, Number(p.extra?.freezeChance) || 0.15));
+                            const freezeDuration = Math.max(0.8, Number(p.extra?.freezeDuration) || 2.5);
+                            const burnChance = Math.max(0, Math.min(1, Number(p.extra?.burnChance) || 1));
+                            const slowDuration = p.type === 'obsidian_spike' ? 0 : Math.max(0.3, Number(p.extra?.slowDuration) || 1.6);
+                            if (slowDuration > 0) {
+                                e.slowTimer = Math.max(Number.isFinite(e.slowTimer) ? e.slowTimer : 0, slowDuration);
+                                addFloatingText(e.x, e.y - 24, 'LERDADO!', '#3498db', 11);
                             }
-                            addFloatingText(e.x, e.y - 12, 'CONGELADO!', '#74b9ff', 12);
-                        }
-                        if (p.type === 'pyro_fireball' && Math.random() < Math.max(0, Math.min(1, Number(p.extra?.burnChance) || 0.10))) {
-                            e.burnTimer = Math.max(Number.isFinite(e.burnTimer) ? e.burnTimer : 0, 3.2);
-                            e.burnDmg = Math.max(Number.isFinite(e.burnDmg) ? e.burnDmg : 0, Math.max(2, realDmg * 0.28));
-                            addFloatingText(e.x, e.y - 12, 'QUEIMANDO!', '#ff7b39', 12);
+                            if (burnChance > 0 && Math.random() < burnChance) {
+                                e.burnTimer = Math.max(Number.isFinite(e.burnTimer) ? e.burnTimer : 0, 3.2);
+                                e.burnDmg = Math.max(Number.isFinite(e.burnDmg) ? e.burnDmg : 0, Math.max(2, realDmg * 0.28));
+                                addFloatingText(e.x, e.y - 12, 'QUEIMANDO!', '#ff7b39', 12);
+                            }
+                            if (Math.random() < freezeChance) {
+                                e.freezeTimer = Math.max(Number.isFinite(e.freezeTimer) ? e.freezeTimer : 0, freezeDuration);
+                                e.slowTimer = Math.max(Number.isFinite(e.slowTimer) ? e.slowTimer : 0, freezeDuration);
+                                addFloatingText(e.x, e.y - 36, 'CONGELADO!', '#74b9ff', 12);
+                                createParticles(e.x, e.y, '#74b9ff');
+                            }
                         }
                         if (p.type === 'gma_cookie' && Math.random() < Math.max(0, Math.min(1, Number(p.extra?.burnChance) || 0.15))) {
                             e.burnTimer = Math.max(Number.isFinite(e.burnTimer) ? e.burnTimer : 0, 3.2);
@@ -22381,7 +22326,7 @@ function getPlayerSpriteId() {
         return player.glitchCurrentFormId;
     }
     if (pd?.selectedChar === 'adam' && player?.adamMechActive) return 'adam_mech';
-    if (pd?.selectedChar === 'cyro_pyro') return (player?.cyroPyroMode || getCyroPyroMode()) === 'cyro' ? 'cyro' : 'pyro';
+    if (pd?.selectedChar === 'cyro_pyro') return isCrioheatObsidianForm() ? 'obsidian' : 'crioheat';
     if (pd?.selectedChar === 'gladiator') {
         return ((player?.gladiatorMode || pd?.chars?.gladiator?.mode || 'shooter') === 'shooter') ? 'gladiator_spear' : 'gladiator_sword';
     }
@@ -23950,12 +23895,6 @@ function draw() {
             const radius = a.radius || 78; const pulse = 0.08 + 0.03*Math.sin((a.pulse||0)*3);
             ctx.save(); ctx.globalAlpha = pulse; ctx.fillStyle='#4da6ff'; ctx.beginPath(); ctx.arc(a.x,a.y,radius,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=0.75; ctx.strokeStyle='#8fd0ff'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(a.x,a.y,radius,0,Math.PI*2); ctx.stroke();
             ctx.globalAlpha=1; ctx.strokeStyle='#dfefff'; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(a.x,a.y+16); ctx.lineTo(a.x,a.y-14); ctx.stroke(); ctx.fillStyle='#4da6ff'; for(let k=0;k<3;k++){ const ang=(a.pulse||0)*2+k*2*Math.PI/3; ctx.save(); ctx.translate(a.x+Math.cos(ang)*10,a.y-18+Math.sin(ang)*10); ctx.rotate(ang); ctx.beginPath(); ctx.moveTo(0,0); ctx.quadraticCurveTo(18,-5,24,0); ctx.quadraticCurveTo(15,5,0,0); ctx.fill(); ctx.restore(); } ctx.restore();
-        } else if(a.type === 'cyro_pyro_partner') {
-            const rr = a.r || 13;
-            drawCharacterSprite(ctx, a.x, a.y, rr, a.elementMode === 'cyro' ? 'cyro' : 'pyro', {
-                widthMult: 10.2,
-                flipX: Boolean(a.facingLeft)
-            });
         } else if(a.type === 'penguin') {
             const rr = a.r || 18;
             drawCharacterSprite(ctx, a.x, a.y, rr, 'pipi', {
@@ -25752,44 +25691,25 @@ function draw() {
         }
         else if(p.type === 'bomb' || p.type === 'rocket' || p.type === 'buster_rocket') { ctx.fillStyle = '#2c3e50'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#e67e22'; ctx.beginPath(); ctx.arc(p.x + p.size/2, p.y - p.size/2, 2, 0, Math.PI*2); ctx.fill(); }
         else if(p.type === 'grenade' || p.type === 'big_grenade' || p.type === 'grenade_fragment') { ctx.fillStyle = '#27ae60'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); }
-        else if(p.type === 'cyro_iceball') {
+        else if (p.type === 'crioheat_orb') {
             const r = p.size || 13;
-            ctx.save();
-            ctx.translate(px, py);
-            ctx.rotate(Math.atan2(p.vy, p.vx));
-            ctx.shadowBlur = 12;
-            ctx.shadowColor = 'rgba(116,185,255,0.85)';
-            ctx.fillStyle = '#bfe8ff';
-            ctx.beginPath();
-            ctx.arc(0, 0, r, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#74b9ff';
-            ctx.beginPath();
-            ctx.arc(-r * 0.25, -r * 0.2, r * 0.34, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-            ctx.restore();
+            ctx.save(); ctx.translate(px, py); ctx.rotate(Math.atan2(p.vy, p.vx));
+            const grad = ctx.createLinearGradient(-r, 0, r, 0);
+            grad.addColorStop(0, '#74b9ff'); grad.addColorStop(0.5, '#dfefff'); grad.addColorStop(1, '#ff7b39');
+            ctx.shadowBlur = 16; ctx.shadowColor = 'rgba(223,239,255,0.92)'; ctx.fillStyle = grad;
+            ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.stroke(); ctx.restore();
         }
-        else if(p.type === 'pyro_fireball') {
+        else if (p.type === 'obsidian_spike') {
             const r = p.size || 9;
-            ctx.save();
-            ctx.translate(px, py);
-            ctx.rotate(Math.atan2(p.vy, p.vx));
-            ctx.shadowBlur = 14;
-            ctx.shadowColor = 'rgba(231,76,60,0.9)';
-            ctx.fillStyle = '#e74c3c';
-            ctx.beginPath();
-            ctx.arc(0, 0, r, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#ffd27a';
-            ctx.beginPath();
-            ctx.arc(-r * 0.25, -r * 0.25, Math.max(2, r * 0.38), 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
+            ctx.save(); ctx.translate(px, py); ctx.rotate(Math.atan2(p.vy, p.vx));
+            ctx.shadowBlur = 12; ctx.shadowColor = 'rgba(231,76,60,0.75)';
+            const grad = ctx.createLinearGradient(-r * 1.2, 0, r * 1.2, 0);
+            grad.addColorStop(0, '#2c2c3a'); grad.addColorStop(0.6, '#15151d'); grad.addColorStop(1, '#8e2f2f'); ctx.fillStyle = grad;
+            ctx.beginPath(); ctx.moveTo(r * 1.9, 0); ctx.lineTo(-r * 0.8, -r * 0.62); ctx.lineTo(-r * 0.5, 0); ctx.lineTo(-r * 0.8, r * 0.62); ctx.closePath(); ctx.fill();
+            ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5; ctx.stroke(); ctx.restore();
         }
-        else if(p.type === 'snapdragon_fireball' || p.type === 'snapdragon_flame') {
+        else if (p.type === 'snapdragon_fireball' || p.type === 'snapdragon_flame') {
             const r = p.size || 10;
             ctx.save();
             ctx.translate(px, py);
