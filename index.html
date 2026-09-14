@@ -11922,7 +11922,17 @@ function startRunAfterShop(options = {}) {
     joyZone.style.display = 'none';
     applyControlLayout();
 
-    const charDef = CHARACTERS[pd.selectedChar]; const lvl = pd.chars[pd.selectedChar].level; const statMult = 1 + (lvl - 1) * 0.15; 
+    // Blindagem contra save inconsistente: uma seleção de personagem sem a entrada
+    // correspondente em pd.chars não pode impedir a partida de iniciar.
+    const safeSelectedChar = (pd && pd.selectedChar && CHARACTERS[pd.selectedChar]) ? pd.selectedChar : 'strike';
+    pd.selectedChar = safeSelectedChar;
+    if (!pd.chars || typeof pd.chars !== 'object') pd.chars = {};
+    if (!pd.chars[safeSelectedChar] || typeof pd.chars[safeSelectedChar] !== 'object') {
+        pd.chars[safeSelectedChar] = { level: 1, slots: 2, chips: [null, null] };
+    }
+    const charDef = CHARACTERS[safeSelectedChar];
+    const lvl = Math.max(1, Number(pd.chars[safeSelectedChar].level) || 1);
+    const statMult = 1 + (lvl - 1) * 0.15; 
     let initialBaseHp = charDef.hp * statMult;
     let initialBaseDmg = charDef.dmg * statMult;
     
@@ -11997,13 +12007,24 @@ function startRunAfterShop(options = {}) {
         });
     }
 
-    isPlaying = true; isPaused = false; lastTime = performance.now(); lastGameHudUpdateMs = 0; lastSpecialUiUpdateMs = 0; updateGameHud(true); ensureMissionState(); pd.missions.lastRunChar = pd.selectedChar; trackMissionProgress('games', 1); 
-    if (pd?.debug?.infiniteXp) player.stats.xpMult = Math.max(player.stats.xpMult || 1, 999999);
-    if (pd?.tutorial?.stage === 'force-play') beginFirstRunTutorial();
-    if (pd.selectedChar === 'eolio') spawnEolioTurbine();
-    if(player.weapon === 'wrench') { allies.push({x: player.x, y: player.y, dmg: player.baseDmg, speed: 0, life: Infinity, cd: 0, isTurret: true, ref: 'meekah_turret'}); }
-    updateSandboxButtonUI();
-    gameLoopId = requestAnimationFrame(loop);
+    // O estado mínimo da partida é marcado como ativo ANTES das rotinas auxiliares.
+    // Assim, uma exceção de HUD/missão/tutorial não deixa a tela preta sem loop.
+    isPlaying = true; isPaused = false; lastTime = performance.now(); lastGameHudUpdateMs = 0; lastSpecialUiUpdateMs = 0;
+
+    try { updateGameHud(true); } catch (err) { recoverRuntimeState(err); }
+    try { ensureMissionState(); pd.missions.lastRunChar = pd.selectedChar; trackMissionProgress('games', 1); } catch (err) { recoverRuntimeState(err); }
+    try {
+        if (pd?.debug?.infiniteXp) player.stats.xpMult = Math.max(player.stats.xpMult || 1, 999999);
+        if (pd?.tutorial?.stage === 'force-play') beginFirstRunTutorial();
+        if (pd.selectedChar === 'eolio') spawnEolioTurbine();
+        if(player.weapon === 'wrench') { allies.push({x: player.x, y: player.y, dmg: player.baseDmg, speed: 0, life: Infinity, cd: 0, isTurret: true, ref: 'meekah_turret'}); }
+        updateSandboxButtonUI();
+    } catch (err) {
+        recoverRuntimeState(err);
+    } finally {
+        // O loop deve ser iniciado mesmo que algum sistema secundário falhe.
+        if (!gameLoopId) gameLoopId = requestAnimationFrame(loop);
+    }
 }
 
 function playerCanPassWalls() {
