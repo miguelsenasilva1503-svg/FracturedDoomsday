@@ -1193,6 +1193,14 @@ html.sandbox-pc .sandbox-tool-hotkey{display:block}.sandbox-tool-state{position:
 .shop-offer-buy{padding:10px 17px !important;font-size:15px !important;border-radius:11px !important;min-width:140px;color:#000 !important;text-shadow:none !important;}
 #shop-bundles .shop-novo-overlay{border-radius:18px !important;font-size:30px !important;letter-spacing:.06em;cursor:pointer;}
 #shop-bundles .shop-discount{top:8px !important;right:8px !important;transform:none !important;border-radius:10px !important;z-index:7 !important;}
+.shop-freebie-card{border-color:#2ecc71 !important;box-shadow:0 0 16px rgba(46,204,113,.24),inset 0 0 0 1px rgba(255,255,255,.05) !important;background:linear-gradient(180deg,rgba(31,78,57,.98),rgba(18,37,30,.98)) !important;}
+.shop-freebie-card .shop-offer-title{color:#7CFFB1 !important;}
+.shop-freebie-card .shop-offer-resource{border-color:rgba(46,204,113,.24);background:rgba(0,0,0,.20);}
+.shop-freebie-card .shop-offer-resource-name{color:#dff8e8 !important;}
+.shop-freebie-card .shop-offer-buy{background:#2ecc71 !important;border:3px solid #219653 !important;color:#000 !important;text-shadow:none !important;}
+.shop-freebie-card .shop-freebie-label{font-size:12px;font-weight:900;color:#b7ffd0;text-transform:uppercase;letter-spacing:.08em;}
+.shop-freebie-card .shop-freebie-pet-note{font-size:10px;color:#d4e9dc;max-width:110px;text-align:center;line-height:1.15;}
+.shop-freebie-card .shop-freebie-box-sprite{width:30px;height:30px;object-fit:contain;flex:0 0 30px;filter:drop-shadow(0 4px 5px rgba(0,0,0,.35));}
 @media(max-width:760px){
   #shop-bundles.shop-grid{width:98vw !important;gap:12px !important;}
   #shop-bundles .shop-bundle-card{min-height:0;grid-template-columns:1fr !important;grid-template-rows:auto auto auto !important;padding:14px !important;row-gap:10px;}
@@ -1354,6 +1362,11 @@ html.sandbox-pc .sandbox-tool-hotkey{display:block}.sandbox-tool-state{position:
 <style id="pet-selected-actions-fix">
 .pet-selected-actions{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap;}
 .pet-selected-actions .btn-action,.pet-selected-actions .btn-menu{min-width:120px;}
+</style>
+<style id="pass-center-reward-sprite-remove-20260915">
+/* O sprite da recompensa permanece no badge da esquerda.
+   Remove apenas o sprite duplicado que aparece dentro do texto central da recompensa. */
+.pass-tier-desc .resource-icon{display:none !important;width:0 !important;height:0 !important;min-width:0 !important;min-height:0 !important;max-width:0 !important;max-height:0 !important;margin:0 !important;padding:0 !important;}
 </style>
 </head>
 <body>
@@ -9471,6 +9484,7 @@ function ensureShopState() {
     if(typeof pd.shopState.lastRotation !== 'number') pd.shopState.lastRotation = 0;
     if(!Array.isArray(pd.shopState.bundles)) pd.shopState.bundles = [];
     if(!Array.isArray(pd.shopState.bundlesBadge)) pd.shopState.bundlesBadge = [];
+    if (typeof pd.shopState.freebieClaimed !== 'boolean') pd.shopState.freebieClaimed = false;
     if (Array.isArray(pd.shopState.bundles) && Array.isArray(pd.shopState.bundlesBadge)) pd.shopState.bundles.forEach((b, i) => { if (b && pd.shopState.bundlesBadge[i] === false) b.xpViewed = true; });
     if(!pd.shopState.login7 || typeof pd.shopState.login7 !== 'object') pd.shopState.login7 = { startedAt: 0, claimedDays: [] };
     if (Object.prototype.hasOwnProperty.call(pd.shopState, 'lifetimeOfferClaimed')) delete pd.shopState.lifetimeOfferClaimed;
@@ -10191,6 +10205,39 @@ function renderShop() {
     const blist = document.getElementById('shop-bundles');
     if (blist) {
         blist.innerHTML = '';
+
+        // Freebie única: 2 Pacotes + 1 Caixa Normal + 1 Caixa de Metal + Ovinho.
+        if (!pd.shopState.freebieClaimed) {
+            const freebie = document.createElement('div');
+            freebie.className = 'card-item rarity-legendary shop-bundle-card shop-freebie-card';
+            freebie.dataset.freebie = 'true';
+            freebie.innerHTML = `
+                <div class="shop-offer-badge">
+                    <div class="shop-freebie-label">FREEBIE GRATUITA</div>
+                    <h4 class="shop-offer-title">Presente da Loja</h4>
+                </div>
+                <div class="shop-offer-main">
+                    <div class="shop-offer-entities">
+                        <div class="shop-offer-entity shop-offer-pet">
+                            <img class="shop-offer-pet-sprite" src="${escapeHtmlText(PET_DATA.tiny_egg?.sprite || 'pets/tiny_egg.png')}" alt="Ovinho">
+                            <div class="shop-offer-entity-name">Ovinho</div>
+                            <div class="shop-offer-entity-rarity">Comum</div>
+                            <div class="shop-freebie-pet-note">Pet gratuito</div>
+                        </div>
+                    </div>
+                    <div class="shop-offer-resources">
+                        <div class="shop-offer-resource"><img class="shop-freebie-box-sprite" src="elements/pack.png" alt="><div class="shop-offer-resource-copy"><span class="shop-offer-resource-name">Pacote</span><span class="shop-offer-resource-amount">x2</span></div></div>
+                        <div class="shop-offer-resource"><img class="shop-freebie-box-sprite" src="elements/cardboard_box.png" alt="><div class="shop-offer-resource-copy"><span class="shop-offer-resource-name">Caixa Normal</span><span class="shop-offer-resource-amount">x1</span></div></div>
+                        <div class="shop-offer-resource"><img class="shop-freebie-box-sprite" src="elements/steel_box.png" alt="><div class="shop-offer-resource-copy"><span class="shop-offer-resource-name">Caixa de Metal</span><span class="shop-offer-resource-amount">x1</span></div></div>
+                    </div>
+                </div>
+                <div class="shop-offer-purchase">
+                    <div class="shop-offer-price">GRÁTIS</div>
+                    <button class="shop-offer-buy" type="button" onclick="claimFreebieOffer()">Resgatar</button>
+                </div>`;
+            blist.appendChild(freebie);
+        }
+
         (pd.shopState.bundles || []).forEach((b, index) => {
             if(!b) return;
             if (b.items?.char === 'fasty') b.items.char = null;
@@ -11157,6 +11204,35 @@ function renderRewardText(txt) {
         );
     }
     return renderResourceRewardText(txt);
+}
+
+function claimFreebieOffer() {
+    if (blockShopTutorialInteraction()) return;
+    ensureShopState();
+    if (pd.shopState.freebieClaimed) return;
+
+    ensurePetState();
+    const instant = [];
+    const queues = [];
+
+    // As quatro recompensas em caixas permanecem caixas e abrem normalmente na fila de Gacha.
+    queues.push(buildBoxQueue('pacote'));
+    queues.push(buildBoxQueue('pacote'));
+    queues.push(buildBoxQueue('normal'));
+    queues.push(buildBoxQueue('metal'));
+
+    // Ovinho é entregue diretamente ao inventário de pets como recompensa gratuita.
+    const egg = createPetInstance('tiny_egg', 0);
+    pd.pets.inventory.push(egg);
+    instant.push('NOVO PET: Ovinho (Comum)!');
+
+    pd.shopState.freebieClaimed = true;
+    save();
+    updateUI();
+    renderShop();
+
+    queues.unshift({ type:'instant', title:'Freebie Gratuita', contents:instant });
+    startGachaQueue(queues);
 }
 
 function processBuyBundle(index, cost) {
