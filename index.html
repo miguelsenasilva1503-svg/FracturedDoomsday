@@ -1073,6 +1073,65 @@ html.sandbox-pc .sandbox-tool-hotkey{display:block}.sandbox-tool-state{position:
 #screen-pets{overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important}
 @media(max-width:620px){#screen-main > .btn-profile{left:14px!important;top:16px!important}#screen-main > .btn-settings{right:14px!important;top:16px!important}#screen-main > .btn-main-fullscreen{right:20px!important;left:auto!important;top:112px!important;width:72px!important;min-width:72px!important;height:82px!important;min-height:82px!important;position:absolute!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-end!important;padding:4px 2px!important;}}
 </style>
+
+<style id="fd-gameover-fix">
+#overlay-gameover{
+    padding:clamp(8px,2.5vw,28px);
+    gap:10px;
+    overflow-x:hidden;
+    overflow-y:auto;
+    justify-content:center;
+    align-items:center;
+}
+#overlay-gameover>h1{
+    margin:0;
+    font-size:clamp(26px,6vw,40px);
+    line-height:1;
+    flex:0 0 auto;
+}
+#overlay-gameover .gameover-summary{
+    width:min(92vw,460px);
+    min-width:0;
+    max-width:460px;
+    max-height:min(58vh,430px);
+    overflow-y:auto;
+    overflow-x:hidden;
+    padding:clamp(12px,2.5vw,20px);
+    gap:5px;
+}
+#overlay-gameover .gameover-summary h3{
+    margin:0;
+    font-size:clamp(14px,3.8vw,20px);
+    line-height:1.18;
+}
+#overlay-gameover .gameover-summary .resource-icon,
+#overlay-gameover .gameover-summary .inline-sprite-icon{
+    width:20px;
+    height:20px;
+    min-width:20px;
+    min-height:20px;
+}
+#overlay-gameover>.btn-play{
+    width:min(92vw,300px);
+    max-width:300px;
+    margin:4px auto 0!important;
+    flex:0 0 auto;
+}
+@media(max-width:500px){
+    #overlay-gameover{padding:8px;gap:7px;}
+    #overlay-gameover .gameover-summary{width:94vw;max-height:52vh;padding:10px 12px;}
+    #overlay-gameover .gameover-summary h3{font-size:14px;}
+    #overlay-gameover>.btn-play{font-size:18px;padding:11px 16px;}
+}
+@media(max-height:600px){
+    #overlay-gameover{justify-content:flex-start;padding-top:10px;padding-bottom:10px;}
+    #overlay-gameover>h1{font-size:28px;}
+    #overlay-gameover .gameover-summary{max-height:55vh;padding:9px 12px;}
+    #overlay-gameover .gameover-summary h3{font-size:13px;}
+    #overlay-gameover>.btn-play{font-size:17px;padding:10px 16px;}
+}
+</style>
+
 </head>
 <body>
 
@@ -2030,7 +2089,7 @@ Um cavaleiro medieval que leva sua aparência muito mais a sério do que sua pr�
 Um necromante sombrio que mistura magia obscura com ataques brutais usando pedras amaldiçoadas. Sua presença transforma qualquer luta num lugar estranho… e provavelmente assombrado.
 
 “Os mortos sempre escutam.”`, necroGiantZombie: 0.1 },
-    ari: { id: 'ari', class: 'Algoz', name: 'Owen', rarity: 'epic', cost: 149, hp: 120, speed: 3.5, dmg: 20, fireRate: 60, range: 210, color: '#00cec9', weapon: 'aura', desc: `“Owen passou tanto tempo minerando que começou a resolver tudo girando a picareta.”
+    ari: { id: 'ari', class: 'Algoz', name: 'Owen', rarity: 'epic', cost: 149, hp: 120, speed: 3.5, dmg: 20, fireRate: 60, range: 210, color: '#00cec9', weapon: 'owen_pickaxe_swing', desc: `“Owen passou tanto tempo minerando que começou a resolver tudo girando a picareta.”
 
 Um minerador explosivo e imprevisível que espalha ataques ao redor inteiro. Owen parece simples e tranquilo… até começar a destruir tudo perto dele sem nem perceber.
 
@@ -2579,7 +2638,7 @@ ESPECIAL: periodicamente invoca zumbis temporários.
 ESPECIAL: tem chance de zumbificar inimigos, transformando-os em zumbis aliados temporários.
 
 HABILIDADE: Necro invoca uma lápide que gera zumbis temporariamente, ao final de sua vida, gera 3 zumbis de uma vez (40s de recarga).`,
-    ari: `Owen: desencadeia uma onda sísmica em uma área de 360°.
+    ari: `Owen: gira sua picareta em um ataque completo de 360°.
 
 HABILIDADE: Owen dispara sua picareta que volta pra ele depois (15s de recarga).`,
     goo: `Goo: dispara projéteis que LERDAM inimigos, essa LERDEZA é agrupável.
@@ -11619,7 +11678,7 @@ function triggerCommonCharacterAbility(id) {
         addFloatingText(player.x, player.y - 34, 'ESPAGUETE!', '#f39c12', 16);
     } else if (id === 'necro') {
         if (player.necroTombstoneUid) return false;
-        const tomb = { uid:`necro_tombstone_${Date.now()}_${Math.random().toString(36).slice(2,7)}`, type:'necro_tombstone', x:player.x, y:player.y, r:30, size:30, life:14, hp:10, maxHp:10, spawnTimer:0, isStructure:true, isWall:true, dmg:0, speed:0 };
+        const tomb = { uid:`necro_tombstone_${Date.now()}_${Math.random().toString(36).slice(2,7)}`, type:'necro_tombstone', x:player.x, y:player.y, r:30, size:30, life:14, hp:10, maxHp:10, spawnTimer:1, decayTimer:1, isStructure:true, isWall:true, dmg:0, speed:0 };
         allies.push(tomb);
         player.necroTombstoneUid = tomb.uid; player.necroTombstoneSpawnTimer = 0.9; player.necroTombstoneCooldownPending = true; player.commonAbilityCd = 0;
         addFloatingText(player.x, player.y - 34, 'LÁPIDE!', '#b8a1d9', 16); createParticles(player.x, player.y, '#8e44ad');
@@ -15598,7 +15657,7 @@ function fireWeapon(target) {
 
     const execFire = () => {
         let aimTarget = target;
-        const swingWeapon = ['sword','scythe','mr_perfurant_slash','knighter_sword','shinobi_katana','izaque_claws','vingathron_slash'].includes(w);
+        const swingWeapon = ['sword','scythe','mr_perfurant_slash','knighter_sword','shinobi_katana','izaque_claws','vingathron_slash','owen_pickaxe_swing'].includes(w);
         if (swingWeapon) {
             const swingRange = Math.max(90, player.baseRange * player.stats.rangeMult * 1.18);
             let best = null, bestD = Infinity;
@@ -16251,6 +16310,24 @@ function fireWeapon(target) {
             });
             return;
         }
+        if (w === 'owen_pickaxe_swing' && pd.selectedChar === 'ari') {
+            const swingDuration = 24;
+            const swingRadius = Math.max(108, player.baseRange * player.stats.rangeMult * 0.95);
+            createProj(player.x, player.y, 0, 0, finalDmg, swingDuration, true, 'owen_pickaxe_swing', {
+                size: 24,
+                sourceChar: 'ari',
+                hitShape: 'slash',
+                attackAngle: angle,
+                targetRef: target,
+                swingStart: -Math.PI,
+                swingEnd: Math.PI,
+                swingRadius,
+                swingDuration,
+                hitRadius: 24,
+                fullSpin: true
+            });
+            return;
+        }
         if(w === 'aura') { createExplosion(player.x, player.y, 110 * player.stats.rangeMult, finalDmg, '#00cec9'); return; }
         if(w === 'glace_ice') {
             const attackAngle = angle;
@@ -16663,11 +16740,18 @@ function fireWeapon(target) {
             return;
         }
         if (w === 'snapdragon' && pd.selectedChar === 'snapdragon') {
-            const biteRange=Math.max(92,player.baseRange*player.stats.rangeMult*.64);
-            createProj(player.x,player.y,0,0,Math.max(1,finalDmg*.95),14,true,'snapdragon_bite',{size:26,sourceChar:'snapdragon',attackAngle:angle,biteReach:biteRange,biteDuration:14,hitRadius:26});
-            // A bola de fogo sai no mesmo momento da mordida e usa o modelo visual do ataque/rajada.
-            createProj(sx,sy,Math.cos(angle)*pSpd*1.18,Math.sin(angle)*pSpd*1.18,finalDmg,82,true,'snapdragon_fireball',{size:12,sourceChar:'snapdragon',burnDuration:3,maxRange:player.baseRange*player.stats.rangeMult*1.40});
-            player.cd=Math.max(48,Math.round(player.baseFireRate*player.stats.fireRateMult)); return;
+            const biteRange = Math.max(92, player.baseRange * player.stats.rangeMult * 0.64);
+            const fireballOffset = player.r + 10;
+            const sx = player.x + Math.cos(angle) * fireballOffset;
+            const sy = player.y + Math.sin(angle) * fireballOffset;
+            createProj(player.x, player.y, 0, 0, Math.max(1, finalDmg * 0.95), 14, true, 'snapdragon_bite', {
+                size: 26, sourceChar: 'snapdragon', attackAngle: angle, biteReach: biteRange, biteDuration: 14, hitRadius: 26
+            });
+            createProj(sx, sy, Math.cos(angle) * pSpd * 1.18, Math.sin(angle) * pSpd * 1.18, finalDmg, 82, true, 'snapdragon_fireball', {
+                size: 12, sourceChar: 'snapdragon', burnDuration: 3, maxRange: player.baseRange * player.stats.rangeMult * 1.40
+            });
+            player.cd = Math.max(48, Math.round(player.baseFireRate * player.stats.fireRateMult));
+            return;
         }
         if(w === 'cowbew_revolver') {
             const spread = 0.14;
@@ -17051,7 +17135,7 @@ function fireWeapon(target) {
     };
 
     execFire(); 
-    let blockDouble = ['dagger','stones','grenade_gun','hunter_shotgun','wild','scythe','shinobi_katana','machinegun','ice_dagger','triple','boomerang','quarterback','saw_throw','chess','screws','snowball','echo_pull','flame_cone','puddle','flex_hammer','kaisen_tool','lunch_sauce','shinobi','stormy','bulb','mr_perfurant','kael_bow','sharkie','gma_cookie','joseph_skate','xilo_anvil','yoyo','vingathron_slash'];
+    let blockDouble = ['dagger','stones','grenade_gun','hunter_shotgun','wild','scythe','shinobi_katana','owen_pickaxe_swing','machinegun','ice_dagger','triple','boomerang','quarterback','saw_throw','chess','screws','snowball','echo_pull','flame_cone','puddle','flex_hammer','kaisen_tool','lunch_sauce','shinobi','stormy','bulb','mr_perfurant','kael_bow','sharkie','gma_cookie','joseph_skate','xilo_anvil','yoyo','vingathron_slash'];
     if(!blockDouble.includes(w) && Math.random() < player.stats.doubleShotChance) {
         setTimeout(execFire, 100);
     } else if(['grenade_gun','hunter_shotgun','stones'].includes(w) && Math.random() < player.stats.doubleShotChance) {
@@ -17130,7 +17214,7 @@ function createProj(x, y, vx, vy, dmg, life, isPlayer, type, extra={}) {
     if (type === 'heavy' || type === 'tank') size = 8;
     else if (type === 'sniper') size = 3;
     else if (type === 'sword') size = extra.hitRadius || 10;
-    else if (type === 'scythe' || type === 'shinobi' || type === 'shinobi_katana' || type === 'knighter_slash' || type === 'nox_slash_a' || type === 'nox_slash_b') size = extra.hitRadius || 10;
+    else if (type === 'scythe' || type === 'shinobi' || type === 'shinobi_katana' || type === 'knighter_slash' || type === 'nox_slash_a' || type === 'nox_slash_b' || type === 'owen_pickaxe_swing') size = extra.hitRadius || 10;
     else if (type === 'popeye_punch') size = extra.hitRadius || extra.size || 10;
     else if (type === 'zoe_punch') size = extra.hitRadius || extra.size || 10;
     else if (type === 'vingathron_slash') size = extra.hitRadius || extra.size || 18;
@@ -17191,7 +17275,7 @@ function createProj(x, y, vx, vy, dmg, life, isPlayer, type, extra={}) {
     let sourceStats = extra.sourceStats || (isPlayer ? player.stats : null);
     let pierce = extra.disableBasePierce ? 0 : (sourceStats ? Number(sourceStats.pierce || 0) : 0);
     if (Number.isFinite(extra.pierce)) pierce += Number(extra.pierce || 0);
-    if(type==='sniper') pierce += 99; if(type==='shell_trident') pierce += 99; if(type==='sword') pierce += 99; if(type==='scythe') pierce += 99; if(type==='mr_perfurant_slash') pierce += 99; if(type==='chain_lightning') pierce += 99; if(type==='laser' || type==='zippi_laser') pierce += 99; if(type==='eel_lash') pierce += 1; if(type==='lance') pierce += 99;
+    if(type==='sniper') pierce += 99; if(type==='shell_trident') pierce += 99; if(type==='sword') pierce += 99; if(type==='scythe') pierce += 99; if(type==='owen_pickaxe_swing') pierce += 99; if(type==='mr_perfurant_slash') pierce += 99; if(type==='chain_lightning') pierce += 99; if(type==='laser' || type==='zippi_laser') pierce += 99; if(type==='eel_lash') pierce += 1; if(type==='lance') pierce += 99;
     if(type==='arrow' && extra?.sourceChar !== 'vesper') pierce += Math.random() < 0.40 ? 1 : 0; if(type==='boomerang') pierce += 99; if(type==='energy_wave') pierce += 99; if(type==='microphone') pierce += 0;
     if(type==='shiv' || type==='shiv_dagger') size = extra.hitRadius || extra.size || 10;
     if(type==='saw_throw') pierce += 99;
@@ -19339,18 +19423,32 @@ function updateAllies(dt) {
         for(let e of enemies) { if (isCurrentlyHypnotized(e)) continue; let d = dist(a, e); if(d < minD) { minD = d; target = e; } }
 
         if(a.type === 'necro_tombstone') {
-            // A lápide é uma parede com HP próprio: inimigos em contato conseguem destruí-la.
-            for(const e of enemies){
-                if(!e||e.hp<=0) continue;
-                if(dist(a,e) < (a.r||30) + (e.size||0)){
-                    const hitPerSecond=Math.max(1, Number(e.dmg)||1);
-                    a.hp=Math.max(0,(Number(a.hp)||0)-hitPerSecond*dt);
-                    if((a._hitFxCd||0)<=0){ addFloatingText(a.x,a.y,`-${Math.max(1,Math.floor(hitPerSecond*0.35))}`,'#b8a1d9',10); a._hitFxCd=0.35; }
-                    if(a.hp<=0){ a.life=0; break; }
-                }
+            // A lápide se desgasta sozinha: exatamente 1 HP por segundo.
+            // Cada HP perdido gera exatamente 1 zumbi.
+            a.decayTimer = Number.isFinite(a.decayTimer) ? a.decayTimer : 1;
+            a.decayTimer -= dt;
+            while (a.decayTimer <= 0 && a.hp > 0) {
+                a.decayTimer += 1;
+                a.hp = Math.max(0, (Number(a.hp) || 0) - 1);
+                const ang = Math.random() * Math.PI * 2;
+                allies.push({
+                    x:a.x + Math.cos(ang)*24,
+                    y:a.y + Math.sin(ang)*24,
+                    dmg:player.baseDmg*(8/15),
+                    speed:1.8,
+                    life:8,
+                    cd:0,
+                    isTurret:false,
+                    isZombie:true,
+                    type:'necro_zombie',
+                    radius:25,
+                    facingLeft:false
+                });
+                addFloatingText(a.x, a.y - 24, '-1', '#b8a1d9', 10);
+                createParticles(a.x, a.y, '#8e44ad');
             }
-            a._hitFxCd=Math.max(0,(Number(a._hitFxCd)||0)-dt);
-            if(a.hp>0) continue;
+            if (a.hp <= 0) a.life = 0;
+            if (a.hp > 0) continue;
         } else if(a.type === 'tea_table') {
             a.teaCd = Math.max(0, (a.teaCd || 0) - dt);
             continue;
@@ -19633,7 +19731,7 @@ function updateAllies(dt) {
                 e.ivySlowTimer = Math.max(Number.isFinite(e.ivySlowTimer) ? e.ivySlowTimer : 0, 1.25);
             }
         } else if (a.type === 'necro_tombstone') {
-            a.spawnTimer = Math.max(0, (a.spawnTimer || 0) - dt);
+            a.spawnTimer = 1;
             for (const e of enemies) {
                 if (!e || e.hp <= 0) continue;
                 const d=dist(a,e), minD=(a.r||30)+(e.size||0)+3;
@@ -19906,7 +20004,7 @@ function updateBulbBubbles(dt) {
     }
 }
 
-const PLAYER_SLASH_TYPES = new Set(['scythe','mr_perfurant_slash','knighter_slash','gladiator_slash','shinobi','shinobi_katana','shiv','nox_slash_a','nox_slash_b','izaque_slash']);
+const PLAYER_SLASH_TYPES = new Set(['scythe','mr_perfurant_slash','knighter_slash','gladiator_slash','shinobi','shinobi_katana','shiv','nox_slash_a','nox_slash_b','izaque_slash','owen_pickaxe_swing']);
 
 function projectileHitsEnemy(p,e){
     if(!p||!e)return false;const ex=p.extra||{};const dx=e.x-p.x,dy=e.y-p.y;
@@ -20233,7 +20331,7 @@ function updateProjectiles(dt) {
             if (!Number.isFinite(p.life) || p.life <= 0 || p.extra?.fxOnly) { projectiles.splice(i, 1); continue; }
             continue;
         }
-        else if(p.type === 'sword' || p.type === 'scythe' || p.type === 'gladiator_slash' || p.type === 'knighter_slash') { p.x = player.x + p.vx * 60; p.y = player.y + p.vy * 60; } 
+        else if(p.type === 'sword' || p.type === 'scythe' || p.type === 'gladiator_slash' || p.type === 'knighter_slash' || p.type === 'owen_pickaxe_swing') { p.x = player.x + p.vx * 60; p.y = player.y + p.vy * 60; } 
         else if (p.type === 'bomb') { const bombTarget = p.extra || {}; let d = dist(p, {x: Number.isFinite(bombTarget.tx) ? bombTarget.tx : p.x, y: Number.isFinite(bombTarget.ty) ? bombTarget.ty : p.y}); if(d < 5 || p.life < 10) { applyCyberBombEffects(p); projectiles.splice(i, 1); continue; } p.x += p.vx * 60 * dt; p.y += p.vy * 60 * dt; } 
         else if (p.type === 'bombman_ability') {
             const bombTarget = p.extra || {};
@@ -20316,9 +20414,60 @@ function updateProjectiles(dt) {
             p.x += p.vx*60*dt; p.y += p.vy*60*dt;
         }
         else if (p.type === 'owen_pickaxe') {
-            if(!p.returnPhase && (p.life < 78 || dist(p, player) > player.baseRange * player.stats.rangeMult * 1.15)) { p.returnPhase = true; p.hitIds.clear(); }
-            if(p.returnPhase) { const a = Math.atan2(player.y - p.y, player.x - p.x); const rs = Number.isFinite(p.extra.returnSpeed) ? p.extra.returnSpeed : 12.5; p.vx = Math.cos(a)*rs; p.vy = Math.sin(a)*rs; if(dist(p,player) < player.r + 16){ projectiles.splice(i,1); continue; } }
-            p.x += p.vx*60*dt; p.y += p.vy*60*dt;
+            p.extra = p.extra || {};
+            if (!p.returnPhase) {
+                const stepX = p.vx * 60 * dt;
+                const stepY = p.vy * 60 * dt;
+                p.x += stepX;
+                p.y += stepY;
+                p.extra.travelled = (Number(p.extra.travelled) || 0) + Math.hypot(stepX, stepY);
+                const maxRange = Number(p.extra.maxRange) || Math.max(260, player.baseRange * player.stats.rangeMult * 1.25);
+                if (p.extra.travelled >= maxRange || p.life < 78) {
+                    p.returnPhase = true;
+                    p.hitIds?.clear?.();
+                    createParticles(p.x, p.y, '#95a5a6');
+                }
+            } else {
+                const a = Math.atan2(player.y - p.y, player.x - p.x);
+                const rs = Number.isFinite(p.extra.returnSpeed) ? p.extra.returnSpeed : 12.5;
+                p.vx = Math.cos(a) * rs;
+                p.vy = Math.sin(a) * rs;
+                p.x += p.vx * 60 * dt;
+                p.y += p.vy * 60 * dt;
+                if (dist(p, player) < player.r + 16) {
+                    projectiles.splice(i,1);
+                    continue;
+                }
+            }
+
+            for (const e of enemies) {
+                if (!e || e.hp <= 0 || isCurrentlyHypnotized(e) || p.hitIds.has(e)) continue;
+                if (dist(p, e) > p.size + (e.size || 0)) continue;
+                const dealt = p.dmg * getEnemyDamageTakenMultiplier(e) * (e.isBoss ? player.stats.bossDmgMult : 1);
+                e.hp -= dealt;
+                e.lastHitSourceChar = 'ari';
+                p.hitIds.add(e);
+                addFloatingText(e.x, e.y, Math.floor(dealt), '#d8d8d8');
+                trackMissionDamage(dealt);
+            }
+
+            if (!p.returnPhase) {
+                for (const o of obstacles) {
+                    if (!o || ['ice','mud','car','bamboo_spike'].includes(o.type)) continue;
+                    if (dist(p, o) < (o.r || 0) + p.size) {
+                        p.returnPhase = true;
+                        p.hitIds?.clear?.();
+                        createParticles(p.x, p.y, '#95a5a6');
+                        break;
+                    }
+                }
+            }
+
+            if (p.life <= 0) {
+                p.life = 90;
+                p.returnPhase = true;
+            }
+            continue;
         }
         else if (p.type === 'boomerang') {
             if(!p.returnPhase && (p.life < 78 || dist(p, player) > player.baseRange * player.stats.rangeMult * 1.15)) { p.returnPhase = true; p.hitIds.clear(); }
@@ -20675,7 +20824,7 @@ function updateProjectiles(dt) {
         const extra = p.extra || {};
         let hitObstacle = false;
         obstacles.forEach(o => { if(o.type !== 'ice' && o.type !== 'mud' && o.type !== 'car' && o.type !== 'bamboo_spike' && dist(p, o) < o.r + p.size) hitObstacle = true; });
-        if(hitObstacle && p.type !== 'lumber_axe' && p.type !== 'lance' && p.type !== 'ghost_fishing_line' && p.type !== 'sword' && p.type !== 'scythe' && p.type !== 'gladiator_slash' && p.type !== 'knighter_slash' && p.type !== 'nox_slash_a' && p.type !== 'nox_slash_b' && p.type !== 'izaque_slash' && p.type !== 'nox_cleave' && p.type !== 'snapdragon_bite' && p.type !== 'shinobi' && p.type !== 'shinobi_fireball' && p.type !== 'boomerang' && p.type !== 'wind_gust' && p.type !== 'tornado' && p.type !== 'energy_wave' && p.type !== 'water_wave' && p.type !== 'beezy_honey' && p.type !== 'beezy_bee' && p.type !== 'shell_trident' && p.type !== 'geisha_gong' && p.type !== 'yoyo') { 
+        if(hitObstacle && p.type !== 'lumber_axe' && p.type !== 'lance' && p.type !== 'ghost_fishing_line' && p.type !== 'sword' && p.type !== 'scythe' && p.type !== 'gladiator_slash' && p.type !== 'knighter_slash' && p.type !== 'nox_slash_a' && p.type !== 'nox_slash_b' && p.type !== 'izaque_slash' && p.type !== 'nox_cleave' && p.type !== 'snapdragon_bite' && p.type !== 'owen_pickaxe' && p.type !== 'shinobi' && p.type !== 'shinobi_fireball' && p.type !== 'boomerang' && p.type !== 'wind_gust' && p.type !== 'tornado' && p.type !== 'energy_wave' && p.type !== 'water_wave' && p.type !== 'beezy_honey' && p.type !== 'beezy_bee' && p.type !== 'shell_trident' && p.type !== 'geisha_gong' && p.type !== 'yoyo') { 
             if(p.type === 'echo_bh_core') { spawnEchoBlackHole(p.x, p.y, p.extra); }
             if(p.type === 'blood_ball' && (extra.size || 0) === 10) { for(let j=0; j<boxPulls('normal'); j++) { let a = Math.PI*2/3 * j; createProj(p.x, p.y, Math.cos(a)*3, Math.sin(a)*3, p.dmg*0.4, 30, true, 'blood_ball', {size: 4}); } }
             if(p.type === 'rocket') { createExplosion(p.x, p.y, 80 * player.stats.rangeMult, p.dmg); projectiles.splice(i, 1); continue; }
@@ -25184,7 +25333,7 @@ function draw() {
         }
 
         // Slashes: swing real orientado exatamente para o alvo.
-        if (p.isPlayer && (type === 'scythe' || type === 'mr_perfurant_slash' || type === 'knighter_slash' || type === 'gladiator_slash' || type === 'shinobi' || type === 'shinobi_katana' || type === 'shiv')) {
+        if (p.isPlayer && (type === 'scythe' || type === 'mr_perfurant_slash' || type === 'knighter_slash' || type === 'gladiator_slash' || type === 'shinobi' || type === 'shinobi_katana' || type === 'shiv' || type === 'owen_pickaxe_swing')) {
             const ex = p.extra || {};
             const base = Number.isFinite(ex.attackAngle) ? ex.attackAngle : ang;
             const dur = Math.max(1, Number(ex.swingDuration) || 18);
@@ -25196,7 +25345,26 @@ function draw() {
             const radius = Math.max(30, Number(ex.swingRadius) || 100);
             const alpha = ex.fullSpin ? 1 : Math.max(.08, Math.sin(Math.PI*t));
             ctx.save(); ctx.translate(player.x,player.y); ctx.rotate(swing); ctx.globalAlpha=alpha; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.shadowBlur=0;
-            if(type==='scythe'){
+            if(type==='owen_pickaxe_swing'){
+                const shaft = Math.max(30, radius * 0.82);
+                const grip = Math.max(7, radius * 0.065);
+                const headW = Math.max(32, radius * 0.48);
+                const headH = Math.max(11, radius * 0.18);
+                ctx.shadowColor='rgba(181,238,242,.9)'; ctx.shadowBlur=12;
+                ctx.strokeStyle='#6d4c41'; ctx.lineWidth=grip;
+                ctx.beginPath(); ctx.moveTo(-radius*.18,0); ctx.lineTo(shaft,0); ctx.stroke();
+                ctx.strokeStyle='#aeb7bd'; ctx.lineWidth=Math.max(4.5,radius*.10); ctx.lineCap='round';
+                ctx.beginPath();
+                ctx.moveTo(shaft-headW*.55,-headH*.35);
+                ctx.quadraticCurveTo(shaft-headW*.08,-headH*.95,shaft+headW*.48,-headH*.35);
+                ctx.quadraticCurveTo(shaft+headW*.16,0,shaft+headW*.48,headH*.35);
+                ctx.quadraticCurveTo(shaft-headW*.08,headH*.95,shaft-headW*.55,headH*.35);
+                ctx.stroke();
+                ctx.strokeStyle='rgba(235,251,255,.9)'; ctx.lineWidth=Math.max(2,radius*.035);
+                ctx.beginPath(); ctx.moveTo(-radius*.18,0); ctx.lineTo(shaft*.72,0); ctx.stroke();
+                ctx.strokeStyle='rgba(149,231,238,.45)'; ctx.lineWidth=Math.max(2,radius*.028);
+                ctx.beginPath(); ctx.arc(0,0,radius*.91,0,TAU); ctx.stroke();
+            } else if(type==='scythe'){
                 ctx.shadowColor='rgba(210,225,238,.92)';
                 const h=Math.max(24,radius*.52), br=Math.max(38,radius*.74);
                 // Full-spin attacks keep the entire scythe visible while rotating around
@@ -26444,7 +26612,7 @@ function draw() {
             const g=ctx.createLinearGradient(0,0,len,0);g.addColorStop(0,'#fff');g.addColorStop(.48,'#bdf5ff');g.addColorStop(1,'#54d8ff');ctx.strokeStyle=g;ctx.lineWidth=Math.max(4,radius*.045);ctx.beginPath();ctx.moveTo(radius*.10,0);ctx.lineTo(len,0);ctx.stroke();
             ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=Math.max(1.5,radius*.012);ctx.beginPath();ctx.arc(0,0,radius*.97,start,end,false);ctx.stroke();ctx.restore();
         }
-        else if(p.type === 'izaque_slash' || p.type === 'scythe' || p.type === 'gladiator_slash' || p.type === 'knighter_slash' || p.type === 'mr_perfurant_slash' || p.type === 'shinobi' || p.type === 'shinobi_katana' || p.type === 'shiv') {
+        else if(p.type === 'izaque_slash' || p.type === 'scythe' || p.type === 'gladiator_slash' || p.type === 'knighter_slash' || p.type === 'mr_perfurant_slash' || p.type === 'shinobi' || p.type === 'shinobi_katana' || p.type === 'shiv' || p.type === 'owen_pickaxe_swing') {
             const ex=p.extra||{}; const base=Number.isFinite(ex.attackAngle)?ex.attackAngle:Math.atan2(p.vy,p.vx);
             const dur=Math.max(1,Number(ex.swingDuration)||18); const t=Math.min(1,Math.max(0,(dur-p.life)/dur));
             const ease=t; const start=Number.isFinite(ex.swingStart)?ex.swingStart:-Math.PI*.66; const end=Number.isFinite(ex.swingEnd)?ex.swingEnd:Math.PI*.66;
