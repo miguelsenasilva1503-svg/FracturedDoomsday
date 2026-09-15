@@ -33,20 +33,6 @@ html.sandbox-pc .sandbox-tool-hotkey{display:block}.sandbox-tool-state{position:
 #btn-sandbox-summon img{width:40px;height:40px;object-fit:contain;pointer-events:none}
 @media(max-width:650px){#sandbox-tool-cluster{right:8px;bottom:122px;grid-template-columns:56px 56px;grid-template-rows:56px 56px;gap:18px 8px}.sandbox-fixed-tool{width:56px!important;height:56px!important;min-width:56px!important;min-height:56px!important}.sandbox-fixed-tool img,#btn-sandbox-summon img{width:38px;height:38px}}
 
-/* Passe: os patamares não exibem o sprite grande da recompensa no centro. */
-.pass-tier-card .pass-tier-desc .resource-icon,
-.pass-tier-card .pass-tier-desc .inline-sprite-icon,
-.pass-tier-card .pass-tier-icon,
-.pass-tier-card .pass-box-icon{
-  display:none !important;
-  width:0 !important;
-  height:0 !important;
-  min-width:0 !important;
-  min-height:0 !important;
-  max-width:0 !important;
-  max-height:0 !important;
-  margin:0 !important;
-}
 </style>
 <style>
 /* FD FIX — diálogo de tutorial estável em zoom/telas diferentes. */
@@ -1240,6 +1226,11 @@ html.sandbox-pc .sandbox-tool-hotkey{display:block}.sandbox-tool-state{position:
 }
 </style>
 
+<style id="pass-reward-slot-restore-20260915">
+.pass-tier-icon{display:flex !important;align-items:center !important;justify-content:center !important;min-width:0 !important;min-height:24px !important;font-size:28px !important;line-height:1 !important;}
+.pass-tier-icon .pass-box-icon,.pass-tier-icon .resource-icon{width:42px !important;height:42px !important;max-width:42px !important;max-height:42px !important;object-fit:contain !important;display:block !important;margin:0 auto !important;}
+@media(max-width:620px){.pass-tier-icon .pass-box-icon,.pass-tier-icon .resource-icon{width:36px !important;height:36px !important;max-width:36px !important;max-height:36px !important;}}
+</style>
 
 <style id="resource-size-normalization-20260915">
 /* Normaliza contadores e recompensas que ficaram desproporcionais. */
@@ -11445,6 +11436,7 @@ function renderPassRewardCard(tier, currentTier, reward, featured = false) {
         <div class="pass-tier-card ${featured ? 'featured' : ''} ${claimed ? 'claimed' : ''} ${active ? 'active' : ''} ${locked && !claimed ? 'locked' : ''}">
             <div class="pass-tier-badge">
                 <div class="pass-tier-number">${featured ? 'RECOMPENSA ATUAL' : 'PRÓXIMO PATAMAR'}</div>
+                <div class="pass-tier-icon">${view.rewards?.[0]?.type === 'box' ? `<img class="pass-box-icon" src="${boxSprite(view.rewards[0].kind)}" alt="">` : (view.rewards?.[0]?.type === 'coins' ? resourceIcon('coins','pass-box-icon') : view.rewards?.[0]?.type === 'gems' ? resourceIcon('gems','pass-box-icon') : view.rewards?.[0]?.type === 'evo' ? resourceIcon('evo','pass-box-icon') : view.rewards?.[0]?.type === 'scrap' ? resourceIcon('scrap','pass-box-icon') : view.icon)}</div>
             </div>
             <div class="pass-tier-body">
                 <h4 class="pass-tier-title">${view.tierLabel || `Patamar ${formatCompactNumber(tier)}`}</h4>
