@@ -1225,6 +1225,125 @@ html.sandbox-pc .sandbox-tool-hotkey{display:block}.sandbox-tool-state{position:
 }
 </style>
 
+
+<style id="resource-size-normalization-20260915">
+/* Normaliza contadores e recompensas que ficaram desproporcionais. */
+#screen-shop > .top-bar .resource,
+#screen-shop .resource,
+#screen-trail .resource{
+  font-size:16px !important;
+  padding:5px 12px !important;
+  gap:4px !important;
+  border-radius:18px !important;
+}
+#screen-shop > .top-bar .resource-icon,
+#screen-shop .resource-icon,
+#screen-trail .resource-icon{
+  width:22px !important;
+  height:22px !important;
+  min-width:22px !important;
+  min-height:22px !important;
+  max-width:22px !important;
+  max-height:22px !important;
+  flex:0 0 22px !important;
+}
+#screen-trail > div[style*="text-align:right"] .resource{
+  font-size:16px !important;
+  padding:5px 12px !important;
+}
+#screen-trail > div[style*="text-align:right"] .resource-icon{
+  width:22px !important;
+  height:22px !important;
+  min-width:22px !important;
+  min-height:22px !important;
+  max-width:22px !important;
+  max-height:22px !important;
+}
+#pass-xp-text{
+  font-size:16px !important;
+  line-height:1.2 !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:4px !important;
+}
+#pass-xp-text .resource-icon{
+  width:22px !important;
+  height:22px !important;
+  min-width:22px !important;
+  min-height:22px !important;
+  max-width:22px !important;
+  max-height:22px !important;
+  flex:0 0 22px !important;
+  margin-right:0 !important;
+}
+.pass-tier-icon img.pass-box-icon[src*="elements/"]{
+  width:42px !important;
+  height:42px !important;
+  min-width:42px !important;
+  min-height:42px !important;
+  max-width:42px !important;
+  max-height:42px !important;
+  object-fit:contain !important;
+  margin:0 auto !important;
+}
+/* As recompensas do passe que são recursos devem ser compactas; caixas continuam maiores. */
+.pass-tier-icon .resource-icon,
+.pass-tier-icon .pass-box-icon[src*="elements/coin.png"],
+.pass-tier-icon .pass-box-icon[src*="elements/gems.png"],
+.pass-tier-icon .pass-box-icon[src*="elements/evo.png"],
+.pass-tier-icon .pass-box-icon[src*="elements/scrap.png"],
+.pass-tier-icon .pass-box-icon[src*="elements/xp.png"],
+.pass-tier-icon .pass-box-icon[src*="elements/medal.png"],
+.pass-tier-icon .pass-box-icon[src*="elements/chip.png"]{
+  width:42px !important;
+  height:42px !important;
+  min-width:42px !important;
+  min-height:42px !important;
+  max-width:42px !important;
+  max-height:42px !important;
+  flex:0 0 42px !important;
+  object-fit:contain !important;
+}
+@media(max-width:620px){
+  #screen-shop > .top-bar .resource,
+  #screen-shop .resource,
+  #screen-trail .resource{
+    font-size:14px !important;
+    padding:4px 9px !important;
+  }
+  #screen-shop > .top-bar .resource-icon,
+  #screen-shop .resource-icon,
+  #screen-trail .resource-icon{
+    width:20px !important;
+    height:20px !important;
+    min-width:20px !important;
+    min-height:20px !important;
+    max-width:20px !important;
+    max-height:20px !important;
+    flex-basis:20px !important;
+  }
+  #pass-xp-text{font-size:14px !important;}
+  #pass-xp-text .resource-icon{width:20px !important;height:20px !important;min-width:20px !important;min-height:20px !important;max-width:20px !important;max-height:20px !important;flex-basis:20px !important;}
+  .pass-tier-icon img.pass-box-icon[src*="elements/"],
+  .pass-tier-icon .resource-icon,
+  .pass-tier-icon .pass-box-icon[src*="elements/coin.png"],
+  .pass-tier-icon .pass-box-icon[src*="elements/gems.png"],
+  .pass-tier-icon .pass-box-icon[src*="elements/evo.png"],
+  .pass-tier-icon .pass-box-icon[src*="elements/scrap.png"],
+  .pass-tier-icon .pass-box-icon[src*="elements/xp.png"],
+  .pass-tier-icon .pass-box-icon[src*="elements/medal.png"],
+  .pass-tier-icon .pass-box-icon[src*="elements/chip.png"]{
+    width:36px !important;
+    height:36px !important;
+    min-width:36px !important;
+    min-height:36px !important;
+    max-width:36px !important;
+    max-height:36px !important;
+    flex-basis:36px !important;
+  }
+}
+</style>
 </head>
 <body>
 
