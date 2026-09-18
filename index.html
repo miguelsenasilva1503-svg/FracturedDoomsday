@@ -6024,6 +6024,12 @@ function getMapElementSpriteKey(type, obj = {}) {
             return 'kelp';
         case 'fall':
             return 'fall';
+        case 'pillar_vertical':
+            return 'pillar_vertical';
+        case 'pillar_horizontal':
+            return 'pillar_horizontal';
+        case 'coliseum_pillar':
+            return obj.rotate ? 'pillar_horizontal' : 'pillar_vertical';
         case 'shroom':
             return 'shroom';
         case 'car':
@@ -12992,6 +12998,9 @@ function startGame(isHardcore) {
 
 function startRunAfterShop(options = {}) {
     const characterTest = !!options.characterTest;
+    const carrySandboxFractures = (sandboxMode && Array.isArray(window.fractures) ? window.fractures.filter(f => f?.sandbox) : []);
+    const pendingRunFractures = carrySandboxFractures.length ? carrySandboxFractures : (Array.isArray(window.fdPendingRunFractures) ? window.fdPendingRunFractures : []);
+    window.fdPendingRunFractures = [];
     sandboxMode = false; sandboxMenuOpen = false; sandboxTab = 'home'; sandboxPlacedElements = []; sandboxMapHalfSize = 1500; activeWorldHalfSize = 1500; sandboxEnemyUndetectable = false; sandboxSavePosition = true; sandboxAutoSpawnEnabled = true; sandboxPersistentEntities = []; sandboxPetDisabled = false;
     if (!characterTest) {
         // Cada início real de partida é contabilizado imediatamente.
@@ -13073,6 +13082,25 @@ function startRunAfterShop(options = {}) {
     if (o2WrapAtStart) o2WrapAtStart.classList.toggle('hidden', window.currentMap !== 10);
     document.getElementById('map-text').innerHTML = `Mapa: ${MAPS[window.currentMap]}`;
     generateMapObstacles();
+    if (pendingRunFractures.length) {
+        try {
+            window.fractures = pendingRunFractures.map(src => {
+                const f = JSON.parse(JSON.stringify(src, (key,value) => value === Infinity ? '__FD_INFINITY__' : value));
+                const revive = v => {
+                    if (Array.isArray(v)) return v.map(revive);
+                    if (v && typeof v === 'object') { for (const k of Object.keys(v)) v[k]=revive(v[k]); return v; }
+                    return v === '__FD_INFINITY__' ? Infinity : v;
+                };
+                const out = revive(f);
+                out.sandbox = false;
+                out.manual = true;
+                out.life = Infinity;
+                out.maxLife = Infinity;
+                out.spawnTimer = Math.max(.4, Number(out.spawnTimer) || .8);
+                return out;
+            });
+        } catch (_) { window.fractures = []; }
+    }
     if (pd.settings.ultraHardcore && window.currentMap === 9) {
         window.discoSpotlights = Array.from({ length: 42 }, (_, i) => {
             const angle = (Math.PI * 2 * i) / 42 + Math.random() * 0.35;
@@ -13832,6 +13860,7 @@ let sandboxEnemyUndetectable = false;
 let runEnemyUndetectable = false;
 let sandboxSavePosition = true;
 let sandboxPersistentEntities = [];
+window.fdPendingRunFractures = Array.isArray(window.fdPendingRunFractures) ? window.fdPendingRunFractures : [];
 let sandboxSelectedSpawn = null;
 let sandboxSelectedSpawnLabel = '';
 let sandboxSelectedSpawnIcon = '';
@@ -14371,6 +14400,11 @@ function deactivateSandbox() {
     const restoreMap = Number.isInteger(sandboxOriginalMap) ? sandboxOriginalMap : 0;
     const restoreId = sandboxOriginalSelection || pd?.selectedChar;
     sandboxSaveCurrentWorld();
+    const liveSandboxFractures = Array.isArray(window.fractures) ? window.fractures.filter(f => f?.sandbox) : [];
+    window.fdPendingRunFractures = liveSandboxFractures.map(f => {
+        try { return JSON.parse(JSON.stringify(f)); } catch (_) { return null; }
+    }).filter(Boolean);
+    for (const f of liveSandboxFractures) { f.sandbox = false; f.manual = true; f.life = Infinity; f.maxLife = Infinity; }
     sandboxMode = false;
     sandboxPetDisabled = false;
     if (player) player.petAI = null;
@@ -15094,7 +15128,7 @@ function sandboxSpawnElement(group, key, direct=false) {
     if (group === 'map' && Object.prototype.hasOwnProperty.call(MAP_ELEMENT_SPRITES, key)) {
         const obstacleTypeMap = {
             stone:'rock', cactus:'cacto', tree:'tree', volcano:'volcano', bamboo:'bamboo', spike_bamboo:'bamboo_spike',
-            soundbox:'speaker', shroom:'shroom', kelp:'kelp'
+            soundbox:'speaker', shroom:'shroom', kelp:'kelp', fall:'fall'
         };
         if (['side_car','left_car','right_car','front_car','behind_car'].includes(key)) {
             const dirMap = {
@@ -15109,8 +15143,15 @@ function sandboxSpawnElement(group, key, direct=false) {
         }
         const type = obstacleTypeMap[key];
         if (!type) return false;
-        const rMap = { rock:28, cacto:24, tree:34, volcano:42, bamboo:30, bamboo_spike:24, speaker:40, shroom:24, kelp:34 };
+        const rMap = { rock:28, cacto:24, tree:34, volcano:42, bamboo:30, bamboo_spike:24, speaker:40, shroom:24, kelp:34, fall:42 };
         const obj = {x,y,r:rMap[type] || 24,type,sandbox:true};
+        if (type === 'fall') {
+            obj.w = 84;
+            obj.h = 70;
+            obj.rot = Math.random() * Math.PI * 2;
+            obj.isWall = true;
+            obj.outonalTree = true;
+        }
         if (type === 'kelp') obj.isWall = false;
         if (type === 'volcano') obj.timer = 99;
         if (type === 'speaker') obj.cd = 0;
@@ -15193,6 +15234,25 @@ function drawSandboxPlacedElements() {
 }
 
 function getActiveWorldHalfSize(){ return sandboxMode ? sandboxMapHalfSize : activeWorldHalfSize; }
+function updateSandboxFractures(dt) {
+    if (!sandboxMode || !Array.isArray(window.fractures) || !window.fractures.length) return;
+    const sandboxEnemyCount = Array.isArray(enemies) ? enemies.filter(e => e && e.sandbox && e.hp > 0).length : 0;
+    const maxFractureEnemies = 48;
+    for (const f of window.fractures) {
+        if (!f || !f.sandbox) continue;
+        if (!Number.isFinite(Number(f.x)) || !Number.isFinite(Number(f.y))) continue;
+        f.spawnTimer = Math.max(0, (Number(f.spawnTimer) || 0) - dt);
+        if (f.spawnTimer > 0) continue;
+        f.spawnTimer = 3.25 + Math.random() * 1.75;
+        const currentCount = Array.isArray(enemies) ? enemies.filter(e => e && e.sandbox && e.hp > 0).length : 0;
+        if (currentCount >= maxFractureEnemies) continue;
+        try {
+            window.spawnFractureEnemy(f, { sandbox: true });
+        } catch (err) {
+            console.warn('Spawn de Fratura do Sandbox protegido:', err);
+        }
+    }
+}
 function updateSandbox(dt) {
     if (!player || player.isDead) return;
     if (sandboxImmortalityEnabled) {
@@ -15214,6 +15274,7 @@ function updateSandbox(dt) {
     camera.x = targetCameraX;
     camera.y = targetCameraY;
     sandboxEraseAtPlayer();
+    updateSandboxFractures(dt);
     if(dx||dy){player.lastMoveAngle=Math.atan2(dy,dx); if(dx) playerFacingLeft=dx<0;}
     // O Sandbox intencionalmente não processa tiros, dano, ondas, coleta de XP,
     // spawns automáticos ou qualquer progresso enquanto está aberto.
@@ -24155,7 +24216,11 @@ function drawFractureDecorations(fracture) {
 
 function drawFractureRay(fracture) {
     if (!fracture || !Number.isFinite(fracture.x) || !Number.isFinite(fracture.y)) return;
-    const lifeRatio = Math.max(0, Math.min(1, (fracture.life || 0) / (fracture.maxLife || 14)));
+    const rawLife = Number(fracture.life);
+    const rawMaxLife = Number(fracture.maxLife);
+    const lifeRatio = Number.isFinite(rawLife) && Number.isFinite(rawMaxLife) && rawMaxLife > 0
+        ? Math.max(0, Math.min(1, rawLife / rawMaxLife))
+        : 1;
     const fade = Math.min(1, lifeRatio * 1.8);
     const angle = Number(fracture.angle) || 0;
     const len = Number(fracture.length) || 330;
@@ -24201,7 +24266,7 @@ function drawFractureRay(fracture) {
 
     // Núcleo luminoso em formato de raio.
     ctx.shadowColor = 'rgba(190,120,255,0.95)';
-    ctx.shadowBlur = 34;
+    ctx.shadowBlur = fracture.sandbox ? 14 : 34;
     ctx.strokeStyle = 'rgba(232,205,255,0.98)';
     ctx.lineWidth = Math.max(8, width * 0.09);
     ctx.lineCap = 'round';
@@ -24427,13 +24492,15 @@ function spawnFractureEnemy(fracture, options = {}) {
 }
 
 function updateFractures(dt) {
-    const enabled = window.currentMap === 11 || (!!sandboxSettings.fractures && !sandboxMode);
+    window.fractures = Array.isArray(window.fractures) ? window.fractures : [];
+    const hasManualFractures = window.fractures.some(f => f && f.manual);
+    const enabled = window.currentMap === 11 || (!!sandboxSettings.fractures && !sandboxMode) || hasManualFractures;
     if (!enabled) {
         window.fractures = [];
         return;
     }
-    window.fractures = Array.isArray(window.fractures) ? window.fractures : [];
-    if (wave >= 5 && wave % 10 !== 0 && !enemies.some(e => e && e.isBoss)) {
+    // Fraturas manuais/preservadas continuam existindo, mas não ativam a geração automática.
+    if ((window.currentMap === 11 || !!sandboxSettings.fractures) && wave >= 5 && wave % 10 !== 0 && !enemies.some(e => e && e.isBoss)) {
         if (!Number.isFinite(window.fractureSpawnTimer)) window.fractureSpawnTimer = 14 + Math.random() * 10;
         window.fractureSpawnTimer -= dt;
         if (window.fractureSpawnTimer <= 0) {
@@ -24445,7 +24512,9 @@ function updateFractures(dt) {
     }
     for (let i = window.fractures.length - 1; i >= 0; i--) {
         const f = window.fractures[i];
-        if (!f || !Number.isFinite(f.x) || !Number.isFinite(f.y) || !Number.isFinite(f.life) || !Number.isFinite(f.spawnTimer)) {
+        const finiteLife = Number.isFinite(f?.life);
+        const persistentLife = !!(f?.manual || f?.sandbox) && f?.life === Infinity;
+        if (!f || !Number.isFinite(f.x) || !Number.isFinite(f.y) || (!finiteLife && !persistentLife) || !Number.isFinite(f.spawnTimer)) {
             window.fractures.splice(i, 1);
             continue;
         }
@@ -30771,7 +30840,7 @@ window.sandboxElementEntries=function(){
     ...MAPS.map((name,i)=>({group:'fracture',key:`fracture_${i}`,name:`Fratura — ${name}`,icon:'elements/error.png'}))
   ];
   const names={
-    invisible_wall:'Invisi-Parede',treasure_chest:'Baú de Tesouro',xp_small:'XP Pequeno',xp_large:'XP Grande',stone:'Pedra',tree:'Árvore',cactus:'Cacto',side_car:'Carro Lateral',left_car:'Carro Lateral',right_car:'Carro Lateral',front_car:'Carro Frontal',behind_car:'Carro Traseiro',shroom:'Cogumelo',volcano:'Vulcão',bamboo:'Bambu',spike_bamboo:'Bambu Espinhoso',kelp:'Alga',fall:'Queda',bunniie_hole:'Buraco da Bunniie',adam_scrap_scrap:'Sucata',adam_scrap_config:'Configuração',grenade_barricade:'Barricada do Grenade',turret:'Torreta',mortar:'Morteiro',cannon:'Canhão',tesla:'Tesla',crossbow:'Besta',burner:'Incinerador',heal_station:'Estação de Cura',drone:'Drone',axel_drone:'Drone do Axel',landmine:'Mina Terrestre',chick:'Pintinho',totem:'Totem',ivy_vine:'Trepadeira da Ivy',ivy_flower:'Flor da Ivy',tea_table:'Mesa de Chá',oven:'Forno',necro_tombstone:'Lápide do Necro',knighter_castle:'Castelo do Knighter'
+    invisible_wall:'Invisi-Parede',treasure_chest:'Baú de Tesouro',xp_small:'XP Pequeno',xp_large:'XP Grande',stone:'Pedra',tree:'Árvore',cactus:'Cacto',side_car:'Carro Lateral',left_car:'Carro Lateral',right_car:'Carro Lateral',front_car:'Carro Frontal',behind_car:'Carro Traseiro',shroom:'Cogumelo',volcano:'Vulcão',bamboo:'Bambu',spike_bamboo:'Bambu Espinhoso',kelp:'Alga',fall:'Árvore Outonal',bunniie_hole:'Buraco da Bunniie',adam_scrap_scrap:'Sucata',adam_scrap_config:'Configuração',grenade_barricade:'Barricada do Grenade',turret:'Torreta',mortar:'Morteiro',cannon:'Canhão',tesla:'Tesla',crossbow:'Besta',burner:'Incinerador',heal_station:'Estação de Cura',drone:'Drone',axel_drone:'Drone do Axel',landmine:'Mina Terrestre',chick:'Pintinho',totem:'Totem',ivy_vine:'Trepadeira da Ivy',ivy_flower:'Flor da Ivy',tea_table:'Mesa de Chá',oven:'Forno',necro_tombstone:'Lápide do Necro',knighter_castle:'Castelo do Knighter'
   };
   for(const e of base)if(names[e.key])e.name=names[e.key];
   const seen=new Set();return base.concat(extra).filter(e=>{const k=`${e.group}:${e.key}`;if(seen.has(k))return false;seen.add(k);return true;});
@@ -30894,8 +30963,22 @@ window.updateFractures=function(dt){
   return oldUpdateFractures(dt);
 };
 function fdCreateSandboxFracture(mapId,x,y){
-  const f={x:Number(x)||0,y:Number(y)||0,mapId:Number(mapId),angle:Math.random()*Math.PI*2,length:300+Math.random()*100,width:95+Math.random()*50,branch:100,life:1e9,maxLife:1e9,spawnCount:Infinity,spawned:0,spawnTimer:1.5,sandbox:true,decorations:[]};
-  window.fractures=Array.isArray(window.fractures)?window.fractures:[];window.fractures.push(f);return f;
+  const id=Number(mapId);
+  if(!Number.isInteger(id)||id<0||id>=MAPS.length)return null;
+  const f={x:Number(x)||0,y:Number(y)||0,mapId:id,angle:Math.random()*Math.PI*2,length:300+Math.random()*100,width:95+Math.random()*50,branch:100,life:Infinity,maxLife:Infinity,spawnCount:Infinity,spawned:0,spawnTimer:1.5,sandbox:true,manual:false,decorations:[]};
+  const decorTypes=getFractureDecorTypes(id);
+  if(decorTypes.length){
+    const count=2;
+    for(let i=0;i<count;i++){
+      const type=decorTypes[Math.floor(Math.random()*decorTypes.length)];
+      const a=f.angle,cosA=Math.cos(a),sinA=Math.sin(a);
+      const lx=(Math.random()-.5)*f.length*.72,ly=(Math.random()-.5)*f.width*.52;
+      f.decorations.push({type,x:f.x+lx*cosA-ly*sinA,y:f.y+lx*sinA+ly*cosA,size:type==='fall'?48:(type==='coliseum_pillar'?46:34+Math.random()*10),rotate:Math.random()*Math.PI*2,flipX:Math.random()<.5,seed:Math.random()*1000});
+    }
+  }
+  window.fractures=Array.isArray(window.fractures)?window.fractures:[];
+  window.fractures.push(f);
+  return f;
 }
 window.fdCreateSandboxFracture=fdCreateSandboxFracture;
 
@@ -31023,6 +31106,9 @@ ensureFreezeButton();fdRenderHotbar();fdUpdateFreezeButton();
    the same spawn, fracture, sprite and update implementations everywhere. */
 try{spawnEnemy=window.spawnEnemy;}catch(_){}
 try{updateEnemies=window.updateEnemies;}catch(_){}
+try{updateFractures=window.updateFractures;}catch(_){}
+try{getMapElementSpriteKey=window.getMapElementSpriteKey;}catch(_){}
+try{drawMapElementSprite=window.drawMapElementSprite;}catch(_){}
 try{updateProjectiles=window.updateProjectiles;}catch(_){}
 try{projectileHitsEnemy=window.projectileHitsEnemy;}catch(_){}
 try{getEnemyEntryWave=window.getEnemyEntryWave;}catch(_){}
