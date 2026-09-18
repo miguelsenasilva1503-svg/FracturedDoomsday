@@ -3249,7 +3249,7 @@ const CARDS = [
     { id: 'drone_card', name: 'Drone Aliado', desc: 'Invoca um drone que atira', apply: (s) => { allies.push({x: player.x, y: player.y, dmg: player.baseDmg * player.stats.dmgMult * 0.5, speed: 2.8, life: Infinity, cd: 0, isTurret: false, type: 'drone', followX: 20, followY: -20}); } }
 ];
 
-const MAPS = ["Planície", "Deserto", "Nevasca", "Caverna", "Floresta", "Pântano", "Metrópole", "Ígneo", "Bambuzal", "Discoteca", "Palácio Marinho", "Fraturado", "Chroma Key", "Base Lunar", "Outonal"];
+const MAPS = ["Planície", "Deserto", "Nevasca", "Caverna", "Floresta", "Pântano", "Metrópole", "Ígneo", "Bambuzal", "Discoteca", "Palácio Marinho", "Fraturado", "Chroma Key", "Base Lunar", "Outonal", "Coliseu"];
 
 const UHC_MODIFIERS = {
     "Planície": { night: true },
@@ -3265,7 +3265,8 @@ const UHC_MODIFIERS = {
     "Palácio Marinho": { night: true, underwater: true, oxygenDrain: 1, uhcSpeedMult: 0.58 },
     "Fraturado": { night: true, fractures: true },
     "Base Lunar": { night: true, lunarGravity: true },
-    "Outonal": { autumn: true, leaves: true }
+    "Outonal": { autumn: true, leaves: true },
+    "Coliseu": { night: true }
 };
 
 const ENEMY_TYPES = ["Básico", "Gigante", "Tanque", "Boss", "Ninja", "Kamikaze", "Líder", "Colosso", "Elite Master", "Líder Elite", "Caixa de papelão", "Capacete", "Cabeça de prisma"];
@@ -8067,7 +8068,7 @@ function updateSettingsUI(syncSlider = true) {
     const devMapStatus = document.getElementById('dev-map-rotation-status');
     if (devMapSelect) {
         if (!devMapSelect.options.length) {
-            devMapSelect.innerHTML = '<option value="-1">Rotação automática</option>' + MAPS.map((name, index) => ({name,index})).filter(m => m.index <= 14).map(m => `<option value="${m.index}">${m.name}</option>`).join('');
+            devMapSelect.innerHTML = '<option value="-1">Rotação automática</option>' + MAPS.map((name, index) => ({name,index})).filter(m => m.index <= 11 || m.index === 13 || m.index === 14 || m.index === 15).map(m => `<option value="${m.index}">${m.name}</option>`).join('');
         }
         const override = Number.isInteger(Number(pd?.debug?.mapRotationOverride)) ? Number(pd.debug.mapRotationOverride) : -1;
         devMapSelect.value = (override >= -1 && override < MAPS.length) ? String(override) : '-1';
@@ -8125,7 +8126,7 @@ function getSelectedMapIndex() {
 function getDestinationChoices() {
     const bucket = getMapChoiceBucket();
     const seed = `destinations:${bucket}`;
-    return shuffleWithSeed(MAPS.map((name, index) => index).filter(index => index < 12 || index === 13 || index === 14), seed).slice(0, 3);
+    return shuffleWithSeed(MAPS.map((name, index) => index).filter(index => index < 12 || index === 13 || index === 14 || index === 15), seed).slice(0, 3);
 }
 
 function drawDestinationPreview(canvas, mapId) {
@@ -8160,6 +8161,12 @@ function drawDestinationPreview(canvas, mapId) {
     }
     if (Number(mapId) === 14) {
         c.fillStyle = 'rgba(189,122,45,0.18)'; c.fillRect(0,0,w,h);
+    }
+    if (Number(mapId) === 15) {
+        c.fillStyle = 'rgba(133,88,48,0.24)'; c.fillRect(0,0,w,h);
+        c.strokeStyle = 'rgba(242,220,178,0.55)'; c.lineWidth = 4;
+        c.beginPath(); c.arc(w/2,h/2,w*.23,0,Math.PI*2); c.stroke();
+        c.beginPath(); c.arc(w/2,h/2,w*.38,0,Math.PI*2); c.stroke();
     }
 
     const elementTypes = {
@@ -13850,6 +13857,7 @@ function sandboxSetHud(active) {
         if (el) el.classList.toggle('hidden', !!active);
     });
     if (btnSpecial) btnSpecial.style.display = active ? 'none' : '';
+    document.querySelectorAll('#btn-special, .character-ability-btn, .ability-btn, [data-ability-button]').forEach(el => { if(el !== btnSpecial) el.style.display = active ? 'none' : ''; });
     const cluster = document.getElementById('sandbox-tool-cluster');
     if (cluster) cluster.style.display = active ? 'grid' : 'none';
     updateSandboxSummonButton();
@@ -14099,7 +14107,7 @@ function sandboxClearRunEntities() {
     bulbBubbles = [];
     caveVisionBursts = [];
     graffitMarks = [];
-    window.fractures = [];
+    window.fractures = Array.isArray(window.fractures) ? window.fractures.filter(f => f && f.sandbox) : [];
     window.discoSpotlights = [];
     window.dancersTimer = 20;
 }
@@ -14474,19 +14482,33 @@ if (!window.__sandboxDelegationBoundV5) {
             case 'border': adjustSandboxMapBorder(Number(btn.dataset.sandboxDelta || 0)); break;
             case 'delete-spawns': sandboxDeleteSpawned(); notify('Tudo que foi spawnado pelo Sandbox foi removido.'); break;
             case 'eraser': toggleSandboxEraser(); break;
-            case 'enemy': { const t=btn.dataset.sandboxEnemyType||'', sk=btn.dataset.sandboxEnemySkin||'', proto=btn.dataset.sandboxPrototype||''; if(proto){ setSandboxSelectedSpawn('enemy',{type:t,skin:sk,prototype:proto},`${getSandboxPrototype(proto)?.label || t} • PROTOTYPE`,''); } else { const spriteKey=sandboxEnemySpriteForSelection(t,sk); const icon=spriteKey ? getEnemySpritePath(spriteKey) : ''; setSandboxSelectedSpawn('enemy',{type:t,skin:sk},sandboxEnemyButtonLabel(t,sk,null),icon); } break; }
+            case 'enemy': {
+                const t=btn.dataset.sandboxEnemyType||'', sk=btn.dataset.sandboxEnemySkin||'', proto=btn.dataset.sandboxPrototype||'';
+                const mapRaw=btn.dataset.sandboxMapId||''; const mapId=mapRaw!=='' && Number.isInteger(Number(mapRaw)) ? Number(mapRaw) : null;
+                const spriteKey=sandboxEnemySpriteForSelection(t,sk) || sandboxCanonicalEnemySpriteKey(t);
+                const icon=spriteKey ? getEnemySpritePath(spriteKey) : '';
+                const label=proto ? `${getSandboxPrototype(proto)?.label || t} • PROTOTYPE` : (window.fdFinalSandboxEnemyName ? window.fdFinalSandboxEnemyName(t,sk,mapId) : sandboxEnemyButtonLabel(t,sk,mapId));
+                const data={type:t,skin:sk,prototype:proto,mapId};
+                setSandboxSelectedSpawn('enemy',data,label,icon);
+                if(typeof fdAddSandboxHotbar==='function') fdAddSandboxHotbar({kind:'enemy',data,label,icon});
+                break;
+            }
             case 'character': sandboxSelectCharacter(btn.dataset.sandboxChar || ''); break;
             case 'map': sandboxSelectMap(Number(btn.dataset.sandboxMap)); break;
-            case 'element': { const g=btn.dataset.sandboxGroup||'', k=btn.dataset.sandboxKey||''; const ent=sandboxElementEntries().find(e=>e.group===g&&e.key===k); setSandboxSelectedSpawn('element',{group:g,key:k},ent?.name||k,Array.isArray(ent?.icon)?ent.icon[0]:(ent?.icon||'')); break; }
+            case 'element': {
+                const g=btn.dataset.sandboxGroup||'', k=btn.dataset.sandboxKey||'';
+                const ent=sandboxElementEntries().find(e=>e.group===g&&e.key===k);
+                const icon=Array.isArray(ent?.icon)?(ent.icon.find(Boolean)||''):(ent?.icon||'');
+                const label=ent?.name||k;
+                setSandboxSelectedSpawn('element',{group:g,key:k},label,icon);
+                if(typeof fdAddSandboxHotbar==='function') fdAddSandboxHotbar({kind:'element',data:{group:g,key:k},label,icon});
+                break;
+            }
             default: return false;
         }
         return true;
     };
-    // Touch/pointer só cancela o comportamento padrão; nenhuma ação é executada aqui.
-    sandboxOverlay?.addEventListener('pointerdown', ev => {
-        if (ev.button > 0) return;
-        try { ev.preventDefault(); } catch (_) {}
-    }, {passive:false});
+    // Não interceptamos pointerdown/touchstart no overlay: listas e telas do Sandbox precisam rolar normalmente.
     sandboxOverlay?.addEventListener('click', ev => {
         const btn = getSandboxActionButton(ev);
         if (!btn) return;
@@ -14726,30 +14748,55 @@ function toggleSandboxAutoSpawn() {
 }
 
 function sandboxEnemyPoolAll() {
-    const set = new Set();
-    for (const mapId of [0,1,2,3,4,5,6,7,8,9,10,13,14]) {
-        try { getFractureBiomePool(mapId).forEach(t => set.add(t)); } catch (_) {}
-    }
-    try { getFracturedGlobalEnemyPool().forEach(t => set.add(t)); } catch (_) {}
-    ['boss','megaboss','panda','sarcophagus','shark'].forEach(t => set.add(t));
-    set.delete('dancer');
-    ['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','boss'].forEach(t=>set.add(t));
-    return [...set].filter(t => t !== 'dancer');
+    const all = [
+        'basico','velocista','dancer','atirador','kamikaze','gigante','tanque','curandeiro','elite','lider',
+        'boss','megaboss','colosso','elite_master','lider_elite',
+        'cardboard_head','motorcycle_helmet','prism_head','tnt_crate',
+        'mummy','explorer','sarcophagus','camel','scorpion','stone_golem',
+        'goblin','lumberjack','gorilla','monkey','leopard',
+        'truck','ballon','snow_walker','ice_statue','deer_pilot','burned','obsidian_miner','fireman',
+        'ghost_fisher','swordfish','shark','triton','crocodile','swamp_monster',
+        'worker','conehead','motorcycle','police_car','ambulance',
+        'ninja','sein_sein','samurai','panda_suit','panda','nunchaku','geisha',
+        'rocknrool','sounder','piano','singer','tour_truck',
+        'cosmic','laser_shooter','light_saber','machine_gun',
+        'cesar','roman_statue','swordsman','shieldman','roman_turtle','archer'
+    ];
+    return [...new Set(all)].filter(t => t !== 'monster_tree');
 }
 
 function sandboxEnemyVariants(type) {
+    const t = String(type || '').toLowerCase();
     const out = [];
-    for (const mapId of [0,1,2,3,4,5,6,7,8,9,10,13,14]) {
+    const seen = new Set();
+    const add = (skin, mapId) => {
+        if (!skin || typeof getEnemySpritePath !== 'function' || !getEnemySpritePath(skin)) return;
+        const id = `${skin}::${Number.isInteger(mapId) ? mapId : 'base'}`;
+        if (seen.has(id)) return;
+        seen.add(id);
+        out.push({ skin, mapId: Number.isInteger(mapId) ? mapId : null });
+    };
+    let canonical = '';
+    try { canonical = sandboxCanonicalEnemySpriteKey(t); } catch (_) { canonical = t; }
+    add(canonical || t, null);
+    const mapIds = [0,1,2,3,4,5,6,7,8,9,10,11,13,14,15];
+    for (const mapId of mapIds) {
         try {
-            const temp = { type, fracturedOrigin: true, fractureMapId: mapId, skinSourceMapId: mapId };
-            const skin = getFracturedEnemySkinType(temp);
-            if (skin && getEnemySpritePath(skin)) out.push({ skin, mapId });
+            let skin = null;
+            if (mapId === 15) {
+                const roman = {basico:'roman_basic',cardboard_head:'wood_helment',motorcycle_helmet:'iron_hemlet',prism_head:'cesar_head',velocista:'roman_velocist',atirador:'roman_shooter',gigante:'roman_giant',boss:'emperor_boss',ballon:'SPQR_baloon',truck:'roman_truck',tanque:'pillar_tank',kamikaze:'roman_kamikaze',curandeiro:'roman_healer',elite:'roman_elite_shooter',lider:'coronel_leader'};
+                const special = {cesar:'cesar',roman_statue:'roman_statue',swordsman:'sword',shieldman:'shield',roman_turtle:'roman_turtle',archer:'archer'};
+                skin = roman[t] || special[t] || null;
+            } else {
+                skin = getFracturedEnemySkinType({type:t,fracturedOrigin:true,fractureMapId:mapId,skinSourceMapId:mapId});
+            }
+            add(skin, mapId);
         } catch (_) {}
     }
-    const fallback = getEnemySpritePath(type) ? type : null;
-    if (fallback) out.push({ skin: fallback, mapId: null });
-    const seen = new Set();
-    return out.filter(v => { if (seen.has(v.skin)) return false; seen.add(v.skin); return true; });
+    if (t === 'geisha') add('prospector', 14);
+    if (t === 'snow_walker') { add('mudded',5); add('rastel',14); }
+    if (t === 'scorpion') add('cave_scorpion',3);
+    return out;
 }
 
 function sandboxEnemyButtonLabel(type, skin, mapId) {
@@ -14777,7 +14824,11 @@ const SANDBOX_PROTOTYPES = [
     { key:'tanque', label:'Tanque', enemyType:'tanque', color:'#34495e', boss:false },
     { key:'curandeiro', label:'Curandeiro', enemyType:'curandeiro', color:'#ffffff', boss:false },
     { key:'kamikaze', label:'Kamikaze', enemyType:'kamikaze', color:'#e1b12c', boss:false },
-    { key:'elite', label:'Atirador de Elite', enemyType:'elite', color:'#1abc9c', boss:false }
+    { key:'elite', label:'Atirador de Elite', enemyType:'elite', color:'#1abc9c', boss:false },
+    { key:'megaboss', label:'Mega Boss', enemyType:'megaboss', color:'#2c3e50', boss:true },
+    { key:'colosso', label:'Colosso', enemyType:'colosso', color:'#4cd137', boss:false },
+    { key:'elite_master', label:'Atirador de Elite Master', enemyType:'elite_master', color:'#00a8ff', boss:false },
+    { key:'lider_elite', label:'Líder de Elite', enemyType:'lider_elite', color:'#e84118', boss:false }
 ];
 const SANDBOX_PROTOTYPE_MAP = Object.fromEntries(SANDBOX_PROTOTYPES.map(v => [v.key, v]));
 function getSandboxPrototype(key){ return SANDBOX_PROTOTYPE_MAP[String(key||'').toLowerCase()] || null; }
@@ -14820,24 +14871,26 @@ function sandboxEnemySpriteForSelection(type, skin) {
 
 function renderSandboxEnemies(root) {
     const protoCards = SANDBOX_PROTOTYPES.map(proto =>
-        `<button class="sandbox-entry sandbox-prototype-entry" type="button" data-sandbox-action="enemy" data-sandbox-enemy-type="${escapeHtmlAttr(proto.enemyType)}" data-sandbox-enemy-skin="" data-sandbox-prototype="${escapeHtmlAttr(proto.key)}">${sandboxPrototypeCanvasMarkup(proto.key)}<span>${escapeHtmlText(proto.label)} • PROTOTYPE</span></button>`
+        `<button class="sandbox-entry sandbox-prototype-entry" type="button" data-sandbox-action="enemy" data-sandbox-enemy-type="${escapeHtmlAttr(proto.enemyType)}" data-sandbox-enemy-skin="" data-sandbox-map-id="" data-sandbox-prototype="${escapeHtmlAttr(proto.key)}">${sandboxPrototypeCanvasMarkup(proto.key)}<span>${escapeHtmlText(proto.label)} • PROTOTYPE</span></button>`
     );
     const cards=[];
+    const prototypeTypes=new Set(SANDBOX_PROTOTYPES.map(p=>String(p.enemyType||'').toLowerCase()));
     const baseTypes=sandboxEnemyPoolAll();
     baseTypes.forEach(type=>{
-        const variants=sandboxEnemyVariants(type);
-        if (!variants.length) variants.push({skin:'',mapId:null});
-        variants.slice(0,12).forEach(v=>{
-            const spriteKey = sandboxEnemySpriteForSelection(type, v.skin || '');
-            const icon = spriteKey ? getEnemySpritePath(spriteKey) : 'enemies/basic.png';
-            cards.push(`<button class="sandbox-entry" type="button" data-sandbox-action="enemy" data-sandbox-enemy-type="${escapeHtmlAttr(type)}" data-sandbox-enemy-skin="${escapeHtmlAttr(v.skin||'')}"><img src="${escapeHtmlAttr(icon)}" data-sandbox-sprite-key="${escapeHtmlAttr(spriteKey)}" alt=""><span>${escapeHtmlText(sandboxEnemyButtonLabel(type,v.skin,v.mapId))}</span></button>`);
+        let variants=sandboxEnemyVariants(type);
+        if(prototypeTypes.has(String(type).toLowerCase())){
+            const canonical=sandboxCanonicalEnemySpriteKey(type);
+            variants=variants.filter(v=>!(v.mapId===null && String(v.skin||'')===String(canonical||'')));
+        }
+        variants.forEach(v=>{
+            const spriteKey=sandboxEnemySpriteForSelection(type,v.skin||'');
+            const icon=spriteKey?getEnemySpritePath(spriteKey):'enemies/basic.png';
+            const label=window.fdFinalSandboxEnemyName?window.fdFinalSandboxEnemyName(type,v.skin||'',v.mapId):sandboxEnemyButtonLabel(type,v.skin,v.mapId);
+            cards.push(`<button class="sandbox-entry" type="button" data-sandbox-action="enemy" data-sandbox-enemy-type="${escapeHtmlAttr(type)}" data-sandbox-enemy-skin="${escapeHtmlAttr(v.skin||'')}" data-sandbox-map-id="${escapeHtmlAttr(v.mapId==null?'':String(v.mapId))}"><img src="${escapeHtmlAttr(icon)}" data-sandbox-sprite-key="${escapeHtmlAttr(spriteKey)}" alt=""><span>${escapeHtmlText(label)}</span></button>`);
         });
     });
-    root.innerHTML=`<div class="sandbox-section-head"><button class="sandbox-small-btn" type="button" data-sandbox-action="tab" data-sandbox-tab="home">Voltar</button><h2>Inimigos</h2><span>${protoCards.length + cards.length} spawns</span></div><div class="sandbox-list">${protoCards.join('')}${cards.join('')}</div>`;
-    root.querySelectorAll('[data-sandbox-prototype-preview]').forEach(canvasHost => {
-        const proto = getSandboxPrototype(canvasHost.getAttribute('data-sandbox-prototype-preview'));
-        if (proto) drawSandboxPrototypePreview(canvasHost, proto);
-    });
+    root.innerHTML=`<div class="sandbox-section-head"><button class="sandbox-small-btn" type="button" data-sandbox-action="tab" data-sandbox-tab="home">Voltar</button><h2>Inimigos</h2><span>${protoCards.length+cards.length} spawns</span></div><div class="sandbox-list">${protoCards.join('')}${cards.join('')}</div>`;
+    root.querySelectorAll('[data-sandbox-prototype-preview]').forEach(canvasHost=>{const proto=getSandboxPrototype(canvasHost.getAttribute('data-sandbox-prototype-preview'));if(proto)drawSandboxPrototypePreview(canvasHost,proto);});
 }
 
 function sandboxSpawnEnemy(type, skin, direct=false, prototypeKey='') {
@@ -18609,7 +18662,7 @@ function spawnEnemy(forcedType = null, forcedPoint = null, spriteOverride = null
 
     let e = { x: ex, y: ey, type, hp: 0, maxHp: 0, speed: 0, baseDmg: 0, dmg: 0, size: 0, cd: 0, color: '', poison: { timer: 0, dmg: 0, tickCd: 0 }, slowTimer: 0, timeDistortionTimer:0, weakenTimer: 0, curseTimer: 0, burnTimer: 0, freezeTimer: 0, burnDmg: 0, speedBuffTimer: 0, soak: 0, shockTimer: 0, shockSemiTimer: 0, shockTick: 0, shockSemiTick: 0, shockDmg: 0, shockSemiDmg: 0, shockRate: 0.3, semiShockRate: 0.4, spawnBiome: window.currentMap, spawnWave, entryWave: spawnWave, stationary: false, poisonOnHit: 0, enemySkin: (window.currentMap === 4 && type === 'goblin') ? 'hunter' : null, fracturedOrigin: false, fractureMapId: null, skinSourceMapId: window.currentMap === 11 ? null : window.currentMap, pandaSummonTimer: 0, pandaSummoned: false, seinSein: false, seinAuraRadius: 115, samuraiAttackTimer: 0, samuraiAttackAngle: 0, samuraiAttackApplied: false, samuraiCd: 0, nunchakuAttackTimer: 0, nunchakuAttackAngle: 0, nunchakuAttackApplied: false, nunchakuCd: 0,
         piano: false, pianoAuraRadius: 125, singer: false, singerOrbitAngle: 0, singerOrbitRadius: 28, singerOrbitSpeed: 3.4, singerMicCd: 0, singerMicHitPlayer: false,
-        firemanJetTimer: 0, firemanReloadTimer: 0, firemanJetTick: 0,
+        firemanJetTimer: 0, firemanReloadTimer: 1.8, firemanJetTick: 0,
         sounder: false, sounderAttackCd: 1.55, sounderAttackTimer: 0, sounderAttackRadius: 0, sounderAttackDuration: 0.62, sounderAttackHitTargets: [], sounderAttackHitPlayer: false,
         machineGunBurstCount: 0, machineGunShotTimer: 0, machineGunCd: 0, machineGunAngle: 0,
         lightSaberAttackTimer: 0, lightSaberAttackAngle: 0, lightSaberAttackApplied: false, lightSaberCd: 0,
@@ -18630,7 +18683,7 @@ function spawnEnemy(forcedType = null, forcedPoint = null, spriteOverride = null
     if(type === 'ninja') { e.hp = 20*mult; e.speed = 1.8; e.baseDmg = 8*mult; e.size = 11; e.color = '#2d3436'; e.dodgeChance = 0.25; }
     if(type === 'burned') { e.hp = 30*mult; e.speed = 2.8; e.baseDmg = 5*mult; e.size = 12; e.color = '#7f2704'; e.burned = true; }
     if(type === 'obsidian_miner') { e.hp = 85*mult; e.speed = 1.0; e.baseDmg = 7*mult; e.size = 16; e.color = '#2d3436'; e.isObsidianMiner = true; e.obsidianDropChance = 0.45; e.isGlobalArmored = true; e.breakIntoBasic = false; }
-    if(type === 'fireman') { e.hp = 55*mult; e.speed = 1.05; e.baseDmg = 9*mult; e.size = 15; e.color = '#e74c3c'; e.fireman = true; e.firemanJetTimer = 0; e.firemanReloadTimer = 1.0; e.firemanJetTick = 0; }
+    if(type === 'fireman') { e.hp = 45*mult; e.speed = 1.05; e.baseDmg = 7*mult; e.size = 15; e.color = '#e74c3c'; e.fireman = true; e.firemanJetTimer = 0; e.firemanReloadTimer = 1.8; e.firemanJetTick = 0; }
     if(type === 'kamikaze') { e.hp = 10*mult; e.speed = 2.8; e.baseDmg = 40*mult; e.size = 10; e.color = '#e1b12c'; }
     if(type === 'goblin') { e.hp = 28*mult; e.speed = 1.45; e.baseDmg = 7*mult; e.size = 13; e.color = '#7bed9f'; e.cd = 0; }
     if(type === 'lider') { e.hp = 45*mult; e.speed = 1.2; e.baseDmg = 8*mult; e.size = 14; e.color = '#fbc531'; e.spawnCd = 20; }
@@ -19188,24 +19241,24 @@ function updateEnemies(dt) {
             if (!isFrozen && !isHypnotized && player.invisTimer <= 0) {
                 if (e.firemanJetTimer <= 0) {
                     if (e.firemanReloadTimer > 0) e.firemanReloadTimer = Math.max(0, e.firemanReloadTimer - actionDt);
-                    if (e.firemanReloadTimer <= 0 && d <= 430) {
-                        e.firemanJetTimer = 2.0;
+                    if (e.firemanReloadTimer <= 0 && d <= 360) {
+                        e.firemanJetTimer = 1.25;
                         e.firemanJetTick = 0;
                     }
                 } else {
                     e.firemanJetTimer = Math.max(0, e.firemanJetTimer - actionDt);
                     e.firemanJetTick -= actionDt;
                     if (e.firemanJetTick <= 0) {
-                        e.firemanJetTick += 0.18;
-                        if (d <= 430) {
-                            const waterDamage = Math.max(1, e.dmg * 0.22);
-                            dealPlayerDamage(waterDamage);
-                            addFloatingText(player.x, player.y, `-${Math.floor(getDisplayedPlayerDamage(waterDamage))}`, '#5dade2');
-                            player.soakTimer = Math.max(Number(player.soakTimer) || 0, 0.35);
+                        e.firemanJetTick += 0.22;
+                        if (d <= 360) {
+                            const waterDamage = Math.max(1, e.dmg * 0.10);
+                            dealPlayerDamage(waterDamage, {sourceEnemy:e});
+                            addFloatingText(player.x, player.y, `-${Math.floor(getDisplayedPlayerDamage(waterDamage))}`, '#5dadee');
+                            player.soakTimer = Math.max(Number(player.soakTimer) || 0, 0.30);
                             if (player.hp <= 0) { triggerRevivePrompt(); return; }
                         }
                     }
-                    if (e.firemanJetTimer <= 0) e.firemanReloadTimer = 2.0;
+                    if (e.firemanJetTimer <= 0) e.firemanReloadTimer = 2.8;
                 }
             }
             const a = Math.atan2(targetY-e.y,targetX-e.x);
@@ -24002,6 +24055,7 @@ function drawOutonalTextureRect(x, y, w, h) {
 }
 
 function getFractureMapTexture(mapId) {
+    if (Number(mapId) === 15 && typeof window.fdGetColiseumPattern === 'function') return window.fdGetColiseumPattern();
     switch (Number(mapId)) {
         case 0: return getPlainsGrassPattern();
         case 1: return getBiomeSandPattern();
@@ -24034,6 +24088,7 @@ function getFractureDecorTypes(mapId) {
         case 10: return ['kelp'];
         case 13: return [];
         case 14: return ['fall'];
+        case 15: return ['coliseum_pillar'];
         default: return [];
     }
 }
@@ -24189,7 +24244,7 @@ function getFractureSpawnPosition() {
 function createFracture() {
     if ((window.currentMap !== 11 && !(sandboxSettings.fractures && !sandboxMode)) || wave < 5 || wave % 10 === 0 || enemies.some(e => e && e.isBoss)) return false;
     const pos = getFractureSpawnPosition();
-    const fractureSourceMaps = [0,1,2,3,4,5,6,7,8,9,10,13,14];
+    const fractureSourceMaps = [0,1,2,3,4,5,6,7,8,9,10,13,14,15];
     const mapId = fractureSourceMaps[Math.floor(Math.random() * fractureSourceMaps.length)];
     const maxLife = 13 + Math.random() * 3;
     window.fractures = window.fractures || [];
@@ -24345,7 +24400,7 @@ function spawnFractureEnemy(fracture, options = {}) {
     else if (type === 'tnt_crate') { e.speed=1.35; e.baseDmg=5*mult; e.size=15; e.color='#b8793c'; e.tntCrate=true; }
     else if (type === 'burned') { e.speed=2.8; e.baseDmg=5*mult; e.size=12; e.color='#7f2704'; e.burned=true; }
     else if (type === 'obsidian_miner') { e.speed=1.0; e.baseDmg=7*mult; e.size=16; e.color='#2d3436'; e.isObsidianMiner=true; e.obsidianDropChance=0.45; e.isGlobalArmored=true; e.breakIntoBasic=false; }
-    else if (type === 'fireman') { e.speed=1.05; e.baseDmg=9*mult; e.size=15; e.color='#e74c3c'; e.fireman=true; e.firemanJetTimer=0; e.firemanReloadTimer=1.0; e.firemanJetTick=0; }
+    else if (type === 'fireman') { e.speed=1.05; e.baseDmg=7*mult; e.size=15; e.color='#e74c3c'; e.fireman=true; e.firemanJetTimer=0; e.firemanReloadTimer=1.8; e.firemanJetTick=0; }
     else if (type === 'stone_golem') { e.speed=0.65; e.baseDmg=26*mult; e.size=30; e.color='#7f8c8d'; e.golemAttackCd=1.1; e.golemAttackTimer=0; e.golemAttackAngle=0; e.golemAttackApplied=false; }
     else if (type === 'lumberjack') { e.speed=1.05; e.baseDmg=24*mult; e.size=20; e.color='#795548'; e.cd=150; e.lumberjack=true; }
     else if (type === 'gorilla') { e.speed=0.8; e.baseDmg=15*mult; e.size=22; e.color='#6d4c41'; e.gorilla=true; e.gorillaSplitUsed=false; }
@@ -24526,6 +24581,34 @@ function draw() {
         drawLunarTextureRect(camera.x, camera.y, cw, ch);
     } else if (window.currentMap === 14) {
         drawOutonalTextureRect(camera.x, camera.y, cw, ch);
+    } else if (window.currentMap === 15) {
+        // Coliseu: usa o mesmo tamanho de mundo dos demais mapas (3000x3000),
+        // com piso próprio repetível e a arena apenas como detalhe central.
+        const pattern = (typeof window.fdGetColiseumPattern === 'function') ? window.fdGetColiseumPattern() : null;
+        ctx.fillStyle = pattern || '#b48a5a';
+        ctx.fillRect(camera.x, camera.y, cw, ch);
+        ctx.save();
+        // Textura secundária para evitar que o piso pareça um quadrado plano.
+        ctx.globalAlpha = 0.18;
+        ctx.strokeStyle = '#6b4a30';
+        ctx.lineWidth = 2;
+        const tile = 128;
+        const sx = Math.floor(camera.x / tile) * tile;
+        const sy = Math.floor(camera.y / tile) * tile;
+        for(let x=sx; x<=camera.x+cw+tile; x+=tile){
+            ctx.beginPath(); ctx.moveTo(x,camera.y); ctx.lineTo(x,camera.y+ch); ctx.stroke();
+        }
+        for(let y=sy; y<=camera.y+ch+tile; y+=tile){
+            ctx.beginPath(); ctx.moveTo(camera.x,y); ctx.lineTo(camera.x+cw,y); ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = 'rgba(236,206,160,.34)';
+        ctx.lineWidth = 14;
+        ctx.beginPath(); ctx.arc(0,0,430,0,Math.PI*2); ctx.stroke();
+        ctx.strokeStyle = 'rgba(67,49,34,.42)';
+        ctx.lineWidth = 5;
+        ctx.beginPath(); ctx.arc(0,0,430,0,Math.PI*2); ctx.stroke();
+        ctx.restore();
     } else if (window.currentMap === 12) {
         ctx.fillStyle = '#9fe3a2';
         ctx.fillRect(camera.x, camera.y, cw, ch);
@@ -24556,7 +24639,7 @@ function draw() {
         }
         ctx.restore();
     }
-    if (window.currentMap === 11 && Array.isArray(window.fractures)) {
+    if ((window.currentMap === 11 || (typeof sandboxMode !== 'undefined' && sandboxMode && Array.isArray(window.fractures) && window.fractures.some(f => f && f.sandbox))) && Array.isArray(window.fractures)) {
         window.fractures.forEach(drawFractureRay);
     }
     ctx.save();
@@ -25359,6 +25442,44 @@ function draw() {
         ctx.restore();
     }
 
+    // Jato do Bombeiro: desenhado em uma passada separada, atrás dos sprites.
+    // Isso evita que o efeito altere a composição visual dos inimigos e do jogador.
+    if (player) {
+        for (const e of enemies) {
+            if (!e || e.hp <= 0 || e.type !== 'fireman' || Number(e.firemanJetTimer) <= 0) continue;
+            if (typeof isFrozen === 'boolean' && isFrozen) continue;
+            if (!isWorldVisible(e.x, e.y, (e.size || 15) + 430)) continue;
+            const d = dist(e, player);
+            if (d <= 0 || d > 360) continue;
+            const ang = Math.atan2(player.y - e.y, player.x - e.x);
+            const beamLen = Math.min(360, Math.max(28, d));
+            ctx.save();
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.globalAlpha = 0.42;
+            ctx.filter = 'none';
+            ctx.shadowColor = 'rgba(93,173,226,0.55)';
+            ctx.shadowBlur = 8;
+            ctx.strokeStyle = 'rgba(93,173,226,0.78)';
+            ctx.lineCap = 'round';
+            ctx.lineWidth = Math.max(8, (e.size || 15) * 0.62);
+            ctx.translate(e.x, e.y);
+            ctx.rotate(ang);
+            ctx.beginPath();
+            ctx.moveTo(10, 0);
+            ctx.lineTo(beamLen, 0);
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+            ctx.globalAlpha = 0.78;
+            ctx.strokeStyle = 'rgba(214,245,255,0.92)';
+            ctx.lineWidth = Math.max(2.5, (e.size || 15) * 0.20);
+            ctx.beginPath();
+            ctx.moveTo(10, 0);
+            ctx.lineTo(beamLen, 0);
+            ctx.stroke();
+            ctx.restore();
+        }
+    }
+
     enemies.forEach(e => { 
         if (!isWorldVisible(e.x, e.y, e.size || 24)) return;
         const effectiveSpriteType = getEffectiveEnemySpriteType(e);
@@ -25389,24 +25510,6 @@ function draw() {
             drawShape(ctx, e.x, e.y, e.size, 'circle', e.color, e.isBoss);
         }
 
-        if (e.hp > 0 && e.type === 'fireman' && Number(e.firemanJetTimer) > 0 && !isFrozen) {
-            const ang = Math.atan2(player.y - e.y, player.x - e.x);
-            const beamLen = Math.min(430, Math.max(40, dist(e, player)));
-            ctx.save();
-            ctx.translate(e.x, e.y);
-            ctx.rotate(ang);
-            ctx.globalAlpha = 0.78;
-            ctx.shadowColor = 'rgba(93,173,226,0.9)';
-            ctx.shadowBlur = 14;
-            ctx.strokeStyle = 'rgba(93,173,226,0.82)';
-            ctx.lineWidth = Math.max(10, (e.size || 15) * 0.9);
-            ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(beamLen, 0); ctx.stroke();
-            ctx.shadowBlur = 0;
-            ctx.strokeStyle = 'rgba(214,245,255,0.95)';
-            ctx.lineWidth = Math.max(3, (e.size || 15) * 0.28);
-            ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(beamLen, 0); ctx.stroke();
-            ctx.restore();
-        }
         if (e.hp > 0 && e.type === 'piano') {
             const rr=Number(e.pianoAuraRadius)||125, pulse=1+Math.sin((gameTime||0)*4.5)*0.025;
             ctx.save();ctx.globalAlpha=.12;ctx.fillStyle='#9b7cff';ctx.beginPath();ctx.arc(e.x,e.y,rr*pulse,0,Math.PI*2);ctx.fill();ctx.globalAlpha=.82;ctx.strokeStyle='#b9a4ff';ctx.lineWidth=2.5;ctx.setLineDash([7,5]);ctx.beginPath();ctx.arc(e.x,e.y,rr*pulse,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);ctx.restore();
@@ -27115,6 +27218,57 @@ function draw() {
         const py = p.y;
         if (p.type === 'astra_planet') {
             window.drawAstraPlanet?.(ctx, px, py, Math.max(7, Number(p.size) || 10), p.extra?.planetType, Math.atan2(p.vy, p.vx));
+            return;
+        }
+        if (p.type === 'enemy_saber_slash' || p.type === 'enemy_samurai_slash' || p.type === 'enemy_nunchaku_slash') {
+            const ex = p.extra || {};
+            const a = Number.isFinite(ex.attackAngle) ? ex.attackAngle : Math.atan2(p.vy,p.vx);
+            const dur = Math.max(1, Number(ex.swingDuration) || 14);
+            const progress = Math.max(0, Math.min(1, 1 - (Number(p.life) || dur) / dur));
+            const pulse = 0.92 + 0.08 * Math.sin(progress * Math.PI);
+            const start = Number.isFinite(ex.swingStart) ? ex.swingStart : -Math.PI * 0.8;
+            const end = Number.isFinite(ex.swingEnd) ? ex.swingEnd : Math.PI * 0.8;
+            const endNow = start + (end - start) * Math.min(1, progress * 1.18 + 0.04);
+            const radius = Math.max(60, Number(ex.swingRadius || ex.hitRadius || 105)) * 0.92;
+            ctx.save();
+            ctx.translate(px,py);
+            ctx.rotate(a);
+            ctx.globalAlpha = Math.max(.15, pulse * (1 - progress * .18));
+            ctx.lineCap='round'; ctx.lineJoin='round';
+            if (p.type === 'enemy_saber_slash') {
+                ctx.shadowColor='rgba(255,35,35,.95)'; ctx.shadowBlur=22;
+                ctx.strokeStyle='rgba(255,45,45,.95)'; ctx.lineWidth=16;
+                ctx.beginPath(); ctx.arc(0,0,radius,start,endNow); ctx.stroke();
+                ctx.shadowBlur=4; ctx.strokeStyle='#fff4f4'; ctx.lineWidth=4.2;
+                ctx.beginPath(); ctx.arc(0,0,radius,start,endNow); ctx.stroke();
+            } else if (p.type === 'enemy_samurai_slash') {
+                ctx.shadowColor='rgba(255,255,255,.50)'; ctx.shadowBlur=10;
+                ctx.strokeStyle='rgba(30,30,35,.95)'; ctx.lineWidth=13;
+                ctx.beginPath(); ctx.arc(0,0,radius,start,endNow); ctx.stroke();
+                ctx.shadowBlur=0; ctx.strokeStyle='#dfe6e9'; ctx.lineWidth=8;
+                ctx.beginPath(); ctx.arc(0,0,radius,start,endNow); ctx.stroke();
+                ctx.strokeStyle='#ffffff'; ctx.lineWidth=2;
+                ctx.beginPath(); ctx.arc(0,0,radius-1,endNow-.13,endNow+.01); ctx.stroke();
+                // Guarda/cabo na extremidade final, no estilo de uma espada real.
+                ctx.strokeStyle='#4a2f20'; ctx.lineWidth=6;
+                ctx.beginPath(); ctx.moveTo(Math.cos(endNow)*radius*.86,Math.sin(endNow)*radius*.86); ctx.lineTo(Math.cos(endNow)*radius*.69,Math.sin(endNow)*radius*.69); ctx.stroke();
+                ctx.strokeStyle='#c9a227'; ctx.lineWidth=4;
+                const gx=Math.cos(endNow)*radius*.73, gy=Math.sin(endNow)*radius*.73;
+                ctx.beginPath(); ctx.moveTo(gx-Math.sin(endNow)*8,gy+Math.cos(endNow)*8); ctx.lineTo(gx+Math.sin(endNow)*8,gy-Math.cos(endNow)*8); ctx.stroke();
+            } else {
+                const swing = Math.max(.001, endNow-start);
+                const h1=start+swing*.30, h2=start+swing*.73;
+                const p1={x:Math.cos(h1)*radius*.84,y:Math.sin(h1)*radius*.84};
+                const p2={x:Math.cos(h2)*radius*.84,y:Math.sin(h2)*radius*.84};
+                ctx.strokeStyle='rgba(35,24,20,.95)'; ctx.lineWidth=4;
+                ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.quadraticCurveTo(Math.cos((h1+h2)/2)*(radius*.56),Math.sin((h1+h2)/2)*(radius*.56),p2.x,p2.y); ctx.stroke();
+                ctx.strokeStyle='#8b5e34'; ctx.lineWidth=11;
+                const drawRod=(pt,ang)=>{ctx.save();ctx.translate(pt.x,pt.y);ctx.rotate(ang);ctx.fillStyle='#9a6a3e';ctx.strokeStyle='#3d2b1c';ctx.lineWidth=2;ctx.fillRect(-4,-20,8,40);ctx.strokeRect(-4,-20,8,40);ctx.restore();};
+                drawRod(p1,h1+Math.PI/2); drawRod(p2,h2+Math.PI/2);
+                ctx.strokeStyle='rgba(255,204,120,.85)'; ctx.lineWidth=2;
+                ctx.beginPath(); ctx.arc(0,0,radius,start,endNow); ctx.stroke();
+            }
+            ctx.restore();
             return;
         }
         if (drawPolishedProjectileModel(ctx, p, px, py)) return;
@@ -30301,7 +30455,8 @@ window.openPetShop=openPetShop;
 
 
 
-</body>
+
+
 
 <style id="micro-scroll-balance-fix">
 /* Only trims the extra blank scroll created by the previous viewport fix. */
@@ -30314,7 +30469,7 @@ window.openPetShop=openPetShop;
   #screen-pets #pet-shop-content{padding-bottom:12px !important;}
 }
 </style>
-</html>
+
 
 <!-- AUREN_FINAL_PATCH_V1 -->
 <style id="auren-final-ui">
@@ -30371,20 +30526,520 @@ window.openPetShop=openPetShop;
 #screen-main > .btn-main-fullscreen{right:20px !important;left:auto !important;top:112px !important;}
 @media(max-width:620px){#screen-main > .btn-main-fullscreen{right:14px !important;left:auto !important;top:110px !important;}#screen-main .main-actions{padding-bottom:48px !important;}}
 </style>
-</body>
+<!-- FD SANDBOX FINAL INTERACTION FIX V8 -->
 
-<style id="micro-scroll-balance-fix">
-/* Only trims the extra blank scroll created by the previous viewport fix. */
-#screen-main .main-menu-shell{padding-bottom:8px !important;}
-#screen-main .main-actions{padding-bottom:8px !important;}
-#screen-pets #pet-shop-content{padding-bottom:10px !important;}
-@media(max-width:620px){
-  #screen-main .main-menu-shell{padding-bottom:12px !important;}
-  #screen-main .main-actions{padding-bottom:12px !important;}
-  #screen-pets #pet-shop-content{padding-bottom:12px !important;}
+
+<style id="fd-sandbox-consolidated-v1-css">
+/* Sandbox consolidado: um único estado de hotbar/congelamento e uma única área de ferramentas. */
+#sandbox-tool-cluster{
+  grid-template-columns:58px 58px !important;
+  grid-template-rows:58px 58px 58px !important;
+  grid-template-areas:"delete summon" "eraser hypno" "freeze freeze" !important;
+  width:126px !important;height:188px !important;
+  gap:10px !important;
+  touch-action:none !important;
+  pointer-events:none !important;
+}
+#sandbox-tool-cluster #btn-sandbox-delete{grid-area:delete !important;}
+#sandbox-tool-cluster #btn-sandbox-summon{grid-area:summon !important;}
+#sandbox-tool-cluster #btn-sandbox-eraser{grid-area:eraser !important;}
+#sandbox-tool-cluster #btn-sandbox-hypno{grid-area:hypno !important;}
+#sandbox-tool-cluster #fd-sandbox-freeze{grid-area:freeze !important;justify-self:center !important;align-self:start !important;}
+#fd-sandbox-freeze{
+  width:58px !important;height:58px !important;min-width:58px !important;min-height:58px !important;
+  padding:5px !important;border-radius:16px !important;background:#ff4fa3 !important;border:3px solid #ff4fa3 !important;
+  display:none !important;align-items:center !important;justify-content:center !important;position:relative !important;
+  pointer-events:auto !important;touch-action:manipulation !important;cursor:pointer !important;
+  box-shadow:0 5px 0 rgba(0,0,0,.35),0 0 18px rgba(255,79,163,.3) !important;
+}
+#fd-sandbox-freeze.visible{display:flex !important;}
+#fd-sandbox-freeze.hidden{display:none !important;}
+#fd-sandbox-freeze.fd-freeze-on{box-shadow:0 5px 0 rgba(0,0,0,.35),0 0 20px rgba(39,174,96,.45) !important;}
+#fd-sandbox-freeze img{width:40px !important;height:40px !important;object-fit:contain;display:block;pointer-events:none;}
+.fd-sandbox-freeze-state{position:absolute;right:-5px;top:-5px;width:21px;height:21px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#c0392b;border:2px solid #fff;pointer-events:none;}
+.fd-sandbox-freeze-state::after{content:'X';color:#fff;font-size:12px;font-weight:900;line-height:1;}
+#fd-sandbox-freeze.fd-freeze-on .fd-sandbox-freeze-state{background:#27ae60;}
+#fd-sandbox-freeze.fd-freeze-on .fd-sandbox-freeze-state::after{content:'';width:9px;height:5px;border-left:3px solid #fff;border-bottom:3px solid #fff;transform:rotate(-45deg);margin-top:-3px;}
+#fd-sandbox-hotbar{
+  position:fixed !important;left:50% !important;bottom:14px !important;transform:translateX(-50%) !important;
+  z-index:26001 !important;display:none !important;grid-template-columns:repeat(9,38px) !important;
+  gap:3px !important;padding:5px !important;border-radius:10px !important;
+  background:rgba(8,10,18,.92) !important;border:2px solid rgba(255,255,255,.18) !important;
+  box-shadow:0 8px 24px rgba(0,0,0,.45) !important;pointer-events:none !important;
+  touch-action:manipulation !important;
+}
+#fd-sandbox-hotbar.fd-visible{display:grid !important;pointer-events:auto !important;}
+.fd-hotbar-slot{position:relative !important;width:38px !important;height:38px !important;min-width:38px !important;min-height:38px !important;padding:2px !important;margin:0 !important;display:flex !important;align-items:center !important;justify-content:center !important;border:2px solid rgba(255,255,255,.16) !important;border-radius:6px !important;background:rgba(255,255,255,.05) !important;color:#fff !important;box-shadow:none !important;touch-action:manipulation !important;}
+.fd-hotbar-slot.fd-selected{border-color:#ff4fa3 !important;box-shadow:0 0 0 2px rgba(255,79,163,.18) inset !important;}
+.fd-hotbar-slot.fd-hotbar-empty{opacity:.45 !important;}
+.fd-hotbar-slot img{width:27px !important;height:27px !important;object-fit:contain !important;pointer-events:none !important;}
+.fd-hotbar-number{position:absolute;left:2px;bottom:1px;font-size:8px;font-weight:900;line-height:1;color:#fff;pointer-events:none;text-shadow:1px 1px 1px #000;}
+.fd-hotbar-kind{position:absolute;right:2px;top:1px;font-size:7px;font-weight:900;line-height:1;color:#fff;pointer-events:none;text-shadow:1px 1px 1px #000;}
+#overlay-sandbox .sandbox-list{touch-action:pan-y !important;-webkit-overflow-scrolling:touch !important;}
+#overlay-sandbox .sandbox-entry{touch-action:pan-y !important;}
+@media(max-width:650px){
+  #sandbox-tool-cluster{grid-template-columns:56px 56px !important;grid-template-rows:56px 56px 56px !important;width:120px !important;height:180px !important;gap:8px !important;right:8px !important;bottom:122px !important;}
+  #sandbox-tool-cluster .sandbox-fixed-tool,#fd-sandbox-freeze{width:56px !important;height:56px !important;min-width:56px !important;min-height:56px !important;}
+  #sandbox-tool-cluster .sandbox-fixed-tool img,#fd-sandbox-freeze img{width:38px !important;height:38px !important;}
+  #fd-sandbox-hotbar{grid-template-columns:repeat(9,32px) !important;gap:2px !important;padding:4px !important;max-width:calc(100vw - 8px) !important;}
+  .fd-hotbar-slot{width:32px !important;height:32px !important;min-width:32px !important;min-height:32px !important;}
+  .fd-hotbar-slot img{width:23px !important;height:23px !important;}
+  .fd-hotbar-number{font-size:7px;} .fd-hotbar-kind{font-size:6px;}
 }
 </style>
-</html>
+
+<script id="fd-sandbox-consolidated-v1">
+(function(){
+'use strict';
+if(window.__FD_SANDBOX_CONSOLIDATED_V1)return;
+window.__FD_SANDBOX_CONSOLIDATED_V1=true;
+
+const COLISEUM_ID=15;
+const COLISEUM_SKINS={
+  basico:'roman_basic',cardboard_head:'wood_helment',motorcycle_helmet:'iron_hemlet',prism_head:'cesar_head',
+  velocista:'roman_velocist',atirador:'roman_shooter',gigante:'roman_giant',boss:'emperor_boss',ballon:'SPQR_baloon',truck:'roman_truck',
+  tanque:'pillar_tank',kamikaze:'roman_kamikaze',curandeiro:'roman_healer',elite:'roman_elite_shooter',lider:'coronel_leader'
+};
+const COLISEUM_NEW=new Set(['cesar','roman_statue','swordsman','shieldman','roman_turtle','archer']);
+const COLISEUM_ENTRY_WAVES={cesar:16,roman_statue:10,swordsman:16,shieldman:16,roman_turtle:32,archer:29};
+const COLISEUM_NORMAL=['basico','cardboard_head','motorcycle_helmet','prism_head','velocista','atirador','gigante','boss','kamikaze','curandeiro','tanque','lider','elite','ballon','truck','colosso','elite_master','lider_elite'];
+const COLISEUM_SPECIAL=['cesar','roman_statue','swordsman','shieldman','roman_turtle','archer'];
+
+const ADD_ENEMY_SPRITES={
+  roman_basic:'enemies/roman_basic.png',wood_helment:'enemies/wood_helment.png',iron_hemlet:'enemies/iron_hemlet.png',cesar_head:'enemies/cesar_head.png',
+  roman_velocist:'enemies/roman_velocist.png',roman_shooter:'enemies/roman_shooter.png',roman_giant:'enemies/roman_giant.png',emperor_boss:'enemies/emperor_boss.png',
+  SPQR_baloon:'enemies/SPQR_baloon.png',roman_truck:'enemies/roman_truck.png',pillar_tank:'enemies/pillar_tank.png',roman_kamikaze:'enemies/roman_kamikaze.png',
+  roman_healer:'enemies/roman_healer.png',roman_elite_shooter:'enemies/roman_elite_shooter.png',coronel_leader:'enemies/coronel_leader.png',
+  cesar:'enemies/cesar.png',roman_statue:'enemies/roman_statue.png',sword:'enemies/sword.png',shield:'enemies/shield.png',roman_turtle:'enemies/roman_turtle.png',archer:'enemies/archer.png'
+};
+Object.assign(ENEMY_SPRITES,ADD_ENEMY_SPRITES);
+Object.assign(MAP_ELEMENT_SPRITES,{coliseum_pillar:'elements/pillar.png',pillar_vertical:'elements/pillar.png',pillar_horizontal:'elements/pillar.png'});
+
+const NAME_MAP={
+  basico:'Básico',basic:'Básico',cardboard_head:'Papelão',cardboard:'Papelão',motorcycle_helmet:'Capacete',helmet:'Capacete',prism_head:'Prisma',prism:'Prisma',
+  velocista:'Velocista',velocist:'Velocista',dancer:'Velocista Dançarino',atirador:'Atirador',shooter:'Atirador',gigante:'Gigante',giant:'Gigante',tank:'Tanque',tanque:'Tanque',
+  curandeiro:'Curandeiro',healer:'Curandeiro',elite:'Atirador de Elite',elite_shooter:'Atirador de Elite',elite_master:'Atirador de Elite Master',master_elite_shooter:'Atirador de Elite Master',
+  lider:'Líder',leader:'Líder',lider_elite:'Líder de Elite',elite_leader:'Líder de Elite',boss:'Boss',megaboss:'Mega Boss',mega_boss:'Mega Boss',colosso:'Colosso',kamikaze:'Kamikaze',ballon:'Baloneiro',truck:'Caminhoneiro',
+  tnt_crate:'Caixa TNT',mummy:'Múmia',explorer:'Explorador',sarcophagus:'Sarcófago',camel:'Camelo',scorpion:'Escorpião',stone_golem:'Golem de Pedra',
+  goblin:'Goblin',lumberjack:'Lenhador',gorilla:'Gorila',monkey:'Macaco',leopard:'Leopardo',snow_walker:'Caminhante de Geada',ice_statue:'Estátua de Gelo',deer_pilot:'Piloto Cervo',burned:'Queimado',obsidian_miner:'Minerador de Obsidiana',fireman:'Bombeiro',
+  ghost_fisher:'Pescador Fantasma',swordfish:'Peixe-Espada',shark:'Tubarão',triton:'Tritão',crocodile:'Crocodilo',swamp_monster:'Monstro do Pântano',worker:'Operário',conehead:'Conehead',motorcycle:'Moto',police_car:'Viatura',ambulance:'Ambulância',
+  ninja:'Ninja',sein_sein:'Sein-Sein',samurai:'Samurai',panda_suit:'Panda Fantasia',panda:'Panda',nunchaku:'Nunchaku',geisha:'Gueixa',
+  rocknrool:'Roqueiro',sounder:'Sonoplasta',piano:'Pianista',singer:'Cantor',tour_truck:'Caminhão de Tour',
+  cosmic:'Fraturado Cósmico',laser_shooter:'Pistoleiro Laser',light_saber:'Espadachim de Sabre',machine_gun:'Gigante Metralheiro',
+  cesar:'César',roman_statue:'Estátua Romana',swordsman:'Espadachim',shieldman:'Escudeiro',roman_turtle:'Tartaruga Romana',archer:'Arqueiro',
+  prospector:'Soprador',rastel:'Rastelo',mudded:'Lamacento',cave_scorpion:'Aranha',hunter_goblin:'Caçador da Floresta',magma_golem:'Golem de Magma Ígneo'
+};
+const SPECIAL_SKINS={prospector:'Soprador',rastel:'Rastelo',mudded:'Lamacento',cave_scorpion:'Aranha',hunter_goblin:'Caçador da Floresta',magma_golem:'Golem de Magma Ígneo'};
+const LUNAR_ONLY=new Set(['cosmic','laser_shooter','light_saber','machine_gun']);
+const SPECIAL_MAP_ONLY=new Map([
+  ['mummy',1],['explorer',1],['sarcophagus',1],['camel',1],
+  ['ice_statue',2],['deer_pilot',2],
+  ['tnt_crate',3],['stone_golem',3],['scorpion',3],
+  ['goblin',4],['lumberjack',4],['gorilla',4],['monkey',4],['leopard',4],
+  ['crocodile',5],['swamp_monster',5],
+  ['worker',6],['conehead',6],['motorcycle',6],['police_car',6],['ambulance',6],
+  ['burned',7],['obsidian_miner',7],['fireman',7],
+  ['sein_sein',8],['samurai',8],['panda_suit',8],['panda',8],['nunchaku',8],['geisha',8],
+  ['rocknrool',9],['sounder',9],['piano',9],['singer',9],['tour_truck',9],
+  ['ghost_fisher',10],['swordfish',10],['shark',10],['triton',10],
+  ['cesar',15],['roman_statue',15],['swordsman',15],['shieldman',15],['roman_turtle',15],['archer',15]
+]);
+
+function fdMapName(id){const n=Number(id);return Number.isInteger(n)&&Array.isArray(MAPS)&&MAPS[n]?MAPS[n]:'';}
+function fdEnemyName(type,skin,mapId){
+  const t=String(type||'').toLowerCase(),s=String(skin||'').toLowerCase();
+  let name=SPECIAL_SKINS[s]||NAME_MAP[s]||NAME_MAP[t]||t||s||'Inimigo';
+  const m=Number.isInteger(mapId)?fdMapName(mapId):'';
+  return m?`${name} • ${m}`:name;
+}
+window.fdFinalSandboxEnemyName=fdEnemyName;
+window.sandboxEnemyButtonLabel=fdEnemyName;
+
+/* ---------- Sprite helpers ---------- */
+function canonicalSprite(type){
+  const t=String(type||'').toLowerCase();
+  const special={cesar:'cesar',roman_statue:'roman_statue',swordsman:'sword',shieldman:'shield',roman_turtle:'roman_turtle',archer:'archer'};
+  if(special[t]&&getEnemySpritePath(special[t]))return special[t];
+  try{const k=sandboxCanonicalEnemySpriteKey(t);if(k&&getEnemySpritePath(k))return k;}catch(_){ }
+  return getEnemySpritePath(t)?t:'';
+}
+window.canonicalSprite=canonicalSprite;
+
+/* ---------- Entry waves ---------- */
+const oldGetEnemyEntryWave=window.getEnemyEntryWave;
+window.getEnemyEntryWave=function(type,requestedWave){const k=String(type||'').toLowerCase();return COLISEUM_ENTRY_WAVES[k]!=null?COLISEUM_ENTRY_WAVES[k]:oldGetEnemyEntryWave(type,requestedWave);};
+
+/* ---------- Fraturado / sprite resolution ---------- */
+const oldFracturedSkin=window.getFracturedEnemySkinType;
+window.getFracturedEnemySkinType=function(e){
+  const origin=Number.isInteger(e?.fractureMapId)?Number(e.fractureMapId):(Number.isInteger(e?.skinSourceMapId)?Number(e.skinSourceMapId):null);
+  const inFracture=!!e?.fracturedOrigin||e?.spawnBiome===11||window.currentMap===11;
+  if(inFracture&&origin===COLISEUM_ID){
+    const t=String(e?.type||'').toLowerCase();
+    const mapped=COLISEUM_SKINS[t];if(mapped&&getEnemySpritePath(mapped))return mapped;
+    if(COLISEUM_NEW.has(t)){const k=t==='swordsman'?'sword':t==='shieldman'?'shield':t;if(getEnemySpritePath(k))return k;}
+  }
+  return oldFracturedSkin(e);
+};
+const oldEffectiveSprite=window.getEffectiveEnemySpriteType;
+window.getEffectiveEnemySpriteType=function(e){
+  const t=String(e?.type||'').toLowerCase();
+  if(e?.skinOverride&&getEnemySpritePath(e.skinOverride))return e.skinOverride;
+  if(COLISEUM_NEW.has(t)){const k=t==='swordsman'?'sword':t==='shieldman'?'shield':t;if(getEnemySpritePath(k))return k;}
+  const sourceMap=Number.isInteger(e?.fractureMapId)?e.fractureMapId:(Number.isInteger(e?.skinSourceMapId)?e.skinSourceMapId:window.currentMap);
+  if((window.currentMap===COLISEUM_ID||sourceMap===COLISEUM_ID)&&COLISEUM_SKINS[t]&&getEnemySpritePath(COLISEUM_SKINS[t]))return COLISEUM_SKINS[t];
+  if(window.currentMap===7&&t==='truck'&&getEnemySpritePath('magma_truck'))return 'magma_truck';
+  return oldEffectiveSprite(e);
+};
+
+/* ---------- Sandbox enemy pool / variants ---------- */
+const oldEnemyPool=window.sandboxEnemyPoolAll;
+window.sandboxEnemyPoolAll=function(){
+  const base=(typeof oldEnemyPool==='function'?oldEnemyPool():[]);
+  const extra=['cesar','roman_statue','swordsman','shieldman','roman_turtle','archer'];
+  return [...new Set(base.concat(extra))].filter(t=>t!=='monster_tree');
+};
+window.fdFinalSandboxEnemyVariants=function(type){
+  const t=String(type||'').toLowerCase();
+  const out=[];const seen=new Set();
+  const add=(skin,mapId)=>{
+    if(!skin||!getEnemySpritePath(skin))return;
+    const id=`${skin}|${Number.isInteger(mapId)?mapId:'base'}`;if(seen.has(id))return;
+    seen.add(id);out.push({skin,mapId:Number.isInteger(mapId)?mapId:null});
+  };
+  const canonical=canonicalSprite(t);
+  if(LUNAR_ONLY.has(t)){
+    try{const skin=getFracturedEnemySkinType({type:t,fracturedOrigin:true,fractureMapId:13,skinSourceMapId:13});add(skin||canonical,13);}catch(_){ }
+    return out;
+  }
+  const only=SPECIAL_MAP_ONLY.get(t);
+  if(Number.isInteger(only)){
+    if(only!==15)add(canonical,null);
+    const skin=only===15?(COLISEUM_SKINS[t]||canonical):(()=>{try{return getFracturedEnemySkinType({type:t,fracturedOrigin:true,fractureMapId:only,skinSourceMapId:only});}catch(_){return null;}})();
+    if(skin&&skin!==t)add(skin,only);
+    if(t==='goblin')add('hunter_goblin',4);
+    if(t==='stone_golem')add('magma_golem',7);
+    if(t==='scorpion')add('cave_scorpion',3);
+    return out;
+  }
+  if(canonical)add(canonical,null);
+  for(const mapId of [0,1,2,3,4,5,6,7,8,9,10,14,15]){
+    let skin=null;
+    if(mapId===15)skin=COLISEUM_SKINS[t]||null;
+    else {try{skin=getFracturedEnemySkinType({type:t,fracturedOrigin:true,fractureMapId:mapId,skinSourceMapId:mapId});}catch(_){}}
+    if(skin&&skin!==t&&skin!==canonical)add(skin,mapId);
+  }
+  if(t==='geisha')add('prospector',14);
+  if(t==='snow_walker'){add('mudded',5);add('rastel',14);}
+  if(t==='scorpion')add('cave_scorpion',3);
+  if(t==='goblin')add('hunter_goblin',4);
+  if(t==='stone_golem')add('magma_golem',7);
+  return out;
+};
+window.sandboxEnemyVariants=window.fdFinalSandboxEnemyVariants;
+
+const BASE_PROTO=(typeof SANDBOX_PROTOTYPES!=='undefined'?SANDBOX_PROTOTYPES:[]);
+window.renderSandboxEnemies=function(root){
+  if(!root)return;
+  const protoCards=BASE_PROTO.map(p=>`<button class="sandbox-entry sandbox-prototype-entry" type="button" data-sandbox-action="enemy" data-sandbox-enemy-type="${escapeHtmlAttr(p.enemyType)}" data-sandbox-enemy-skin="" data-sandbox-map-id="" data-sandbox-prototype="${escapeHtmlAttr(p.key)}">${sandboxPrototypeCanvasMarkup(p.key)}<span>${escapeHtmlText(p.label)} • PROTOTYPE</span></button>`);
+  const cards=[];const protoTypes=new Set(BASE_PROTO.map(p=>String(p.enemyType||'').toLowerCase()));
+  const baseTypes=window.sandboxEnemyPoolAll();
+  for(const type of baseTypes){
+    let variants=window.fdFinalSandboxEnemyVariants(type);
+    if(protoTypes.has(String(type).toLowerCase())){
+      const canonical=canonicalSprite(type);
+      variants=variants.filter(v=>!(v.mapId===null&&String(v.skin||'')===String(canonical||'')));
+    }
+    for(const v of variants){
+      const spriteKey=sandboxEnemySpriteForSelection(type,v.skin||'')||canonicalSprite(type)||'basic';
+      const icon=getEnemySpritePath(spriteKey)||'enemies/basic.png';
+      const label=fdEnemyName(type,v.skin||'',v.mapId);
+      cards.push(`<button class="sandbox-entry" type="button" data-sandbox-action="enemy" data-sandbox-enemy-type="${escapeHtmlAttr(type)}" data-sandbox-enemy-skin="${escapeHtmlAttr(v.skin||'')}" data-sandbox-map-id="${escapeHtmlAttr(v.mapId==null?'':String(v.mapId))}"><img src="${escapeHtmlAttr(icon)}" data-sandbox-sprite-key="${escapeHtmlAttr(spriteKey)}" alt=""><span>${escapeHtmlText(label)}</span></button>`);
+    }
+  }
+  root.innerHTML=`<div class="sandbox-section-head"><button class="sandbox-small-btn" type="button" data-sandbox-action="tab" data-sandbox-tab="home">Voltar</button><h2>Inimigos</h2><span>${protoCards.length+cards.length} spawns</span></div><div class="sandbox-list">${protoCards.join('')}${cards.join('')}</div>`;
+  root.querySelectorAll('[data-sandbox-prototype-preview]').forEach(c=>{const p=getSandboxPrototype(c.getAttribute('data-sandbox-prototype-preview'));if(p)drawSandboxPrototypePreview(c,p);});
+};
+
+/* ---------- Fractures + Coliseu elements ---------- */
+const oldElementEntries=window.sandboxElementEntries;
+window.sandboxElementEntries=function(){
+  const base=(typeof oldElementEntries==='function'?oldElementEntries():[]);
+  const extra=[
+    {group:'coliseum',key:'pillar_vertical',name:'Pilar — Vertical',icon:'elements/pillar.png'},
+    {group:'coliseum',key:'pillar_horizontal',name:'Pilar — Horizontal',icon:'elements/pillar.png'},
+    ...MAPS.map((name,i)=>({group:'fracture',key:`fracture_${i}`,name:`Fratura — ${name}`,icon:'elements/error.png'}))
+  ];
+  const names={
+    invisible_wall:'Invisi-Parede',treasure_chest:'Baú de Tesouro',xp_small:'XP Pequeno',xp_large:'XP Grande',stone:'Pedra',tree:'Árvore',cactus:'Cacto',side_car:'Carro Lateral',left_car:'Carro Lateral',right_car:'Carro Lateral',front_car:'Carro Frontal',behind_car:'Carro Traseiro',shroom:'Cogumelo',volcano:'Vulcão',bamboo:'Bambu',spike_bamboo:'Bambu Espinhoso',kelp:'Alga',fall:'Queda',bunniie_hole:'Buraco da Bunniie',adam_scrap_scrap:'Sucata',adam_scrap_config:'Configuração',grenade_barricade:'Barricada do Grenade',turret:'Torreta',mortar:'Morteiro',cannon:'Canhão',tesla:'Tesla',crossbow:'Besta',burner:'Incinerador',heal_station:'Estação de Cura',drone:'Drone',axel_drone:'Drone do Axel',landmine:'Mina Terrestre',chick:'Pintinho',totem:'Totem',ivy_vine:'Trepadeira da Ivy',ivy_flower:'Flor da Ivy',tea_table:'Mesa de Chá',oven:'Forno',necro_tombstone:'Lápide do Necro',knighter_castle:'Castelo do Knighter'
+  };
+  for(const e of base)if(names[e.key])e.name=names[e.key];
+  const seen=new Set();return base.concat(extra).filter(e=>{const k=`${e.group}:${e.key}`;if(seen.has(k))return false;seen.add(k);return true;});
+};
+window.renderSandboxElements=function(root){
+  if(!root)return;
+  const entries=window.sandboxElementEntries();
+  const cards=entries.map(e=>{
+    const rawIcon=Array.isArray(e.icon)?(e.icon.find(Boolean)||''):(e.icon||'');
+    const visual=rawIcon?`<img src="${escapeHtmlAttr(rawIcon)}" alt="">`:'';
+    return `<button class="sandbox-entry" type="button" data-sandbox-action="element" data-sandbox-group="${escapeHtmlAttr(e.group)}" data-sandbox-key="${escapeHtmlAttr(e.key)}">${visual}<span>${escapeHtmlText(e.name)}</span></button>`;
+  }).join('');
+  root.innerHTML=`<div class="sandbox-section-head"><button class="sandbox-small-btn" type="button" data-sandbox-action="tab" data-sandbox-tab="home">Voltar</button><h2>Elementos</h2><span>${entries.length}</span></div><div class="sandbox-list">${cards}</div>`;
+};
+
+const oldSandboxSpawnElement=window.sandboxSpawnElement;
+window.sandboxSpawnElement=function(group,key,direct=false){
+  if(group==='coliseum'&&(key==='pillar_vertical'||key==='pillar_horizontal')){
+    if(!sandboxMode||!player)return false;
+    const obj={x:Number(player.x)||0,y:Number(player.y)||0,type:key,r:32,size:86,pillarLength:86,rotate:key==='pillar_horizontal'?Math.PI/2:0,isWall:true,coliseumWall:false,sandbox:true};
+    obstacles.push(obj);sandboxRegisterPersistentEntity(obj,'obstacle');notify(key==='pillar_vertical'?'Pilar vertical invocado.':'Pilar horizontal invocado.');return true;
+  }
+  if(group==='fracture'&&/^fracture_\d+$/.test(key)){
+    if(!sandboxMode||!player)return false;const mapId=Number(key.slice(9));if(!Number.isInteger(mapId)||mapId<0||mapId>=MAPS.length)return false;
+    const f=fdCreateSandboxFracture(mapId,player.x,player.y);if(!f)return false;notify(`Fratura de ${MAPS[mapId]} invocada.`);return true;
+  }
+  return oldSandboxSpawnElement?oldSandboxSpawnElement(group,key,direct):false;
+};
+
+/* ---------- Custom Coliseu enemies ---------- */
+function fdCommonEnemy(x,y,type,opts={}){
+  const scale=Number(opts.mult)||1,hp=Number(opts.hp)||30*scale,spd=Number(opts.speed)||0,dmg=Number(opts.dmg)||0;
+  return {x,y,type,hp,maxHp:hp,speed:spd,baseDmg:dmg,dmg,size:Number(opts.size)||14,cd:0,color:opts.color||'#c0392b',poison:{timer:0,dmg:0,tickCd:0},slowTimer:0,timeDistortionTimer:0,weakenTimer:0,curseTimer:0,burnTimer:0,freezeTimer:0,burnDmg:0,speedBuffTimer:0,soak:0,shockTimer:0,shockSemiTimer:0,shockTick:0,shockSemiTick:0,shockDmg:0,shockSemiDmg:0,shockRate:.3,semiShockRate:.4,spawnBiome:window.currentMap,spawnWave:Number(wave)||1,entryWave:COLISEUM_ENTRY_WAVES[type]||Number(wave)||1,stationary:!!opts.stationary,poisonOnHit:0,fracturedOrigin:!!opts.fractured,fractureMapId:opts.fractured?COLISEUM_ID:null,skinSourceMapId:COLISEUM_ID,sandbox:!!opts.sandbox,skinOverride:opts.skin||null,isGlobalArmored:false,breakIntoBasic:false};
+}
+function fdSpawnCustomEnemy(type,x,y,opts={}){
+  const t=String(type||'').toLowerCase();if(!COLISEUM_NEW.has(t))return false;
+  const enemyCap=Math.min(180,90+Math.max(0,Math.min(1000000,Number(wave)||1)-5)*3);if(Array.isArray(enemies)&&enemies.length>=enemyCap)return false;
+  const mult=Math.max(.25,Number(getEnemyDifficultyMultiplierFromEntry(t,wave,wave))||1);let e;
+  if(t==='cesar'){e=fdCommonEnemy(x,y,t,{hp:210*mult,speed:1,dmg:10*mult,size:23,color:'#d4af37',sandbox:!!opts.sandbox});e.spawnCd=15;e.cesar=true;}
+  else if(t==='roman_statue'){e=fdCommonEnemy(x,y,t,{hp:130*mult,speed:0,dmg:0,size:25,color:'#a5a5a5',stationary:true,sandbox:!!opts.sandbox});e.statueAmmoEater=true;}
+  else if(t==='swordsman'){e=fdCommonEnemy(x,y,t,{hp:70*mult,speed:1.1,dmg:16*mult,size:15,color:'#9b2c2c',sandbox:!!opts.sandbox,skin:'sword'});e.samurai=true;e.swordsman=true;e.samuraiCd=1.45;e.samuraiAttackTimer=0;e.samuraiAttackAngle=0;e.samuraiAttackApplied=false;}
+  else if(t==='shieldman'){e=fdCommonEnemy(x,y,t,{hp:85*mult,speed:1.1,dmg:6*mult,size:16,color:'#56616d',sandbox:!!opts.sandbox,skin:'shield'});e.shieldman=true;e.shieldBroken=false;e.deflectChance=.25;e.isGlobalArmored=true;}
+  else if(t==='roman_turtle'){e=fdCommonEnemy(x,y,t,{hp:180*mult,speed:.72,dmg:10*mult,size:23,color:'#4d7c4d',sandbox:!!opts.sandbox,skin:'roman_turtle'});e.romanTurtle=true;e.deflectChance=.35;}
+  else if(t==='archer'){e=fdCommonEnemy(x,y,t,{hp:48*mult,speed:1.2,dmg:10*mult,size:14,color:'#8e6b3a',sandbox:!!opts.sandbox,skin:'archer'});e.archer=true;e.archerCd=1.45;}
+  e.entryWave=COLISEUM_ENTRY_WAVES[t]||wave;if(opts.sandbox)e.sandbox=true;if(opts.fractured)e.fracturedOrigin=true;
+  enemies.push(e);fdApplySandboxFlags(e);return e;
+}
+
+const oldSpawnEnemy=window.spawnEnemy;
+function fdColiseumSpawnTypes(){
+  const types=['basico','basico','basico'];
+  if(wave>2)types.push('velocista');if(wave>4)types.push('atirador','kamikaze');if(wave>5)types.push('gigante');if(wave>12)types.push('tanque');if(wave>15)types.push('curandeiro');if(wave>16)types.push('elite');if(wave>=21)types.push('lider');if(wave>=30)types.push('colosso','elite_master','lider_elite');
+  if(wave>=10)types.push('roman_statue');if(wave>=16)types.push('cesar','swordsman','shieldman');if(wave>=29)types.push('archer');if(wave>=32)types.push('roman_turtle');
+  return types;
+}
+window.spawnEnemy=function(forcedType=null,forcedPoint=null,spriteOverride=null){
+  let type=forcedType;
+  if(window.currentMap===COLISEUM_ID&&!type)type=fdColiseumSpawnTypes()[Math.floor(Math.random()*fdColiseumSpawnTypes().length)];
+  if(COLISEUM_NEW.has(String(type||'').toLowerCase())){
+    const p=forcedPoint&&Number.isFinite(forcedPoint.x)&&Number.isFinite(forcedPoint.y)?forcedPoint:{x:Math.random()*2800-1400,y:Math.random()*2800-1400};
+    return fdSpawnCustomEnemy(type,p.x,p.y,{sandbox:!!sandboxMode,fractured:window.currentMap===11});
+  }
+  const e=oldSpawnEnemy(type,forcedPoint,spriteOverride);
+  if(e){
+    const spawnType=String(type||e.type||'').toLowerCase();
+    if(window.currentMap===COLISEUM_ID){
+      const skin=COLISEUM_SKINS[spawnType];
+      if(skin&&getEnemySpritePath(skin))e.skinOverride=skin;
+      e.skinSourceMapId=COLISEUM_ID;
+      e.spawnBiome=COLISEUM_ID;
+    }
+    // No Fraturado, as versões romanas também entram na rotação global.
+    // O tipo lógico continua sendo o original; apenas o visual/skin muda.
+    if(window.currentMap===11 && COLISEUM_SKINS[spawnType] && getEnemySpritePath(COLISEUM_SKINS[spawnType]) && Math.random()<0.24){
+      e.skinOverride=COLISEUM_SKINS[spawnType];
+      e.skinSourceMapId=COLISEUM_ID;
+    }
+    if(window.currentMap===7&&spawnType==='truck'&&getEnemySpritePath('magma_truck'))e.skinOverride='magma_truck';
+    if(sandboxMode)e.sandbox=true;
+    fdApplySandboxFlags(e);
+  }
+  return e;
+};
+const oldSandboxSpawnEnemy=window.sandboxSpawnEnemy;
+window.sandboxSpawnEnemy=function(type,skin,direct=false,prototypeKey=''){
+  const before=enemies.length;const result=oldSandboxSpawnEnemy(type,skin,direct,prototypeKey);
+  if(result){for(let i=before;i<enemies.length;i++){const e=enemies[i];if(e&&e.sandbox){if(skin&&getEnemySpritePath(skin))e.skinOverride=skin;fdApplySandboxFlags(e);}}}
+  return result;
+};
+
+/* ---------- Fraturado / explicit Sandbox fractures ---------- */
+const oldFracturePool=window.getFractureBiomePool;
+window.getFractureBiomePool=function(mapId){
+  if(Number(mapId)===COLISEUM_ID)return [...COLISEUM_NORMAL,...COLISEUM_SPECIAL].filter(t=>(getEnemyEntryWave(t,wave)||1)<=wave);
+  return oldFracturePool(mapId);
+};
+const oldGlobalPool=window.getFracturedGlobalEnemyPool;
+window.getFracturedGlobalEnemyPool=function(){
+  const romanLogical=Object.keys(COLISEUM_SKINS);
+  return [...new Set((oldGlobalPool?oldGlobalPool():[]).concat(romanLogical,COLISEUM_SPECIAL))]
+    .filter(t=>(getEnemyEntryWave(t,wave)||1)<=wave);
+};
+function fdFractureMap15(fracture){
+  if(!fracture||wave%10===0||enemies.some(e=>e&&e.isBoss))return false;
+  const pool=window.getFractureBiomePool(COLISEUM_ID).filter(t=>(getEnemyEntryWave(t,wave)||1)<=wave);if(!pool.length)return false;
+  const type=pool[Math.floor(Math.random()*pool.length)],a=(Number(fracture.angle)||0)+(Math.random()-.5)*.9+Math.PI,d=25+Math.random()*70;
+  const x=Math.max(-1480,Math.min(1480,fracture.x+Math.cos(a)*d)),y=Math.max(-1480,Math.min(1480,fracture.y+Math.sin(a)*d));
+  const prev=window.currentMap;window.currentMap=COLISEUM_ID;let e;try{e=window.spawnEnemy(type,{x,y},COLISEUM_SKINS[type]||null);}finally{window.currentMap=prev;}
+  if(e){e.fracturedOrigin=true;e.fractureMapId=COLISEUM_ID;e.skinSourceMapId=COLISEUM_ID;e.spawnBiome=COLISEUM_ID;e.skinOverride=COLISEUM_SKINS[type]||e.skinOverride||null;e.sandbox=!!sandboxMode;fdApplySandboxFlags(e);return true;}return false;
+}
+const oldSpawnFractureEnemy=window.spawnFractureEnemy;
+window.spawnFractureEnemy=function(fracture,options={}){return Number(fracture?.mapId)===COLISEUM_ID?fdFractureMap15(fracture):oldSpawnFractureEnemy(fracture,options);};
+const oldUpdateFractures=window.updateFractures;
+window.updateFractures=function(dt){
+  if(sandboxMode){
+    window.fractures=Array.isArray(window.fractures)?window.fractures:[];
+    for(const f of window.fractures){if(!f||!f.sandbox)continue;f.spawnTimer=Math.max(0,(Number(f.spawnTimer)||0)-dt);if(f.spawnTimer<=0){f.spawnTimer=3+Math.random()*2;if(enemies.filter(e=>e&&e.sandbox&&e.hp>0).length<80)window.spawnFractureEnemy(f,{sandbox:true});}}
+    return;
+  }
+  return oldUpdateFractures(dt);
+};
+function fdCreateSandboxFracture(mapId,x,y){
+  const f={x:Number(x)||0,y:Number(y)||0,mapId:Number(mapId),angle:Math.random()*Math.PI*2,length:300+Math.random()*100,width:95+Math.random()*50,branch:100,life:1e9,maxLife:1e9,spawnCount:Infinity,spawned:0,spawnTimer:1.5,sandbox:true,decorations:[]};
+  window.fractures=Array.isArray(window.fractures)?window.fractures:[];window.fractures.push(f);return f;
+}
+window.fdCreateSandboxFracture=fdCreateSandboxFracture;
+
+/* ---------- Coliseu texture + walls ---------- */
+window.fdGetColiseumPattern=function(){
+  if(window.__fdColiseumPattern)return window.__fdColiseumPattern;
+  const tile=document.createElement('canvas');tile.width=256;tile.height=256;const c=tile.getContext('2d');if(!c)return null;
+  let seed=0xC0115E;const rnd=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
+  c.fillStyle='#a97d4f';c.fillRect(0,0,256,256);const cols=6,rows=6,cell=256/cols;
+  for(let row=0;row<rows;row++)for(let col=0;col<cols;col++){
+    const ox=(rnd()-.5)*5,oy=(rnd()-.5)*5,r=128+Math.floor(rnd()*24),g=94+Math.floor(rnd()*22),b=58+Math.floor(rnd()*18);c.fillStyle=`rgb(${r},${g},${b})`;c.fillRect(col*cell+2+ox,row*cell+2+oy,cell-4,cell-4);
+    c.fillStyle='rgba(255,235,195,.07)';c.fillRect(col*cell+4+ox,row*cell+4+oy,cell-8,5);c.fillStyle='rgba(55,35,20,.16)';c.fillRect(col*cell+4+ox,row*cell+cell-9+oy,cell-8,5);
+    for(let k=0;k<8;k++){const x=col*cell+8+rnd()*(cell-16),y=row*cell+8+rnd()*(cell-16);c.fillStyle=rnd()<.6?'rgba(67,43,25,.20)':'rgba(250,226,180,.11)';c.beginPath();c.ellipse(x,y,1+rnd()*3.5,.7+rnd()*2,rnd()*Math.PI,0,Math.PI*2);c.fill();}
+  }
+  c.strokeStyle='rgba(62,40,22,.38)';c.lineWidth=2;for(let x=0;x<=256;x+=cell){c.beginPath();c.moveTo(x,0);c.lineTo(x,256);c.stroke();}for(let y=0;y<=256;y+=cell){c.beginPath();c.moveTo(0,y);c.lineTo(256,y);c.stroke();}
+  c.strokeStyle='rgba(245,221,183,.18)';c.lineWidth=1;for(let i=0;i<42;i++){const x=rnd()*256,y=rnd()*256,len=5+rnd()*18,a=rnd()*Math.PI;c.beginPath();c.moveTo(x,y);c.lineTo(x+Math.cos(a)*len,y+Math.sin(a)*len);c.stroke();}
+  window.__fdColiseumPattern=c.createPattern(tile,'repeat');return window.__fdColiseumPattern;
+};
+function fdColiseumWalls(markSandbox=false){
+  obstacles=(obstacles||[]).filter(o=>!String(o?.type||'').startsWith('pillar_')&&!o?.coliseumWall);
+  const make=(x,y,horiz)=>({x,y,r:32,size:86,pillarLength:86,type:horiz?'pillar_horizontal':'pillar_vertical',rotate:horiz?Math.PI/2:0,isWall:true,coliseumWall:true,sandbox:!!markSandbox});
+  const half=1440,start=-1395,end=1395,seg=90;for(let x=start;x<=end;x+=seg){obstacles.push(make(x,-half,true),make(x,half,true));}for(let y=start;y<=end;y+=seg){obstacles.push(make(-half,y,false),make(half,y,false));}
+}
+function fdStartColiseumWalls(){if(window.currentMap===COLISEUM_ID)fdColiseumWalls(false);}
+const oldStartRun=window.startRunAfterShop;window.startRunAfterShop=function(options={}){const r=oldStartRun(options);fdStartColiseumWalls();return r;};
+const oldSandboxSelectMap=window.sandboxSelectMap;window.sandboxSelectMap=function(id){const r=oldSandboxSelectMap(id);if(Number(id)===COLISEUM_ID)fdColiseumWalls(true);return r;};
+const oldGetElementKey=window.getMapElementSpriteKey;window.getMapElementSpriteKey=function(type,obj={}){const t=String(type||'').toLowerCase();if(t==='pillar_vertical')return 'pillar_vertical';if(t==='pillar_horizontal')return 'pillar_horizontal';if(t==='coliseum_pillar')return obj.rotate?'pillar_horizontal':'pillar_vertical';return oldGetElementKey(type,obj);};
+const oldDrawElementSprite=window.drawMapElementSprite;window.drawMapElementSprite=function(c,key,x,y,size,opts={}){if(key==='pillar_vertical'||key==='pillar_horizontal')return oldDrawElementSprite(c,'coliseum_pillar',x,y,size,{...opts,rotate:key==='pillar_horizontal'?Math.PI/2:(opts.rotate||0),scale:Math.max(1,Number(opts.scale)||1)});return oldDrawElementSprite(c,key,x,y,size,opts);};
+
+/* ---------- Enemy custom behaviors ---------- */
+function fdFindOtherEnemy(e){for(let n=0;n<Math.max(1,enemies.length);n++){const x=enemies[Math.floor(Math.random()*enemies.length)];if(x&&x!==e&&x.hp>0&&!isCurrentlyHypnotized(x))return x;}return null;}
+function fdCustomEnemyTick(dt){
+  if(!Array.isArray(enemies))return;
+  for(const e of enemies){if(!e||e.hp<=0)continue;const frozen=Number(e.freezeTimer)>0;
+    if(e.cesar){e.spawnCd=Math.max(0,(e.spawnCd||15)-dt);if(e.spawnCd<=0&&!frozen&&!isCurrentlyHypnotized(e)){e.spawnCd=15;const kinds=['basico','cardboard_head','motorcycle_helmet','prism_head'].sort(()=>Math.random()-.5).slice(0,2);for(const k of kinds){const a=Math.random()*Math.PI*2,prev=window.currentMap;window.currentMap=COLISEUM_ID;let ch;try{ch=window.spawnEnemy(k,{x:e.x+Math.cos(a)*35,y:e.y+Math.sin(a)*35},COLISEUM_SKINS[k]||null);}finally{window.currentMap=prev;}if(ch){ch.skinSourceMapId=COLISEUM_ID;ch.skinOverride=COLISEUM_SKINS[k]||ch.skinOverride||null;ch.sandbox=!!e.sandbox;fdApplySandboxFlags(ch);}}}}
+    if(e.archer){e.archerCd=Math.max(0,(e.archerCd||1.45)-dt);if(e.archerCd<=0&&!frozen&&!isCurrentlyHypnotized(e)&&player&&player.hp>0){e.archerCd=1.55;const a=Math.atan2(player.y-e.y,player.x-e.x);createProj(e.x,e.y,Math.cos(a)*4.2,Math.sin(a)*4.2,e.dmg,80,false,'roman_arrow',{size:7,sourceEnemy:e,sourceEnemyType:'archer',homing:true,homingTurn:.10});}}
+    if(e.swordsman){e.samuraiCd=Math.max(0,(e.samuraiCd||0)-dt);e.samuraiAttackTimer=Math.max(0,(e.samuraiAttackTimer||0)-dt);if(e.samuraiAttackTimer>0&&!e.samuraiAttackApplied&&!frozen&&!isCurrentlyHypnotized(e)){const a=e.samuraiAttackAngle||0;if(player&&player.hp>0&&Math.abs(normalizeAngle(Math.atan2(player.y-e.y,player.x-e.x)-a))<=Math.PI/2&&dist(e,player)<(e.size||15)*6.2+player.r)dealPlayerDamage(e.dmg);e.samuraiAttackApplied=true;}if(e.samuraiCd<=0&&!frozen&&!isCurrentlyHypnotized(e)&&player&&dist(e,player)<190){e.samuraiCd=1.65;e.samuraiAttackTimer=.22;e.samuraiAttackApplied=false;e.samuraiAttackAngle=Math.atan2(player.y-e.y,player.x-e.x);const r=Math.max(105,(e.size||15)*6.2);createProj(e.x,e.y,Math.cos(e.samuraiAttackAngle),Math.sin(e.samuraiAttackAngle),0,14,false,'enemy_samurai_slash',{size:18,hitRadius:r,sourceEnemy:e,sourceEnemyType:e.type,enemySlash:true,hitShape:'slash',attackAngle:e.samuraiAttackAngle,swingStart:-Math.PI/2,swingEnd:Math.PI/2,swingRadius:r,swingDuration:14,weapon:'katana',sourceChar:'coliseum'});}}
+    if(e.statueAmmoEater){for(let i=projectiles.length-1;i>=0;i--){const p=projectiles[i];if(p&&p.isPlayer&&p.life>0&&Math.hypot(p.x-e.x,p.y-e.y)<(e.size||25)+Math.max(12,p.size||4)){p.life=0;p.extra=p.extra||{};p.extra.statueConsumed=true;}}}
+  }
+}
+function fdCustomDeathPrep(){
+  if(!Array.isArray(enemies))return;
+  for(const e of enemies){if(!e||e.hp>0)continue;
+    if(e.shieldman&&!e.shieldBroken){e.shieldBroken=true;e.type='basico';e.hp=Math.max(1,30*Math.max(.35,(Number(e.maxHp)||85)/85));e.maxHp=e.hp;e.baseDmg=5;e.dmg=5;e.speed=1.5;e.size=12;e.isGlobalArmored=false;e.deflectChance=0;e.skinOverride=COLISEUM_SKINS.basico;e.freezeTimer=window.fdFreezeEnabled?Infinity:.15;continue;}
+    if(e.romanTurtle&&!e.fdDeathSpawned){e.fdDeathSpawned=true;for(let k=0;k<3;k++){const a=Math.random()*Math.PI*2;const ch=fdSpawnCustomEnemy('shieldman',e.x+Math.cos(a)*28,e.y+Math.sin(a)*28,{sandbox:!!e.sandbox});if(ch){ch.sandbox=!!e.sandbox;fdApplySandboxFlags(ch);}}}
+    if(e.statueAmmoEater&&!e.fdDeathProcessed){e.fdDeathProcessed=true;if(Math.random()<.12){const p=window.spawnEnemy('prism_head',{x:e.x,y:e.y},COLISEUM_SKINS.prism_head);if(p){p.skinOverride=COLISEUM_SKINS.prism_head;p.sandbox=!!e.sandbox;fdApplySandboxFlags(p);}}}
+  }
+}
+const oldUpdateEnemies=window.updateEnemies;
+window.updateEnemies=function(dt){fdCustomEnemyTick(dt);fdCustomDeathPrep();const r=oldUpdateEnemies(dt);if(window.fdFreezeEnabled&&sandboxMode&&Array.isArray(enemies))for(const e of enemies)if(e?.sandbox&&e.hp>0)fdApplySandboxFlags(e);return r;};
+const oldUpdateProjectiles=window.updateProjectiles;window.updateProjectiles=function(dt){if(Array.isArray(projectiles)&&player)for(const p of projectiles){if(!p||p.type!=='roman_arrow')continue;const a=Math.atan2(player.y-p.y,player.x-p.x),cur=Math.atan2(p.vy,p.vx),turn=Math.max(0,Math.min(.18,Number(p.extra?.homingTurn)||.10)),d=normalizeAngle(a-cur),na=cur+Math.max(-turn,Math.min(turn,d)),sp=Math.max(1,Math.hypot(p.vx,p.vy));p.vx=Math.cos(na)*sp;p.vy=Math.sin(na)*sp;}return oldUpdateProjectiles(dt);};
+const oldProjectileHitsEnemy=window.projectileHitsEnemy;window.projectileHitsEnemy=function(p,e){
+  if(p&&p.isPlayer&&e&&e.hp>0&&e.deflectChance&&e.type!=='roman_statue'&&!p.extra?.__fdDeflected){const slash=p.extra?.hitShape==='slash'||/slash/i.test(String(p.type||''));if(!slash&&Math.random()<Number(e.deflectChance)){const target=fdFindOtherEnemy(e);if(target){const dx=target.x-e.x,dy=target.y-e.y,len=Math.hypot(dx,dy)||1;p.x=e.x+dx/len*12;p.y=e.y+dy/len*12;const sp=Math.max(3,Math.hypot(p.vx,p.vy));p.vx=dx/len*sp;p.vy=dy/len*sp;p.extra=p.extra||{};p.extra.__fdDeflected=true;if(p.hitIds?.add)p.hitIds.add(e);createParticles(e.x,e.y,'#dfe6e9');addFloatingText(e.x,e.y,'DEFLETIDO!','#dfe6e9',10);return false;}}}
+  if(p&&p.isPlayer&&e?.type==='roman_statue'){p.life=0;p.extra=p.extra||{};p.extra.statueConsumed=true;if(p.hitIds instanceof Set)for(const x of enemies)if(x)p.hitIds.add(x);return false;}
+  return oldProjectileHitsEnemy(p,e);
+};
+
+/* ---------- Stable hotbar ---------- */
+const HOTBAR_KEY='fd_sandbox_recent_invocations_v4';
+function hotbarRead(k){try{const v=JSON.parse(localStorage.getItem(k)||'[]');return Array.isArray(v)?v:[];}catch(_){return[];}}
+let fdHotbar=hotbarRead(HOTBAR_KEY);if(!fdHotbar.length)fdHotbar=hotbarRead('fd_sandbox_recent_invocations_v3').slice(0,9);fdHotbar=fdHotbar.slice(0,9);
+let fdHotbarSelectedIndex=-1;window.fdHotbar=fdHotbar;
+function fdHotbarIdentity(item){try{return `${item?.kind||''}|${JSON.stringify(item?.data||null)}`;}catch(_){return `${item?.kind||''}|${item?.label||''}`;}}
+function fdSaveHotbar(){try{localStorage.setItem(HOTBAR_KEY,JSON.stringify(fdHotbar.slice(0,9)));}catch(_){}}
+function fdRenderHotbar(selectedIndex){
+  const root=document.getElementById('fd-sandbox-hotbar');if(!root)return;
+  if(typeof selectedIndex==='number')fdHotbarSelectedIndex=selectedIndex;
+  root.classList.toggle('fd-visible',!!sandboxMode&&!sandboxMenuOpen);
+  if(root.children.length!==9){root.innerHTML='';for(let i=0;i<9;i++){const b=document.createElement('button');b.type='button';b.className='fd-hotbar-slot';b.dataset.hotbarIndex=String(i);const img=document.createElement('img');img.alt='';img.draggable=false;b.appendChild(img);const n=document.createElement('span');n.className='fd-hotbar-number';b.appendChild(n);const k=document.createElement('span');k.className='fd-hotbar-kind';b.appendChild(k);root.appendChild(b);}}
+  const signature=fdHotbar.map(x=>fdHotbarIdentity(x)).join('||')+`|sel:${fdHotbarSelectedIndex}`;
+  if(root.dataset.fdSignature===signature){return;}
+  root.dataset.fdSignature=signature;
+  for(let i=0;i<9;i++){
+    const b=root.children[i],item=fdHotbar[i],img=b.querySelector('img'),n=b.querySelector('.fd-hotbar-number'),k=b.querySelector('.fd-hotbar-kind');
+    b.className='fd-hotbar-slot'+(i===fdHotbarSelectedIndex?' fd-selected':'')+(item?'':' fd-hotbar-empty');
+    b.title=item?.label||'';b.setAttribute('aria-label',item?`${i+1}: ${item.label}`:`Slot vazio ${i+1}`);n.textContent=String(i+1);k.textContent=item?(item.kind==='enemy'?'I':'E'):'';
+    if(item){const src=item.icon||'elements/error.png';if(img.getAttribute('src')!==src)img.src=src;img.style.display='block';}else{img.removeAttribute('src');img.style.display='none';}
+  }
+}
+function fdEnsureHotbar(){let root=document.getElementById('fd-sandbox-hotbar');if(root)return root;root=document.createElement('div');root.id='fd-sandbox-hotbar';root.setAttribute('aria-label','Atalhos recentes do Sandbox');document.body.appendChild(root);return root;}
+function fdAddSandboxHotbar(item){
+  if(!item?.kind)return;const normalized={kind:String(item.kind),data:item.data||null,label:item.label||'Objeto',icon:item.icon||''},id=fdHotbarIdentity(normalized);fdHotbar=fdHotbar.filter(x=>fdHotbarIdentity(x)!==id);fdHotbar.unshift(normalized);fdHotbar=fdHotbar.slice(0,9);window.fdHotbar=fdHotbar;fdHotbarSelectedIndex=0;fdSaveHotbar();fdRenderHotbar(0);
+}
+function fdHotbarSelect(index){const item=fdHotbar[Number(index)];if(!item||!sandboxMode)return false;fdHotbarSelectedIndex=Number(index);setSandboxSelectedSpawn(item.kind,item.data,item.label,item.icon||'');fdRenderHotbar(fdHotbarSelectedIndex);return true;}
+window.fdAddSandboxHotbar=fdAddSandboxHotbar;window.fdHotbarSelect=fdHotbarSelect;window.fdRenderHotbar=fdRenderHotbar;
+
+/* ---------- Stable freeze button ---------- */
+window.fdFreezeEnabled=false;
+function fdApplySandboxFlags(e){
+  if(!e)return;try{if(typeof applySandboxForceHypnosis==='function')applySandboxForceHypnosis(e);}catch(_){ }
+  if(sandboxMode&&window.fdFreezeEnabled){e.freezeTimer=Infinity;e.sandboxFrozen=true;e.frozenBySandbox=true;}
+}
+window.fdApplySandboxFlags=fdApplySandboxFlags;
+function ensureFreezeButton(){
+  const cluster=document.getElementById('sandbox-tool-cluster');if(!cluster)return null;let b=document.getElementById('fd-sandbox-freeze');
+  if(!b){b=document.createElement('button');b.id='fd-sandbox-freeze';b.type='button';b.className='sandbox-fixed-tool hidden';b.setAttribute('aria-label','Congelamento');b.title='Congelamento';b.innerHTML='<img src="elements/frost_toutch.png" alt=""><span class="fd-sandbox-freeze-state" aria-hidden="true"></span>';cluster.appendChild(b);b.addEventListener('click',fdToggleFreeze,{passive:false});}
+  return b;
+}
+function fdUpdateFreezeButton(){const b=ensureFreezeButton();if(!b)return;const visible=!!sandboxMode&&!sandboxMenuOpen;b.classList.toggle('visible',visible);b.classList.toggle('hidden',!visible);b.classList.toggle('fd-freeze-on',visible&&!!window.fdFreezeEnabled);b.dataset.state=window.fdFreezeEnabled?'on':'off';b.setAttribute('aria-pressed',window.fdFreezeEnabled?'true':'false');}
+function fdToggleFreeze(){if(!sandboxMode)return false;window.fdFreezeEnabled=!window.fdFreezeEnabled;if(window.fdFreezeEnabled&&Array.isArray(enemies))for(const e of enemies)if(e?.sandbox&&e.hp>0)fdApplySandboxFlags(e);fdUpdateFreezeButton();notify(window.fdFreezeEnabled?'Congelamento ativado: inimigos do Sandbox ficarão congelados permanentemente.':'Congelamento desativado.');return window.fdFreezeEnabled;}
+window.fdToggleFreeze=fdToggleFreeze;window.fdUpdateFreezeButton=fdUpdateFreezeButton;
+
+/* ---------- State transitions + persistence ---------- */
+function fdSyncSandboxUi(){ensureFreezeButton();fdUpdateFreezeButton();fdRenderHotbar();const sp=document.getElementById('btn-special');if(sp)sp.style.display=sandboxMode?'none':'';}
+const oldSandboxSetHud=window.sandboxSetHud;window.sandboxSetHud=function(active){const r=oldSandboxSetHud(active);fdSyncSandboxUi();return r;};
+const oldOpenSandbox=window.openSandboxMenu;window.openSandboxMenu=function(tab='home'){const r=oldOpenSandbox(tab);fdSyncSandboxUi();return r;};
+const oldCloseSandbox=window.closeSandboxMenu;window.closeSandboxMenu=function(fromDeactivate=false){const r=oldCloseSandbox(fromDeactivate);fdSyncSandboxUi();return r;};
+const oldActivateSandbox=window.activateSandbox;window.activateSandbox=function(){const r=oldActivateSandbox();window.fdFreezeEnabled=false;fdSyncSandboxUi();return r;};
+const oldDeactivateSandbox=window.deactivateSandbox;window.deactivateSandbox=function(){const r=oldDeactivateSandbox();window.fdFreezeEnabled=false;fdSyncSandboxUi();return r;};
+
+const oldCollect=window.sandboxCollectSavedWorld;if(typeof oldCollect==='function')window.sandboxCollectSavedWorld=function(){const snap=oldCollect();if(snap&&Array.isArray(window.fractures))snap.fractures=window.fractures.filter(f=>f?.sandbox).map(f=>{try{return JSON.parse(JSON.stringify(f));}catch(_){return null;}}).filter(Boolean);return snap;};
+const oldRestore=window.sandboxRestoreSavedWorld;if(typeof oldRestore==='function')window.sandboxRestoreSavedWorld=function(){const r=oldRestore();if(sandboxMode&&sandboxSavedWorld&&Array.isArray(sandboxSavedWorld.fractures))window.fractures=sandboxSavedWorld.fractures.map(f=>{const x=JSON.parse(JSON.stringify(f));x.sandbox=true;return x;});fdSyncSandboxUi();return r;};
+const oldSave=window.sandboxSaveCurrentWorld;if(typeof oldSave==='function')window.sandboxSaveCurrentWorld=function(){const r=oldSave();if(sandboxSavePosition&&sandboxSavedWorld&&Array.isArray(window.fractures))sandboxSavedWorld.fractures=window.fractures.filter(f=>f?.sandbox).map(f=>{try{return JSON.parse(JSON.stringify(f));}catch(_){return null;}}).filter(Boolean);return r;};
+
+/* Ability button: one authoritative rule while Sandbox is active. */
+try{if(btnSpecial)btnSpecial.style.display=sandboxMode?'none':'';}catch(_){ }
+
+/* Stable event model: menu items use the existing click delegation; no pointerdown/touchstart interception. */
+const hb=fdEnsureHotbar();if(!hb.dataset.fdDelegated){hb.dataset.fdDelegated='1';hb.addEventListener('click',ev=>{const b=ev.target?.closest?.('.fd-hotbar-slot');if(!b||!hb.contains(b))return;ev.preventDefault();ev.stopPropagation();fdHotbarSelect(Number(b.dataset.hotbarIndex));},{passive:false});}
+ensureFreezeButton();fdRenderHotbar();fdUpdateFreezeButton();
+
+/* ---------- Keep lexical game functions in sync with the authoritative wrappers ----------
+   Top-level function declarations are lexical bindings; assigning window.foo alone does
+   not replace internal calls to foo(). This sync is required for Coliseu/Fraturado to use
+   the same spawn, fracture, sprite and update implementations everywhere. */
+try{spawnEnemy=window.spawnEnemy;}catch(_){}
+try{updateEnemies=window.updateEnemies;}catch(_){}
+try{updateProjectiles=window.updateProjectiles;}catch(_){}
+try{projectileHitsEnemy=window.projectileHitsEnemy;}catch(_){}
+try{getEnemyEntryWave=window.getEnemyEntryWave;}catch(_){}
+try{getFractureBiomePool=window.getFractureBiomePool;}catch(_){}
+try{getFracturedGlobalEnemyPool=window.getFracturedGlobalEnemyPool;}catch(_){}
+try{getFracturedEnemySkinType=window.getFracturedEnemySkinType;}catch(_){}
+try{getEffectiveEnemySpriteType=window.getEffectiveEnemySpriteType;}catch(_){}
+try{spawnFractureEnemy=window.spawnFractureEnemy;}catch(_){}
+try{sandboxSelectMap=window.sandboxSelectMap;}catch(_){}
+try{startRunAfterShop=window.startRunAfterShop;}catch(_){}
+
+})();
+
+</script>
+
+
+
 
 
 <style id="tutorial-dialog-visibility-final">
@@ -30550,3 +31205,9 @@ html > #overlay-tutorial-dialog > .tutorial-dialog-box{
 #screen-char-detail .char-detail-lore-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.24);border-radius:999px;}
 </style>
 
+
+
+<!-- FD SANDBOX AUTHORITATIVE FIX V6 -->
+<!-- FD SANDBOX AUTHORITATIVE FIX V7 -->
+</body>
+</html>
