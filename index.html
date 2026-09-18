@@ -13972,6 +13972,7 @@ function applySandboxForceHypnosis(enemy) {
 }
 
 function setSandboxSelectedSpawn(kind, data, label, icon='') {
+    if (kind !== 'enemy' && kind !== 'element') return;
     sandboxSelectedSpawn = kind;
     sandboxSelectedSpawnData = data || null;
     sandboxSelectedSpawnLabel = label || '';
@@ -13983,6 +13984,7 @@ function setSandboxSelectedSpawn(kind, data, label, icon='') {
     updateSandboxSummonButton();
     updateSandboxHypnoButton();
     updateSandboxEraseButtons();
+    fdUpdateFreezeButton();
     notify(`${sandboxSelectedSpawnLabel || 'Objeto'} selecionado. Toque no botão rosa para invocar.`);
 }
 
@@ -14525,6 +14527,7 @@ if (!window.__sandboxDelegationBoundV5) {
                 const data={type:t,skin:sk,prototype:proto,mapId};
                 setSandboxSelectedSpawn('enemy',data,label,icon);
                 if(typeof fdAddSandboxHotbar==='function') fdAddSandboxHotbar({kind:'enemy',data,label,icon});
+                if(typeof fdUpdateFreezeButton==='function') fdUpdateFreezeButton();
                 break;
             }
             case 'character': sandboxSelectCharacter(btn.dataset.sandboxChar || ''); break;
@@ -14536,6 +14539,7 @@ if (!window.__sandboxDelegationBoundV5) {
                 const label=ent?.name||k;
                 setSandboxSelectedSpawn('element',{group:g,key:k},label,icon);
                 if(typeof fdAddSandboxHotbar==='function') fdAddSandboxHotbar({kind:'element',data:{group:g,key:k},label,icon});
+                if(typeof fdUpdateFreezeButton==='function') fdUpdateFreezeButton();
                 break;
             }
             default: return false;
@@ -14958,8 +14962,10 @@ function sandboxSpawnEnemy(type, skin, direct=false, prototypeKey='') {
             };
             const forcedBossSprite = proto ? '' : sandboxEnemySpriteForSelection(type, skin || '');
             if (forcedBossSprite && getEnemySpritePath(forcedBossSprite)) e.skinOverride = forcedBossSprite;
+            e.fdSandboxSpawned = true;
             enemies.push(e);
             applySandboxForceHypnosis(e);
+            fdApplySandboxFlags(e);
         } else {
             try { wave = safeWave; spawnEnemy(effectiveType, point, proto ? null : (skin || null)); }
             finally { wave = realWave; }
@@ -14968,6 +14974,7 @@ function sandboxSpawnEnemy(type, skin, direct=false, prototypeKey='') {
                     const e = enemies[i];
                     if (!e) continue;
                     e.sandbox = true;
+                    e.fdSandboxSpawned = true;
                     e.spawnWave = realWave;
                     e.entryWave = realWave;
                     const forcedSpriteKey = proto ? '' : sandboxEnemySpriteForSelection(type, skin || '');
@@ -15083,8 +15090,10 @@ function sandboxElementEntries() {
             .map(([key,path]) => ({group:'map', key, name:key.replaceAll('_',' '), icon:Array.isArray(path) ? path[0] : path})),
         {group:'ability', key:'grenade_barricade', name:'Barricada do Grenade', icon:'elements/barricade.png'},
         ...Object.entries(ALLY_ELEMENT_SPRITES)
-            .filter(([key]) => !['grenade_barricade','oven','minesweeper'].includes(key))
-            .map(([key,path]) => ({group:'ally', key, name:key.replaceAll('_',' '), icon:Array.isArray(path) ? path[0] : path}))
+            .filter(([key]) => !['grenade_barricade','oven','minesweeper','necro_tombstone'].includes(key))
+            .map(([key,path]) => ({group:'ally', key, name:key.replaceAll('_',' '), icon:Array.isArray(path) ? path[0] : path})),
+        {group:'coliseum', key:'pillar_vertical', name:'Pilar — Vertical', icon:'elements/pillar.png'},
+        {group:'coliseum', key:'pillar_horizontal', name:'Pilar — Horizontal', icon:'elements/pillar.png'}
     ];
     const seen = new Set();
     return entries.filter(e => {
@@ -15095,6 +15104,8 @@ function sandboxElementEntries() {
 }
 
 function sandboxSpawnElement(group, key, direct=false) {
+    if (group === 'fracture') return false;
+    if (group === 'ally' && key === 'necro_tombstone') return false;
     if (!sandboxMode || !player || !group || !key) return false;
     try { sandboxPrimeSelectedSprite(); } catch (_) {}
     const actionKey = `element:${group}:${key}`;
@@ -15103,6 +15114,17 @@ function sandboxSpawnElement(group, key, direct=false) {
     sandboxLastSpawnAction = { key:actionKey, at:actionNow };
     const x = Number(player.x) || 0, y = Number(player.y) || 0;
 
+    if (group === 'coliseum' && (key === 'pillar_vertical' || key === 'pillar_horizontal')) {
+        const obj = {
+            x, y, r:34, size:110, pillarLength:110,
+            type:key, rotate:key === 'pillar_horizontal' ? Math.PI / 2 : 0,
+            isWall:true, coliseumWall:false, sandbox:true
+        };
+        obstacles.push(obj);
+        sandboxRegisterPersistentEntity(obj, 'obstacle');
+        notify(key === 'pillar_vertical' ? 'Pilar vertical invocado.' : 'Pilar horizontal invocado.');
+        return true;
+    }
 
     if (group === 'secret' && key === 'invisible_wall') { const obj={x,y,r:38,type:'sandbox_invisible_wall',isWall:true,sandbox:true,invisibleWall:true}; obstacles.push(obj); sandboxPlacedElements.push(obj); sandboxRegisterPersistentEntity(obj, 'obstacle'); notify('Invisi-parede colocada.'); return true; }
 
@@ -15235,23 +15257,8 @@ function drawSandboxPlacedElements() {
 
 function getActiveWorldHalfSize(){ return sandboxMode ? sandboxMapHalfSize : activeWorldHalfSize; }
 function updateSandboxFractures(dt) {
-    if (!sandboxMode || !Array.isArray(window.fractures) || !window.fractures.length) return;
-    const sandboxEnemyCount = Array.isArray(enemies) ? enemies.filter(e => e && e.sandbox && e.hp > 0).length : 0;
-    const maxFractureEnemies = 48;
-    for (const f of window.fractures) {
-        if (!f || !f.sandbox) continue;
-        if (!Number.isFinite(Number(f.x)) || !Number.isFinite(Number(f.y))) continue;
-        f.spawnTimer = Math.max(0, (Number(f.spawnTimer) || 0) - dt);
-        if (f.spawnTimer > 0) continue;
-        f.spawnTimer = 3.25 + Math.random() * 1.75;
-        const currentCount = Array.isArray(enemies) ? enemies.filter(e => e && e.sandbox && e.hp > 0).length : 0;
-        if (currentCount >= maxFractureEnemies) continue;
-        try {
-            window.spawnFractureEnemy(f, { sandbox: true });
-        } catch (err) {
-            console.warn('Spawn de Fratura do Sandbox protegido:', err);
-        }
-    }
+    // Fraturas não são mais invocáveis diretamente no Sandbox.
+    // A configuração de evento sandboxSettings.fractures continua intacta.
 }
 function updateSandbox(dt) {
     if (!player || player.isDead) return;
@@ -18965,7 +18972,7 @@ function updateEnemies(dt) {
                 e.merlinBabyTimer=0;
             }
         }
-        if((e.type === 'boss' || e.type === 'megaboss') && !e.spawnSkillUsed) triggerBossSpawnSkill(e);
+        if((e.type === 'boss' || e.type === 'megaboss') && !e.spawnSkillUsed && !e.sandboxFrozen) triggerBossSpawnSkill(e);
         if(e.weakenTimer > 0) { e.weakenTimer -= dt; e.dmg = e.baseDmg * 0.5; } else { e.dmg = e.baseDmg; }
         if (e.curseTimer > 0) e.curseTimer = Math.max(0, e.curseTimer - dt);
         if(e.burnTimer > 0) { 
@@ -19076,8 +19083,9 @@ function updateEnemies(dt) {
                 if (d2 < o.r + e.size) e.hp -= 30 * dt * getEnemyDamageTakenMultiplier(e);
             }
         }
-        const isFrozen = Number.isFinite(e.freezeTimer) && e.freezeTimer > 0;
-        if(isFrozen) { e.freezeTimer -= dt; currentSpeed = 0; }
+        const isSandboxPermanentFrozen = !!e.sandboxFrozen;
+        const isFrozen = isSandboxPermanentFrozen || (Number.isFinite(e.freezeTimer) && e.freezeTimer > 0) || e.freezeTimer === Infinity;
+        if(isFrozen) { if(!isSandboxPermanentFrozen && e.freezeTimer !== Infinity) e.freezeTimer -= dt; currentSpeed = 0; }
         const isStunned = Number.isFinite(e.stunTimer) && e.stunTimer > 0;
         if(isStunned) { e.stunTimer -= dt; currentSpeed = 0; }
 
@@ -19840,7 +19848,7 @@ function updateEnemies(dt) {
             }
         }
 
-        if(!isHypnotized && d < e.size + player.r && player.shieldTimer <= 0 && e.type !== 'kamikaze' && e.type !== 'swordfish' && !(pd.selectedChar === 'hank' && (e.type === 'velocista' || e.type === 'dancer'))) {
+        if(!e.sandboxFrozen && !isHypnotized && d < e.size + player.r && player.shieldTimer <= 0 && e.type !== 'kamikaze' && e.type !== 'swordfish' && !(pd.selectedChar === 'hank' && (e.type === 'velocista' || e.type === 'dancer'))) {
             if(Math.random() > (player.stats.dodgeChance || 0)) {
                 const spartaShieldMult = (isSpartaCharacter() && player.spartaShieldActive) ? 0.6 : 1;
                 const defMul = Math.max(0.1, (player.stats.defMult - (pd.selectedChar === 'quarterback' && player.qbShield ? 0.4 : player.stats.dynamicDef) - (player.graffitDefFlat || 0)) * spartaShieldMult);
@@ -24708,7 +24716,7 @@ function draw() {
         }
         ctx.restore();
     }
-    if ((window.currentMap === 11 || (typeof sandboxMode !== 'undefined' && sandboxMode && Array.isArray(window.fractures) && window.fractures.some(f => f && f.sandbox))) && Array.isArray(window.fractures)) {
+    if ((window.currentMap === 11 || (typeof sandboxMode !== 'undefined' && sandboxMode && Array.isArray(window.fractures) && window.fractures.some(f => f && f.sandbox)) || Array.isArray(window.fractures) && window.fractures.some(f => f && f.manual)) && Array.isArray(window.fractures)) {
         window.fractures.forEach(drawFractureRay);
     }
     ctx.save();
@@ -30615,10 +30623,11 @@ window.openPetShop=openPetShop;
 #sandbox-tool-cluster #btn-sandbox-hypno{grid-area:hypno !important;}
 #sandbox-tool-cluster #fd-sandbox-freeze{grid-area:freeze !important;justify-self:center !important;align-self:start !important;}
 #fd-sandbox-freeze{
-  width:58px !important;height:58px !important;min-width:58px !important;min-height:58px !important;
-  padding:5px !important;border-radius:16px !important;background:#ff4fa3 !important;border:3px solid #ff4fa3 !important;
+  width:58px !important;height:58px !important;min-width:58px !important;min-height:58px !important;max-width:58px !important;max-height:58px !important;
+  padding:5px !important;margin:0 auto !important;border-radius:16px !important;background:#ff4fa3 !important;border:3px solid #ff4fa3 !important;
   display:none !important;align-items:center !important;justify-content:center !important;position:relative !important;
   pointer-events:auto !important;touch-action:manipulation !important;cursor:pointer !important;
+  transform:none !important;line-height:1 !important;overflow:visible !important;box-sizing:border-box !important;
   box-shadow:0 5px 0 rgba(0,0,0,.35),0 0 18px rgba(255,79,163,.3) !important;
 }
 #fd-sandbox-freeze.visible{display:flex !important;}
@@ -30834,11 +30843,7 @@ window.renderSandboxEnemies=function(root){
 const oldElementEntries=window.sandboxElementEntries;
 window.sandboxElementEntries=function(){
   const base=(typeof oldElementEntries==='function'?oldElementEntries():[]);
-  const extra=[
-    {group:'coliseum',key:'pillar_vertical',name:'Pilar — Vertical',icon:'elements/pillar.png'},
-    {group:'coliseum',key:'pillar_horizontal',name:'Pilar — Horizontal',icon:'elements/pillar.png'},
-    ...MAPS.map((name,i)=>({group:'fracture',key:`fracture_${i}`,name:`Fratura — ${name}`,icon:'elements/error.png'}))
-  ];
+  const extra=[];
   const names={
     invisible_wall:'Invisi-Parede',treasure_chest:'Baú de Tesouro',xp_small:'XP Pequeno',xp_large:'XP Grande',stone:'Pedra',tree:'Árvore',cactus:'Cacto',side_car:'Carro Lateral',left_car:'Carro Lateral',right_car:'Carro Lateral',front_car:'Carro Frontal',behind_car:'Carro Traseiro',shroom:'Cogumelo',volcano:'Vulcão',bamboo:'Bambu',spike_bamboo:'Bambu Espinhoso',kelp:'Alga',fall:'Árvore Outonal',bunniie_hole:'Buraco da Bunniie',adam_scrap_scrap:'Sucata',adam_scrap_config:'Configuração',grenade_barricade:'Barricada do Grenade',turret:'Torreta',mortar:'Morteiro',cannon:'Canhão',tesla:'Tesla',crossbow:'Besta',burner:'Incinerador',heal_station:'Estação de Cura',drone:'Drone',axel_drone:'Drone do Axel',landmine:'Mina Terrestre',chick:'Pintinho',totem:'Totem',ivy_vine:'Trepadeira da Ivy',ivy_flower:'Flor da Ivy',tea_table:'Mesa de Chá',oven:'Forno',necro_tombstone:'Lápide do Necro',knighter_castle:'Castelo do Knighter'
   };
@@ -30858,22 +30863,14 @@ window.renderSandboxElements=function(root){
 
 const oldSandboxSpawnElement=window.sandboxSpawnElement;
 window.sandboxSpawnElement=function(group,key,direct=false){
-  if(group==='coliseum'&&(key==='pillar_vertical'||key==='pillar_horizontal')){
-    if(!sandboxMode||!player)return false;
-    const obj={x:Number(player.x)||0,y:Number(player.y)||0,type:key,r:32,size:86,pillarLength:86,rotate:key==='pillar_horizontal'?Math.PI/2:0,isWall:true,coliseumWall:false,sandbox:true};
-    obstacles.push(obj);sandboxRegisterPersistentEntity(obj,'obstacle');notify(key==='pillar_vertical'?'Pilar vertical invocado.':'Pilar horizontal invocado.');return true;
-  }
-  if(group==='fracture'&&/^fracture_\d+$/.test(key)){
-    if(!sandboxMode||!player)return false;const mapId=Number(key.slice(9));if(!Number.isInteger(mapId)||mapId<0||mapId>=MAPS.length)return false;
-    const f=fdCreateSandboxFracture(mapId,player.x,player.y);if(!f)return false;notify(`Fratura de ${MAPS[mapId]} invocada.`);return true;
-  }
+  if(group==='fracture') return false;
   return oldSandboxSpawnElement?oldSandboxSpawnElement(group,key,direct):false;
 };
 
 /* ---------- Custom Coliseu enemies ---------- */
 function fdCommonEnemy(x,y,type,opts={}){
   const scale=Number(opts.mult)||1,hp=Number(opts.hp)||30*scale,spd=Number(opts.speed)||0,dmg=Number(opts.dmg)||0;
-  return {x,y,type,hp,maxHp:hp,speed:spd,baseDmg:dmg,dmg,size:Number(opts.size)||14,cd:0,color:opts.color||'#c0392b',poison:{timer:0,dmg:0,tickCd:0},slowTimer:0,timeDistortionTimer:0,weakenTimer:0,curseTimer:0,burnTimer:0,freezeTimer:0,burnDmg:0,speedBuffTimer:0,soak:0,shockTimer:0,shockSemiTimer:0,shockTick:0,shockSemiTick:0,shockDmg:0,shockSemiDmg:0,shockRate:.3,semiShockRate:.4,spawnBiome:window.currentMap,spawnWave:Number(wave)||1,entryWave:COLISEUM_ENTRY_WAVES[type]||Number(wave)||1,stationary:!!opts.stationary,poisonOnHit:0,fracturedOrigin:!!opts.fractured,fractureMapId:opts.fractured?COLISEUM_ID:null,skinSourceMapId:COLISEUM_ID,sandbox:!!opts.sandbox,skinOverride:opts.skin||null,isGlobalArmored:false,breakIntoBasic:false};
+  return {x,y,type,hp,maxHp:hp,speed:spd,baseDmg:dmg,dmg,size:Number(opts.size)||14,cd:0,color:opts.color||'#c0392b',poison:{timer:0,dmg:0,tickCd:0},slowTimer:0,timeDistortionTimer:0,weakenTimer:0,curseTimer:0,burnTimer:0,freezeTimer:0,burnDmg:0,speedBuffTimer:0,soak:0,shockTimer:0,shockSemiTimer:0,shockTick:0,shockSemiTick:0,shockDmg:0,shockSemiDmg:0,shockRate:.3,semiShockRate:.4,spawnBiome:window.currentMap,spawnWave:Number(wave)||1,entryWave:COLISEUM_ENTRY_WAVES[type]||Number(wave)||1,stationary:!!opts.stationary,fracturedOrigin:!!opts.fractured,fractureMapId:opts.fractured?COLISEUM_ID:null,skinSourceMapId:COLISEUM_ID,sandbox:!!opts.sandbox,fdSandboxSpawned:!!opts.sandbox,skinOverride:opts.skin||null,isGlobalArmored:false,breakIntoBasic:false};
 }
 function fdSpawnCustomEnemy(type,x,y,opts={}){
   const t=String(type||'').toLowerCase();if(!COLISEUM_NEW.has(t))return false;
@@ -30927,15 +30924,19 @@ window.spawnEnemy=function(forcedType=null,forcedPoint=null,spriteOverride=null)
 const oldSandboxSpawnEnemy=window.sandboxSpawnEnemy;
 window.sandboxSpawnEnemy=function(type,skin,direct=false,prototypeKey=''){
   const before=enemies.length;const result=oldSandboxSpawnEnemy(type,skin,direct,prototypeKey);
-  if(result){for(let i=before;i<enemies.length;i++){const e=enemies[i];if(e&&e.sandbox){if(skin&&getEnemySpritePath(skin))e.skinOverride=skin;fdApplySandboxFlags(e);}}}
+  if(result){for(let i=before;i<enemies.length;i++){const e=enemies[i];if(e&&e.sandbox){e.fdSandboxSpawned=true;if(skin&&getEnemySpritePath(skin))e.skinOverride=skin;fdApplySandboxFlags(e);}}}
   return result;
 };
 
 /* ---------- Fraturado / explicit Sandbox fractures ---------- */
 const oldFracturePool=window.getFractureBiomePool;
 window.getFractureBiomePool=function(mapId){
-  if(Number(mapId)===COLISEUM_ID)return [...COLISEUM_NORMAL,...COLISEUM_SPECIAL].filter(t=>(getEnemyEntryWave(t,wave)||1)<=wave);
-  return oldFracturePool(mapId);
+  if(Number(mapId)===COLISEUM_ID){
+    const pool=[...COLISEUM_NORMAL,...COLISEUM_SPECIAL];
+    return window.__fdForceRandomFractureWorld ? pool : pool.filter(t=>(getEnemyEntryWave(t,wave)||1)<=wave);
+  }
+  const pool=oldFracturePool(mapId);
+  return pool;
 };
 const oldGlobalPool=window.getFracturedGlobalEnemyPool;
 window.getFracturedGlobalEnemyPool=function(){
@@ -30943,16 +30944,34 @@ window.getFracturedGlobalEnemyPool=function(){
   return [...new Set((oldGlobalPool?oldGlobalPool():[]).concat(romanLogical,COLISEUM_SPECIAL))]
     .filter(t=>(getEnemyEntryWave(t,wave)||1)<=wave);
 };
-function fdFractureMap15(fracture){
+function fdFractureMap15(fracture,forceRandom=false){
   if(!fracture||wave%10===0||enemies.some(e=>e&&e.isBoss))return false;
-  const pool=window.getFractureBiomePool(COLISEUM_ID).filter(t=>(getEnemyEntryWave(t,wave)||1)<=wave);if(!pool.length)return false;
+  const basePool=[...COLISEUM_NORMAL,...COLISEUM_SPECIAL];
+  const pool=(forceRandom?basePool:basePool.filter(t=>(getEnemyEntryWave(t,wave)||1)<=wave));if(!pool.length)return false;
   const type=pool[Math.floor(Math.random()*pool.length)],a=(Number(fracture.angle)||0)+(Math.random()-.5)*.9+Math.PI,d=25+Math.random()*70;
   const x=Math.max(-1480,Math.min(1480,fracture.x+Math.cos(a)*d)),y=Math.max(-1480,Math.min(1480,fracture.y+Math.sin(a)*d));
   const prev=window.currentMap;window.currentMap=COLISEUM_ID;let e;try{e=window.spawnEnemy(type,{x,y},COLISEUM_SKINS[type]||null);}finally{window.currentMap=prev;}
   if(e){e.fracturedOrigin=true;e.fractureMapId=COLISEUM_ID;e.skinSourceMapId=COLISEUM_ID;e.spawnBiome=COLISEUM_ID;e.skinOverride=COLISEUM_SKINS[type]||e.skinOverride||null;e.sandbox=!!sandboxMode;fdApplySandboxFlags(e);return true;}return false;
 }
 const oldSpawnFractureEnemy=window.spawnFractureEnemy;
-window.spawnFractureEnemy=function(fracture,options={}){return Number(fracture?.mapId)===COLISEUM_ID?fdFractureMap15(fracture):oldSpawnFractureEnemy(fracture,options);};
+window.spawnFractureEnemy=function(fracture,options={}){
+  const forceRandom=!!(options?.sandbox || fracture?.sandbox || fracture?.manual);
+  if(Number(fracture?.mapId)===COLISEUM_ID) return fdFractureMap15(fracture,forceRandom);
+  if(!forceRandom) return oldSpawnFractureEnemy(fracture,options);
+  const prevForce=window.__fdForceRandomFractureWorld;
+  const prevWindowEntry=window.getEnemyEntryWave;
+  const prevLexEntry=getEnemyEntryWave;
+  window.__fdForceRandomFractureWorld=true;
+  try{
+    window.getEnemyEntryWave=()=>1;
+    getEnemyEntryWave=window.getEnemyEntryWave;
+    return oldSpawnFractureEnemy(fracture,options);
+  }finally{
+    window.__fdForceRandomFractureWorld=prevForce;
+    window.getEnemyEntryWave=prevWindowEntry;
+    getEnemyEntryWave=prevLexEntry;
+  }
+};
 const oldUpdateFractures=window.updateFractures;
 window.updateFractures=function(dt){
   if(sandboxMode){
@@ -30963,22 +30982,8 @@ window.updateFractures=function(dt){
   return oldUpdateFractures(dt);
 };
 function fdCreateSandboxFracture(mapId,x,y){
-  const id=Number(mapId);
-  if(!Number.isInteger(id)||id<0||id>=MAPS.length)return null;
-  const f={x:Number(x)||0,y:Number(y)||0,mapId:id,angle:Math.random()*Math.PI*2,length:300+Math.random()*100,width:95+Math.random()*50,branch:100,life:Infinity,maxLife:Infinity,spawnCount:Infinity,spawned:0,spawnTimer:1.5,sandbox:true,manual:false,decorations:[]};
-  const decorTypes=getFractureDecorTypes(id);
-  if(decorTypes.length){
-    const count=2;
-    for(let i=0;i<count;i++){
-      const type=decorTypes[Math.floor(Math.random()*decorTypes.length)];
-      const a=f.angle,cosA=Math.cos(a),sinA=Math.sin(a);
-      const lx=(Math.random()-.5)*f.length*.72,ly=(Math.random()-.5)*f.width*.52;
-      f.decorations.push({type,x:f.x+lx*cosA-ly*sinA,y:f.y+lx*sinA+ly*cosA,size:type==='fall'?48:(type==='coliseum_pillar'?46:34+Math.random()*10),rotate:Math.random()*Math.PI*2,flipX:Math.random()<.5,seed:Math.random()*1000});
-    }
-  }
-  window.fractures=Array.isArray(window.fractures)?window.fractures:[];
-  window.fractures.push(f);
-  return f;
+  // Desativado de propósito: Fraturas não são spawn direto do Sandbox.
+  return null;
 }
 window.fdCreateSandboxFracture=fdCreateSandboxFracture;
 
@@ -30998,10 +31003,24 @@ window.fdGetColiseumPattern=function(){
   window.__fdColiseumPattern=c.createPattern(tile,'repeat');return window.__fdColiseumPattern;
 };
 function fdColiseumWalls(markSandbox=false){
-  obstacles=(obstacles||[]).filter(o=>!String(o?.type||'').startsWith('pillar_')&&!o?.coliseumWall);
-  const make=(x,y,horiz)=>({x,y,r:32,size:86,pillarLength:86,type:horiz?'pillar_horizontal':'pillar_vertical',rotate:horiz?Math.PI/2:0,isWall:true,coliseumWall:true,sandbox:!!markSandbox});
-  const half=1440,start=-1395,end=1395,seg=90;for(let x=start;x<=end;x+=seg){obstacles.push(make(x,-half,true),make(x,half,true));}for(let y=start;y<=end;y+=seg){obstacles.push(make(-half,y,false),make(half,y,false));}
+  obstacles=(obstacles||[]).filter(o=>!o?.coliseumWall);
+  const make=(x,y,horiz)=>({x,y,r:34,size:110,pillarLength:110,type:horiz?'pillar_horizontal':'pillar_vertical',rotate:horiz?Math.PI/2:0,isWall:true,coliseumWall:true,sandbox:!!markSandbox});
+  const placed=[];
+  const canPlace=(x,y)=>placed.every(p=>Math.hypot(p.x-x,p.y-y)>=210);
+  const addScattered=(count,horiz)=>{
+    let added=0,attempts=0;
+    while(added<count && attempts<1000){
+      attempts++;
+      const x=(Math.random()*2-1)*1180;
+      const y=(Math.random()*2-1)*1180;
+      if(Math.hypot(x,y)<180 || !canPlace(x,y)) continue;
+      const obj=make(x,y,horiz); obstacles.push(obj); placed.push({x,y}); added++;
+    }
+  };
+  addScattered(11,false);
+  addScattered(11,true);
 }
+
 function fdStartColiseumWalls(){if(window.currentMap===COLISEUM_ID)fdColiseumWalls(false);}
 const oldStartRun=window.startRunAfterShop;window.startRunAfterShop=function(options={}){const r=oldStartRun(options);fdStartColiseumWalls();return r;};
 const oldSandboxSelectMap=window.sandboxSelectMap;window.sandboxSelectMap=function(id){const r=oldSandboxSelectMap(id);if(Number(id)===COLISEUM_ID)fdColiseumWalls(true);return r;};
@@ -31039,7 +31058,7 @@ const oldProjectileHitsEnemy=window.projectileHitsEnemy;window.projectileHitsEne
 /* ---------- Stable hotbar ---------- */
 const HOTBAR_KEY='fd_sandbox_recent_invocations_v4';
 function hotbarRead(k){try{const v=JSON.parse(localStorage.getItem(k)||'[]');return Array.isArray(v)?v:[];}catch(_){return[];}}
-let fdHotbar=hotbarRead(HOTBAR_KEY);if(!fdHotbar.length)fdHotbar=hotbarRead('fd_sandbox_recent_invocations_v3').slice(0,9);fdHotbar=fdHotbar.slice(0,9);
+let fdHotbar=hotbarRead(HOTBAR_KEY);if(!fdHotbar.length)fdHotbar=hotbarRead('fd_sandbox_recent_invocations_v3').slice(0,9);fdHotbar=fdHotbar.filter(item=>!(item?.kind==='element'&&item?.data?.group==='fracture')&&!(item?.kind==='element'&&item?.data?.group==='ally'&&item?.data?.key==='necro_tombstone')).slice(0,9);
 let fdHotbarSelectedIndex=-1;window.fdHotbar=fdHotbar;
 function fdHotbarIdentity(item){try{return `${item?.kind||''}|${JSON.stringify(item?.data||null)}`;}catch(_){return `${item?.kind||''}|${item?.label||''}`;}}
 function fdSaveHotbar(){try{localStorage.setItem(HOTBAR_KEY,JSON.stringify(fdHotbar.slice(0,9)));}catch(_){}}
@@ -31067,9 +31086,10 @@ window.fdAddSandboxHotbar=fdAddSandboxHotbar;window.fdHotbarSelect=fdHotbarSelec
 
 /* ---------- Stable freeze button ---------- */
 window.fdFreezeEnabled=false;
+window.fdFreezeGeneration=0;
 function fdApplySandboxFlags(e){
   if(!e)return;try{if(typeof applySandboxForceHypnosis==='function')applySandboxForceHypnosis(e);}catch(_){ }
-  if(sandboxMode&&window.fdFreezeEnabled){e.freezeTimer=Infinity;e.sandboxFrozen=true;e.frozenBySandbox=true;}
+  if(sandboxMode&&window.fdFreezeEnabled&&e.sandbox&&e.fdSandboxSpawned){e.freezeTimer=Infinity;e.sandboxFrozen=true;e.frozenBySandbox=true;}
 }
 window.fdApplySandboxFlags=fdApplySandboxFlags;
 function ensureFreezeButton(){
@@ -31077,8 +31097,24 @@ function ensureFreezeButton(){
   if(!b){b=document.createElement('button');b.id='fd-sandbox-freeze';b.type='button';b.className='sandbox-fixed-tool hidden';b.setAttribute('aria-label','Congelamento');b.title='Congelamento';b.innerHTML='<img src="elements/frost_toutch.png" alt=""><span class="fd-sandbox-freeze-state" aria-hidden="true"></span>';cluster.appendChild(b);b.addEventListener('click',fdToggleFreeze,{passive:false});}
   return b;
 }
-function fdUpdateFreezeButton(){const b=ensureFreezeButton();if(!b)return;const visible=!!sandboxMode&&!sandboxMenuOpen;b.classList.toggle('visible',visible);b.classList.toggle('hidden',!visible);b.classList.toggle('fd-freeze-on',visible&&!!window.fdFreezeEnabled);b.dataset.state=window.fdFreezeEnabled?'on':'off';b.setAttribute('aria-pressed',window.fdFreezeEnabled?'true':'false');}
-function fdToggleFreeze(){if(!sandboxMode)return false;window.fdFreezeEnabled=!window.fdFreezeEnabled;if(window.fdFreezeEnabled&&Array.isArray(enemies))for(const e of enemies)if(e?.sandbox&&e.hp>0)fdApplySandboxFlags(e);fdUpdateFreezeButton();notify(window.fdFreezeEnabled?'Congelamento ativado: inimigos do Sandbox ficarão congelados permanentemente.':'Congelamento desativado.');return window.fdFreezeEnabled;}
+function fdUpdateFreezeButton(){
+  const b=ensureFreezeButton();
+  if(!b)return;
+  const visible=!!sandboxMode&&!sandboxMenuOpen&&!!sandboxSelectedSpawn&&(sandboxSelectedSpawnKind==='enemy'||sandboxSelectedSpawnKind==='element');
+  b.classList.toggle('visible',visible);
+  b.classList.toggle('hidden',!visible);
+  b.classList.toggle('fd-freeze-on',visible&&!!window.fdFreezeEnabled);
+  b.dataset.state=window.fdFreezeEnabled?'on':'off';
+  b.setAttribute('aria-pressed',window.fdFreezeEnabled?'true':'false');
+}
+function fdToggleFreeze(){
+  if(!sandboxMode)return false;
+  window.fdFreezeEnabled=!window.fdFreezeEnabled;
+  if(window.fdFreezeEnabled) window.fdFreezeGeneration=(Number(window.fdFreezeGeneration)||0)+1;
+  fdUpdateFreezeButton();
+  notify(window.fdFreezeEnabled?'Congelamento ativado: os próximos inimigos invocados ficarão congelados permanentemente.':'Congelamento desativado para os próximos spawns.');
+  return window.fdFreezeEnabled;
+}
 window.fdToggleFreeze=fdToggleFreeze;window.fdUpdateFreezeButton=fdUpdateFreezeButton;
 
 /* ---------- State transitions + persistence ---------- */
@@ -31089,9 +31125,9 @@ const oldCloseSandbox=window.closeSandboxMenu;window.closeSandboxMenu=function(f
 const oldActivateSandbox=window.activateSandbox;window.activateSandbox=function(){const r=oldActivateSandbox();window.fdFreezeEnabled=false;fdSyncSandboxUi();return r;};
 const oldDeactivateSandbox=window.deactivateSandbox;window.deactivateSandbox=function(){const r=oldDeactivateSandbox();window.fdFreezeEnabled=false;fdSyncSandboxUi();return r;};
 
-const oldCollect=window.sandboxCollectSavedWorld;if(typeof oldCollect==='function')window.sandboxCollectSavedWorld=function(){const snap=oldCollect();if(snap&&Array.isArray(window.fractures))snap.fractures=window.fractures.filter(f=>f?.sandbox).map(f=>{try{return JSON.parse(JSON.stringify(f));}catch(_){return null;}}).filter(Boolean);return snap;};
-const oldRestore=window.sandboxRestoreSavedWorld;if(typeof oldRestore==='function')window.sandboxRestoreSavedWorld=function(){const r=oldRestore();if(sandboxMode&&sandboxSavedWorld&&Array.isArray(sandboxSavedWorld.fractures))window.fractures=sandboxSavedWorld.fractures.map(f=>{const x=JSON.parse(JSON.stringify(f));x.sandbox=true;return x;});fdSyncSandboxUi();return r;};
-const oldSave=window.sandboxSaveCurrentWorld;if(typeof oldSave==='function')window.sandboxSaveCurrentWorld=function(){const r=oldSave();if(sandboxSavePosition&&sandboxSavedWorld&&Array.isArray(window.fractures))sandboxSavedWorld.fractures=window.fractures.filter(f=>f?.sandbox).map(f=>{try{return JSON.parse(JSON.stringify(f));}catch(_){return null;}}).filter(Boolean);return r;};
+const oldCollect=window.sandboxCollectSavedWorld;if(typeof oldCollect==='function')window.sandboxCollectSavedWorld=function(){const snap=oldCollect();if(snap)delete snap.fractures;return snap;};
+const oldRestore=window.sandboxRestoreSavedWorld;if(typeof oldRestore==='function')window.sandboxRestoreSavedWorld=function(){const r=oldRestore();if(Array.isArray(window.fractures))window.fractures=window.fractures.filter(f=>!f?.sandbox);fdSyncSandboxUi();return r;};
+const oldSave=window.sandboxSaveCurrentWorld;if(typeof oldSave==='function')window.sandboxSaveCurrentWorld=function(){const r=oldSave();if(sandboxSavedWorld)delete sandboxSavedWorld.fractures;return r;};
 
 /* Ability button: one authoritative rule while Sandbox is active. */
 try{if(btnSpecial)btnSpecial.style.display=sandboxMode?'none':'';}catch(_){ }
@@ -31118,6 +31154,7 @@ try{getFracturedEnemySkinType=window.getFracturedEnemySkinType;}catch(_){}
 try{getEffectiveEnemySpriteType=window.getEffectiveEnemySpriteType;}catch(_){}
 try{spawnFractureEnemy=window.spawnFractureEnemy;}catch(_){}
 try{sandboxSelectMap=window.sandboxSelectMap;}catch(_){}
+try{sandboxSpawnElement=window.sandboxSpawnElement;}catch(_){}
 try{startRunAfterShop=window.startRunAfterShop;}catch(_){}
 
 })();
