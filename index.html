@@ -2303,7 +2303,7 @@ body .screen,body .overlay{width:100% !important;height:100% !important;}
     <svg id="o2-gauge" viewBox="0 0 180 104" role="img" aria-label="Medidor de oxigênio">
         <path class="o2-gauge-track" d="M 18 84 A 72 72 0 0 1 162 84"></path>
         <path id="o2-bar" class="o2-gauge-fill" d="M 18 84 A 72 72 0 0 1 162 84"></path>
-        <line id="o2-needle" x1="90" y1="84" x2="145" y2="84"></line>
+        <line id="o2-needle" x1="90" y1="84" x2="18" y2="84"></line>
         <circle cx="90" cy="84" r="7" class="o2-gauge-hub"></circle>
     </svg>
     <span id="o2-bar-label">O2 100%</span>
@@ -3730,7 +3730,7 @@ function renderGachaRevealHtml(rawText) {
 
 const DEFAULT_KEYBINDS = { up: 'w', down: 's', left: 'a', right: 'd', special: 'p', pause: 'escape' };
 const DEFAULT_INITIAL_ZOOM = (('ontouchstart' in window) || navigator.maxTouchPoints > 0) ? 0.60 : 1.00;
-const DEFAULT_SETTINGS = { skipGacha: false, controlMode: 'auto', joystickSize: 120, sandboxEnabled: true, ultraHardcore: false, uhcDark: false, noParticles: false, showCombatText: true, showHpBar: false, screenZoom: DEFAULT_INITIAL_ZOOM, musicVolume: 0.7, mapChoice: -1, mapChoiceBucket: -1, menuMusic: 'legacy_awaits', casualMusic: 'roguish_journey', keybinds: { ...DEFAULT_KEYBINDS } };
+const DEFAULT_SETTINGS = { skipGacha: false, controlMode: 'auto', joystickSize: 120, sandboxEnabled: false, ultraHardcore: false, uhcDark: false, noParticles: false, showCombatText: true, showHpBar: false, screenZoom: DEFAULT_INITIAL_ZOOM, musicVolume: 0.7, mapChoice: -1, mapChoiceBucket: -1, menuMusic: 'legacy_awaits', casualMusic: 'roguish_journey', keybinds: { ...DEFAULT_KEYBINDS } };
 
 const MUSIC_OPTIONS = {
     menu: {
@@ -4073,7 +4073,7 @@ function normalizeSaveData(rawSave) {
 
     if (!next.settings || typeof next.settings !== 'object') next.settings = cloneAccountValue(defaults.settings);
     next.settings = mergeAccountValues(defaults.settings, next.settings);
-    if (typeof next.settings.sandboxEnabled !== 'boolean') next.settings.sandboxEnabled = true;
+    if (typeof next.settings.sandboxEnabled !== 'boolean') next.settings.sandboxEnabled = false;
 
     if (!next.chars || typeof next.chars !== 'object') next.chars = {};
     if (!next.chars.strike) next.chars.strike = { level: 1, slots: 2, chips: [null, null] };
@@ -4248,7 +4248,7 @@ function load() {
     ensureDevDebugState();
     syncDevUnlocks();
     if (!pd.settings || typeof pd.settings !== 'object') pd.settings = {};
-    if (typeof pd.settings.sandboxEnabled !== 'boolean') pd.settings.sandboxEnabled = true;
+    if (typeof pd.settings.sandboxEnabled !== 'boolean') pd.settings.sandboxEnabled = false;
 
     if (!pd || typeof pd !== 'object') pd = JSON.parse(JSON.stringify(PD_TEMPLATE));
     if (!pd.chars || typeof pd.chars !== 'object') pd.chars = {};
@@ -4460,7 +4460,8 @@ function getEnemyEntryWave(type, currentWave = wave) {
         ghost_fisher: 8, swordfish: 10, triton: 16, crocodile: 10, swamp_monster: 20, explorer: 15, camel: 18, scorpion: 30, worker: 8, conehead: 9, motorcycle: 10, police_car: 15, ambulance: 16,
         sein_sein: 10, samurai: 16, panda_suit: 16, panda: 16, nunchaku: 17, geisha: 20,
         rocknrool: 11, sounder: 14, piano: 11, singer: 13, tour_truck: 32,
-        cosmic: 10, laser_shooter: 12, light_saber: 18, machine_gun: 22
+        cosmic: 10, laser_shooter: 12, light_saber: 18, machine_gun: 22,
+        fighter_plane: 30, machine_gun_war: 18, anti_radiation: 12, mutant_basic: 1, mutant_giant: 1
     };
     return Object.prototype.hasOwnProperty.call(entryWaves, key) ? entryWaves[key] : Math.max(1, Number(currentWave) || 1);
 }
@@ -20782,7 +20783,7 @@ function updateEnemies(dt) {
                 createParticles(e.x, e.y, '#5d5d66');
             } else if(e.type !== 'merlin_baby' && e.breakIntoBasic && e.isGlobalArmored) {
                 // O invólucro é destruído: nasce um inimigo Básico no mesmo ponto.
-                const basicMult = Math.max(0.25, (Number(e.maxHp) > 0 ? Number(e.maxHp) / (e.type === 'cardboard_head' ? 45 : (e.type === 'motorcycle_helmet' ? 85 : 180)) : 1));
+                const basicMult = Math.max(0.25, (Number(e.maxHp) > 0 ? Number(e.maxHp) / (e.type === 'cardboard_head' ? 45 : ((e.type === 'motorcycle_helmet' || e.type === 'machine_gun_war') ? 85 : 180)) : 1));
                 const sourceMapId = Number.isInteger(e.fractureMapId) ? e.fractureMapId : (Number.isInteger(e.skinSourceMapId) ? e.skinSourceMapId : (Number.isInteger(e.spawnBiome) ? e.spawnBiome : window.currentMap));
                 e.type = 'basico';
                 e.hp = 30 * basicMult;
@@ -20829,7 +20830,7 @@ function updateEnemies(dt) {
                 } else if (e.type === 'ice_statue') {
                     const mult = Math.max(0.25, (Number(e.maxHp) > 0 ? Number(e.maxHp) / 150 : 1));
                     enemies.push({
-                        x:e.x, y:e.y, type:'basico', hp:30*mult, maxHp:30*mult, speed:1.5, baseDmg:5*mult, dmg:5*mult, size:12, cd:0, color:'#e74c3c',
+                        x:e.x, y:e.y, type:'basico', hp:30*basicMult, maxHp:30*basicMult, speed:1.5, baseDmg:5*basicMult, dmg:5*basicMult, size:12, cd:0, color:'#e74c3c',
                         poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0,
                         shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4,
                         spawnBiome: Number.isInteger(e.skinSourceMapId) ? e.skinSourceMapId : 2, spawnWave:e.entryWave || wave, entryWave:e.entryWave || wave,
@@ -20858,11 +20859,13 @@ function updateEnemies(dt) {
                         });
                     }
                 } else if (e.type === 'camel') {
-                    const mult = 1 + (wave * 0.15);
+                    const spawnWave = Math.max(1, Number(e.entryWave) || Number(e.spawnWave) || getEnemyEntryWave('camel', wave));
+                    const basicMult = getEnemyDifficultyMultiplierFromEntry('basico', spawnWave, wave);
+                    const cardboardMult = getEnemyDifficultyMultiplierFromEntry('cardboard_head', spawnWave, wave);
                     const camelSourceMap = Number.isInteger(e.skinSourceMapId) ? e.skinSourceMapId : (Number.isInteger(e.fractureMapId) ? e.fractureMapId : 1);
                     const camelFractured = !!e.fracturedOrigin;
                     enemies.push({ x:e.x-10, y:e.y, type:'basico', hp:30*mult, maxHp:30*mult, speed:1.5, baseDmg:5*mult, dmg:5*mult, size:12, cd:0, color:'#e74c3c', poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0, shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4, spawnBiome:camelSourceMap, skinSourceMapId:camelSourceMap, fracturedOrigin:camelFractured, fractureMapId:camelFractured ? camelSourceMap : null, enemySkin:null, fracturedSkinType:null, resolvedFracturedSkinType:null, _skinTypeForEnemy:null });
-                    enemies.push({ x:e.x+10, y:e.y, type:'cardboard_head', hp:45*mult, maxHp:45*mult, speed:1.35, baseDmg:5*mult, dmg:5*mult, size:15, cd:0, color:'#b8793c', poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0, shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4, isGlobalArmored:true, breakIntoBasic:true, spawnBiome:camelSourceMap, skinSourceMapId:camelSourceMap, fracturedOrigin:camelFractured, fractureMapId:camelFractured ? camelSourceMap : null, enemySkin:null, fracturedSkinType:null, resolvedFracturedSkinType:null, _skinTypeForEnemy:null });
+                    enemies.push({ x:e.x+10, y:e.y, type:'cardboard_head', hp:45*cardboardMult, maxHp:45*cardboardMult, speed:1.35, baseDmg:5*cardboardMult, dmg:5*cardboardMult, size:15, cd:0, color:'#b8793c', poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0, shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4, isGlobalArmored:true, breakIntoBasic:true, spawnBiome:camelSourceMap, skinSourceMapId:camelSourceMap, fracturedOrigin:camelFractured, fractureMapId:camelFractured ? camelSourceMap : null, enemySkin:null, fracturedSkinType:null, resolvedFracturedSkinType:null, _skinTypeForEnemy:null });
                 }
                 enemiesKilled++;
                 runProgressStats.totalKills = Math.max(0, Number(runProgressStats.totalKills) || 0) + 1;
@@ -32630,7 +32633,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
         </defs>
         <path class="radioactivity-gauge-track" d="M 18 84 A 72 72 0 0 1 162 84"></path>
         <path id="radioactivity-bar" class="radioactivity-gauge-fill" d="M 18 84 A 72 72 0 0 1 162 84"></path>
-        <line id="radioactivity-needle" x1="90" y1="84" x2="145" y2="84"></line>
+        <line id="radioactivity-needle" x1="90" y1="84" x2="162" y2="84"></line>
         <circle cx="90" cy="84" r="7" class="radioactivity-gauge-hub"></circle>
     </svg>
     <span id="radioactivity-label">RADIOATIVIDADE 0%</span>
@@ -32912,6 +32915,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
     window.drawRadioactiveTextureRect=drawRadioactiveTextureRect;
 
     let radioactiveClouds=[];
+    window.fdRadioactiveGetClouds=()=>radioactiveClouds;
     function initRadioactiveSystem(){
         if(window.currentMap!==RADIOACTIVE_MAP_ID || !player) return;
         radioactiveClouds=Array.from({length:8},(_,i)=>{
@@ -32919,6 +32923,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
             const d=200+Math.random()*1080;
             return {x:Math.cos(a)*d,y:Math.sin(a)*d,rx:90+Math.random()*90,ry:55+Math.random()*75,vx:(Math.random()<.5?-1:1)*(2.5+Math.random()*3.2),vy:(Math.random()<.5?-1:1)*(1.8+Math.random()*2.5),phase:Math.random()*Math.PI*2,pulse:Math.random()*Math.PI*2};
         });
+        radioactiveClouds._fdInitialized = true;
         player.radioactivity=0; player.radioactivityMax=100; player.radioactivityDamageTimer=1; player.radioactivityFlash=0;
     }
     function pointInsideRadioactiveCloud(px,py,cloud){
@@ -32939,9 +32944,14 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
             path.style.strokeDashoffset=`${arcLength*(1-pct)}`;
         }
         if(needle){
-            const angle=180-pct*180;
-            needle.setAttribute('transform',`rotate(${angle} 90 84)`);
-            needle.style.stroke=pct>=0.65 ? '#fff' : '#fff';
+            const angle=Math.PI*(1-pct);
+            const radius=72;
+            const x2=90+Math.cos(angle)*radius;
+            const y2=84-Math.sin(angle)*radius;
+            needle.removeAttribute('transform');
+            needle.setAttribute('x2',String(x2));
+            needle.setAttribute('y2',String(y2));
+            needle.style.stroke='#fff';
         }
         if(label) label.textContent=`RADIOATIVIDADE ${Math.ceil(pct*100)}%`;
     }
@@ -32951,7 +32961,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
         const active=window.currentMap===RADIOACTIVE_MAP_ID && !sandboxMode && !!player;
         if(bar) bar.classList.toggle('hidden',!active);
         if(!active || !player) return;
-        if(!Array.isArray(radioactiveClouds) || radioactiveClouds.length!==8) initRadioactiveSystem();
+        if(!Array.isArray(radioactiveClouds) || radioactiveClouds._fdInitialized !== true) initRadioactiveSystem();
         const half=getActiveWorldHalfSize();
         for(const cloud of radioactiveClouds){
             cloud.x+=cloud.vx*dt; cloud.y+=cloud.vy*dt;
@@ -33174,5 +33184,629 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
     window.renderSeasonalQuests=renderSeasonalQuests;
 })();
 </script>
+
+<script id="fd-radioactive-v11-fixes">
+(function(){
+  'use strict';
+
+  const RADIO_MAP = 19;
+  const NEW_TYPES = new Set(['fighter_plane','machine_gun_war','anti_radiation','mutant_basic','mutant_giant']);
+
+  /* =========================
+     Radioactive gauge + sound
+     ========================= */
+  let radioAudioCtx = null;
+  let radioAudioReady = false;
+  let radioNextClick = 0;
+
+  function ensureRadioAudio(){
+    try{
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if(!Ctx) return;
+      if(!radioAudioCtx) radioAudioCtx = new Ctx();
+      if(radioAudioCtx.state === 'suspended') radioAudioCtx.resume().catch(()=>{});
+      radioAudioReady = true;
+    }catch(_){}
+  }
+
+  function playRadioClick(intensity){
+    if(!radioAudioReady || !radioAudioCtx || !player) return;
+    try{
+      const now = radioAudioCtx.currentTime;
+      const i = Math.max(0, Math.min(1, Number(intensity)||0));
+      const osc = radioAudioCtx.createOscillator();
+      const gain = radioAudioCtx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(920 + i * 720, now);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(Math.min(0.055, 0.014 + i * 0.041), now + 0.008);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.055 + i * 0.025);
+      osc.connect(gain);
+      gain.connect(radioAudioCtx.destination);
+      osc.start(now);
+      osc.stop(now + 0.095);
+    }catch(_){}
+  }
+
+  function updateRadioSound(dt){
+    if(window.currentMap !== RADIO_MAP || sandboxMode || !player || player.isDead){
+      radioNextClick = 0;
+      return;
+    }
+    const pct = Math.max(0, Math.min(1, (Number(player.radioactivity)||0) / 100));
+    const musicVol = Math.max(0, Math.min(1, Number(pd?.settings?.musicVolume ?? 0.7)));
+    if(musicVol <= 0.001 || pct <= 0.001) return;
+    radioNextClick -= Math.max(0, Number(dt)||0);
+    const interval = 1.05 - pct * 0.90;
+    if(radioNextClick <= 0){
+      playRadioClick(pct);
+      radioNextClick = Math.max(0.12, interval * (0.82 + Math.random()*0.28));
+    }
+  }
+
+  document.addEventListener('pointerdown', ensureRadioAudio, {capture:true, passive:true});
+  document.addEventListener('touchstart', ensureRadioAudio, {capture:true, passive:true});
+
+  /* The old radioactive system used the array length as its initialization check.
+     Permanent clouds and Anti-radioativizado can change that length, so use a marker. */
+  try{
+    const src = String(window.updateRadioactiveSystem || '');
+    if(src.includes('radioactiveClouds.length!==8')){
+      // Defensive only; the actual textual replacement is done below in the source file.
+    }
+  }catch(_){}
+
+  /* =========================
+     Enemy sprites
+     ========================= */
+  try{
+    Object.assign(ENEMY_SPRITES, {
+      plane: 'enemies/plane.png',
+      machine_gun_war: 'enemies/machine_gun_war.png',
+      anti_radiation: 'enemies/anti_radiation.png',
+      mutant_basic: 'enemies/mutant_basic.png',
+      mutant_giant: 'enemies/mutant_giant.png'
+    });
+  }catch(_){}
+
+  const oldEffectiveSprite = window.getEffectiveEnemySpriteType;
+  window.getEffectiveEnemySpriteType = function(e){
+    const t = String(e?.type || '').toLowerCase();
+    if(window.currentMap === RADIO_MAP){
+      const mapSkins = {
+        fighter_plane:'plane',
+        machine_gun_war:'machine_gun_war',
+        anti_radiation:'anti_radiation',
+        mutant_basic:'mutant_basic',
+        mutant_giant:'mutant_giant'
+      };
+      if(mapSkins[t] && getEnemySpritePath(mapSkins[t])) return mapSkins[t];
+    }
+    return typeof oldEffectiveSprite === 'function' ? oldEffectiveSprite(e) : t;
+  };
+
+  /* =========================
+     Mutant clouds
+     ========================= */
+  const mutationClouds = [];
+
+  function clearMutationClouds(){ mutationClouds.length = 0; }
+
+  function spawnMutationCloud(x,y,kind){
+    mutationClouds.push({
+      x:Number(x)||0,
+      y:Number(y)||0,
+      r:kind === 'giant' ? 62 : 44,
+      kind:kind === 'giant' ? 'giant' : 'basic',
+      phase:Math.random()*Math.PI*2
+    });
+  }
+
+  function mutateEnemy(e, kind){
+    if(!e || e.hp <= 0) return;
+    const oldType = String(e.type||'').toLowerCase();
+    const sourceWave = Math.max(1, Number(e.entryWave)||Number(e.spawnWave)||Number(wave)||1);
+    const mult = kind === 'giant'
+      ? Math.max(0.25, getEnemyDifficultyMultiplierFromEntry('tanque', sourceWave, wave))
+      : Math.max(0.25, getEnemyDifficultyMultiplierFromEntry('prism_head', sourceWave, wave));
+
+    e.type = kind === 'giant' ? 'mutant_giant' : 'mutant_basic';
+    e.radioactiveMutant = kind;
+    e.mutationFromType = oldType;
+    e.hp = (kind === 'giant' ? 160 : 180) * mult;
+    e.maxHp = e.hp;
+    e.baseDmg = (kind === 'giant' ? 20 : 12) * mult;
+    e.dmg = e.baseDmg;
+    e.speed = kind === 'giant' ? 0.75 : 1.05;
+    e.size = kind === 'giant' ? 25 : 18;
+    e.color = kind === 'giant' ? '#7b4fa3' : '#6cbf55';
+    e.poison = {timer:0,dmg:0,tickCd:0};
+    e.isGlobalArmored = false;
+    e.breakIntoBasic = false;
+    e.skinOverride = kind === 'giant' ? 'mutant_giant' : 'mutant_basic';
+    e.skinSourceMapId = RADIO_MAP;
+    e.spawnBiome = RADIO_MAP;
+    e.fracturedOrigin = false;
+    e.fractureMapId = null;
+    e.radioactiveDeathHandled = false;
+  }
+
+  function tickMutationClouds(){
+    if(window.currentMap !== RADIO_MAP || sandboxMode) return;
+    for(const cloud of mutationClouds){
+      for(const e of enemies){
+        if(!e || e.hp <= 0) continue;
+        const t = String(e.type||'').toLowerCase();
+        if(t === 'boss' || t === 'megaboss' || t === 'mega_boss') continue;
+
+        const giantTargets = new Set(['gigante','tanque','machine_gun_war','colosso','monster_tree','gorilla']);
+        const basicTargets = new Set(['basico','cardboard_head','motorcycle_helmet','prism_head']);
+        const canMutate = cloud.kind === 'giant' ? giantTargets.has(t) : basicTargets.has(t);
+        if(!canMutate) continue;
+
+        const minR = cloud.r + (Number(e.size)||12);
+        if(Math.hypot(e.x-cloud.x,e.y-cloud.y) <= minR){
+          mutateEnemy(e, cloud.kind);
+        }
+      }
+    }
+  }
+
+  const oldDrawRadioClouds = window.drawRadioactiveClouds;
+  function drawMutationClouds(){
+    if(window.currentMap !== RADIO_MAP) return;
+    for(const c of mutationClouds){
+      const pulse = 1 + Math.sin((gameTime||0) * 3 + c.phase) * 0.08;
+      const r = c.r * pulse;
+      ctx.save();
+      ctx.globalAlpha = 0.28;
+      ctx.fillStyle = c.kind === 'giant' ? 'rgba(130,70,210,.45)' : 'rgba(85,190,75,.50)';
+      ctx.shadowColor = c.kind === 'giant' ? 'rgba(160,90,255,.75)' : 'rgba(80,255,100,.72)';
+      ctx.shadowBlur = c.kind === 'giant' ? 18 : 14;
+      ctx.beginPath();
+      ctx.ellipse(c.x,c.y,r,r*0.64,0,0,Math.PI*2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.globalAlpha = 0.55;
+      ctx.strokeStyle = c.kind === 'giant' ? 'rgba(210,170,255,.42)' : 'rgba(180,255,175,.40)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.ellipse(c.x,c.y,r*0.72,r*0.42,0,0,Math.PI*2);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+  window.drawRadioactiveClouds = function(){
+    if(typeof oldDrawRadioClouds === 'function') oldDrawRadioClouds();
+    drawMutationClouds();
+  };
+
+  const oldInitRadio = window.initRadioactiveSystem;
+  window.initRadioactiveSystem = function(){
+    clearMutationClouds();
+    radioNextClick = 0;
+    if(typeof oldInitRadio === 'function') return oldInitRadio();
+  };
+
+  /* =========================
+     New enemy construction
+     ========================= */
+  const oldSpawn = window.spawnEnemy;
+
+  function makeRadioEnemy(type, forcedPoint){
+    if(typeof oldSpawn !== 'function') return null;
+    const e = oldSpawn('basico', forcedPoint, null);
+    if(!e) return e;
+
+    const entryWave = Math.max(1, Number(wave)||1);
+    const diffFor = t => Math.max(0.25, getEnemyDifficultyMultiplierFromEntry(t, entryWave, wave));
+    const basMult = diffFor('basico');
+    const prismMult = diffFor('prism_head');
+    const tankMult = diffFor('tanque');
+
+    e.type = type;
+    e.skinOverride = ({
+      fighter_plane:'plane',
+      machine_gun_war:'machine_gun_war',
+      anti_radiation:'anti_radiation',
+      mutant_basic:'mutant_basic',
+      mutant_giant:'mutant_giant'
+    })[type];
+    e.skinSourceMapId = RADIO_MAP;
+    e.spawnBiome = RADIO_MAP;
+    e.fracturedOrigin = false;
+    e.fractureMapId = null;
+    e.enemySkin = null;
+    e.fracturedSkinType = null;
+    e.resolvedFracturedSkinType = null;
+    e._skinTypeForEnemy = null;
+    e.poison = {timer:0,dmg:0,tickCd:0};
+    e.slowTimer = 0;
+    e.weakenTimer = 0;
+    e.burnTimer = 0;
+    e.freezeTimer = 0;
+    e.shockTimer = 0;
+    e.shockSemiTimer = 0;
+    e.shockTick = 0;
+    e.shockSemiTick = 0;
+    e.entryWave = entryWave;
+    e.spawnWave = entryWave;
+
+    if(type === 'fighter_plane'){
+      const mult = Math.max(0.25, 1 + (entryWave * (pd?.settings?.ultraHardcore ? 0.11 : (window.isHardcoreMode ? 0.095 : 0.085))));
+      e.hp = 420 * mult;
+      e.maxHp = e.hp;
+      e.baseDmg = 24 * basMult;
+      e.dmg = e.baseDmg;
+      e.speed = 1.72;
+      e.size = 22;
+      e.globalBalloon = true;
+      e.breakIntoBasic = false;
+      e.isGlobalArmored = false;
+      e.forceNormalOnDeath = false;
+      e.radioactiveSpecialType = 'fighter_plane';
+    } else if(type === 'machine_gun_war'){
+      const helmetMult = diffFor('motorcycle_helmet');
+      e.hp = Math.max(1, 85 * helmetMult);
+      e.maxHp = e.hp;
+      e.baseDmg = 16 * basMult;
+      e.dmg = e.baseDmg;
+      e.speed = 0.72;
+      e.size = 24;
+      e.isGlobalArmored = true;
+      e.breakIntoBasic = true;
+      e.machineGunCd = 0.85;
+      e.machineGunBurstCount = 0;
+      e.machineGunShotTimer = 0;
+      e.machineGunAngle = 0;
+      e.radioactiveSpecialType = 'machine_gun_war';
+    } else if(type === 'anti_radiation'){
+      e.hp = 100 * basMult;
+      e.maxHp = e.hp;
+      e.baseDmg = 10 * basMult;
+      e.dmg = e.baseDmg;
+      e.speed = 1.02;
+      e.size = 15;
+      e.radioactiveSpecialType = 'anti_radiation';
+      e.poisonImmune = true;
+    } else if(type === 'mutant_basic'){
+      e.hp = 180 * prismMult;
+      e.maxHp = e.hp;
+      e.baseDmg = 12 * basMult;
+      e.dmg = e.baseDmg;
+      e.speed = 1.05;
+      e.size = 18;
+      e.radioactiveMutant = 'basic';
+      e.radioactiveSpecialType = 'mutant_basic';
+    } else if(type === 'mutant_giant'){
+      e.hp = 160 * tankMult;
+      e.maxHp = e.hp;
+      e.baseDmg = 20 * basMult;
+      e.dmg = e.baseDmg;
+      e.speed = 0.75;
+      e.size = 25;
+      e.radioactiveMutant = 'giant';
+      e.radioactiveSpecialType = 'mutant_giant';
+    }
+    return e;
+  }
+
+  window.spawnEnemy = function(forcedType=null, forcedPoint=null, spriteOverride=null){
+    const forced = String(forcedType||'').toLowerCase();
+
+    if(window.currentMap === RADIO_MAP && NEW_TYPES.has(forced)){
+      const e = makeRadioEnemy(forced, forcedPoint);
+      if(e && spriteOverride) e.skinOverride = spriteOverride;
+      return e;
+    }
+
+    if(window.currentMap === RADIO_MAP && !forced && !sandboxMode && !window.survivalModeRun && !window.dailyMissionRun){
+      const r = Math.random();
+      let special = null;
+      if((Number(wave)||1) >= 30 && r < 0.045) special = 'fighter_plane';
+      else if((Number(wave)||1) >= 18 && r < 0.095) special = 'machine_gun_war';
+      else if((Number(wave)||1) >= 12 && r < 0.16) special = 'anti_radiation';
+      if(special) return makeRadioEnemy(special, forcedPoint);
+    }
+
+    const e = typeof oldSpawn === 'function'
+      ? oldSpawn(forcedType, forcedPoint, spriteOverride)
+      : null;
+
+    if(e && window.currentMap === RADIO_MAP){
+      const t=String(e.type||forcedType||'').toLowerCase();
+      const radioSkin=({fighter_plane:'plane',machine_gun_war:'machine_gun_war',anti_radiation:'anti_radiation',mutant_basic:'mutant_basic',mutant_giant:'mutant_giant'})[t];
+      if(radioSkin && getEnemySpritePath(radioSkin)) e.skinOverride=radioSkin;
+    }
+    return e;
+  };
+  if(typeof spawnEnemy === 'function') spawnEnemy = window.spawnEnemy;
+
+  /* =========================
+     Sandbox pool / variants
+     ========================= */
+  const oldPool = window.sandboxEnemyPoolAll;
+  window.sandboxEnemyPoolAll = function(){
+    const base = typeof oldPool === 'function' ? oldPool() : [];
+    const extra = window.currentMap === RADIO_MAP ? [...NEW_TYPES] : [];
+    return [...new Set(base.concat(extra))];
+  };
+
+  const oldVariants = window.fdFinalSandboxEnemyVariants;
+  window.fdFinalSandboxEnemyVariants = function(type){
+    const t=String(type||'').toLowerCase();
+    const out=typeof oldVariants==='function' ? oldVariants(t) : [];
+    if(window.currentMap===RADIO_MAP || NEW_TYPES.has(t)){
+      const skin=({fighter_plane:'plane',machine_gun_war:'machine_gun_war',anti_radiation:'anti_radiation',mutant_basic:'mutant_basic',mutant_giant:'mutant_giant'})[t];
+      if(skin && getEnemySpritePath(skin) && !out.some(v=>v?.skin===skin && Number(v?.mapId)===RADIO_MAP)){
+        out.push({skin,mapId:RADIO_MAP});
+      }
+    }
+    return out;
+  };
+  window.sandboxEnemyVariants=window.fdFinalSandboxEnemyVariants;
+
+  const oldEnemyName = window.fdFinalSandboxEnemyName;
+  window.fdFinalSandboxEnemyName = function(type,skin,mapId){
+    const t=String(type||'').toLowerCase();
+    const names={
+      fighter_plane:'Caça',
+      machine_gun_war:'Metralhador',
+      anti_radiation:'Anti-radioativizado',
+      mutant_basic:'Mutante básico',
+      mutant_giant:'Mutante Gigante'
+    };
+    if(names[t]) return names[t];
+    return typeof oldEnemyName==='function' ? oldEnemyName(type,skin,mapId) : t;
+  };
+
+  /* =========================
+     Enemy attack repair
+     ========================= */
+  function radioTemporal(e,dt){
+    try{
+      return Math.max(0, getEnemyTemporalActionDt(e,dt));
+    }catch(_){
+      return Math.max(0,dt);
+    }
+  }
+
+  function isEnemyFrozen(e){ return (Number(e?.freezeTimer)||0)>0; }
+  function enemyHypnotized(e){
+    try{return typeof isCurrentlyHypnotized==='function' && isCurrentlyHypnotized(e);}catch(_){return false;}
+  }
+
+  function repairEnemyAttacks(dt){
+    if(!Array.isArray(enemies) || !player || player.isDead) return;
+
+    for(const e of enemies){
+      if(!e || e.hp<=0) continue;
+      if(e.poisonImmune) e.poison={timer:0,dmg:0,tickCd:0};
+
+      const d = Math.hypot(player.x-e.x,player.y-e.y);
+      const invisible = (Number(player.invisTimer)||0)>0;
+      const frozen = isEnemyFrozen(e);
+      const hyp = enemyHypnotized(e);
+
+      if(e.type === 'machine_gun_war'){
+        e.machineGunCd = Math.max(0,(Number(e.machineGunCd)||0)-radioTemporal(e,dt));
+        e.machineGunBurstCount = Math.max(0,Number(e.machineGunBurstCount)||0);
+        if(e.machineGunBurstCount>0){
+          e.machineGunShotTimer = Math.max(0,(Number(e.machineGunShotTimer)||0)-radioTemporal(e,dt));
+          if(e.machineGunShotTimer<=0 && !frozen){
+            const target = hyp && typeof getHypnosisTarget==='function' ? getHypnosisTarget(e) : player;
+            if(target){
+              const a=Math.atan2(target.y-e.y,target.x-e.x);
+              const shotIndex=3-e.machineGunBurstCount;
+              const spread=shotIndex===1?0:(shotIndex===0?-0.025:0.025);
+              createProj(e.x,e.y,Math.cos(a+spread)*4.8,Math.sin(a+spread)*4.8,e.dmg*0.72,72,false,'enemy',{
+                size:7,sourceEnemy:e,sourceEnemyType:e.type,targetEnemy:hyp?target:null,hypnotized:hyp
+              });
+              e.machineGunBurstCount=Math.max(0,e.machineGunBurstCount-1);
+              e.machineGunShotTimer=e.machineGunBurstCount>0?0.14:0;
+            }
+          }
+        }
+        if(e.machineGunBurstCount<=0 && e.machineGunCd<=0 && d<=310 && !invisible && !frozen && !hyp){
+          e.machineGunCd=2.55;
+          e.machineGunBurstCount=3;
+          e.machineGunShotTimer=0;
+          e.machineGunAngle=Math.atan2(player.y-e.y,player.x-e.x);
+        }
+      }
+
+      if(e.type === 'swamp_monster' && !invisible && !frozen && !hyp && d <= 125){
+        e.fdSwampAttackCd = Math.max(0,(Number(e.fdSwampAttackCd)||0)-dt);
+        if(e.fdSwampAttackCd<=0){
+          const dealt=Math.max(1,Number(e.dmg)||1)*Math.max(0.35,Number(player.stats?.defMult)||1)*0.72;
+          if(Math.random()>Number(player.stats?.dodgeChance||0)){
+            dealPlayerDamage(dealt);
+            createExplosion(e.x,e.y,78,0,'rgba(75,105,65,.28)');
+            addFloatingText(player.x,player.y-18,`-${Math.floor(dealt)}`,'#7b8f5a',12);
+            if(player.hp<=0 && typeof triggerRevivePrompt==='function') triggerRevivePrompt();
+          }else{
+            addFloatingText(player.x,player.y,'Esquiva!','#3498db',12);
+          }
+          e.fdSwampAttackCd=1.35;
+        }
+      }else if(e.type === 'swamp_monster' && e.fdSwampAttackCd==null){
+        e.fdSwampAttackCd=0;
+      }
+
+      if(e.type === 'ghost_fisher'){
+        e.cd = Number.isFinite(Number(e.cd)) ? Number(e.cd) : 0;
+        if(e.cd<=0 && !invisible && !frozen && !hyp && d<=380){
+          const a=Math.atan2(player.y-e.y,player.x-e.x);
+          createProj(e.x,e.y,Math.cos(a)*4.1,Math.sin(a)*4.1,e.dmg,82,false,'ghost_fishing_line',{
+            size:7,sourceEnemy:e,sourceEnemyType:e.type,pullDistance:62,maxRange:360
+          });
+          e.cd=210;
+        }
+      }
+
+      if(e.type === 'stone_golem'){
+        e.golemAttackCd = Math.max(0,(Number(e.golemAttackCd)||0)-dt);
+        if(e.golemAttackCd<=0 && !invisible && !frozen && !hyp && d<=190){
+          const dealt=Math.max(1,Number(e.dmg)||1)*Math.max(0.35,Number(player.stats?.defMult)||1)*0.55;
+          if(Math.random()>Number(player.stats?.dodgeChance||0)){
+            dealPlayerDamage(dealt);
+            createExplosion(e.x,e.y,94,0,'rgba(120,120,120,.25)');
+            addFloatingText(player.x,player.y-20,`-${Math.floor(dealt)}`,'#b8b8b8',12);
+            if(player.hp<=0 && typeof triggerRevivePrompt==='function') triggerRevivePrompt();
+          }else{
+            addFloatingText(player.x,player.y,'Esquiva!','#3498db',12);
+          }
+          e.golemAttackCd=1.35;
+        }
+      }
+    }
+  }
+
+  /* =========================
+     Poison immunity + special deaths
+     ========================= */
+  const oldProjectileHit = window.projectileHitsEnemy;
+  if(typeof oldProjectileHit === 'function'){
+    window.projectileHitsEnemy=function(p,e){
+      const result=oldProjectileHit.apply(this,arguments);
+      if(e?.type==='anti_radiation') e.poison={timer:0,dmg:0,tickCd:0};
+      return result;
+    };
+  }
+
+  function processRadioDeaths(beforeSet){
+    if(!Array.isArray(enemies)) return;
+    for(const info of beforeSet){
+      if(enemies.includes(info.e)) continue;
+      const e=info.e;
+      if(!e) continue;
+      if(info.type==='anti_radiation'){
+        const clouds=window.fdRadioactiveGetClouds?.();
+        if(Array.isArray(clouds) && clouds.length){
+          const idx=Math.floor(Math.random()*clouds.length);
+          clouds.splice(idx,1);
+        }
+      }else if(info.type==='fighter_plane'){
+        const clouds=window.fdRadioactiveGetClouds?.();
+        if(Array.isArray(clouds)){
+          clouds.push({
+            x:Number(e.x)||0,y:Number(e.y)||0,
+            rx:105,ry:68,vx:0,vy:0,phase:Math.random()*Math.PI*2,pulse:Math.random()*Math.PI*2,
+            permanent:true
+          });
+        }
+      }else if(info.type==='mutant_basic'){
+        spawnMutationCloud(e.x,e.y,'basic');
+      }else if(info.type==='mutant_giant'){
+        spawnMutationCloud(e.x,e.y,'giant');
+      }
+    }
+  }
+
+  const oldUpdateEnemies = window.updateEnemies;
+  window.updateEnemies = function(dt){
+    const before=[];
+    if(Array.isArray(enemies)){
+      for(const e of enemies){
+        if(!e) continue;
+        const t=String(e.type||'').toLowerCase();
+        if(NEW_TYPES.has(t)) before.push({e,type:t});
+        if(t==='fighter_plane' && e.hp<=0 && !e.truckDeathPending){
+          e.truckDeathPending=true;
+          e.truckExplosionTimer=1;
+          e.hp=1;
+          e.speed=0;
+          e.stationary=true;
+        }
+      }
+    }
+
+    tickMutationClouds();
+
+    const result = typeof oldUpdateEnemies==='function' ? oldUpdateEnemies(dt) : undefined;
+
+    repairEnemyAttacks(dt);
+    processRadioDeaths(before);
+
+    return result;
+  };
+  if(typeof updateEnemies === 'function') updateEnemies=window.updateEnemies;
+
+  /* =========================
+     Gauge/sandbox visibility
+     ========================= */
+  const oldUpdateSandboxButton = window.updateSandboxButtonUI;
+  window.updateSandboxButtonUI = function(){
+    if(typeof oldUpdateSandboxButton==='function') oldUpdateSandboxButton();
+    const btn=document.getElementById('btn-sandbox');
+    if(btn){
+      const visible=!!(isPlaying && !isPaused && pd?.settings?.sandboxEnabled===true);
+      btn.classList.toggle('hidden',!visible);
+      btn.style.display=visible?'flex':'none';
+      btn.style.pointerEvents=visible?'auto':'none';
+    }
+  };
+
+  function hideSandboxGameplayButtonsWhenPaused(){
+    const ids=['btn-sandbox','btn-sandbox-summon','btn-sandbox-hypno','btn-sandbox-eraser','sandbox-tool-cluster'];
+    for(const id of ids){
+      const el=document.getElementById(id);
+      if(el && isPaused){
+        if(id==='sandbox-tool-cluster') el.style.display='none';
+        else { el.classList.add('hidden'); el.style.display='none'; }
+      }
+    }
+  }
+
+  const oldTogglePause = window.togglePause;
+  window.togglePause = function(){
+    const result = typeof oldTogglePause==='function' ? oldTogglePause.apply(this,arguments) : undefined;
+    window.updateSandboxButtonUI?.();
+    hideSandboxGameplayButtonsWhenPaused();
+    return result;
+  };
+  if(typeof togglePause==='function') togglePause=window.togglePause;
+
+  /* Permanently keep the new enemy selectors usable inside Sandbox. */
+  try{
+    document.addEventListener('click',()=>{ if(isPaused) hideSandboxGameplayButtonsWhenPaused(); },true);
+  }catch(_){}
+
+  /* =========================
+     One-time cleanup: this build used to default Sandbox to ON.
+     ========================= */
+  try{
+    const migrationKey='fd_sandbox_default_off_v11';
+    if(localStorage.getItem(migrationKey)!=='1'){
+      if(pd?.settings) pd.settings.sandboxEnabled=false;
+      localStorage.setItem(migrationKey,'1');
+      if(typeof save==='function') save();
+    }
+    // Never restore an active Sandbox session after a reload.
+    if(typeof sandboxMode!=='undefined' && sandboxMode){
+      sandboxMode=false;
+      sandboxMenuOpen=false;
+    }
+  }catch(_){}
+
+  /* Update audio + visibility alongside the existing game update. */
+  const oldUpdate = window.update;
+  window.update = function(dt){
+    updateRadioSound(dt);
+    const result = typeof oldUpdate==='function' ? oldUpdate.apply(this,arguments) : undefined;
+    if(isPaused) hideSandboxGameplayButtonsWhenPaused();
+    return result;
+  };
+  if(typeof update==='function') update=window.update;
+
+  /* Initial gauge visibility is map-scoped. */
+  try{
+    const gauge=document.getElementById('radioactivity-bar-container');
+    if(gauge) gauge.classList.toggle('hidden',window.currentMap!==RADIO_MAP || !!sandboxMode);
+  }catch(_){}
+
+})();
+</script>
+
 </body>
 </html>
