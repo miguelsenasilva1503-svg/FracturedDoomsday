@@ -393,7 +393,7 @@ html.sandbox-pc .sandbox-tool-hotkey{display:block}.sandbox-tool-state{position:
 </style>
 
 <style id="sandbox-style">
-#btn-sandbox{position:absolute;right:0;top:calc(100% + 7px);width:56px;height:56px;padding:8px;border-radius:14px;background:#5b2c83;border:3px solid #8e44ad !important;box-shadow:0 5px 12px rgba(0,0,0,.42);z-index:1000;display:inline-flex;pointer-events:auto !important;touch-action:manipulation;-webkit-user-select:none;user-select:none;cursor:pointer}
+#btn-sandbox{position:absolute;bottom:50px;right:140px;width:64px;height:64px;padding:8px;border-radius:50%;background:rgba(91,44,131,.86);border:3px solid #8e44ad !important;box-shadow:0 5px 12px rgba(0,0,0,.42);z-index:5;display:inline-flex;pointer-events:auto !important;touch-action:manipulation;-webkit-user-select:none;user-select:none;cursor:pointer}#btn-sandbox img{width:100%;height:100%;object-fit:contain;pointer-events:none}
 #btn-sandbox img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}
 #btn-sandbox:active{transform:scale(.94);}
 #overlay-sandbox{z-index:50000!important;background:rgba(5,7,13,.97)!important;backdrop-filter:blur(8px);padding:12px;overflow:hidden}
@@ -1555,8 +1555,8 @@ body .screen,body .overlay{width:100% !important;height:100% !important;}
 <img id="tutorial-pointer" class="tutorial-pointer" aria-hidden="true" src="elements/up.png" alt="">
 
 <div id="overlay-tutorial-dialog" class="overlay hidden" onclick="advanceTutorialDialog(event)">
-    <img id="tutorial-dialog-sprite" class="tutorial-dialog-sprite" src="" alt="">
     <div class="tutorial-dialog-box">
+        <img id="tutorial-dialog-sprite" class="tutorial-dialog-sprite" src="" alt="">
         <div class="tutorial-dialog-copy">
             <div id="tutorial-dialog-speaker" class="tutorial-dialog-speaker">Strike</div>
             <div id="tutorial-dialog-text" class="tutorial-dialog-text"></div>
@@ -14802,7 +14802,7 @@ function updateSandboxButtonUI() {
         return;
     }
     // Sandbox é um recurso normal da conta e pode aparecer desde a primeira partida.
-    const visible = !!(isPlaying && pd?.settings?.sandboxEnabled !== false);
+    const visible = !!(isPlaying && pd?.settings?.sandboxEnabled === true);
     btn.classList.toggle('hidden', !visible);
     btn.title = sandboxMode ? 'Abrir SANDBOX' : 'Ativar SANDBOX';
     btn.setAttribute('aria-label', sandboxMode ? 'Abrir SANDBOX' : 'Ativar SANDBOX');
@@ -25852,16 +25852,7 @@ function draw() {
                 ctx.restore();
             }
             else if(o.type === 'cacto') { ctx.fillStyle = '#27ae60'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI*2); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.stroke(); }
-            else if(o.type === 'radio_rock') {
-                ctx.save(); ctx.translate(o.x,o.y); ctx.rotate((o.rot||0));
-                const rr=o.r||20;
-                ctx.fillStyle = '#7b4524'; ctx.beginPath();
-                ctx.moveTo(-rr*.95,rr*.12); ctx.lineTo(-rr*.52,-rr*.78); ctx.lineTo(rr*.16,-rr); ctx.lineTo(rr*.88,-rr*.38); ctx.lineTo(rr,rr*.32); ctx.lineTo(rr*.28,rr*.9); ctx.lineTo(-rr*.48,rr*.72); ctx.closePath(); ctx.fill();
-                ctx.fillStyle = '#a85b24'; ctx.beginPath();
-                ctx.moveTo(-rr*.46,-rr*.5); ctx.lineTo(rr*.1,-rr*.72); ctx.lineTo(rr*.58,-rr*.18); ctx.lineTo(rr*.15,rr*.18); ctx.lineTo(-rr*.46,rr*.04); ctx.closePath(); ctx.fill();
-                ctx.lineWidth = 2; ctx.strokeStyle = '#3b2417'; ctx.stroke(); ctx.restore();
-            }
-            else if(o.type === 'rock') { ctx.fillStyle = '#2c3e50'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI*2); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.stroke(); }
+    else if(o.type === 'rock') { ctx.fillStyle = '#2c3e50'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI*2); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.stroke(); }
             else if(o.type === 'sandbox_invisible_wall') { if (sandboxMode) { ctx.save(); ctx.globalAlpha=0.30; ctx.fillStyle='#bfe3ff'; ctx.strokeStyle='#74b9ff'; ctx.lineWidth=2; ctx.fillRect(o.x-o.r,o.y-o.r,o.r*2,o.r*2); ctx.strokeRect(o.x-o.r,o.y-o.r,o.r*2,o.r*2); ctx.restore(); } }
             else if(o.type === 'tree') { ctx.fillStyle = '#1e272e'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r*0.4, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#218c74'; ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI*2); ctx.fill(); }
             else if(o.type === 'car') { ctx.fillStyle = '#f39c12'; ctx.fillRect(o.x-o.r, o.y-o.r, o.r*2, o.r*2); ctx.fillStyle = '#333'; ctx.fillRect(o.x-o.r+5, o.y-o.r+5, o.r*2-10, o.r*2-10); }
@@ -32580,27 +32571,70 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
 
 <style id="fd-radioactive-seasonal-v1">
 #o2-bar-container{z-index:5;}
-#radioactivity-bar-container{position:absolute;top:98px;left:50%;transform:translateX(-50%);width:300px;height:18px;background:#161b12;border:3px solid #000;border-radius:12px;overflow:hidden;z-index:5;box-shadow:0 0 10px rgba(0,0,0,.5);}
-#radioactivity-bar{height:100%;width:0%;background:linear-gradient(90deg,#2ecc71 0%,#f1c40f 38%,#f39c12 68%,#e74c3c 100%);transition:width .15s linear;box-shadow:inset 0 0 7px rgba(255,255,255,.22);}
-#radioactivity-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:900;text-shadow:1px 1px 0 #000;pointer-events:none;letter-spacing:.02em;}
-.seasonal-event-head{max-width:1100px;width:100%;margin:0 auto 18px;padding:18px 20px;border-radius:22px;background:linear-gradient(145deg,rgba(34,41,63,.98),rgba(14,19,31,.98));border:1px solid rgba(255,255,255,.11);box-shadow:0 14px 30px rgba(0,0,0,.35);}
-.seasonal-event-head h3{margin:3px 0 6px;color:#fff;font-size:30px;text-align:left;}
-.seasonal-quest-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;max-width:1100px;width:100%;margin:0 auto;padding-bottom:18px;}
-.seasonal-quest-card{min-width:0;display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:20px;background:linear-gradient(145deg,rgba(39,47,68,.98),rgba(13,18,30,.98));border:1px solid rgba(255,255,255,.12);box-shadow:0 12px 24px rgba(0,0,0,.32);}
-.seasonal-quest-art{height:105px;border-radius:16px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:linear-gradient(140deg,#56613f,#282f22);border:1px solid rgba(255,255,255,.08);}
-.seasonal-quest-art img{width:150px;height:92px;object-fit:contain;filter:drop-shadow(0 6px 10px rgba(0,0,0,.45));}
-.seasonal-quest-title{font-size:20px;font-weight:900;color:#fff;line-height:1.1;}
-.seasonal-quest-desc{font-size:13px;line-height:1.4;color:#d5dde4;min-height:54px;}
-.seasonal-quest-meta{display:flex;gap:8px;flex-wrap:wrap;}
-.seasonal-quest-meta span{padding:5px 8px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.09);font-size:11px;font-weight:900;color:#e8edf2;}
-.seasonal-quest-progress{height:12px;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.12);border-radius:999px;overflow:hidden;}
-.seasonal-quest-progress-fill{height:100%;background:linear-gradient(90deg,#f39c12,#f1c40f);width:0%;transition:width .2s ease;}
-.seasonal-quest-progress-fill.done{background:linear-gradient(90deg,#2ecc71,#27ae60);}
-.seasonal-quest-card button{width:100%;padding:11px 14px;font-size:14px;border-radius:999px;margin-top:auto;}
-@media(max-width:900px){.seasonal-quest-list{grid-template-columns:1fr 1fr;}.seasonal-quest-card{min-height:0;}}
-@media(max-width:620px){.seasonal-quest-list{grid-template-columns:1fr;}.seasonal-event-head h3{font-size:24px;}#radioactivity-bar-container{top:84px;width:178px;height:18px;}}
+#radioactivity-bar-container{position:absolute !important;top:88px !important;left:50% !important;transform:translateX(-50%) !important;width:198px !important;height:112px !important;padding:5px 7px 4px !important;display:flex !important;flex-direction:column !important;align-items:center !important;justify-content:flex-start !important;background:linear-gradient(180deg,rgba(22,27,18,.94),rgba(10,13,8,.94)) !important;border:2px solid rgba(110,255,150,.22) !important;border-radius:20px !important;box-shadow:0 8px 22px rgba(0,0,0,.36),inset 0 1px 0 rgba(255,255,255,.08) !important;overflow:visible !important;z-index:5 !important;}
+#radioactivity-gauge{width:188px;height:92px;display:block;overflow:visible;}
+#radioactivity-gauge .radioactivity-gauge-track,#radioactivity-gauge .radioactivity-gauge-fill{fill:none;stroke-linecap:round;stroke-width:12;}
+#radioactivity-gauge .radioactivity-gauge-track{stroke:rgba(255,255,255,.12);filter:drop-shadow(0 2px 2px rgba(0,0,0,.35));}
+#radioactivity-gauge .radioactivity-gauge-fill{stroke:url(#radioactivity-gauge-gradient);stroke-dasharray:226.195;stroke-dashoffset:226.195;transition:stroke-dashoffset .16s linear;}
+#radioactivity-needle{stroke:#fff;stroke-width:4.5;stroke-linecap:round;filter:drop-shadow(0 2px 2px rgba(0,0,0,.72));transform-origin:90px 84px;transition:transform .16s linear,stroke .16s linear;}
+#radioactivity-gauge .radioactivity-gauge-hub{fill:#fff;stroke:rgba(0,0,0,.72);stroke-width:3;}
+#radioactivity-label{display:block;position:relative;z-index:3;margin-top:-3px;min-width:150px;text-align:center;color:#fff;font-size:11px;font-weight:900;line-height:1;text-shadow:1px 1px 0 #000;letter-spacing:.05em;white-space:nowrap;}
+
+/* As quests sazonais usam a mesma composição horizontal das quests convencionais. */
+#event-section-seasonal .seasonal-event-head{max-width:1100px;width:100%;margin:0 auto 18px;padding:18px 20px;border-radius:22px;background:rgba(24,30,38,.96);border:1px solid rgba(255,255,255,.11);box-shadow:0 14px 30px rgba(0,0,0,.35);}
+#event-section-seasonal .seasonal-event-head h3{margin:3px 0 6px;color:#fff;font-size:30px;text-align:left;}
+#event-section-seasonal .seasonal-quest-list{display:flex;flex-direction:column;gap:12px;max-width:1100px;width:100%;margin:0 auto;padding-bottom:18px;}
+#event-section-seasonal .seasonal-quest-card{min-width:0;min-height:122px;width:100%;display:grid;grid-template-columns:180px minmax(0,1fr) auto;align-items:center;gap:14px;padding:10px 14px;border-radius:18px;background:rgba(27,34,43,.96);border:1px solid rgba(255,255,255,.12);box-shadow:0 12px 24px rgba(0,0,0,.28);}
+#event-section-seasonal .seasonal-quest-art{position:relative;height:100px;border-radius:14px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#151b16;border:1px solid rgba(255,255,255,.08);}
+#event-section-seasonal .seasonal-quest-art .daily-map-canvas{display:block;width:100%;height:100%;image-rendering:auto;}
+#event-section-seasonal .seasonal-quest-art .daily-map-label{position:absolute;left:7px;right:7px;bottom:5px;padding:3px 5px;background:rgba(0,0,0,.62);border-radius:7px;color:#fff;font-size:10px;font-weight:900;text-align:center;line-height:1.05;}
+#event-section-seasonal .seasonal-map-character{position:absolute;left:50%;top:50%;width:66px;height:66px;transform:translate(-50%,-50%);object-fit:contain;image-rendering:auto;filter:drop-shadow(0 3px 5px rgba(0,0,0,.52));pointer-events:none;}
+#event-section-seasonal .seasonal-quest-main{min-width:0;display:flex;flex-direction:column;gap:6px;}
+#event-section-seasonal .seasonal-quest-title{font-size:20px;font-weight:900;color:#fff;line-height:1.1;}
+#event-section-seasonal .seasonal-quest-desc{font-size:13px;line-height:1.35;color:#d5dde4;min-height:0;}
+#event-section-seasonal .seasonal-quest-meta{display:flex;gap:7px;flex-wrap:wrap;}
+#event-section-seasonal .seasonal-quest-meta span{padding:4px 7px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.09);font-size:10px;font-weight:900;color:#e8edf2;}
+#event-section-seasonal .seasonal-quest-progress{height:8px;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.12);border-radius:999px;overflow:hidden;}
+#event-section-seasonal .seasonal-quest-progress-fill{height:100%;background:#f39c12;width:0%;transition:width .2s ease;}
+#event-section-seasonal .seasonal-quest-progress-fill.done{background:#2ecc71;}
+#event-section-seasonal .seasonal-quest-action{display:flex;align-items:center;justify-content:center;min-width:118px;}
+#event-section-seasonal .seasonal-quest-card button{width:118px;padding:11px 14px;font-size:14px;border-radius:999px;margin:0;}
+
+@media(max-width:760px){
+    #btn-sandbox{width:58px;height:58px;right:120px;bottom:48px;}
+    #radioactivity-bar-container{top:84px !important;width:178px !important;height:103px !important;}
+    #radioactivity-gauge{width:169px;height:83px;}
+    #event-section-seasonal .seasonal-quest-card{grid-template-columns:145px minmax(0,1fr) auto;gap:10px;padding:8px 10px;}
+    #event-section-seasonal .seasonal-quest-art{height:92px;}
+    #event-section-seasonal .seasonal-map-character{width:58px;height:58px;}
+    #event-section-seasonal .seasonal-quest-title{font-size:16px;}
+    #event-section-seasonal .seasonal-quest-desc{font-size:11px;}
+    #event-section-seasonal .seasonal-quest-card button{width:92px;padding:9px 8px;font-size:12px;}
+}
+@media(max-width:560px){
+    #event-section-seasonal .seasonal-quest-card{grid-template-columns:1fr;align-items:stretch;}
+    #event-section-seasonal .seasonal-quest-art{height:120px;}
+    #event-section-seasonal .seasonal-quest-action{justify-content:flex-end;}
+    #event-section-seasonal .seasonal-quest-card button{width:110px;}
+}
 </style>
-<div id="radioactivity-bar-container" class="hidden" aria-label="Radioatividade"><div id="radioactivity-bar"></div><span id="radioactivity-label">RADIOATIVIDADE 0%</span></div>
+<div id="radioactivity-bar-container" class="hidden" aria-label="Radioatividade">
+    <svg id="radioactivity-gauge" viewBox="0 0 180 104" role="img" aria-label="Medidor de radioatividade">
+        <defs>
+            <linearGradient id="radioactivity-gauge-gradient" x1="18" y1="84" x2="162" y2="84" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#2ecc71"></stop>
+                <stop offset="38%" stop-color="#f1c40f"></stop>
+                <stop offset="68%" stop-color="#f39c12"></stop>
+                <stop offset="100%" stop-color="#e74c3c"></stop>
+            </linearGradient>
+        </defs>
+        <path class="radioactivity-gauge-track" d="M 18 84 A 72 72 0 0 1 162 84"></path>
+        <path id="radioactivity-bar" class="radioactivity-gauge-fill" d="M 18 84 A 72 72 0 0 1 162 84"></path>
+        <line id="radioactivity-needle" x1="90" y1="84" x2="145" y2="84"></line>
+        <circle cx="90" cy="84" r="7" class="radioactivity-gauge-hub"></circle>
+    </svg>
+    <span id="radioactivity-label">RADIOATIVIDADE 0%</span>
+</div>
 <script>
 (function(){
     const RADIOACTIVE_MAP_ID = 19;
@@ -32677,13 +32711,31 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
             const completed=!!st.completed;
             const phase=Math.min(q.phases,Math.max(0,Math.floor(Number(st.phase)||0)));
             const currentPhase=Math.min(q.phases-1,phase);
-            const target= q.phaseTargets[currentPhase] || 25;
+            const target=q.phaseTargets[currentPhase] || 25;
             const pct=completed?100:((phase/q.phases)*100);
-            const art=seasonalRewardVisual(q);
+            const charId=q.reward?.kind==='character' ? q.reward.charId : null;
+            const charMarkup=charId ? `<img class="seasonal-map-character" src="${getCharacterSpritePath(charId)}" alt="${escapeHtmlAttr(CHARACTERS?.[charId]?.name || charId)}">` : '';
             const status=completed?'Concluída':`Fase ${phase+1}/${q.phases}`;
             const btn=completed?`<button class="btn-menu" type="button" disabled>Concluída</button>`:`<button class="btn-action" type="button" onclick="launchSeasonalQuest('${q.id}')">Jogar</button>`;
-            return `<div class="seasonal-quest-card">\n                <div class="seasonal-quest-art">${art}</div>\n                <div class="seasonal-quest-title">${escapeHtmlText(q.title)}</div>\n                <div class="seasonal-quest-desc">${escapeHtmlText(q.desc)}</div>\n                <div class="seasonal-quest-meta"><span>${escapeHtmlText(status)}</span><span>${target} waves por fase</span><span>Campo Radioativo</span></div>\n                <div class="seasonal-quest-progress"><div class="seasonal-quest-progress-fill ${completed?'done':''}" style="width:${Math.max(0,Math.min(100,pct))}%"></div></div>\n                <div class="seasonal-quest-meta"><span>Recompensa</span><span>${escapeHtmlText(seasonalRewardLabel(q))}</span></div>\n                ${btn}\n            </div>`;
+            return `<div class="seasonal-quest-card">
+                <div class="seasonal-quest-art"><canvas class="daily-map-canvas" data-seasonal-map-preview="1" width="180" height="100"></canvas><div class="daily-map-label">Campo Radioativo</div>${charMarkup}</div>
+                <div class="seasonal-quest-main">
+                    <div class="seasonal-quest-title">${escapeHtmlText(q.title)}</div>
+                    <div class="seasonal-quest-desc">${escapeHtmlText(q.desc)}</div>
+                    <div class="seasonal-quest-meta"><span>${escapeHtmlText(status)}</span><span>${target} waves por fase</span><span>Campo Radioativo</span></div>
+                    <div class="seasonal-quest-progress"><div class="seasonal-quest-progress-fill ${completed?'done':''}" style="width:${Math.max(0,Math.min(100,pct))}%"></div></div>
+                    <div class="seasonal-quest-meta"><span>Recompensa</span><span>${escapeHtmlText(seasonalRewardLabel(q))}</span></div>
+                </div>
+                <div class="seasonal-quest-action">${btn}</div>
+            </div>`;
         }).join('');
+
+        root.querySelectorAll('canvas[data-seasonal-map-preview]').forEach(canvas=>{
+            const qCard=canvas.closest('.seasonal-quest-card');
+            const idx=Array.from(root.querySelectorAll('.seasonal-quest-card')).indexOf(qCard);
+            const q=SEASONAL_QUEST_DEFS[idx];
+            if(q && typeof drawDailyMapPreview==='function') drawDailyMapPreview(canvas,{mapIndex:RADIOACTIVE_MAP_ID,mapName:'Campo Radioativo'});
+        });
     }
 
     function launchSeasonalQuest(id){
@@ -32873,6 +32925,27 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
         const dx=(px-cloud.x)/cloud.rx,dy=(py-cloud.y)/cloud.ry;
         return dx*dx+dy*dy<=1;
     }
+    function updateRadioactivityGaugeVisual(){
+        const wrap=document.getElementById('radioactivity-bar-container');
+        const path=document.getElementById('radioactivity-bar');
+        const needle=document.getElementById('radioactivity-needle');
+        const label=document.getElementById('radioactivity-label');
+        const active=window.currentMap===RADIOACTIVE_MAP_ID && !sandboxMode && !!player;
+        if(wrap) wrap.classList.toggle('hidden',!active);
+        const pct=Math.max(0,Math.min(1,(Number(player?.radioactivity)||0)/100));
+        const arcLength=Math.PI*72;
+        if(path){
+            path.style.strokeDasharray=`${arcLength}`;
+            path.style.strokeDashoffset=`${arcLength*(1-pct)}`;
+        }
+        if(needle){
+            const angle=180-pct*180;
+            needle.setAttribute('transform',`rotate(${angle} 90 84)`);
+            needle.style.stroke=pct>=0.65 ? '#fff' : '#fff';
+        }
+        if(label) label.textContent=`RADIOATIVIDADE ${Math.ceil(pct*100)}%`;
+    }
+
     function updateRadioactiveSystem(dt){
         const bar=document.getElementById('radioactivity-bar-container');
         const active=window.currentMap===RADIOACTIVE_MAP_ID && !sandboxMode && !!player;
@@ -32909,9 +32982,9 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
             addFloatingText(player.x,player.y-player.r-24,`RADIAÇÃO CRÍTICA -${RADIOACTIVE_BIG_HIT}`,'#ff6b5b',18);
             if(player.hp<=0){player.isDead=true;gameOver(false);return;}
         }
-        const fill=document.getElementById('radioactivity-bar'); if(fill) fill.style.width=`${Math.max(0,Math.min(100,Number(player.radioactivity)||0))}%`;
-        const label=document.getElementById('radioactivity-label'); if(label) label.textContent=`RADIOATIVIDADE ${Math.ceil(Math.max(0,Math.min(100,Number(player.radioactivity)||0)))}%`;
-        if(player.radioactivity>=65) label?.style.setProperty('color','#fff');
+        updateRadioactivityGaugeVisual();
+        const radioLabel=document.getElementById('radioactivity-label');
+        if(player.radioactivity>=65) radioLabel?.style.setProperty('color','#fff');
         if(player.radioactivityFlash>0){
             ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle=`rgba(255,65,35,${Math.min(.2,player.radioactivityFlash*.2)})`;ctx.fillRect(0,0,cw,ch);ctx.restore();
         }
@@ -33000,12 +33073,9 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
     if(oldGenerateMapObstacles){
         generateMapObstacles=function(){
             oldGenerateMapObstacles();
-            if(window.currentMap===RADIOACTIVE_MAP_ID && !sandboxWallsSuppressed){
-                for(let i=0;i<22;i++){
-                    const a=Math.random()*Math.PI*2,d=180+Math.random()*1180;
-                    obstacles.push({x:Math.cos(a)*d,y:Math.sin(a)*d,r:18+Math.random()*22,type:'radio_rock',radioactiveDecor:true});
-                }
-            }
+            // O Campo Radioativo usa crateras/terreno morto no próprio desenho do mapa;
+            // não deve criar pedras CSS/obstáculos decorativos adicionais.
+            obstacles = Array.isArray(obstacles) ? obstacles.filter(o => o?.type !== 'radio_rock' && !o?.radioactiveDecor) : obstacles;
         };
     }
 
@@ -33081,9 +33151,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
             const active=window.currentMap===RADIOACTIVE_MAP_ID && !sandboxMode && !!player;
             if(bar) bar.classList.toggle('hidden',!active);
             if(active && player){
-                const pct=Math.max(0,Math.min(100,Number(player.radioactivity)||0));
-                const fill=document.getElementById('radioactivity-bar');if(fill)fill.style.width=`${pct}%`;
-                const label=document.getElementById('radioactivity-label');if(label)label.textContent=`RADIOATIVIDADE ${Math.ceil(pct)}%`;
+                updateRadioactivityGaugeVisual();
             }
         };
     }
