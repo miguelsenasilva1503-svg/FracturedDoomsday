@@ -4440,6 +4440,9 @@ const SUGAR_IMMUNE_ENEMY_TYPES = new Set(['boss', 'megaboss', 'colosso', 'elite_
 // Clássico < Hardcore < UHC, mas com crescimento mais controlado ao longo das waves.
 function getEnemyDifficultyMultiplier(currentWave = wave) {
     const w = Math.max(1, Number(currentWave) || 1);
+    // Terra Sem Lei — Parte 2 usa uma dificuldade própria, entre Clássico e Hardcore.
+    // Ela vale somente para esta side quest e não altera o balanceamento dos mapas globais.
+    if (window.seasonalQuestRun?.id === 'terra_sem_lei_2') return 1.05 + (w * 0.13);
     if (pd?.settings?.ultraHardcore) return 1.14 + (w * 0.17);
     if (window.isHardcoreMode) return 1.10 + (w * 0.15);
     return 1.00 + (w * 0.11);
@@ -4472,8 +4475,10 @@ function getEnemyDifficultyMultiplierFromEntry(type, spawnWave = wave, currentWa
     // A wave may be arbitrarily large in Sandbox. Keep enemy stats finite and performant
     // while preserving the displayed/current wave number itself.
     const nowWave = Math.min(rawNowWave, 1000000);
-    const baseline = pd?.settings?.ultraHardcore ? 1.14 : (window.isHardcoreMode ? 1.10 : 1.00);
-    const slope = pd?.settings?.ultraHardcore ? 0.17 : (window.isHardcoreMode ? 0.15 : 0.11);
+    // Dificuldade exclusiva da Parte 2: acima do Clássico, abaixo do Hardcore.
+    const terraPart2 = window.seasonalQuestRun?.id === 'terra_sem_lei_2';
+    const baseline = terraPart2 ? 1.05 : (pd?.settings?.ultraHardcore ? 1.14 : (window.isHardcoreMode ? 1.10 : 1.00));
+    const slope = terraPart2 ? 0.13 : (pd?.settings?.ultraHardcore ? 0.17 : (window.isHardcoreMode ? 0.15 : 0.11));
     return baseline + Math.max(0, nowWave - startWave) * slope;
 }
 
@@ -14996,7 +15001,7 @@ function sandboxBuildBaselinePlayer(id) {
 }
 
 function sandboxAvailable() {
-    return !!(isPlaying && pd?.settings?.sandboxEnabled !== false && player);
+    return !!(isPlaying && pd?.settings?.sandboxEnabled === true && player && !isPaused);
 }
 
 let sandboxButtonLastInput = 0;
@@ -20830,7 +20835,7 @@ function updateEnemies(dt) {
                 } else if (e.type === 'ice_statue') {
                     const mult = Math.max(0.25, (Number(e.maxHp) > 0 ? Number(e.maxHp) / 150 : 1));
                     enemies.push({
-                        x:e.x, y:e.y, type:'basico', hp:30*basicMult, maxHp:30*basicMult, speed:1.5, baseDmg:5*basicMult, dmg:5*basicMult, size:12, cd:0, color:'#e74c3c',
+                        x:e.x, y:e.y, type:'basico', hp:30*mult, maxHp:30*mult, speed:1.5, baseDmg:5*mult, dmg:5*mult, size:12, cd:0, color:'#e74c3c',
                         poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0,
                         shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4,
                         spawnBiome: Number.isInteger(e.skinSourceMapId) ? e.skinSourceMapId : 2, spawnWave:e.entryWave || wave, entryWave:e.entryWave || wave,
@@ -20864,7 +20869,7 @@ function updateEnemies(dt) {
                     const cardboardMult = getEnemyDifficultyMultiplierFromEntry('cardboard_head', spawnWave, wave);
                     const camelSourceMap = Number.isInteger(e.skinSourceMapId) ? e.skinSourceMapId : (Number.isInteger(e.fractureMapId) ? e.fractureMapId : 1);
                     const camelFractured = !!e.fracturedOrigin;
-                    enemies.push({ x:e.x-10, y:e.y, type:'basico', hp:30*mult, maxHp:30*mult, speed:1.5, baseDmg:5*mult, dmg:5*mult, size:12, cd:0, color:'#e74c3c', poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0, shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4, spawnBiome:camelSourceMap, skinSourceMapId:camelSourceMap, fracturedOrigin:camelFractured, fractureMapId:camelFractured ? camelSourceMap : null, enemySkin:null, fracturedSkinType:null, resolvedFracturedSkinType:null, _skinTypeForEnemy:null });
+                    enemies.push({ x:e.x-10, y:e.y, type:'basico', hp:30*basicMult, maxHp:30*basicMult, speed:1.5, baseDmg:5*basicMult, dmg:5*basicMult, size:12, cd:0, color:'#e74c3c', poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0, shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4, spawnBiome:camelSourceMap, skinSourceMapId:camelSourceMap, fracturedOrigin:camelFractured, fractureMapId:camelFractured ? camelSourceMap : null, enemySkin:null, fracturedSkinType:null, resolvedFracturedSkinType:null, _skinTypeForEnemy:null });
                     enemies.push({ x:e.x+10, y:e.y, type:'cardboard_head', hp:45*cardboardMult, maxHp:45*cardboardMult, speed:1.35, baseDmg:5*cardboardMult, dmg:5*cardboardMult, size:15, cd:0, color:'#b8793c', poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0, shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4, isGlobalArmored:true, breakIntoBasic:true, spawnBiome:camelSourceMap, skinSourceMapId:camelSourceMap, fracturedOrigin:camelFractured, fractureMapId:camelFractured ? camelSourceMap : null, enemySkin:null, fracturedSkinType:null, resolvedFracturedSkinType:null, _skinTypeForEnemy:null });
                 }
                 enemiesKilled++;
@@ -32574,7 +32579,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
 
 <style id="fd-radioactive-seasonal-v1">
 #o2-bar-container{z-index:5;}
-#radioactivity-bar-container{position:absolute !important;top:88px !important;left:50% !important;transform:translateX(-50%) !important;width:198px !important;height:112px !important;padding:5px 7px 4px !important;display:flex !important;flex-direction:column !important;align-items:center !important;justify-content:flex-start !important;background:linear-gradient(180deg,rgba(22,27,18,.94),rgba(10,13,8,.94)) !important;border:2px solid rgba(110,255,150,.22) !important;border-radius:20px !important;box-shadow:0 8px 22px rgba(0,0,0,.36),inset 0 1px 0 rgba(255,255,255,.08) !important;overflow:visible !important;z-index:5 !important;}
+#radioactivity-bar-container{position:absolute !important;top:88px !important;left:50% !important;transform:translateX(-50%) !important;width:198px !important;height:112px !important;padding:5px 7px 4px !important;display:flex;flex-direction:column !important;align-items:center !important;justify-content:flex-start !important;background:linear-gradient(180deg,rgba(22,27,18,.94),rgba(10,13,8,.94)) !important;border:2px solid rgba(110,255,150,.22) !important;border-radius:20px !important;box-shadow:0 8px 22px rgba(0,0,0,.36),inset 0 1px 0 rgba(255,255,255,.08) !important;overflow:visible !important;z-index:5 !important;}
 #radioactivity-gauge{width:188px;height:92px;display:block;overflow:visible;}
 #radioactivity-gauge .radioactivity-gauge-track,#radioactivity-gauge .radioactivity-gauge-fill{fill:none;stroke-linecap:round;stroke-width:12;}
 #radioactivity-gauge .radioactivity-gauge-track{stroke:rgba(255,255,255,.12);filter:drop-shadow(0 2px 2px rgba(0,0,0,.35));}
@@ -32620,6 +32625,17 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
     #event-section-seasonal .seasonal-quest-action{justify-content:flex-end;}
     #event-section-seasonal .seasonal-quest-card button{width:110px;}
 }
+#radioactivity-bar-container.hidden{display:none !important;}
+</style>
+<style id="fd-radio-transparent-v2">
+#o2-bar-container,#radioactivity-bar-container{
+    background:rgba(8,12,18,.34)!important;
+    border-color:rgba(255,255,255,.14)!important;
+    box-shadow:0 8px 22px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.07)!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+}
+#radioactivity-bar-container{background:rgba(10,15,8,.34)!important;}
 </style>
 <div id="radioactivity-bar-container" class="hidden" aria-label="Radioatividade">
     <svg id="radioactivity-gauge" viewBox="0 0 180 104" role="img" aria-label="Medidor de radioatividade">
@@ -32633,7 +32649,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
         </defs>
         <path class="radioactivity-gauge-track" d="M 18 84 A 72 72 0 0 1 162 84"></path>
         <path id="radioactivity-bar" class="radioactivity-gauge-fill" d="M 18 84 A 72 72 0 0 1 162 84"></path>
-        <line id="radioactivity-needle" x1="90" y1="84" x2="162" y2="84"></line>
+        <line id="radioactivity-needle" x1="90" y1="84" x2="18" y2="84"></line>
         <circle cx="90" cy="84" r="7" class="radioactivity-gauge-hub"></circle>
     </svg>
     <span id="radioactivity-label">RADIOATIVIDADE 0%</span>
@@ -32647,16 +32663,28 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
     const RADIOACTIVE_TARGET_COLOR = '#7dff4f';
     const SEASONAL_QUEST_DEFS = [
         {
-            id:'terra_sem_lei', title:'Terra sem lei', phases:10, mapIndex:19, mapName:'Campo Radioativo',
-            desc:'Um teaser do Campo Radioativo. Sobreviva às fases e atravesse a guerra nuclear.',
+            id:'terra_sem_lei', title:'Terra sem lei — Parte 1', phases:12, mapIndex:19, mapName:'Campo Radioativo',
+            desc:'A primeira parte da batalha no Campo Radioativo. Sobreviva às fases e atravesse a guerra nuclear.',
             reward:{kind:'box',boxType:'gold',label:'1 Caixa de Ouro',icon:'elements/gold_box.png'},
-            phaseTargets:Array.from({length:10},(_,i)=>25+i*5),
+            phaseTargets:Array.from({length:12},(_,i)=>25+i*5),
             introSteps:[
                 {speaker:'Tenent',text:'O conflito chegou ao ponto em que armas nucleares foram usadas no campo de batalha.'},
                 {speaker:'Tenent',text:'A explosão devastou a região e deixou o terreno contaminado. Ainda existem bolsões de gás radioativo por toda parte.'},
                 {speaker:'Tenent',text:'Dentro dessas nuvens, a radioatividade sobe. Fora delas, ela diminui. Aos 65%, seu corpo começa a sofrer com a exposição.'},
                 {speaker:'Tenent',text:'A radioatividade cresce em estágios. Ao chegar a 100%, você sofre uma descarga extrema e o contador volta para 50%.'},
                 {speaker:'Tenent',text:'As nuvens não ficam paradas: elas atravessam o campo lentamente. Não dependa de um único lugar seguro.'}
+            ]
+        },
+        {
+            id:'terra_sem_lei_2', title:'Terra sem lei — Parte 2', phases:8, mapIndex:19, mapName:'Campo Radioativo',
+            desc:'Os reforços chegaram. A radiação aumentou e começou a transformar os Fraturadis.',
+            reward:{kind:'box',boxType:'gold',label:'1 Caixa de Ouro',icon:'elements/gold_box.png'},
+            phaseTargets:Array.from({length:8},(_,i)=>25+i*5),
+            introSteps:[
+                {speaker:'Major Briggs',text:'Major Briggs aqui. Enviaram muitos reforços para essa área.'},
+                {speaker:'Major Briggs',text:'Mas temos um problema pior: a radiação está ficando forte demais.'},
+                {speaker:'Major Briggs',text:'Ela está deixando os Fraturadis mutantes. E essas coisas não parecem muito felizes com a transformação.'},
+                {speaker:'Major Briggs',text:'Os reforços já estão no campo. Os novos inimigos e o líder não vão esperar você se preparar.'}
             ]
         },
         {
@@ -32752,11 +32780,11 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
             document.getElementById('overlay-seasonal-victory')?.classList.add('hidden');
             window.seasonalQuestLaunch={id:q.id};
             window.seasonalQuestRun=null;
-            window.isHardcoreMode=true;
+            window.isHardcoreMode=(q.id!=='terra_sem_lei_2');
             startRunAfterShop({seasonalQuest:true,seasonalQuestId:q.id});
         };
         document.getElementById('event-section-seasonal')?.classList.remove('hidden');
-        if(q.id==='terra_sem_lei' && !st.introShown){
+        if((q.id==='terra_sem_lei' || q.id==='terra_sem_lei_2') && q.introSteps?.length && !st.introShown){
             showTutorialDialog(q.introSteps, begin);
         } else begin();
     }
@@ -32827,7 +32855,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
         document.getElementById('overlay-seasonal-victory')?.classList.add('hidden');
         window.seasonalQuestLaunch={id:q.id};
         window.seasonalQuestRun=null;
-        window.isHardcoreMode=true;
+        window.isHardcoreMode=(q.id!=='terra_sem_lei_2');
         startRunAfterShop({seasonalQuest:true,seasonalQuestId:q.id});
     }
 
@@ -32872,7 +32900,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
         }
         if(window.seasonalQuestRun){
             const id=window.seasonalQuestRun.id;
-            window.seasonalQuestLaunch={id}; window.isHardcoreMode=true; window.seasonalQuestRun=null;
+            window.seasonalQuestLaunch={id}; window.isHardcoreMode=(id!=='terra_sem_lei_2'); window.seasonalQuestRun=null;
             startRunAfterShop({seasonalQuest:true,seasonalQuestId:id});
         }
     }
@@ -32935,7 +32963,9 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
         const path=document.getElementById('radioactivity-bar');
         const needle=document.getElementById('radioactivity-needle');
         const label=document.getElementById('radioactivity-label');
-        const active=window.currentMap===RADIOACTIVE_MAP_ID && !sandboxMode && !!player;
+        const radioValue=Math.max(0,Math.min(100,Number(player?.radioactivity)||0));
+        // Campo Radioativo: contador sempre visível. Outros mapas: só enquanto houver exposição.
+        const active=!!player && (window.currentMap===RADIOACTIVE_MAP_ID || radioValue>0.001);
         if(wrap) wrap.classList.toggle('hidden',!active);
         const pct=Math.max(0,Math.min(1,(Number(player?.radioactivity)||0)/100));
         const arcLength=Math.PI*72;
@@ -32958,24 +32988,39 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
 
     function updateRadioactiveSystem(dt){
         const bar=document.getElementById('radioactivity-bar-container');
-        const active=window.currentMap===RADIOACTIVE_MAP_ID && !sandboxMode && !!player;
-        if(bar) bar.classList.toggle('hidden',!active);
-        if(!active || !player) return;
-        if(!Array.isArray(radioactiveClouds) || radioactiveClouds._fdInitialized !== true) initRadioactiveSystem();
-        const half=getActiveWorldHalfSize();
-        for(const cloud of radioactiveClouds){
-            cloud.x+=cloud.vx*dt; cloud.y+=cloud.vy*dt;
-            if(cloud.x-cloud.rx < -half+20){cloud.x=-half+20+cloud.rx;cloud.vx=Math.abs(cloud.vx);}
-            if(cloud.x+cloud.rx > half-20){cloud.x=half-20-cloud.rx;cloud.vx=-Math.abs(cloud.vx);}
-            if(cloud.y-cloud.ry < -half+20){cloud.y=-half+20+cloud.ry;cloud.vy=Math.abs(cloud.vy);}
-            if(cloud.y+cloud.ry > half-20){cloud.y=half-20-cloud.ry;cloud.vy=-Math.abs(cloud.vy);}
+        if(!player){
+            if(bar) bar.classList.add('hidden');
+            return;
         }
-        const inCloud=radioactiveClouds.some(c=>pointInsideRadioactiveCloud(player.x,player.y,c));
-        const before=Number(player.radioactivity)||0;
-        player.radioactivity=Math.max(0,Math.min(100,before+(inCloud?6:-3)*dt));
+        const activeMap=window.currentMap===RADIOACTIVE_MAP_ID;
+        const radioValue=Math.max(0,Math.min(100,Number(player.radioactivity)||0));
+        const uiActive=activeMap || radioValue>0.001;
+        if(bar) bar.classList.toggle('hidden',!uiActive);
+
+        if(activeMap){
+            if(!Array.isArray(radioactiveClouds) || radioactiveClouds._fdInitialized !== true){
+                if(sandboxMode) return;
+                initRadioactiveSystem();
+            }
+            const half=getActiveWorldHalfSize();
+            for(const cloud of radioactiveClouds){
+                cloud.x+=cloud.vx*dt; cloud.y+=cloud.vy*dt;
+                if(cloud.x-cloud.rx < -half+20){cloud.x=-half+20+cloud.rx;cloud.vx=Math.abs(cloud.vx);}
+                if(cloud.x+cloud.rx > half-20){cloud.x=half-20-cloud.rx;cloud.vx=-Math.abs(cloud.vx);}
+                if(cloud.y-cloud.ry < -half+20){cloud.y=-half+20+cloud.ry;cloud.vy=Math.abs(cloud.vy);}
+                if(cloud.y+cloud.ry > half-20){cloud.y=half-20-cloud.ry;cloud.vy=-Math.abs(cloud.vy);}
+            }
+            const inCloud=radioactiveClouds.some(c=>pointInsideRadioactiveCloud(player.x,player.y,c));
+            const before=Number(player.radioactivity)||0;
+            player.radioactivity=Math.max(0,Math.min(100,before+(inCloud?6:-3)*dt));
+        } else {
+            // Fora do Campo Radioativo, a exposição residual desaparece gradualmente.
+            player.radioactivity=Math.max(0,Number(player.radioactivity||0)-4.5*dt);
+        }
+
         player.radioactivityDamageTimer=Math.max(0,(Number(player.radioactivityDamageTimer)||1)-dt);
         player.radioactivityFlash=Math.max(0,(Number(player.radioactivityFlash)||0)-dt);
-        if(player.radioactivity>=RADIOACTIVE_DAMAGE_START && player.radioactivity<100 && player.radioactivityDamageTimer<=0){
+        if(activeMap && player.radioactivity>=RADIOACTIVE_DAMAGE_START && player.radioactivity<100 && player.radioactivityDamageTimer<=0){
             player.radioactivityDamageTimer=RADIOACTIVE_HIT_PERIOD;
             const tier=1+Math.floor((player.radioactivity-RADIOACTIVE_DAMAGE_START)/5);
             const dmg=Math.max(1,tier);
@@ -32983,7 +33028,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
             addFloatingText(player.x,player.y-player.r-18,`-${dmg} RAD`,'#e74c3c',15);
             if(player.hp<=0){player.isDead=true;gameOver(false);return;}
         }
-        if(player.radioactivity>=100){
+        if(activeMap && player.radioactivity>=100){
             player.radioactivity=50;
             player.radioactivityDamageTimer=1;
             player.radioactivityFlash=.7;
@@ -33158,7 +33203,8 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
         updateGameHud=function(force=false){
             oldUpdateGameHud(force);
             const bar=document.getElementById('radioactivity-bar-container');
-            const active=window.currentMap===RADIOACTIVE_MAP_ID && !sandboxMode && !!player;
+            const radioValue=Math.max(0,Math.min(100,Number(player?.radioactivity)||0));
+            const active=!!player && (window.currentMap===RADIOACTIVE_MAP_ID || radioValue>0.001);
             if(bar) bar.classList.toggle('hidden',!active);
             if(active && player){
                 updateRadioactivityGaugeVisual();
@@ -33191,12 +33237,24 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
 
   const RADIO_MAP = 19;
   const NEW_TYPES = new Set(['fighter_plane','machine_gun_war','anti_radiation','mutant_basic','mutant_giant']);
+  const TERRA_PART1_ID = 'terra_sem_lei';
+  const TERRA_PART2_ID = 'terra_sem_lei_2';
+  const RADIO_SPECIAL_TYPES = ['mutant_basic','mutant_giant','anti_radiation','machine_gun_war','fighter_plane'];
+  const RADIO_GLOBAL_SPECIAL_CHANCE = 0.13;
+  const PART2_SPECIAL_CHANCE = 0.07;
+  function getActiveTerraQuestId(){
+    const id = window.seasonalQuestRun?.id;
+    return id === TERRA_PART1_ID || id === TERRA_PART2_ID ? id : null;
+  }
+  function isTerraPart1Run(){ return getActiveTerraQuestId() === TERRA_PART1_ID; }
+  function isTerraPart2Run(){ return getActiveTerraQuestId() === TERRA_PART2_ID; }
 
   /* =========================
      Radioactive gauge + sound
      ========================= */
   let radioAudioCtx = null;
   let radioAudioReady = false;
+  let radioNoiseBuffer = null;
   let radioNextClick = 0;
 
   function ensureRadioAudio(){
@@ -33205,42 +33263,67 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
       if(!Ctx) return;
       if(!radioAudioCtx) radioAudioCtx = new Ctx();
       if(radioAudioCtx.state === 'suspended') radioAudioCtx.resume().catch(()=>{});
+      if(!radioNoiseBuffer){
+        const sampleRate = radioAudioCtx.sampleRate || 44100;
+        const length = Math.floor(sampleRate * 0.09);
+        radioNoiseBuffer = radioAudioCtx.createBuffer(1, length, sampleRate);
+        const data = radioNoiseBuffer.getChannelData(0);
+        let filtered = 0;
+        for(let n=0;n<length;n++){
+          const raw = Math.random()*2-1;
+          // Ruído levemente "grosso" em vez de uma senoide limpa: lembra o clique mecânico de um Geiger.
+          filtered = filtered * 0.82 + raw * 0.18;
+          const envelope = Math.max(0, 1 - n / length);
+          data[n] = (filtered * 1.35 + raw * 0.12) * envelope;
+        }
+      }
       radioAudioReady = true;
     }catch(_){}
   }
 
   function playRadioClick(intensity){
-    if(!radioAudioReady || !radioAudioCtx || !player) return;
+    if(!radioAudioReady || !radioAudioCtx || !radioNoiseBuffer || !player) return;
     try{
       const now = radioAudioCtx.currentTime;
       const i = Math.max(0, Math.min(1, Number(intensity)||0));
-      const osc = radioAudioCtx.createOscillator();
+      const src = radioAudioCtx.createBufferSource();
+      const filter = radioAudioCtx.createBiquadFilter();
       const gain = radioAudioCtx.createGain();
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(920 + i * 720, now);
+      src.buffer = radioNoiseBuffer;
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(1350 + i * 1050, now);
+      filter.Q.setValueAtTime(0.85 + i * 0.35, now);
+      const volume = Math.min(0.095, 0.018 + i * 0.072);
       gain.gain.setValueAtTime(0.0001, now);
-      gain.gain.exponentialRampToValueAtTime(Math.min(0.055, 0.014 + i * 0.041), now + 0.008);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.055 + i * 0.025);
-      osc.connect(gain);
+      gain.gain.exponentialRampToValueAtTime(volume, now + 0.0035);
+      gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, volume * 0.18), now + 0.020);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.075 + i * 0.012);
+      src.connect(filter);
+      filter.connect(gain);
       gain.connect(radioAudioCtx.destination);
-      osc.start(now);
-      osc.stop(now + 0.095);
+      src.start(now);
+      src.stop(now + 0.083 + i * 0.01);
     }catch(_){}
   }
 
   function updateRadioSound(dt){
-    if(window.currentMap !== RADIO_MAP || sandboxMode || !player || player.isDead){
+    if(!player || player.isDead){
       radioNextClick = 0;
       return;
     }
     const pct = Math.max(0, Math.min(1, (Number(player.radioactivity)||0) / 100));
+    const radioActive = window.currentMap === RADIO_MAP || pct > 0.001;
     const musicVol = Math.max(0, Math.min(1, Number(pd?.settings?.musicVolume ?? 0.7)));
-    if(musicVol <= 0.001 || pct <= 0.001) return;
+    if(musicVol <= 0.001 || !radioActive || pct <= 0.001){
+      radioNextClick = 0;
+      return;
+    }
     radioNextClick -= Math.max(0, Number(dt)||0);
-    const interval = 1.05 - pct * 0.90;
+    // Exposição baixa = poucos cliques; exposição alta = sequência de cliques cada vez mais apertada.
+    const interval = 1.34 - pct * 1.17;
     if(radioNextClick <= 0){
       playRadioClick(pct);
-      radioNextClick = Math.max(0.12, interval * (0.82 + Math.random()*0.28));
+      radioNextClick = Math.max(0.085, interval * (0.78 + Math.random()*0.24));
     }
   }
 
@@ -33332,7 +33415,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
   }
 
   function tickMutationClouds(){
-    if(window.currentMap !== RADIO_MAP || sandboxMode) return;
+    if(window.currentMap !== RADIO_MAP) return;
     for(const cloud of mutationClouds){
       for(const e of enemies){
         if(!e || e.hp <= 0) continue;
@@ -33387,6 +33470,28 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
     radioNextClick = 0;
     if(typeof oldInitRadio === 'function') return oldInitRadio();
   };
+
+  /* =========================
+     Terra sem Lei — Parte 2: abertura com os cinco especiais + líder.
+     ========================= */
+  let terraPart2OpeningSpawned = false;
+  function clampRadioSpawnPoint(x,y){
+    const half = typeof getActiveWorldHalfSize === 'function' ? getActiveWorldHalfSize() : 1500;
+    return {x:Math.max(-half+40,Math.min(half-40,x)),y:Math.max(-half+40,Math.min(half-40,y))};
+  }
+  function spawnTerraPart2OpeningEnemies(){
+    if(!isTerraPart2Run() || terraPart2OpeningSpawned || !player || !Array.isArray(enemies)) return;
+    terraPart2OpeningSpawned = true;
+    const radius = 360;
+    RADIO_SPECIAL_TYPES.forEach((type,i)=>{
+      const a=(Math.PI*2*i)/RADIO_SPECIAL_TYPES.length;
+      const p=clampRadioSpawnPoint(player.x+Math.cos(a)*radius,player.y+Math.sin(a)*radius);
+      makeRadioEnemy(type,p);
+    });
+    const leaderAngle = Math.PI * 2 * 0.5;
+    const lp=clampRadioSpawnPoint(player.x+Math.cos(leaderAngle)*430,player.y+Math.sin(leaderAngle)*430);
+    if(typeof oldSpawn==='function'){ const leader=oldSpawn('lider',lp,null); if(leader) leader.terraPart2OpeningLeader=true; }
+  }
 
   /* =========================
      New enemy construction
@@ -33452,9 +33557,10 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
       e.baseDmg = 16 * basMult;
       e.dmg = e.baseDmg;
       e.speed = 0.72;
-      e.size = 24;
-      e.isGlobalArmored = true;
-      e.breakIntoBasic = true;
+      // Metralhador tem exatamente o porte de um Básico; somente o ataque é de metralhadora.
+      e.size = 12;
+      e.isGlobalArmored = false;
+      e.breakIntoBasic = false;
       e.machineGunCd = 0.85;
       e.machineGunBurstCount = 0;
       e.machineGunShotTimer = 0;
@@ -33493,6 +33599,12 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
 
   window.spawnEnemy = function(forcedType=null, forcedPoint=null, spriteOverride=null){
     const forced = String(forcedType||'').toLowerCase();
+    const terraId = getActiveTerraQuestId();
+
+    // Parte 1: os cinco especiais e o líder não existem nesta side quest.
+    if(window.currentMap === RADIO_MAP && terraId === TERRA_PART1_ID && (NEW_TYPES.has(forced) || forced === 'lider' || forced === 'leader')){
+      return false;
+    }
 
     if(window.currentMap === RADIO_MAP && NEW_TYPES.has(forced)){
       const e = makeRadioEnemy(forced, forcedPoint);
@@ -33501,17 +33613,32 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
     }
 
     if(window.currentMap === RADIO_MAP && !forced && !sandboxMode && !window.survivalModeRun && !window.dailyMissionRun){
-      const r = Math.random();
-      let special = null;
-      if((Number(wave)||1) >= 30 && r < 0.045) special = 'fighter_plane';
-      else if((Number(wave)||1) >= 18 && r < 0.095) special = 'machine_gun_war';
-      else if((Number(wave)||1) >= 12 && r < 0.16) special = 'anti_radiation';
-      if(special) return makeRadioEnemy(special, forcedPoint);
+      const currentWave=Math.max(1,Number(wave)||1);
+      const isPart2=terraId === TERRA_PART2_ID;
+      const isGlobal=!terraId;
+      const pool=RADIO_SPECIAL_TYPES.filter(t=>{
+        try{return getEnemyEntryWave(t,currentWave)<=currentWave;}catch(_){return true;}
+      });
+      const specialChance=isPart2 ? PART2_SPECIAL_CHANCE : (isGlobal ? RADIO_GLOBAL_SPECIAL_CHANCE : 0);
+      if(pool.length && Math.random()<specialChance){
+        const special=pool[Math.floor(Math.random()*pool.length)];
+        return makeRadioEnemy(special, forcedPoint);
+      }
     }
 
     const e = typeof oldSpawn === 'function'
       ? oldSpawn(forcedType, forcedPoint, spriteOverride)
       : null;
+
+    // Parte 1 também bloqueia o líder quando ele é escolhido pela rotação normal.
+    if(e && window.currentMap === RADIO_MAP && terraId === TERRA_PART1_ID){
+      const t=String(e.type||'').toLowerCase();
+      if(NEW_TYPES.has(t) || t === 'lider' || t === 'leader'){
+        const idx=Array.isArray(enemies) ? enemies.indexOf(e) : -1;
+        if(idx>=0) enemies.splice(idx,1);
+        return false;
+      }
+    }
 
     if(e && window.currentMap === RADIO_MAP){
       const t=String(e.type||forcedType||'').toLowerCase();
@@ -33521,6 +33648,18 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
     return e;
   };
   if(typeof spawnEnemy === 'function') spawnEnemy = window.spawnEnemy;
+
+  /* Wrap the run initializer only to seed the Part 2 opening roster. */
+  const oldStartRunAfterShop = window.startRunAfterShop;
+  if(typeof oldStartRunAfterShop === 'function'){
+    window.startRunAfterShop = function(options={}){
+      terraPart2OpeningSpawned = false;
+      const result = oldStartRunAfterShop.apply(this, arguments);
+      if(isTerraPart2Run() && isPlaying && !player?.isDead) spawnTerraPart2OpeningEnemies();
+      return result;
+    };
+    if(typeof startRunAfterShop === 'function') startRunAfterShop=window.startRunAfterShop;
+  }
 
   /* =========================
      Sandbox pool / variants
@@ -33689,6 +33828,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
       }else if(info.type==='fighter_plane'){
         const clouds=window.fdRadioactiveGetClouds?.();
         if(Array.isArray(clouds)){
+          clouds._fdInitialized=true;
           clouds.push({
             x:Number(e.x)||0,y:Number(e.y)||0,
             rx:105,ry:68,vx:0,vy:0,phase:Math.random()*Math.PI*2,pulse:Math.random()*Math.PI*2,
@@ -33711,6 +33851,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
         if(!e) continue;
         const t=String(e.type||'').toLowerCase();
         if(NEW_TYPES.has(t)) before.push({e,type:t});
+        if(t==='anti_radiation') e.poison={timer:0,dmg:0,tickCd:0};
         if(t==='fighter_plane' && e.hp<=0 && !e.truckDeathPending){
           e.truckDeathPending=true;
           e.truckExplosionTimer=1;
@@ -33724,6 +33865,28 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
     tickMutationClouds();
 
     const result = typeof oldUpdateEnemies==='function' ? oldUpdateEnemies(dt) : undefined;
+
+    // Terra sem Lei — Parte 1 nunca permite os cinco especiais nem qualquer líder,
+    // inclusive quando outra lógica de inimigo tenta inseri-los diretamente em `enemies`.
+    if(isTerraPart1Run() && Array.isArray(enemies)){
+      for(let i=enemies.length-1;i>=0;i--){
+        const t=String(enemies[i]?.type||'').toLowerCase();
+        if(NEW_TYPES.has(t) || t==='lider' || t==='leader') enemies.splice(i,1);
+      }
+    }
+
+    // Na Parte 2, o líder continua existindo, mas aparece com bem menos frequência.
+    // O líder inicial garantido pela abertura não é afetado.
+    if(isTerraPart2Run() && Array.isArray(enemies)){
+      let keptOpeningLeader = false;
+      for(let i=enemies.length-1;i>=0;i--){
+        const e=enemies[i];
+        const t=String(e?.type||'').toLowerCase();
+        if((t==='lider' || t==='leader') && !e.terraPart2OpeningLeader){
+          if(Math.random() > 0.12) enemies.splice(i,1);
+        }
+      }
+    }
 
     repairEnemyAttacks(dt);
     processRadioDeaths(before);
@@ -33776,9 +33939,11 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
      One-time cleanup: this build used to default Sandbox to ON.
      ========================= */
   try{
-    const migrationKey='fd_sandbox_default_off_v11';
+    const migrationKey='fd_sandbox_hard_reset_v12';
     if(localStorage.getItem(migrationKey)!=='1'){
       if(pd?.settings) pd.settings.sandboxEnabled=false;
+      if(typeof sandboxMode!=='undefined') sandboxMode=false;
+      if(typeof sandboxMenuOpen!=='undefined') sandboxMenuOpen=false;
       localStorage.setItem(migrationKey,'1');
       if(typeof save==='function') save();
     }
@@ -33799,10 +33964,11 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
   };
   if(typeof update==='function') update=window.update;
 
-  /* Initial gauge visibility is map-scoped. */
+  /* Initial gauge visibility: always on Campo Radioativo; lingering exposure elsewhere. */
   try{
     const gauge=document.getElementById('radioactivity-bar-container');
-    if(gauge) gauge.classList.toggle('hidden',window.currentMap!==RADIO_MAP || !!sandboxMode);
+    const radioNow=Math.max(0,Math.min(100,Number(player?.radioactivity)||0));
+    if(gauge) gauge.classList.toggle('hidden',!(window.currentMap===RADIO_MAP || radioNow>0.001));
   }catch(_){}
 
 })();
