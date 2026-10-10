@@ -1527,6 +1527,18 @@ body .screen,body .overlay{width:100% !important;height:100% !important;}
 #btn-hardcore-select.uhc-active:hover{filter:brightness(1.08) saturate(1.06) !important;}
 #btn-hardcore-select.uhc-active:active{filter:brightness(.98) saturate(1.05) !important;}
 </style>
+<style id="fd-update4-ui">
+#damage-vignette{position:fixed;inset:0;z-index:9;pointer-events:none;box-shadow:inset 0 0 0 0 rgba(210,20,25,0);transition:box-shadow .12s linear;}
+body.fd-entry-cinematic #joystick-zone,body.fd-entry-cinematic #btn-special,body.fd-entry-cinematic #btn-special-hint,body.fd-entry-cinematic #exp-bar-container,body.fd-entry-cinematic #o2-bar-container,body.fd-entry-cinematic #qb-bar-container,body.fd-entry-cinematic #radioactivity-bar-container,body.fd-entry-cinematic #game-hud>div:first-child,body.fd-entry-cinematic #sandbox-tool-cluster{display:none!important;}
+body.fd-entry-cinematic #game-hud{display:block!important;visibility:visible!important;}body.fd-entry-cinematic #game-hud>#btn-pause{display:flex!important;visibility:visible!important;pointer-events:auto!important;position:fixed;top:14px;right:14px;}
+.tutorial-skip-btn{margin-top:10px;padding:7px 12px!important;font-size:11px!important;border-radius:999px!important;background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.16)!important;box-shadow:none!important;color:#cfd8dc!important;}
+.sandbox-modifier-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;max-width:900px;margin:0 auto;padding:4px;}
+.sandbox-modifier-card{display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center!important;text-align:left!important;min-height:110px!important;padding:12px!important;gap:5px!important;}
+.sandbox-modifier-card strong{font-size:14px!important;width:100%;text-align:left!important;}
+.sandbox-modifier-card span{font-size:10px;color:#b9c4d0;line-height:1.3;}
+.sandbox-modifier-card em{font-style:normal;font-size:11px;font-weight:900;margin-top:auto;color:#fff;}
+@media(max-width:760px){.sandbox-modifier-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}@media(max-width:520px){.sandbox-modifier-grid{grid-template-columns:1fr;}}
+</style>
 </head>
 <body>
 
@@ -1560,7 +1572,7 @@ body .screen,body .overlay{width:100% !important;height:100% !important;}
         <div class="tutorial-dialog-copy">
             <div id="tutorial-dialog-speaker" class="tutorial-dialog-speaker">Strike</div>
             <div id="tutorial-dialog-text" class="tutorial-dialog-text"></div>
-            <div id="tutorial-dialog-hint" class="tutorial-dialog-hint">Clique para mostrar tudo</div>
+            <div id="tutorial-dialog-hint" class="tutorial-dialog-hint">Clique para mostrar tudo</div><button id="tutorial-dialog-skip" class="tutorial-skip-btn hidden" type="button" onclick="skipTutorialDialog(event)">Pular tutorial</button>
         </div>
     </div>
 </div>
@@ -1766,6 +1778,7 @@ body .screen,body .overlay{width:100% !important;height:100% !important;}
             <div class="settings-section-title">Acessibilidade</div>
             <div class="settings-grid">
                 <button class="btn-menu settings-option" onclick="toggleSetting('showHpBar')">Barra de Vida: <br><span id="set-hpbar" style="color:var(--btn-red)">Desativado</span></button>
+                <button class="btn-menu settings-option" onclick="toggleSetting('showHitboxes')">Ver hitboxes: <br><span id="set-hitboxes" style="color:var(--btn-red)">Desativado</span></button>
                 <div class="settings-card settings-card--wide">
                     <div class="zoom-control">
                         <div class="zoom-row">
@@ -1889,6 +1902,7 @@ body .screen,body .overlay{width:100% !important;height:100% !important;}
             <div class="settings-grid">
                 <button class="btn-menu settings-option" style="background:#8e44ad; border-color:#9b59b6 !important;" onclick="toggleSetting('ultraHardcore')">Modo Ultra Hardcore: <br><span id="set-uhc" style="color:#e056fd">Desativado</span></button>
                 <button class="btn-menu settings-option" style="background:#2c3e50; border-color:#34495e !important;" onclick="toggleSetting('uhcDark')">UHC Claro: <br><span id="set-uhc-light" style="color:var(--btn-green)">Desativado</span></button>
+                <button class="btn-menu settings-option" onclick="toggleSetting('entryAnimation')">Animação de entrada: <br><span id="set-entry-animation" style="color:var(--btn-green)">Ativado</span></button>
             </div>
         </div>
 
@@ -2151,6 +2165,7 @@ body .screen,body .overlay{width:100% !important;height:100% !important;}
     <div class="shop-tabs event-tabs">
       <button class="btn-menu shop-tab active" data-section="daily" onclick="showEventSection('daily')"><span class="tab-label">Diária</span></button>
       <button class="btn-menu shop-tab" data-section="store" onclick="showEventSection('store')"><img class="tab-sprite-icon" src="elements/shop.png" alt=""><span class="tab-label">Loja sazonal</span></button>
+      <button class="btn-menu shop-tab" data-section="launches" onclick="showEventSection('launches')"><img class="tab-sprite-icon" src="elements/character.png" alt=""><span class="tab-label">Lançamentos</span></button>
       <button class="btn-menu shop-tab" data-section="seasonal" onclick="showEventSection('seasonal')"><img class="tab-sprite-icon" src="elements/event.png" alt=""><span class="tab-label">Sazonal</span></button>
     </div>
     <div id="event-section-daily" class="shop-section shop-panel">
@@ -2166,7 +2181,8 @@ body .screen,body .overlay{width:100% !important;height:100% !important;}
       <div id="daily-pending-list" class="daily-pending-list"></div>
     </div>
     <div id="event-section-store" class="shop-section shop-panel hidden"><h3>Loja sazonal</h3><div class="shop-section" style="margin-top:0;"><h3>Personagens em promoção</h3><div id="event-promo-list" class="menu-grid shop-grid"></div></div></div>
-    <div id="event-section-seasonal" class="shop-section shop-panel hidden"><div class="seasonal-event-head"><div class="daily-kicker">TEMPORADA</div><h3>Missões Sazonais</h3><p class="daily-event-sub">Novas fases do Campo Radioativo e recompensas especiais.</p></div><div id="seasonal-quest-list" class="seasonal-quest-list"></div></div>
+    <div id="event-section-launches" class="shop-section shop-panel hidden"><div class="daily-event-head"><div><div class="daily-kicker">LANÇAMENTOS</div><h3>Novos personagens</h3><p class="daily-event-sub">Missões de desbloqueio para os personagens recém-lançados.</p></div><div class="daily-refresh-box"><span>Lançamentos</span><strong>1</strong></div></div><div id="launch-quest-list" class="daily-mission-list"></div></div>
+    <div id="event-section-seasonal" class="shop-section shop-panel hidden"><div class="daily-event-head"><div><div class="daily-kicker">EVENTO SAZONAL</div><h3>Missões Sazonais</h3><p class="daily-event-sub">Missões especiais da temporada. Cada missão tem suas próprias fases de sobrevivência no Hardcore.</p></div><div class="daily-refresh-box"><span>Missões</span><strong>2</strong></div></div><div id="seasonal-quest-list" class="daily-mission-list"></div></div>
 </div>
 
 <div id="overlay-daily-mission" class="overlay hidden daily-overlay" style="z-index:1300;">
@@ -2186,13 +2202,13 @@ body .screen,body .overlay{width:100% !important;height:100% !important;}
     <div class="daily-equipped-row">
       <div class="daily-equipped-copy"><span class="daily-kicker">PERSONAGEM EQUIPADO</span><strong id="daily-equipped-name">Strike</strong><small id="daily-equipped-level">Nível 1</small></div>
       <div id="daily-equipped-card" class="daily-char-mini-card"></div>
-      <button class="btn-menu daily-characters-btn" onclick="openDailyCharacterPicker()">Personagens</button>
+      <button id="daily-character-btn" class="btn-menu daily-characters-btn" onclick="openDailyCharacterPicker()">Personagens</button>
     </div>
     <div class="daily-buffed-head"><h3>Personagens buffados</h3><span>+1 Nível • somente se possuídos</span></div>
     <div id="daily-buffed-cards" class="daily-buffed-cards"></div>
     <div class="daily-detail-actions">
       <button class="btn-menu" onclick="closeDailyMissionDetails()">Voltar</button>
-      <button class="btn-action" onclick="startDailyMissionFromDetails()">Jogar</button>
+      <button id="daily-start-btn" class="btn-action" onclick="startDailyMissionFromDetails()">Jogar</button>
     </div>
   </div>
 </div>
@@ -2287,6 +2303,7 @@ body .screen,body .overlay{width:100% !important;height:100% !important;}
 </div>
 
 <canvas id="gameCanvas"></canvas>
+<div id="damage-vignette" aria-hidden="true"></div>
 <div id="game-hud" class="hidden">
     <div>
         <div class="hud-text">Wave: <span id="hud-wave">1</span></div>
@@ -2362,6 +2379,7 @@ body .screen,body .overlay{width:100% !important;height:100% !important;}
                 <button class="btn-menu settings-option fullscreen-corner-btn" type="button" onclick="toggleFullscreen()"><span class="fs-corner tl"></span><span class="fs-corner tr"></span><span class="fs-corner bl"></span><span class="fs-corner br"></span><span class="fs-label">Tela Cheia</span></button>
                 <button class="btn-menu" style="width:100%;" onclick="toggleSetting('showCombatText')">Texto de Combate: <br><span id="pause-set-combat-text" style="color:var(--btn-green)">Ativado</span></button>
                 <button class="btn-menu" style="width:100%;" onclick="toggleSetting('showHpBar')">Barra de Vida: <br><span id="pause-set-hpbar" style="color:var(--btn-red)">Desativado</span></button>
+                <button class="btn-menu" style="width:100%;" onclick="toggleSetting('showHitboxes')">Ver hitboxes: <br><span id="pause-set-hitboxes" style="color:var(--btn-red)">Desativado</span></button>
                 <button class="btn-menu" style="width:100%;" onclick="toggleSetting('noParticles')">Sem Partículas: <br><span id="pause-set-particles" style="color:var(--btn-red)">Desativado</span></button>
                 <button class="btn-menu" style="width:100%; margin-top:4px;" onclick="togglePauseView('menu')"><span aria-hidden="true">×</span><span class="sr-only">Voltar</span></button>
             </div>
@@ -2913,6 +2931,12 @@ auren: { id:'auren', class:'Destruidor', name:'Auren', rarity:'legendary', sortL
 Um homem misterioso conhecido como o Dono da Energia Vital, capaz de sentir e manipular a força que existe dentro de todos os seres vivos. Para Auren, a energia vital não é apenas uma fonte de poder, mas uma parte essencial da própria existência. Sua conexão com essa força é tão profunda que poucos conseguem compreender até onde seus poderes realmente podem chegar.
 
 “A vida está em todos nós... e eu consigo senti-la.”` },
+
+serca: { id:'serca', class:'Controle', name:'Sercã', rarity:'legendary', sortLast:true, cost:349, hp:112, speed:3.25, dmg:20, fireRate:70, range:120, color:'#d6a15d', weapon:'serca_spear', sandChance:0.75, sandTornadoChance:0.10, desc:`“Sercã acreditava que Sand Land estava sob seu controle. Até descobrir que nem mesmo um governador pode controlar tudo.”
+
+Um governador de Sand Land cujo governo acabou marcado pela corrupção e pela opressão de seu próprio povo. Mestre do Fogo enfrentou Sercã e o derrotou, libertando Sand Land de seu domínio. Desde então, Sercã alimenta um forte desejo de vingança e procura uma maneira de recuperar seu poder e acertar as contas com aqueles que destruíram seu governo.
+
+“Sand Land ainda vai ouvir falar de mim.”` },
 };
 const CHARACTER_SUMMARIES = {
     merlin: `Merlin: dispara uma magia teleguiada que tem 15% de chance de ENVENENAR e 15% de chance de BEBETIZAR. Quando esse efeito é aplicado, o inimigo fica BEBETIZADO.
@@ -3291,6 +3315,10 @@ ESPECIAL: a cada acerto cria uma orbital envolta do inimigo, essas orbitais dão
 auren: `Auren: dispara esferas de energia vital que têm 15% de chance de causar DANO CRÍTICO
 
 ESPECIAL: conforme mata inimigos, ganha energia vital, ela pode servir pra comprar power ups ao acessar seu botão, ela funciona igual uma loja, cada vez que toma dano perde energia vital`,
+
+serca: `Sercã: ataca com sua lança de perto e tem 75% de chance de disparar uma bola de areia que STUNA e inimigos adjacentes são LERDADOS
+
+ESPECIAL: a bola de areia tem 10% de chance de se tornar um redemoinho de areia que leva os inimigos pra longe`,
 };
 
 const CHIPS_DATA = {
@@ -3497,7 +3525,7 @@ const CARDS = [
     { id: 'drone_card', name: 'Drone Aliado', desc: 'Invoca um drone que atira', apply: (s) => { allies.push({x: player.x, y: player.y, dmg: player.baseDmg * player.stats.dmgMult * 0.5, speed: 2.8, life: Infinity, cd: 0, isTurret: false, type: 'drone', followX: 20, followY: -20}); } }
 ];
 
-const MAPS = ["Planície", "Deserto", "Nevasca", "Caverna", "Floresta", "Pântano", "Metrópole", "Ígneo", "Bambuzal", "Discoteca", "Palácio Marinho", "Fraturado", "Chroma Key", "Base Lunar", "Outonal", "Coliseu", "Pirâmide", "Desgelo", "Permafrost", "Campo Radioativo"];
+const MAPS = ["Planície", "Deserto", "Nevasca", "Caverna", "Floresta", "Pântano", "Metrópole", "Ígneo", "Bambuzal", "Discoteca", "Palácio Marinho", "Fraturado", "Chroma Key", "Base Lunar", "Outonal", "Coliseu", "Pirâmide", "Desgelo", "Permafrost", "Campo Radioativo", "Dia das Crianças"];
 
 const UHC_MODIFIERS = {
     "Planície": { night: true },
@@ -3730,7 +3758,7 @@ function renderGachaRevealHtml(rawText) {
 
 const DEFAULT_KEYBINDS = { up: 'w', down: 's', left: 'a', right: 'd', special: 'p', pause: 'escape' };
 const DEFAULT_INITIAL_ZOOM = (('ontouchstart' in window) || navigator.maxTouchPoints > 0) ? 0.60 : 1.00;
-const DEFAULT_SETTINGS = { skipGacha: false, controlMode: 'auto', joystickSize: 120, sandboxEnabled: false, ultraHardcore: false, uhcDark: false, noParticles: false, showCombatText: true, showHpBar: false, screenZoom: DEFAULT_INITIAL_ZOOM, musicVolume: 0.7, mapChoice: -1, mapChoiceBucket: -1, menuMusic: 'legacy_awaits', casualMusic: 'roguish_journey', keybinds: { ...DEFAULT_KEYBINDS } };
+const DEFAULT_SETTINGS = { skipGacha: false, controlMode: 'auto', joystickSize: 120, sandboxEnabled: false, ultraHardcore: false, uhcDark: false, noParticles: false, showCombatText: true, showHpBar: false, showHitboxes: false, entryAnimation: true, screenZoom: DEFAULT_INITIAL_ZOOM, musicVolume: 0.7, mapChoice: -1, mapChoiceBucket: -1, menuMusic: 'legacy_awaits', casualMusic: 'roguish_journey', keybinds: { ...DEFAULT_KEYBINDS } };
 
 const MUSIC_OPTIONS = {
     menu: {
@@ -4284,6 +4312,7 @@ function load() {
     if (!pd.shopState || typeof pd.shopState !== 'object' || typeof pd.shopState.lastRotation === 'undefined') pd.shopState = { lastRotation: 0, items: {} };
     if (!pd.hardcoreBans || typeof pd.hardcoreBans !== 'object' || Array.isArray(pd.hardcoreBans.chars)) pd.hardcoreBans = { hc: { lastRotation: 0, chars: [] }, uhc: { lastRotation: 0, chars: [] } };
     if (!pd.settings || typeof pd.settings !== 'object') pd.settings = { ...DEFAULT_SETTINGS };
+    if (typeof pd.settings.entryAnimation !== 'boolean') pd.settings.entryAnimation = true;
     if (!Array.isArray(pd.passClaimedTiers)) pd.passClaimedTiers = [];
     if (!Number.isFinite(pd.passRewardSeed) || pd.passRewardSeed <= 0) pd.passRewardSeed = (Date.now() ^ Math.floor(Math.random() * 1e9)) >>> 0;
     if (!pd.passRewardCache || typeof pd.passRewardCache !== 'object') pd.passRewardCache = {};
@@ -4302,6 +4331,7 @@ function load() {
     if (pd.shopState?.items?.boxes) delete pd.shopState.items.boxes.mega;
     if (typeof pd.settings.showCombatText === 'undefined') pd.settings.showCombatText = true;
     if (typeof pd.settings.showHpBar === 'undefined') pd.settings.showHpBar = false;
+    if (typeof pd.settings.showHitboxes === 'undefined') pd.settings.showHitboxes = false;
     if (typeof pd.settings.screenZoom !== 'number' || !isFinite(pd.settings.screenZoom)) {
         pd.settings.screenZoom = DEFAULT_INITIAL_ZOOM;
     } else {
@@ -4440,9 +4470,6 @@ const SUGAR_IMMUNE_ENEMY_TYPES = new Set(['boss', 'megaboss', 'colosso', 'elite_
 // Clássico < Hardcore < UHC, mas com crescimento mais controlado ao longo das waves.
 function getEnemyDifficultyMultiplier(currentWave = wave) {
     const w = Math.max(1, Number(currentWave) || 1);
-    // Terra Sem Lei — Parte 2 usa uma dificuldade própria, entre Clássico e Hardcore.
-    // Ela vale somente para esta side quest e não altera o balanceamento dos mapas globais.
-    if (window.seasonalQuestRun?.id === 'terra_sem_lei_2') return 1.05 + (w * 0.13);
     if (pd?.settings?.ultraHardcore) return 1.14 + (w * 0.17);
     if (window.isHardcoreMode) return 1.10 + (w * 0.15);
     return 1.00 + (w * 0.11);
@@ -4464,7 +4491,8 @@ function getEnemyEntryWave(type, currentWave = wave) {
         sein_sein: 10, samurai: 16, panda_suit: 16, panda: 16, nunchaku: 17, geisha: 20,
         rocknrool: 11, sounder: 14, piano: 11, singer: 13, tour_truck: 32,
         cosmic: 10, laser_shooter: 12, light_saber: 18, machine_gun: 22,
-        fighter_plane: 30, machine_gun_war: 18, anti_radiation: 12, mutant_basic: 1, mutant_giant: 1
+        fighter_plane: 30, machine_gun_war: 18, anti_radiation: 12, mutant_basic: 1, mutant_giant: 6,
+        pogo: 18, kid_snake: 15
     };
     return Object.prototype.hasOwnProperty.call(entryWaves, key) ? entryWaves[key] : Math.max(1, Number(currentWave) || 1);
 }
@@ -4475,10 +4503,8 @@ function getEnemyDifficultyMultiplierFromEntry(type, spawnWave = wave, currentWa
     // A wave may be arbitrarily large in Sandbox. Keep enemy stats finite and performant
     // while preserving the displayed/current wave number itself.
     const nowWave = Math.min(rawNowWave, 1000000);
-    // Dificuldade exclusiva da Parte 2: acima do Clássico, abaixo do Hardcore.
-    const terraPart2 = window.seasonalQuestRun?.id === 'terra_sem_lei_2';
-    const baseline = terraPart2 ? 1.05 : (pd?.settings?.ultraHardcore ? 1.14 : (window.isHardcoreMode ? 1.10 : 1.00));
-    const slope = terraPart2 ? 0.13 : (pd?.settings?.ultraHardcore ? 0.17 : (window.isHardcoreMode ? 0.15 : 0.11));
+    const baseline = pd?.settings?.ultraHardcore ? 1.14 : (window.isHardcoreMode ? 1.10 : 1.00);
+    const slope = pd?.settings?.ultraHardcore ? 0.17 : (window.isHardcoreMode ? 0.15 : 0.11);
     return baseline + Math.max(0, nowWave - startWave) * slope;
 }
 
@@ -4830,6 +4856,7 @@ const CHARACTER_TITLES = {
 
 astra: 'Cósmica',
     auren: 'Dono da energia vital',
+    serca: 'Sand Land',
 };
 
 function isCharacterHiddenForUnownedView(id) { return false; }
@@ -4977,6 +5004,7 @@ const CHARACTER_SPRITES = {
 astra: 'sprites/astra.png',
 
 auren: 'sprites/auren.png',
+    serca: 'sprites/serca.png',
 };
 
 const ENEMY_SPRITES = {
@@ -5228,6 +5256,24 @@ const ENEMY_SPRITES = {
     commander_leader: 'enemies/commander_leader.png',
     driver_baloon: 'enemies/driver_baloon.png',
     tank_truck: 'enemies/tank_truck.png',
+    kid_basic: 'enemies/kid_basic.png',
+    fancy_cardboard: 'enemies/fancy_cardboard.png',
+    teddy_head: 'enemies/teddy_head.png',
+    cube_head: 'enemies/cube_head.png',
+    kid_velocist: 'enemies/kid_velocist.png',
+    kid_shooter: 'enemies/kid_shooter.png',
+    kid_giant: 'enemies/kid_giant.png',
+    baby_boss: 'enemies/baby_boss.png',
+    kid_healer: 'enemies/kid_healer.png',
+    kid_kamikaze: 'enemies/kid_kamikaze.png',
+    fancy_baloon: 'enemies/fancy_baloon.png',
+    confette_tank: 'enemies/confette_tank.png',
+    kid_truck: 'enemies/kid_truck.png',
+    kid_leader: 'enemies/kid_leader.png',
+    kid_elite_shooter: 'enemies/kid_elite_shooter.png',
+    jacknbox: 'enemies/jacknbox.png',
+    pogo: 'enemies/pogo.png',
+    kid_snake: 'enemies/kid_snake.png',
 };
 
 const ENEMY_SPRITE_CACHE = new Map();
@@ -5251,7 +5297,8 @@ const MAP_ELEMENT_SPRITES = {
     fall: 'elements/fall.png',
     bunniie_hole: 'elements/hole.png',
     adam_scrap_scrap: 'elements/scrap.png',
-    adam_scrap_config: 'elements/config.png'
+    adam_scrap_config: 'elements/config.png',
+    abc_wall: 'elements/ABC.png'
 };
 const ALLY_ELEMENT_SPRITES = {
     turret: 'elements/turret.png',
@@ -5855,6 +5902,37 @@ function getEnemySpritePath(type) {
     return ENEMY_SPRITES[String(type || '').toLowerCase()] || '';
 }
 
+// FD UPDATE 1: the skin's source biome is authoritative for enemies that
+// drop/transform into another enemy, even when they die on another map.
+function fd1GetDropOriginMapId(e, fallback = window.currentMap) {
+    if (!e) return Number.isInteger(fallback) ? fallback : 0;
+    if (Number.isInteger(e.dropOriginMapId)) return e.dropOriginMapId;
+    const type = String(e.type || '').toLowerCase();
+    const skinKeys = [e.skinOverride, e.fracturedSkinType, e.resolvedFracturedSkinType, e.enemySkin]
+        .map(v => String(v || '').toLowerCase()).filter(Boolean);
+    const radioSkins = new Set([
+        'war_basic','war_hat','war_helmet','nuke_head','cartographer','war_shooter','war_giant',
+        'bazooka_tank','war_healer','masked_elite_shooter','nuke_kamikaze','commander_leader',
+        'driver_baloon','tank_truck','commander_boss','plane','machine_gun_war','anti_radiation','mutant_basic','mutant_giant'
+    ]);
+    const romanSkin = (typeof COLISEUM_SKINS !== 'undefined') ? COLISEUM_SKINS[type] : null;
+    for (const skin of skinKeys) {
+        if (skin === 'gangster') return 6;
+        if (romanSkin && String(romanSkin).toLowerCase() === skin) return 15;
+        if (radioSkins.has(skin)) return 19;
+        for (const mapId of [19,15,14,13,10,9,8,7,6,5,4,3,2,1,0]) {
+            try {
+                const candidate = getFracturedEnemySkinType({type,fracturedOrigin:true,fractureMapId:mapId,skinSourceMapId:mapId,_skinTypeForEnemy:null});
+                if (candidate && String(candidate).toLowerCase() === skin) return mapId;
+            } catch (_) {}
+        }
+    }
+    if (Number.isInteger(e.fractureMapId)) return e.fractureMapId;
+    if (Number.isInteger(e.skinSourceMapId)) return e.skinSourceMapId;
+    if (Number.isInteger(e.spawnBiome)) return e.spawnBiome;
+    return Number.isInteger(fallback) ? fallback : 0;
+}
+
 // Retorna a skin visual específica do bioma sem alterar a lógica do inimigo.
 // Assim, qualquer inimigo criado por invocação também herda a skin do Deserto.
 function getFracturedEnemySkinType(e) {
@@ -5909,7 +5987,8 @@ function getFracturedEnemySkinType(e) {
         },
         10:{ basico:'swim_basic', velocista:'seahorse_velocist', dancer:'seahorse_velocist', atirador:'swim_shooter', gigante:'swim_giant', tanque:'swim_tank', curandeiro:'swim_healer', elite:'swim_elite_shooter', lider:'swim_leader', truck:'submarine', ballon:'pupperfish', swordfish:'swordfish', shark:'shark', triton:'triton', ghost_fisher:'ghost_fisher', boss:'swim_boss' },
         13:{ basico:'space_basic', basic:'space_basic', acucarado:'space_basic', cardboard_head:'space_helmet', cardboard:'space_helmet', motorcycle_helmet:'meteor_head', helmet:'meteor_head', prism_head:'steel_meteor', prism:'steel_meteor', velocista:'space_velocist', velocist:'space_velocist', dancer:'space_velocist', atirador:'space_shooter', shooter:'space_shooter', gigante:'space_giant', giant:'space_giant', boss:'cosmo_boss', tanque:'cosmo_tank', tank:'cosmo_tank', curandeiro:'tecno_healer', healer:'tecno_healer', elite:'cosmo_elite_shooter', elite_shooter:'cosmo_elite_shooter', elite_master:'cosmo_elite_shooter', master_elite_shooter:'cosmo_elite_shooter', kamikaze:'alien_kamikaze', lider:'cosmo_leader', leader:'cosmo_leader', lider_elite:'cosmo_leader', elite_leader:'cosmo_leader', ballon:'rocket_baloon', truck:'space_truck', colosso:'space_giant', megaboss:'cosmo_boss', mega_boss:'cosmo_boss', cosmic:'cosmic', laser_shooter:'laser_shooter', light_saber:'light_saber', machine_gun:'machine_gun' },
-        14:{ cardboard_head:'leaf_head', cardboard:'leaf_head', motorcycle_helmet:'pumpkin_head', helmet:'pumpkin_head', prism_head:'log_head', prism:'log_head', kamikaze:'fall_fruits', truck:'leaf_truck', geisha:'prospector', snow_walker:'rastel', lumberjack:'lumberjack' }
+        14:{ cardboard_head:'leaf_head', cardboard:'leaf_head', motorcycle_helmet:'pumpkin_head', helmet:'pumpkin_head', prism_head:'log_head', prism:'log_head', kamikaze:'fall_fruits', truck:'leaf_truck', geisha:'prospector', snow_walker:'rastel', lumberjack:'lumberjack' },
+        19:{ basico:'war_basic', basic:'war_basic', cardboard_head:'war_hat', cardboard:'war_hat', motorcycle_helmet:'war_helmet', helmet:'war_helmet', prism_head:'nuke_head', prism:'nuke_head', velocista:'cartographer', velocist:'cartographer', dancer:'cartographer', atirador:'war_shooter', shooter:'war_shooter', gigante:'war_giant', giant:'war_giant', tanque:'bazooka_tank', tank:'bazooka_tank', curandeiro:'war_healer', healer:'war_healer', elite:'masked_elite_shooter', elite_shooter:'masked_elite_shooter', kamikaze:'nuke_kamikaze', lider:'commander_leader', leader:'commander_leader', ballon:'driver_baloon', baloon:'driver_baloon', truck:'tank_truck', boss:'commander_boss', megaboss:'commander_boss', mega_boss:'commander_boss', fighter_plane:'plane', machine_gun_war:'machine_gun_war', anti_radiation:'anti_radiation', mutant_basic:'mutant_basic', mutant_giant:'mutant_giant' }
     };
 
     // A Fracture is authoritative: its enemies must always use the fracture biome.
@@ -6328,6 +6407,8 @@ function getMapElementSpriteKey(type, obj = {}) {
             return 'kelp';
         case 'fall':
             return 'fall';
+        case 'child_wall':
+            return 'abc_wall';
         case 'pillar_vertical':
             return 'pillar_vertical';
         case 'pillar_horizontal':
@@ -7323,6 +7404,8 @@ function toggleSetting(key) {
         pd.settings.uhcDark = !pd.settings.uhcDark;
     }
     else if(key === 'showHpBar') { pd.settings.showHpBar = !pd.settings.showHpBar; }
+    else if(key === 'showHitboxes') { pd.settings.showHitboxes = !pd.settings.showHitboxes; }
+    else if(key === 'entryAnimation') { pd.settings.entryAnimation = pd.settings.entryAnimation !== false ? false : true; }
     else if(key === 'sandboxEnabled') { pd.settings.sandboxEnabled = pd.settings.sandboxEnabled !== false ? false : true; }
     else if(key === 'showCombatText') { pd.settings.showCombatText = !pd.settings.showCombatText; }
     else if(key === 'noParticles') {
@@ -7824,8 +7907,19 @@ function showTutorialDialog(steps, onClose = null) {
     // o diálogo aparecer deslocado, principalmente na Loja e em telas estreitas.
     overlay.style.zoom = '1';
     overlay.dataset.open = '1';
+    const skipBtn=document.getElementById('tutorial-dialog-skip'); if(skipBtn) skipBtn.classList.toggle('hidden', !(pd?.tutorial?.stage==='control-dialog' || pd?.tutorial?.stage==='intro'));
     renderTutorialDialogStep();
     overlay.classList.remove('hidden');
+}
+
+function skipTutorialDialog(event){
+    if(event){event.preventDefault();event.stopPropagation();}
+    stopTutorialTypewriter();
+    const overlay=document.getElementById('overlay-tutorial-dialog'); if(overlay){overlay.classList.add('hidden');overlay.dataset.open='0';}
+    const cb=tutorialDialogOnClose; tutorialDialogSteps=[]; tutorialDialogIndex=0; tutorialDialogOnClose=null; tutorialTypewriterFullText=''; tutorialTypewriterDone=true;
+    pd.tutorial.stage='playing'; save(); isPaused=false; applyControlLayout(); lastTime=performance.now();
+    hideTutorialPointer();
+    return false;
 }
 
 function renderTutorialDialogStep() {
@@ -7899,14 +7993,14 @@ function beginFirstRunTutorial() {
     save();
     const controlSteps = isTouchDevice()
         ? [
-            { speaker: 'Strike', text: 'Use o joystick para se movimentar pelo mapa.' },
-            { speaker: 'Strike', text: 'Não precisa mirar manualmente: seu personagem ataca sozinho quando há inimigos ao alcance.' },
-            { speaker: 'Strike', text: 'Derrote inimigos para ganhar experiência. Quando a barra encher, você receberá uma escolha de melhoria.' }
+            { speaker: 'Strike', text: 'Dá uma olhada no joystick: ele é a forma mais simples de circular pelo mapa.' },
+            { speaker: 'Strike', text: 'Os ataques acontecem sozinhos quando há inimigos ao alcance, então não precisa ficar mirando o tempo todo.' },
+            { speaker: 'Strike', text: 'Ao derrotar inimigos você acumula experiência; quando a barra encher, uma melhoria aparece para você escolher.' }
         ]
         : [
-            { speaker: 'Strike', text: 'Use W, A, S e D ou as setas para se movimentar pelo mapa.' },
-            { speaker: 'Strike', text: 'Não precisa mirar manualmente: seu personagem ataca sozinho quando há inimigos ao alcance.' },
-            { speaker: 'Strike', text: 'Derrote inimigos para ganhar experiência. Quando a barra encher, você receberá uma escolha de melhoria.' }
+            { speaker: 'Strike', text: 'Para se movimentar, você pode usar W, A, S, D ou as setas. Escolha o que ficar mais natural.' },
+            { speaker: 'Strike', text: 'Os ataques acontecem sozinhos quando há inimigos ao alcance, então não precisa ficar mirando o tempo todo.' },
+            { speaker: 'Strike', text: 'Ao derrotar inimigos você acumula experiência; quando a barra encher, uma melhoria aparece para você escolher.' }
         ];
     showTutorialDialog(controlSteps, () => {
         pd.tutorial.stage = 'playing';
@@ -8435,6 +8529,8 @@ function updateSettingsUI(syncSlider = true) {
     const pEl = document.getElementById('set-particles'); if(pEl) { pEl.innerHTML = pd.settings.noParticles ? 'Ativado' : 'Desativado'; pEl.style.color = pd.settings.noParticles ? 'var(--btn-green)' : 'var(--btn-red)'; }
     const ctEl = document.getElementById('set-combat-text'); if(ctEl) { ctEl.innerHTML = pd.settings.showCombatText ? 'Ativado' : 'Desativado'; ctEl.style.color = pd.settings.showCombatText ? 'var(--btn-green)' : 'var(--btn-red)'; }
     const hpEl = document.getElementById('set-hpbar'); if(hpEl) { hpEl.innerHTML = pd.settings.showHpBar ? 'Ativado' : 'Desativado'; hpEl.style.color = pd.settings.showHpBar ? 'var(--btn-green)' : 'var(--btn-red)'; }
+    const hbEl = document.getElementById('set-hitboxes'); if(hbEl) { hbEl.textContent = pd.settings.showHitboxes ? 'Ativado' : 'Desativado'; hbEl.style.color = pd.settings.showHitboxes ? 'var(--btn-green)' : 'var(--btn-red)'; }
+    const entryEl = document.getElementById('set-entry-animation'); if(entryEl) { entryEl.innerHTML = pd.settings.entryAnimation !== false ? 'Ativado' : 'Desativado'; entryEl.style.color = pd.settings.entryAnimation !== false ? 'var(--btn-green)' : 'var(--btn-red)'; }
     const sandboxEl = document.getElementById('set-sandbox'); if(sandboxEl) { sandboxEl.textContent = pd.settings.sandboxEnabled !== false ? 'Ativado' : 'Desativado'; sandboxEl.style.color = pd.settings.sandboxEnabled !== false ? 'var(--btn-green)' : 'var(--btn-red)'; }
     const zoomEl = document.getElementById('set-zoom'); if(zoomEl) zoomEl.innerHTML = `${Math.round(getEffectiveScreenZoom() * 100)}%`;
     const zoomSlider = document.getElementById('screen-zoom-slider'); if(syncSlider !== false && zoomSlider) zoomSlider.value = Number(pd.settings.screenZoom) || 1;
@@ -8534,7 +8630,7 @@ function drawDestinationPreview(canvas, mapId) {
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
     const w = Math.max(180, Math.floor(rect.width || 360));
-    const h = w;
+    const h = Math.max(90, Math.floor(rect.height || Math.round(w * 0.52)));
     const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
     canvas.width = Math.floor(w * dpr); canvas.height = Math.floor(h * dpr);
     const c = canvas.getContext('2d');
@@ -8549,6 +8645,30 @@ function drawDestinationPreview(canvas, mapId) {
         c.fillStyle = fallback[mapId] || '#26113f';
     }
     c.fillRect(0,0,w,h);
+    if (Number(mapId) === 19) {
+        // Textura legível mesmo quando a prévia roda antes de o padrão procedural estar pronto.
+        c.save();
+        const craters = [
+            [.17,.30,.095,.12,-.30],[.49,.22,.075,.085,.42],[.77,.36,.12,.14,-.48],
+            [.32,.70,.13,.15,.18],[.67,.76,.085,.10,-.22],[.91,.14,.055,.065,.55]
+        ];
+        for (const [px,py,rx,ry,rot] of craters) {
+            c.save(); c.translate(px*w,py*h); c.rotate(rot);
+            c.fillStyle='rgba(58,35,22,.78)'; c.beginPath(); c.ellipse(0,0,rx*w*1.10,ry*h*1.10,0,0,Math.PI*2); c.fill();
+            c.fillStyle='rgba(122,61,27,.94)'; c.beginPath(); c.ellipse(-rx*w*.06,-ry*h*.04,rx*w*.80,ry*h*.76,0,0,Math.PI*2); c.fill();
+            c.fillStyle='rgba(221,104,34,.56)'; c.beginPath(); c.ellipse(-rx*w*.18,-ry*h*.22,rx*w*.40,ry*h*.28,0,0,Math.PI*2); c.fill();
+            c.strokeStyle='rgba(220,161,90,.44)'; c.lineWidth=1.5; c.beginPath(); c.ellipse(0,0,rx*w*.90,ry*h*.84,0,Math.PI*1.02,Math.PI*1.84); c.stroke();
+            c.restore();
+        }
+        for(let i=0;i<40;i++){
+            const x=((i*37+13)%101)/100*w, y=((i*61+7)%97)/96*h;
+            const rw=1+(i%3), rh=.7+(i%4)*.35;
+            c.save(); c.translate(x,y); c.rotate((i*1.17)%Math.PI);
+            c.fillStyle=i%3===0?'rgba(203,124,59,.78)':'rgba(60,46,31,.78)';
+            c.beginPath(); c.moveTo(-rw*2,-rh); c.lineTo(rw,rh*1.7); c.lineTo(rw*2,-rh*.2); c.closePath(); c.fill(); c.restore();
+        }
+        c.restore();
+    }
     if (Number(mapId) === 4) {
         // A seleção de mapa usa a mesma camada verde-limão do mapa jogável.
         c.fillStyle = 'rgba(154,255,28,0.34)';
@@ -8564,16 +8684,27 @@ function drawDestinationPreview(canvas, mapId) {
         c.fillStyle = 'rgba(189,122,45,0.18)'; c.fillRect(0,0,w,h);
     }
     if (Number(mapId) === 15) {
-        c.fillStyle = 'rgba(133,88,48,0.24)'; c.fillRect(0,0,w,h);
-        c.strokeStyle = 'rgba(242,220,178,0.55)'; c.lineWidth = 4;
-        c.beginPath(); c.arc(w/2,h/2,w*.23,0,Math.PI*2); c.stroke();
-        c.beginPath(); c.arc(w/2,h/2,w*.38,0,Math.PI*2); c.stroke();
+        c.save();
+        c.fillStyle = 'rgba(45,28,18,0.14)'; c.fillRect(0,0,w,h);
+        c.strokeStyle = 'rgba(239,210,166,0.42)'; c.lineWidth = Math.max(1.5,w*0.012);
+        c.beginPath(); c.ellipse(w/2,h/2,w*.24,h*.30,0,0,Math.PI*2); c.stroke();
+        c.strokeStyle = 'rgba(64,43,28,0.28)'; c.lineWidth = Math.max(2,w*0.018);
+        c.beginPath(); c.ellipse(w/2,h/2,w*.40,h*.46,0,0,Math.PI*2); c.stroke();
+        const pillarImgCache=window.__destPreviewPillarCache||(window.__destPreviewPillarCache=new Map());
+        const pillarPath='elements/pillar.png';
+        let img=pillarImgCache.get(pillarPath);
+        if(!img){img=new Image();img.src=pillarPath;pillarImgCache.set(pillarPath,img);}
+        const points=[];
+        for(let i=0;i<11;i++){const a=(Math.PI*2*i)/11;points.push([.5+Math.cos(a)*.41,.5+Math.sin(a)*.44,0]);}
+        for(let i=0;i<11;i++){const a=(Math.PI*2*(i+.5))/11;points.push([.5+Math.cos(a)*.30,.5+Math.sin(a)*.33,Math.PI/2]);}
+        const drawPillar=()=>{ if(!img.complete||!img.naturalWidth){img.onload=()=>drawDestinationPreview(canvas,mapId);return;} for(const [px,py,rot] of points){c.save();c.translate(px*w,py*h);c.rotate(rot);const ph=Math.max(10,h*.085),pw=ph*(img.naturalWidth/img.naturalHeight);c.globalAlpha=.92;c.drawImage(img,-pw/2,-ph/2,pw,ph);c.restore();} };
+        drawPillar(); c.restore();
     }
 
     const elementTypes = {
         1:['cacto'], 2:['ice'], 3:['rock'], 4:['tree'], 5:['mud'],
         6:['side_car','front_car','behind_car'], 7:['volcano'], 8:['bamboo'],
-        9:['speaker'], 10:['kelp'], 12:[], 13:[], 14:['fall']
+        9:['speaker'], 10:['kelp'], 12:[], 13:[], 14:['fall'], 15:['coliseum_pillar']
     };
     if (Number(mapId) === 12) { c.fillStyle='#00ff00'; c.fillRect(0,0,w,h); return; }
     if (Number(mapId) === 12) {
@@ -8582,6 +8713,7 @@ function drawDestinationPreview(canvas, mapId) {
         for(let yy=0; yy<h; yy+=step){ c.beginPath(); c.moveTo(0,yy); c.lineTo(w,yy); c.stroke(); }
         return;
     }
+    if (Number(mapId) === 15) return;
     const list = elementTypes[Number(mapId)] || [];
     const positions = [[0.18,0.22],[0.52,0.18],[0.82,0.30],[0.28,0.55],[0.67,0.51],[0.47,0.78],[0.83,0.77],[0.12,0.77]];
     const cache = window.__destPreviewImageCache || (window.__destPreviewImageCache = new Map());
@@ -9251,6 +9383,50 @@ function dailyMapLayoutMarkup(m){
     const safe=(v)=>escapeHtmlText(decodeHtmlEntities(String(v||'')));
     return `<div class="daily-map-art ${dailyMapThemeClass(m)}"><canvas class="daily-map-canvas" data-daily-map-preview="1"></canvas><div class="daily-map-label">${safe(m.mapName)}</div></div>`;
 }
+function drawKidsDayPreviewCanvas(canvas){
+    if(!canvas) return;
+    const rect=canvas.getBoundingClientRect();
+    const w=Math.max(220,Math.floor(rect.width||360)), h=Math.max(120,Math.floor(rect.height||150));
+    const dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));
+    canvas.width=Math.floor(w*dpr); canvas.height=Math.floor(h*dpr);
+    const c=canvas.getContext('2d'); if(!c) return;
+    c.setTransform(dpr,0,0,dpr,0,0); c.clearRect(0,0,w,h);
+    const plainsPattern = typeof getPlainsGrassPattern === 'function' ? getPlainsGrassPattern() : null;
+    c.fillStyle=plainsPattern || '#557A46'; c.fillRect(0,0,w,h);
+    const palette=['#ff4757','#1e90ff','#ffd32a','#ff6b81','#8c7ae6','#2ed573','#ffa502','#ffffff'];
+    for(let i=0;i<42;i++){
+        const seed=fdPseudoSeed(i+37,20);
+        const x=(seed%1000)/1000*w;
+        const y=((Math.floor(seed/1000)%1000)/1000)*h;
+        const angle=((Math.floor(seed/100000)%628)/100)*0.1;
+        const size=3+(seed%5);
+        c.save(); c.translate(x,y); c.rotate(angle); c.fillStyle=palette[seed%palette.length];
+        if(seed%3===0){ c.fillRect(-size*0.55,-size*0.28,size*1.1,size*0.56); }
+        else if(seed%3===1){ c.beginPath(); c.arc(0,0,size*.52,0,Math.PI*2); c.fill(); }
+        else { c.beginPath(); c.moveTo(0,-size*.7); c.lineTo(size*.62,size*.55); c.lineTo(-size*.62,size*.55); c.closePath(); c.fill(); }
+        c.restore();
+    }
+}
+function drawKidsDayTextureRect(x,y,w,h){
+    const plainsPattern = typeof getPlainsGrassPattern === 'function' ? getPlainsGrassPattern() : null;
+    ctx.fillStyle=plainsPattern || '#557A46'; ctx.fillRect(x,y,w,h);
+    const palette=['#ff4757','#1e90ff','#ffd32a','#ff6b81','#8c7ae6','#2ed573','#ffa502','#ffffff'];
+    const tile=180, sx=Math.floor(x/tile)-1, sy=Math.floor(y/tile)-1;
+    for(let gy=sy;gy<=Math.floor((y+h)/tile)+1;gy++)for(let gx=sx;gx<=Math.floor((x+w)/tile)+1;gx++){
+        const base=fdPseudoSeed(gx+37,gy+20), count=5+(base%5);
+        for(let i=0;i<count;i++){
+            const seed=fdPseudoSeed(base+i*17,gx*7+gy*13+i);
+            const px=gx*tile+(seed%tile), py=gy*tile+((Math.floor(seed/1000))%tile);
+            const size=3+(seed%6), angle=((Math.floor(seed/100000)%628)/100)*0.1;
+            ctx.save(); ctx.translate(px,py); ctx.rotate(angle); ctx.fillStyle=palette[seed%palette.length];
+            if(seed%3===0) ctx.fillRect(-size*.55,-size*.28,size*1.1,size*.56);
+            else if(seed%3===1){ctx.beginPath();ctx.arc(0,0,size*.52,0,Math.PI*2);ctx.fill();}
+            else {ctx.beginPath();ctx.moveTo(0,-size*.7);ctx.lineTo(size*.62,size*.55);ctx.lineTo(-size*.62,size*.55);ctx.closePath();ctx.fill();}
+            ctx.restore();
+        }
+    }
+}
+
 function drawDailyMapPreview(canvas,m){
     if(!canvas||!m)return;
     const rect=canvas.getBoundingClientRect();
@@ -9258,6 +9434,7 @@ function drawDailyMapPreview(canvas,m){
     const dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));
     canvas.width=Math.floor(w*dpr); canvas.height=Math.floor(h*dpr);
     const c=canvas.getContext('2d'); c.setTransform(dpr,0,0,dpr,0,0); c.clearRect(0,0,w,h);
+    if(Number(m.mapIndex)===20){ drawKidsDayPreviewCanvas(canvas); return; }
     if(m.mapVariant==='pyramid'){
         c.fillStyle='#b98250';c.fillRect(0,0,w,h);
         c.save();c.globalAlpha=.95;const cols=5,rows=3,cw2=w/cols,ch2=h/rows;
@@ -9365,11 +9542,45 @@ function renderDailyEquipped(){
     if(lv)lv.textContent=`Nível ${shown}${buffed?' • +1 Diário':''}`;
     if(card)card.innerHTML=`${getCharacterSpriteMarkup(id,'menu')}<span>${buffed?'+1':''}</span>`;
 }
+let missionDetailMode='daily';
+let missionDetailSeasonalId=null;
 function openDailyMissionDetails(slot){
     const m=getDailyMission(slot); if(!m||m.completed)return;
+    missionDetailMode='daily'; missionDetailSeasonalId=null;
     pd.daily.activeSlot=Math.floor(Number(slot)); save();
     renderDailyMissionDetails();
     document.getElementById('overlay-daily-mission').classList.remove('hidden');
+}
+function openSeasonalMissionDetails(id){
+    const q=getSeasonalQuest(id); if(!q)return;
+    const st=pd.seasonalQuests?.[q.id]; if(!st||st.completed)return;
+    missionDetailMode='seasonal'; missionDetailSeasonalId=q.id;
+    renderSeasonalMissionDetails(q);
+    document.getElementById('overlay-daily-mission').classList.remove('hidden');
+}
+function renderSeasonalMissionDetails(q){
+    if(!q)return;
+    const st=pd.seasonalQuests?.[q.id]||{phase:0};
+    const phase=Math.max(0,Math.min(q.phases-1,Math.floor(Number(st.phase)||0)));
+    const title=document.getElementById('daily-detail-title'); if(title) title.textContent=q.title;
+    const kicker=document.querySelector('#overlay-daily-mission .daily-kicker'); if(kicker) kicker.textContent='MISSÃO SAZONAL';
+    const phaseEl=document.getElementById('daily-detail-phase'); if(phaseEl) phaseEl.textContent=`FASE ${phase+1}/${q.phases}`;
+    const mapName=document.getElementById('daily-detail-map-name'); if(mapName) mapName.textContent=q.mapName;
+    const waves=document.getElementById('daily-detail-waves'); if(waves) waves.textContent=`${q.phaseTargets[phase]||25} waves`;
+    const mapHost=document.getElementById('daily-detail-map'); if(mapHost){ mapHost.innerHTML=dailyMapLayoutMarkup(q); const art=mapHost.querySelector('.daily-map-art'); if(art) art.__dailyMission=q; const can=mapHost.querySelector('[data-daily-map-preview]'); if(can) drawDailyMapPreview(can,q); }
+    const rewardHost=document.getElementById('daily-detail-reward'); if(rewardHost) rewardHost.innerHTML=q.reward?.kind==='character' ? `<div class="daily-reward-sprite daily-reward-sprite--large">${getCharacterSpriteMarkup(q.reward.charId,'menu')}</div><span class="daily-reward-copy">${escapeHtmlText(seasonalRewardLabel(q))}</span>` : dailyRewardSpriteMarkup(q.reward,true);
+    const mod=document.getElementById('daily-detail-modifier'); if(mod){mod.classList.remove('hidden');mod.textContent=`FASE: alcance ${q.phaseTargets[phase]||25} waves para avançar.`;}
+    const cards=document.getElementById('daily-buffed-cards'); if(cards) cards.innerHTML=`<div class="daily-no-buffs">Missão sazonal • ${q.phases} fases • alcance o alvo indicado acima.</div>`;
+    renderDailyEquipped();
+    const start=document.getElementById('daily-start-btn'); if(start){ start.textContent='Jogar'; start.onclick=()=>startSeasonalMissionFromDetails(); }
+    const chars=document.getElementById('daily-character-btn'); if(chars) chars.classList.add('hidden');
+}
+function startSeasonalMissionFromDetails(){
+    const id=missionDetailSeasonalId; const q=getSeasonalQuest(id); const st=id?pd.seasonalQuests?.[id]:null;
+    if(!q||!st||st.completed)return;
+    document.getElementById('overlay-daily-mission')?.classList.add('hidden');
+    window.seasonalQuestLaunch={id:q.id}; window.isHardcoreMode=true; window.seasonalQuestRun=null;
+    startRunAfterShop({seasonalQuest:true,seasonalQuestId:q.id,releaseTrialChar:q.trialCharId||''});
 }
 function renderDailyMissionDetails(){
     const m=getDailyMission(pd.daily.activeSlot); if(!m)return;
@@ -9391,7 +9602,7 @@ function renderDailyMissionDetails(){
     cards.innerHTML=(m.buffChars||[]).map(id=>renderDailyBuffCard(id,m)).join('') || `<div class="daily-no-buffs">Nenhum personagem buffado nesta missão.</div>`;
     renderDailyEquipped();
 }
-function closeDailyMissionDetails(){ document.getElementById('overlay-daily-mission').classList.add('hidden'); pd.daily.activeSlot=null; save(); }
+function closeDailyMissionDetails(){ document.getElementById('overlay-daily-mission').classList.add('hidden'); if(missionDetailMode==='daily') pd.daily.activeSlot=null; missionDetailMode='daily'; missionDetailSeasonalId=null; const kicker=document.querySelector('#overlay-daily-mission .daily-kicker'); if(kicker) kicker.textContent='MISSÃO DIÁRIA'; const chars=document.getElementById('daily-character-btn'); if(chars) chars.classList.remove('hidden'); const start=document.getElementById('daily-start-btn'); if(start) start.onclick=()=>startDailyMissionFromDetails(); save(); }
 function openDailyCharacterPicker(){
     const root=document.getElementById('daily-character-picker-grid');
     const ids=Object.keys(pd.chars||{}).filter(id=>CHARACTERS[id]);
@@ -9487,7 +9698,7 @@ function dailyLossGameOver(isQuit=false){
     document.getElementById('go-scrap').innerHTML=resourceIcon('scrap')+` Sucatas obtidas: <strong>${runScrap||0}</strong>`;
     document.getElementById('go-medals').innerHTML=resourceIcon('medal')+' Medalhas obtidas: <strong>0</strong>';
     document.getElementById('go-daily').innerHTML=isQuit ? 'Quest: Partida encerrada' : 'Quest: Fase não concluída';
-    document.getElementById('overlay-gameover').classList.remove('hidden');
+    document.getElementById('overlay-gameover').classList.remove('hidden'); if(document.getElementById('damage-vignette')) document.getElementById('damage-vignette').style.boxShadow='inset 0 0 0 0 rgba(220,20,25,0)';
     document.getElementById('game-hud').classList.add('hidden');
     document.getElementById('exp-bar-container').classList.add('hidden');
     const overlay=document.getElementById('overlay-gameover'); if(overlay) fitOverlayToViewport(overlay);
@@ -9563,7 +9774,7 @@ function renderEvents() {
     renderDailySection();
     const promoList = document.getElementById('event-promo-list');
     if (promoList) promoList.innerHTML = EVENT_PROMOS.map(renderEventPromoCard).join('');
-    if (currentEventSection !== 'store' && currentEventSection !== 'daily') currentEventSection = 'daily';
+    if (!['store','daily','seasonal','launches'].includes(currentEventSection)) currentEventSection = 'daily';
     showEventSection(currentEventSection);
 }
 function showEventSection(section) {
@@ -13589,6 +13800,7 @@ function updatePauseSettingsUI(syncSlider = true) {
     const musicSlider = document.getElementById('pause-music-volume-slider'); if(syncSlider !== false && musicSlider) musicSlider.value = Math.round(getMusicVolume() * 100);
     const ctEl = document.getElementById('pause-set-combat-text'); if(ctEl) { ctEl.innerHTML = pd.settings.showCombatText ? 'Ativado' : 'Desativado'; ctEl.style.color = pd.settings.showCombatText ? 'var(--btn-green)' : 'var(--btn-red)'; }
     const hpEl = document.getElementById('pause-set-hpbar'); if(hpEl) { hpEl.innerHTML = pd.settings.showHpBar ? 'Ativado' : 'Desativado'; hpEl.style.color = pd.settings.showHpBar ? 'var(--btn-green)' : 'var(--btn-red)'; }
+    const hbEl = document.getElementById('pause-set-hitboxes'); if(hbEl) { hbEl.textContent = pd.settings.showHitboxes ? 'Ativado' : 'Desativado'; hbEl.style.color = pd.settings.showHitboxes ? 'var(--btn-green)' : 'var(--btn-red)'; }
     
     const pEl = document.getElementById('pause-set-particles'); if(pEl) { pEl.innerHTML = pd.settings.noParticles ? 'Ativado' : 'Desativado'; pEl.style.color = pd.settings.noParticles ? 'var(--btn-green)' : 'var(--btn-red)'; }
 }
@@ -13724,6 +13936,7 @@ function startRunAfterShop(options = {}) {
     const characterTest = !!options.characterTest;
     const dailyMission = !!options.dailyMission;
     const seasonalQuest = !!options.seasonalQuest;
+    const releaseTrialChar = String(options.releaseTrialChar || '');
     const survival = !!options.survival || !!window.survivalLaunch;
     if(survival && !dailyMission){
         ensureSurvivalRotation(true);
@@ -13738,7 +13951,7 @@ function startRunAfterShop(options = {}) {
         const sq = getSeasonalQuest(seasonalQuestId);
         const st = sq ? pd.seasonalQuests?.[sq.id] : null;
         if (!sq || !st || st.completed) { showAlert('Esta missão sazonal já foi concluída.'); return; }
-        window.seasonalQuestRun = { id: sq.id, targetWaves: sq.phaseTargets[Math.min(sq.phases-1, Math.max(0, st.phase))], mapIndex: 19 };
+        window.seasonalQuestRun = { id: sq.id, targetWaves: sq.phaseTargets[Math.min(sq.phases-1, Math.max(0, st.phase))], mapIndex: Number(sq.mapIndex ?? 20) };
         window.seasonalQuestLaunch = null;
     }
     if (dailyMission && dailyMissionSlot !== null) {
@@ -13769,12 +13982,18 @@ function startRunAfterShop(options = {}) {
     runMissionCommitInProgress = false;
     if (!characterTest && !dailyMission && !seasonalQuest && !survival && !window.characterTestMode) { for(const sectionId of Object.keys(EVENT_CHARACTER_PROGRESS||{})){ if(!runEventStats[sectionId]||typeof runEventStats[sectionId]!=='object') runEventStats[sectionId]={}; runEventStats[sectionId].seasonRuns=1; } }
     if (!characterTest) save();
+    if (releaseTrialChar && CHARACTERS[releaseTrialChar] && !pd.chars?.[releaseTrialChar]) {
+        if (!window.releaseQuestPreviousChar) window.releaseQuestPreviousChar = pd.selectedChar;
+        window.releaseQuestTrialActive = true;
+        pd.selectedChar = releaseTrialChar;
+    }
     document.getElementById('overlay-pregame-shop').classList.add('hidden'); showScreen(null); document.getElementById('game-hud').classList.remove('hidden'); document.getElementById('exp-bar-container').classList.remove('hidden');
     joyZone.style.display = 'none';
     applyControlLayout();
 
     const charDef = CHARACTERS[pd.selectedChar];
-    const savedLevel = survival ? 5 : Math.max(1, Math.floor(Number(pd.chars[pd.selectedChar].level) || 1));
+    const activeCharSave = pd.chars?.[pd.selectedChar] || { level:1, slots:2, chips:[null,null] };
+    const savedLevel = survival ? 5 : Math.max(1, Math.floor(Number(activeCharSave.level) || 1));
     const dailyBuffLevel = (dailyMission && window.dailyMissionRun && getDailyMission(window.dailyMissionRun.slot)?.buffChars?.includes(pd.selectedChar)) ? 1 : 0;
     const lvl = savedLevel + dailyBuffLevel;
     const statMult = 1 + (lvl - 1) * 0.15; 
@@ -13821,7 +14040,7 @@ function startRunAfterShop(options = {}) {
 
     if(window.tempPregameCard) { window.tempPregameCard.apply(player.stats); player.pickedCards.push(window.tempPregameCard.name); window.tempPregameCard = null; }
     
-    let equippedChips = pd.chars[pd.selectedChar].chips || [];
+    let equippedChips = activeCharSave.chips || [];
     equippedChips.forEach(chipId => {
         if(chipId && CHIPS_DATA[chipId]) {
             CHIPS_DATA[chipId].effect(player.stats, player, allies);
@@ -13839,10 +14058,11 @@ function startRunAfterShop(options = {}) {
     pd.run = { charId: pd.selectedChar, medals: 0 };
     const runChar = ensureCharacterProgress(pd.selectedChar);
     if (runChar && runChar.medals) runChar.medals.run = 0;
-    window.currentMap = seasonalQuest ? 19 : (dailyMission && window.dailyMissionRun ? Number(window.dailyMissionRun.mapIndex) : (survival && window.survivalModeRun ? Number(window.survivalModeRun.mapIndex) : (characterTest ? 0 : getSelectedMapIndex())));
+    const seasonalDefAtRunStart = seasonalQuest && typeof window.getSeasonalQuest === 'function' ? window.getSeasonalQuest(window.seasonalQuestRun?.id || window.seasonalQuestLaunch?.id) : null;
+    window.currentMap = seasonalQuest ? Number(seasonalDefAtRunStart?.mapIndex ?? 20) : (dailyMission && window.dailyMissionRun ? Number(window.dailyMissionRun.mapIndex) : (survival && window.survivalModeRun ? Number(window.survivalModeRun.mapIndex) : (characterTest ? 0 : getSelectedMapIndex())));
     const o2WrapAtStart = document.getElementById('o2-bar-container');
     if (o2WrapAtStart) o2WrapAtStart.classList.toggle('hidden', window.currentMap !== 10);
-    document.getElementById('map-text').innerHTML = seasonalQuest && window.seasonalQuestRun ? `Sazonal • Campo Radioativo • Fase ${(pd.seasonalQuests?.[window.seasonalQuestRun.id]?.phase || 0) + 1}/${getSeasonalQuest(window.seasonalQuestRun.id)?.phases || 1}` : dailyMission && window.dailyMissionRun ? `Diária • ${getDailyMission(window.dailyMissionRun.slot)?.mapName || MAPS[window.currentMap]} • Fase ${(getDailyMission(window.dailyMissionRun.slot)?.phase||0)+1}/10` : survival && window.survivalModeRun ? `Sobrevivência • ${MAPS[window.currentMap]} • Hardcore • Endless` : `Mapa: ${MAPS[window.currentMap]}`;
+    document.getElementById('map-text').innerHTML = seasonalQuest && window.seasonalQuestRun ? `Sazonal • ${seasonalDefAtRunStart?.mapName || MAPS[window.currentMap]} • Fase ${(pd.seasonalQuests?.[window.seasonalQuestRun.id]?.phase || 0) + 1}/${seasonalDefAtRunStart?.phases || 1}` : dailyMission && window.dailyMissionRun ? `Diária • ${getDailyMission(window.dailyMissionRun.slot)?.mapName || MAPS[window.currentMap]} • Fase ${(getDailyMission(window.dailyMissionRun.slot)?.phase||0)+1}/10` : survival && window.survivalModeRun ? `Sobrevivência • ${MAPS[window.currentMap]} • Hardcore • Endless` : `Mapa: ${MAPS[window.currentMap]}`;
     generateMapObstacles();
     if (pendingRunFractures.length) {
         try {
@@ -13880,10 +14100,10 @@ function startRunAfterShop(options = {}) {
 
     isPlaying = true; isPaused = false; lastTime = performance.now(); lastGameHudUpdateMs = 0; lastSpecialUiUpdateMs = 0; updateGameHud(true); ensureMissionState(); pd.missions.lastRunChar = pd.selectedChar; trackMissionProgress('games', 1); 
     if (pd?.debug?.infiniteXp) player.stats.xpMult = Math.max(player.stats.xpMult || 1, 999999);
-    if (pd?.tutorial?.stage === 'force-play') beginFirstRunTutorial();
     if (pd.selectedChar === 'eolio') spawnEolioTurbine();
     if(player.weapon === 'wrench') { allies.push({x: player.x, y: player.y, dmg: player.baseDmg, speed: 0, life: Infinity, cd: 0, isTurret: true, ref: 'meekah_turret'}); }
     updateSandboxButtonUI();
+    beginEntryAnimation();
     gameLoopId = requestAnimationFrame(loop);
 }
 
@@ -13950,7 +14170,7 @@ function generateMapObstacles() {
     }
     let type = window.currentMap;
     if(type === 1 || type === 3 || type === 4) {
-        let count = type === 3 ? 15 : 10;
+        let count = 22;
         for(let i=0; i<count; i++) {
             let ox = (Math.random()*2-1)*getActiveWorldHalfSize(); let oy = (Math.random()-0.5)*2800;
             if(Math.abs(ox)<100 && Math.abs(oy)<100) ox+=200;
@@ -13962,7 +14182,7 @@ function generateMapObstacles() {
     if(type === 6) { /* Metro - done in update loop */ }
     if(type === 7) { for(let i=0; i<6; i++) obstacles.push({ x: (Math.random()-0.5)*2800, y: (Math.random()-0.5)*2800, r: 45, type: 'volcano', timer: Math.random()*5 }); }
     if(type === 8) { 
-        for(let i=0; i<18; i++) {
+        for(let i=0; i<22; i++) {
             const horizontal = Math.random() < 0.55;
             const w = horizontal ? (52 + Math.random() * 14) : (14 + Math.random() * 4);
             const h = horizontal ? (14 + Math.random() * 4) : (52 + Math.random() * 14);
@@ -13979,13 +14199,25 @@ function generateMapObstacles() {
             for(let i=0; i<15; i++) obstacles.push({ x: (Math.random()-0.5)*2800, y: (Math.random()-0.5)*2800, r: 16, type: 'bamboo_spike' });
         }
     }
-    if(type === 9) { for(let i=0; i<8; i++) obstacles.push({ x: (Math.random()-0.5)*2800, y: (Math.random()-0.5)*2800, r: 40, type: 'speaker', cd: 0 }); }
+    if(type === 9) { for(let i=0; i<22; i++) obstacles.push({ x: (Math.random()-0.5)*2800, y: (Math.random()-0.5)*2800, r: 40, type: 'speaker', cd: 0 }); }
     if(type === 10) {
         for(let i=0; i<18; i++) {
             let kx = (Math.random()-0.5)*2800;
             let ky = (Math.random()-0.5)*2800;
             if(Math.abs(kx) < 120 && Math.abs(ky) < 120) kx += 220;
             obstacles.push({ x: kx, y: ky, r: 34 + Math.random()*12, type: 'kelp', isWall: false });
+        }
+    }
+    if(type === 20) {
+        const wallCount = 22;
+        for(let i=0;i<wallCount;i++){
+            let ox=0, oy=0, attempts=0;
+            do {
+                ox=(Math.random()-0.5)*2760;
+                oy=(Math.random()-0.5)*2760;
+                attempts++;
+            } while(attempts<60 && (Math.hypot(ox,oy)<190 || obstacles.some(o=>o && o.childWall && Math.hypot(ox-o.x,oy-o.y)<110)));
+            obstacles.push({x:ox,y:oy,r:38,w:76,h:76,rot:0,type:'child_wall',isWall:true,childWall:true});
         }
     }
     if(type === 14) {
@@ -14629,7 +14861,7 @@ let sandboxOriginalSelection = null;
 let sandboxOriginalMap = 0;
 let sandboxOriginalHardcore = false;
 let sandboxOriginalUHC = false;
-let sandboxSettings = { difficulty: 'classic', o2: false, fractures: false, meteors: false, shooting: true };
+let sandboxSettings = { difficulty: 'classic', o2: false, fractures: false, meteors: false, radioactiveClouds: false, lightning: false, sandWhirls: false, limitedVision: false, blizzards: false, skating: false, shooting: true };
 let sandboxPetDisabled = false;
 let sandboxHasSavedWorld = false;
 let sandboxSavedWorld = null;
@@ -14644,6 +14876,9 @@ let sandboxMapHalfSize = 1500;
 let activeWorldHalfSize = 1500;
 let sandboxEnemyUndetectable = false;
 let runEnemyUndetectable = false;
+let entryAnimationActive = false;
+let entryAnimationTime = 0;
+let entryAnimationData = null;
 let sandboxSavePosition = true;
 let sandboxPersistentEntities = [];
 window.fdPendingRunFractures = Array.isArray(window.fdPendingRunFractures) ? window.fdPendingRunFractures : [];
@@ -15142,6 +15377,7 @@ function activateSandbox() {
         sandboxSettings.o2 = false;
         sandboxSettings.fractures = false;
         sandboxSettings.meteors = false;
+        sandboxSettings.radioactiveClouds = false; sandboxSettings.lightning = false; sandboxSettings.sandWhirls = false; sandboxSettings.limitedVision = false; sandboxSettings.blizzards = false; sandboxSettings.skating = false;
         sandboxSettings.shooting = true;
         sandboxAutoSpawnEnabled = true;
         sandboxImmortalityEnabled = false;
@@ -15249,7 +15485,7 @@ function deactivateSandbox() {
 }
 
 function openSandboxMenu(tab='home') {
-    if (!sandboxMode || !sandboxAvailable()) return;
+    if (!sandboxMode || !isPlaying) return;
     sandboxTab = tab;
     sandboxMenuOpen = true;
     isPaused = true;
@@ -15435,12 +15671,14 @@ function renderSandboxMenu() {
     if (sandboxTab === 'characters') return renderSandboxCharacters(root);
     if (sandboxTab === 'maps') return renderSandboxMaps(root);
     if (sandboxTab === 'elements') return renderSandboxElements(root);
+    if (sandboxTab === 'modifiers') return renderSandboxModifiers(root);
     root.innerHTML = `
         <div class="sandbox-grid-home">
             <button class="sandbox-category-btn" type="button" data-sandbox-action="tab" data-sandbox-tab="enemies"><img src="enemies/basic.png" alt=""><span>Inimigos</span></button>
             <button class="sandbox-category-btn" type="button" data-sandbox-action="tab" data-sandbox-tab="characters"><img src="sprites/strike.png" alt=""><span>Personagens</span></button>
             <button class="sandbox-category-btn" type="button" data-sandbox-action="tab" data-sandbox-tab="maps"><span class="sandbox-map-preview" data-map-preview="0"></span><span>Mapa</span></button>
             <button class="sandbox-category-btn" type="button" data-sandbox-action="tab" data-sandbox-tab="elements"><img src="elements/tree.png" alt=""><span>Elementos</span></button>
+            <button class="sandbox-category-btn sandbox-category-btn--modifiers" type="button" data-sandbox-action="tab" data-sandbox-tab="modifiers"><span class="sandbox-category-symbol">MOD</span><span>Modificadores</span></button>
         </div>
         <div class="sandbox-controls"><div class="sandbox-control-card"><strong>Borda do mapa</strong><div class="sandbox-control-row"><button class="sandbox-small-btn" data-sandbox-action="border" data-sandbox-delta="-100">Reduzir</button><button class="sandbox-small-btn" data-sandbox-action="border" data-sandbox-delta="100">Expandir</button></div><span id="sandbox-border-status">Atual: 1500</span></div>
             <div class="sandbox-control-card">
@@ -15461,11 +15699,8 @@ function renderSandboxMenu() {
                 <span id="sandbox-difficulty-status"></span>
             </div>
             <div class="sandbox-control-card">
-                <strong>Regras de ambiente</strong>
+                <strong>Configurações</strong>
                 <div class="sandbox-toggle-grid">
-                    <button class="sandbox-small-btn" type="button" data-sandbox-action="setting" data-sandbox-setting="o2">O2: <span id="sandbox-o2-status" class="sandbox-setting-state"></span></button>
-                    <button class="sandbox-small-btn" type="button" data-sandbox-action="setting" data-sandbox-setting="fractures">Fraturas: <span id="sandbox-fractures-status" class="sandbox-setting-state"></span></button>
-                    <button class="sandbox-small-btn" type="button" data-sandbox-action="setting" data-sandbox-setting="meteors">Meteoros: <span id="sandbox-meteors-status" class="sandbox-setting-state"></span></button>
                     <button class="sandbox-small-btn" type="button" data-sandbox-action="setting" data-sandbox-setting="undetectable">InDetecção: <span id="sandbox-undetect-status" class="sandbox-setting-state"></span></button>
                     <button class="sandbox-small-btn" type="button" data-sandbox-action="setting" data-sandbox-setting="savePosition">Salvar posição: <span id="sandbox-save-position-status" class="sandbox-setting-state"></span></button>
                     <button class="sandbox-small-btn" type="button" data-sandbox-action="setting" data-sandbox-setting="shooting">Atirar: <span id="sandbox-shooting-status" class="sandbox-setting-state"></span></button>
@@ -15479,13 +15714,13 @@ function renderSandboxMenu() {
                 </div>
                 <span class="sandbox-help">Você nunca perde vida enquanto estiver ativada.</span>
             </div>
-            </div>
             <div class="sandbox-control-card">
                 <strong>Spawn automático</strong>
                 <div class="sandbox-tool-row">
                     <button id="sandbox-auto-spawn-btn" class="sandbox-small-btn sandbox-tool-btn" type="button" data-sandbox-action="auto-spawn">Spawn automático: OFF</button>
                 </div>
                 <span id="sandbox-auto-spawn-status" class="sandbox-tool-status">Desativado</span>
+                <span class="sandbox-help">Retoma o spawn normal assim que o Sandbox for desativado.</span>
             </div>
         </div>
         <div class="sandbox-help">O jogo fica pausado no Sandbox: inimigos e objetos não avançam, XP/baús/caixas não podem ser coletados e você atravessa paredes. Feche o menu para movimentar-se; desative o Sandbox para retomar a simulação.</div>`;
@@ -15495,6 +15730,17 @@ function renderSandboxMenu() {
         const can = document.createElement('canvas'); can.width = 170; can.height = 86; previewHost.appendChild(can);
         try { drawDestinationPreview(can, 0); } catch (_) {}
     }
+    updateSandboxControlsUI();
+}
+
+function renderSandboxModifiers(root){
+    const defs=[
+        ['o2','O2','Oxigênio do mapa marinho'],['fractures','Fraturas','Fraturas spawnáveis do Fraturado'],['meteors','Meteoros','Mecânica dos meteoros do Ígneo UHC'],
+        ['radioactiveClouds','Nuvens radioativas','Nuvens móveis e exposição radioativa'],['lightning','Raios','Queda de raios no mapa, com 1% de chance de atingir o jogador'],['sandWhirls','Redemoinhos de areia','10 redemoinhos móveis de areia'],
+        ['limitedVision','Visão limitada','Mesma visão circular da Caverna UHC'],['blizzards','Nevascas','Nevasca que atrapalha e desacelera como na Nevasca UHC'],['skating','Patinação','Movimento escorregadio como Base Lunar/Permafrost']
+    ];
+    const cards=defs.map(([key,label,desc])=>`<button class="sandbox-small-btn sandbox-modifier-card" type="button" data-sandbox-action="setting" data-sandbox-setting="${key}"><strong>${label}</strong><span>${desc}</span><em id="sandbox-${key==='radioactiveClouds'?'radioactive-clouds':key==='sandWhirls'?'sand-whirls':key==='limitedVision'?'limited-vision':key}-status" class="sandbox-setting-state"></em></button>`).join('');
+    root.innerHTML=`<div class="sandbox-section-head"><button class="sandbox-small-btn" type="button" data-sandbox-action="tab" data-sandbox-tab="home">Voltar</button><h2>Modificadores</h2><span>9</span></div><div class="sandbox-modifier-grid">${cards}</div>`;
     updateSandboxControlsUI();
 }
 
@@ -15532,7 +15778,7 @@ function getSandboxDifficultyLabel() {
 }
 function updateSandboxControlsUI() {
     const d = document.getElementById('sandbox-difficulty-status'); if (d) d.textContent = `Atual: ${getSandboxDifficultyLabel()}`;
-    const states = [['o2', sandboxSettings.o2], ['fractures', sandboxSettings.fractures], ['meteors', sandboxSettings.meteors], ['undetect', sandboxEnemyUndetectable], ['save-position', sandboxSavePosition], ['shooting', sandboxSettings.shooting], ['pet', !sandboxPetDisabled], ['immortality', sandboxImmortalityEnabled]];
+    const states = [['o2', sandboxSettings.o2], ['fractures', sandboxSettings.fractures], ['meteors', sandboxSettings.meteors], ['radioactive-clouds', sandboxSettings.radioactiveClouds], ['lightning', sandboxSettings.lightning], ['sand-whirls', sandboxSettings.sandWhirls], ['limited-vision', sandboxSettings.limitedVision], ['blizzards', sandboxSettings.blizzards], ['skating', sandboxSettings.skating], ['undetect', sandboxEnemyUndetectable], ['save-position', sandboxSavePosition], ['shooting', sandboxSettings.shooting], ['pet', !sandboxPetDisabled], ['immortality', sandboxImmortalityEnabled]];
     for (const [key, enabled] of states) {
         const el = document.getElementById(`sandbox-${key}-status`);
         if (!el) continue;
@@ -15553,7 +15799,7 @@ function setSandboxDifficulty(mode) {
 }
 function adjustSandboxMapBorder(delta){ if(!sandboxMode) return; const n=Math.max(300,Math.min(3000,sandboxMapHalfSize + (Number(delta)||0))); sandboxMapHalfSize=n; if(player){ player.x=Math.max(-n,Math.min(n,player.x)); player.y=Math.max(-n,Math.min(n,player.y)); } updateSandboxControlsUI(); notify(`Borda do mapa: ${n}`); }
 function toggleSandboxSetting(key) {
-    if (!sandboxMode || !['o2','fractures','meteors','undetectable','savePosition','shooting','pet','immortality'].includes(key)) return;
+    if (!sandboxMode || !['o2','fractures','meteors','radioactiveClouds','lightning','sandWhirls','limitedVision','blizzards','skating','undetectable','savePosition','shooting','pet','immortality'].includes(key)) return;
     if (key === 'undetectable') { sandboxEnemyUndetectable = !sandboxEnemyUndetectable; updateSandboxControlsUI(); return; }
     if (key === 'savePosition') { sandboxSavePosition = !sandboxSavePosition; updateSandboxControlsUI(); return; }
     if (key === 'shooting') { sandboxSettings.shooting = !sandboxSettings.shooting; updateSandboxControlsUI(); return; }
@@ -15603,7 +15849,7 @@ function sandboxEnemyVariants(type) {
     let canonical = '';
     try { canonical = sandboxCanonicalEnemySpriteKey(t); } catch (_) { canonical = t; }
     add(canonical || t, null);
-    const mapIds = [0,1,2,3,4,5,6,7,8,9,10,11,13,14,15];
+    const mapIds = [0,1,2,3,4,5,6,7,8,9,10,11,13,14,15,19];
     for (const mapId of mapIds) {
         try {
             let skin = null;
@@ -16078,10 +16324,54 @@ function updateSandbox(dt) {
 
 /* ===================================================================== */
 
+function beginEntryAnimation(){
+    if(pd?.settings?.entryAnimation===false || !player) return false;
+    entryAnimationActive=true; entryAnimationTime=0;
+    const a=-Math.PI*0.18, d=220;
+    entryAnimationData={x:player.x,y:player.y,angle:a,targetX:Math.max(-1420,Math.min(1420,player.x+Math.cos(a)*d)),targetY:Math.max(-1420,Math.min(1420,player.y+Math.sin(a)*d)),open:0};
+    entryAnimationData.fx=entryAnimationData.targetX; entryAnimationData.fy=entryAnimationData.targetY;
+    player.invisible=true;
+    document.body.classList.add('fd-entry-cinematic');
+    const hud=document.getElementById('game-hud'); if(hud) hud.classList.remove('hidden');
+    const exp=document.getElementById('exp-bar-container'); if(exp) exp.classList.add('hidden');
+    const btn=document.getElementById('btn-pause'); if(btn) btn.style.display='flex';
+    camera.x=entryAnimationData.fx-cw/2; camera.y=entryAnimationData.fy-ch/2;
+    enemySpawnTimer=9999;
+    return true;
+}
+function updateEntryAnimation(dt){
+    if(!entryAnimationActive)return false;
+    entryAnimationTime+=dt;
+    const t=entryAnimationTime;
+    if(t<0.75){const p=Math.min(1,t/.75);camera.x=entryAnimationData.x+(entryAnimationData.fx-entryAnimationData.x)*p-cw/2;camera.y=entryAnimationData.y+(entryAnimationData.fy-entryAnimationData.y)*p-ch/2;entryAnimationData.open=0;}
+    else if(t<1.35){entryAnimationData.open=Math.min(1,(t-.75)/.60);camera.x=entryAnimationData.fx-cw/2;camera.y=entryAnimationData.fy-ch/2;}
+    else if(t<1.95){entryAnimationData.open=1;entryAnimationData.x=entryAnimationData.fx;entryAnimationData.y=entryAnimationData.fy;player.x=entryAnimationData.fx;player.y=entryAnimationData.fy;camera.x=entryAnimationData.fx-cw/2;camera.y=entryAnimationData.fy-ch/2;}
+    else if(t<2.35){entryAnimationData.open=1-Math.min(1,(t-1.95)/.40);camera.x=entryAnimationData.fx-cw/2;camera.y=entryAnimationData.fy-ch/2;}
+    else{entryAnimationActive=false;entryAnimationTime=0;entryAnimationData=null;player.invisible=false;document.body.classList.remove('fd-entry-cinematic');enemySpawnTimer=Math.min(enemySpawnTimer,0.65);updateGameHud(true);applyControlLayout();camera.x=player.x-cw/2;camera.y=player.y-ch/2;updateDamageVignette();if(pd?.tutorial?.stage==='force-play')beginFirstRunTutorial();}
+    return true;
+}
+function drawEntryAnimation(){
+    if(!entryAnimationActive||!entryAnimationData)return;
+    const d=entryAnimationData; const p=Math.max(.02,d.open);
+    ctx.save();ctx.translate(d.fx,d.fy);ctx.rotate(d.angle);ctx.globalAlpha=.95;
+    const len=260*p,width=105*p;ctx.shadowColor='rgba(205,150,255,.95)';ctx.shadowBlur=38;ctx.strokeStyle='rgba(236,214,255,.98)';ctx.lineWidth=Math.max(8,width*.10);ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-len*.5,0);ctx.lineTo(-len*.18,-width*.18);ctx.lineTo(len*.05,width*.12);ctx.lineTo(len*.28,-width*.20);ctx.lineTo(len*.5,0);ctx.stroke();
+    ctx.shadowBlur=0;ctx.strokeStyle='rgba(185,135,255,.7)';ctx.lineWidth=3;for(let i=0;i<5;i++){const yy=(i-2)*width*.18;ctx.beginPath();ctx.moveTo(-len*.42,yy);ctx.lineTo(len*.42,-yy*.7);ctx.stroke();}
+    if(entryAnimationTime>=1.35&&entryAnimationTime<2.35){ctx.globalAlpha=Math.min(1,(entryAnimationTime-1.35)/.25);ctx.rotate(-d.angle);const sid=getPlayerSpriteId(); if(sid) drawCharacterSprite(ctx,d.fx,d.fy,player.r,sid,{widthMult:10.2,autoFlip:true,opacity:1}); else drawShape(ctx,d.fx,d.fy,player.r,'circle',player.color,false,sid);}
+    ctx.restore();
+}
+function updateDamageVignette(){
+    const el=document.getElementById('damage-vignette'); if(!el||!player)return;
+    const maxHp=Math.max(1,Number(player.baseHp||player.hp||1)*(Number(player.stats?.maxHpMult)||1)); const ratio=Math.max(0,Math.min(1,Number(player.hp||0)/maxHp));
+    const t=ratio<.55 ? Math.min(1,(.55-ratio)/.55) : 0; const alpha=Math.min(.72,t*.82);
+    el.style.boxShadow=`inset 0 0 ${18+62*t}px ${4+42*t}px rgba(220,20,25,${alpha})`;
+}
+
 function update(dt) {
     if (sandboxMode) { updateSandbox(dt); return; }
+    if (entryAnimationActive) { updateEntryAnimation(dt); updateDamageVignette(); return; }
     updateEquippedPet(dt);
-    if(player.isDead) return;
+    if(player.isDead) { updateDamageVignette(); return; }
+    updateDamageVignette();
 
     // Elektro: primeiro ataque com telegraph antes do raio.
     if (pd?.selectedChar === 'elektro' && player.elekStrikePending) {
@@ -16195,13 +16485,20 @@ if (!isBossAlive) {
         if (wave % 2 === 0 && pd.selectedChar === 'ripper') { let s = allies.find(a => a.type === 'speaker' || a.ref === 'ripper_speaker'); if(s) { s.x = player.x; s.y = player.y; s.cd = 0; } }
         if ((window.survivalModeRun || sandboxAutoSpawnEnabled) && wave % 10 === 0 && window.dailyMissionRun?.modifierKey !== 'kamikaze') {
             let spawn = getSafeSpawnPoint(60, 340, 36); let ex = spawn.x; let ey = spawn.y;
-            const bossSpawnWave = wave; let mult = getEnemyDifficultyMultiplierFromEntry(wave >= 30 ? 'megaboss' : 'boss', bossSpawnWave, wave) * (isUhcGameplayActive() ? 1.16 : (window.isHardcoreMode ? 1.12 : 1.08));
-            if(wave >= 30) {
+            const bossSpawnWave = wave; const childDayBoss = window.currentMap===20;
+            let mult = getEnemyDifficultyMultiplierFromEntry(childDayBoss ? 'boss' : (wave >= 30 ? 'megaboss' : 'boss'), bossSpawnWave, wave) * (isUhcGameplayActive() ? 1.16 : (window.isHardcoreMode ? 1.12 : 1.08));
+            if(wave >= 30 && !childDayBoss) {
                 enemies.push({ x: ex, y: ey, type: 'megaboss', isBoss: true, spawnWave: bossSpawnWave, entryWave: bossSpawnWave, hp: 2250*mult, maxHp: 2250*mult, speed: 1.2, baseDmg: 30*mult, dmg: 30*mult, size: 60, cd: -15, dashCd: 0, color: '#2c3e50', poison: {timer:0,dmg:0}, slowTimer: 0, weakenTimer: 0, burnTimer: 0, orbitalCd: 0, soak: 0, spawnSkillUsed: false }); triggerBossSpawnSkill(enemies[enemies.length - 1]); itemsMap = itemsMap.filter(it => it.type !== 'chest');
                 addFloatingText(cw/2 + camera.x, ch/2 + camera.y - 100, "MEGA BOSS WAVE!", '#8e44ad', 50);
             } else {
                 enemies.push({ x: ex, y: ey, type: 'boss', isBoss: true, spawnWave: bossSpawnWave, entryWave: bossSpawnWave, hp: 900*mult, maxHp: 900*mult, speed: 0.8, baseDmg: 20*mult, dmg: 20*mult, size: 50, cd: -15, color: '#8b0000', poison: {timer:0,dmg:0}, slowTimer: 0, weakenTimer: 0, burnTimer: 0, soak: 0, spawnSkillUsed: false }); triggerBossSpawnSkill(enemies[enemies.length - 1]); itemsMap = itemsMap.filter(it => it.type !== 'chest');
                 addFloatingText(cw/2 + camera.x, ch/2 + camera.y - 100, "BOSS WAVE!", '#ff0000', 50);
+            }
+            const spawnedBoss=enemies[enemies.length-1];
+            if(window.currentMap===20 && spawnedBoss){
+                spawnedBoss.type='boss'; spawnedBoss.isBoss=true;
+                spawnedBoss.skinOverride='baby_boss';
+                spawnedBoss.skinSourceMapId=20; spawnedBoss.dropOriginMapId=20; spawnedBoss.spawnBiome=20;
             }
         }
     }
@@ -16241,7 +16538,7 @@ if (!isBossAlive) {
     }
     
     // Nevasca UHC
-    if(isUhcGameplayActive() && window.currentMap === 2 && Math.random() < 0.002) {
+    if((isUhcGameplayActive() && window.currentMap === 2 || (!sandboxMode && sandboxSettings?.blizzards)) && Math.random() < 0.002) {
        puddles.push({x: player.x + (Math.random()-0.5)*1000, y: player.y + (Math.random()-0.5)*1000, r: 200, dmg: 0, life: 10, type: 'snowstorm', tick:0});
     }
     
@@ -16506,7 +16803,7 @@ if (!isBossAlive) {
     ) ? 1.35 : 1;
     let fastyAbilitySpeedMult = (pd.selectedChar === 'fasty' && (player.fastyAbilityTimer || 0) > 0) ? 1.8 : 1;
     const zoeTunedSpeedMult = (pd.selectedChar === 'zoe' && player.zoeTunedActive) ? 1.45 : 1;
-    const lunarIceMovement = window.currentMap === 13 || window.currentMap === 18 || window.dailyMissionRun?.mapVariant === 'permafrost';
+    const lunarIceMovement = window.currentMap === 13 || window.currentMap === 18 || window.dailyMissionRun?.mapVariant === 'permafrost' || (!sandboxMode && sandboxSettings?.skating);
     let lunarSpeedMult = lunarIceMovement ? 1.28 : 1;
     let dailyTerrainSlowMult = 1;
     if ((Number(player.dailyWaterSlowTimer)||0) > 0 || (Number(player.dailyColdSlowTimer)||0) > 0) dailyTerrainSlowMult = 0.5;
@@ -16692,7 +16989,7 @@ if (!isBossAlive) {
             player.flameTickCd = Math.max(0, (player.flameTickCd || 0) - dt);
             let target = null; let minDist = player.baseRange * player.stats.rangeMult;
             for(let e of enemies) {
-                if (isCurrentlyHypnotized(e)) continue;
+                if (isCurrentlyHypnotized(e) || e.pogo) continue;
                 let d = dist(player, e);
                 if(d < minDist) { minDist = d; target = e; }
             }
@@ -16713,7 +17010,7 @@ if (!isBossAlive) {
             if(player.flameTickCd <= 0) {
                 player.flameTickCd = flameTickRate;
                 for(let e of enemies) {
-                    if (isCurrentlyHypnotized(e)) continue;
+                    if (isCurrentlyHypnotized(e) || e.pogo) continue;
                     let d = dist(player, e);
                     if(d < coneLen) {
                         let aToE = Math.atan2(e.y - player.y, e.x - player.x);
@@ -16734,7 +17031,7 @@ if (!isBossAlive) {
             player.cd -= 60 * dt;
             if (player.cd <= 0) {
                 let target = null; let minDist = player.baseRange * player.stats.rangeMult;
-                for(let e of enemies) { if (isCurrentlyHypnotized(e)) continue; let d = dist(player, e); if(d < minDist) { minDist = d; target = e; } }
+                for(let e of enemies) { if (isCurrentlyHypnotized(e) || e.pogo) continue; let d = dist(player, e); if(d < minDist) { minDist = d; target = e; } }
                 if (target) {
                     fireWeapon(target);
                     player.cd = Math.max(2, Math.round(player.baseFireRate * player.stats.fireRateMult * 0.25));
@@ -16747,7 +17044,7 @@ if (!isBossAlive) {
             player.cd -= 60 * dt;
             if(player.cd <= 0) {
                 let target = null; let minDist = player.baseRange * player.stats.rangeMult;
-                for(let e of enemies) { if (isCurrentlyHypnotized(e)) continue; let d = dist(player, e); if(d < minDist) { minDist = d; target = e; } }
+                for(let e of enemies) { if (isCurrentlyHypnotized(e) || e.pogo) continue; let d = dist(player, e); if(d < minDist) { minDist = d; target = e; } }
                 if(target) { fireWeapon(target); player.boldShots++; if(player.boldShots >= 6) { player.boldShots = 0; player.boldReload = 1; } }
             }
         }
@@ -16756,7 +17053,7 @@ if (!isBossAlive) {
         if (player.yoyoReady) {
             let target = null; let minDist = player.baseRange * player.stats.rangeMult;
             for (let e of enemies) {
-                if (isCurrentlyHypnotized(e)) continue;
+                if (isCurrentlyHypnotized(e) || e.pogo) continue;
                 let d = dist(player, e);
                 if (d < minDist) { minDist = d; target = e; }
             }
@@ -16792,7 +17089,7 @@ if (!isBossAlive) {
             player.cd -= 60 * dt;
             if(player.cd <= 0) {
                 let target = null; let minDist = player.baseRange * player.stats.rangeMult;
-                for(let e of enemies) { if (isCurrentlyHypnotized(e)) continue; let d = dist(player, e); if(d < minDist) { minDist = d; target = e; } }
+                for(let e of enemies) { if (isCurrentlyHypnotized(e) || e.pogo) continue; let d = dist(player, e); if(d < minDist) { minDist = d; target = e; } }
                 if(target) { fireWeapon(target); player.boobooReturn = false; }
             }
         }
@@ -16810,7 +17107,7 @@ if (!isBossAlive) {
                     minDist = Math.min(minDist, shotReach);
                 }
             }
-            for(let e of enemies) { if (isCurrentlyHypnotized(e)) continue; let d = dist(player, e); if(d < minDist) { minDist = d; target = e; } }
+            for(let e of enemies) { if (isCurrentlyHypnotized(e) || e.pogo) continue; let d = dist(player, e); if(d < minDist) { minDist = d; target = e; } }
             if(target) fireWeapon(target);
         }
     }
@@ -17128,7 +17425,7 @@ function fireWeapon(target) {
 
     const execFire = () => {
         let aimTarget = target;
-        const swingWeapon = ['sword','scythe','mr_perfurant_slash','knighter_sword','shinobi_katana','izaque_claws','vingathron_slash','owen_pickaxe_swing'].includes(w);
+        const swingWeapon = ['sword','scythe','mr_perfurant_slash','knighter_sword','shinobi_katana','izaque_claws','vingathron_slash','owen_pickaxe_swing','serca_spear'].includes(w);
         if (swingWeapon) {
             const swingRange = Math.max(75, player.baseRange * player.stats.rangeMult * 0.88);
             let best = null, bestD = Infinity;
@@ -17402,6 +17699,35 @@ function fireWeapon(target) {
 
         if (w === 'zoe_punch' && pd.selectedChar === 'zoe') {
             executeZoeAttack(target, angle, finalDmg, pSpd);
+            return;
+        }
+
+        if (w === 'serca_spear' && pd.selectedChar === 'serca') {
+            const spearRange = Math.max(82, player.baseRange * player.stats.rangeMult * 0.82);
+            const spearDuration = 16;
+            createProj(player.x, player.y, 0, 0, finalDmg, spearDuration, true, 'serca_spear', {
+                size:18, sourceChar:'serca', hitShape:'slash', attackAngle:angle, targetRef:aimTarget,
+                swingStart:-0.10, swingEnd:0.10, swingRadius:spearRange, swingDuration:spearDuration, hitRadius:14
+            });
+            if (Math.random() < (CHARACTERS.serca.sandChance || 0.75)) {
+                const sx = player.x + Math.cos(angle) * (player.r + 9);
+                const sy = player.y + Math.sin(angle) * (player.r + 9);
+                if (Math.random() < (CHARACTERS.serca.sandTornadoChance || 0.10)) {
+                    const tornadoRange = Math.max(560, player.baseRange * player.stats.rangeMult * 2.7);
+                    const tornadoSpeed = 4.2 * player.stats.projSpdMult;
+                    createProj(sx, sy, Math.cos(angle)*tornadoSpeed, Math.sin(angle)*tornadoSpeed, finalDmg,
+                        Math.ceil(tornadoRange / tornadoSpeed) + 20, true, 'tornado', {
+                            size:30, windRadius:88, windTick:0, maxRange:tornadoRange, travelled:0, pullRadius:132,
+                            originX:sx, originY:sy, dirX:Math.cos(angle), dirY:Math.sin(angle), sandTornado:true, sourceChar:'serca'
+                        });
+                } else {
+                    const sandSpeed = pSpd * 1.08;
+                    createProj(sx, sy, Math.cos(angle)*sandSpeed, Math.sin(angle)*sandSpeed, finalDmg, 56, true, 'serca_sand_ball', {
+                        size:11, sourceChar:'serca', sandRadius:135, stunDuration:4, bossStunDuration:2.5, slowDuration:2.4, sandBall:true
+                    });
+                }
+            }
+            player.cd = Math.max(24, Math.round(player.baseFireRate * player.stats.fireRateMult));
             return;
         }
 
@@ -18702,6 +19028,8 @@ function createProj(x, y, vx, vy, dmg, life, isPlayer, type, extra={}) {
     else if (type === 'popeye_punch') size = extra.hitRadius || extra.size || 10;
     else if (type === 'zoe_punch') size = extra.hitRadius || extra.size || 10;
     else if (type === 'vingathron_slash') size = extra.hitRadius || extra.size || 18;
+    else if (type === 'serca_spear') size = extra.hitRadius || extra.size || 12;
+    else if (type === 'serca_sand_ball') size = extra.size || 11;
     else if (type === 'bit_cherry') size = extra.size || 9;
     else if (type === 'bit_banana') size = extra.size || 10;
     else if (type === 'bit_banana_peeled') size = extra.size || 8;
@@ -18938,7 +19266,9 @@ function getHypnosisTarget(sourceEnemy) {
 }
 
 function inheritHypnosis(parent, child) {
-    if (!parent || !child || !isCurrentlyHypnotized(parent)) return child;
+    if (!parent || !child) return child;
+    if (Number.isInteger(parent.dropOriginMapId)) child.dropOriginMapId = parent.dropOriginMapId;
+    if (!isCurrentlyHypnotized(parent)) return child;
     child.hypnotizedTimer = parent.hypnotizedTimer === Infinity ? Infinity : Math.max(Number(child.hypnotizedTimer) || 0, Number(parent.hypnotizedTimer) || 0);
     child.hypnotizedBySandbox = !!(parent.hypnotizedBySandbox || child.hypnotizedBySandbox);
     child.sandboxForcedHypnosis = !!(parent.sandboxForcedHypnosis || child.sandboxForcedHypnosis);
@@ -19293,7 +19623,7 @@ function getNearestEnemyFrom(x, y, maxDist = Infinity) {
     let target = null;
     let best = maxDist;
     for (const e of enemies) {
-        if (!e || e.hp <= 0 || isCurrentlyHypnotized(e)) continue;
+        if (!e || e.hp <= 0 || isCurrentlyHypnotized(e) || e.pogo) continue;
         const d = dist({ x, y }, e);
         if (d < best) {
             best = d;
@@ -19364,15 +19694,35 @@ function getSafeSpawnPoint(approxSize = 14, minPlayerDist = 220, attempts = 28) 
 }
 
 function spawnEnemy(forcedType = null, forcedPoint = null, spriteOverride = null) {
-    if(window.survivalModeRun?.enemyPool?.length){
+    let survivalEntryWave = null;
+    let survivalOriginMapId = null;
+    if(window.survivalModeRun?.enemyPool?.length && !window.__fdBypassSurvivalRoster){
         const forced=String(forcedType||'').toLowerCase();
         if(!SURVIVAL_AUTO_BOSS_TYPES.has(forced)){
-            const pick=window.survivalModeRun.enemyPool[Math.floor(Math.random()*window.survivalModeRun.enemyPool.length)];
-            if(pick){ forcedType=pick.type; spriteOverride=pick.spriteKey||spriteOverride; }
+            const currentWave = Math.max(1, Number(wave) || 1);
+            const eligible = window.survivalModeRun.enemyPool.filter(p => {
+                if(!p || isSurvivalPrototypeEnemy(p)) return false;
+                const type = String(p.type || '').toLowerCase();
+                if(!type || SURVIVAL_AUTO_BOSS_TYPES.has(type)) return false;
+                return getEnemyEntryWave(type, currentWave) <= currentWave;
+            });
+            if(!eligible.length) return false;
+            const pick=eligible[Math.floor(Math.random()*eligible.length)];
+            if(pick){
+                forcedType=pick.type;
+                spriteOverride=pick.spriteKey||spriteOverride;
+                survivalEntryWave = Math.max(1, getEnemyEntryWave(pick.type, currentWave));
+                survivalOriginMapId = Number.isInteger(pick.mapId) ? pick.mapId : (window.currentMap === 11 ? 0 : window.currentMap);
+            }
         }
         if(typeof COLISEUM_NEW !== 'undefined' && COLISEUM_NEW.has(String(forcedType||'').toLowerCase()) && typeof fdSpawnCustomEnemy === 'function'){
             const spawnPoint = forcedPoint && Number.isFinite(forcedPoint.x) && Number.isFinite(forcedPoint.y) ? forcedPoint : getSafeSpawnPoint(24,260);
-            return fdSpawnCustomEnemy(forcedType,spawnPoint.x,spawnPoint.y,{sandbox:false,skin:spriteOverride||null});
+            const custom = fdSpawnCustomEnemy(forcedType,spawnPoint.x,spawnPoint.y,{sandbox:false,skin:spriteOverride||null});
+            if(custom){
+                if(Number.isInteger(survivalEntryWave)){ custom.spawnWave=survivalEntryWave; custom.entryWave=survivalEntryWave; }
+                if(Number.isInteger(survivalOriginMapId)){ custom.dropOriginMapId=survivalOriginMapId; custom.skinSourceMapId=survivalOriginMapId; }
+            }
+            return custom;
         }
     }
     if (window.dailyMissionRun?.modifierKey === 'kamikaze') {
@@ -19531,6 +19881,24 @@ function spawnEnemy(forcedType = null, forcedPoint = null, spriteOverride = null
         if (wave >= 20) types.push('geisha');
     }
 
+    // Dia das Crianças: elenco próprio usando as mesmas waves de entrada dos tipos-base.
+    if (window.currentMap === 20) {
+        types = ['basico'];
+        if (wave >= 2) types.push('cardboard_head');
+        if (wave >= 3) types.push('motorcycle_helmet','velocista');
+        if (wave >= 5) types.push('atirador','kamikaze','ballon','tnt_crate');
+        if (wave >= 6) types.push('gigante');
+        if (wave >= 7) types.push('prism_head');
+        if (wave >= 12) types.push('truck');
+        if (wave >= 13) types.push('tanque');
+        if (wave >= 15) types.push('kid_snake');
+        if (wave >= 16) types.push('curandeiro');
+        if (wave >= 17) types.push('elite');
+        if (wave >= 18) types.push('pogo');
+        if (wave >= 21) types.push('lider');
+        if (pd.selectedChar === 'healy') types = types.filter(t => t !== 'curandeiro');
+    }
+
     // Fraturado: todos os inimigos entram pela PRÓPRIA wave de estreia,
     // independentemente do mapa onde normalmente aparecem.
     if (window.currentMap === 11) {
@@ -19538,7 +19906,13 @@ function spawnEnemy(forcedType = null, forcedPoint = null, spriteOverride = null
         if (pd.selectedChar === 'healy') types = types.filter(t => t !== 'curandeiro');
     }
     
-    let type = forcedType || types[Math.floor(Math.random() * types.length)]; const spawnWave = Number.isSafeInteger(wave) ? wave : Math.max(1, Number(wave) || 1); let mult = getEnemyDifficultyMultiplierFromEntry(type, spawnWave, wave);
+    if (!forcedType) {
+        // Alguns inimigos globais são adicionados à lista por tempo de partida.
+        // O tempo não pode antecipar a estreia deles: a wave de entrada é a regra final.
+        types = types.filter(t => getEnemyEntryWave(t, wave) <= wave);
+        if (!types.length) types = ['basico'];
+    }
+    let type = forcedType || types[Math.floor(Math.random() * types.length)]; const spawnWave = Number.isInteger(survivalEntryWave) ? survivalEntryWave : (Number.isSafeInteger(wave) ? wave : Math.max(1, Number(wave) || 1)); let mult = getEnemyDifficultyMultiplierFromEntry(type, spawnWave, wave);
     if (!forcedPoint && window.currentMap === 5 && type === 'crocodile') {
         const mudPools = obstacles.filter(o => o && o.type === 'mud');
         if (mudPools.length) {
@@ -19551,7 +19925,7 @@ function spawnEnemy(forcedType = null, forcedPoint = null, spriteOverride = null
     
     if(!sandboxMode && isUhcGameplayActive() && window.currentMap === 4 && type === 'gigante') type = 'monster_tree';
 
-    let e = { x: ex, y: ey, type, hp: 0, maxHp: 0, speed: 0, baseDmg: 0, dmg: 0, size: 0, cd: 0, color: '', poison: { timer: 0, dmg: 0, tickCd: 0 }, slowTimer: 0, timeDistortionTimer:0, weakenTimer: 0, curseTimer: 0, burnTimer: 0, freezeTimer: 0, burnDmg: 0, speedBuffTimer: 0, soak: 0, shockTimer: 0, shockSemiTimer: 0, shockTick: 0, shockSemiTick: 0, shockDmg: 0, shockSemiDmg: 0, shockRate: 0.3, semiShockRate: 0.4, spawnBiome: window.currentMap, spawnWave, entryWave: spawnWave, stationary: false, poisonOnHit: 0, enemySkin: (window.currentMap === 4 && type === 'goblin') ? 'hunter' : null, fracturedOrigin: false, fractureMapId: null, skinSourceMapId: window.currentMap === 11 ? null : window.currentMap, pandaSummonTimer: 0, pandaSummoned: false, seinSein: false, seinAuraRadius: 115, samuraiAttackTimer: 0, samuraiAttackAngle: 0, samuraiAttackApplied: false, samuraiCd: 0, nunchakuAttackTimer: 0, nunchakuAttackAngle: 0, nunchakuAttackApplied: false, nunchakuCd: 0,
+    let e = { x: ex, y: ey, type, hp: 0, maxHp: 0, speed: 0, baseDmg: 0, dmg: 0, size: 0, cd: 0, color: '', poison: { timer: 0, dmg: 0, tickCd: 0 }, slowTimer: 0, timeDistortionTimer:0, weakenTimer: 0, curseTimer: 0, burnTimer: 0, freezeTimer: 0, burnDmg: 0, speedBuffTimer: 0, soak: 0, shockTimer: 0, shockSemiTimer: 0, shockTick: 0, shockSemiTick: 0, shockDmg: 0, shockSemiDmg: 0, shockRate: 0.3, semiShockRate: 0.4, spawnBiome: window.currentMap, spawnWave, entryWave: spawnWave, stationary: false, poisonOnHit: 0, enemySkin: (window.currentMap === 4 && type === 'goblin') ? 'hunter' : null, fracturedOrigin: false, fractureMapId: null, skinSourceMapId: window.currentMap === 11 ? null : window.currentMap, dropOriginMapId: Number.isInteger(survivalOriginMapId) ? survivalOriginMapId : (window.currentMap === 11 ? 0 : window.currentMap), pandaSummonTimer: 0, pandaSummoned: false, seinSein: false, seinAuraRadius: 115, samuraiAttackTimer: 0, samuraiAttackAngle: 0, samuraiAttackApplied: false, samuraiCd: 0, nunchakuAttackTimer: 0, nunchakuAttackAngle: 0, nunchakuAttackApplied: false, nunchakuCd: 0,
         piano: false, pianoAuraRadius: 125, singer: false, singerOrbitAngle: 0, singerOrbitRadius: 28, singerOrbitSpeed: 3.4, singerMicCd: 0, singerMicHitPlayer: false,
         firemanJetTimer: 0, firemanReloadTimer: 1.8, firemanJetTick: 0,
         sounder: false, sounderAttackCd: 1.55, sounderAttackTimer: 0, sounderAttackRadius: 0, sounderAttackDuration: 0.62, sounderAttackHitTargets: [], sounderAttackHitPlayer: false,
@@ -19560,7 +19934,19 @@ function spawnEnemy(forcedType = null, forcedPoint = null, spriteOverride = null
         laserShooterCd: 0,
         rocker: false, tourTruck: false, isColossal: false, tourTruckDeathPending: false, tourTruckExplosionTimer: 0 };
     if (window.currentMap === 11) e.fracturedSkinType = getFracturedEnemySkinType(e);
+    if (window.currentMap === 20) {
+        e.skinSourceMapId = 20; e.dropOriginMapId = 20; e.spawnBiome = 20;
+        const childSkin = {
+            basico:'kid_basic',cardboard_head:'fancy_cardboard',motorcycle_helmet:'teddy_head',prism_head:'cube_head',
+            velocista:'kid_velocist',atirador:'kid_shooter',gigante:'kid_giant',curandeiro:'kid_healer',kamikaze:'kid_kamikaze',
+            ballon:'fancy_baloon',tanque:'confette_tank',truck:'kid_truck',lider:'kid_leader',elite:'kid_elite_shooter',
+            tnt_crate:'jacknbox',pogo:'pogo',kid_snake:'kid_snake'
+        }[type];
+        if(childSkin && getEnemySpritePath(childSkin)) e.skinOverride=childSkin;
+        if(type==='tnt_crate') e.childDayJacknbox=true;
+    }
     if (spriteOverride && getEnemySpritePath(spriteOverride)) e.skinOverride = spriteOverride;
+    if (Number.isInteger(survivalOriginMapId)) { e.dropOriginMapId = survivalOriginMapId; e.skinSourceMapId = survivalOriginMapId; }
     if (type === 'ballon' && e.fracturedSkinType === 'metro_ballon') e.gangsterBalloon = true;
     
     if(type === 'basico') { e.hp = 30*mult; e.speed = 1.5; e.baseDmg = 5*mult; e.size = 12; e.color = '#e74c3c'; }
@@ -19609,6 +19995,14 @@ function spawnEnemy(forcedType = null, forcedPoint = null, spriteOverride = null
     if(type === 'tnt_crate') {
         e.hp = 58*mult; e.speed = 1.35; e.baseDmg = 5*mult; e.size = 15; e.color = '#b8793c';
         e.tntCrate = true;
+    }
+    if(type === 'pogo') {
+        e.hp = 70*mult; e.speed = 2.05; e.baseDmg = 7*mult; e.size = 14; e.color = '#f1c40f';
+        e.pogo = true; e.pogoPhase = Math.random()*Math.PI*2; e.pogoScale = 1; e.pogoJumpOffset = 0; e.dodgeChance = 0.25; e.ignoreObstacleCollision = true;
+    }
+    if(type === 'kid_snake') {
+        e.hp = 155*mult; e.speed = 1.05; e.baseDmg = 8*mult; e.size = 18; e.color = '#9b59b6';
+        e.kidSnake = true; e.kidSnakeDeathHandled = false;
     }
     if(type === 'swordfish') {
         e.hp = 38*mult; e.speed = 3.0; e.baseDmg = 18*mult; e.size = 15; e.color = '#d6f6ff';
@@ -19715,7 +20109,7 @@ function updateEnemies(dt) {
         try {
         let e = enemies[i]; let d = dist(e, player);
         if (e.ambulanceDeathPending) { e.ambulanceExplosionTimer = Math.max(0,(e.ambulanceExplosionTimer||0)-dt); if(e.ambulanceExplosionTimer<=0){ createExplosion(e.x,e.y,95,0,'rgba(241,196,15,0.25)'); blizzardCoolDownOnKill(e); enemies.splice(i,1); } continue; }
-        if (e.policeCarDeathPending) { e.policeCarExplosionTimer = Math.max(0,(e.policeCarExplosionTimer||0)-dt); if(e.policeCarExplosionTimer<=0){ createExplosion(e.x,e.y,85,0,'rgba(231,76,60,0.35)'); blizzardCoolDownOnKill(e); const sm=Math.max(0.25,(Number(e.maxHp)||155)/155); const mapId=Number.isInteger(e.fractureMapId)?e.fractureMapId:6; for(let k=0;k<3;k++){const a=Math.random()*Math.PI*2; enemies.push(inheritHypnosis(e,{x:e.x+Math.cos(a)*35,y:e.y+Math.sin(a)*35,type:'atirador',hp:20*sm,maxHp:20*sm,speed:1.2,baseDmg:8*sm,dmg:8*sm,size:14,cd:30,color:'#2980b9',poison:{timer:0,dmg:0,tickCd:0},slowTimer:0,weakenTimer:0,burnTimer:0,freezeTimer:0,burnDmg:0,spawnBiome:mapId,skinSourceMapId:mapId,fracturedOrigin:!!e.fracturedOrigin,fractureMapId:Number.isInteger(e.fractureMapId)?e.fractureMapId:null,enemySkin:null,fracturedSkinType:null,resolvedFracturedSkinType:null,_skinTypeForEnemy:null}));} enemies.splice(i,1); } continue; }
+        if (e.policeCarDeathPending) { e.policeCarExplosionTimer = Math.max(0,(e.policeCarExplosionTimer||0)-dt); if(e.policeCarExplosionTimer<=0){ createExplosion(e.x,e.y,85,0,'rgba(231,76,60,0.35)'); blizzardCoolDownOnKill(e); const sm=Math.max(0.25,(Number(e.maxHp)||155)/155); const mapId=fd1GetDropOriginMapId(e,6); for(let k=0;k<3;k++){const a=Math.random()*Math.PI*2; enemies.push(inheritHypnosis(e,{x:e.x+Math.cos(a)*35,y:e.y+Math.sin(a)*35,type:'atirador',hp:20*sm,maxHp:20*sm,speed:1.2,baseDmg:8*sm,dmg:8*sm,size:14,cd:30,color:'#2980b9',poison:{timer:0,dmg:0,tickCd:0},slowTimer:0,weakenTimer:0,burnTimer:0,freezeTimer:0,burnDmg:0,spawnBiome:mapId,skinSourceMapId:mapId,fracturedOrigin:!!e.fracturedOrigin,fractureMapId:Number.isInteger(e.fractureMapId)?e.fractureMapId:null,enemySkin:null,fracturedSkinType:null,resolvedFracturedSkinType:null,_skinTypeForEnemy:null}));} enemies.splice(i,1); } continue; }
         if (e.truckDeathPending) {
             e.truckExplosionTimer = Math.max(0, (e.truckExplosionTimer || 0) - dt);
             if (e.truckExplosionTimer <= 0) {
@@ -19923,7 +20317,7 @@ function updateEnemies(dt) {
                 e.pandaSummoned = true;
                 const pandaEntry = Math.max(16, Number(e.entryWave) || 16);
                 const pandaMult = getEnemyDifficultyMultiplierFromEntry('panda', pandaEntry, wave);
-                const sourceMapId = Number.isInteger(e.fractureMapId) ? e.fractureMapId : (Number.isInteger(e.skinSourceMapId) ? e.skinSourceMapId : window.currentMap);
+                const sourceMapId = fd1GetDropOriginMapId(e, window.currentMap);
                 const pandaFractured = !!e.fracturedOrigin;
                 const pandaChild = {
                     x:e.x + (Math.random()-0.5)*24, y:e.y + (Math.random()-0.5)*24, type:'panda',
@@ -19960,6 +20354,12 @@ function updateEnemies(dt) {
                 targetY = gooClone.y;
             }
         }
+        if(e.pogo){
+            e.pogoPhase=(Number(e.pogoPhase)||0)+dt*8.2;
+            const jump=Math.max(0,Math.sin(e.pogoPhase));
+            e.pogoScale=1 + jump*0.10;
+            e.pogoJumpOffset=-jump*18;
+        }
         const activeEnemyTarget = isHypnotized ? hypTarget : enemyNoticeTarget;
         const attackTargetDistance = activeEnemyTarget ? dist(e, activeEnemyTarget) : d;
         const dailyHeatEnemyRangeMult = isDailyModifier('heat') ? 0.75 : 1;
@@ -19972,7 +20372,7 @@ function updateEnemies(dt) {
             const candidateX = Math.max(-1480, Math.min(1480, e.x + push.vx * step));
             const candidateY = Math.max(-1480, Math.min(1480, e.y + push.vy * step));
             let blockedByWall = false;
-            if (!e.globalBalloon) {
+            if (!e.globalBalloon && !e.ignoreObstacleCollision) {
                 for (const obstacle of FDPerf.blockingObstacles) {
                     if (!obstacle || (e.type === 'lumberjack' && obstacle.type === 'tree') || obstacle.type === 'kelp') continue;
                     const minDist = (Number(obstacle.r) || 0) + (Number(e.size) || 0);
@@ -20464,7 +20864,7 @@ function updateEnemies(dt) {
                     const summonedType = isGiant ? 'gigante' : 'basico';
                     const summonedEntryWave = Number(e.entryWave) || getEnemyEntryWave(e.type, wave);
                     let mult = getEnemyDifficultyMultiplierFromEntry(summonedType, summonedEntryWave, wave);
-                    const leaderSourceMap = Number.isInteger(e.fractureMapId) ? e.fractureMapId : (Number.isInteger(e.skinSourceMapId) ? e.skinSourceMapId : window.currentMap);
+                    const leaderSourceMap = fd1GetDropOriginMapId(e, window.currentMap);
                     const child = { x: e.x + (Math.random()-0.5)*60, y: e.y + (Math.random()-0.5)*60, type: summonedType, hp: (isGiant?80:30)*mult, maxHp: (isGiant?80:30)*mult, speed: isGiant?0.8:1.5, baseDmg: (isGiant?15:5)*mult, dmg: (isGiant?15:5)*mult, size: isGiant?22:12, color: isGiant?'#8e44ad':'#e74c3c', poison: {timer:0,dmg:0}, slowTimer: 0, weakenTimer: 0, burnTimer: 0, soak: 0, spawnWave: summonedEntryWave, entryWave: summonedEntryWave, spawnBiome: leaderSourceMap, skinSourceMapId: leaderSourceMap, fracturedOrigin: !!e.fracturedOrigin, fractureMapId: Number.isInteger(e.fractureMapId) ? e.fractureMapId : null, enemySkin: null, fracturedSkinType: null, resolvedFracturedSkinType: null, _skinTypeForEnemy: null };
                     enemies.push(inheritHypnosis(e, child));
                 }
@@ -20565,7 +20965,7 @@ function updateEnemies(dt) {
         if (Math.abs(nx - prevX) > 0.01) e.facingLeft = nx < prevX;
 
         // Xilo's temporary anvil walls block passage, but never freeze an enemy inside them.
-        for (const wall of FDPerf.xiloWalls) {
+        if (!e.ignoreObstacleCollision) for (const wall of FDPerf.xiloWalls) {
             const wallRadius = Number.isFinite(wall.extra.wallRadius) ? wall.extra.wallRadius : 21;
             const minD = wallRadius + (e.size || 0) + 1;
             const dWall = distXY(nx, ny, wall.x, wall.y);
@@ -20578,7 +20978,7 @@ function updateEnemies(dt) {
             }
         }
 
-        if (!e.globalBalloon) {
+        if (!e.globalBalloon && !e.ignoreObstacleCollision) {
             for (const o of FDPerf.blockingObstacles) {
                 if (e.type === 'lumberjack' && o.type === 'tree') continue;
                 if (distXY(nx, ny, o.x, o.y) < o.r + e.size) { nx = e.x; ny = e.y; break; }
@@ -20765,23 +21165,23 @@ function updateEnemies(dt) {
             if(e.revives && e.revives > 0) {
                 e.revives--; e.hp = e.maxHp; e.freezeTimer = 1.0; e.color = '#7f8c8d';
             } else if (e.type === 'worker' && e.workerConverted) {
-                e.type='basico'; e.hp=30*Math.max(0.25,(Number(e.maxHp)||38)/38); e.maxHp=e.hp; e.speed=1.5; e.baseDmg=5; e.dmg=5; e.size=12; e.color='#e74c3c'; e.workerConverted=false; e.skinSourceMapId=Number.isInteger(e.fractureMapId)?e.fractureMapId:(Number.isInteger(e.skinSourceMapId)?e.skinSourceMapId:6); e.fracturedSkinType=null; e.resolvedFracturedSkinType=null; e._skinTypeForEnemy=null; if(e.fracturedOrigin)e.fractureMapId=e.skinSourceMapId; continue;
+                e.type='basico'; e.hp=30*Math.max(0.25,(Number(e.maxHp)||38)/38); e.maxHp=e.hp; e.speed=1.5; e.baseDmg=5; e.dmg=5; e.size=12; e.color='#e74c3c'; e.workerConverted=false; e.skinSourceMapId=fd1GetDropOriginMapId(e,6); e.dropOriginMapId=e.skinSourceMapId; e.fracturedSkinType=null; e.resolvedFracturedSkinType=null; e._skinTypeForEnemy=null; if(e.fracturedOrigin)e.fractureMapId=e.skinSourceMapId; continue;
             } else if (e.type === 'ambulance' && !e.ambulanceDeathPending) { e.ambulanceDeathPending=true; e.ambulanceExplosionTimer=1.0; e.hp=1; e.speed=0; e.stationary=true; addFloatingText(e.x,e.y-18,'BOOM em 1s!','#f1c40f',12); continue;
             } else if (e.type === 'police_car' && !e.policeCarDeathPending) { e.policeCarDeathPending=true; e.policeCarExplosionTimer=1.0; e.hp=1; e.speed=0; e.stationary=true; addFloatingText(e.x,e.y-18,'BOOM em 1s!','#f1c40f',12); continue;
             } else if (e.type === 'conehead' && e.conehead) {
                 e.type='atirador'; e.conehead=false; e.isGlobalArmored=false; e.breakIntoBasic=false; delete e.armorHp;
                 const shooterMult=getEnemyDifficultyMultiplierFromEntry('atirador',e.entryWave||wave,wave);
                 e.hp=20*shooterMult; e.maxHp=e.hp; e.baseDmg=8*shooterMult; e.dmg=e.baseDmg; e.size=14; e.speed=1.2; e.color='#2980b9'; e.cd=0; e.spawnCd=0; e.stationary=false;
-                e.skinSourceMapId=Number.isInteger(e.fractureMapId)?e.fractureMapId:window.currentMap; e.skinOverride=e.fracturedOrigin?null:'metro_shooter'; e.fracturedSkinType=null; e.resolvedFracturedSkinType=null; e._skinTypeForEnemy=null; if(e.fracturedOrigin)e.fractureMapId=e.skinSourceMapId; continue;
-            } else if (e.type === 'motorcycle' && e.motorcycle) { e.type='motorcycle_helmet'; e.hp=85; e.maxHp=85; e.baseDmg=6; e.dmg=6; e.size=16; e.speed=1.1; e.motorcycle=false; e.motorcycleArmor=false; e.isGlobalArmored=true; e.breakIntoBasic=true; delete e.armorHp; e.skinSourceMapId=Number.isInteger(e.fractureMapId)?e.fractureMapId:6; e.fracturedSkinType=null; e.resolvedFracturedSkinType=null; e._skinTypeForEnemy=null; if(e.fracturedOrigin)e.fractureMapId=e.skinSourceMapId; continue;
+                e.skinSourceMapId=fd1GetDropOriginMapId(e,window.currentMap); e.dropOriginMapId=e.skinSourceMapId; e.skinOverride=e.fracturedOrigin?null:'metro_shooter'; e.fracturedSkinType=null; e.resolvedFracturedSkinType=null; e._skinTypeForEnemy=null; if(e.fracturedOrigin)e.fractureMapId=e.skinSourceMapId; continue;
+            } else if (e.type === 'motorcycle' && e.motorcycle) { e.type='motorcycle_helmet'; e.hp=85; e.maxHp=85; e.baseDmg=6; e.dmg=6; e.size=16; e.speed=1.1; e.motorcycle=false; e.motorcycleArmor=false; e.isGlobalArmored=true; e.breakIntoBasic=true; delete e.armorHp; e.skinSourceMapId=fd1GetDropOriginMapId(e,6); e.dropOriginMapId=e.skinSourceMapId; e.fracturedSkinType=null; e.resolvedFracturedSkinType=null; e._skinTypeForEnemy=null; if(e.fracturedOrigin)e.fractureMapId=e.skinSourceMapId; continue;
             } else if (e.type === 'obsidian_miner' && Math.random() < (Number(e.obsidianDropChance) || 0.45)) {
                 const multMiner = Math.max(0.25, (Number(e.maxHp) > 0 ? Number(e.maxHp) / 85 : 1));
                 enemies.push(inheritHypnosis(e, {
                     x:e.x, y:e.y, type:'motorcycle_helmet', hp:85*multMiner, maxHp:85*multMiner, speed:1.1, baseDmg:6*multMiner, dmg:6*multMiner, size:16, cd:0, color:'#56616d',
                     poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, curseTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0,
                     shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4,
-                    spawnBiome:Number.isInteger(e.skinSourceMapId)?e.skinSourceMapId:7, spawnWave:e.entryWave||wave, entryWave:e.entryWave||wave,
-                    skinSourceMapId:Number.isInteger(e.skinSourceMapId)?e.skinSourceMapId:7, fracturedOrigin:!!e.fracturedOrigin,
+                    spawnBiome:fd1GetDropOriginMapId(e,7), spawnWave:e.entryWave||wave, entryWave:e.entryWave||wave,
+                    skinSourceMapId:fd1GetDropOriginMapId(e,7), dropOriginMapId:fd1GetDropOriginMapId(e,7), fracturedOrigin:!!e.fracturedOrigin,
                     fractureMapId:e.fracturedOrigin ? (Number.isInteger(e.fractureMapId)?e.fractureMapId:7) : null, enemySkin:null, fracturedSkinType:null, resolvedFracturedSkinType:null, _skinTypeForEnemy:null,
                     isGlobalArmored:true, breakIntoBasic:true, skinOverride:(e.fracturedOrigin?null:(Number.isInteger(e.skinSourceMapId)?'magma_motorcycle_helmet':null))
                 }));
@@ -20789,7 +21189,7 @@ function updateEnemies(dt) {
             } else if(e.type !== 'merlin_baby' && e.breakIntoBasic && e.isGlobalArmored) {
                 // O invólucro é destruído: nasce um inimigo Básico no mesmo ponto.
                 const basicMult = Math.max(0.25, (Number(e.maxHp) > 0 ? Number(e.maxHp) / (e.type === 'cardboard_head' ? 45 : ((e.type === 'motorcycle_helmet' || e.type === 'machine_gun_war') ? 85 : 180)) : 1));
-                const sourceMapId = Number.isInteger(e.fractureMapId) ? e.fractureMapId : (Number.isInteger(e.skinSourceMapId) ? e.skinSourceMapId : (Number.isInteger(e.spawnBiome) ? e.spawnBiome : window.currentMap));
+                const sourceMapId = fd1GetDropOriginMapId(e, window.currentMap);
                 e.type = 'basico';
                 e.hp = 30 * basicMult;
                 e.maxHp = e.hp;
@@ -20801,6 +21201,7 @@ function updateEnemies(dt) {
                 e.isGlobalArmored = false;
                 e.breakIntoBasic = false;
                 e.skinSourceMapId = sourceMapId;
+                e.dropOriginMapId = sourceMapId;
                 // A proteção não pode continuar presa em skinOverride; caso contrário
                 // o renderer apenas encolhe a versão protegida. Recomeçamos a resolução
                 // visual a partir do inimigo básico do mapa de origem.
@@ -20816,6 +21217,21 @@ function updateEnemies(dt) {
                 addFloatingText(e.x, e.y - 10, 'QUEBROU!', '#f1c40f', 11);
             } else {
                 // Conteúdo em cadeia de biomas e globais.
+                if (e.type === 'kid_snake' && !e.kidSnakeDeathHandled) {
+                    e.kidSnakeDeathHandled = true;
+                    const snakeMult = Math.max(0.25, (Number(e.maxHp) || 155) / 155);
+                    for (let j=0; j<3; j++) {
+                        const a=(Math.PI*2*j/3)+Math.random()*0.35;
+                        enemies.push({
+                            x:e.x+Math.cos(a)*28,y:e.y+Math.sin(a)*28,type:'basico',hp:30*snakeMult,maxHp:30*snakeMult,
+                            speed:1.5,baseDmg:5*snakeMult,dmg:5*snakeMult,size:12,cd:0,color:'#e74c3c',
+                            poison:{timer:0,dmg:0,tickCd:0.3},slowTimer:0,weakenTimer:0,curseTimer:0,burnTimer:0,freezeTimer:0,burnDmg:0,
+                            spawnBiome:0,spawnWave:e.entryWave||wave,entryWave:e.entryWave||wave,skinSourceMapId:0,dropOriginMapId:0,
+                            fracturedOrigin:false,fractureMapId:null,enemySkin:null,fracturedSkinType:null,resolvedFracturedSkinType:null,_skinTypeForEnemy:null,
+                            skinOverride:'basic',forceNormalSkin:true,childSnakeDropNormal:true
+                        });
+                    }
+                }
                 if (e.type === 'rocknrool') obstacles.push({x:e.x,y:e.y,r:42,type:'speaker',cd:0.35,temporaryLife:14,discoSpeakerDrop:true});
                 if (e.type === 'ballon' || e.type === 'deer_pilot') {
                     const basicMult = Math.max(0.25, (Number(e.maxHp) > 0 ? Number(e.maxHp) / 30 : 1));
@@ -20823,12 +21239,13 @@ function updateEnemies(dt) {
                         x:e.x, y:e.y, type:'basico', hp:30*basicMult, maxHp:30*basicMult, speed:1.5, baseDmg:5*basicMult, dmg:5*basicMult, size:12, cd:0, color:'#e74c3c',
                         poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0,
                         shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4,
-                        spawnBiome: Number.isInteger(e.skinSourceMapId) ? e.skinSourceMapId : (e.type === 'deer_pilot' ? 2 : window.currentMap), spawnWave: e.entryWave || wave, entryWave: e.entryWave || wave,
-                        skinSourceMapId: Number.isInteger(e.skinSourceMapId) ? e.skinSourceMapId : (e.type === 'deer_pilot' ? 2 : window.currentMap),
+                        spawnBiome: fd1GetDropOriginMapId(e, e.type === 'deer_pilot' ? 2 : window.currentMap), spawnWave: e.entryWave || wave, entryWave: e.entryWave || wave,
+                        skinSourceMapId: fd1GetDropOriginMapId(e, e.type === 'deer_pilot' ? 2 : window.currentMap),
+                        dropOriginMapId: fd1GetDropOriginMapId(e, e.type === 'deer_pilot' ? 2 : window.currentMap),
                         fracturedOrigin: !!e.fracturedOrigin, fractureMapId: Number.isInteger(e.fractureMapId) ? e.fractureMapId : null,
                         forceUnprotectedMapSkin: true,
-                        skinOverride: (e.type === 'ballon' && (e.gangsterBalloon || Number(e.spawnBiome) === 9 || Number(e.skinSourceMapId) === 9))
-                            ? (e.gangsterBalloon ? 'gangster' : 'disco_basic')
+                        skinOverride: (e.type === 'ballon' && (e.gangsterBalloon || fd1GetDropOriginMapId(e, window.currentMap) === 6))
+                            ? 'gangster'
                             : null,
                         enemySkin: null, fracturedSkinType: null, resolvedFracturedSkinType: null, _skinTypeForEnemy: null
                     }));
@@ -20838,8 +21255,8 @@ function updateEnemies(dt) {
                         x:e.x, y:e.y, type:'basico', hp:30*mult, maxHp:30*mult, speed:1.5, baseDmg:5*mult, dmg:5*mult, size:12, cd:0, color:'#e74c3c',
                         poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0,
                         shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4,
-                        spawnBiome: Number.isInteger(e.skinSourceMapId) ? e.skinSourceMapId : 2, spawnWave:e.entryWave || wave, entryWave:e.entryWave || wave,
-                        skinSourceMapId: Number.isInteger(e.skinSourceMapId) ? e.skinSourceMapId : 2,
+                        spawnBiome: fd1GetDropOriginMapId(e, 2), spawnWave:e.entryWave || wave, entryWave:e.entryWave || wave,
+                        skinSourceMapId: fd1GetDropOriginMapId(e, 2), dropOriginMapId: fd1GetDropOriginMapId(e, 2),
                         fracturedOrigin: !!e.fracturedOrigin, fractureMapId: Number.isInteger(e.fractureMapId) ? e.fractureMapId : null,
                         enemySkin: null, fracturedSkinType: null, resolvedFracturedSkinType: null, _skinTypeForEnemy: null
                     });
@@ -20848,29 +21265,29 @@ function updateEnemies(dt) {
                         x: e.x, y: e.y, type: 'sarcophagus', hp: 150 * getEnemyDifficultyMultiplierFromEntry('sarcophagus', e.entryWave || 15, wave), maxHp: 150 * getEnemyDifficultyMultiplierFromEntry('sarcophagus', e.entryWave || 15, wave),
                         speed: 0, baseDmg: 8 * getEnemyDifficultyMultiplierFromEntry('sarcophagus', e.entryWave || 15, wave), dmg: 8 * getEnemyDifficultyMultiplierFromEntry('sarcophagus', e.entryWave || 15, wave), size: 22, cd: 0, color: '#c7a76b',
                         poison: {timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0,
-                        shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4, stationary:true, spawnBiome:1, desertEnemy:true
+                        shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4, stationary:true, spawnBiome:fd1GetDropOriginMapId(e,1), skinSourceMapId:fd1GetDropOriginMapId(e,1), dropOriginMapId:fd1GetDropOriginMapId(e,1), desertEnemy:true
                     });
                 } else if (e.type === 'sarcophagus') {
                     const mult = getEnemyDifficultyMultiplierFromEntry('sarcophagus', e.entryWave || 15, wave);
                     if (Math.random() < 0.08) {
                         enemies.push({
                             x:e.x, y:e.y, type:'lider', hp:45*mult, maxHp:45*mult, speed:1.2, baseDmg:8*mult, dmg:8*mult, size:14, cd:0, color:'#fbc531', spawnCd:20,
-                            poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0, shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4, spawnBiome:1, desertEnemy:true
+                            poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0, shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4, spawnBiome:fd1GetDropOriginMapId(e,1), skinSourceMapId:fd1GetDropOriginMapId(e,1), dropOriginMapId:fd1GetDropOriginMapId(e,1), desertEnemy:true
                         });
                     } else {
                         enemies.push({
                             x:e.x, y:e.y, type:'mummy', hp:50*mult, maxHp:50*mult, speed:1.3, baseDmg:10*mult, dmg:10*mult, size:13, cd:0, color:'#f5f6fa',
-                            poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0, shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4, revives:1, spawnBiome:1, desertEnemy:true
+                            poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0, shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4, revives:1, spawnBiome:fd1GetDropOriginMapId(e,1), skinSourceMapId:fd1GetDropOriginMapId(e,1), dropOriginMapId:fd1GetDropOriginMapId(e,1), desertEnemy:true
                         });
                     }
                 } else if (e.type === 'camel') {
                     const spawnWave = Math.max(1, Number(e.entryWave) || Number(e.spawnWave) || getEnemyEntryWave('camel', wave));
                     const basicMult = getEnemyDifficultyMultiplierFromEntry('basico', spawnWave, wave);
                     const cardboardMult = getEnemyDifficultyMultiplierFromEntry('cardboard_head', spawnWave, wave);
-                    const camelSourceMap = Number.isInteger(e.skinSourceMapId) ? e.skinSourceMapId : (Number.isInteger(e.fractureMapId) ? e.fractureMapId : 1);
+                    const camelSourceMap = fd1GetDropOriginMapId(e, 1);
                     const camelFractured = !!e.fracturedOrigin;
-                    enemies.push({ x:e.x-10, y:e.y, type:'basico', hp:30*basicMult, maxHp:30*basicMult, speed:1.5, baseDmg:5*basicMult, dmg:5*basicMult, size:12, cd:0, color:'#e74c3c', poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0, shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4, spawnBiome:camelSourceMap, skinSourceMapId:camelSourceMap, fracturedOrigin:camelFractured, fractureMapId:camelFractured ? camelSourceMap : null, enemySkin:null, fracturedSkinType:null, resolvedFracturedSkinType:null, _skinTypeForEnemy:null });
-                    enemies.push({ x:e.x+10, y:e.y, type:'cardboard_head', hp:45*cardboardMult, maxHp:45*cardboardMult, speed:1.35, baseDmg:5*cardboardMult, dmg:5*cardboardMult, size:15, cd:0, color:'#b8793c', poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0, shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4, isGlobalArmored:true, breakIntoBasic:true, spawnBiome:camelSourceMap, skinSourceMapId:camelSourceMap, fracturedOrigin:camelFractured, fractureMapId:camelFractured ? camelSourceMap : null, enemySkin:null, fracturedSkinType:null, resolvedFracturedSkinType:null, _skinTypeForEnemy:null });
+                    enemies.push({ x:e.x-10, y:e.y, type:'basico', hp:30*basicMult, maxHp:30*basicMult, speed:1.5, baseDmg:5*basicMult, dmg:5*basicMult, size:12, cd:0, color:'#e74c3c', poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0, shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4, spawnBiome:camelSourceMap, skinSourceMapId:camelSourceMap, dropOriginMapId:camelSourceMap, fracturedOrigin:camelFractured, fractureMapId:camelFractured ? camelSourceMap : null, enemySkin:null, fracturedSkinType:null, resolvedFracturedSkinType:null, _skinTypeForEnemy:null });
+                    enemies.push({ x:e.x+10, y:e.y, type:'cardboard_head', hp:45*cardboardMult, maxHp:45*cardboardMult, speed:1.35, baseDmg:5*cardboardMult, dmg:5*cardboardMult, size:15, cd:0, color:'#b8793c', poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0, shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4, isGlobalArmored:true, breakIntoBasic:true, spawnBiome:camelSourceMap, skinSourceMapId:camelSourceMap, dropOriginMapId:camelSourceMap, fracturedOrigin:camelFractured, fractureMapId:camelFractured ? camelSourceMap : null, enemySkin:null, fracturedSkinType:null, resolvedFracturedSkinType:null, _skinTypeForEnemy:null });
                 }
                 enemiesKilled++;
                 runProgressStats.totalKills = Math.max(0, Number(runProgressStats.totalKills) || 0) + 1;
@@ -20914,8 +21331,25 @@ function updateEnemies(dt) {
                 if (cosmicTransform) {
                     const pool = getCosmicTransformationPool();
                     if (pool.length) {
-                        const transformedType = pool[Math.floor(Math.random() * pool.length)];
-                        spawnEnemy(transformedType, cosmicTransform);
+                        const transformed = pool[Math.floor(Math.random() * pool.length)];
+                        const oldBypass = !!window.__fdBypassSurvivalRoster;
+                        window.__fdBypassSurvivalRoster = true;
+                        let cosmicSpawn = null;
+                        try {
+                            cosmicSpawn = spawnEnemy(transformed.type, cosmicTransform, transformed.skin || null);
+                        } finally {
+                            window.__fdBypassSurvivalRoster = oldBypass;
+                        }
+                        if (cosmicSpawn) {
+                            if (Number.isInteger(transformed.mapId)) {
+                                cosmicSpawn.dropOriginMapId = transformed.mapId;
+                                cosmicSpawn.skinSourceMapId = transformed.mapId;
+                                cosmicSpawn.spawnBiome = transformed.mapId;
+                            } else {
+                                cosmicSpawn.dropOriginMapId = fd1GetDropOriginMapId(cosmicSpawn, window.currentMap);
+                            }
+                            cosmicSpawn.skinOverride = transformed.skin || cosmicSpawn.skinOverride || null;
+                        }
                         addFloatingText(cosmicTransform.x, cosmicTransform.y - 12, 'FRACTURA!', '#caa8ff', 11);
                     }
                 }
@@ -21054,7 +21488,7 @@ function updateAllies(dt) {
             continue;
         }
         let target = null; let minD = 500;
-        for(let e of enemies) { if (isCurrentlyHypnotized(e)) continue; let d = dist(a, e); if(d < minD) { minD = d; target = e; } }
+        for(let e of enemies) { if (isCurrentlyHypnotized(e) || (e.pogo && a.type !== 'drone')) continue; let d = dist(a, e); if(d < minD) { minD = d; target = e; } }
 
         if(a.type === 'necro_tombstone') {
             // A lápide se desgasta sozinha: exatamente 1 HP por segundo.
@@ -21362,7 +21796,7 @@ function updateAllies(dt) {
             if (!a.trappedIds) a.trappedIds = new Set();
             const vineRadius = a.radius || 160;
             for (const e of enemies) {
-                if (!e || e.hp <= 0) continue;
+                if (!e || e.hp <= 0 || e.pogo) continue;
                 const dx = a.x - e.x;
                 const dy = a.y - e.y;
                 const d = Math.hypot(dx, dy);
@@ -21495,6 +21929,7 @@ const SERRANO_CHARACTER_PROJECTILES = {
     tiki: ['dart'],
     chessy: ['chess_piece'],
     aresta: ['wind_gust', 'tornado'],
+    serca: ['serca_spear', 'serca_sand_ball', 'tornado'],
     nucleon: ['nucleon_shot'],
     ninji: ['dagger'],
     elektro: ['lightning'],
@@ -21656,7 +22091,7 @@ function updateBulbBubbles(dt) {
     }
 }
 
-const PLAYER_SLASH_TYPES = new Set(['scythe','mr_perfurant_slash','knighter_slash','gladiator_slash','shinobi','shinobi_katana','shiv','nox_slash_a','nox_slash_b','izaque_slash','owen_pickaxe_swing']);
+const PLAYER_SLASH_TYPES = new Set(['scythe','mr_perfurant_slash','knighter_slash','gladiator_slash','shinobi','shinobi_katana','shiv','nox_slash_a','nox_slash_b','izaque_slash','owen_pickaxe_swing','serca_spear']);
 
 function spawnGrenadeFragments(x, y, damage, hitTarget = null) {
     // Grenade sempre dispersa em exatamente 8 direções cardeais/diagonais.
@@ -23639,6 +24074,30 @@ function updateProjectiles(dt) {
             }
         }
 
+        if(hit && p.type === 'serca_sand_ball') {
+            const targetEnemy = hitTarget || null;
+            const impactX = Number.isFinite(p.x) ? p.x : 0;
+            const impactY = Number.isFinite(p.y) ? p.y : 0;
+            const sandRadius = Number.isFinite(p.extra?.sandRadius) ? p.extra.sandRadius : 135;
+            if (targetEnemy && targetEnemy.hp > 0) {
+                const normalStun = Number.isFinite(p.extra?.stunDuration) ? p.extra.stunDuration : 4;
+                const bossStun = Number.isFinite(p.extra?.bossStunDuration) ? p.extra.bossStunDuration : 2.5;
+                targetEnemy.stunTimer = Math.max(Number(targetEnemy.stunTimer)||0, targetEnemy.isBoss ? bossStun : normalStun);
+                addFloatingText(targetEnemy.x, targetEnemy.y - 14, 'STUN!', '#d9b36c', 12);
+            }
+            for (const e2 of enemies) {
+                if (!e2 || e2.hp <= 0 || isCurrentlyHypnotized(e2) || e2 === targetEnemy) continue;
+                if (dist({x:impactX,y:impactY}, e2) <= sandRadius + (e2.size || 12)) {
+                    const slowDuration = Number.isFinite(p.extra?.slowDuration) ? p.extra.slowDuration : 2.4;
+                    e2.slowTimer = Math.max(Number(e2.slowTimer)||0, slowDuration);
+                    addFloatingText(e2.x, e2.y - 8, 'LERDA!', '#d9b36c', 10);
+                }
+            }
+            createParticles(impactX, impactY, '#d9b36c');
+            p.life = 0;
+            projectiles.splice(i,1);
+            continue;
+        }
         if(hit && p.type === 'graffit_can') {
             try {
                 const impactX = Number.isFinite(p.x) ? p.x : 0;
@@ -23837,13 +24296,22 @@ function getDailyNearPlayerPoint(minDist=120,maxDist=240){
     };
 }
 function spawnDailySandWhirlwind(){
-    const pt=getDailyNearPlayerPoint(120,260);
-    puddles.push({x:pt.x,y:pt.y,r:92+Math.random()*38,life:7.5,tick:0,dmg:0,type:'daily_sandstorm',daily:true});
+    const bound=getDailyMapHalfSize()-110;
+    const a=Math.random()*Math.PI*2,d=140+Math.random()*Math.max(40,bound-140);
+    const x=Math.max(-bound,Math.min(bound,player.x+Math.cos(a)*d)), y=Math.max(-bound,Math.min(bound,player.y+Math.sin(a)*d));
+    puddles.push({x,y,r:92+Math.random()*38,life:8.0+Math.random()*1.5,tick:0,dmg:0,type:'daily_sandstorm',daily:true,relocateTimer:4.5+Math.random()*2.5});
 }
 function spawnDailyLightning(){
-    const pt=getDailyNearPlayerPoint(105,270);
-    const x=pt.x, y=pt.y;
-    const strike={x,y,r:82+Math.random()*26,life:.48,maxLife:.48};
+    const bound=Math.min(getDailyMapHalfSize()-100,1480);
+    let x=0,y=0,onPlayer=false;
+    if(player && Math.random()<0.01){ x=player.x; y=player.y; onPlayer=true; }
+    else {
+        for(let attempt=0;attempt<30;attempt++){
+            x=(Math.random()*2-1)*bound; y=(Math.random()*2-1)*bound;
+            if(!player || dist({x,y},player)>=260) break;
+        }
+    }
+    const strike={x,y,r:82+Math.random()*26,life:.48,maxLife:.48,onPlayer};
     window.dailyLightningStrikes=Array.isArray(window.dailyLightningStrikes)?window.dailyLightningStrikes:[]; window.dailyLightningStrikes.push(strike);
     if(player && dist({x,y},player)<strike.r+(player.r||15)) dealPlayerDamage(20);
     for(const e of enemies) if(e&&e.hp>0&&dist({x,y},e)<strike.r+e.size){e.hp-=22;}
@@ -23859,7 +24327,19 @@ function spawnDailyArrow(){
     window.dailyArrows.push({x,y,vx,vy,life:8,r:10,rot:Math.atan2(vy,vx)});
 }
 function updateDailyModifiers(dt){
-    if(!window.dailyMissionRun)return;
+    const sandboxEnv=!sandboxMode && typeof sandboxSettings!=='undefined' ? sandboxSettings : null;
+    if(!window.dailyMissionRun){
+        if(!sandboxEnv)return;
+        if(sandboxEnv.lightning){
+            window.dailyLightningTimer=(Number(window.dailyLightningTimer)||1.1)-dt;
+            if(window.dailyLightningTimer<=0){spawnDailyLightning();window.dailyLightningTimer=1.05+Math.random()*.55;}
+        }
+        if(sandboxEnv.sandWhirls){
+            const active=puddles.filter(p=>p&&p.type==='daily_sandstorm'); while(active.length<10){spawnDailySandWhirlwind();active.push(puddles[puddles.length-1]);}
+            for(const p of active){p.relocateTimer=(Number(p.relocateTimer)||5)-dt;if(p.relocateTimer<=0){const bound=getDailyMapHalfSize()-110,a=Math.random()*Math.PI*2,d=150+Math.random()*Math.max(30,bound-150);p.x=Math.max(-bound,Math.min(bound,player.x+Math.cos(a)*d));p.y=Math.max(-bound,Math.min(bound,player.y+Math.sin(a)*d));p.relocateTimer=4.5+Math.random()*2.5;}}
+        }
+        return;
+    }
     const key=window.dailyMissionRun.modifierKey;
     if(player){
         player.dailyWaterSlowTimer=Math.max(0,Number(player.dailyWaterSlowTimer)||0);
@@ -23870,10 +24350,18 @@ function updateDailyModifiers(dt){
     }
     if(key==='rain'){
         if((Number(window.dailyWaterSpawnTimer)||0)<=0){spawnDailyWaterPuddle();window.dailyWaterSpawnTimer=1.8+Math.random()*1.7;}
-        window.dailyLightningTimer=(Number(window.dailyLightningTimer)||3.5)-dt;
-        if(window.dailyLightningTimer<=0){spawnDailyLightning();window.dailyLightningTimer=3.4+Math.random()*3.2;}
+        window.dailyLightningTimer=(Number(window.dailyLightningTimer)||1.1)-dt;
+        if(window.dailyLightningTimer<=0){spawnDailyLightning();window.dailyLightningTimer=1.05+Math.random()*.55;}
     } else if(key==='sandstorm'){
-        const active=puddles.filter(p=>p&&p.type==='daily_sandstorm'); if(active.length<3){spawnDailySandWhirlwind();}
+        const active=puddles.filter(p=>p&&p.type==='daily_sandstorm');
+        while(active.length<10){spawnDailySandWhirlwind(); active.push(puddles[puddles.length-1]);}
+        for(const p of active){
+            p.relocateTimer=(Number(p.relocateTimer)||5)-dt;
+            if(p.relocateTimer<=0){
+                const bound=getDailyMapHalfSize()-110, a=Math.random()*Math.PI*2,d=150+Math.random()*Math.max(30,bound-150);
+                p.x=Math.max(-bound,Math.min(bound,player.x+Math.cos(a)*d)); p.y=Math.max(-bound,Math.min(bound,player.y+Math.sin(a)*d)); p.relocateTimer=4.5+Math.random()*2.5;
+            }
+        }
     } else if(key==='arrows'){
         window.dailyArrowTimer=(Number(window.dailyArrowTimer)||1.0)-dt;
         if(window.dailyArrowTimer<=0){spawnDailyArrow();window.dailyArrowTimer=.9+Math.random()*1.0;}
@@ -23913,7 +24401,7 @@ function updatePuddles(dt) {
         } else if (p.type === 'caramel') {
             for(const e of enemies) if(e && e.hp > 0 && dist(p, e) < p.r + e.size) e.slowTimer = Math.max(Number(e.slowTimer) || 0, 1.0);
         } else if(p.type === 'snowstorm') {
-            if(player && dist(p, player) < p.r && player.shieldTimer <= 0) { dealPlayerDamage(2 * dt); player.dashTimer = 0; }
+            if(player && dist(p, player) < p.r && player.shieldTimer <= 0) { dealPlayerDamage(2 * dt); player.dashTimer = 0; player.dailyColdSlowTimer=Math.max(Number(player.dailyColdSlowTimer)||0,0.8); }
         } else if(p.type === 'bulb_coral') {
             for(const e of enemies) if(e && e.hp > 0 && dist(p, e) < p.r + e.size) e.slowTimer = Math.max(Number(e.slowTimer) || 0, 0.5);
         } else if (p.type === 'goo_ability') {
@@ -25159,8 +25647,9 @@ function drawFractureRay(fracture) {
         : 1;
     const fade = Math.min(1, lifeRatio * 1.8);
     const angle = Number(fracture.angle) || 0;
-    const len = Number(fracture.length) || 330;
-    const width = Number(fracture.width) || 115;
+    const openAnim=Math.max(0,Math.min(1,Number(fracture.openProgress ?? 1)));
+    const len = (Number(fracture.length) || 330) * (0.18 + 0.82*openAnim);
+    const width = (Number(fracture.width) || 115) * (0.18 + 0.82*openAnim);
     const branch = Number(fracture.branch) || 0;
     const x = fracture.x, y = fracture.y;
 
@@ -25245,7 +25734,7 @@ function getFractureSpawnPosition() {
 function createFracture() {
     if ((window.currentMap !== 11 && !(sandboxSettings.fractures && !sandboxMode)) || wave < 5 || wave % 10 === 0 || enemies.some(e => e && e.isBoss)) return false;
     const pos = getFractureSpawnPosition();
-    const fractureSourceMaps = [0,1,2,3,4,5,6,7,8,9,10,13,14,15];
+    const fractureSourceMaps = [0,1,2,3,4,5,6,7,8,9,10,13,14,15,19];
     const mapId = fractureSourceMaps[Math.floor(Math.random() * fractureSourceMaps.length)];
     const maxLife = 13 + Math.random() * 3;
     window.fractures = window.fractures || [];
@@ -25274,7 +25763,7 @@ function createFracture() {
         }
     }
     window.fractures.push({
-        x: pos.x, y: pos.y, mapId,
+        x: pos.x, y: pos.y, mapId, openProgress:0, openSpeed:2.4,
         angle,
         length,
         width,
@@ -25302,16 +25791,45 @@ function getFractureBiomePool(mapId) {
         9: ['basico','velocista','dancer','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','rocknrool','sounder','piano','singer','tour_truck'],
         10:['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','ghost_fisher','swordfish','shark','triton','rocknrool','sounder','piano','singer','tour_truck','snow_walker','scorpion'],
         13:['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','cosmic','laser_shooter','light_saber','machine_gun'],
-        14:['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','snow_walker','lumberjack','geisha']
+        14:['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','snow_walker','lumberjack','geisha'],
+        19:['basico','velocista','atirador','gigante','tanque','curandeiro','elite','kamikaze','lider','cardboard_head','motorcycle_helmet','prism_head','truck','ballon','fighter_plane','machine_gun_war','anti_radiation','mutant_basic','mutant_giant']
     };
     return [...new Set(byMap[Number(mapId)] || byMap[0])];
 }
 
 function getCosmicTransformationPool() {
-    const lunar = ['cosmic','machine_gun','light_saber','laser_shooter'];
-    const extras = ['monster_tree','monkey','panda','sarcophagus','shark'];
-    return [...new Set(getFracturedGlobalEnemyPool().concat(lunar, extras))]
-        .filter(t => t !== 'cosmic' && getEnemyEntryWave(t, wave) <= wave);
+    const logicalTypes = [...new Set(getFracturedGlobalEnemyPool().concat([
+        'monster_tree','monkey','panda','sarcophagus','shark',
+        'fighter_plane','machine_gun_war','anti_radiation','mutant_basic','mutant_giant'
+    ]))].filter(t => t !== 'cosmic');
+    const out = [];
+    const seen = new Set();
+    const add = (type, skin, mapId) => {
+        const t = String(type || '').toLowerCase();
+        const sk = String(skin || '');
+        const m = Number.isInteger(mapId) ? mapId : null;
+        if (!t || getEnemyEntryWave(t, wave) > wave) return;
+        if (!sk || typeof getEnemySpritePath !== 'function' || !getEnemySpritePath(sk)) return;
+        const key = `${t}|${sk}|${m === null ? 'base' : m}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+        out.push({type:t, skin:sk, mapId:m});
+    };
+    for (const type of logicalTypes) {
+        let variants = [];
+        try {
+            if (typeof window.fdFinalSandboxEnemyVariants === 'function') variants = window.fdFinalSandboxEnemyVariants(type) || [];
+            else if (typeof sandboxEnemyVariants === 'function') variants = sandboxEnemyVariants(type) || [];
+        } catch (_) {}
+        if (Array.isArray(variants) && variants.length) {
+            for (const v of variants) add(type, v?.skin, Number.isInteger(v?.mapId) ? v.mapId : null);
+        } else {
+            let canonical = '';
+            try { canonical = sandboxCanonicalEnemySpriteKey(type); } catch (_) { canonical = type; }
+            add(type, canonical, null);
+        }
+    }
+    return out;
 }
 
 function getFracturedGlobalEnemyPool() {
@@ -25331,6 +25849,37 @@ function getFracturedGlobalEnemyPool() {
 function spawnFractureEnemy(fracture, options = {}) {
     if (!fracture) return false;
     if (wave % 10 === 0 || enemies.some(e => e && e.isBoss)) return false;
+
+    if (Number(fracture.mapId) === 19 && typeof window.spawnEnemy === 'function') {
+        const radioPool = getFractureBiomePool(19).filter(t => getEnemyEntryWave(t, wave) <= wave);
+        if (!radioPool.length) return false;
+        const type = radioPool[Math.floor(Math.random() * radioPool.length)];
+        const distance = 25 + Math.random() * 70;
+        const sideAngle = fracture.angle + (Math.random() - 0.5) * 0.9 + Math.PI;
+        const x = Math.max(-1480, Math.min(1480, fracture.x + Math.cos(sideAngle) * distance));
+        const y = Math.max(-1480, Math.min(1480, fracture.y + Math.sin(sideAngle) * distance));
+        const oldMap = window.currentMap;
+        const oldBypass = !!window.__fdBypassSurvivalRoster;
+        let spawned = null;
+        try {
+            window.__fdBypassSurvivalRoster = true;
+            window.currentMap = 19;
+            spawned = window.spawnEnemy(type, {x,y}, null);
+        } finally {
+            window.currentMap = oldMap;
+            window.__fdBypassSurvivalRoster = oldBypass;
+        }
+        if (!spawned) return false;
+        spawned.fracturedOrigin = true;
+        spawned.fractureMapId = 19;
+        spawned.skinSourceMapId = 19;
+        spawned.spawnBiome = 19;
+        spawned.dropOriginMapId = 19;
+        spawned.fracturedSkinType = getFracturedEnemySkinType(spawned) || spawned.skinOverride || null;
+        spawned.enemySkin = null;
+        return spawned;
+    }
+
     const pool = getFractureBiomePool(fracture.mapId)
         .filter(t => getEnemyEntryWave(t, wave) <= wave);
     if (!pool.length) return false;
@@ -25359,7 +25908,7 @@ function spawnFractureEnemy(fracture, options = {}) {
         freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0, shockTimer:0, shockSemiTimer:0,
         shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4,
         spawnBiome: fracture.mapId, spawnWave, entryWave: spawnWave, stationary:false, poisonOnHit:0,
-        fracturedOrigin: true, fractureMapId: fracture.mapId, skinSourceMapId: fracture.mapId, spriteScale: 1,
+        fracturedOrigin: true, fractureMapId: fracture.mapId, skinSourceMapId: fracture.mapId, dropOriginMapId: fracture.mapId, spriteScale: 1,
         pandaSummonTimer: 0, pandaSummoned: false, seinSein: false, seinAuraRadius: 115, samuraiAttackTimer: 0, samuraiAttackAngle: 0, samuraiAttackApplied: false, samuraiCd: 0, nunchakuAttackTimer: 0, nunchakuAttackAngle: 0, nunchakuAttackApplied: false, nunchakuCd: 0,
         enemySkin: (fracture.mapId === 4 && type === 'goblin') ? 'hunter' : null
     };
@@ -25456,6 +26005,7 @@ function updateFractures(dt) {
         }
         f.life -= dt;
         f.spawnTimer -= dt;
+        if(Number(f.openProgress)<1) f.openProgress=Math.min(1,(Number(f.openProgress)||0)+(Number(f.openSpeed)||2.4)*dt);
         if (f.spawned < f.spawnCount && f.spawnTimer <= 0 && f.life > 3.2) {
             try {
                 if (spawnFractureEnemy(f)) f.spawned++;
@@ -25583,8 +26133,9 @@ function drawDailyModifierOverlay(){
     }
 }
 function drawDailyWorldEntities(){
-    if(!window.dailyMissionRun)return;
-    const key=window.dailyMissionRun.modifierKey;
+    const sandboxEnv=!sandboxMode && typeof sandboxSettings!=='undefined' ? sandboxSettings : null;
+    if(!window.dailyMissionRun && !(sandboxEnv?.lightning || sandboxEnv?.sandWhirls))return;
+    const key=window.dailyMissionRun?.modifierKey || (sandboxEnv?.sandWhirls?'sandstorm':sandboxEnv?.lightning?'rain':'');
     if(key==='arrows'&&Array.isArray(window.dailyArrows)){
         for(const a of window.dailyArrows){if(!isWorldVisible(a.x,a.y,20))continue;ctx.save();ctx.translate(a.x,a.y);ctx.rotate(a.rot);ctx.fillStyle='#e8d7aa';ctx.strokeStyle='#5d432b';ctx.lineWidth=2;ctx.fillRect(-18,-3,28,6);ctx.beginPath();ctx.moveTo(10,-10);ctx.lineTo(28,0);ctx.lineTo(10,10);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();}
     }
@@ -25745,6 +26296,8 @@ function draw() {
         drawDailyPermafrostTextureRect(camera.x,camera.y,cw,ch);
     } else if (window.currentMap === 19) {
         drawRadioactiveTextureRect(camera.x, camera.y, cw, ch);
+    } else if (window.currentMap === 20) {
+        drawKidsDayTextureRect(camera.x, camera.y, cw, ch);
     } else if (window.currentMap === 15) {
         // Coliseu: usa o mesmo tamanho de mundo dos demais mapas (3000x3000),
         // com piso próprio repetível e a arena apenas como detalhe central.
@@ -25803,10 +26356,11 @@ function draw() {
         }
         ctx.restore();
     }
-    if (window.currentMap === 19) drawRadioactiveClouds();
+    if (window.currentMap === 19 || (!sandboxMode && sandboxSettings?.radioactiveClouds)) drawRadioactiveClouds();
     if ((window.currentMap === 11 || window.dailyMissionRun?.modifierKey === 'fractures' || (typeof sandboxMode !== 'undefined' && sandboxMode && Array.isArray(window.fractures) && window.fractures.some(f => f && f.sandbox)) || Array.isArray(window.fractures) && window.fractures.some(f => f && f.manual)) && Array.isArray(window.fractures)) {
         window.fractures.forEach(drawFractureRay);
     }
+    if(entryAnimationActive) drawEntryAnimation();
     drawDailyWorldEntities();
     ctx.save();
     ctx.strokeStyle = 'rgba(0,0,0,0.82)';
@@ -26314,10 +26868,48 @@ function draw() {
             let target = null; let minDist = player.baseRange * player.stats.rangeMult;
             for(let e of enemies) { if (isCurrentlyHypnotized(e)) continue; let d = dist(player, e); if(d < minDist) { minDist = d; target = e; } }
             if(target) angle = Math.atan2(target.y - player.y, target.x - player.x);
+            const flameRange = player.baseRange * player.stats.rangeMult * 1.5;
+            const flameTime = Number(gameTime)||0;
+            const flameAlpha = Math.max(0.18, Math.min(0.78, player.flameTimer * 2.6));
             ctx.save();
             ctx.translate(player.x, player.y); ctx.rotate(angle);
-            ctx.globalAlpha = Math.max(0.08, Math.min(0.5, player.flameTimer * 2.2));
-            ctx.fillStyle='rgba(231,76,60,.5)'; ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,player.baseRange*player.stats.rangeMult*1.5,-.25,.25); ctx.closePath(); ctx.fill();
+            ctx.globalAlpha = flameAlpha;
+            // The fan matches the attack's 0.25-radian targeting cone but now emits layered fire.
+            ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,flameRange,-.25,.25); ctx.closePath(); ctx.clip();
+            const fireGradient = ctx.createLinearGradient(0,0,flameRange,0);
+            fireGradient.addColorStop(0,'rgba(255,255,210,.98)');
+            fireGradient.addColorStop(.16,'rgba(255,205,61,.94)');
+            fireGradient.addColorStop(.48,'rgba(255,104,12,.86)');
+            fireGradient.addColorStop(.82,'rgba(235,43,8,.62)');
+            fireGradient.addColorStop(1,'rgba(190,20,0,.05)');
+            ctx.fillStyle=fireGradient; ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,flameRange,-.25,.25); ctx.closePath(); ctx.fill();
+            // Wavy flame tongues move outward at different speeds; no random allocations per frame.
+            for(let i=0;i<17;i++){
+                const f=.12+(i/18)*.82;
+                const x=flameRange*f;
+                const edge=Math.tan(.25)*x*.82;
+                const phase=flameTime*8.5+i*1.71;
+                const y=Math.sin(phase)*edge;
+                const h=(7+((Math.sin(phase*1.37)+1)*5))*(.55+f*.7);
+                const len=(10+((Math.cos(phase*.83)+1)*10))*(.5+f*.7);
+                ctx.globalAlpha=flameAlpha*(.38+.42*(1-f));
+                ctx.fillStyle=i%3===0?'#fff1a0':(i%2===0?'#ffb52e':'#ff5b12');
+                ctx.shadowColor=i%3===0?'rgba(255,238,125,.95)':'rgba(255,73,8,.85)'; ctx.shadowBlur=8+f*11;
+                ctx.beginPath(); ctx.moveTo(x-len*.6,y);
+                ctx.quadraticCurveTo(x-len*.35,y-h*.65,x+len*.20,y-h);
+                ctx.quadraticCurveTo(x+len*.48,y-h*.24,x+len*.2,y+h*.32);
+                ctx.quadraticCurveTo(x-len*.18,y+h*.12,x-len*.6,y); ctx.closePath(); ctx.fill();
+            }
+            ctx.shadowBlur=0;
+            for(let i=0;i<22;i++){
+                const f=((flameTime*1.7+i*.173)%1);
+                const x=flameRange*(.08+f*.88);
+                const edge=Math.tan(.25)*x*.78;
+                const y=Math.sin(flameTime*4+i*2.31)*edge;
+                ctx.globalAlpha=flameAlpha*(1-f)*.72;
+                ctx.fillStyle=i%2?'#ffd05c':'#fff3a6';
+                ctx.beginPath(); ctx.arc(x,y,1.2+(i%3)*.55,0,Math.PI*2); ctx.fill();
+            }
             ctx.restore();
         }
     }
@@ -26651,7 +27243,9 @@ function draw() {
         const effectiveSpriteType = getEffectiveEnemySpriteType(e);
         const enemySpriteType = e.sandboxPrototype ? null : (getEnemySpritePath(effectiveSpriteType) ? effectiveSpriteType : (getEnemySpritePath(e.type) ? e.type : null));
         const enemySprite = enemySpriteType ? getEnemySpriteImage(enemySpriteType) : null;
-        const visualSize = (e.merlinBabyTimer > 0 && e.type === 'merlin_baby') ? 9.5 : (Number.isFinite(e.spriteSize) ? e.spriteSize : e.size);
+        const pogoScale = e.pogo ? (Number(e.pogoScale)||1) : 1;
+        const drawY = e.pogo ? e.y + (Number(e.pogoJumpOffset)||0) : e.y;
+        const visualSize = ((e.merlinBabyTimer > 0 && e.type === 'merlin_baby') ? 9.5 : (Number.isFinite(e.spriteSize) ? e.spriteSize : e.size)) * pogoScale;
         let drawW = Math.max(24, visualSize * 2);
         let drawH = drawW;
 
@@ -26670,7 +27264,7 @@ function draw() {
                 const widthMult = getEnemySpriteWidthMult(enemySpriteType);
                 drawW = Math.max(22, visualSize * widthMult);
                 drawH = drawW / ratio;
-                drawEnemySprite(ctx, e.x, e.y, visualSize, enemySpriteType, { flipX: Boolean(e.facingLeft) });
+                drawEnemySprite(ctx, e.x, drawY, visualSize, enemySpriteType, { flipX: Boolean(e.facingLeft) });
             }
         } else {
             drawShape(ctx, e.x, e.y, e.size, 'circle', e.color, e.isBoss);
@@ -29193,13 +29787,21 @@ function draw() {
             const g=ctx.createLinearGradient(0,0,len,0);g.addColorStop(0,'#fff');g.addColorStop(.48,'#bdf5ff');g.addColorStop(1,'#54d8ff');ctx.strokeStyle=g;ctx.lineWidth=Math.max(4,radius*.045);ctx.beginPath();ctx.moveTo(radius*.10,0);ctx.lineTo(len,0);ctx.stroke();
             ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=Math.max(1.5,radius*.012);ctx.beginPath();ctx.arc(0,0,radius*.97,start,end,false);ctx.stroke();ctx.restore();
         }
-        else if(p.type === 'izaque_slash' || p.type === 'scythe' || p.type === 'gladiator_slash' || p.type === 'knighter_slash' || p.type === 'mr_perfurant_slash' || p.type === 'shinobi' || p.type === 'shinobi_katana' || p.type === 'shiv' || p.type === 'owen_pickaxe_swing') {
+        else if(p.type === 'izaque_slash' || p.type === 'scythe' || p.type === 'gladiator_slash' || p.type === 'knighter_slash' || p.type === 'mr_perfurant_slash' || p.type === 'shinobi' || p.type === 'shinobi_katana' || p.type === 'shiv' || p.type === 'owen_pickaxe_swing' || p.type === 'serca_spear') {
             const ex=p.extra||{}; const base=Number.isFinite(ex.attackAngle)?ex.attackAngle:Math.atan2(p.vy,p.vx);
             const dur=Math.max(1,Number(ex.swingDuration)||18); const t=Math.min(1,Math.max(0,(dur-p.life)/dur));
             const ease=t; const start=Number.isFinite(ex.swingStart)?ex.swingStart:-Math.PI*.66; const end=Number.isFinite(ex.swingEnd)?ex.swingEnd:Math.PI*.66;
             const swing=base+start+(end-start)*ease; const radius=Math.max(34,Number(ex.swingRadius)||82); const alpha=.25+.75*Math.sin(Math.PI*t);
             ctx.save(); ctx.translate(player.x,player.y); ctx.rotate(swing); ctx.globalAlpha=alpha; ctx.lineCap='round'; ctx.lineJoin='round';
-            if(p.type==='izaque_slash') {
+            if(p.type==='serca_spear') {
+                const spearLen=radius*1.02, shaftEnd=spearLen*0.86;
+                ctx.strokeStyle='#5a3a1c'; ctx.lineWidth=Math.max(4,radius*.055);
+                ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(shaftEnd,0); ctx.stroke();
+                ctx.strokeStyle='#c9b38c'; ctx.lineWidth=Math.max(2,radius*.028);
+                ctx.beginPath(); ctx.moveTo(radius*.08,0); ctx.lineTo(shaftEnd,0); ctx.stroke();
+                ctx.fillStyle='#f2f5f7'; ctx.strokeStyle='#7b6a54'; ctx.lineWidth=1.6;
+                ctx.beginPath(); ctx.moveTo(shaftEnd,-radius*.09); ctx.lineTo(spearLen,0); ctx.lineTo(shaftEnd,radius*.09); ctx.lineTo(shaftEnd+radius*.015,0); ctx.closePath(); ctx.fill(); ctx.stroke();
+            } else if(p.type==='izaque_slash') {
                 const form = p.extra?.izaqueForm || 'normal';
                 const len = radius * (form === 'wolf' ? .94 : (form === 'wolfcat' ? .98 : .84));
                 const clawSpread = form === 'cat' ? 0.16 : 0.13;
@@ -29298,8 +29900,18 @@ function draw() {
         else if(p.type === 'echo_bh_core') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx)); ctx.shadowColor = '#8e44ad'; ctx.shadowBlur = 12; ctx.fillStyle = '#05000a'; ctx.beginPath(); ctx.arc(0, 0, 7, 0, Math.PI*2); ctx.fill(); ctx.shadowBlur = 0; ctx.strokeStyle = '#8e44ad'; ctx.lineWidth = 2; ctx.stroke(); ctx.restore(); }
         else if(p.type === 'mrsaw_saw') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(gameTime*15); ctx.fillStyle = '#dfe6e9'; ctx.strokeStyle = '#59636b'; ctx.lineWidth = 2; ctx.beginPath(); for(let k=0;k<20;k++){ const aa=k*Math.PI/10, rr=k%2?14:9; const sx=Math.cos(aa)*rr, sy=Math.sin(aa)*rr; if(k===0)ctx.moveTo(sx,sy);else ctx.lineTo(sx,sy); } ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle='#555'; ctx.beginPath(); ctx.arc(0,0,4,0,Math.PI*2); ctx.fill(); ctx.restore(); }
         else if(p.type === 'saw_throw') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(gameTime*15); ctx.fillStyle = '#7f8c8d'; ctx.beginPath(); ctx.arc(0, 0, p.size, 0, Math.PI*2); ctx.fill(); for(let k=0; k<8; k++){ ctx.beginPath(); ctx.moveTo(p.size, 0); ctx.lineTo(p.size+3, -2); ctx.lineTo(p.size, -4); ctx.fill(); ctx.rotate(Math.PI/4); } ctx.restore(); }
+        else if(p.type === 'serca_sand_ball') {
+            ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(Math.atan2(p.vy,p.vx));
+            const r=Math.max(7,p.size||11);
+            ctx.shadowColor='rgba(218,170,95,.75)'; ctx.shadowBlur=14;
+            const g=ctx.createRadialGradient(-r*.30,-r*.30,r*.12,0,0,r);
+            g.addColorStop(0,'#f7e2a4'); g.addColorStop(.42,'#d9a95d'); g.addColorStop(1,'#8b5a2b');
+            ctx.fillStyle=g; ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2); ctx.fill();
+            ctx.strokeStyle='rgba(255,241,204,.78)'; ctx.lineWidth=1.6; ctx.stroke();
+            ctx.restore();
+        }
         else if(p.type === 'wind_gust') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx)); ctx.fillStyle = 'rgba(255,255,255,0.75)'; ctx.beginPath(); ctx.ellipse(0, 0, p.size * 1.35, p.size * 0.55, 0, -Math.PI * 0.55, Math.PI * 0.55); ctx.fill(); ctx.fillStyle = 'rgba(214, 255, 250, 0.55)'; ctx.beginPath(); ctx.arc(-p.size * 0.1, 0, p.size * 0.45, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
-        else if(p.type === 'tornado') { ctx.save(); ctx.translate(p.x, p.y); const spin = gameTime * 12; ctx.rotate(spin); ctx.fillStyle = 'rgba(129, 236, 236, 0.20)'; ctx.beginPath(); ctx.arc(0, 0, p.size * 1.15, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = 'rgba(129, 236, 236, 0.9)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, p.size * 0.8, 0, Math.PI * 2); ctx.stroke(); ctx.beginPath(); ctx.arc(0, 0, p.size * 0.45, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); }
+        else if(p.type === 'tornado') { ctx.save(); ctx.translate(p.x, p.y); const spin = gameTime * 12; ctx.rotate(spin); const sand=!!p.extra?.sandTornado; ctx.fillStyle = sand ? 'rgba(218,170,95,0.22)' : 'rgba(129, 236, 236, 0.20)'; ctx.beginPath(); ctx.arc(0, 0, p.size * 1.15, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = sand ? 'rgba(238,196,113,0.95)' : 'rgba(129, 236, 236, 0.9)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, p.size * 0.8, 0, Math.PI * 2); ctx.stroke(); ctx.beginPath(); ctx.arc(0, 0, p.size * 0.45, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); }
         else if(p.type === 'stormy_bolt') {
             ctx.save();
             ctx.translate(px, py);
@@ -29639,12 +30251,12 @@ function draw() {
         }
     });
 
-    if (isUhcGameplayActive() && !pd.settings.uhcDark) {
+    if ((isUhcGameplayActive() || (!sandboxMode && sandboxSettings?.limitedVision)) && !pd.settings.uhcDark) {
         ctx.save();
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.globalCompositeOperation = 'source-over';
 
-        if (window.currentMap === 3) {
+        if (window.currentMap === 3 || (!sandboxMode && sandboxSettings?.limitedVision)) {
             // Tudo fica preto, exceto a visão circular do jogador e as áreas abertas por explosões.
             ctx.fillStyle = 'rgba(0,0,0,0.98)';
             ctx.beginPath();
@@ -30031,14 +30643,19 @@ function gameOver(isQuit) {
     document.getElementById('go-scrap').innerHTML = resourceIcon('scrap') + ` Sucatas obtidas: <strong>${runScrap || 0}</strong>`;
     document.getElementById('go-medals').innerHTML = resourceIcon('medal') + ` Medalhas obtidas: <strong>${isQuit ? 0 : (medalsThisRun || 0)}</strong>`;
     document.getElementById('go-daily').innerHTML = winText;
-    document.getElementById('overlay-gameover').classList.remove('hidden'); document.getElementById('game-hud').classList.add('hidden'); document.getElementById('exp-bar-container').classList.add('hidden');
+    document.getElementById('overlay-gameover').classList.remove('hidden'); if(document.getElementById('damage-vignette')) document.getElementById('damage-vignette').style.boxShadow='inset 0 0 0 0 rgba(220,20,25,0)'; document.getElementById('game-hud').classList.add('hidden'); document.getElementById('exp-bar-container').classList.add('hidden');
     // O tutorial da primeira derrota começa somente depois de o jogador sair da tela de game over.
 }
 
 
 let runCoins = 0; let runGems = 0; let runScrap = 0; let runMedals = 0; let runChestCoins = 0; let runChestGems = 0; let runChestScrap = 0; let runBossBoxDrops = []; let runRewardsInvalidated = false; let runMissionEvents = []; let runEventStats = {}; let runProgressStats = { gamesStarted: 0, totalKills: 0, bossKills: 0 }; let runMissionCommitInProgress = false;
 function returnToMenu() {
-    document.getElementById('overlay-daily-victory')?.classList.add('hidden');
+    if (window.releaseQuestTrialActive && window.releaseQuestPreviousChar) {
+        pd.selectedChar = window.releaseQuestPreviousChar;
+        window.releaseQuestTrialActive = false;
+        window.releaseQuestPreviousChar = null;
+        save();
+    }
     window.dailyMissionRun=null; window.dailyMissionLaunch=null; window.survivalModeRun=null; window.survivalLaunch=null;
     runRewardsInvalidated = true;
     runMissionEvents = []; runProgressStats = { gamesStarted: 0, totalKills: 0, bossKills: 0 }; runMissionCommitInProgress = false;
@@ -31932,7 +32549,7 @@ window.fdFinalSandboxEnemyVariants=function(type){
     const lunarTruck=getEnemySpritePath('space_truck')?'space_truck':(getEnemySpritePath('tour_truck')?'tour_truck':'');
     if(lunarTruck)add(lunarTruck,13);
   }
-  for(const mapId of [0,1,2,3,4,5,6,7,8,9,10,13,14,15]){
+  for(const mapId of [0,1,2,3,4,5,6,7,8,9,10,13,14,15,19]){
     let skin=null;
     if(mapId===15)skin=COLISEUM_SKINS[t]||null;
     else {try{skin=getFracturedEnemySkinType({type:t,fracturedOrigin:true,fractureMapId:mapId,skinSourceMapId:mapId});}catch(_){}}
@@ -31955,7 +32572,7 @@ window.sandboxEnemyVariants=window.fdFinalSandboxEnemyVariants;
         if (!Number.isInteger(id)) return null;
         const maps = {
             0:'basic',1:'desert_basic',2:'snow_basic',3:'cave_basic',4:'forest_basic',5:'forest_basic',
-            6:'basic',7:'magma_basic',8:'bambuzal_basic',9:'disco_basic',10:'swim_basic',13:'space_basic',14:'fall_basic'
+            6:'basic',7:'magma_basic',8:'bambuzal_basic',9:'disco_basic',10:'swim_basic',13:'space_basic',14:'fall_basic',19:'war_basic'
         };
         if(id===15 && typeof COLISEUM_SKINS!=='undefined') return COLISEUM_SKINS.basico || 'roman_basic';
         const key = maps[id] || null;
@@ -32027,7 +32644,7 @@ window.sandboxSpawnElement=function(group,key,direct=false){
 /* ---------- Custom Coliseu enemies ---------- */
 function fdCommonEnemy(x,y,type,opts={}){
   const scale=Number(opts.mult)||1,hp=Number(opts.hp)||30*scale,spd=Number(opts.speed)||0,dmg=Number(opts.dmg)||0;
-  return {x,y,type,hp,maxHp:hp,speed:spd,baseDmg:dmg,dmg,size:Number(opts.size)||14,cd:0,color:opts.color||'#c0392b',poison:{timer:0,dmg:0,tickCd:0},slowTimer:0,timeDistortionTimer:0,weakenTimer:0,curseTimer:0,burnTimer:0,freezeTimer:0,burnDmg:0,speedBuffTimer:0,soak:0,shockTimer:0,shockSemiTimer:0,shockTick:0,shockSemiTick:0,shockDmg:0,shockSemiDmg:0,shockRate:.3,semiShockRate:.4,spawnBiome:window.currentMap,spawnWave:Number(wave)||1,entryWave:COLISEUM_ENTRY_WAVES[type]||Number(wave)||1,stationary:!!opts.stationary,fracturedOrigin:!!opts.fractured,fractureMapId:opts.fractured?COLISEUM_ID:null,skinSourceMapId:COLISEUM_ID,sandbox:!!opts.sandbox,fdSandboxSpawned:!!opts.sandbox,skinOverride:opts.skin||null,isGlobalArmored:false,breakIntoBasic:false};
+  return {x,y,type,hp,maxHp:hp,speed:spd,baseDmg:dmg,dmg,size:Number(opts.size)||14,cd:0,color:opts.color||'#c0392b',poison:{timer:0,dmg:0,tickCd:0},slowTimer:0,timeDistortionTimer:0,weakenTimer:0,curseTimer:0,burnTimer:0,freezeTimer:0,burnDmg:0,speedBuffTimer:0,soak:0,shockTimer:0,shockSemiTimer:0,shockTick:0,shockSemiTick:0,shockDmg:0,shockSemiDmg:0,shockRate:.3,semiShockRate:.4,spawnBiome:window.currentMap,spawnWave:Number(wave)||1,entryWave:COLISEUM_ENTRY_WAVES[type]||Number(wave)||1,stationary:!!opts.stationary,fracturedOrigin:!!opts.fractured,fractureMapId:opts.fractured?COLISEUM_ID:null,skinSourceMapId:COLISEUM_ID,dropOriginMapId:COLISEUM_ID,sandbox:!!opts.sandbox,fdSandboxSpawned:!!opts.sandbox,skinOverride:opts.skin||null,isGlobalArmored:false,breakIntoBasic:false};
 }
 function fdSpawnCustomEnemy(type,x,y,opts={}){
   const t=String(type||'').toLowerCase();if(!COLISEUM_NEW.has(t))return false;
@@ -32663,40 +33280,21 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
     const RADIOACTIVE_TARGET_COLOR = '#7dff4f';
     const SEASONAL_QUEST_DEFS = [
         {
-            id:'terra_sem_lei', title:'Terra sem lei — Parte 1', phases:12, mapIndex:19, mapName:'Campo Radioativo',
-            desc:'A primeira parte da batalha no Campo Radioativo. Sobreviva às fases e atravesse a guerra nuclear.',
+            id:'dia_das_criancas', title:'Dia das Crianças', phases:10, mapIndex:20, mapName:'Dia das Crianças', section:'seasonal',
+            desc:'Uma comemoração infantil tomada por confete e pelos novos inimigos do evento.',
             reward:{kind:'box',boxType:'gold',label:'1 Caixa de Ouro',icon:'elements/gold_box.png'},
-            phaseTargets:Array.from({length:12},(_,i)=>25+i*5),
-            introSteps:[
-                {speaker:'Tenent',text:'O conflito chegou ao ponto em que armas nucleares foram usadas no campo de batalha.'},
-                {speaker:'Tenent',text:'A explosão devastou a região e deixou o terreno contaminado. Ainda existem bolsões de gás radioativo por toda parte.'},
-                {speaker:'Tenent',text:'Dentro dessas nuvens, a radioatividade sobe. Fora delas, ela diminui. Aos 65%, seu corpo começa a sofrer com a exposição.'},
-                {speaker:'Tenent',text:'A radioatividade cresce em estágios. Ao chegar a 100%, você sofre uma descarga extrema e o contador volta para 50%.'},
-                {speaker:'Tenent',text:'As nuvens não ficam paradas: elas atravessam o campo lentamente. Não dependa de um único lugar seguro.'}
-            ]
+            phaseTargets:Array.from({length:10},(_,i)=>25+i*5)
         },
         {
-            id:'terra_sem_lei_2', title:'Terra sem lei — Parte 2', phases:8, mapIndex:19, mapName:'Campo Radioativo',
-            desc:'Os reforços chegaram. A radiação aumentou e começou a transformar os Fraturadis.',
-            reward:{kind:'box',boxType:'gold',label:'1 Caixa de Ouro',icon:'elements/gold_box.png'},
-            phaseTargets:Array.from({length:8},(_,i)=>25+i*5),
-            introSteps:[
-                {speaker:'Major Briggs',text:'Major Briggs aqui. Enviaram muitos reforços para essa área.'},
-                {speaker:'Major Briggs',text:'Mas temos um problema pior: a radiação está ficando forte demais.'},
-                {speaker:'Major Briggs',text:'Ela está deixando os Fraturadis mutantes. E essas coisas não parecem muito felizes com a transformação.'},
-                {speaker:'Major Briggs',text:'Os reforços já estão no campo. Os novos inimigos e o líder não vão esperar você se preparar.'}
-            ]
+            id:'out_dated_booboo', title:'Out dated da Boo Boo', phases:20, mapIndex:20, mapName:'Dia das Crianças', section:'seasonal',
+            desc:'A Out dated da Boo Boo no mapa especial do Dia das Crianças.',
+            reward:{kind:'character',charId:'booboo',label:'Boo Boo gratuitamente'},
+            phaseTargets:Array.from({length:20},(_,i)=>25+i*5)
         },
         {
-            id:'out_dated_tenent', title:'Out dated do Tenent', phases:15, mapIndex:19, mapName:'Campo Radioativo',
-            desc:'A campanha de Tenent no campo contaminado.',
-            reward:{kind:'character',charId:'tenent',label:'Tenent gratuitamente'},
-            phaseTargets:Array.from({length:15},(_,i)=>25+i*5)
-        },
-        {
-            id:'out_dated_major_briggs', title:'Out dated do Major Briggs', phases:20, mapIndex:19, mapName:'Campo Radioativo',
-            desc:'A campanha de Major Briggs no campo contaminado.',
-            reward:{kind:'character',charId:'major_briggs',label:'Major Briggs gratuitamente'},
+            id:'release_serca', title:'Desbloqueio do Sercã', phases:20, mapIndex:1, mapName:'Deserto', section:'launch', trialCharId:'serca',
+            desc:'Uma missão especial para conquistar Sercã e liberar o governador de Sand Land.',
+            reward:{kind:'character',charId:'serca',label:'Sercã gratuitamente'},
             phaseTargets:Array.from({length:20},(_,i)=>25+i*5)
         }
     ];
@@ -32705,6 +33303,9 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
         if(!pd || typeof pd!=='object') return;
         if(!pd.seasonalQuests || typeof pd.seasonalQuests!=='object') pd.seasonalQuests={};
         let changed=false;
+        for(const oldId of ['terra_sem_lei','terra_sem_lei_2','out_dated_tenent','out_dated_major_briggs']){
+            if(Object.prototype.hasOwnProperty.call(pd.seasonalQuests,oldId)){ delete pd.seasonalQuests[oldId]; changed=true; }
+        }
         for(const q of SEASONAL_QUEST_DEFS){
             let st=pd.seasonalQuests[q.id];
             if(!st || typeof st!=='object'){
@@ -32725,7 +33326,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
     }
     function seasonalRewardLabel(q){
         if(!q?.reward) return 'Recompensa';
-        if(q.reward.kind==='character') return `${q.reward.charId==='major_briggs'?'Major Briggs':'Tenent'} gratuitamente`;
+        if(q.reward.kind==='character') return `${CHARACTERS?.[q.reward.charId]?.name || q.reward.charId} gratuitamente`;
         return q.reward.label || 'Recompensa';
     }
     function seasonalRewardVisual(q){
@@ -32737,39 +33338,51 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
         ensureSeasonalQuestState(false);
         const root=document.getElementById('seasonal-quest-list');
         if(!root) return;
-        root.innerHTML=SEASONAL_QUEST_DEFS.map(q=>{
+        const cards=[];
+        for(const q of SEASONAL_QUEST_DEFS.filter(v=>v.section!=='launch')){
             const st=pd.seasonalQuests[q.id];
             const completed=!!st.completed;
             const phase=Math.min(q.phases,Math.max(0,Math.floor(Number(st.phase)||0)));
             const currentPhase=Math.min(q.phases-1,phase);
             const target=q.phaseTargets[currentPhase] || 25;
-            const pct=completed?100:((phase/q.phases)*100);
-            const charId=q.reward?.kind==='character' ? q.reward.charId : null;
-            const charMarkup=charId ? `<img class="seasonal-map-character" src="${getCharacterSpritePath(charId)}" alt="${escapeHtmlAttr(CHARACTERS?.[charId]?.name || charId)}">` : '';
-            const status=completed?'Concluída':`Fase ${phase+1}/${q.phases}`;
-            const btn=completed?`<button class="btn-menu" type="button" disabled>Concluída</button>`:`<button class="btn-action" type="button" onclick="launchSeasonalQuest('${q.id}')">Jogar</button>`;
-            return `<div class="seasonal-quest-card">
-                <div class="seasonal-quest-art"><canvas class="daily-map-canvas" data-seasonal-map-preview="1" width="180" height="100"></canvas><div class="daily-map-label">Campo Radioativo</div>${charMarkup}</div>
-                <div class="seasonal-quest-main">
-                    <div class="seasonal-quest-title">${escapeHtmlText(q.title)}</div>
-                    <div class="seasonal-quest-desc">${escapeHtmlText(q.desc)}</div>
-                    <div class="seasonal-quest-meta"><span>${escapeHtmlText(status)}</span><span>${target} waves por fase</span><span>Campo Radioativo</span></div>
-                    <div class="seasonal-quest-progress"><div class="seasonal-quest-progress-fill ${completed?'done':''}" style="width:${Math.max(0,Math.min(100,pct))}%"></div></div>
-                    <div class="seasonal-quest-meta"><span>Recompensa</span><span>${escapeHtmlText(seasonalRewardLabel(q))}</span></div>
-                </div>
-                <div class="seasonal-quest-action">${btn}</div>
-            </div>`;
-        }).join('');
-
-        root.querySelectorAll('canvas[data-seasonal-map-preview]').forEach(canvas=>{
-            const qCard=canvas.closest('.seasonal-quest-card');
-            const idx=Array.from(root.querySelectorAll('.seasonal-quest-card')).indexOf(qCard);
-            const q=SEASONAL_QUEST_DEFS[idx];
-            if(q && typeof drawDailyMapPreview==='function') drawDailyMapPreview(canvas,{mapIndex:RADIOACTIVE_MAP_ID,mapName:'Campo Radioativo'});
+            const rewardMarkup=q.reward?.kind==='character'
+                ? `<span class="daily-reward-sprite daily-reward-sprite--large"><span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;">${getCharacterSpriteMarkup(q.reward.charId,'menu')}</span></span><span class="daily-reward-copy">${escapeHtmlText(seasonalRewardLabel(q))}</span>`
+                : dailyRewardSpriteMarkup(q.reward);
+            const action=completed ? 'return false;' : `launchSeasonalQuest('${escapeHtmlAttr(q.id)}')`;
+            cards.push(`<div class="daily-mission-card" data-seasonal-id="${escapeHtmlAttr(q.id)}">${dailyMapLayoutMarkup(q)}<div class="daily-mission-main"><div class="daily-mission-title">${escapeHtmlText(q.title)}</div><div class="daily-mission-meta"><span>${completed?'Concluída':`Fase ${phase+1}/${q.phases}`}</span><span>${completed?'Todas as fases concluídas':`Próxima meta: ${target} waves`}</span></div><div class="daily-mission-reward">${rewardMarkup}</div></div><button class="${completed?'btn-menu':'btn-action'} daily-play-btn" ${completed?'disabled':''} onclick="${completed?'return false;':`openSeasonalMissionDetails('${escapeHtmlAttr(q.id)}')`}">${completed?'Concluída':'Jogar'}</button></div>`);
+        }
+        root.innerHTML=cards.join('') || `<div class="daily-empty">Nenhuma missão sazonal disponível.</div>`;
+        root.querySelectorAll('[data-seasonal-id]').forEach(card=>{
+            const q=getSeasonalQuest(card.dataset.seasonalId);
+            const art=card.querySelector('.daily-map-art');
+            if(art) art.__dailyMission=q;
+            const canvas=card.querySelector('[data-daily-map-preview]');
+            if(canvas) drawDailyMapPreview(canvas,q);
         });
     }
 
-    function launchSeasonalQuest(id){
+    function renderLaunchQuests(){
+        ensureSeasonalQuestState(false);
+        const root=document.getElementById('launch-quest-list');
+        if(!root) return;
+        const q=SEASONAL_QUEST_DEFS.find(v=>v.section==='launch');
+        if(!q){root.innerHTML='<div class="daily-empty">Nenhum lançamento disponível.</div>';return;}
+        const st=pd.seasonalQuests[q.id];
+        const completed=!!st.completed;
+        const phase=Math.min(q.phases,Math.max(0,Math.floor(Number(st.phase)||0)));
+        const currentPhase=Math.min(q.phases-1,phase);
+        const target=q.phaseTargets[currentPhase] || 25;
+        const rewardMarkup=`<span class="daily-reward-sprite daily-reward-sprite--large"><span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;">${getCharacterSpriteMarkup(q.reward.charId,'menu')}</span></span><span class="daily-reward-copy">${escapeHtmlText(seasonalRewardLabel(q))}</span>`;
+        const action=completed?'return false;':`launchSeasonalQuest('${escapeHtmlAttr(q.id)}')`;
+        const trialAction=completed?'return false;':`launchSeasonalQuest('${escapeHtmlAttr(q.id)}',true)`;
+        root.innerHTML=`<div class="daily-mission-card" data-launch-id="${escapeHtmlAttr(q.id)}">${dailyMapLayoutMarkup(q)}<div class="daily-mission-main"><div class="daily-mission-title">${escapeHtmlText(q.title)}</div><div class="daily-mission-meta"><span>${completed?'Concluída':`Fase ${phase+1}/${q.phases}`}</span><span>Próxima meta: ${target} waves</span></div><div class="daily-mission-reward">${rewardMarkup}</div></div><div style="display:flex;flex-direction:column;gap:7px;align-items:stretch;min-width:118px;"><button class="${completed?'btn-menu':'btn-action'} daily-play-btn" ${completed?'disabled':''} onclick="${action}">${completed?'Concluída':'Jogar'}</button><button class="btn-menu daily-play-btn" ${completed?'disabled':''} onclick="${trialAction}">Jogar com Sercã</button></div></div>`;
+        root.querySelectorAll('[data-launch-id]').forEach(card=>{
+            const art=card.querySelector('.daily-map-art'); if(art) art.__dailyMission=q;
+            const canvas=card.querySelector('[data-daily-map-preview]'); if(canvas) drawDailyMapPreview(canvas,q);
+        });
+    }
+
+    function launchSeasonalQuest(id, trialChar=false){
         ensureSeasonalQuestState(false);
         const q=getSeasonalQuest(id); if(!q) return;
         const st=pd.seasonalQuests[q.id];
@@ -32778,15 +33391,13 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
             st.introShown=true;
             save();
             document.getElementById('overlay-seasonal-victory')?.classList.add('hidden');
-            window.seasonalQuestLaunch={id:q.id};
+            window.seasonalQuestLaunch={id:q.id,trialChar:!!trialChar};
             window.seasonalQuestRun=null;
-            window.isHardcoreMode=(q.id!=='terra_sem_lei_2');
-            startRunAfterShop({seasonalQuest:true,seasonalQuestId:q.id});
+            window.isHardcoreMode=true;
+            startRunAfterShop({seasonalQuest:true,seasonalQuestId:q.id,releaseTrialChar:trialChar ? q.trialCharId : ''});
         };
-        document.getElementById('event-section-seasonal')?.classList.remove('hidden');
-        if((q.id==='terra_sem_lei' || q.id==='terra_sem_lei_2') && q.introSteps?.length && !st.introShown){
-            showTutorialDialog(q.introSteps, begin);
-        } else begin();
+        document.getElementById(q.section==='launch' ? 'event-section-launches' : 'event-section-seasonal')?.classList.remove('hidden');
+        begin();
     }
 
     function grantSeasonalReward(q){
@@ -32843,6 +33454,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
         ov.classList.remove('hidden');
         fitOverlayToViewport?.(ov);
         renderSeasonalQuests();
+        renderLaunchQuests();
         return true;
     }
 
@@ -32855,7 +33467,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
         document.getElementById('overlay-seasonal-victory')?.classList.add('hidden');
         window.seasonalQuestLaunch={id:q.id};
         window.seasonalQuestRun=null;
-        window.isHardcoreMode=(q.id!=='terra_sem_lei_2');
+        window.isHardcoreMode=true;
         startRunAfterShop({seasonalQuest:true,seasonalQuestId:q.id});
     }
 
@@ -32884,7 +33496,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
         document.getElementById('go-medals').innerHTML=resourceIcon('medal')+` Medalhas obtidas: <strong>0</strong>`;
         document.getElementById('go-daily').textContent=q?`Missão Sazonal: ${isQuit?'Cancelada':'Não concluída'}`:'Missão Sazonal';
         const retry=document.getElementById('quest-retry-btn'); if(retry) retry.classList.remove('hidden');
-        document.getElementById('overlay-gameover').classList.remove('hidden');
+        document.getElementById('overlay-gameover').classList.remove('hidden'); if(document.getElementById('damage-vignette')) document.getElementById('damage-vignette').style.boxShadow='inset 0 0 0 0 rgba(220,20,25,0)';
         fitOverlayToViewport?.(document.getElementById('overlay-gameover'));
         document.getElementById('game-hud').classList.add('hidden'); document.getElementById('exp-bar-container').classList.add('hidden'); document.getElementById('radioactivity-bar-container')?.classList.add('hidden');
     }
@@ -32900,7 +33512,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
         }
         if(window.seasonalQuestRun){
             const id=window.seasonalQuestRun.id;
-            window.seasonalQuestLaunch={id}; window.isHardcoreMode=(id!=='terra_sem_lei_2'); window.seasonalQuestRun=null;
+            window.seasonalQuestLaunch={id}; window.isHardcoreMode=true; window.seasonalQuestRun=null;
             startRunAfterShop({seasonalQuest:true,seasonalQuestId:id});
         }
     }
@@ -32945,7 +33557,8 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
     let radioactiveClouds=[];
     window.fdRadioactiveGetClouds=()=>radioactiveClouds;
     function initRadioactiveSystem(){
-        if(window.currentMap!==RADIOACTIVE_MAP_ID || !player) return;
+        const modifierActive=!sandboxMode && typeof sandboxSettings!=='undefined' && !!sandboxSettings.radioactiveClouds;
+        if((window.currentMap!==RADIOACTIVE_MAP_ID && !modifierActive) || !player) return;
         radioactiveClouds=Array.from({length:8},(_,i)=>{
             const a=(Math.PI*2*i)/8+Math.random()*.35;
             const d=200+Math.random()*1080;
@@ -32992,7 +33605,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
             if(bar) bar.classList.add('hidden');
             return;
         }
-        const activeMap=window.currentMap===RADIOACTIVE_MAP_ID;
+        const activeMap=window.currentMap===RADIOACTIVE_MAP_ID || (!sandboxMode && !!sandboxSettings?.radioactiveClouds);
         const radioValue=Math.max(0,Math.min(100,Number(player.radioactivity)||0));
         const uiActive=activeMap || radioValue>0.001;
         if(bar) bar.classList.toggle('hidden',!uiActive);
@@ -33045,7 +33658,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
         }
     }
     function drawRadioactiveClouds(){
-        if(window.currentMap!==RADIOACTIVE_MAP_ID) return;
+        if(window.currentMap!==RADIOACTIVE_MAP_ID && !( !sandboxMode && sandboxSettings?.radioactiveClouds)) return;
         for(const cloud of radioactiveClouds){
             if(!isWorldVisible(cloud.x,cloud.y,Math.max(cloud.rx,cloud.ry)+30)) continue;
             ctx.save();
@@ -33139,12 +33752,13 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
     const oldShowEventSection=typeof showEventSection==='function'?showEventSection:null;
     if(oldShowEventSection){
         showEventSection=function(section){
-            if(section==='seasonal'){
-                currentEventSection='seasonal';
-                renderSeasonalQuests();
+            if(section==='seasonal' || section==='launches'){
+                currentEventSection=section;
+                if(section==='seasonal') renderSeasonalQuests();
+                if(section==='launches') renderLaunchQuests();
                 document.querySelectorAll('#screen-event .shop-panel').forEach(el=>el.classList.add('hidden'));
-                document.getElementById('event-section-seasonal')?.classList.remove('hidden');
-                document.querySelectorAll('#screen-event .shop-tab').forEach(btn=>btn.classList.toggle('active',btn.dataset.section==='seasonal'));
+                document.getElementById(`event-section-${section}`)?.classList.remove('hidden');
+                document.querySelectorAll('#screen-event .shop-tab').forEach(btn=>btn.classList.toggle('active',btn.dataset.section===section));
                 return;
             }
             return oldShowEventSection(section);
@@ -33153,10 +33767,11 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
     if(oldRenderEvents){
         renderEvents=function(){
             const wanted=currentEventSection;
-            if(wanted==='seasonal') currentEventSection='daily';
+            if(wanted==='seasonal' || wanted==='launches') currentEventSection='daily';
             oldRenderEvents();
             renderSeasonalQuests();
-            if(wanted==='seasonal') showEventSection('seasonal');
+            renderLaunchQuests();
+            if(wanted==='seasonal' || wanted==='launches') showEventSection(wanted);
         };
     }
 
@@ -33228,6 +33843,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
     window.seasonalLossGameOver=seasonalLossGameOver;
     window.retryQuestPhase=retryQuestPhase;
     window.renderSeasonalQuests=renderSeasonalQuests;
+    window.renderLaunchQuests=renderLaunchQuests;
 })();
 </script>
 
@@ -33408,6 +34024,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
     e.breakIntoBasic = false;
     e.skinOverride = kind === 'giant' ? 'mutant_giant' : 'mutant_basic';
     e.skinSourceMapId = RADIO_MAP;
+    e.dropOriginMapId = RADIO_MAP;
     e.spawnBiome = RADIO_MAP;
     e.fracturedOrigin = false;
     e.fractureMapId = null;
@@ -33422,8 +34039,9 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
         const t = String(e.type||'').toLowerCase();
         if(t === 'boss' || t === 'megaboss' || t === 'mega_boss') continue;
 
-        const giantTargets = new Set(['gigante','tanque','machine_gun_war','colosso','monster_tree','gorilla']);
-        const basicTargets = new Set(['basico','cardboard_head','motorcycle_helmet','prism_head']);
+        const giantTargets = new Set(['gigante','tanque','colosso','monster_tree','gorilla']);
+        // O metralheiro radioativo é de porte básico e resistência de capacete; não é o gigante lunar.
+        const basicTargets = new Set(['basico','cardboard_head','motorcycle_helmet','prism_head','machine_gun_war']);
         const canMutate = cloud.kind === 'giant' ? giantTargets.has(t) : basicTargets.has(t);
         if(!canMutate) continue;
 
@@ -33518,6 +34136,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
       mutant_giant:'mutant_giant'
     })[type];
     e.skinSourceMapId = RADIO_MAP;
+    e.dropOriginMapId = RADIO_MAP;
     e.spawnBiome = RADIO_MAP;
     e.fracturedOrigin = false;
     e.fractureMapId = null;
@@ -33971,8 +34590,70 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
     if(gauge) gauge.classList.toggle('hidden',!(window.currentMap===RADIO_MAP || radioNow>0.001));
   }catch(_){}
 
+
+  /* Optional collision diagnostics: disabled by default; drawn over the existing renderer. */
+  const fdOldDrawForHitboxes = window.draw;
+  if (typeof fdOldDrawForHitboxes === 'function' && !fdOldDrawForHitboxes.__fdHitboxesWrapped) {
+    const fdDrawWithHitboxes = function(){
+      const result = fdOldDrawForHitboxes.apply(this, arguments);
+      if (!pd?.settings?.showHitboxes || !isPlaying || !ctx || !player) return result;
+      try {
+        ctx.save();
+        ctx.setTransform(1,0,0,1,0,0);
+        ctx.translate(-camera.x,-camera.y);
+        ctx.globalAlpha=1; ctx.lineWidth=2; ctx.setLineDash([]);
+        const circle=(obj,r,color,dash=[])=>{
+          if(!obj || !Number.isFinite(Number(obj.x)) || !Number.isFinite(Number(obj.y))) return;
+          const rr=Math.max(2,Math.min(500,Number(r)||5));
+          ctx.save(); ctx.strokeStyle=color; ctx.setLineDash(dash); ctx.beginPath(); ctx.arc(Number(obj.x),Number(obj.y),rr,0,Math.PI*2); ctx.stroke(); ctx.restore();
+        };
+        // Player, NPC enemies, allies/turrets and loot pickup collision areas.
+        circle(player,Number(player.r)||15,'rgba(70,255,120,.95)');
+        for(const e of (Array.isArray(enemies)?enemies:[])) circle(e,Number(e?.hitRadius)||Number(e?.r)||Number(e?.size)||12,'rgba(255,72,72,.94)',e?.isBoss?[7,3]:[]);
+        for(const a of (Array.isArray(allies)?allies:[])){
+          circle(a,Number(a?.hitRadius)||Number(a?.r)||Number(a?.size)||Number(a?.radius)||12,'rgba(75,190,255,.92)');
+          if(a?.isTurret && Number(a.range)>0) circle(a,Number(a.range),'rgba(75,190,255,.32)',[3,6]);
+        }
+        for(const q of (Array.isArray(projectiles)?projectiles:[])){
+          const rr=Number(q?.hitRadius)||Number(q?.extra?.hitRadius)||Number(q?.r)||Number(q?.size)||6;
+          if(Number(q?.w)>0 && Number(q?.h)>0){
+            ctx.save();ctx.translate(q.x,q.y);ctx.rotate(Number(q.rot)||0);ctx.strokeStyle=q.isPlayer?'rgba(115,255,170,.95)':'rgba(255,155,80,.95)';ctx.strokeRect(-q.w/2,-q.h/2,q.w,q.h);ctx.restore();
+          } else circle(q,rr,q?.isPlayer?'rgba(115,255,170,.95)':'rgba(255,155,80,.95)');
+        }
+        for(const q of (Array.isArray(puddles)?puddles:[])) circle(q,Number(q?.r)||Number(q?.radius)||18,'rgba(255,210,75,.92)');
+        for(const q of (Array.isArray(itemsMap)?itemsMap:[])) circle(q,Number(q?.r)||12,'rgba(255,255,255,.85)',[3,4]);
+        for(const q of (Array.isArray(xpGems)?xpGems:[])) circle(q,Number(q?.r)||6,'rgba(70,255,230,.85)',[2,3]);
+        for(const q of (Array.isArray(graffitMarks)?graffitMarks:[])) circle(q,Number(q?.r)||30,'rgba(220,105,255,.82)',[4,4]);
+        for(const o of (Array.isArray(obstacles)?obstacles:[])){
+          if(!o || !Number.isFinite(Number(o.x)) || !Number.isFinite(Number(o.y))) continue;
+          ctx.save(); ctx.strokeStyle='rgba(255,235,90,.9)'; ctx.setLineDash([5,3]);
+          if(Number(o.w)>0 && Number(o.h)>0){ctx.translate(o.x,o.y);ctx.rotate(Number(o.rot)||0);ctx.strokeRect(-o.w/2,-o.h/2,o.w,o.h);}
+          else {const rr=Math.max(3,Number(o.r)||14);ctx.beginPath();ctx.arc(o.x,o.y,rr,0,Math.PI*2);ctx.stroke();}
+          ctx.restore();
+        }
+        for(const f of (Array.isArray(window.fractures)?window.fractures:[])){
+          if(!f || !Number.isFinite(Number(f.x)) || !Number.isFinite(Number(f.y))) continue;
+          ctx.save();ctx.translate(f.x,f.y);ctx.rotate(Number(f.angle)||0);ctx.strokeStyle='rgba(210,130,255,.9)';ctx.setLineDash([7,4]);ctx.beginPath();ctx.ellipse(0,0,Math.max(20,Number(f.length)||100)*.5,Math.max(12,Number(f.width)||40)*.5,0,0,Math.PI*2);ctx.stroke();ctx.restore();
+        }
+        const clouds = typeof window.fdRadioactiveGetClouds==='function' ? window.fdRadioactiveGetClouds() : [];
+        for(const cl of (Array.isArray(clouds)?clouds:[])){
+          if(!cl || !Number.isFinite(Number(cl.x)) || !Number.isFinite(Number(cl.y))) continue;
+          ctx.save();ctx.strokeStyle='rgba(130,255,65,.9)';ctx.setLineDash([5,4]);ctx.beginPath();ctx.ellipse(cl.x,cl.y,Number(cl.rx)||70,Number(cl.ry)||45,0,0,Math.PI*2);ctx.stroke();ctx.restore();
+        }
+        ctx.restore();
+      } catch(err) { try{ctx.restore();}catch(_){} }
+      return result;
+    };
+    fdDrawWithHitboxes.__fdHitboxesWrapped=true;
+    window.draw=fdDrawWithHitboxes;
+    try { draw=fdDrawWithHitboxes; } catch(_) {}
+  }
+
 })();
 </script>
+
+
+
 
 </body>
 </html>
