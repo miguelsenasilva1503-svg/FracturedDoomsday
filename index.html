@@ -3153,6 +3153,12 @@ serca: { id:'serca', class:'Controle', name:'Sercã', rarity:'legendary', sortLa
 Um governador de Sand Land cujo governo acabou marcado pela corrupção e pela opressão de seu próprio povo. Mestre do Fogo enfrentou Sercã e o derrotou, libertando Sand Land de seu domínio. Desde então, Sercã alimenta um forte desejo de vingança e procura uma maneira de recuperar seu poder e acertar as contas com aqueles que destruíram seu governo.
 
 “Sand Land ainda vai ouvir falar de mim.”` },
+
+    drizz: { id: 'drizz', class: 'Controle', name: 'Drizz', title: 'Dia de Chuva', rarity: 'common', cost: 29, hp: 100, speed: 3.5, dmg: 14, fireRate: 45, range: 250, color: '#00cec9', weapon: 'drizz_water', desc: `“Drizz nunca sabe quando vai chover. Por isso, ele está sempre preparado... até quando o céu está completamente limpo.”
+
+Um garoto extremamente precavido que vive preocupado com a possibilidade de uma chuva repentina. Ele nunca sai sem sua capa de chuva e sua fiel pistola d’água, que carrega consigo como se fosse um equipamento de sobrevivência. Amigo de Axel, Drizz garante que está apenas se preparando para qualquer situação — e, quando perguntam por que precisa de uma pistola d’água, sua resposta é sempre a mesma.
+
+“É pra me defender.”` },
 };
 const CHARACTER_SUMMARIES = {
     merlin: `Merlin: dispara uma magia teleguiada que tem 15% de chance de ENVENENAR e 15% de chance de BEBETIZAR. Quando esse efeito é aplicado, o inimigo fica BEBETIZADO.
@@ -3535,6 +3541,11 @@ ESPECIAL: conforme mata inimigos, ganha energia vital, ela pode servir pra compr
 serca: `Sercã: ataca com sua lança de perto e tem 75% de chance de disparar uma bola de areia que STUNA e inimigos adjacentes são LERDADOS
 
 ESPECIAL: a bola de areia tem 10% de chance de se tornar um redemoinho de areia que leva os inimigos pra longe`,
+    drizz: `Drizz: dispara projéteis de água com 15% de chance de espirrar água em área.
+
+(Quando chega no lvl 5)
+HABILIDADE: Drizz carrega sua arma e dispara uma rajada de 10 projéteis (25s de reload)`,
+
 };
 
 const CHIPS_DATA = {
@@ -3546,7 +3557,7 @@ const CHIPS_DATA = {
     pierce: { id: 'pierce', name: '+1 Perfuração', iconHtml: '<img src=\"elements/arrow.png\" alt=\"\" aria-hidden=\"true\">', desc: 'Atravessa 1 inimigo', effect: (s) => s.pierce += 1 },
     bounce: { id: 'bounce', name: '+1 Ricochete', iconHtml: '<img src=\"elements/ricochet.png\" alt=\"\" aria-hidden=\"true\">', desc: 'Tiros quicam 1x', effect: (s) => s.bounce = (s.bounce || 0) + 1 },
     expl: { id: 'expl', name: 'Explosão Leve', iconHtml: '<img src=\"elements/bomb.png\" alt=\"\" aria-hidden=\"true\">', desc: 'Tiros explodem', effect: (s) => s.explodeHit = true },
-    xp: { id: 'xp', name: '+XP', iconHtml: '<img src=\"elements/xp.png\" alt=\"\" aria-hidden=\"true\">', desc: '+25% XP Ganho', effect: (s) => s.xpMult += 0.25 },
+    xp: { id: 'xp', name: '+XP', iconHtml: '<img src=\"elements/xp.png\" alt=\"\" aria-hidden=\"true\">', desc: '1,2x XP para Level Up (+20%)', effect: (s) => { s.xpMult = (Number(s.xpMult) || 1) * 1.2; } },
     turret: { id: 'turret', name: 'Torreta Início', emoji: '🤖', desc: 'Inicia c/ Torreta', effect: (s, p, allies) => { allies.push({x: p.x, y: p.y, dmg: p.baseDmg * p.stats.dmgMult, speed: 0, life: Infinity, cd: 0, isTurret: true}); }, iconHtml: '<img src="elements/turret.png" alt="" aria-hidden="true" style="width:34px;height:34px;object-fit:contain;display:block;">' },
     mortar: { id: 'mortar', name: 'Morteiro Aliado', emoji: '🧨', desc: 'Torreta que atira bombas', effect: (s, p, allies) => { allies.push({x: p.x, y: p.y, dmg: p.baseDmg * 1.0, speed: 0, life: Infinity, cd: 0, isTurret: true, type: 'mortar'}); }, iconHtml: '<img src="elements/mortar.png" alt="" aria-hidden="true" style="width:34px;height:34px;object-fit:contain;display:block;">' },
     cannon_turret: { id: 'cannon_turret', name: 'Canhão Aliado', emoji: '🛰️', desc: 'Torreta que empurra', effect: (s, p, allies) => { allies.push({x: p.x, y: p.y, dmg: p.baseDmg * p.stats.dmgMult, speed: 0, life: Infinity, cd: 0, isTurret: true, type: 'cannon'}); }, iconHtml: '<img src="elements/canon.png" alt="" aria-hidden="true" style="width:34px;height:34px;object-fit:contain;display:block;">' },
@@ -3718,7 +3729,7 @@ const CARDS = [
     { id: 'projSpd', name: '+20% Vel. Proj&eacute;til', desc: 'Tiros mais r&aacute;pidos', apply: (s) => s.projSpdMult += 0.2 },
     { id: 'def', name: '-10% Dano Recebido', desc: 'Resist&ecirc;ncia', apply: (s) => s.defMult -= 0.1 },
     { id: 'vamp', name: 'Vampirismo', desc: 'Cura ao matar', apply: (s) => s.vamp += 1 },
-    { id: 'xpGen', name: '+XP Wave', desc: 'Mais XP para o passe', apply: (s) => s.xpMult += 0.2 },
+    { id: 'xpGen', name: '+XP', desc: '1,2x XP para Level Up (+20%)', apply: (s) => { s.xpMult = (Number(s.xpMult) || 1) * 1.2; } },
     { id: 'waveBuff', name: 'Buff P&oacute;s-Wave', desc: 'Cura ao fim da wave', apply: (s) => s.waveBuff = true },
     { id: 'allStats', name: 'Buff Global Leve', desc: '+5% em tudo', apply: (s) => { s.dmgMult+=0.05; s.maxHpMult+=0.05; s.speedMult+=0.05; } },
     { id: 'double', name: 'Chance Disparo Duplo', desc: '10% de atirar 2x', apply: (s) => s.doubleShotChance += 0.1 },
@@ -5223,6 +5234,7 @@ astra: 'sprites/astra.png',
 
 auren: 'sprites/auren.png',
     serca: 'sprites/serca.png',
+    drizz: 'sprites/drizz.png',
 };
 
 const ENEMY_SPRITES = {
@@ -5506,6 +5518,10 @@ const ENEMY_SPRITES = {
     vampire: 'enemies/vampire.png',
     skeleton: 'enemies/skeleton.png',
     bones: 'enemies/bones.png',
+    pumpkin_tank: 'enemies/pumpkin_tank.png',
+    hallo_leader: 'enemies/hallo_leader.png',
+    pumpkin_baloon: 'enemies/pumpkin_baloon.png',
+    candy_truck: 'enemies/candy_truck.png',
 };
 
 const ENEMY_SPRITE_CACHE = new Map();
@@ -11052,7 +11068,7 @@ function showCharDetail(id) {
         document.getElementById('detail-class').innerHTML = c.class;
         const titleEl = document.getElementById('detail-title');
         if (titleEl) {
-            const titleText = getTitleLabel(id);
+            const titleText = c.title || getTitleLabel(id);
             titleEl.innerHTML = titleText ? `${escapeHtmlText(titleText)}` : '';
             titleEl.style.display = titleText ? 'block' : 'none';
         }
@@ -19031,6 +19047,17 @@ function fireWeapon(target) {
             return;
         }
         
+        if (w === 'drizz_water') {
+            const total = 1 + Math.max(0, Math.floor(player.stats.extraProj || 0));
+            for (let k = 0; k < total; k++) {
+                const shotAngle = angle + (k - (total - 1) / 2) * 0.06;
+                createProj(player.x, player.y, Math.cos(shotAngle) * pSpd, Math.sin(shotAngle) * pSpd, finalDmg, 50, true, 'water_bubble', {
+                    size: 8, sourceChar: 'drizz', drizzSplash: Math.random() < 0.15
+                });
+            }
+            return;
+        }
+
         if (w === 'water_bubble') {
             if(Math.random() < 0.1) {
                 createProj(player.x, player.y, Math.cos(angle)*pSpd*1.5, Math.sin(angle)*pSpd*1.5, finalDmg, 50, true, 'water_wave', {size: 15});
@@ -23967,9 +23994,23 @@ function updateProjectiles(dt) {
                             e.x = Math.max(-1480, Math.min(1480, e.x)); e.y = Math.max(-1480, Math.min(1480, e.y));
                         }
                         if(p.type === 'water_bubble') {
-                            if(Math.random() < 0.75) e.soak = Math.min((e.soak || 0) + 1, 7);
-                            if(pd.selectedChar === 'seae' && Math.random() < 0.08) {
-                                puddles.push({x: p.x + (Math.random()-0.5)*8, y: p.y + (Math.random()-0.5)*8, r: 24, dmg: 0, life: 1.4, type: 'water_puddle', tick: 0});
+                            if (p.extra?.sourceChar === 'drizz') {
+                                if (p.extra.drizzSplash && !p.extra.drizzSplashDone) {
+                                    p.extra.drizzSplashDone = true;
+                                    const splashRadius = 52;
+                                    createExplosion(p.x, p.y, splashRadius, Math.max(1, realDmg * 0.55), '#00cec9');
+                                    createParticles(p.x, p.y, '#00cec9');
+                                    for (const soakedEnemy of enemies) {
+                                        if (soakedEnemy && !isCurrentlyHypnotized(soakedEnemy) && dist({x:p.x, y:p.y}, soakedEnemy) < splashRadius) {
+                                            soakedEnemy.soak = Math.min((soakedEnemy.soak || 0) + 1, 7);
+                                        }
+                                    }
+                                }
+                            } else {
+                                if(Math.random() < 0.75) e.soak = Math.min((e.soak || 0) + 1, 7);
+                                if(pd.selectedChar === 'seae' && Math.random() < 0.08) {
+                                    puddles.push({x: p.x + (Math.random()-0.5)*8, y: p.y + (Math.random()-0.5)*8, r: 24, dmg: 0, life: 1.4, type: 'water_puddle', tick: 0});
+                                }
                             }
                         }
 
@@ -24935,7 +24976,7 @@ function updateEquippedPet(dt){
     } else if(pet.id==='dog'){
         let best=null,bd=Infinity;
         for(const g of xpGems){ if(!g)continue; const d=dist(g,st); if(d<bd && d<430){bd=d;best=g;} }
-        if(best){ st.mode='xp'; const d=movePetToward(st,best.x,best.y,7.8,dt); if(d<player.r+12){ const bonus=PET_DOG_XP_MULT[pet.rarity]||0; const val=best.val*(1+bonus); inRunXp += pd?.debug?.infiniteXp ? Math.max(val,xpToNext) : val; addFloatingText(best.x,best.y,`+${Math.floor(val)} XP`,'#f1c40f',10); const idx=xpGems.indexOf(best); if(idx>=0)xpGems.splice(idx,1); if(inRunXp>=xpToNext) triggerLevelUp(); } }
+        if(best){ st.mode='xp'; const d=movePetToward(st,best.x,best.y,7.8,dt); if(d<player.r+12){ const bonus=PET_DOG_XP_MULT[pet.rarity]||0; const val=best.val*(1+bonus)*Math.max(1,Number(player?.stats?.xpMult)||1); inRunXp += pd?.debug?.infiniteXp ? Math.max(val,xpToNext) : val; addFloatingText(best.x,best.y,`+${Math.floor(val)} XP`,'#f1c40f',10); const idx=xpGems.indexOf(best); if(idx>=0)xpGems.splice(idx,1); if(inRunXp>=xpToNext) triggerLevelUp(); } }
         else { st.wanderTimer-=dt; if(st.wanderTimer<=0 || Math.hypot(st.wanderX-st.x,st.wanderY-st.y)<28){ st.wanderTimer=1.0+Math.random()*2.2; st.wanderAngle=Math.random()*Math.PI*2; const wanderRadius=260+Math.random()*520; st.wanderX=st.x+Math.cos(st.wanderAngle)*wanderRadius; st.wanderY=st.y+Math.sin(st.wanderAngle)*wanderRadius; } st.mode='wander'; movePetToward(st,st.wanderX,st.wanderY,5.6,dt); }
     } else if(pet.id==='cat'){
         const target=nearestPetEnemy(700,true);
@@ -25037,7 +25078,7 @@ function updateGems(dt) {
     for(let i = xpGems.length - 1; i >= 0; i--) {
         let g = xpGems[i]; let d = dist(g, player);
         if(d < pArea) { let a = Math.atan2(player.y - g.y, player.x - g.x); g.x += Math.cos(a) * 8 * 60 * dt; g.y += Math.sin(a) * 8 * 60 * dt; }
-        if(d < player.r + 10) { inRunXp += pd?.debug?.infiniteXp ? Math.max(g.val, xpToNext) : g.val; xpGems.splice(i, 1); if(inRunXp >= xpToNext) triggerLevelUp(); }
+        if(d < player.r + 10) { const gemXp = Math.max(0, Number(g.val) || 0) * Math.max(1, Number(player?.stats?.xpMult) || 1); inRunXp += pd?.debug?.infiniteXp ? Math.max(gemXp, xpToNext) : gemXp; xpGems.splice(i, 1); if(inRunXp >= xpToNext) triggerLevelUp(); }
     }
     document.getElementById('exp-bar').style.width = `${Math.min(100, (inRunXp / xpToNext) * 100)}%`;
 }
@@ -31029,7 +31070,7 @@ function gameOver(isQuit) {
     if (!isQuit) {
         // Morte legítima conclui a run para fins de XP, melhor wave e vitória diária.
         const xpPerWave = isUhcGameplayActive() ? 25 : (window.isHardcoreMode ? 20 : 10);
-        passXpGained = Math.floor(finalWave * xpPerWave * (Number(player?.stats?.xpMult) || 1));
+        passXpGained = Math.floor(finalWave * xpPerWave);
         addPassXp(passXpGained);
 
         if (runChestCoins > 0) { pd.coins += runChestCoins; runCoins += runChestCoins; }
@@ -33757,6 +33798,12 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
             phaseTargets:Array.from({length:20},()=>25)
         },
         {
+            id:'out_dated_ghoul', title:'Out Dated do Ghoul', phases:20, mapIndex:3, mapName:'Cemitério', mapVariant:'cemetery', section:'seasonal',
+            desc:'Conquiste o Out Dated do Ghoul sobrevivendo às ondas no pseudo mapa Cemitério.',
+            reward:{kind:'character',charId:'ghoul',label:'Ghoul gratuitamente'},
+            phaseTargets:Array.from({length:20},()=>25)
+        },
+        {
             id:'release_serca', title:'Desbloqueio do Sercã', phases:20, mapIndex:1, mapName:'Deserto', section:'launch', trialCharId:'serca',
             desc:'Uma missão especial para conquistar Sercã e liberar o governador de Sand Land.',
             reward:{kind:'character',charId:'serca',label:'Sercã gratuitamente'},
@@ -36094,7 +36141,10 @@ body.fd-sandbox-button-hidden #btn-sandbox,body.fd-sandbox-button-hidden #btn-sa
     gigante:'giantstein',giant:'giantstein',
     boss:'hallo_boss',curandeiro:'scary_healer',healer:'scary_healer',
     kamikaze:'treat_kamikaze',elite:'hallo_elite_shooter',elite_shooter:'hallo_elite_shooter',
-    lider:'coronel_leader',leader:'coronel_leader'
+    tanque:'pumpkin_tank',tank:'pumpkin_tank',
+    lider:'hallo_leader',leader:'hallo_leader',
+    ballon:'pumpkin_baloon',balloon:'pumpkin_baloon',baloneiro:'pumpkin_baloon',
+    truck:'candy_truck',caminhoneiro:'candy_truck'
   };
   const halloweenSpecialAppearances=[
     {type:'mummy',skin:'mummy',from:1},
@@ -36104,7 +36154,7 @@ body.fd-sandbox-button-hidden #btn-sandbox,body.fd-sandbox-button-hidden #btn-sa
     {type:'motorcycle_helmet',skin:'war_helmet',from:5},
     {type:'cardboard_head',skin:'snowman_head',from:3}
   ];
-  function isHalloweenMission(){return window.seasonalQuestRun?.id==='halloween_cemetery'&&window.seasonalQuestRun?.mapVariant==='cemetery';}
+  function isHalloweenMission(){return window.seasonalQuestRun?.mapVariant==='cemetery'&&['halloween_cemetery','out_dated_ghoul'].includes(window.seasonalQuestRun?.id);}
   const originalSpawnEnemy=window.spawnEnemy;
   if(typeof originalSpawnEnemy==='function'){
     const spawnWrapped=function(forcedType=null,forcedPoint=null,spriteOverride=null){
@@ -36464,5 +36514,132 @@ body.fd-sky-weather-wind #fd-sky-tablet{background:linear-gradient(145deg,#d8e6e
 body.fd-sky-weather-rain #fd-sky-tablet{background:linear-gradient(145deg,#cad7e2,#8297ad) !important;}
 body.fd-sky-weather-storm #fd-sky-tablet{background:linear-gradient(145deg,#aeb7ca,#65768f) !important;}
 </style>
+<script id="fd-drizz-halloween-content-patch">
+(function(){
+  'use strict';
+
+  // The droplet is the same symbol used by the enemy-soaked status indicator.
+  try {
+    COMMON_ABILITY_CONFIGS.drizz = {
+      label: '<span aria-hidden="true" style="font-size:40px;line-height:1;color:#00e5ff">💧</span>',
+      title: 'Habilidade — Dia de Chuva',
+      cooldown: 25
+    };
+  } catch (err) { console.warn('FD Drizz ability config:', err); }
+
+  // Level 5 ability: a ten-shot water burst aimed at the nearest enemy (or last aim).
+  try {
+    const previousTrigger = window.triggerCommonCharacterAbility || triggerCommonCharacterAbility;
+    const triggerWithDrizz = function(id) {
+      if (id !== 'drizz') return previousTrigger.apply(this, arguments);
+      if (sandboxMode || runShootingDisabled || !player) return false;
+      const level = Number(pd?.chars?.drizz?.level) || 0;
+      if (level < 5 || (player.commonAbilityCd || 0) > 0) return false;
+
+      const target = getCommonAbilityTarget();
+      const angle = target
+        ? Math.atan2(target.y - player.y, target.x - player.x)
+        : (Number.isFinite(player.lastAimAngle) ? player.lastAimAngle : (Number.isFinite(player.lastMoveAngle) ? player.lastMoveAngle : 0));
+      player.lastAimAngle = angle;
+      const pSpd = 5 * Math.max(0.1, Number(player.stats?.projSpdMult) || 1);
+      const finalDmg = Math.max(1, (Number(player.baseDmg) || 1) * Math.max(0.1, Number(player.stats?.dmgMult) || 1));
+      const spawnOffset = (Number(player.r) || 10) + 8;
+      const shotSpread = 0.055;
+      for (let i = 0; i < 10; i++) {
+        const shotAngle = angle + (i - 4.5) * shotSpread;
+        const sx = player.x + Math.cos(shotAngle) * spawnOffset;
+        const sy = player.y + Math.sin(shotAngle) * spawnOffset;
+        createProj(sx, sy, Math.cos(shotAngle) * pSpd, Math.sin(shotAngle) * pSpd,
+          finalDmg, 55, true, 'water_bubble', {
+            size: 8, sourceChar: 'drizz', abilityShot: true, drizzSplash: Math.random() < 0.15
+          });
+      }
+      player.commonAbilityCd = 25;
+      addFloatingText(player.x, player.y - 34, 'DIA DE CHUVA!', '#00cec9', 15);
+      createParticles(player.x, player.y, '#00cec9');
+      updateSpecialButtonUI(true);
+      return true;
+    };
+    window.triggerCommonCharacterAbility = triggerWithDrizz;
+    try { triggerCommonCharacterAbility = triggerWithDrizz; } catch (_) {}
+  } catch (err) { console.warn('FD Drizz ability runtime:', err); }
+
+  // Human-readable labels for Halloween-only sprites shown in the Sandbox.
+  const halloweenSandboxNames = {
+    pumpkin_tank: 'Tanque de Abóbora', hallo_leader: 'Líder de Halloween',
+    pumpkin_baloon: 'Baloneiro Abóbora', candy_truck: 'Caminhão de Doces',
+    hallo_basic: 'Básico de Halloween', witch_hat: 'Chapéu de Bruxa',
+    hallo_pumpkin: 'Cabeça de Abóbora', skull_heas: 'Cabeça de Crânio',
+    ghost_velocist: 'Velocista Fantasma', monster_shooter: 'Atirador Monstro',
+    giantstein: 'Gigante Frankenstein', hallo_boss: 'Boss de Halloween',
+    scary_healer: 'Curandeiro Assustador', treat_kamikaze: 'Kamikaze Guloseima',
+    hallo_elite_shooter: 'Atirador de Elite de Halloween',
+    vampire: 'Vampiro', skeleton: 'Esqueleto', bones: 'Ossos'
+  };
+  const previousSandboxName = window.fdFinalSandboxEnemyName || window.sandboxEnemyButtonLabel;
+  const sandboxNameWithHalloween = function(type, skin, mapId) {
+    const key = String(skin || '').toLowerCase();
+    if (halloweenSandboxNames[key]) {
+      const mapName = Number.isInteger(mapId) && typeof MAPS !== 'undefined' && MAPS[mapId] ? MAPS[mapId] : '';
+      return mapName ? `${halloweenSandboxNames[key]} • ${mapName}` : halloweenSandboxNames[key];
+    }
+    return typeof previousSandboxName === 'function' ? previousSandboxName.apply(this, arguments) : String(type || skin || 'Inimigo');
+  };
+  window.fdFinalSandboxEnemyName = sandboxNameWithHalloween;
+  window.sandboxEnemyButtonLabel = sandboxNameWithHalloween;
+
+  // Include the seasonal enemy roster in the Sandbox pool.
+  const previousPool = window.sandboxEnemyPoolAll || (typeof sandboxEnemyPoolAll === 'function' ? sandboxEnemyPoolAll : null);
+  if (previousPool) {
+    const poolWithHalloween = function() {
+      const existing = previousPool.apply(this, arguments) || [];
+      return Array.from(new Set(existing.concat(['vampire', 'skeleton', 'bones'])));
+    };
+    window.sandboxEnemyPoolAll = poolWithHalloween;
+    try { sandboxEnemyPoolAll = poolWithHalloween; } catch (_) {}
+  }
+
+  // Add Halloween skins as base variants, independent of the map that originally owns them.
+  const halloweenSandboxSkins = {
+    basico: ['hallo_basic'], basic: ['hallo_basic'], acucarado: ['hallo_basic'],
+    cardboard_head: ['witch_hat'], cardboard: ['witch_hat'],
+    motorcycle_helmet: ['hallo_pumpkin'], helmet: ['hallo_pumpkin'],
+    prism_head: ['skull_heas'], prism: ['skull_heas'],
+    velocista: ['ghost_velocist'], velocist: ['ghost_velocist'], dancer: ['ghost_velocist'],
+    atirador: ['monster_shooter'], shooter: ['monster_shooter'],
+    gigante: ['giantstein'], giant: ['giantstein'],
+    boss: ['hallo_boss'], megaboss: ['hallo_boss'],
+    curandeiro: ['scary_healer'], healer: ['scary_healer'],
+    kamikaze: ['treat_kamikaze'],
+    elite: ['hallo_elite_shooter'], elite_shooter: ['hallo_elite_shooter'],
+    tanque: ['pumpkin_tank'], tank: ['pumpkin_tank'],
+    lider: ['hallo_leader'], leader: ['hallo_leader'],
+    ballon: ['pumpkin_baloon'], balloon: ['pumpkin_baloon'], baloneiro: ['pumpkin_baloon'],
+    truck: ['candy_truck'], caminhoneiro: ['candy_truck']
+  };
+  const previousVariants = window.fdFinalSandboxEnemyVariants || window.sandboxEnemyVariants || (typeof sandboxEnemyVariants === 'function' ? sandboxEnemyVariants : null);
+  if (previousVariants) {
+    const variantsWithHalloween = function(type) {
+      const t = String(type || '').toLowerCase();
+      const existing = previousVariants.apply(this, arguments) || [];
+      const result = existing.slice();
+      const seen = new Set(result.map(v => `${String(v?.skin || '')}::${Number.isInteger(v?.mapId) ? v.mapId : 'base'}`));
+      for (const skin of (halloweenSandboxSkins[t] || [])) {
+        if (typeof getEnemySpritePath !== 'function' || !getEnemySpritePath(skin)) continue;
+        const key = `${skin}::base`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          result.push({ skin, mapId: null });
+        }
+      }
+      return result;
+    };
+    window.fdFinalSandboxEnemyVariants = variantsWithHalloween;
+    window.sandboxEnemyVariants = variantsWithHalloween;
+    try { sandboxEnemyVariants = variantsWithHalloween; } catch (_) {}
+  }
+})();
+</script>
+
 </body>
 </html>
