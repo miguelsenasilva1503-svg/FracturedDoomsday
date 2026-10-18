@@ -1531,7 +1531,7 @@ body .screen,body .overlay{width:100% !important;height:100% !important;}
 #damage-vignette{position:fixed;inset:0;z-index:9;pointer-events:none;box-shadow:inset 0 0 0 0 rgba(210,20,25,0);transition:box-shadow .12s linear;}
 body.fd-entry-cinematic #joystick-zone,body.fd-entry-cinematic #btn-special,body.fd-entry-cinematic #btn-special-hint,body.fd-entry-cinematic #exp-bar-container,body.fd-entry-cinematic #o2-bar-container,body.fd-entry-cinematic #qb-bar-container,body.fd-entry-cinematic #radioactivity-bar-container,body.fd-entry-cinematic #game-hud>div:first-child,body.fd-entry-cinematic #sandbox-tool-cluster{display:none!important;}
 body.fd-entry-cinematic #game-hud{display:block!important;visibility:visible!important;}body.fd-entry-cinematic #game-hud>#btn-pause{display:flex!important;visibility:visible!important;pointer-events:auto!important;position:fixed;top:14px;right:14px;}
-.tutorial-skip-btn{margin-top:10px;padding:7px 12px!important;font-size:11px!important;border-radius:999px!important;background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.16)!important;box-shadow:none!important;color:#cfd8dc!important;}
+
 .sandbox-modifier-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;max-width:900px;margin:0 auto;padding:4px;}
 .sandbox-modifier-card{display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center!important;text-align:left!important;min-height:110px!important;padding:12px!important;gap:5px!important;}
 .sandbox-modifier-card strong{font-size:14px!important;width:100%;text-align:left!important;}
@@ -1695,6 +1695,31 @@ body.fd-entry-cinematic #game-hud{display:block!important;visibility:visible!imp
   @media(max-width:560px){#fd-sky-tablet{top:64px;right:7px;transform:scale(.86);transform-origin:top right}#fd-sky-dialog .fd-sky-dialog-card{flex-direction:column;gap:6px;padding:16px;max-height:90vh;overflow-y:auto}#fd-sky-dialog .fd-sky-dialog-art{width:95px;height:95px;flex-basis:95px}#fd-sky-dialog .fd-sky-dialog-copy{text-align:center}#fd-sky-dialog .fd-sky-dialog-copy h2{text-align:center;font-size:23px}}
   
 </style>
+
+<style id="fd-credits-v101">
+.fd-settings-footer{display:flex;flex-direction:column;align-items:center;gap:7px;margin:22px auto 5px;padding:8px 0 12px;width:100%;}
+.fd-settings-footer button{width:min(100%,300px);}
+.fd-settings-footer p{margin:0;color:#aeb8c2;font-size:12px;font-weight:900;letter-spacing:.12em;}
+#overlay-game-credits{position:fixed!important;inset:0!important;z-index:100000!important;background:radial-gradient(ellipse at 50% 42%,#17243c 0%,#070a12 62%,#020307 100%)!important;overflow:hidden!important;backdrop-filter:none!important;padding:0!important;}
+#overlay-game-credits .credits-close{position:absolute;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));z-index:20;width:44px;height:44px;padding:0;border:2px solid rgba(255,255,255,.65)!important;border-radius:50%;background:rgba(8,12,22,.82)!important;color:#fff;font-size:31px;line-height:1;box-shadow:0 5px 20px rgba(0,0,0,.55);}
+#overlay-game-credits .credits-mask{position:absolute;inset:0;overflow:hidden;perspective:500px;}
+#overlay-game-credits .credits-roll{position:absolute;top:0;left:0;width:100%;padding:0 18px 12vh;transform:translateY(100vh);text-align:center;color:#f4f6fa;animation:fdCreditsRoll 66s linear forwards;}
+#overlay-game-credits .credits-roll h1{font-size:clamp(28px,6vw,54px);line-height:1.12;margin:0 auto 18px;color:#f1c40f;max-width:900px;-webkit-text-stroke:0;text-shadow:0 4px 20px rgba(241,196,15,.25);}
+#overlay-game-credits .credits-roll .credits-kicker{font-size:clamp(14px,2.6vw,20px);font-weight:900;letter-spacing:.42em;text-transform:uppercase;color:#a9c6ff;margin:0 0 44px;}
+#overlay-game-credits .credits-section{margin:0 auto 40px;max-width:760px;}
+#overlay-game-credits .credits-section h2{font-size:clamp(18px,3.4vw,28px);color:#f1c40f;letter-spacing:.16em;margin:0 0 16px;text-shadow:0 2px 9px rgba(0,0,0,.8);}
+#overlay-game-credits .credits-role{font-size:clamp(13px,2.8vw,19px);font-weight:900;letter-spacing:.06em;color:#b6c9e8;text-transform:uppercase;margin:20px 0 5px;}
+#overlay-game-credits .credits-name{font-size:clamp(16px,3.5vw,25px);font-weight:900;line-height:1.45;margin:0 auto;color:#fff;}
+#overlay-game-credits .credits-note{font-size:clamp(12px,2.4vw,17px);line-height:1.5;color:#bfc9d7;margin:3px auto 0;max-width:660px;}
+#overlay-game-credits .credits-rule{width:90px;height:2px;margin:30px auto 34px;background:linear-gradient(90deg,transparent,#718bb8,transparent);}
+#overlay-game-credits .credits-final{display:flex;flex-direction:column;align-items:center;gap:22px;margin:0 auto;max-width:680px;}
+#overlay-game-credits .credits-final img{width:clamp(96px,24vw,180px);height:clamp(96px,24vw,180px);object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 12px 16px rgba(0,0,0,.5));}
+#overlay-game-credits .credits-speech{position:relative;max-width:min(86vw,520px);padding:16px 22px;border:3px solid #252c39;border-radius:22px;background:#fff;color:#202633;font-size:clamp(16px,3.3vw,23px);font-weight:900;text-shadow:none;box-shadow:0 10px 25px rgba(0,0,0,.35);}
+#overlay-game-credits .credits-speech::before{content:"";position:absolute;top:-15px;left:50%;transform:translateX(-50%);border-left:13px solid transparent;border-right:13px solid transparent;border-bottom:15px solid #252c39;}
+@keyframes fdCreditsRoll{from{transform:translateY(100vh)}to{transform:translateY(-110%)}}
+@media(prefers-reduced-motion:reduce){#overlay-game-credits .credits-roll{animation-duration:90s;}}
+</style>
+
 </head>
 <body>
 
@@ -1754,7 +1779,7 @@ body.fd-entry-cinematic #game-hud{display:block!important;visibility:visible!imp
         <div class="tutorial-dialog-copy">
             <div id="tutorial-dialog-speaker" class="tutorial-dialog-speaker">Strike</div>
             <div id="tutorial-dialog-text" class="tutorial-dialog-text"></div>
-            <div id="tutorial-dialog-hint" class="tutorial-dialog-hint">Clique para mostrar tudo</div><button id="tutorial-dialog-skip" class="tutorial-skip-btn hidden" type="button" onclick="skipTutorialDialog(event)">Pular tutorial</button>
+            <div id="tutorial-dialog-hint" class="tutorial-dialog-hint">Clique para mostrar tudo</div>
         </div>
     </div>
 </div>
@@ -1993,7 +2018,6 @@ body.fd-entry-cinematic #game-hud{display:block!important;visibility:visible!imp
                 
                 </div>
             </div>
-        </div>
 
         <div class="settings-section">
             <div class="settings-section-title">Jogabilidade</div>
@@ -2115,7 +2139,60 @@ body.fd-entry-cinematic #game-hud{display:block!important;visibility:visible!imp
         </div>
 
     </div>
-    <p style="text-align:center; color:#aaa; font-size:12px; margin-top: 26px;">Criado por Migton Tv zim | Auxílio especial: Gemini</p>
+    <div class="fd-settings-footer">
+        <button class="btn-menu" type="button" onclick="openGameCredits()">Créditos</button>
+        <p>v1.0.1</p>
+    </div>
+</div>
+
+<div id="overlay-game-credits" class="overlay hidden" role="dialog" aria-modal="true" aria-label="Créditos do Fractured Doomsday">
+    <button class="credits-close" type="button" onclick="closeGameCredits()" aria-label="Fechar créditos">×</button>
+    <div class="credits-mask">
+        <div id="game-credits-roll" class="credits-roll">
+            <h1>FRACTURED DOOMSDAY</h1>
+            <p class="credits-kicker">Créditos • v1.0.1</p>
+            <div class="credits-section">
+                <h2>Liderança e desenvolvimento</h2>
+                <p class="credits-role">ADM e Dev geral</p><p class="credits-name">Migton TV</p>
+                <p class="credits-role">ADM secundário e Dev</p><p class="credits-name">Lucas._.ba12</p>
+                <p class="credits-role">Protótipo e corpo inicial do jogo</p><p class="credits-name">Gemini</p>
+                <p class="credits-role">Atualizações periódicas</p><p class="credits-name">ChatGTP</p>
+            </div>
+            <div class="credits-rule"></div>
+            <div class="credits-section">
+                <h2>Contribuintes</h2>
+                <p class="credits-name">Izaque Gamer</p><p class="credits-note">Criador de conteúdo pequeno; criou Izaque.</p>
+                <p class="credits-name" style="margin-top:16px">Arthur Batista</p><p class="credits-note">Criou o mapa Céu.</p>
+                <p class="credits-name" style="margin-top:16px">Pietro Macário</p><p class="credits-note">Criou Vingathron.</p>
+                <p class="credits-name" style="margin-top:16px">Lucas._.ba12</p><p class="credits-note">Criou Zoe.</p>
+                <p class="credits-name" style="margin-top:16px">Juan Kaleby</p><p class="credits-note">Criou Auren e Chronos.</p>
+                <p class="credits-name" style="margin-top:16px">Davi Tavares</p><p class="credits-note">Criou Snapdragon e Nox; melhor wave: 204.</p>
+            </div>
+            <div class="credits-rule"></div>
+            <div class="credits-section">
+                <h2>Menções honrosas</h2>
+                <p class="credits-name">Felipe Ramon</p>
+                <p class="credits-name">Karol</p>
+                <p class="credits-name">Jefté</p>
+                <p class="credits-name">Jahyron da Cruz</p>
+                <p class="credits-name">Gabriel Antônio</p>
+                <p class="credits-name">Tarso Melo</p>
+                <p class="credits-name">Jaspe Miguel</p>
+                <p class="credits-name">Bernardo</p>
+                <p class="credits-name">Kaique Lohan</p>
+                <p class="credits-name">Matheus Rian</p>
+                <p class="credits-name">Jhon_place</p>
+                <p class="credits-name">RobôGamer-000</p>
+                <p class="credits-name">GreenDekuHalloween8196</p>
+                <p class="credits-name">Bliss from XP</p>
+            </div>
+            <div class="credits-rule"></div>
+            <div class="credits-final">
+                <img src="sprites/chick.png" alt="Pintinho do Chickbot" loading="eager">
+                <div class="credits-speech">Agradecemos por jogar, piu piu :3</div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div id="overlay-dev-password" class="overlay hidden" style="z-index: 99996;">
@@ -3159,8 +3236,16 @@ Um governador de Sand Land cujo governo acabou marcado pela corrupção e pela o
 Um garoto extremamente precavido que vive preocupado com a possibilidade de uma chuva repentina. Ele nunca sai sem sua capa de chuva e sua fiel pistola d’água, que carrega consigo como se fosse um equipamento de sobrevivência. Amigo de Axel, Drizz garante que está apenas se preparando para qualquer situação — e, quando perguntam por que precisa de uma pistola d’água, sua resposta é sempre a mesma.
 
 “É pra me defender.”` },
+
+    inky: { id: 'inky', class: 'Controle', name: 'Inky', title: 'Tímida', rarity: 'legendary', sortLast: true, cost: 349, hp: 95, speed: 3.35, dmg: 9, fireRate: 72, range: 250, color: '#8e44ad', weapon: 'inky_ink_spray', desc: `“Inky prefere ficar quietinha no seu canto. Afinal, nem todo mundo sabe lidar com uma lula tímida.”
+
+Uma pequena híbrida de lula e humana, reconhecível por seu capuz roxo e pelos tentáculos que formam seu cabelo. Tímida e reservada, Inky prefere evitar situações desconfortáveis e chamar o mínimo de atenção possível. Porém, quando é exposta a situações desagradáveis ou se sente ameaçada, acaba liberando uma tinta venenosa como mecanismo de defesa. Às vezes, é melhor deixá-la tranquila!
+
+“P-por favor... fique longe de mim!”` },
 };
 const CHARACTER_SUMMARIES = {
+    inky: `Inky: dispara uma rajada de tinta vertical e duradoura; quanto mais os inimigos ficam na tinta, mais dano vão tomar. ESPECIAL: cada hit tem 10% de chance de ENVENENAR o inimigo.`,
+
     merlin: `Merlin: dispara uma magia teleguiada que tem 15% de chance de ENVENENAR e 15% de chance de BEBETIZAR. Quando esse efeito é aplicado, o inimigo fica BEBETIZADO.
 
 ESPECIAL: tem 3 modos que podem ser escolhidos ao usar seu botão.
@@ -5104,6 +5189,7 @@ function getCharacterRaritySortValue(c) {
 
 
 const CHARACTER_SPRITES = {
+    inky: 'sprites/inky.png',
     strike: 'sprites/strike.png',
     fasty: 'sprites/fasty.png',
     cherry: 'sprites/cherry.png',
@@ -6292,11 +6378,25 @@ function getFracturedEnemySkinType(e) {
     }
 
     // The Fraturado map itself: choose one compatible biome skin exactly once.
+    // Céu agora é um bioma real, inclusive como origem de fraturas e skins no Fraturado.
+    biomeMaps[21] = {
+        basico:'sky_basic', basic:'sky_basic', acucarado:'sky_basic', cardboard_head:'aero_hat', cardboard:'aero_hat', motorcycle_helmet:'iron_aero_hat', helmet:'iron_aero_hat',
+        prism_head:'motor_head', prism:'motor_head', truck:'plane_truck', atirador:'sky_shooter', shooter:'sky_shooter', velocista:'sky_velocist', velocist:'sky_velocist', dancer:'sky_velocist',
+        gigante:'sky_giant', giant:'sky_giant', boss:'sky_boss', tanque:'sky_tank', tank:'sky_tank', kamikaze:'wingsuit_kamiaze',
+        curandeiro:'sky_healer', healer:'sky_healer', elite:'sky_elite_shooter', elite_shooter:'sky_elite_shooter', lider:'sky_leader', leader:'sky_leader'
+    };
+
     const candidates=[];
     for (const mapId of Object.keys(biomeMaps)) {
         const key = biomeMaps[mapId][type];
         if (key && getEnemySpritePath(key)) candidates.push({ key, mapId: Number(mapId) });
     }
+    // As variantes especiais do Céu também podem surgir em inimigos do Fraturado.
+    if (type === 'truck') {
+        if (Number(wave) >= 12 && getEnemySpritePath('helicopter')) candidates.push({key:'helicopter',mapId:21});
+        if (Number(wave) >= 20 && getEnemySpritePath('jet')) candidates.push({key:'jet',mapId:21});
+    }
+    if (type === 'atirador' && Number(wave) >= 10 && getEnemySpritePath('enemy_drone')) candidates.push({key:'enemy_drone',mapId:21});
     if (!candidates.length) {
         const fallback = getEnemySpritePath(type) ? type : null;
         e.fracturedSkinType = fallback;
@@ -6822,18 +6922,17 @@ function drawEnemySprite(cCtx, x, y, size, type, opts = {}) {
     const ratio = img.naturalWidth / img.naturalHeight;
     const scale = Number.isFinite(opts.scale) ? opts.scale : 1;
     const widthMult = Number.isFinite(opts.widthMult) ? opts.widthMult : getEnemySpriteWidthMult(type);
-    const w = Math.max(22, size * widthMult * scale);
+    const rawWidth = size * widthMult * scale;
+    const w = opts.allowTiny ? Math.max(1, rawWidth) : Math.max(22, rawWidth);
     const h = w / ratio;
     const flipX = Boolean(opts.flipX);
+    const rotate = Number.isFinite(opts.rotate) ? opts.rotate : 0;
     cCtx.save();
     if (Number.isFinite(opts.opacity)) cCtx.globalAlpha = opts.opacity;
-    if (flipX) {
-        cCtx.translate(x, y);
-        cCtx.scale(-1, 1);
-        cCtx.drawImage(img, -w / 2, -h / 2, w, h);
-    } else {
-        cCtx.drawImage(img, x - w / 2, y - h / 2, w, h);
-    }
+    cCtx.translate(x, y);
+    if (rotate) cCtx.rotate(rotate);
+    if (flipX) cCtx.scale(-1, 1);
+    cCtx.drawImage(img, -w / 2, -h / 2, w, h);
     cCtx.restore();
     return true;
 }
@@ -8118,19 +8217,8 @@ function showTutorialDialog(steps, onClose = null) {
     // o diálogo aparecer deslocado, principalmente na Loja e em telas estreitas.
     overlay.style.zoom = '1';
     overlay.dataset.open = '1';
-    const skipBtn=document.getElementById('tutorial-dialog-skip'); if(skipBtn) skipBtn.classList.toggle('hidden', !(pd?.tutorial?.stage==='control-dialog' || pd?.tutorial?.stage==='intro'));
     renderTutorialDialogStep();
     overlay.classList.remove('hidden');
-}
-
-function skipTutorialDialog(event){
-    if(event){event.preventDefault();event.stopPropagation();}
-    stopTutorialTypewriter();
-    const overlay=document.getElementById('overlay-tutorial-dialog'); if(overlay){overlay.classList.add('hidden');overlay.dataset.open='0';}
-    const cb=tutorialDialogOnClose; tutorialDialogSteps=[]; tutorialDialogIndex=0; tutorialDialogOnClose=null; tutorialTypewriterFullText=''; tutorialTypewriterDone=true;
-    pd.tutorial.stage='playing'; save(); isPaused=false; applyControlLayout(); lastTime=performance.now();
-    hideTutorialPointer();
-    return false;
 }
 
 function renderTutorialDialogStep() {
@@ -8834,7 +8922,7 @@ function getSelectedMapIndex() {
 function getDestinationChoices() {
     const bucket = getMapChoiceBucket();
     const seed = `destinations:${bucket}`;
-    return shuffleWithSeed(MAPS.map((name, index) => index).filter(index => index < 12 || index === 13 || index === 14 || index === 15 || index === 19), seed).slice(0, 3);
+    return shuffleWithSeed(MAPS.map((name, index) => index).filter(index => index < 12 || index === 13 || index === 14 || index === 15 || index === 19 || index === 21), seed).slice(0, 3);
 }
 
 function drawDestinationPreview(canvas, mapId) {
@@ -15122,7 +15210,7 @@ let sandboxOriginalSelection = null;
 let sandboxOriginalMap = 0;
 let sandboxOriginalHardcore = false;
 let sandboxOriginalUHC = false;
-let sandboxSettings = { difficulty: 'classic', o2: false, fractures: false, meteors: false, radioactiveClouds: false, lightning: false, sandWhirls: false, limitedVision: false, blizzards: false, skating: false, shooting: true };
+let sandboxSettings = { difficulty: 'classic', o2: false, fractures: false, meteors: false, radioactiveClouds: false, lightning: false, sandWhirls: false, limitedVision: false, blizzards: false, skating: false, friendlyClouds: false, shooting: true };
 let sandboxPetDisabled = false;
 let sandboxHasSavedWorld = false;
 let sandboxSavedWorld = null;
@@ -15600,6 +15688,7 @@ function sandboxRestoreSavedWorld() {
     const savedCharacter = sandboxSavedWorld.character;
     if (savedCharacter && CHARACTERS?.[savedCharacter]) pd.selectedChar = savedCharacter;
     window.currentMap = Number.isInteger(sandboxSavedWorld.map) ? sandboxSavedWorld.map : 0;
+    if (window.currentMap !== 21) sandboxSettings.friendlyClouds = false;
     sandboxMapHalfSize = Math.max(300, Math.min(3000, Number(sandboxSavedWorld.border) || 1500));
     sandboxAutoSpawnEnabled = !!sandboxSavedWorld.autoSpawn;
     const ids = new Set((sandboxSavedWorld.entities || []).map(e => e.id));
@@ -15658,6 +15747,7 @@ function activateSandbox() {
     const restoringSavedWorld = sandboxHasSavedWorld && sandboxSavePosition && !!sandboxSavedWorld;
     if (!restoringSavedWorld) {
         sandboxSettings.o2 = false;
+        sandboxSettings.friendlyClouds = false;
         sandboxSettings.fractures = false;
         sandboxSettings.meteors = false;
         sandboxSettings.radioactiveClouds = false; sandboxSettings.lightning = false; sandboxSettings.sandWhirls = false; sandboxSettings.limitedVision = false; sandboxSettings.blizzards = false; sandboxSettings.skating = false;
@@ -16022,8 +16112,9 @@ function renderSandboxModifiers(root){
         ['radioactiveClouds','Nuvens radioativas','Nuvens móveis e exposição radioativa'],['lightning','Raios','Queda de raios no mapa, com 1% de chance de atingir o jogador'],['sandWhirls','Redemoinhos de areia','10 redemoinhos móveis de areia'],
         ['limitedVision','Visão limitada','Mesma visão circular da Caverna UHC'],['blizzards','Nevascas','Nevasca que atrapalha e desacelera como na Nevasca UHC'],['skating','Patinação','Movimento escorregadio como Base Lunar/Permafrost']
     ];
-    const cards=defs.map(([key,label,desc])=>`<button class="sandbox-small-btn sandbox-modifier-card" type="button" data-sandbox-action="setting" data-sandbox-setting="${key}"><strong>${label}</strong><span>${desc}</span><em id="sandbox-${key==='radioactiveClouds'?'radioactive-clouds':key==='sandWhirls'?'sand-whirls':key==='limitedVision'?'limited-vision':key}-status" class="sandbox-setting-state"></em></button>`).join('');
-    root.innerHTML=`<div class="sandbox-section-head"><button class="sandbox-small-btn" type="button" data-sandbox-action="tab" data-sandbox-tab="home">Voltar</button><h2>Modificadores</h2><span>9</span></div><div class="sandbox-modifier-grid">${cards}</div>`;
+    if (Number(window.currentMap) === 21) defs.push(['friendlyClouds','Nuvem amiga','Nuvens sob os inimigos para impedir a queda no mapa Céu']);
+    const cards=defs.map(([key,label,desc])=>`<button class="sandbox-small-btn sandbox-modifier-card" type="button" data-sandbox-action="setting" data-sandbox-setting="${key}"><strong>${label}</strong><span>${desc}</span><em id="sandbox-${key==='radioactiveClouds'?'radioactive-clouds':key==='sandWhirls'?'sand-whirls':key==='limitedVision'?'limited-vision':key==='friendlyClouds'?'friendly-clouds':key}-status" class="sandbox-setting-state"></em></button>`).join('');
+    root.innerHTML=`<div class="sandbox-section-head"><button class="sandbox-small-btn" type="button" data-sandbox-action="tab" data-sandbox-tab="home">Voltar</button><h2>Modificadores</h2><span>${defs.length}</span></div><div class="sandbox-modifier-grid">${cards}</div>`;
     updateSandboxControlsUI();
 }
 
@@ -16061,7 +16152,7 @@ function getSandboxDifficultyLabel() {
 }
 function updateSandboxControlsUI() {
     const d = document.getElementById('sandbox-difficulty-status'); if (d) d.textContent = `Atual: ${getSandboxDifficultyLabel()}`;
-    const states = [['o2', sandboxSettings.o2], ['fractures', sandboxSettings.fractures], ['meteors', sandboxSettings.meteors], ['radioactive-clouds', sandboxSettings.radioactiveClouds], ['lightning', sandboxSettings.lightning], ['sand-whirls', sandboxSettings.sandWhirls], ['limited-vision', sandboxSettings.limitedVision], ['blizzards', sandboxSettings.blizzards], ['skating', sandboxSettings.skating], ['undetect', sandboxEnemyUndetectable], ['save-position', sandboxSavePosition], ['shooting', sandboxSettings.shooting], ['pet', !sandboxPetDisabled], ['immortality', sandboxImmortalityEnabled]];
+    const states = [['o2', sandboxSettings.o2], ['fractures', sandboxSettings.fractures], ['meteors', sandboxSettings.meteors], ['radioactive-clouds', sandboxSettings.radioactiveClouds], ['lightning', sandboxSettings.lightning], ['sand-whirls', sandboxSettings.sandWhirls], ['limited-vision', sandboxSettings.limitedVision], ['blizzards', sandboxSettings.blizzards], ['skating', sandboxSettings.skating], ['friendly-clouds', sandboxSettings.friendlyClouds], ['undetect', sandboxEnemyUndetectable], ['save-position', sandboxSavePosition], ['shooting', sandboxSettings.shooting], ['pet', !sandboxPetDisabled], ['immortality', sandboxImmortalityEnabled]];
     for (const [key, enabled] of states) {
         const el = document.getElementById(`sandbox-${key}-status`);
         if (!el) continue;
@@ -16082,7 +16173,8 @@ function setSandboxDifficulty(mode) {
 }
 function adjustSandboxMapBorder(delta){ if(!sandboxMode) return; const n=Math.max(300,Math.min(3000,sandboxMapHalfSize + (Number(delta)||0))); sandboxMapHalfSize=n; if(player){ player.x=Math.max(-n,Math.min(n,player.x)); player.y=Math.max(-n,Math.min(n,player.y)); } updateSandboxControlsUI(); notify(`Borda do mapa: ${n}`); }
 function toggleSandboxSetting(key) {
-    if (!sandboxMode || !['o2','fractures','meteors','radioactiveClouds','lightning','sandWhirls','limitedVision','blizzards','skating','undetectable','savePosition','shooting','pet','immortality'].includes(key)) return;
+    if (!sandboxMode || !['o2','fractures','meteors','radioactiveClouds','lightning','sandWhirls','limitedVision','blizzards','skating','friendlyClouds','undetectable','savePosition','shooting','pet','immortality'].includes(key)) return;
+    if (key === 'friendlyClouds' && Number(window.currentMap) !== 21) { sandboxSettings.friendlyClouds = false; updateSandboxControlsUI(); notify('Nuvem amiga só pode ser usada no mapa Céu.'); return; }
     if (key === 'undetectable') { sandboxEnemyUndetectable = !sandboxEnemyUndetectable; updateSandboxControlsUI(); return; }
     if (key === 'savePosition') { sandboxSavePosition = !sandboxSavePosition; updateSandboxControlsUI(); return; }
     if (key === 'shooting') { sandboxSettings.shooting = !sandboxSettings.shooting; updateSandboxControlsUI(); return; }
@@ -16403,6 +16495,7 @@ function renderSandboxMaps(root) {
 function sandboxSelectMap(id) {
     if (!sandboxMode || !Number.isInteger(id) || id < 0 || id >= MAPS.length) return;
     window.currentMap = id;
+    if (id !== 21) sandboxSettings.friendlyClouds = false;
     obstacles = [];
     sandboxWallsSuppressed = true;
     if (player) { player.x = 0; player.y = 0; }
@@ -20277,6 +20370,25 @@ function spawnEnemy(forcedType = null, forcedPoint = null, spriteOverride = null
         if (pd.selectedChar === 'healy') types = types.filter(t => t !== 'curandeiro');
     }
 
+    // Céu: elenco próprio. Os baloneiros continuam usando qualquer tipo de balão existente.
+    if (window.currentMap === 21) {
+        types = ['basico','basico','basico'];
+        if (wave >= 2) types.push('cardboard_head');
+        if (wave >= 3) types.push('motorcycle_helmet','velocista');
+        if (wave >= 5) types.push('atirador','kamikaze','ballon');
+        if (wave >= 6) types.push('gigante');
+        if (wave >= 7) types.push('prism_head');
+        if (wave >= 10) types.push('atirador');
+        if (wave >= 12) types.push('truck','truck');
+        if (wave >= 13) types.push('tanque');
+        if (wave >= 16) types.push('curandeiro');
+        if (wave >= 17) types.push('elite');
+        if (wave >= 20) types.push('truck');
+        if (wave >= 21) types.push('lider');
+        if (wave >= 30) types.push('colosso','elite_master','lider_elite');
+        if (pd.selectedChar === 'healy') types = types.filter(t => t !== 'curandeiro');
+    }
+
     // Fraturado: todos os inimigos entram pela PRÓPRIA wave de estreia,
     // independentemente do mapa onde normalmente aparecem.
     if (window.currentMap === 11) {
@@ -21015,7 +21127,7 @@ function updateEnemies(dt) {
             const a = Math.atan2(targetY - e.y, targetX - e.x);
             nx += Math.cos(a) * currentSpeed * eSpeedMult * 60 * dt;
             ny += Math.sin(a) * currentSpeed * eSpeedMult * 60 * dt;
-        } else if (e.type === 'machine_gun') {
+        } else if (e.type === 'machine_gun' || e.skySpecialType === 'jet') {
             e.machineGunCd = Math.max(0, (e.machineGunCd || 0) - getEnemyTemporalActionDt(e, dt));
             if ((e.machineGunBurstCount || 0) > 0) {
                 e.machineGunShotTimer = Math.max(0, (e.machineGunShotTimer || 0) - getEnemyTemporalActionDt(e, dt));
@@ -21470,7 +21582,7 @@ function updateEnemies(dt) {
                     addFloatingText(player.x, player.y - 18, '-2 HP', '#2ecc71', 11);
                     addFloatingText(e.x, e.y - 16, 'VENENO!', '#2ecc71', 11);
                 }
-                if (e.type === 'scorpion' || (e.type === 'vampire' && window.seasonalQuestRun?.id === 'halloween_cemetery')) {
+                if (e.type === 'scorpion' || (e.type === 'vampire' && (window.seasonalQuestRun?.id === 'halloween_cemetery' || (sandboxMode && e.sandbox)))) {
                     player.poison = player.poison || { timer: 0, dmg: 0, tickCd: 0 };
                     player.poison.timer = Math.max(Number(player.poison.timer) || 0, e.poisonOnHit || 2.5);
                     player.poison.dmg = Math.max(Number(player.poison.dmg) || 0, Math.max(1, e.baseDmg * 0.10));
@@ -27704,7 +27816,8 @@ function draw() {
         const enemySprite = enemySpriteType ? getEnemySpriteImage(enemySpriteType) : null;
         const pogoScale = e.pogo ? (Number(e.pogoScale)||1) : 1;
         const drawY = e.pogo ? e.y + (Number(e.pogoJumpOffset)||0) : e.y;
-        const visualSize = ((e.merlinBabyTimer > 0 && e.type === 'merlin_baby') ? 9.5 : (Number.isFinite(e.spriteSize) ? e.spriteSize : e.size)) * pogoScale;
+        const fallScale = e.fdSkyFalling ? Math.max(0.025, Number(e.fdSkyFallScale) || 1) : 1;
+        const visualSize = ((e.merlinBabyTimer > 0 && e.type === 'merlin_baby') ? 9.5 : (Number.isFinite(e.spriteSize) ? e.spriteSize : e.size)) * pogoScale * fallScale;
         let drawW = Math.max(24, visualSize * 2);
         let drawH = drawW;
 
@@ -27723,10 +27836,10 @@ function draw() {
                 const widthMult = getEnemySpriteWidthMult(enemySpriteType);
                 drawW = Math.max(22, visualSize * widthMult);
                 drawH = drawW / ratio;
-                drawEnemySprite(ctx, e.x, drawY, visualSize, enemySpriteType, { flipX: Boolean(e.facingLeft) });
+                drawEnemySprite(ctx, e.x, drawY, visualSize, enemySpriteType, { flipX: Boolean(e.facingLeft), rotate: e.fdSkyFalling ? (Number(e.fdSkyFallAngle) || 0) : 0, allowTiny: Boolean(e.fdSkyFalling) });
             }
         } else {
-            drawShape(ctx, e.x, e.y, e.size, 'circle', e.color, e.isBoss);
+            ctx.save();ctx.translate(e.x,e.y);if(e.fdSkyFalling)ctx.rotate(Number(e.fdSkyFallAngle)||0);ctx.scale(fallScale,fallScale);drawShape(ctx,0,0,e.size,'circle',e.color,e.isBoss);ctx.restore();
         }
 
         if (e.hp > 0 && e.type === 'piano') {
@@ -35551,13 +35664,19 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
     }
     skyWallsActive=true;skyWallsObstacleRef=obstacles;
   }
+  let cachedSkyWave=-1, cachedSkyWeather=null;
   function currentSkyWeather(){
     const wv=Math.max(1,Math.floor(Number(typeof wave!=='undefined'?wave:1)||1));
-    const cycle=Math.floor((wv-1)/3);
-    const kinds=['sun','wind','rain','storm'];
-    const type=kinds[cycle%kinds.length];
-    const dir=windDirs[Math.floor(cycle/4)%windDirs.length];
-    return {type,wind:dir,cycle,waveGroup:cycle};
+    if(wv!==cachedSkyWave){
+      cachedSkyWave=wv;
+      const kinds=['sun','wind','rain','storm'];
+      const previous=cachedSkyWeather?.type;
+      const pool=kinds.filter(kind=>kind!==previous);
+      const type=pool[Math.floor(Math.random()*pool.length)];
+      const dir=windDirs[Math.floor(Math.random()*windDirs.length)];
+      cachedSkyWeather={type,wind:dir,cycle:wv,waveGroup:wv};
+    }
+    return cachedSkyWeather;
   }
   function updateSkyTablet(state){
     const isSky=Number(window.currentMap)===21;
@@ -35641,17 +35760,34 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
   window.fdDrawSkyPreviewCanvas=function(c,w,h){
     if(!c)return;const g=c.createLinearGradient(0,0,w,h);g.addColorStop(0,'#55b8f1');g.addColorStop(.6,'#a5e0ff');g.addColorStop(1,'#effbff');c.fillStyle=g;c.fillRect(0,0,w,h);
     c.fillStyle='rgba(255,241,163,.92)';c.beginPath();c.arc(w*.79,h*.20,Math.min(w,h)*.10,0,Math.PI*2);c.fill();
-    function puff(x,y,r){c.fillStyle='rgba(255,255,255,.94)';c.beginPath();c.ellipse(x,y,r*1.4,r*.47,0,0,Math.PI*2);c.ellipse(x-r*.42,y-r*.18,r*.55,r*.52,0,0,Math.PI*2);c.ellipse(x+r*.10,y-r*.34,r*.66,r*.70,0,0,Math.PI*2);c.ellipse(x+r*.62,y-r*.10,r*.47,r*.42,0,0,Math.PI*2);c.fill();}
+    function puff(x,y,r){if(!skyCloudSprite.complete||!skyCloudSprite.naturalWidth)return;const ww=r*2.9,hh=ww*(skyCloudSprite.naturalHeight/skyCloudSprite.naturalWidth);c.drawImage(skyCloudSprite,x-ww/2,y-hh/2,ww,hh);}
     puff(w*.22,h*.34,Math.min(w,h)*.14);puff(w*.65,h*.62,Math.min(w,h)*.12);puff(w*.87,h*.42,Math.min(w,h)*.08);
-    c.fillStyle='rgba(255,255,255,.46)';c.beginPath();c.ellipse(w*.49,h*.91,w*.34,h*.09,0,0,Math.PI*2);c.fill();
+    if(skyCloudSprite.complete&&skyCloudSprite.naturalWidth){const sw=w*.58,sh=sw*(skyCloudSprite.naturalHeight/skyCloudSprite.naturalWidth);c.globalAlpha=.52;c.drawImage(skyCloudSprite,w*.49-sw/2,h*.91-sh/2,sw,sh);c.globalAlpha=1;}
   };
+  const skyCloudSprite = new Image();
+  skyCloudSprite.src = 'elements/cloud.png';
   function drawCloud(c,x,y,r,alpha=1,wall=false){
-    c.save();c.globalAlpha=alpha;c.shadowColor=wall?'rgba(60,78,96,.5)':'rgba(22,83,126,.23)';c.shadowBlur=wall?8:6;
-    const g=c.createLinearGradient(x,y-r*.55,x,y+r*.5);g.addColorStop(0,wall?'#f4f7fa':'rgba(255,255,255,.96)');g.addColorStop(1,wall?'#8ba8ba':'rgba(210,239,255,.86)');c.fillStyle=g;
-    c.beginPath();c.ellipse(x,y,r*1.45,r*.53,0,0,Math.PI*2);c.ellipse(x-r*.48,y-r*.12,r*.57,r*.54,0,0,Math.PI*2);c.ellipse(x-r*.05,y-r*.35,r*.64,r*.70,0,0,Math.PI*2);c.ellipse(x+r*.48,y-r*.17,r*.55,r*.48,0,0,Math.PI*2);c.ellipse(x+r*.87,y+r*.02,r*.34,r*.34,0,0,Math.PI*2);c.fill();
-    c.shadowBlur=0;c.strokeStyle=wall?'rgba(80,108,132,.82)':'rgba(255,255,255,.55)';c.lineWidth=2;c.beginPath();c.ellipse(x,y,r*1.42,r*.50,0,0,Math.PI*2);c.stroke();c.restore();
+    if(!skyCloudSprite.complete||!skyCloudSprite.naturalWidth)return;
+    c.save();c.globalAlpha=alpha;
+    if(wall){c.shadowColor='rgba(60,78,96,.42)';c.shadowBlur=6;}
+    const w=Math.max(24,r*2.9),h=w*(skyCloudSprite.naturalHeight/skyCloudSprite.naturalWidth);
+    c.drawImage(skyCloudSprite,x-w/2,y-h/2,w,h);c.restore();
   }
-  function enemyNoCloud(e){const t=String(e?.type||e?.id||e?.name||'').toLowerCase();return /fighter[_ -]?plane|airplane|aircraft|avi[aã]o|ca[cç]a|balone|balloon|baloon|bal[aã]o/.test(t);}
+  function drawFootCloud(c,x,y,w,h,alpha=1){
+    if(!skyCloudSprite.complete||!skyCloudSprite.naturalWidth)return;
+    c.save();c.globalAlpha=alpha;c.drawImage(skyCloudSprite,x-w/2,y-h/2,w,h);c.restore();
+  }
+  function enemyNoCloud(e){
+    if(!e)return false;
+    const vals=[e.type,e.id,e.name,e.skinOverride,e.enemySkin,e.fracturedSkinType,e.resolvedFracturedSkinType,e._skinTypeForEnemy,e.skySpecialType].map(v=>String(v||'').toLowerCase());
+    // Os inimigos que já voam com uma skin do Céu não precisam da plataforma de nuvem.
+    // Mega Boss, Colosso, Atirador de Elite Master e Líder de Elite são exceções: sempre têm nuvem.
+    const permanentCloud=new Set(['megaboss','mega_boss','colosso','elite_master','master_elite_shooter','lider_elite','elite_leader']);
+    if(vals.some(t=>permanentCloud.has(t)))return false;
+    const skyFloatSkins=new Set(['sky_basic','aero_hat','iron_aero_hat','motor_head','plane_truck','sky_shooter','sky_velocist','sky_giant','sky_boss','sky_tank','wingsuit_kamiaze','sky_healer','sky_elite_shooter','sky_leader','helicopter','jet','enemy_drone']);
+    if(vals.some(t=>skyFloatSkins.has(t)))return true;
+    return vals.some(t=>t==='fighter_plane'||t==='plane'||t==='radioactive_plane'||t==='ballon'||t==='balloon'||t==='baloneiro'||t==='pumpkin_baloon'||t.includes('baloneiro')||t.includes('balloon')||t.includes('baloon')||t.includes('bal[aã]o')) || !!(e.globalBalloon||e.gangsterBalloon);
+  }
   window.fdDrawSkyWorldLayer=function(){
     if(Number(window.currentMap)!==21||!ctx)return;
     seedSkyClouds();const state=window.fdSkyWeatherState||{type:'sun',wind:windDirs[0]};
@@ -35659,13 +35795,13 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
     for(const cl of window.fdSkyClouds){if(!isWorldVisible(cl.x,cl.y,cl.r*1.7))continue;drawCloud(ctx,cl.x,cl.y,cl.r*.72,state.type==='storm'?.62:state.type==='rain'?.72:.58,!!cl.wall);}
     // Shadows/cloud platforms under player and enemies, with the four requested exceptions.
     const selected=String(pd?.selectedChar||'').toLowerCase();
-    if(player&&!['eolio','stormy','echo','aresta'].includes(selected)){
-      ctx.save();ctx.globalAlpha=.74;ctx.fillStyle='rgba(255,255,255,.92)';ctx.shadowColor='rgba(41,105,148,.4)';ctx.shadowBlur=8;ctx.beginPath();ctx.ellipse(player.x,player.y+(player.r||14)*.72,Math.max(24,(player.r||14)*1.55),Math.max(8,(player.r||14)*.48),0,0,Math.PI*2);ctx.fill();ctx.restore();
+    if(player){
+      const pr=Math.max(12,Number(player.r)||14);drawFootCloud(ctx,player.x,player.y+pr*.62,Math.max(50,pr*3.2),Math.max(22,pr*1.65),.84);
     }
     for(const e of (Array.isArray(enemies)?enemies:[])){
       if(!e||e.hp<=0||enemyNoCloud(e))continue;
       if(!isWorldVisible(e.x,e.y,Number(e.size)||15))continue;
-      const r=clamp((Number(e.size)||14)*1.2,14,32);ctx.save();ctx.globalAlpha=.64;ctx.fillStyle='rgba(247,253,255,.95)';ctx.shadowColor='rgba(44,93,135,.28)';ctx.shadowBlur=5;ctx.beginPath();ctx.ellipse(e.x,e.y+(Number(e.size)||12)*.62,r*1.25,r*.42,0,0,Math.PI*2);ctx.fill();ctx.restore();
+      const r=clamp((Number(e.size)||14),12,30);drawFootCloud(ctx,e.x,e.y+r*.58,Math.max(42,r*3.0),Math.max(20,r*1.5),.78);
     }
     // Wind streaks move in the direction announced on the tablet.
     if(state.type==='wind'){
@@ -35845,9 +35981,9 @@ body.fd-meter-row #fd-sky-tablet .fd-tablet-dir{font-size:clamp(6px,1.6vw,8px)!i
 #fd-sky-atmosphere{overflow:hidden!important;}
 #fd-sky-atmosphere::before,#fd-sky-atmosphere::after{content:"";position:absolute;inset:-25%;pointer-events:none;display:none;}
 body.fd-sky-weather-rain #fd-sky-atmosphere::before,body.fd-sky-weather-storm #fd-sky-atmosphere::before{display:block;background-image:repeating-linear-gradient(105deg,transparent 0 17px,rgba(203,231,255,.48) 18px,rgba(203,231,255,.48) 19px,transparent 20px 31px);background-size:35px 52px;opacity:.56;animation:fdSkyRainFall .42s linear infinite;}
-body.fd-sky-weather-rain #fd-sky-atmosphere::after,body.fd-sky-weather-storm #fd-sky-atmosphere::after{display:block;background:radial-gradient(ellipse at 18% 14%,rgba(157,175,198,.20),transparent 34%),radial-gradient(ellipse at 70% 25%,rgba(120,139,166,.22),transparent 36%),radial-gradient(ellipse at 48% 72%,rgba(97,117,146,.13),transparent 40%);opacity:.9;}
+body.fd-sky-weather-rain #fd-sky-atmosphere::after,body.fd-sky-weather-storm #fd-sky-atmosphere::after{display:block;background-image:url('elements/cloud.png');background-repeat:repeat;background-size:clamp(100px,18vw,220px) auto;filter:grayscale(.55) brightness(.78);opacity:.22;}
 body.fd-sky-weather-storm #fd-sky-atmosphere::before{background-image:repeating-linear-gradient(105deg,transparent 0 10px,rgba(219,239,255,.7) 11px,rgba(219,239,255,.7) 13px,transparent 14px 22px),repeating-linear-gradient(102deg,transparent 0 26px,rgba(166,203,245,.38) 27px,rgba(166,203,245,.38) 28px,transparent 29px 43px);background-size:27px 38px,47px 62px;opacity:.76;animation:fdSkyRainFall .2s linear infinite;}
-body.fd-sky-weather-storm #fd-sky-atmosphere::after{background:radial-gradient(ellipse at 15% 12%,rgba(90,102,130,.34),transparent 38%),radial-gradient(ellipse at 78% 18%,rgba(74,87,115,.36),transparent 42%),radial-gradient(ellipse at 44% 65%,rgba(50,63,91,.30),transparent 46%);opacity:1;}
+body.fd-sky-weather-storm #fd-sky-atmosphere::after{background-image:url('elements/cloud.png');background-repeat:repeat;background-size:clamp(120px,21vw,260px) auto;filter:grayscale(1) brightness(.35);opacity:.48;}
 @keyframes fdSkyRainFall{from{background-position:0 0,0 0;}to{background-position:-28px 52px,-19px 62px;}}
 
 /* Em missões de evento e sobrevivência, o Sandbox não pode ser usado nem aparecer. */
@@ -36203,7 +36339,7 @@ body.fd-sandbox-button-hidden #btn-sandbox,body.fd-sandbox-button-hidden #btn-sa
   const originalUpdateEnemies=window.updateEnemies;
   if(typeof originalUpdateEnemies==='function'&&!originalUpdateEnemies.__fdHalloweenSkeletons){
     const updateEnemiesWrapped=function(dt){
-      if(isHalloweenMission()&&Array.isArray(enemies)){
+      if((isHalloweenMission()||(sandboxMode&&Array.isArray(enemies)&&enemies.some(e=>e?.sandbox&&e.halloweenSkeleton)))&&Array.isArray(enemies)){
         const delta=Math.max(0,Math.min(.12,Number(dt)||0));
         for(let i=enemies.length-1;i>=0;i--){
           const e=enemies[i];if(!e||!e.halloweenSkeleton)continue;
@@ -36580,8 +36716,10 @@ body.fd-sky-weather-storm #fd-sky-tablet{background:linear-gradient(145deg,#aeb7
   const sandboxNameWithHalloween = function(type, skin, mapId) {
     const key = String(skin || '').toLowerCase();
     if (halloweenSandboxNames[key]) {
-      const mapName = Number.isInteger(mapId) && typeof MAPS !== 'undefined' && MAPS[mapId] ? MAPS[mapId] : '';
-      return mapName ? `${halloweenSandboxNames[key]} • ${mapName}` : halloweenSandboxNames[key];
+      let base = typeof previousSandboxName === 'function' ? previousSandboxName.call(this, type, '', mapId) : String(type || 'Inimigo');
+      base = String(base || type || 'Inimigo').replace(/\s*[•-]\s*HALLOWEEN$/i,'').replace(/\s*[•-]\s*[^•-]+$/,'');
+      if (/^(vampire|skeleton|bones)$/i.test(String(type||''))) base = halloweenSandboxNames[key];
+      return `${base} - HALLOWEEN`;
     }
     return typeof previousSandboxName === 'function' ? previousSandboxName.apply(this, arguments) : String(type || skin || 'Inimigo');
   };
@@ -36638,6 +36776,521 @@ body.fd-sky-weather-storm #fd-sky-tablet{background:linear-gradient(145deg,#aeb7
     window.sandboxEnemyVariants = variantsWithHalloween;
     try { sandboxEnemyVariants = variantsWithHalloween; } catch (_) {}
   }
+})();
+</script>
+
+
+<script id="fd-inky-sky-fix">
+(function(){
+  'use strict';
+  // Sprite path supplied for Inky.
+  const inkyDef = CHARACTERS.inky;
+  if (inkyDef) inkyDef.sprite = 'sprites/inky.png';
+
+  // Emz-inspired lingering spray: a broad, directional cloud that ticks repeatedly.
+  const inkZones = [];
+  const oldFireWeapon = fireWeapon;
+  fireWeapon = function(target) {
+    if (!player || pd?.selectedChar !== 'inky') return oldFireWeapon.apply(this, arguments);
+    if (sandboxMode || runShootingDisabled || !target || isCurrentlyHypnotized(target) || player.cd > 0) return;
+    const angle = Math.atan2(target.y-player.y, target.x-player.x);
+    player.lastAimAngle = angle;
+    const dmg = Math.max(1, player.baseDmg * player.stats.dmgMult * (player.inTotem ? 1.2 : 1));
+    const len = Math.min(290, player.baseRange * player.stats.rangeMult * 1.05);
+    const width = 78;
+    const sx = player.x + Math.cos(angle) * (player.r + 8);
+    const sy = player.y + Math.sin(angle) * (player.r + 8);
+    inkZones.push({x:sx,y:sy,angle,len,width,life:1.35,maxLife:1.35,tick:0,hitAt:new Map(),dmg,color:'#8e44ad'});
+    if (inkZones.length > 12) inkZones.shift();
+    player.cd = Math.max(48, player.baseFireRate * player.stats.fireRateMult * 1.12);
+  };
+
+  const oldUpdateEnemies = updateEnemies;
+  updateEnemies = function(dt) {
+    const out = oldUpdateEnemies.apply(this, arguments);
+    if (!Array.isArray(enemies)) return out;
+    for (let zi=inkZones.length-1; zi>=0; zi--) {
+      const z=inkZones[zi];
+      z.life -= Math.max(0, Number(dt)||0);
+      z.tick -= Math.max(0, Number(dt)||0);
+      if (z.life<=0) { inkZones.splice(zi,1); continue; }
+      if (z.tick>0) continue;
+      z.tick=0.35;
+      const ux=Math.cos(z.angle), uy=Math.sin(z.angle);
+      for (const e of enemies) {
+        if (!e || e.hp<=0 || isCurrentlyHypnotized(e)) continue;
+        const dx=e.x-z.x, dy=e.y-z.y;
+        const along=dx*ux+dy*uy, across=Math.abs(-dx*uy+dy*ux);
+        if (along<0 || along>z.len || across>z.width+(e.size||10)) continue;
+        const last=z.hitAt.get(e) || 0;
+        if (performance.now()/1000-last < 0.33) continue;
+        z.hitAt.set(e,performance.now()/1000);
+        const dealt=Math.max(1,Math.round(z.dmg*getEnemyDamageTakenMultiplier(e)));
+        e.hp-=dealt; e.lastHitSourceChar='inky';
+        addFloatingText(e.x,e.y,`${dealt}`,'#c084fc');
+        trackMissionDamage(dealt);
+        createParticles(e.x,e.y,'#9b59b6');
+        if (Math.random()<0.10) {
+          e.poison=e.poison||{timer:0,dmg:0,tickCd:0};
+          e.poison.timer=Math.max(Number(e.poison.timer)||0,2.4);
+          e.poison.dmg=Math.max(Number(e.poison.dmg)||0,z.dmg*0.18);
+          e.poison.tickCd=0;
+          addFloatingText(e.x,e.y-14,'VENENO!','#2ecc71',11);
+        }
+      }
+    }
+    return out;
+  };
+
+  // Render the lingering ink in world coordinates, using the same camera transform as the map.
+  const oldDraw = draw;
+  draw = function() {
+    const out = oldDraw.apply(this, arguments);
+    if (!ctx || !inkZones.length || (!isPlaying && !sandboxMode)) return out;
+    ctx.save();
+    ctx.translate(-(Number(camera?.x) || 0), -(Number(camera?.y) || 0));
+    for (const z of inkZones) {
+      const fade = Math.max(0, Math.min(1, z.life / z.maxLife));
+      ctx.save();
+      ctx.translate(z.x, z.y);
+      ctx.rotate(z.angle);
+
+      // Wide, lingering cone inspired by Emz's spray. Multiple layers preserve contrast on any map.
+      const plume = ctx.createLinearGradient(0, 0, z.len, 0);
+      plume.addColorStop(0, 'rgba(192,132,252,0.66)');
+      plume.addColorStop(0.32, 'rgba(168,85,247,0.54)');
+      plume.addColorStop(1, 'rgba(126,34,206,0.35)');
+      ctx.globalAlpha = fade;
+      ctx.fillStyle = plume;
+      ctx.beginPath();
+      ctx.moveTo(0, -z.width * 0.30);
+      ctx.bezierCurveTo(z.len * 0.16, -z.width * 0.32, z.len * 0.24, -z.width * 0.66, z.len * 0.48, -z.width * 0.70);
+      ctx.quadraticCurveTo(z.len * 0.83, -z.width * 0.88, z.len, 0);
+      ctx.quadraticCurveTo(z.len * 0.85, z.width * 0.88, z.len * 0.53, z.width * 0.70);
+      ctx.bezierCurveTo(z.len * 0.28, z.width * 0.60, z.len * 0.16, z.width * 0.30, 0, z.width * 0.30);
+      ctx.closePath();
+      ctx.fill();
+
+      // A brighter edge and small droplets make the zone readable against busy backgrounds.
+      ctx.globalAlpha = 0.88 * fade;
+      ctx.strokeStyle = 'rgba(221,180,255,0.92)';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(0, -z.width * 0.30);
+      ctx.quadraticCurveTo(z.len * 0.22, -z.width * 0.52, z.len * 0.48, -z.width * 0.70);
+      ctx.quadraticCurveTo(z.len * 0.88, -z.width * 0.68, z.len, 0);
+      ctx.quadraticCurveTo(z.len * 0.86, z.width * 0.74, z.len * 0.53, z.width * 0.70);
+      ctx.quadraticCurveTo(z.len * 0.22, z.width * 0.50, 0, z.width * 0.30);
+      ctx.stroke();
+
+      ctx.globalAlpha = 0.82 * fade;
+      for (let i = 0; i < 12; i++) {
+        const t = 0.10 + i * 0.071;
+        const x = z.len * t;
+        const spread = z.width * (0.18 + t * 0.52);
+        const wobble = Math.sin((Number(gameTime) || 0) * 2.1 + i * 1.73) * spread * 0.45;
+        const y = ((i % 2) ? 1 : -1) * spread * 0.34 + wobble;
+        const r = 2.4 + (i % 4) * 1.15;
+        ctx.fillStyle = i % 3 === 0 ? 'rgba(245,220,255,0.95)' : 'rgba(214,165,255,0.90)';
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+    ctx.restore();
+    return out;
+  };
+
+  // Weather choice is handled by currentSkyWeather in the Sky-map closure.
+
+  // Grey overcast during rain; considerably darker skies during storms.
+  const style=document.createElement('style');
+  style.textContent=`
+    body.fd-sky-weather-rain #fd-sky-atmosphere{background:rgba(92,101,113,.48)!important}
+    body.fd-sky-weather-rain #gameCanvas{filter:brightness(.94) saturate(.72)}
+    body.fd-sky-weather-storm #fd-sky-atmosphere{background:rgba(5,8,18,.70)!important}
+    body.fd-sky-weather-storm #gameCanvas{filter:brightness(.72) saturate(.62)}
+    body.fd-sky-weather-rain #fd-sky-tablet{background:linear-gradient(145deg,#b0b5bc,#707983)!important}
+    body.fd-sky-weather-storm #fd-sky-tablet{background:linear-gradient(145deg,#727985,#353b48)!important;color:#fff!important}
+  `;
+  document.head.appendChild(style);
+})();
+</script>
+
+<script id="fd-cloud-fall-sandbox-fixes">
+(function(){
+  'use strict';
+  const safe=(fn)=>{try{return fn();}catch(err){console.warn('FD sky/Sandbox fix:',err);}};
+
+  function fdFriendlyCloudsActive(){
+    return Number(window.currentMap)===21 && (
+      (typeof sandboxMode!=='undefined' && sandboxMode && !!sandboxSettings?.friendlyClouds) ||
+      window.seasonalQuestRun?.id==='pelos_ares'
+    );
+  }
+  window.fdFriendlyCloudsActive=fdFriendlyCloudsActive;
+
+  function fdIsSkyCloudException(e){
+    if(!e)return false;
+    const values=[e.type,e.id,e.name,e.skinOverride,e.enemySkin,e.fracturedSkinType,e.resolvedFracturedSkinType,e._skinTypeForEnemy,e.skySpecialType].map(v=>String(v||'').toLowerCase());
+    const balloon=!!(e.globalBalloon||e.gangsterBalloon) || values.some(v=>['ballon','balloon','baloon','pumpkin_baloon','driver_baloon'].includes(v) || /baloneiro|balloon|baloon/.test(v));
+    const plane=values.some(v=>v==='fighter_plane'||v==='plane'||v==='radioactive_plane');
+    const skySkin=['sky_basic','aero_hat','iron_aero_hat','motor_head','plane_truck','sky_shooter','sky_velocist','sky_giant','sky_boss','sky_tank','wingsuit_kamiaze','sky_healer','sky_elite_shooter','sky_leader','helicopter','jet','enemy_drone'];
+    const skyEnemy=values.some(v=>skySkin.includes(v));
+    const permanentCloud=['megaboss','mega_boss','colosso','elite_master','master_elite_shooter','lider_elite','elite_leader'];
+    const cloudPlatformAlways=values.some(v=>permanentCloud.includes(v));
+    return balloon||plane||skyEnemy||cloudPlatformAlways;
+  }
+  window.fdIsSkyCloudException=fdIsSkyCloudException;
+
+  // Sandbox map-gated modifier is also checked here, not only in the UI.
+  const oldSandboxSelectMap=window.sandboxSelectMap||sandboxSelectMap;
+  if(typeof oldSandboxSelectMap==='function'){
+    const mapSelect=function(id){const result=oldSandboxSelectMap.apply(this,arguments);if(Number(id)!==21&&typeof sandboxSettings!=='undefined')sandboxSettings.friendlyClouds=false;safe(()=>window.updateSandboxControlsUI?.());return result;};
+    window.sandboxSelectMap=mapSelect;try{sandboxSelectMap=mapSelect;}catch(_){}
+  }
+
+  // Ensure each Sandbox enemy is initialized correctly (and frozen before its first simulation tick).
+  const oldSandboxSpawn=window.sandboxSpawnEnemy||sandboxSpawnEnemy;
+  if(typeof oldSandboxSpawn==='function'){
+    const sandboxSpawnFixed=function(){
+      const before=new Set(Array.isArray(enemies)?enemies:[]);
+      const result=oldSandboxSpawn.apply(this,arguments);
+      if(Array.isArray(enemies))for(const e of enemies){
+        if(!e||before.has(e))continue;
+        e.sandbox=true;e.fdSandboxSpawned=true;
+        if(window.fdFreezeEnabled&&sandboxMode){e.freezeTimer=Infinity;e.sandboxFrozen=true;e.frozenBySandbox=true;}
+        safe(()=>window.fdApplySandboxFlags?.(e));
+      }
+      return result;
+    };
+    window.sandboxSpawnEnemy=sandboxSpawnFixed;try{sandboxSpawnEnemy=sandboxSpawnFixed;}catch(_){}
+  }
+
+  // Vampire, skeleton and bone pile have explicit Sandbox stats/sprites; none can spawn with 0 HP.
+  const oldSpawnEnemy=window.spawnEnemy||spawnEnemy;
+  if(typeof oldSpawnEnemy==='function'&&!oldSpawnEnemy.__fdSandboxHalloweenStats){
+    const spawnWithHalloweenStats=function(forcedType=null,forcedPoint=null,spriteOverride=null){
+      const result=oldSpawnEnemy.apply(this,arguments);
+      if(!result||typeof result!=='object')return result;
+      const t=String(result.type||forcedType||'').toLowerCase();
+      const mult=Math.max(.5,Number(safe(()=>getEnemyDifficultyMultiplierFromEntry(t==='skeleton'?'motorcycle_helmet':'basico',Math.max(1,Number(result.entryWave)||Number(wave)||1),Math.max(1,Number(wave)||1))))||1);
+      if(t==='vampire'){
+        result.hp=result.maxHp=Math.max(35,48*mult);result.speed=2.35;result.baseDmg=result.dmg=Math.max(5,8*mult);
+        result.size=12;result.spriteSize=12;result.poisonOnHit=4.5;result.halloweenVampire=true;result.breakIntoBasic=false;result.stationary=false;
+        result.skinOverride='vampire';
+      }else if(t==='skeleton'){
+        result.hp=result.maxHp=Math.max(55,85*mult);result.speed=1.05;result.baseDmg=result.dmg=Math.max(5,8*mult);
+        result.size=12;result.spriteSize=12;result.isGlobalArmored=true;result.breakIntoBasic=false;result.halloweenSkeleton=true;
+        result.halloweenSkeletonHp=result.maxHp;result.halloweenSkeletonCorpse=false;result.halloweenSkeletonDestroyed=false;result.stationary=false;result.skinOverride='skeleton';
+      }else if(t==='bones'){
+        result.hp=result.maxHp=Math.max(12,Number(result.hp)||16);result.speed=0;result.baseDmg=result.dmg=0;result.size=12;result.spriteSize=12;
+        result.stationary=true;result.halloweenSkeleton=true;result.halloweenSkeletonCorpse=true;result.halloweenSkeletonTimer=Math.max(0,Number(result.halloweenSkeletonTimer)||7);
+        result.halloweenSkeletonHp=Math.max(55,85*mult);result.halloweenSkeletonDestroyed=false;result.skinOverride='bones';
+      }
+      if(spriteOverride&&['vampire','skeleton','bones'].includes(t))result.skinOverride=t;
+      if(typeof sandboxMode!=='undefined'&&sandboxMode){result.sandbox=true;result.fdSandboxSpawned=true;if(window.fdFreezeEnabled){result.freezeTimer=Infinity;result.sandboxFrozen=true;result.frozenBySandbox=true;}safe(()=>window.fdApplySandboxFlags?.(result));}
+      return result;
+    };
+    spawnWithHalloweenStats.__fdSandboxHalloweenStats=true;window.spawnEnemy=spawnWithHalloweenStats;try{spawnEnemy=spawnWithHalloweenStats;}catch(_){}
+  }
+
+  // Falling deaths are removed directly from the enemy array, never entering the normal XP-drop path.
+  function fdShouldFallInSky(e){return Number(window.currentMap)===21&&!fdFriendlyCloudsActive()&&!fdIsSkyCloudException(e);}
+  const oldUpdateEnemies=window.updateEnemies||updateEnemies;
+  if(typeof oldUpdateEnemies==='function'&&!oldUpdateEnemies.__fdSkyFallNoXp){
+    const updateEnemiesWithSkyFall=function(dt){
+      const delta=Math.max(0,Math.min(.12,Number(dt)||0));
+      const activeMap=Number(window.currentMap)===21;
+      const prePositions=new Map();
+      if(Array.isArray(enemies))for(const e of enemies){
+        if(!e)continue;
+        if(fdShouldFallInSky(e)){
+          if(!e.fdSkyFalling){e.fdSkyFalling=true;e.fdSkyFallTotal=1.65;e.fdSkyFallRemaining=1.65;e.fdSkyFallAngle=(Math.random()-.5)*.22;e.fdSkyFallScale=1;e.fdSkyFallOriginalSpeed=Number(e.speed)||0;e.fdSkyFallOriginalStationary=!!e.stationary;}
+          e.fdSkyFallRemaining=Math.max(0,(Number(e.fdSkyFallRemaining)||0)-delta);
+          e.fdSkyFallScale=Math.max(.015,Math.min(1,(Number(e.fdSkyFallRemaining)||0)/(Number(e.fdSkyFallTotal)||1)));
+          e.fdSkyFallAngle=(Number(e.fdSkyFallAngle)||0)+delta*4.8;
+          e.speed=0;e.stationary=true;
+          prePositions.set(e,{x:Number(e.x)||0,y:Number(e.y)||0});
+        }else if(e.fdSkyFalling){
+          e.fdSkyFalling=false;e.fdSkyFallScale=1;
+          if(Number.isFinite(e.fdSkyFallOriginalSpeed))e.speed=e.fdSkyFallOriginalSpeed;
+          e.stationary=!!e.fdSkyFallOriginalStationary;
+          delete e.fdSkyFallRemaining;delete e.fdSkyFallTotal;delete e.fdSkyFallAngle;
+        }
+      }
+      const preXp=new Set(Array.isArray(xpGems)?xpGems:[]);
+      const out=oldUpdateEnemies.apply(this,arguments);
+      if(Array.isArray(enemies)){
+        for(const [e,pos] of prePositions){
+          if(!e||!e.fdSkyFalling)continue;
+          const stillPresent=enemies.includes(e);
+          // If a hit killed a falling enemy during this tick, remove only XP gems created at its fall location.
+          if(e.hp<=0||!stillPresent){
+            for(let i=(Array.isArray(xpGems)?xpGems.length:0)-1;i>=0;i--){const gem=xpGems[i];if(gem&&!preXp.has(gem)&&Math.hypot((Number(gem.x)||0)-pos.x,(Number(gem.y)||0)-pos.y)<Math.max(40,(Number(e.size)||12)*3))xpGems.splice(i,1);}
+            const idx=enemies.indexOf(e);if(idx>=0)enemies.splice(idx,1);
+            continue;
+          }
+          if((Number(e.fdSkyFallRemaining)||0)<=0){
+            const idx=enemies.indexOf(e);if(idx>=0)enemies.splice(idx,1);
+            safe(()=>createParticles(pos.x,pos.y,'#eaf6ff'));
+          }
+        }
+      }
+      return out;
+    };
+    updateEnemiesWithSkyFall.__fdSkyFallNoXp=true;window.updateEnemies=updateEnemiesWithSkyFall;try{updateEnemies=updateEnemiesWithSkyFall;}catch(_){}
+  }
+
+  // Player and ordinary enemies receive sprite clouds only on the Sky map; exceptions are shared with falling logic.
+  // UI restoration after starting a run directly from the Sandbox.
+  const oldUpdateSandboxButton=window.updateSandboxButtonUI||updateSandboxButtonUI;
+  if(typeof oldUpdateSandboxButton==='function'){
+    const updateSandboxButtonFixed=function(){
+      const result=oldUpdateSandboxButton.apply(this,arguments);
+      const btn=document.getElementById('btn-sandbox');
+      const restricted=!!window.characterTestMode||!!window.seasonalQuestRun||!!window.dailyMissionRun||!!window.survivalModeRun||!!window.seasonalQuestLaunch||!!window.dailyMissionLaunch||!!window.survivalLaunch||!!window.eventMissionRun;
+      if(btn&&!restricted&&isPlaying&&pd?.settings?.sandboxEnabled===true)btn.classList.remove('hidden');
+      if(btn&&restricted)btn.classList.add('hidden');
+      return result;
+    };
+    window.updateSandboxButtonUI=updateSandboxButtonFixed;try{updateSandboxButtonUI=updateSandboxButtonFixed;}catch(_){}
+  }
+  const oldStartRun=window.startRunAfterShop||startRunAfterShop;
+  if(typeof oldStartRun==='function'){
+    const startRunWithSandboxUI=function(){const out=oldStartRun.apply(this,arguments);safe(()=>window.updateSandboxButtonUI?.());return out;};
+    window.startRunAfterShop=startRunWithSandboxUI;try{startRunAfterShop=startRunWithSandboxUI;}catch(_){}
+  }
+
+  // Guarantee sprite-based clouds load even when the roster/preview first opens before the Sky map.
+  safe(()=>{if(typeof Image!=='undefined'){const im=new Image();im.src='elements/cloud.png';window.fdSkyCloudSprite=im;}});
+})();
+</script>
+
+<script id="fd-sky-real-map-v101">
+(function(){
+  'use strict';
+  const safe=(fn)=>{try{return fn();}catch(err){console.warn('FD v1.0.2:',err);return undefined;}};
+  const SKY_SKINS={
+    basico:'sky_basic', basic:'sky_basic', acucarado:'sky_basic',
+    cardboard_head:'aero_hat', cardboard:'aero_hat', motorcycle_helmet:'iron_aero_hat', helmet:'iron_aero_hat', prism_head:'motor_head', prism:'motor_head',
+    truck:'plane_truck', atirador:'sky_shooter', shooter:'sky_shooter', velocista:'sky_velocist', velocist:'sky_velocist', dancer:'sky_velocist',
+    gigante:'sky_giant', giant:'sky_giant', boss:'sky_boss', tanque:'sky_tank', tank:'sky_tank',
+    kamikaze:'wingsuit_kamiaze', curandeiro:'sky_healer', healer:'sky_healer', elite:'sky_elite_shooter', elite_shooter:'sky_elite_shooter',
+    lider:'sky_leader', leader:'sky_leader'
+  };
+  const SKY_SPECIAL_SKINS=new Set(['helicopter','jet','enemy_drone']);
+  const ALL_SKY_SKINS=new Set(Object.values(SKY_SKINS).concat([...SKY_SPECIAL_SKINS]));
+  safe(()=>Object.assign(ENEMY_SPRITES,{
+    sky_basic:'enemies/sky_basic.png', aero_hat:'enemies/aero_hat.png', iron_aero_hat:'enemies/iron_aero_hat.png',
+    motor_head:'enemies/motor_head.png', plane_truck:'enemies/plane_truck.png', sky_shooter:'enemies/sky_shooter.png',
+    sky_velocist:'enemies/sky_velocist.png', sky_giant:'enemies/sky_giant.png', sky_boss:'enemies/sky_boss.png',
+    sky_tank:'enemies/sky_tank.png', wingsuit_kamiaze:'enemies/wingsuit_kamiaze.png', sky_healer:'enemies/sky_healer.png',
+    sky_elite_shooter:'enemies/sky_elite_shooter.png', sky_leader:'enemies/sky_leader.png',
+    helicopter:'enemies/helicopter.png', jet:'enemies/jet.png', enemy_drone:'enemies/enemy_drone.png'
+  }));
+
+  // Also resolves entities created directly (including bosses), not only those created by spawnEnemy().
+  const oldEffectiveSky=window.getEffectiveEnemySpriteType||(typeof getEffectiveEnemySpriteType==='function'?getEffectiveEnemySpriteType:null);
+  if(typeof oldEffectiveSky==='function'){
+    const effectiveWithSky=function(e){
+      const type=String(e?.type||'').toLowerCase();
+      const explicit=String(e?.skinOverride||'').toLowerCase();
+      if(explicit&&getEnemySpritePath(explicit))return explicit;
+      const sourceMap=Number.isInteger(e?.fractureMapId)?e.fractureMapId:(Number.isInteger(e?.skinSourceMapId)?e.skinSourceMapId:null);
+      const fractured=String(e?.fracturedSkinType||e?.resolvedFracturedSkinType||'').toLowerCase();
+      if(fractured&&ALL_SKY_SKINS.has(fractured)&&getEnemySpritePath(fractured))return fractured;
+      if(sourceMap===21&&SKY_SKINS[type]&&getEnemySpritePath(SKY_SKINS[type]))return SKY_SKINS[type];
+      if(fractured&&getEnemySpritePath(fractured))return fractured;
+      if(Number(window.currentMap)===21&&SKY_SKINS[type]&&getEnemySpritePath(SKY_SKINS[type]))return SKY_SKINS[type];
+      return oldEffectiveSky.apply(this,arguments);
+    };
+    window.getEffectiveEnemySpriteType=effectiveWithSky;try{getEffectiveEnemySpriteType=effectiveWithSky;}catch(_){}
+  }
+
+  // Céu participates in the hourly world selection rotation.
+  function destinationChoicesWithSky(){
+    const bucket=getMapChoiceBucket();
+    const eligible=MAPS.map((_,index)=>index).filter(index=>index<12||[13,14,15,19,21].includes(index));
+    return shuffleWithSeed(eligible,`destinations:${bucket}`).slice(0,3);
+  }
+  window.getDestinationChoices=destinationChoicesWithSky;
+  try{getDestinationChoices=destinationChoicesWithSky;}catch(_){}
+
+  // Add the real Sky map to Survival's existing rotation; keep the rest of the pool unchanged.
+  safe(()=>{if(Array.isArray(SURVIVAL_REAL_MAP_POOL)&&!SURVIVAL_REAL_MAP_POOL.includes(21))SURVIVAL_REAL_MAP_POOL.push(21);});
+
+  const SKY_FRACTURE_POOL=[
+    'basico','cardboard_head','motorcycle_helmet','prism_head','truck','atirador','velocista','gigante','boss',
+    'tanque','kamikaze','curandeiro','elite','lider','ballon','colosso','elite_master','lider_elite'
+  ];
+  const oldFracturePool=window.getFractureBiomePool||getFractureBiomePool;
+  if(typeof oldFracturePool==='function'){
+    const fracturePoolWithSky=function(mapId){
+      if(Number(mapId)===21)return SKY_FRACTURE_POOL.slice();
+      return oldFracturePool.apply(this,arguments);
+    };
+    window.getFractureBiomePool=fracturePoolWithSky;try{getFractureBiomePool=fracturePoolWithSky;}catch(_){}
+  }
+
+  // Sandbox and Survival can draw the same Sky variants as normal gameplay.
+  const oldVariants=window.fdFinalSandboxEnemyVariants||window.sandboxEnemyVariants;
+  const SKY_VARIANTS={
+    basico:['sky_basic'], cardboard_head:['aero_hat'], motorcycle_helmet:['iron_aero_hat'], prism_head:['motor_head'],
+    truck:['plane_truck','helicopter','jet'], atirador:['sky_shooter','enemy_drone'], velocista:['sky_velocist'],
+    gigante:['sky_giant'], boss:['sky_boss'], tanque:['sky_tank'], kamikaze:['wingsuit_kamiaze'],
+    curandeiro:['sky_healer'], elite:['sky_elite_shooter'], lider:['sky_leader']
+  };
+  if(typeof oldVariants==='function'){
+    const variantsWithSky=function(type){
+      const out=oldVariants.apply(this,arguments);const list=Array.isArray(out)?out.slice():[];
+      const t=String(type||'').toLowerCase();const seen=new Set(list.map(v=>`${String(v?.skin||'')}|${Number.isInteger(v?.mapId)?v.mapId:'base'}`));
+      for(const skin of (SKY_VARIANTS[t]||[])){
+        if(!getEnemySpritePath(skin))continue;
+        const key=`${skin}|21`;if(seen.has(key))continue;seen.add(key);list.push({skin,mapId:21});
+      }
+      return list;
+    };
+    window.fdFinalSandboxEnemyVariants=variantsWithSky;window.sandboxEnemyVariants=variantsWithSky;
+    try{fdFinalSandboxEnemyVariants=variantsWithSky;sandboxEnemyVariants=variantsWithSky;}catch(_){}
+  }
+
+  // The map's sky-only skins and special aircraft/drone don't need friendly clouds to stay aloft.
+  const oldFallException=window.fdIsSkyCloudException;
+  window.fdIsSkyCloudException=function(e){
+    if(!e)return false;
+    const vals=[e.type,e.id,e.name,e.skinOverride,e.enemySkin,e.fracturedSkinType,e.resolvedFracturedSkinType,e._skinTypeForEnemy,e.skySpecialType].map(v=>String(v||'').toLowerCase());
+    const balloon=!!(e.globalBalloon||e.gangsterBalloon)||vals.some(v=>['ballon','balloon','baloon','pumpkin_baloon','driver_baloon'].includes(v)||/baloneiro|balloon|baloon/.test(v));
+    const plane=vals.some(v=>['fighter_plane','plane','radioactive_plane'].includes(v));
+    const platformTypes=new Set(['megaboss','mega_boss','colosso','elite_master','master_elite_shooter','lider_elite','elite_leader']);
+    return balloon||plane||vals.some(v=>ALL_SKY_SKINS.has(v))||vals.some(v=>platformTypes.has(v))||!!safe(()=>oldFallException?.call(this,e));
+  };
+  const oldFriendlyClouds=window.fdFriendlyCloudsActive;
+  window.fdFriendlyCloudsActive=function(){
+    if(Number(window.currentMap)===21&&(!!window.survivalModeRun||!!window.survivalLaunch))return true;
+    return !!safe(()=>oldFriendlyClouds?.apply(this,arguments));
+  };
+
+  // Give every enemy from the Sky its requested skin, and initialize the three special enemies.
+  const oldSpawn=window.spawnEnemy||spawnEnemy;
+  if(typeof oldSpawn==='function'&&!oldSpawn.__fdSkyRealMapV101){
+    const spawnWithSky=function(forcedType=null,forcedPoint=null,spriteOverride=null){
+      const result=oldSpawn.apply(this,arguments);
+      if(!result||typeof result!=='object')return result;
+      const type=String(result.type||forcedType||'').toLowerCase();
+      const mapId=Number(window.currentMap);
+      let skin=String(result.skinOverride||result.fracturedSkinType||result.resolvedFracturedSkinType||spriteOverride||'').toLowerCase();
+      const survivalOnSky=mapId===21&&!!window.survivalModeRun;
+      if(mapId===21&&SKY_SKINS[type]){
+        const canonical=String(safe(()=>canonicalSprite(type))||'').toLowerCase();
+        const hasMappedSkin=ALL_SKY_SKINS.has(skin);
+        const shouldReplaceCanonical=!!skin&&skin===canonical;
+        if(!skin||shouldReplaceCanonical||(!hasMappedSkin&&survivalOnSky&&[type,canonical].includes(skin))){
+          skin=SKY_SKINS[type];
+          if(type==='truck'&&Number(wave)>=12){
+            const roll=Math.random();
+            if(Number(wave)>=20&&roll<.22)skin='jet';
+            else if(roll<.48)skin='helicopter';
+          }else if(type==='atirador'&&Number(wave)>=10&&Math.random()<.28){skin='enemy_drone';}
+        }
+        if(skin&&getEnemySpritePath(skin))result.skinOverride=skin;
+        if(ALL_SKY_SKINS.has(skin)){
+          result.skinSourceMapId=21;result.dropOriginMapId=21;result.spawnBiome=21;
+        }
+      }
+      // Special variants retain their mechanics even when they appear from a Sky fracture.
+      skin=String(result.skinOverride||result.fracturedSkinType||result.resolvedFracturedSkinType||skin||'').toLowerCase();
+      const activeWave=Math.max(1,Number(wave)||1);
+      if(skin==='helicopter'&&activeWave<12){skin=mapId===21?'plane_truck':'truck';result.skinOverride=skin;}
+      if(skin==='jet'&&activeWave<20){skin=mapId===21?'plane_truck':'truck';result.skinOverride=skin;}
+      if(skin==='enemy_drone'&&activeWave<10){skin=mapId===21?'sky_shooter':'shooter';result.skinOverride=skin;}
+      if(type==='truck'&&(skin==='helicopter'||skin==='jet')){
+        result.skySpecialType=skin;
+        result.machineGunCd=Number.isFinite(Number(result.machineGunCd))?Number(result.machineGunCd):0;
+        result.machineGunBurstCount=Number(result.machineGunBurstCount)||0;
+        result.machineGunShotTimer=Number(result.machineGunShotTimer)||0;
+        result.machineGunAngle=Number(result.machineGunAngle)||0;
+      }else if(type==='atirador'&&skin==='enemy_drone'){
+        result.skySpecialType='drone';
+        if(!result.fdSkyDroneStatsApplied){
+          const originalMax=Math.max(1,Number(result.maxHp)||Number(result.hp)||20);
+          result.maxHp=Math.max(1,originalMax*.55);result.hp=Math.min(result.maxHp,Math.max(1,Number(result.hp)||result.maxHp));
+          result.cd=Math.min(Number(result.cd)||0,22);result.fdSkyDroneStatsApplied=true;
+        }
+      }
+      return result;
+    };
+    spawnWithSky.__fdSkyRealMapV101=true;window.spawnEnemy=spawnWithSky;try{spawnEnemy=spawnWithSky;}catch(_){}
+  }
+
+  // The fracture spawned from Sky uses the real Sky roster and normal spawn mechanics.
+  const oldSpawnFracture=window.spawnFractureEnemy||spawnFractureEnemy;
+  if(typeof oldSpawnFracture==='function'&&!oldSpawnFracture.__fdSkyFractureV101){
+    const spawnSkyFracture=function(fracture,options={}){
+      if(!fracture||Number(fracture.mapId)!==21)return oldSpawnFracture.apply(this,arguments);
+      if(Number(wave)%10===0||(Array.isArray(enemies)&&enemies.some(e=>e&&e.isBoss)))return false;
+      const eligible=SKY_FRACTURE_POOL.filter(type=>getEnemyEntryWave(type,wave)<=Number(wave));
+      if(!eligible.length)return false;
+      const type=eligible[Math.floor(Math.random()*eligible.length)];
+      const distance=25+Math.random()*70;const side=Number(fracture.angle||0)+(Math.random()-.5)*.9+Math.PI;
+      const x=Math.max(-1480,Math.min(1480,Number(fracture.x||0)+Math.cos(side)*distance));
+      const y=Math.max(-1480,Math.min(1480,Number(fracture.y||0)+Math.sin(side)*distance));
+      const oldMap=window.currentMap;const oldBypass=!!window.__fdBypassSurvivalRoster;let spawned=null;
+      try{window.__fdBypassSurvivalRoster=true;window.currentMap=21;spawned=window.spawnEnemy(type,{x,y},null);}
+      finally{window.currentMap=oldMap;window.__fdBypassSurvivalRoster=oldBypass;}
+      if(!spawned)return false;
+      spawned.fracturedOrigin=true;spawned.fractureMapId=21;spawned.skinSourceMapId=21;spawned.spawnBiome=21;spawned.dropOriginMapId=21;
+      if(ALL_SKY_SKINS.has(String(spawned.skinOverride||'')))spawned.fracturedSkinType=spawned.skinOverride;
+      else spawned.fracturedSkinType=safe(()=>getFracturedEnemySkinType(spawned))||spawned.fracturedSkinType||null;
+      return true;
+    };
+    spawnSkyFracture.__fdSkyFractureV101=true;window.spawnFractureEnemy=spawnSkyFracture;try{spawnFractureEnemy=spawnSkyFracture;}catch(_){}
+  }
+
+  // Helicopter releases three cardboard heads after its truck-style death explosion; drone fires faster.
+  const oldUpdate=window.updateEnemies||updateEnemies;
+  if(typeof oldUpdate==='function'&&!oldUpdate.__fdSkySpecialUpdateV101){
+    const updateSkySpecials=function(dt){
+      const before=Array.isArray(enemies)?enemies.filter(e=>e&&e.skySpecialType==='helicopter').map(e=>({e,wasPending:!!e.truckDeathPending})):[];
+      if(Array.isArray(enemies))for(const e of enemies){
+        if(!e||e.hp<=0)continue;
+        if(e.skySpecialType==='drone'){
+          const cd=Number(e.cd);
+          if(!Number.isFinite(cd)||cd>22)e.cd=22;
+        }
+      }
+      const out=oldUpdate.apply(this,arguments);
+      if(Array.isArray(enemies))for(const info of before){
+        const e=info.e;
+        if(!e||enemies.includes(e)||e.fdSkyHeadsReleased)continue;
+        // A helicopter is removed only after the existing truck explosion resolves.
+        if(!info.wasPending&&!e.truckDeathPending)continue;
+        e.fdSkyHeadsReleased=true;
+        const oldBypass=!!window.__fdBypassSurvivalRoster;
+        try{
+          window.__fdBypassSurvivalRoster=true;
+          for(let i=0;i<3;i++){
+            const a=(Math.PI*2*i/3)+(Math.random()-.5)*.35;
+            const child=window.spawnEnemy('cardboard_head',{x:Number(e.x||0)+Math.cos(a)*(26+Math.random()*12),y:Number(e.y||0)+Math.sin(a)*(26+Math.random()*12)},'aero_hat');
+            if(child){child.skinOverride='aero_hat';child.fracturedOrigin=!!e.fracturedOrigin;child.fractureMapId=Number.isInteger(e.fractureMapId)?e.fractureMapId:(e.spawnBiome===21?21:null);child.skinSourceMapId=Number.isInteger(child.fractureMapId)?child.fractureMapId:21;child.dropOriginMapId=child.skinSourceMapId;child.spawnBiome=child.skinSourceMapId;}
+          }
+        }finally{window.__fdBypassSurvivalRoster=oldBypass;}
+      }
+      if(Array.isArray(enemies))for(const e of enemies){if(e&&e.skySpecialType==='drone'){const cd=Number(e.cd);if(!Number.isFinite(cd)||cd>22)e.cd=22;}}
+      return out;
+    };
+    updateSkySpecials.__fdSkySpecialUpdateV101=true;window.updateEnemies=updateSkySpecials;try{updateEnemies=updateSkySpecials;}catch(_){}
+  }
+
+  // Credits are a restartable, cinematic upward roll with a persistent close button.
+  window.openGameCredits=function(){
+    const overlay=document.getElementById('overlay-game-credits');const roll=document.getElementById('game-credits-roll');if(!overlay||!roll)return;
+    overlay.classList.remove('hidden');roll.style.animation='none';void roll.offsetHeight;roll.style.animation='fdCreditsRoll 66s linear forwards';
+  };
+  window.closeGameCredits=function(){
+    const overlay=document.getElementById('overlay-game-credits');const roll=document.getElementById('game-credits-roll');if(overlay)overlay.classList.add('hidden');if(roll)roll.style.animation='none';
+  };
 })();
 </script>
 
