@@ -2063,39 +2063,6 @@ body.fd-entry-cinematic #game-hud{display:block!important;visibility:visible!imp
                         </div>
                     </div>
                 </div>
-                <div class="settings-card settings-card--wide">
-                    <div class="zoom-control audio-control">
-                        <div class="zoom-row">
-                            <span style="color:var(--btn-yellow); font-size:18px;">Toca-disco</span>
-                            <span style="color:#aaa; font-size:12px;">Trilhas por temporada</span>
-                        </div>
-                        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-top:10px;">
-                            <label style="display:flex; flex-direction:column; gap:7px; color:#fff; font-weight:900; font-size:13px;">
-                                Música do Menu
-                                <select id="music-menu-select" onchange="setMenuMusic(this.value)">
-                                    <option value="legacy_awaits">Legacy Awaits</option>
-                                    <option value="street_awaits">Street Awaits</option>
-                                    <option value="france_awaits">France Awaits</option>
-                                    <option value="battle_awaits">Battle Awaits</option>
-                                    <option value="sea_awaits">Sea Awaits</option>
-                                </select>
-                            </label>
-                            <label style="display:flex; flex-direction:column; gap:7px; color:#fff; font-weight:900; font-size:13px;">
-                                Partidas casuais
-                                <select id="music-casual-select" onchange="setCasualMusic(this.value)">
-                                    <option value="roguish_journey">Roguish Journey</option>
-                                    <option value="bad_journey">Bad Journey</option>
-                                    <option value="parisian_journey">Parisian Journey</option>
-                                    <option value="gladiator_journey">Gladiator Journey</option>
-                                    <option value="marine_journey">Marine Journey</option>
-                                </select>
-                            </label>
-                        </div>
-                        <div style="margin-top:9px; font-size:12px; color:#aaa; line-height:1.35;">
-                            A seleção fica salva na conta. O Ultra Hardcore continua usando sua trilha própria.
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -2149,8 +2116,8 @@ body.fd-entry-cinematic #game-hud{display:block!important;visibility:visible!imp
     <button class="credits-close" type="button" onclick="closeGameCredits()" aria-label="Fechar créditos">×</button>
     <div class="credits-mask">
         <div id="game-credits-roll" class="credits-roll">
-            <h1>FRACTURED DOOMSDAY</h1>
-            <p class="credits-kicker">Créditos • v1.0.1</p>
+            <img class="credits-title-sprite" src="elements/title.png" alt="Fractured Doomsday" draggable="false">
+            <p class="credits-kicker">Créditos</p>
             <div class="credits-section">
                 <h2>Liderança e desenvolvimento</h2>
                 <p class="credits-role">ADM e Dev geral</p><p class="credits-name">Migton TV</p>
@@ -2472,7 +2439,7 @@ body.fd-entry-cinematic #game-hud{display:block!important;visibility:visible!imp
       <div id="daily-pending-list" class="daily-pending-list"></div>
     </div>
     <div id="event-section-store" class="shop-section shop-panel hidden"><h3>Loja sazonal</h3><div class="shop-section" style="margin-top:0;"><h3>Personagens em promoção</h3><div id="event-promo-list" class="menu-grid shop-grid"></div></div></div>
-    <div id="event-section-launches" class="shop-section shop-panel hidden"><div class="daily-event-head"><div><div class="daily-kicker">LANÇAMENTOS</div><h3>Novos personagens</h3><p class="daily-event-sub">Missões de desbloqueio para os personagens recém-lançados.</p></div><div class="daily-refresh-box"><span>Lançamentos</span><strong>1</strong></div></div><div id="launch-quest-list" class="daily-mission-list"></div></div>
+    <div id="event-section-launches" class="shop-section shop-panel hidden"><div class="daily-event-head"><div><div class="daily-kicker">LANÇAMENTOS</div><h3>Novos personagens</h3><p class="daily-event-sub">Missões de desbloqueio para os personagens recém-lançados.</p></div><div class="daily-refresh-box"><span>Lançamentos</span><strong>2</strong></div></div><div id="launch-quest-list" class="daily-mission-list"></div></div>
     <div id="event-section-seasonal" class="shop-section shop-panel hidden"><div class="daily-event-head"><div><div class="daily-kicker">EVENTO SAZONAL</div><h3>Missões Sazonais</h3><p class="daily-event-sub">Missões especiais da temporada. Cada fase exige 25 waves na dificuldade Clássico.</p></div><div class="daily-refresh-box"><span>Missões</span><strong>4</strong></div></div><div id="seasonal-quest-list" class="daily-mission-list"></div></div>
 </div>
 
@@ -3244,7 +3211,7 @@ Uma pequena híbrida de lula e humana, reconhecível por seu capuz roxo e pelos 
 “P-por favor... fique longe de mim!”` },
 };
 const CHARACTER_SUMMARIES = {
-    inky: `Inky: dispara uma rajada de tinta vertical e duradoura; quanto mais os inimigos ficam na tinta, mais dano vão tomar. ESPECIAL: cada hit tem 10% de chance de ENVENENAR o inimigo.`,
+    inky: `Inky: dispara um spray de tinta que avança em cone e desaparece conforme passa; a parte de trás deixa de existir e não continua causando dano. ESPECIAL: cada hit tem 10% de chance de ENVENENAR o inimigo.`,
 
     merlin: `Merlin: dispara uma magia teleguiada que tem 15% de chance de ENVENENAR e 15% de chance de BEBETIZAR. Quando esse efeito é aplicado, o inimigo fica BEBETIZADO.
 
@@ -4070,38 +4037,12 @@ function renderGachaRevealHtml(rawText) {
 
 const DEFAULT_KEYBINDS = { up: 'w', down: 's', left: 'a', right: 'd', special: 'p', pause: 'escape' };
 const DEFAULT_INITIAL_ZOOM = (('ontouchstart' in window) || navigator.maxTouchPoints > 0) ? 0.60 : 1.00;
-const DEFAULT_SETTINGS = { skipGacha: false, controlMode: 'auto', joystickSize: 120, sandboxEnabled: false, ultraHardcore: false, uhcDark: false, noParticles: false, showCombatText: true, showHpBar: false, showHitboxes: false, entryAnimation: true, screenZoom: DEFAULT_INITIAL_ZOOM, musicVolume: 0.7, mapChoice: -1, mapChoiceBucket: -1, menuMusic: 'legacy_awaits', casualMusic: 'roguish_journey', keybinds: { ...DEFAULT_KEYBINDS } };
+const DEFAULT_SETTINGS = { skipGacha: false, controlMode: 'auto', joystickSize: 120, sandboxEnabled: false, ultraHardcore: false, uhcDark: false, noParticles: false, showCombatText: true, showHpBar: false, showHitboxes: false, entryAnimation: true, screenZoom: DEFAULT_INITIAL_ZOOM, musicVolume: 0.7, mapChoice: -1, mapChoiceBucket: -1, keybinds: { ...DEFAULT_KEYBINDS } };
 
-const MUSIC_OPTIONS = {
-    menu: {
-        legacy_awaits: 'soundtracks/legacy_awaits.mp3',
-        street_awaits: 'soundtracks/street_awaits.mp3',
-        france_awaits: 'soundtracks/france_awaits.mp3',
-        battle_awaits: 'soundtracks/battle_awaits.mp3',
-        sea_awaits: 'soundtracks/sea_awaits.mp3'
-    },
-    casual: {
-        roguish_journey: 'soundtracks/roguish_journey.mp3',
-        bad_journey: 'soundtracks/bad_journey.mp3',
-        parisian_journey: 'soundtracks/parisian_journey.mp3',
-        gladiator_journey: 'soundtracks/gladiator_journey.mp3',
-        marine_journey: 'soundtracks/marine_journey.mp3'
-    }
+const DEFAULT_MUSIC_SOURCES = {
+    menu: 'soundtracks/legacy_awaits.mp3',
+    casual: 'soundtracks/roguish_journey.mp3'
 };
-
-const MUSIC_LABELS = {
-    legacy_awaits: 'Legacy Awaits',
-    street_awaits: 'Street Awaits',
-    france_awaits: 'France Awaits',
-    battle_awaits: 'Battle Awaits',
-    sea_awaits: 'Sea Awaits',
-    roguish_journey: 'Roguish Journey',
-    bad_journey: 'Bad Journey',
-    parisian_journey: 'Parisian Journey',
-    gladiator_journey: 'Gladiator Journey',
-    marine_journey: 'Marine Journey'
-};
-
 const MUSIC_TRACKS = {
     ultraHardcore: 'soundtracks/fatal_finale.mp3'
 };
@@ -4132,23 +4073,10 @@ function setMusicVolume(value) {
     updateSettingsUI(false);
     applyMusicVolume();
 }
-function getSelectedMenuMusicKey() {
-    const key = String(pd?.settings?.menuMusic || 'legacy_awaits');
-    return Object.prototype.hasOwnProperty.call(MUSIC_OPTIONS.menu, key) ? key : 'legacy_awaits';
-}
-function getSelectedCasualMusicKey() {
-    const key = String(pd?.settings?.casualMusic || 'roguish_journey');
-    return Object.prototype.hasOwnProperty.call(MUSIC_OPTIONS.casual, key) ? key : 'roguish_journey';
-}
 function resolveMusicSource(trackKey) {
-    if (trackKey === 'menu') return MUSIC_OPTIONS.menu[getSelectedMenuMusicKey()];
-    if (trackKey === 'classic' || trackKey === 'hardcore') return MUSIC_OPTIONS.casual[getSelectedCasualMusicKey()];
-    return MUSIC_TRACKS[trackKey] || MUSIC_OPTIONS.menu.legacy_awaits;
-}
-function getMusicTrackLabel(trackKey) {
-    if (trackKey === 'menu') return MUSIC_LABELS[getSelectedMenuMusicKey()] || 'Legacy Awaits';
-    if (trackKey === 'classic' || trackKey === 'hardcore') return MUSIC_LABELS[getSelectedCasualMusicKey()] || 'Roguish Journey';
-    return trackKey === 'ultraHardcore' ? 'Fatal Finale' : (MUSIC_LABELS[trackKey] || trackKey);
+    if (trackKey === 'menu') return DEFAULT_MUSIC_SOURCES.menu;
+    if (trackKey === 'classic' || trackKey === 'hardcore') return DEFAULT_MUSIC_SOURCES.casual;
+    return MUSIC_TRACKS[trackKey] || DEFAULT_MUSIC_SOURCES.menu;
 }
 async function playMusic(trackKey = 'menu') {
     const player = ensureMusicPlayer();
@@ -4167,20 +4095,6 @@ async function playMusic(trackKey = 'menu') {
     } catch (e) {
         // Bloqueio normal de autoplay; o primeiro toque destrava.
     }
-}
-function setMenuMusic(value) {
-    const key = Object.prototype.hasOwnProperty.call(MUSIC_OPTIONS.menu, value) ? value : 'legacy_awaits';
-    pd.settings.menuMusic = key;
-    save();
-    updateSettingsUI(false);
-    if (currentMusicKey === 'menu') playMusic('menu');
-}
-function setCasualMusic(value) {
-    const key = Object.prototype.hasOwnProperty.call(MUSIC_OPTIONS.casual, value) ? value : 'roguish_journey';
-    pd.settings.casualMusic = key;
-    save();
-    updateSettingsUI(false);
-    if (currentMusicKey === 'classic' || currentMusicKey === 'hardcore') playMusic(currentMusicKey);
 }
 function stopMusic() {
     if (musicPlayer) musicPlayer.pause();
@@ -4633,8 +4547,8 @@ function load() {
     pd.passXp = Math.max(0, Number(pd.passXp) || 0);
     pd.passClaimed = Number(pd.passClaimed) || 0;
     if (typeof pd.settings.musicVolume !== 'number' || !isFinite(pd.settings.musicVolume)) pd.settings.musicVolume = 0.7;
-    if (!Object.prototype.hasOwnProperty.call(MUSIC_OPTIONS.menu, pd.settings.menuMusic)) pd.settings.menuMusic = 'legacy_awaits';
-    if (!Object.prototype.hasOwnProperty.call(MUSIC_OPTIONS.casual, pd.settings.casualMusic)) pd.settings.casualMusic = 'roguish_journey';
+    if (Object.prototype.hasOwnProperty.call(pd.settings, 'menuMusic')) delete pd.settings.menuMusic;
+    if (Object.prototype.hasOwnProperty.call(pd.settings, 'casualMusic')) delete pd.settings.casualMusic;
     if (typeof pd.settings.uhcDark === 'undefined') pd.settings.uhcDark = false;
     if (typeof pd.settings.noParticles === 'undefined') pd.settings.noParticles = false;
     if (!['auto','mobile','pc'].includes(pd.settings.controlMode)) pd.settings.controlMode = 'auto';
@@ -8835,8 +8749,6 @@ function updateSettingsUI(syncSlider = true) {
     const zoomSlider = document.getElementById('screen-zoom-slider'); if(syncSlider !== false && zoomSlider) zoomSlider.value = Number(pd.settings.screenZoom) || 1;
     const musicEl = document.getElementById('set-music-volume'); if(musicEl) musicEl.innerHTML = `${Math.round(getMusicVolume() * 100)}%`;
     const musicSlider = document.getElementById('music-volume-slider'); if(syncSlider !== false && musicSlider) musicSlider.value = Math.round(getMusicVolume() * 100);
-    const menuMusicSelect = document.getElementById('music-menu-select'); if(menuMusicSelect) menuMusicSelect.value = getSelectedMenuMusicKey();
-    const casualMusicSelect = document.getElementById('music-casual-select'); if(casualMusicSelect) casualMusicSelect.value = getSelectedCasualMusicKey();
     const controlMode = ['auto','mobile','pc'].includes(pd.settings?.controlMode) ? pd.settings.controlMode : 'auto';
     document.querySelectorAll('.device-mode-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.controlMode === controlMode));
     const controlModeLabel = document.getElementById('set-control-mode');
@@ -27814,7 +27726,8 @@ function draw() {
     enemies.forEach(e => { 
         if (!isWorldVisible(e.x, e.y, e.size || 24)) return;
         const effectiveSpriteType = getEffectiveEnemySpriteType(e);
-        const enemySpriteType = e.sandboxPrototype ? null : (getEnemySpritePath(effectiveSpriteType) ? effectiveSpriteType : (getEnemySpritePath(e.type) ? e.type : null));
+        const hidePrototypeSprite = !!e.sandboxPrototype && !window.__FD_CANONICAL_ONLY_ENEMY_TYPES?.has(String(e.type || '').toLowerCase());
+        const enemySpriteType = hidePrototypeSprite ? null : (getEnemySpritePath(effectiveSpriteType) ? effectiveSpriteType : (getEnemySpritePath(e.type) ? e.type : null));
         const enemySprite = enemySpriteType ? getEnemySpriteImage(enemySpriteType) : null;
         const pogoScale = e.pogo ? (Number(e.pogoScale)||1) : 1;
         const drawY = e.pogo ? e.y + (Number(e.pogoJumpOffset)||0) : e.y;
@@ -33919,6 +33832,12 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
             phaseTargets:Array.from({length:20},()=>25)
         },
         {
+            id:'release_inky', title:'Desbloqueio da Inky', phases:10, mapIndex:10, mapName:'Palácio Marinho', section:'launch', trialCharId:'inky',
+            desc:'Sobreviva às ondas do Palácio Marinho para desbloquear Inky gratuitamente.',
+            reward:{kind:'character',charId:'inky',label:'Inky gratuitamente'},
+            phaseTargets:Array.from({length:10},()=>25)
+        },
+        {
             id:'release_serca', title:'Desbloqueio do Sercã', phases:20, mapIndex:1, mapName:'Deserto', section:'launch', trialCharId:'serca',
             desc:'Uma missão especial para conquistar Sercã e liberar o governador de Sand Land.',
             reward:{kind:'character',charId:'serca',label:'Sercã gratuitamente'},
@@ -33999,18 +33918,22 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
         ensureSeasonalQuestState(false);
         const root=document.getElementById('launch-quest-list');
         if(!root) return;
-        const q=SEASONAL_QUEST_DEFS.find(v=>v.section==='launch');
-        if(!q){root.innerHTML='<div class="daily-empty">Nenhum lançamento disponível.</div>';return;}
-        const st=pd.seasonalQuests[q.id];
-        const completed=!!st.completed;
-        const phase=Math.min(q.phases,Math.max(0,Math.floor(Number(st.phase)||0)));
-        const currentPhase=Math.min(q.phases-1,phase);
-        const target=q.phaseTargets[currentPhase] || 25;
-        const rewardMarkup=`<span class="daily-reward-sprite daily-reward-sprite--large"><span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;">${getCharacterSpriteMarkup(q.reward.charId,'menu')}</span></span><span class="daily-reward-copy">${escapeHtmlText(seasonalRewardLabel(q))}</span>`;
-        const action=completed?'return false;':`launchSeasonalQuest('${escapeHtmlAttr(q.id)}')`;
-        const trialAction=completed?'return false;':`launchSeasonalQuest('${escapeHtmlAttr(q.id)}',true)`;
-        root.innerHTML=`<div class="daily-mission-card" data-launch-id="${escapeHtmlAttr(q.id)}">${dailyMapLayoutMarkup(q)}<div class="daily-mission-main"><div class="daily-mission-title">${escapeHtmlText(q.title)}</div><div class="daily-mission-meta"><span>${completed?'Concluída':`Fase ${phase+1}/${q.phases}`}</span><span>Próxima meta: ${target} waves</span></div><div class="daily-mission-reward">${rewardMarkup}</div></div><div style="display:flex;flex-direction:column;gap:7px;align-items:stretch;min-width:118px;"><button class="${completed?'btn-menu':'btn-action'} daily-play-btn" ${completed?'disabled':''} onclick="${action}">${completed?'Concluída':'Jogar'}</button><button class="btn-menu daily-play-btn" ${completed?'disabled':''} onclick="${trialAction}">Jogar com Sercã</button></div></div>`;
+        const quests=SEASONAL_QUEST_DEFS.filter(v=>v.section==='launch');
+        if(!quests.length){root.innerHTML='<div class="daily-empty">Nenhum lançamento disponível.</div>';return;}
+        root.innerHTML=quests.map(q=>{
+            const st=pd.seasonalQuests[q.id];
+            const completed=!!st?.completed;
+            const phase=Math.min(q.phases,Math.max(0,Math.floor(Number(st?.phase)||0)));
+            const currentPhase=Math.min(q.phases-1,phase);
+            const target=q.phaseTargets[currentPhase] || 25;
+            const rewardMarkup=`<span class="daily-reward-sprite daily-reward-sprite--large"><span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;">${getCharacterSpriteMarkup(q.reward.charId,'menu')}</span></span><span class="daily-reward-copy">${escapeHtmlText(seasonalRewardLabel(q))}</span>`;
+            const action=completed?'return false;':`launchSeasonalQuest('${escapeHtmlAttr(q.id)}')`;
+            const trialAction=completed?'return false;':`launchSeasonalQuest('${escapeHtmlAttr(q.id)}',true)`;
+            const trialName=CHARACTERS?.[q.trialCharId]?.name || 'personagem';
+            return `<div class="daily-mission-card" data-launch-id="${escapeHtmlAttr(q.id)}">${dailyMapLayoutMarkup(q)}<div class="daily-mission-main"><div class="daily-mission-title">${escapeHtmlText(q.title)}</div><div class="daily-mission-meta"><span>${completed?'Concluída':`Fase ${phase+1}/${q.phases}`}</span><span>${completed?'Todas as fases concluídas':`Próxima meta: ${target} waves`}</span></div><div class="daily-mission-reward">${rewardMarkup}</div></div><div style="display:flex;flex-direction:column;gap:7px;align-items:stretch;min-width:118px;"><button class="${completed?'btn-menu':'btn-action'} daily-play-btn" ${completed?'disabled':''} onclick="${action}">${completed?'Concluída':'Jogar'}</button><button class="btn-menu daily-play-btn" ${completed?'disabled':''} onclick="${trialAction}">Jogar com ${escapeHtmlText(trialName)}</button></div></div>`;
+        }).join('');
         root.querySelectorAll('[data-launch-id]').forEach(card=>{
+            const q=getSeasonalQuest(card.dataset.launchId);
             const art=card.querySelector('.daily-map-art'); if(art) art.__dailyMission=q;
             const canvas=card.querySelector('[data-daily-map-preview]'); if(canvas) drawDailyMapPreview(canvas,q);
         });
@@ -36808,44 +36731,70 @@ body.fd-sky-weather-storm #fd-sky-tablet{background:linear-gradient(145deg,#aeb7
   const inkyDef = CHARACTERS.inky;
   if (inkyDef) inkyDef.sprite = 'sprites/inky.png';
 
-  // Emz-inspired lingering spray: a broad, directional cloud that ticks repeatedly.
+  // Spray direcional em movimento: o rastro traseiro some e deixa de causar dano.
   const inkZones = [];
+  // Inky can keep only one spray active; the next shot unlocks 0.3 s after it vanishes.
+  let nextInkShotAt = 0;
   const oldFireWeapon = fireWeapon;
   fireWeapon = function(target) {
     if (!player || pd?.selectedChar !== 'inky') return oldFireWeapon.apply(this, arguments);
     if (sandboxMode || runShootingDisabled || !target || isCurrentlyHypnotized(target) || player.cd > 0) return;
+    const shotNow = performance.now() / 1000;
+    if (inkZones.length > 0 || shotNow < nextInkShotAt) return;
     const angle = Math.atan2(target.y-player.y, target.x-player.x);
     player.lastAimAngle = angle;
     const dmg = Math.max(1, player.baseDmg * player.stats.dmgMult * (player.inTotem ? 1.2 : 1));
-    const len = Math.min(290, player.baseRange * player.stats.rangeMult * 1.05);
-    const width = 78;
+    const range = Math.max(90, Math.min(290, player.baseRange * player.stats.rangeMult * 1.05));
     const sx = player.x + Math.cos(angle) * (player.r + 8);
     const sy = player.y + Math.sin(angle) * (player.r + 8);
-    inkZones.push({x:sx,y:sy,angle,len,width,life:1.35,maxLife:1.35,tick:0,hitAt:new Map(),dmg,color:'#8e44ad'});
-    if (inkZones.length > 12) inkZones.shift();
-    player.cd = Math.max(48, player.baseFireRate * player.stats.fireRateMult * 1.12);
+    const speed = 260;
+    inkZones.push({
+      x:sx, y:sy, angle, range, width:76,
+      sprayLength:Math.min(126, Math.max(82, range * 0.46)),
+      travel:0, speed, fadeOut:0, fadeDuration:0.14,
+      tick:0, hitAt:new Map(), dmg
+    });
+    if (inkZones.length > 10) inkZones.shift();
+    // Firing cadence is controlled by the spray lifetime and the 0.3 s post-disappearance delay.
+    player.cd = 0;
   };
 
   const oldUpdateEnemies = updateEnemies;
   updateEnemies = function(dt) {
     const out = oldUpdateEnemies.apply(this, arguments);
     if (!Array.isArray(enemies)) return out;
+    const delta = Math.max(0, Number(dt) || 0);
+    const now = performance.now() / 1000;
     for (let zi=inkZones.length-1; zi>=0; zi--) {
       const z=inkZones[zi];
-      z.life -= Math.max(0, Number(dt)||0);
-      z.tick -= Math.max(0, Number(dt)||0);
-      if (z.life<=0) { inkZones.splice(zi,1); continue; }
-      if (z.tick>0) continue;
-      z.tick=0.35;
+      if (z.travel >= z.range) {
+        z.fadeOut -= delta;
+        if (z.fadeOut <= 0) {
+          inkZones.splice(zi,1);
+          nextInkShotAt = now + 0.3;
+        }
+        continue;
+      }
+      z.travel = Math.min(z.range, z.travel + z.speed * delta);
+      if (z.travel >= z.range) {
+        z.fadeOut = z.fadeDuration;
+        continue;
+      }
+      z.tick -= delta;
+      if (z.tick > 0) continue;
+      z.tick = 0.10;
       const ux=Math.cos(z.angle), uy=Math.sin(z.angle);
+      const tail=Math.max(0, z.travel-z.sprayLength);
       for (const e of enemies) {
         if (!e || e.hp<=0 || isCurrentlyHypnotized(e)) continue;
         const dx=e.x-z.x, dy=e.y-z.y;
         const along=dx*ux+dy*uy, across=Math.abs(-dx*uy+dy*ux);
-        if (along<0 || along>z.len || across>z.width+(e.size||10)) continue;
-        const last=z.hitAt.get(e) || 0;
-        if (performance.now()/1000-last < 0.33) continue;
-        z.hitAt.set(e,performance.now()/1000);
+        if (along < tail || along > z.travel) continue;
+        const spread=z.width*(0.18+0.82*Math.max(0,Math.min(1,along/z.range)));
+        if (across > spread+(e.size||10)) continue;
+        const last=z.hitAt.get(e);
+        if (last !== undefined && now-last < 0.22) continue;
+        z.hitAt.set(e,now);
         const dealt=Math.max(1,Math.round(z.dmg*getEnemyDamageTakenMultiplier(e)));
         e.hp-=dealt; e.lastHitSourceChar='inky';
         addFloatingText(e.x,e.y,`${dealt}`,'#c084fc');
@@ -36863,7 +36812,7 @@ body.fd-sky-weather-storm #fd-sky-tablet{background:linear-gradient(145deg,#aeb7
     return out;
   };
 
-  // Render the lingering ink in world coordinates, using the same camera transform as the map.
+  // Render only the advancing section of the spray; no stationary puddle or damaging tail remains.
   const oldDraw = draw;
   draw = function() {
     const out = oldDraw.apply(this, arguments);
@@ -36871,50 +36820,49 @@ body.fd-sky-weather-storm #fd-sky-tablet{background:linear-gradient(145deg,#aeb7
     ctx.save();
     ctx.translate(-(Number(camera?.x) || 0), -(Number(camera?.y) || 0));
     for (const z of inkZones) {
-      const fade = Math.max(0, Math.min(1, z.life / z.maxLife));
+      const fading=z.travel>=z.range;
+      const fade=fading?Math.max(0,Math.min(1,z.fadeOut/z.fadeDuration)):1;
+      const tail=Math.max(0,z.travel-z.sprayLength);
+      const front=Math.min(z.range,z.travel);
+      const plumeLen=front-tail;
+      if (plumeLen < 2 || fade <= 0) continue;
+      const tailWidth=z.width*(0.18+0.82*(tail/z.range));
+      const frontWidth=z.width*(0.18+0.82*(front/z.range));
       ctx.save();
-      ctx.translate(z.x, z.y);
+      ctx.translate(z.x,z.y);
       ctx.rotate(z.angle);
-
-      // Wide, lingering cone inspired by Emz's spray. Multiple layers preserve contrast on any map.
-      const plume = ctx.createLinearGradient(0, 0, z.len, 0);
-      plume.addColorStop(0, 'rgba(192,132,252,0.66)');
-      plume.addColorStop(0.32, 'rgba(168,85,247,0.54)');
-      plume.addColorStop(1, 'rgba(126,34,206,0.35)');
-      ctx.globalAlpha = fade;
-      ctx.fillStyle = plume;
+      const plume=ctx.createLinearGradient(tail,0,front,0);
+      plume.addColorStop(0,'rgba(192,132,252,0.10)');
+      plume.addColorStop(0.45,'rgba(168,85,247,0.52)');
+      plume.addColorStop(1,'rgba(126,34,206,0.76)');
+      ctx.globalAlpha=fade;
+      ctx.fillStyle=plume;
       ctx.beginPath();
-      ctx.moveTo(0, -z.width * 0.30);
-      ctx.bezierCurveTo(z.len * 0.16, -z.width * 0.32, z.len * 0.24, -z.width * 0.66, z.len * 0.48, -z.width * 0.70);
-      ctx.quadraticCurveTo(z.len * 0.83, -z.width * 0.88, z.len, 0);
-      ctx.quadraticCurveTo(z.len * 0.85, z.width * 0.88, z.len * 0.53, z.width * 0.70);
-      ctx.bezierCurveTo(z.len * 0.28, z.width * 0.60, z.len * 0.16, z.width * 0.30, 0, z.width * 0.30);
+      ctx.moveTo(tail,-tailWidth*0.28);
+      ctx.bezierCurveTo(tail+plumeLen*0.22,-tailWidth*0.34,front-plumeLen*0.22,-frontWidth*0.70,front,0);
+      ctx.bezierCurveTo(front-plumeLen*0.22,frontWidth*0.70,tail+plumeLen*0.22,tailWidth*0.34,tail,tailWidth*0.28);
       ctx.closePath();
       ctx.fill();
 
-      // A brighter edge and small droplets make the zone readable against busy backgrounds.
-      ctx.globalAlpha = 0.88 * fade;
-      ctx.strokeStyle = 'rgba(221,180,255,0.92)';
-      ctx.lineWidth = 2.5;
+      ctx.globalAlpha=fade*0.86;
+      ctx.strokeStyle='rgba(221,180,255,0.88)';
+      ctx.lineWidth=2;
       ctx.beginPath();
-      ctx.moveTo(0, -z.width * 0.30);
-      ctx.quadraticCurveTo(z.len * 0.22, -z.width * 0.52, z.len * 0.48, -z.width * 0.70);
-      ctx.quadraticCurveTo(z.len * 0.88, -z.width * 0.68, z.len, 0);
-      ctx.quadraticCurveTo(z.len * 0.86, z.width * 0.74, z.len * 0.53, z.width * 0.70);
-      ctx.quadraticCurveTo(z.len * 0.22, z.width * 0.50, 0, z.width * 0.30);
+      ctx.moveTo(tail,-tailWidth*0.28);
+      ctx.quadraticCurveTo(tail+plumeLen*0.52,-frontWidth*0.56,front,0);
+      ctx.quadraticCurveTo(tail+plumeLen*0.52,frontWidth*0.56,tail,tailWidth*0.28);
       ctx.stroke();
 
-      ctx.globalAlpha = 0.82 * fade;
-      for (let i = 0; i < 12; i++) {
-        const t = 0.10 + i * 0.071;
-        const x = z.len * t;
-        const spread = z.width * (0.18 + t * 0.52);
-        const wobble = Math.sin((Number(gameTime) || 0) * 2.1 + i * 1.73) * spread * 0.45;
-        const y = ((i % 2) ? 1 : -1) * spread * 0.34 + wobble;
-        const r = 2.4 + (i % 4) * 1.15;
-        ctx.fillStyle = i % 3 === 0 ? 'rgba(245,220,255,0.95)' : 'rgba(214,165,255,0.90)';
+      // Small moving droplets make the spray read as expelled ink instead of a static shape.
+      for (let i=0;i<14;i++) {
+        const t=(i+0.5)/14;
+        const px=tail+plumeLen*t;
+        const localWidth=tailWidth+(frontWidth-tailWidth)*t;
+        const wobble=Math.sin((Number(gameTime)||0)*13+i*2.31)*localWidth*0.22;
+        const py=((i%2)?1:-1)*(localWidth*0.12+wobble);
+        ctx.fillStyle=i%3===0?'rgba(245,220,255,0.96)':'rgba(214,165,255,0.90)';
         ctx.beginPath();
-        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.arc(px,py,1.8+(i%4)*0.65,0,Math.PI*2);
         ctx.fill();
       }
       ctx.restore();
@@ -37342,6 +37290,41 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
     window.startRunAfterShop=wrapped;
     try{startRunAfterShop=wrapped;}catch(_){}
   }
+})();
+</script>
+
+
+<style id="fd-credits-title-sprite-style">
+#overlay-game-credits .credits-roll .credits-title-sprite{
+  display:block;
+  width:min(741px,92vw);
+  height:auto;
+  max-height:min(337px,28vh);
+  object-fit:contain;
+  margin:0 auto 18px;
+  filter:drop-shadow(0 8px 18px rgba(0,0,0,.28));
+}
+</style>
+<script id="fd-canonical-enemy-sprite-fix">
+(function(){
+  'use strict';
+  const canonicalOnlySprites={
+    megaboss:'mega_boss', mega_boss:'mega_boss',
+    colosso:'colossum', colossum:'colossum',
+    elite_master:'master_elite_shooter', master_elite_shooter:'master_elite_shooter',
+    lider_elite:'elite_leader', elite_leader:'elite_leader'
+  };
+  window.__FD_CANONICAL_ONLY_ENEMY_TYPES=new Set(Object.keys(canonicalOnlySprites));
+  const previous=window.getEffectiveEnemySpriteType || (typeof getEffectiveEnemySpriteType==='function' ? getEffectiveEnemySpriteType : null);
+  const resolveCanonicalEnemySprite=function(e){
+    const type=String(e?.type||'').toLowerCase();
+    const canonical=canonicalOnlySprites[type];
+    if(canonical && typeof getEnemySpritePath==='function' && getEnemySpritePath(canonical)) return canonical;
+    return typeof previous==='function' ? previous.apply(this,arguments) : (typeof getEnemySpritePath==='function'&&getEnemySpritePath(type)?type:'');
+  };
+  resolveCanonicalEnemySprite.__fdCanonicalOnlySpriteFix=true;
+  window.getEffectiveEnemySpriteType=resolveCanonicalEnemySprite;
+  try{getEffectiveEnemySpriteType=resolveCanonicalEnemySprite;}catch(_){}
 })();
 </script>
 
