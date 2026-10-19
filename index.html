@@ -26613,8 +26613,10 @@ function drawDailyPermafrostTextureRect(x,y,w,h){
     ctx.save();ctx.globalAlpha=.23;ctx.fillStyle='#ffffff';for(let i=Math.floor(x/260)-1;i<=Math.floor((x+w)/260)+1;i++)for(let j=Math.floor(y/260)-1;j<=Math.floor((y+h)/260)+1;j++){const seed=fdPseudoSeed(i,j),px=i*260+((seed>>5)%220),py=j*260+((seed>>13)%220);ctx.beginPath();ctx.arc(px,py,18+(seed%24),0,Math.PI*2);ctx.fill();}ctx.restore();
 }
 function drawDailyModifierOverlay(){
-    if(!window.dailyMissionRun)return;
-    const key=window.dailyMissionRun.modifierKey;
+    const skyWeather = Number(window.currentMap) === 21 ? String(window.fdSkyWeatherState?.type || '') : '';
+    const skyRainActive = skyWeather === 'rain' || skyWeather === 'storm';
+    if(!window.dailyMissionRun && !skyRainActive)return;
+    const key = window.dailyMissionRun?.modifierKey || (skyRainActive ? 'rain' : '');
     if(key==='rain'){
         ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='rgba(10,18,30,.24)';ctx.fillRect(0,0,cw,ch);ctx.globalAlpha=.62;ctx.strokeStyle='rgba(180,220,255,.72)';ctx.lineWidth=1.5;for(let i=0;i<96;i++){const x=((i*131+gameTime*180)% (cw+80))-40,y=((i*83+gameTime*350)% (ch+100))-50;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+4,y+16);ctx.stroke();}ctx.restore();
         const flash=Math.max(0,...(window.dailyLightningStrikes||[]).map(s=>s.life/(s.maxLife||.42)));if(flash>0){ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle=`rgba(255,255,255,${Math.min(.24,flash*.35)})`;ctx.fillRect(0,0,cw,ch);ctx.restore();}
@@ -31100,11 +31102,11 @@ function updateO2GaugeVisual(nearKelp = null) {
     const arcLength = Math.PI * 72;
     if (path) {
         path.style.strokeDasharray = `${arcLength}`;
-        path.style.strokeDashoffset = `${-arcLength * (1 - pct)}`;
+        path.style.strokeDashoffset = `${arcLength * (1 - pct)}`;
         path.style.stroke = nearKelp ? '#2ecc71' : (pct <= .25 ? '#e74c3c' : '#4fc3f7');
     }
     if (needle) {
-        const angle = 180 - pct * 180;
+        const angle = pct * 180;
         needle.setAttribute('transform', `rotate(${angle} 90 84)`);
         needle.style.stroke = nearKelp ? '#2ecc71' : (pct <= .25 ? '#ff6b5f' : '#ffffff');
     }
@@ -33820,7 +33822,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
 #radioactivity-gauge .radioactivity-gauge-track,#radioactivity-gauge .radioactivity-gauge-fill{fill:none;stroke-linecap:round;stroke-width:12;}
 #radioactivity-gauge .radioactivity-gauge-track{stroke:rgba(255,255,255,.12);filter:drop-shadow(0 2px 2px rgba(0,0,0,.35));}
 #radioactivity-gauge .radioactivity-gauge-fill{stroke:url(#radioactivity-gauge-gradient);stroke-dasharray:226.195;stroke-dashoffset:226.195;transition:stroke-dashoffset .16s linear;}
-#radioactivity-needle{stroke:#fff;stroke-width:4.5;stroke-linecap:round;filter:drop-shadow(0 2px 2px rgba(0,0,0,.72));transform-origin:90px 84px;transition:transform .16s linear,stroke .16s linear;}
+#radioactivity-needle{stroke:#fff;stroke-width:4.5;stroke-linecap:round;filter:drop-shadow(0 2px 2px rgba(0,0,0,.72));transform-origin:90px 84px;transform-box:view-box;transition:transform .16s linear,stroke .16s linear;}
 #radioactivity-gauge .radioactivity-gauge-hub{fill:#fff;stroke:rgba(0,0,0,.72);stroke-width:3;}
 #radioactivity-label{display:block;position:relative;z-index:3;margin-top:-3px;min-width:150px;text-align:center;color:#fff;font-size:11px;font-weight:900;line-height:1;text-shadow:1px 1px 0 #000;letter-spacing:.05em;white-space:nowrap;}
 
@@ -34219,13 +34221,14 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
             path.style.strokeDashoffset=`${arcLength*(1-pct)}`;
         }
         if(needle){
-            const angle=Math.PI*(1-pct);
-            const radius=72;
-            const x2=90+Math.cos(angle)*radius;
-            const y2=84-Math.sin(angle)*radius;
-            needle.removeAttribute('transform');
-            needle.setAttribute('x2',String(x2));
-            needle.setAttribute('y2',String(y2));
+            // A agulha fica fixa no centro e gira sobre o arco, como um relógio.
+            // Evita alterar x2/y2 a cada tick, o que dá a impressão de a agulha sair da linha.
+            const angle=pct*180;
+            needle.setAttribute('x1','90');
+            needle.setAttribute('y1','84');
+            needle.setAttribute('x2','18');
+            needle.setAttribute('y2','84');
+            needle.setAttribute('transform',`rotate(${angle} 90 84)`);
             needle.style.stroke='#fff';
         }
         if(label) label.textContent=`RADIOATIVIDADE ${Math.ceil(pct*100)}%`;
@@ -35557,7 +35560,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
     const steps=[
       {speaker:'Eólio',text:'O céu parece tranquilo, mas as correntes de ar podem mudar tudo.'},
       {speaker:'Eólio',text:'A cada três waves, o tablet anuncia o clima. O vento empurra quem se move e também quem fica parado.'},
-      {speaker:'Eólio',text:'Quando começa a chover, as nuvens param de se mover e viram paredes. Planeje sua rota.'},
+      {speaker:'Eólio',text:'As nuvens continuam se movendo pelo céu. Observe a previsão e adapte sua rota à chuva e à tempestade.'},
       {speaker:'Eólio',text:'Na tempestade, o céu fica ainda mais escuro e raios caem pelo mapa. Não fique parado por muito tempo.'},
       {speaker:'Eólio',text:'São dez fases, cada uma com 25 waves. Vamos atravessar os ares!'}
     ];
@@ -35643,11 +35646,12 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
   let skyLastMap=null, skyLastWeather='', skyLightningTimer=3.5, skyFlashTimer=0, skyCloudSeeded=false, skyWallsActive=false, skyWallsObstacleRef=null;
   function seedSkyClouds(){
     if(skyCloudSeeded)return;skyCloudSeeded=true;window.fdSkyClouds.length=0;
-    for(let i=0;i<17;i++){
+    // Poucas nuvens de fundo, com posição fixa no mundo (nunca relativas ao jogador).
+    for(let i=0;i<6;i++){
       let x=((i*733+241)%2700)-1350, y=((i*947+623)%2700)-1350;
       if(Math.hypot(x,y)<280){x+=x<0?-430:430;y+=y<0?-250:250;}
-      const r=44+((i*17)%35);
-      window.fdSkyClouds.push({id:i,x,y,r,vx:0,vy:0,phase:i*1.37,wall:false});
+      const r=36+((i*13)%22);
+      window.fdSkyClouds.push({id:i,x,y,r,vx:7+(i%4)*2,vy:(i%3-1)*1.15,phase:i*1.37,wall:false});
     }
   }
   function clearSkyWalls(){if(!skyWallsActive){skyWallsObstacleRef=null;return;}if(Array.isArray(obstacles))obstacles=obstacles.filter(o=>!o?.fdSkyCloudWall);for(const cl of window.fdSkyClouds)cl.wall=false;skyWallsActive=false;skyWallsObstacleRef=null;}
@@ -35664,20 +35668,29 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
     }
     skyWallsActive=true;skyWallsObstacleRef=obstacles;
   }
-  let cachedSkyWave=-1, cachedSkyWeather=null;
+  let cachedSkyWaveGroup=-1, cachedSkyWeather=null;
   function currentSkyWeather(){
     const wv=Math.max(1,Math.floor(Number(typeof wave!=='undefined'?wave:1)||1));
-    if(wv!==cachedSkyWave){
-      cachedSkyWave=wv;
+    const group=Math.floor((wv-1)/3);
+    if(group!==cachedSkyWaveGroup || !cachedSkyWeather){
+      cachedSkyWaveGroup=group;
       const kinds=['sun','wind','rain','storm'];
       const previous=cachedSkyWeather?.type;
       const pool=kinds.filter(kind=>kind!==previous);
       const type=pool[Math.floor(Math.random()*pool.length)];
       const dir=windDirs[Math.floor(Math.random()*windDirs.length)];
-      cachedSkyWeather={type,wind:dir,cycle:wv,waveGroup:wv};
+      cachedSkyWeather={type,wind:dir,cycle:group,waveGroup:group};
     }
     return cachedSkyWeather;
   }
+  window.fdResetSkyWeatherForRun=function(){
+    cachedSkyWaveGroup=-1;cachedSkyWeather=null;skyLastMap=null;skyLastWeather='';
+    skyLightningTimer=3.5;skyFlashTimer=0;
+    if(Array.isArray(window.fdSkyBolts))window.fdSkyBolts.length=0;
+    clearSkyWalls();
+    document.body.classList.remove('fd-sky-weather-wind','fd-sky-weather-rain','fd-sky-weather-storm','fd-sky-flash');
+    document.body.dataset.fdSkyWeatherType='';
+  };
   function updateSkyTablet(state){
     const isSky=Number(window.currentMap)===21;
     const active=isSky&&((typeof isPlaying!=='undefined'&&!!isPlaying)||(typeof sandboxMode!=='undefined'&&sandboxMode));
@@ -35696,7 +35709,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
     }
     const flash=skyFlashTimer>0;
     if(flash!==document.body.classList.contains('fd-sky-flash'))document.body.classList.toggle('fd-sky-flash',flash);
-    const config={sun:['☀','ENSOLARADO','VISIBILIDADE NORMAL'],wind:[state.wind.arrow,'VENTO',`DIREÇÃO: ${state.wind.label}`],rain:['☂','CHUVA','NUVENS IMÓVEIS = PAREDES'],storm:['ϟ','TEMPESTADE','RAIOS E NUVENS-PAREDE']}[state.type]||['☀','ENSOLARADO','VISIBILIDADE NORMAL'];
+    const config={sun:['☀','ENSOLARADO','VISIBILIDADE NORMAL'],wind:[state.wind.arrow,'VENTO',`DIREÇÃO: ${state.wind.label}`],rain:['☂','CHUVA','CHUVA CONTÍNUA'],storm:['ϟ','TEMPESTADE','CHUVA E RAIOS']}[state.type]||['☀','ENSOLARADO','VISIBILIDADE NORMAL'];
     const key=`${state.type}|${state.wind?.label||''}|${state.wind?.arrow||''}`;
     if(tablet.dataset.fdDisplayKey!==key){
       const sym=tablet.querySelector('.fd-tablet-symbol');
@@ -35716,13 +35729,19 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
       document.body.classList.remove('fd-sky-weather-wind','fd-sky-weather-rain','fd-sky-weather-storm','fd-sky-flash');
       return;
     }
+    if(skyLastMap!==21){
+      cachedSkyWaveGroup=-1;cachedSkyWeather=null;skyLastWeather='';
+      skyLightningTimer=3.5;skyFlashTimer=0;
+      if(Array.isArray(window.fdSkyBolts))window.fdSkyBolts.length=0;
+      clearSkyWalls();
+    }
     seedSkyClouds();
     const state=currentSkyWeather();
     const changed=state.type!==skyLastWeather||state.cycle!==window.fdSkyWeatherState.cycle;
     window.fdSkyWeatherState=state;
-    if(changed){syncSkyWalls(state.type==='rain'||state.type==='storm');skyLastWeather=state.type;}
-    // Clouds are advanced once per simulation tick below, not during map-state synchronization.
-    if(state.type==='sun'||state.type==='wind')clearSkyWalls();
+    if(changed){clearSkyWalls();skyLastWeather=state.type;}
+    // Clima algum não congela nem transforma as nuvens decorativas em paredes.
+    for(const cl of window.fdSkyClouds)cl.wall=false;
     updateSkyTablet(state);
     skyLastMap=21;
   }
@@ -35730,9 +35749,16 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
     const delta=clamp(Number(dt)||0,0,.08);
     if(Number(window.currentMap)!==21)return;
     const st=window.fdSkyWeatherState;
-    if(st.type==='sun'||st.type==='wind'){
-      const speed=st.type==='wind'?38:22;
-      for(const cl of window.fdSkyClouds){cl.wall=false;const factor=st.type==='wind'?1:.45;cl.x+=st.wind.x*speed*delta*factor;cl.y+=st.wind.y*speed*delta*factor;if(cl.x>1510)cl.x=-1510;if(cl.x< -1510)cl.x=1510;if(cl.y>1510)cl.y=-1510;if(cl.y< -1510)cl.y=1510;}
+    {
+      const windy=st.type==='wind';
+      for(const cl of window.fdSkyClouds){
+        cl.wall=false;
+        const vx=windy ? st.wind.x*25+(Number(cl.vx)||8)*.25 : (Number(cl.vx)||8);
+        const vy=windy ? st.wind.y*25+(Number(cl.vy)||0)*.25 : (Number(cl.vy)||0);
+        cl.x+=vx*delta;cl.y+=vy*delta;
+        if(cl.x>1510)cl.x=-1510;if(cl.x< -1510)cl.x=1510;
+        if(cl.y>1510)cl.y=-1510;if(cl.y< -1510)cl.y=1510;
+      }
     }
     if(st.type==='storm'){
       skyLightningTimer-=delta;
@@ -35791,8 +35817,8 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
   window.fdDrawSkyWorldLayer=function(){
     if(Number(window.currentMap)!==21||!ctx)return;
     seedSkyClouds();const state=window.fdSkyWeatherState||{type:'sun',wind:windDirs[0]};
-    // Clouds drifting through the world; during rain they are frozen and behave as walls.
-    for(const cl of window.fdSkyClouds){if(!isWorldVisible(cl.x,cl.y,cl.r*1.7))continue;drawCloud(ctx,cl.x,cl.y,cl.r*.72,state.type==='storm'?.62:state.type==='rain'?.72:.58,!!cl.wall);}
+    // Poucas nuvens decorativas no mundo: pequenas, contínuas e sem seguir o jogador.
+    for(const cl of window.fdSkyClouds){if(!isWorldVisible(cl.x,cl.y,cl.r*1.7))continue;drawCloud(ctx,cl.x,cl.y,cl.r*.72,.58,false);}
     // Shadows/cloud platforms under player and enemies, with the four requested exceptions.
     const selected=String(pd?.selectedChar||'').toLowerCase();
     if(player){
@@ -35912,14 +35938,9 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
   const previousUpdate=window.update;
   if(typeof previousUpdate==='function'&&!previousUpdate.__fdSkyUpdateWrapped){
     const wrappedUpdate=function(dt){
-      const beforeMap=Number(window.currentMap),needWallCollision=beforeMap===21&&(window.fdSkyWeatherState?.type==='rain'||window.fdSkyWeatherState?.type==='storm'),before=needWallCollision&&Array.isArray(enemies)?enemies.map(e=>({e,x:e?.x,y:e?.y})):[];
       syncSkyMap();
       const out=previousUpdate.apply(this,arguments);
       window.fdSkyTick(dt);
-      if(Number(window.currentMap)===21&&(window.fdSkyWeatherState?.type==='rain'||window.fdSkyWeatherState?.type==='storm')){
-        const walls=(Array.isArray(obstacles)?obstacles:[]).filter(o=>o?.fdSkyCloudWall);
-        for(const snap of before){const e=snap.e;if(!e||e.hp<=0)continue;const rr=(Number(e.size)||12);for(const o of walls){const limit=(Number(o.r)||30)+rr;const nowD=Math.hypot(e.x-o.x,e.y-o.y);if(nowD>=limit)continue;const oldD=Math.hypot(snap.x-o.x,snap.y-o.y);if(oldD>=limit){e.x=snap.x;e.y=snap.y;}else if(nowD<oldD){const vx=e.x-o.x,vy=e.y-o.y,len=Math.hypot(vx,vy)||1;e.x=o.x+(vx/len)*(limit+2);e.y=o.y+(vy/len)*(limit+2);}}}
-      }
       return out;
     };
     wrappedUpdate.__fdSkyUpdateWrapped=true;window.update=wrappedUpdate;try{update=wrappedUpdate;}catch(_){}
@@ -37291,6 +37312,36 @@ body.fd-sky-weather-storm #fd-sky-tablet{background:linear-gradient(145deg,#aeb7
   window.closeGameCredits=function(){
     const overlay=document.getElementById('overlay-game-credits');const roll=document.getElementById('game-credits-roll');if(overlay)overlay.classList.add('hidden');if(roll)roll.style.animation='none';
   };
+})();
+</script>
+
+
+
+<style id="fd-sky-weather-reuse-rain-v3">
+/* Céu reutiliza a chuva leve e legível do modificador Dia Chuvoso, desenhada no canvas. */
+#fd-sky-atmosphere::before,
+#fd-sky-atmosphere::after{content:none!important;display:none!important;background:none!important;animation:none!important;}
+body.fd-sky-map-active #fd-sky-atmosphere{opacity:0!important;background:transparent!important;}
+body.fd-sky-map-active.fd-sky-weather-wind #fd-sky-atmosphere,
+body.fd-sky-map-active.fd-sky-weather-rain #fd-sky-atmosphere,
+body.fd-sky-map-active.fd-sky-weather-storm #fd-sky-atmosphere{opacity:0!important;background:transparent!important;}
+body.fd-sky-map-active.fd-sky-weather-rain #gameCanvas{filter:none!important;}
+body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;background:rgba(210,232,255,.22)!important;}
+</style>
+<script id="fd-sky-weather-reset-on-new-run-v3">
+(function(){
+  'use strict';
+  const oldStartRun=window.startRunAfterShop;
+  if(typeof oldStartRun==='function'&&!oldStartRun.__fdSkyWeatherResetWrapped){
+    const wrapped=function(){
+      const result=oldStartRun.apply(this,arguments);
+      try{if(Number(window.currentMap)===21)window.fdResetSkyWeatherForRun?.();}catch(err){console.warn('FD sky weather reset:',err);}
+      return result;
+    };
+    wrapped.__fdSkyWeatherResetWrapped=true;
+    window.startRunAfterShop=wrapped;
+    try{startRunAfterShop=wrapped;}catch(_){}
+  }
 })();
 </script>
 
