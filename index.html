@@ -1418,7 +1418,7 @@ html.sandbox-pc .sandbox-tool-hotkey{display:block}.sandbox-tool-state{position:
 #o2-gauge .o2-gauge-track,#o2-gauge .o2-gauge-fill{fill:none;stroke-linecap:round;stroke-width:12;}
 #o2-gauge .o2-gauge-track{stroke:rgba(255,255,255,.12);filter:drop-shadow(0 2px 2px rgba(0,0,0,.35));}
 #o2-gauge .o2-gauge-fill{stroke:#4fc3f7;stroke-dasharray:226.195;stroke-dashoffset:0;transition:stroke-dashoffset .16s linear,stroke .16s linear;}
-#o2-needle{stroke:#fff;stroke-width:4.5;stroke-linecap:round;filter:drop-shadow(0 2px 2px rgba(0,0,0,.72));transform-origin:90px 84px;transition:transform .16s linear,stroke .16s linear;}
+#o2-needle{stroke:#fff;stroke-width:4.5;stroke-linecap:round;filter:drop-shadow(0 2px 2px rgba(0,0,0,.72));transform:none!important;transform-origin:unset!important;transition:x2 .16s linear,y2 .16s linear,stroke .16s linear;}
 #o2-gauge .o2-gauge-hub{fill:#fff;stroke:rgba(0,0,0,.72);stroke-width:3;}
 #o2-bar-label{display:block;position:relative;z-index:3;margin-top:-3px;min-width:120px;text-align:center;color:#fff;font-size:11px;font-weight:900;line-height:1;text-shadow:1px 1px 0 #000;letter-spacing:.05em;white-space:nowrap;}
 #o2-bar{position:absolute !important;width:auto !important;height:auto !important;background:none !important;border:0 !important;border-radius:0 !important;overflow:visible !important;}#o2-bar-container.hidden{display:none !important;}
@@ -1437,7 +1437,7 @@ html.sandbox-pc .sandbox-tool-hotkey{display:block}.sandbox-tool-state{position:
 @media(max-width:620px){
     #o2-bar-container{top:84px !important;width:178px !important;height:103px !important;}
     #o2-gauge{width:169px;height:83px;}
-    #o2-needle{transform-origin:90px 84px;}
+    #o2-needle{transform:none!important;transform-origin:unset!important;}
     #o2-bar-label{font-size:10px;margin-top:-4px;}
     .survival-mode-inline-btn{min-height:42px !important;font-size:13px !important;margin-top:8px !important;}
     .survival-mode-inline-btn img{width:25px;height:25px;flex-basis:25px;}
@@ -31124,8 +31124,18 @@ function updateO2GaugeVisual(nearKelp = null) {
         path.style.stroke = nearKelp ? '#2ecc71' : (pct <= .25 ? '#e74c3c' : '#4fc3f7');
     }
     if (needle) {
-        const angle = pct * 180;
-        needle.setAttribute('transform', `rotate(${angle} 90 84)`);
+        // Ponteiro geométrico: o centro fica fixo e a ponta percorre o arco
+        // superior da esquerda para a direita, sem transformações SVG/CSS.
+        const theta = (1 - pct) * Math.PI;
+        const radius = 72;
+        const tipX = 90 + Math.cos(theta) * radius;
+        const tipY = 84 - Math.sin(theta) * radius;
+        needle.removeAttribute('transform');
+        needle.style.transform = 'none';
+        needle.setAttribute('x1', '90');
+        needle.setAttribute('y1', '84');
+        needle.setAttribute('x2', tipX.toFixed(3));
+        needle.setAttribute('y2', tipY.toFixed(3));
         needle.style.stroke = nearKelp ? '#2ecc71' : (pct <= .25 ? '#ff6b5f' : '#ffffff');
     }
     if (label) label.textContent = `O2 ${Math.ceil(pct * 100)}%${nearKelp ? ' • ALGA' : ''}`;
@@ -33840,7 +33850,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
 #radioactivity-gauge .radioactivity-gauge-track,#radioactivity-gauge .radioactivity-gauge-fill{fill:none;stroke-linecap:round;stroke-width:12;}
 #radioactivity-gauge .radioactivity-gauge-track{stroke:rgba(255,255,255,.12);filter:drop-shadow(0 2px 2px rgba(0,0,0,.35));}
 #radioactivity-gauge .radioactivity-gauge-fill{stroke:url(#radioactivity-gauge-gradient);stroke-dasharray:226.195;stroke-dashoffset:226.195;transition:stroke-dashoffset .16s linear;}
-#radioactivity-needle{stroke:#fff;stroke-width:4.5;stroke-linecap:round;filter:drop-shadow(0 2px 2px rgba(0,0,0,.72));transform-origin:90px 84px;transform-box:view-box;transition:transform .16s linear,stroke .16s linear;}
+#radioactivity-needle{stroke:#fff;stroke-width:4.5;stroke-linecap:round;filter:drop-shadow(0 2px 2px rgba(0,0,0,.72));transform:none!important;transform-origin:unset!important;transform-box:unset!important;transition:x2 .16s linear,y2 .16s linear,stroke .16s linear;}
 #radioactivity-gauge .radioactivity-gauge-hub{fill:#fff;stroke:rgba(0,0,0,.72);stroke-width:3;}
 #radioactivity-label{display:block;position:relative;z-index:3;margin-top:-3px;min-width:150px;text-align:center;color:#fff;font-size:11px;font-weight:900;line-height:1;text-shadow:1px 1px 0 #000;letter-spacing:.05em;white-space:nowrap;}
 
@@ -34249,14 +34259,18 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
             path.style.strokeDashoffset=`${arcLength*(1-pct)}`;
         }
         if(needle){
-            // A agulha fica fixa no centro e gira sobre o arco, como um relógio.
-            // Evita alterar x2/y2 a cada tick, o que dá a impressão de a agulha sair da linha.
-            const angle=pct*180;
+            // Ponteiro preso ao pivô central; a ponta percorre o arco por coordenadas.
+            // Não usamos rotate/transform para evitar deslocamentos por CSS responsivo.
+            const theta=(1-pct)*Math.PI;
+            const radius=72;
+            const tipX=90+Math.cos(theta)*radius;
+            const tipY=84-Math.sin(theta)*radius;
+            needle.removeAttribute('transform');
+            needle.style.transform='none';
             needle.setAttribute('x1','90');
             needle.setAttribute('y1','84');
-            needle.setAttribute('x2','18');
-            needle.setAttribute('y2','84');
-            needle.setAttribute('transform',`rotate(${angle} 90 84)`);
+            needle.setAttribute('x2',tipX.toFixed(3));
+            needle.setAttribute('y2',tipY.toFixed(3));
             needle.style.stroke='#fff';
         }
         if(label) label.textContent=`RADIOATIVIDADE ${Math.ceil(pct*100)}%`;
