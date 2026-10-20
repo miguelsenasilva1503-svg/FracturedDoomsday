@@ -2260,12 +2260,12 @@ body.fd-entry-cinematic #game-hud{display:block!important;visibility:visible!imp
                 <div class="char-detail-stat hidden" id="detail-dispersion-stat">
                     <div class="char-detail-stat-icon"><img src="elements/damage.png" alt="Dano da dispersão"></div>
                     <div class="char-detail-stat-label">Dano da dispersão</div>
-                    <div class="char-detail-stat-value" id="detail-dispersion-dmg">0</div>
+                    <div class="char-detail-stat-value" id="detail-dispersion-dmg"></div>
                 </div>
                 <div class="char-detail-stat hidden" id="detail-ability-dispersion-stat">
                     <div class="char-detail-stat-icon"><img src="elements/damage.png" alt="Dano da dispersão da habilidade"></div>
                     <div class="char-detail-stat-label">Dano da dispersão da hab.</div>
-                    <div class="char-detail-stat-value" id="detail-ability-dispersion-dmg">0</div>
+                    <div class="char-detail-stat-value" id="detail-ability-dispersion-dmg"></div>
                 </div>
                 <div class="char-detail-ability-stat hidden" id="detail-ability-stat">
                     <div class="char-detail-stat-icon">H</div>
@@ -15283,8 +15283,8 @@ function sandboxSummonSelected() {
     if (!sandboxMode || !sandboxSelectedSpawn) return false;
     if (sandboxSelectedSpawn === 'enemy') {
         const selectedType = String(sandboxSelectedSpawnData?.type || '').toLowerCase();
-        const canonicalOnly = ['megaboss','elite_master','colosso','lider_elite'].includes(selectedType);
-        const sourceMapId = !canonicalOnly && Number.isInteger(sandboxSelectedSpawnData?.mapId)
+        // Todas as variantes reais, inclusive Boss/Mega Boss/Colosso/Elites, mantêm a origem da skin.
+        const sourceMapId = Number.isInteger(sandboxSelectedSpawnData?.mapId)
             ? sandboxSelectedSpawnData.mapId : null;
         return sandboxSpawnEnemy(
             sandboxSelectedSpawnData?.type || '',
@@ -20909,6 +20909,7 @@ function updateEnemies(dt) {
             if (!e.gorillaSplitUsed && e.hp <= e.maxHp * 0.5) {
                 e.gorillaSplitUsed = true;
                 const mult = getEnemyDifficultyMultiplierFromEntry('monkey', e.entryWave || wave, wave);
+                const monkeySourceMap = fd1GetDropOriginMapId(e, window.currentMap);
                 enemies.push({
                     x: e.x + (Math.random() - 0.5) * 30, y: e.y + (Math.random() - 0.5) * 30,
                     type: 'monkey', hp: 15 * mult, maxHp: 15 * mult,
@@ -20917,7 +20918,7 @@ function updateEnemies(dt) {
                     poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0,
                     burnDmg:0, speedBuffTimer:0, soak:0, shockTimer:0, shockSemiTimer:0, shockTick:0,
                     shockSemiTick:0, shockDmg:0, shockRate:0.3, semiShockRate:0.4,
-                    spawnBiome: Number.isInteger(e.skinSourceMapId) ? e.skinSourceMapId : window.currentMap, spawnWave: wave, entryWave: wave, stationary: false, skinSourceMapId: Number.isInteger(e.skinSourceMapId) ? e.skinSourceMapId : window.currentMap, fracturedOrigin: !!e.fracturedOrigin, fractureMapId: Number.isInteger(e.fractureMapId) ? e.fractureMapId : null
+                    spawnBiome: monkeySourceMap, spawnWave: wave, entryWave: wave, stationary: false, skinSourceMapId: monkeySourceMap, dropOriginMapId: monkeySourceMap, fracturedOrigin: !!e.fracturedOrigin, fractureMapId: e.fracturedOrigin && Number.isInteger(e.fractureMapId) ? e.fractureMapId : null
                 });
                 createParticles(e.x, e.y, '#a1887f');
                 addFloatingText(e.x, e.y - 28, 'MACACO!', '#d7ccc8', 12);
@@ -21055,6 +21056,7 @@ function updateEnemies(dt) {
             if (e.spawnCd <= 0 && !isFrozen && !isHypnotized) {
                 e.spawnCd = 20;
                 const sharkCount = 2;
+                const sharkSourceMap = fd1GetDropOriginMapId(e, window.currentMap);
                 for (let s = 0; s < sharkCount; s++) {
                     const angle = Math.random() * Math.PI * 2;
                     const sx = e.x + Math.cos(angle) * 28;
@@ -21066,7 +21068,8 @@ function updateEnemies(dt) {
                         color:'#7aa8c4', poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0,
                         curseTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0,
                         shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0,
-                        shockRate:0.3, semiShockRate:0.4, spawnBiome:10, spawnWave:e.entryWave || wave, entryWave:e.entryWave || wave, shark:true
+                        shockRate:0.3, semiShockRate:0.4, spawnBiome:10, spawnWave:e.entryWave || wave, entryWave:e.entryWave || wave, shark:true,
+                        skinSourceMapId:sharkSourceMap, dropOriginMapId:sharkSourceMap, lineageMapId:sharkSourceMap, originBiomeId:sharkSourceMap
                     });
                 }
                 createParticles(e.x, e.y, '#44d7c8');
@@ -21699,9 +21702,9 @@ function updateEnemies(dt) {
                             x:e.x+Math.cos(a)*28,y:e.y+Math.sin(a)*28,type:'basico',hp:30*snakeMult,maxHp:30*snakeMult,
                             speed:1.5,baseDmg:5*snakeMult,dmg:5*snakeMult,size:12,cd:0,color:'#e74c3c',
                             poison:{timer:0,dmg:0,tickCd:0.3},slowTimer:0,weakenTimer:0,curseTimer:0,burnTimer:0,freezeTimer:0,burnDmg:0,
-                            spawnBiome:0,spawnWave:e.entryWave||wave,entryWave:e.entryWave||wave,skinSourceMapId:0,dropOriginMapId:0,
-                            fracturedOrigin:false,fractureMapId:null,enemySkin:null,fracturedSkinType:null,resolvedFracturedSkinType:null,_skinTypeForEnemy:null,
-                            skinOverride:'basic',forceNormalSkin:true,childSnakeDropNormal:true
+                            spawnBiome:fd1GetDropOriginMapId(e,window.currentMap),spawnWave:e.entryWave||wave,entryWave:e.entryWave||wave,skinSourceMapId:fd1GetDropOriginMapId(e,window.currentMap),dropOriginMapId:fd1GetDropOriginMapId(e,window.currentMap),
+                            fracturedOrigin:!!e.fracturedOrigin,fractureMapId:Number.isInteger(e.fractureMapId)?e.fractureMapId:null,enemySkin:null,fracturedSkinType:null,resolvedFracturedSkinType:null,_skinTypeForEnemy:null,
+                            skinOverride:null,forceNormalSkin:false,forceUnprotectedMapSkin:true,childSnakeDropNormal:false
                         });
                     }
                 }
@@ -21758,7 +21761,7 @@ function updateEnemies(dt) {
                     const basicMult = getEnemyDifficultyMultiplierFromEntry('basico', spawnWave, wave);
                     const cardboardMult = getEnemyDifficultyMultiplierFromEntry('cardboard_head', spawnWave, wave);
                     const camelFractured = !!e.fracturedOrigin;
-                    const camelSourceMap = camelFractured ? fd1GetDropOriginMapId(e, 1) : 1;
+                    const camelSourceMap = fd1GetDropOriginMapId(e, window.currentMap);
                     enemies.push({ x:e.x-10, y:e.y, type:'basico', hp:30*basicMult, maxHp:30*basicMult, speed:1.5, baseDmg:5*basicMult, dmg:5*basicMult, size:12, cd:0, color:'#e74c3c', poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0, shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4, spawnBiome:camelSourceMap, skinSourceMapId:camelSourceMap, dropOriginMapId:camelSourceMap, fracturedOrigin:camelFractured, fractureMapId:camelFractured ? camelSourceMap : null, enemySkin:null, fracturedSkinType:null, resolvedFracturedSkinType:null, _skinTypeForEnemy:null });
                     enemies.push({ x:e.x+10, y:e.y, type:'cardboard_head', hp:45*cardboardMult, maxHp:45*cardboardMult, speed:1.35, baseDmg:5*cardboardMult, dmg:5*cardboardMult, size:15, cd:0, color:'#b8793c', poison:{timer:0,dmg:0,tickCd:0}, slowTimer:0, weakenTimer:0, burnTimer:0, freezeTimer:0, burnDmg:0, speedBuffTimer:0, soak:0, shockTimer:0, shockSemiTimer:0, shockTick:0, shockSemiTick:0, shockDmg:0, shockSemiDmg:0, shockRate:0.3, semiShockRate:0.4, isGlobalArmored:true, breakIntoBasic:true, spawnBiome:camelSourceMap, skinSourceMapId:camelSourceMap, dropOriginMapId:camelSourceMap, fracturedOrigin:camelFractured, fractureMapId:camelFractured ? camelSourceMap : null, enemySkin:null, fracturedSkinType:null, resolvedFracturedSkinType:null, _skinTypeForEnemy:null });
                 }
@@ -24742,7 +24745,7 @@ function updateProjectiles(dt) {
 
 function resolveTourTruckDeathExplosion(e) {
     const radius=132, explosionDamage=Math.max(1,(e?.baseDmg||0)*1.65), mult=Math.max(0.25,(Number(e?.maxHp)||450)/450);
-    const sourceMap=Number.isInteger(e?.skinSourceMapId)?e.skinSourceMapId:9, fractured=!!e?.fracturedOrigin;
+    const sourceMap=typeof fd1GetDropOriginMapId==='function'?fd1GetDropOriginMapId(e,window.currentMap):(Number.isInteger(e?.skinSourceMapId)?e.skinSourceMapId:window.currentMap), fractured=!!e?.fracturedOrigin;
     createExplosion(e.x,e.y,radius,0,'#8e44ad'); createParticles(e.x,e.y,'#c56cf0');
     if(player&&player.hp>0&&player.invisTimer<=0&&player.shieldTimer<=0&&dist(e,player)<=radius+player.r){
         if(Math.random()>(player.stats?.dodgeChance||0)){const blast=explosionDamage*0.24;dealPlayerDamage(blast);addFloatingText(player.x,player.y-22,`-${Math.floor(getDisplayedPlayerDamage(blast))}`,'#c56cf0',12);if(player.hp<=0)triggerRevivePrompt();}
@@ -24750,7 +24753,7 @@ function resolveTourTruckDeathExplosion(e) {
     }
     [['rocknrool',48,9,0,15],['piano',68,7,0.9,17],['singer',58,11,1,15]].forEach(([type,hp,dmg,spd,size],idx)=>{
         const a=(Math.PI*2/3)*idx+Math.random()*0.24;
-        const child={x:e.x+Math.cos(a)*54,y:e.y+Math.sin(a)*54,type,hp:hp*mult,maxHp:hp*mult,speed:spd,baseDmg:dmg*mult,dmg:dmg*mult,size,cd:type==='rocknrool'?1.4:0,color:type==='rocknrool'?'#ff6bd6':(type==='piano'?'#6c5ce7':'#ff4d88'),poison:{timer:0,dmg:0,tickCd:0},slowTimer:0,weakenTimer:0,burnTimer:0,freezeTimer:0,burnDmg:0,speedBuffTimer:0,soak:0,shockTimer:0,shockSemiTimer:0,shockTick:0,shockSemiTick:0,shockDmg:0,shockSemiDmg:0,shockRate:0.3,semiShockRate:0.4,spawnBiome:sourceMap,spawnWave:e.entryWave||wave,entryWave:e.entryWave||wave,stationary:type==='rocknrool',poisonOnHit:0,fracturedOrigin:fractured,fractureMapId:Number.isInteger(e.fractureMapId)?e.fractureMapId:null,skinSourceMapId:sourceMap,fracturedSkinType:null,resolvedFracturedSkinType:null,_skinTypeForEnemy:null,enemySkin:null,rocker:type==='rocknrool',sounder:false,piano:type==='piano',pianoAuraRadius:125,singer:type==='singer',singerOrbitAngle:Math.random()*Math.PI*2,singerOrbitRadius:28,singerOrbitSpeed:3.4,singerMicHitPlayer:false,sounderAttackHitTargets:[],sounderAttackTimer:0,sounderAttackCd:1.55};
+        const child={x:e.x+Math.cos(a)*54,y:e.y+Math.sin(a)*54,type,hp:hp*mult,maxHp:hp*mult,speed:spd,baseDmg:dmg*mult,dmg:dmg*mult,size,cd:type==='rocknrool'?1.4:0,color:type==='rocknrool'?'#ff6bd6':(type==='piano'?'#6c5ce7':'#ff4d88'),poison:{timer:0,dmg:0,tickCd:0},slowTimer:0,weakenTimer:0,burnTimer:0,freezeTimer:0,burnDmg:0,speedBuffTimer:0,soak:0,shockTimer:0,shockSemiTimer:0,shockTick:0,shockSemiTick:0,shockDmg:0,shockSemiDmg:0,shockRate:0.3,semiShockRate:0.4,spawnBiome:sourceMap,spawnWave:e.entryWave||wave,entryWave:e.entryWave||wave,stationary:type==='rocknrool',poisonOnHit:0,fracturedOrigin:fractured,fractureMapId:fractured&&Number.isInteger(e.fractureMapId)?e.fractureMapId:null,skinSourceMapId:sourceMap,dropOriginMapId:sourceMap,lineageMapId:sourceMap,originBiomeId:sourceMap,fracturedSkinType:null,resolvedFracturedSkinType:null,_skinTypeForEnemy:null,enemySkin:null,rocker:type==='rocknrool',sounder:false,piano:type==='piano',pianoAuraRadius:125,singer:type==='singer',singerOrbitAngle:Math.random()*Math.PI*2,singerOrbitRadius:28,singerOrbitSpeed:3.4,singerMicHitPlayer:false,sounderAttackHitTargets:[],sounderAttackTimer:0,sounderAttackCd:1.55};
         if(fractured)child.fracturedSkinType=getFracturedEnemySkinType(child); enemies.push(child);
     });
 }
@@ -26322,12 +26325,21 @@ function getCosmicTransformationPool() {
     ]))].filter(t => t !== 'cosmic');
     const out = [];
     const seen = new Set();
+    const sandboxPrototypeTypes = new Set((typeof SANDBOX_PROTOTYPES !== 'undefined' && Array.isArray(SANDBOX_PROTOTYPES) ? SANDBOX_PROTOTYPES : []).map(p => String(p?.enemyType || '').toLowerCase()));
+    const forbiddenBossTypes = new Set(['boss','megaboss','mega_boss']);
     const add = (type, skin, mapId) => {
         const t = String(type || '').toLowerCase();
         const sk = String(skin || '');
         const m = Number.isInteger(mapId) ? mapId : null;
-        if (!t || getEnemyEntryWave(t, wave) > wave) return;
+        if (!t || forbiddenBossTypes.has(t) || getEnemyEntryWave(t, wave) > wave) return;
         if (!sk || typeof getEnemySpritePath !== 'function' || !getEnemySpritePath(sk)) return;
+        // Sandbox prototypes are only the base prototype sprite without a map variant.
+        // Real map-specific skins of the same enemy remain valid Cosmic transformations.
+        if (sandboxPrototypeTypes.has(t) && m === null) {
+            let canonical = '';
+            try { canonical = sandboxCanonicalEnemySpriteKey(t); } catch (_) { canonical = t; }
+            if (String(sk).toLowerCase() === String(canonical || '').toLowerCase()) return;
+        }
         const key = `${t}|${sk}|${m === null ? 'base' : m}`;
         if (seen.has(key)) return;
         seen.add(key);
@@ -27831,8 +27843,8 @@ function draw() {
     enemies.forEach(e => { 
         if (!isWorldVisible(e.x, e.y, e.size || 24)) return;
         const effectiveSpriteType = getEffectiveEnemySpriteType(e);
-        const hidePrototypeSprite = !!e.sandboxPrototype && !window.__FD_CANONICAL_ONLY_ENEMY_TYPES?.has(String(e.type || '').toLowerCase());
-        const enemySpriteType = hidePrototypeSprite ? null : (getEnemySpritePath(effectiveSpriteType) ? effectiveSpriteType : (getEnemySpritePath(e.type) ? e.type : null));
+        // A identidade histórica de Prototype nunca deve esconder um sprite válido.
+        const enemySpriteType = getEnemySpritePath(effectiveSpriteType) ? effectiveSpriteType : (getEnemySpritePath(e.type) ? e.type : null);
         const enemySprite = enemySpriteType ? getEnemySpriteImage(enemySpriteType) : null;
         const pogoScale = e.pogo ? (Number(e.pogoScale)||1) : 1;
         const drawY = e.pogo ? e.y + (Number(e.pogoJumpOffset)||0) : e.y;
@@ -35849,7 +35861,10 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
   }
   function enemyNoCloud(e){
     if(!e)return false;
-    const vals=[e.type,e.id,e.name,e.skinOverride,e.enemySkin,e.fracturedSkinType,e.resolvedFracturedSkinType,e._skinTypeForEnemy,e.skySpecialType].map(v=>String(v||'').toLowerCase());
+    if(e.fdSkyFalling)return true;
+    const rawVals=[e.type,e.id,e.name,e.skinOverride,e.enemySkin,e.fracturedSkinType,e.resolvedFracturedSkinType,e._skinTypeForEnemy,e.skySpecialType];
+    try { const actual=(window.getEffectiveEnemySpriteType||getEffectiveEnemySpriteType)?.(e); if(actual) rawVals.push(actual); } catch(_) {}
+    const vals=rawVals.map(v=>String(v||'').toLowerCase());
     // Os inimigos que já voam com uma skin do Céu não precisam da plataforma de nuvem.
     // Mega Boss, Colosso, Atirador de Elite Master e Líder de Elite são exceções: sempre têm nuvem.
     const permanentCloud=new Set(['megaboss','mega_boss','colosso','elite_master','master_elite_shooter','lider_elite','elite_leader']);
@@ -37014,6 +37029,7 @@ body.fd-sky-weather-storm #fd-sky-tablet{background:linear-gradient(145deg,#aeb7
   const safe=(fn)=>{try{return fn();}catch(err){console.warn('FD sky/Sandbox fix:',err);}};
 
   function fdFriendlyCloudsActive(){
+    if(Number(window.currentMap)===21 && (!!window.survivalModeRun || !!window.survivalLaunch)) return true;
     return Number(window.currentMap)===21 && (
       (typeof sandboxMode!=='undefined' && sandboxMode && !!sandboxSettings?.friendlyClouds) ||
       window.seasonalQuestRun?.id==='pelos_ares'
@@ -37023,14 +37039,20 @@ body.fd-sky-weather-storm #fd-sky-tablet{background:linear-gradient(145deg,#aeb7
 
   function fdIsSkyCloudException(e){
     if(!e)return false;
-    const values=[e.type,e.id,e.name,e.skinOverride,e.enemySkin,e.fracturedSkinType,e.resolvedFracturedSkinType,e._skinTypeForEnemy,e.skySpecialType].map(v=>String(v||'').toLowerCase());
-    const balloon=!!(e.globalBalloon||e.gangsterBalloon) || values.some(v=>['ballon','balloon','baloon','pumpkin_baloon','driver_baloon'].includes(v) || /baloneiro|balloon|baloon/.test(v));
-    const plane=values.some(v=>v==='fighter_plane'||v==='plane'||v==='radioactive_plane');
+    const values=[e.type,e.id,e.name,e.skinOverride,e.enemySkin,e.fracturedSkinType,e.resolvedFracturedSkinType,e._skinTypeForEnemy,e.skySpecialType];
+    // Include the sprite actually selected by the renderer. A boss or child can be
+    // visually a Sky variant even when the variant exists only through its map tags.
+    try { const actual=(window.getEffectiveEnemySpriteType||getEffectiveEnemySpriteType)?.(e); if(actual) values.push(actual); } catch(_) {}
+    const normalized=values.map(v=>String(v||'').toLowerCase());
+    const balloon=!!(e.globalBalloon||e.gangsterBalloon) || normalized.some(v=>['ballon','balloon','baloon','pumpkin_baloon','driver_baloon'].includes(v) || /baloneiro|balloon|baloon/.test(v));
+    const plane=normalized.some(v=>v==='fighter_plane'||v==='plane'||v==='radioactive_plane');
     const skySkin=['sky_basic','aero_hat','iron_aero_hat','motor_head','plane_truck','sky_shooter','sky_velocist','sky_giant','sky_boss','sky_tank','wingsuit_kamiaze','sky_healer','sky_elite_shooter','sky_leader','helicopter','jet','enemy_drone'];
-    const skyEnemy=values.some(v=>skySkin.includes(v));
+    const skyEnemy=normalized.some(v=>skySkin.includes(v));
     const permanentCloud=['megaboss','mega_boss','colosso','elite_master','master_elite_shooter','lider_elite','elite_leader'];
-    const cloudPlatformAlways=values.some(v=>permanentCloud.includes(v));
-    return balloon||plane||skyEnemy||cloudPlatformAlways;
+    const cloudPlatformAlways=normalized.some(v=>permanentCloud.includes(v));
+    const skyOrigin=Number(window.currentMap)===21 && [e.skinSourceMapId,e.dropOriginMapId,e.fractureMapId,e.spawnBiome].some(v=>Number(v)===21);
+    const skyRosterType=['basico','basic','cardboard_head','motorcycle_helmet','prism_head','truck','atirador','velocista','gigante','boss','tanque','kamikaze','curandeiro','elite','lider'].includes(String(e.type||'').toLowerCase());
+    return balloon||plane||skyEnemy||cloudPlatformAlways||(skyOrigin&&skyRosterType);
   }
   window.fdIsSkyCloudException=fdIsSkyCloudException;
 
@@ -37446,6 +37468,482 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
   resolveCanonicalEnemySprite.__fdCanonicalOnlySpriteFix=true;
   window.getEffectiveEnemySpriteType=resolveCanonicalEnemySprite;
   try{getEffectiveEnemySpriteType=resolveCanonicalEnemySprite;}catch(_){}
+})();
+</script>
+
+
+<script id="fd-sky-lineage-dispersion-fixes-v1">
+(function(){
+  'use strict';
+  if(window.__FD_SKY_LINEAGE_DISPERSION_FIXES_V1)return;
+  window.__FD_SKY_LINEAGE_DISPERSION_FIXES_V1=true;
+  const safe=(fn)=>{try{return fn();}catch(_){return null;}};
+  const validMap=(v)=>Number.isInteger(v)&&v>=0&&v<(Array.isArray(window.MAPS)?window.MAPS.length:22)&&v!==11;
+  const genericSkins=new Set([
+    'basic','basico','velocist','velocista','dancer','shooter','atirador','giant','gigante','tank','tanque',
+    'healer','curandeiro','elite_shooter','elite','master_elite_shooter','elite_master','leader','lider',
+    'elite_leader','lider_elite','boss','mega_boss','megaboss','colossum','colosso','cardboard_head',
+    'motorcycle_helmet','prism_head','tnt_crate','ballon','truck','helmet','prism'
+  ]);
+  const skySkins=new Set([
+    'sky_basic','aero_hat','iron_aero_hat','motor_head','plane_truck','sky_shooter','sky_velocist','sky_giant',
+    'sky_boss','sky_tank','wingsuit_kamiaze','sky_healer','sky_elite_shooter','sky_leader','helicopter','jet','enemy_drone'
+  ]);
+  const daySkins=new Set(['kid_basic','fancy_cardboard','teddy_head','cube_head','kid_velocist','kid_shooter','kid_giant','kid_healer','kid_kamikaze','fancy_baloon','confette_tank','kid_truck','kid_leader','kid_elite_shooter','jacknbox','baby_boss','pogo','kid_snake']);
+  const radioactiveSkins=new Set(['war_basic','war_hat','war_helmet','nuke_head','cartographer','war_shooter','war_giant','bazooka_tank','war_healer','masked_elite_shooter','nuke_kamikaze','commander_leader','driver_baloon','tank_truck','commander_boss','plane','machine_gun_war','anti_radiation','mutant_basic','mutant_giant']);
+  const skyCanonical={basico:'sky_basic',basic:'sky_basic',cardboard_head:'aero_hat',motorcycle_helmet:'iron_aero_hat',prism_head:'motor_head',truck:'plane_truck',atirador:'sky_shooter',velocista:'sky_velocist',gigante:'sky_giant',boss:'sky_boss',tanque:'sky_tank',kamikaze:'wingsuit_kamiaze',curandeiro:'sky_healer',elite:'sky_elite_shooter',lider:'sky_leader'};
+  const dayCanonical={basico:'kid_basic',basic:'kid_basic',cardboard_head:'fancy_cardboard',motorcycle_helmet:'teddy_head',prism_head:'cube_head',velocista:'kid_velocist',atirador:'kid_shooter',gigante:'kid_giant',curandeiro:'kid_healer',kamikaze:'kid_kamikaze',ballon:'fancy_baloon',tanque:'confette_tank',truck:'kid_truck',lider:'kid_leader',elite:'kid_elite_shooter',tnt_crate:'jacknbox',boss:'baby_boss'};
+  const radioCanonical={basico:'war_basic',cardboard_head:'war_hat',motorcycle_helmet:'war_helmet',prism_head:'nuke_head',velocista:'cartographer',dancer:'cartographer',atirador:'war_shooter',gigante:'war_giant',boss:'commander_boss',megaboss:'commander_boss',curandeiro:'war_healer',kamikaze:'nuke_kamikaze',tanque:'bazooka_tank',lider:'commander_leader',elite:'masked_elite_shooter',elite_master:'masked_elite_shooter',lider_elite:'commander_leader',ballon:'driver_baloon',truck:'tank_truck'};
+
+  function sourceMapFromSkin(e, skin){
+    const s=String(skin||'').toLowerCase();
+    if(!s||genericSkins.has(s))return null;
+    if(skySkins.has(s))return 21;
+    if(s==='gangster'||s==='metro_shooter'||s==='metro_ballon')return 6;
+    if(daySkins.has(s))return 20;
+    if(radioactiveSkins.has(s))return 19;
+    const type=String(e?.type||'').toLowerCase();
+    if(dayCanonical[type]===s || ((type==='pogo'||type==='kid_snake')&&s===type))return 20;
+    if(radioCanonical[type]===s)return 19;
+    const coliseumSkins=(typeof COLISEUM_SKINS!=='undefined'&&COLISEUM_SKINS)?COLISEUM_SKINS:window.COLISEUM_SKINS;
+    if(typeof coliseumSkins==='object'&&coliseumSkins){
+      if(String(coliseumSkins[type]||'').toLowerCase()===s || ['sword','shield','roman_turtle','archer','roman_statue','cesar'].includes(s))return 15;
+    }
+    const ids=[20,19,15,14,13,10,9,8,7,6,5,4,3,2,1,0];
+    for(const mapId of ids){
+      const found=safe(()=>{
+        if(mapId===20)return dayCanonical[type]||((type==='pogo'||type==='kid_snake')?type:null);
+        if(mapId===19)return radioCanonical[type]||null;
+        if(mapId===15){const skins=(typeof COLISEUM_SKINS!=='undefined'&&COLISEUM_SKINS)?COLISEUM_SKINS:window.COLISEUM_SKINS;return skins?.[type]||null;}
+        if(typeof window.getFracturedEnemySkinType==='function')return window.getFracturedEnemySkinType({type,fracturedOrigin:true,fractureMapId:mapId,skinSourceMapId:mapId,spawnBiome:mapId,_skinTypeForEnemy:null});
+        return null;
+      });
+      if(String(found||'').toLowerCase()===s)return mapId;
+    }
+    return null;
+  }
+  function explicitSkinMap(e){
+    if(!e||typeof e!=='object')return null;
+    const candidates=[];
+    for(const k of ['skinOverride','lineageSkinKey','fracturedSkinType','resolvedFracturedSkinType','enemySkin'])if(e[k])candidates.push(e[k]);
+    if(!e.forceUnprotectedMapSkin)safe(()=>{const getter=window.getEffectiveEnemySpriteType;if(typeof getter==='function'){const actual=getter(e);if(actual)candidates.push(actual);}});
+    for(const skin of candidates){const map=sourceMapFromSkin(e,skin);if(validMap(map))return map;}
+    // Map-owned skins can be stored only as lineage tags in older enemy objects.
+    if(Number(e.skinSourceMapId)===21 && skyCanonical[String(e.type||'').toLowerCase()])return 21;
+    return null;
+  }
+  function resolveDropMap(e,fallback){
+    const explicit=explicitSkinMap(e);
+    if(validMap(explicit))return explicit;
+    // Unskinned/base enemies use the arena they die in, not a stale spawn tag or
+    // a type-specific fallback (e.g. every cardboard head being forced to Desert).
+    const current=Number(window.currentMap);
+    if(validMap(current))return current;
+    if(validMap(fallback))return fallback;
+    for(const k of ['lineageMapId','originBiomeId','skinSourceMapId','dropOriginMapId','fractureMapId','spawnBiome'])if(validMap(e?.[k]))return e[k];
+    return 0;
+  }
+  window.fdResolveEnemyLineageMapId=resolveDropMap;
+  window.fdStampEnemyLineage=function(e,skin,mapId){
+    if(!e||typeof e!=='object')return null;
+    const resolved=validMap(mapId)?mapId:sourceMapFromSkin(e,skin)||resolveDropMap(e,window.currentMap);
+    if(!validMap(resolved))return null;
+    e.lineageMapId=resolved;e.originBiomeId=resolved;e.skinSourceMapId=resolved;e.dropOriginMapId=resolved;
+    if(skin)e.lineageSkinKey=String(skin).toLowerCase();
+    if(e.fracturedOrigin&&validMap(resolved))e.fractureMapId=resolved;
+    return resolved;
+  };
+  const dropOriginResolver=function(e,fallback=window.currentMap){return resolveDropMap(e,fallback);};
+  window.fd1GetDropOriginMapId=dropOriginResolver;
+  try{fd1GetDropOriginMapId=dropOriginResolver;}catch(_){}
+
+  // Universal inheritance for splitters, death drops, summons and transformations
+  // that use inheritHypnosis(). Preserve an explicitly selected map skin; otherwise
+  // let the offspring use the map where its parent died.
+  const oldInherit=window.inheritHypnosis||(typeof inheritHypnosis==='function'?inheritHypnosis:null);
+  if(typeof oldInherit==='function'&&!oldInherit.__fdLineageV1){
+    const inherit=function(parent,child){
+      const parentMap=resolveDropMap(parent,window.currentMap);
+      // Resolve a child's deliberately requested skin before old inheritance copies
+      // the parent's tags onto it; otherwise a plain child can appear falsely skinned.
+      const childExplicit=explicitSkinMap(child);
+      const out=oldInherit.apply(this,arguments)||child;
+      const map=validMap(childExplicit)?childExplicit:(validMap(parentMap)?parentMap:(validMap(window.currentMap)?window.currentMap:0));
+      out.lineageMapId=map;out.originBiomeId=map;out.skinSourceMapId=map;out.dropOriginMapId=map;
+      if(out.fracturedOrigin&&validMap(map))out.fractureMapId=map;
+      return out;
+    };
+    inherit.__fdLineageV1=true;window.inheritHypnosis=inherit;try{inheritHypnosis=inherit;}catch(_){}
+  }
+
+  // Also repair direct child spawns that bypass inheritHypnosis (e.g. armored drops)
+  // without rewriting their runtime spawnBiome mechanics.
+  const oldSpawn=window.spawnEnemy||(typeof spawnEnemy==='function'?spawnEnemy:null);
+  if(typeof oldSpawn==='function'&&!oldSpawn.__fdDropOriginV1){
+    const spawn=function(){
+      const before=Array.isArray(window.enemies)?window.enemies.length:(typeof enemies!=='undefined'&&Array.isArray(enemies)?enemies.length:0);
+      const out=oldSpawn.apply(this,arguments);
+      const list=Array.isArray(window.enemies)?window.enemies:(typeof enemies!=='undefined'&&Array.isArray(enemies)?enemies:null);
+      if(list){
+        const fresh=list.slice(before);
+        if(out&&typeof out==='object'&&out.type&&!fresh.includes(out))fresh.push(out);
+        for(const e of fresh){
+          if(!e||!e.type)continue;
+          const map=resolveDropMap(e,window.currentMap);
+          if(validMap(map)){e.lineageMapId=map;e.originBiomeId=map;e.skinSourceMapId=map;e.dropOriginMapId=map;if(e.fracturedOrigin&&validMap(map))e.fractureMapId=map;}
+        }
+      }
+      return out;
+    };
+    spawn.__fdDropOriginV1=true;window.spawnEnemy=spawn;try{spawnEnemy=spawn;}catch(_){}
+  }
+
+  // The Metro balloon must always release the Gangster variant, independently of
+  // stale source-map fields left by its spawn path.
+  const oldUpdate=window.updateEnemies||(typeof updateEnemies==='function'?updateEnemies:null);
+  if(typeof oldUpdate==='function'&&!oldUpdate.__fdMetroBalloonGangsterV1){
+    const update=function(){
+      const listBefore=window.enemies||(typeof enemies!=='undefined'?enemies:null);
+      // Only balloons whose actual variant belongs to Metro are converted to Gangster.
+      // Do not overwrite a foreign explicit skin merely because it entered this map.
+      if(Number(window.currentMap)===6&&Array.isArray(listBefore)){
+        for(const e of listBefore){
+          if(!e||String(e.type||'').toLowerCase()!=='ballon')continue;
+          const visualMap=explicitSkinMap(e);
+          if(!validMap(visualMap)||visualMap===6)e.gangsterBalloon=true;
+        }
+      }
+      return oldUpdate.apply(this,arguments);
+    };
+    update.__fdMetroBalloonGangsterV1=true;window.updateEnemies=update;try{updateEnemies=update;}catch(_){}
+  }
+
+  // The late armour-break renderer used the older lineage resolver, which could reuse
+  // a stale map id. Resolve the unarmoured basic sprite from the already-stamped origin.
+  const previousEffectiveFinal=window.getEffectiveEnemySpriteType||(typeof getEffectiveEnemySpriteType==='function'?getEffectiveEnemySpriteType:null);
+  const basicSkinByMap=(mapId)=>{
+    const id=Number(mapId);
+    const table={0:'basic',1:'desert_basic',2:'snow_basic',3:'cave_basic',4:'forest_basic',5:'forest_basic',6:'basic',7:'magma_basic',8:'bambuzal_basic',9:'disco_basic',10:'swim_basic',12:'basic',13:'space_basic',14:'fall_basic',16:'basic',17:'basic',18:'basic',19:'war_basic',20:'kid_basic',21:'sky_basic'};
+    let key=table[id]||null;
+    if(id===15){const skins=(typeof COLISEUM_SKINS!=='undefined'&&COLISEUM_SKINS)?COLISEUM_SKINS:window.COLISEUM_SKINS;key=skins?.basico||'roman_basic';}
+    if(key&&getEnemySpritePath(key))return key;
+    return null;
+  };
+  if(typeof previousEffectiveFinal==='function'&&!previousEffectiveFinal.__fdCorrectLineageBasicSkinV1){
+    const effectiveLineageBasic=function(e){
+      if(e?.skinOverride&&getEnemySpritePath(e.skinOverride))return e.skinOverride;
+      if(e?.forceUnprotectedMapSkin){
+        const map=validMap(e.skinSourceMapId)?e.skinSourceMapId:Number(window.currentMap);
+        const key=basicSkinByMap(map);
+        if(key)return key;
+      }
+      return previousEffectiveFinal.apply(this,arguments);
+    };
+    effectiveLineageBasic.__fdCorrectLineageBasicSkinV1=true;
+    window.getEffectiveEnemySpriteType=effectiveLineageBasic;
+    try{getEffectiveEnemySpriteType=effectiveLineageBasic;}catch(_){}
+  }
+
+  // Sanitize both optional dispersion rows after each character detail render. Only
+  // Grenade/Rüben can own primary dispersion damage; only leveled Rüben has ability spread.
+  const oldShow=window.showCharDetail||(typeof showCharDetail==='function'?showCharDetail:null);
+  if(typeof oldShow==='function'&&!oldShow.__fdDispersionSanitizedV1){
+    const show=function(id){
+      const result=oldShow.apply(this,arguments);
+      const charId=String(id||window.currentDetailCharId||'').toLowerCase();
+      const validText=(el)=>{
+        if(!el)return false;
+        const raw=String(el.textContent??'').trim();
+        if(!raw||/^null|undefined|nan$/i.test(raw))return false;
+        const n=Number(raw);
+        return Number.isFinite(n)&&n>0;
+      };
+      const setRow=(rowId,valueId,allowed)=>{
+        const row=document.getElementById(rowId),value=document.getElementById(valueId);
+        const showIt=!!allowed&&validText(value);
+        if(row){row.classList.toggle('hidden',!showIt);row.style.display=showIt?'':'none';row.setAttribute('aria-hidden',showIt?'false':'true');}
+        if(value&&!showIt)value.textContent='';
+      };
+      setRow('detail-dispersion-stat','detail-dispersion-dmg',charId==='grenade'||charId==='ruben');
+      const playerData=(typeof pd!=='undefined'&&pd)?pd:window.pd;
+      const owned=!!(playerData?.chars?.[charId]);
+      const level=Math.max(0,Number(playerData?.chars?.[charId]?.level)||0);
+      setRow('detail-ability-dispersion-stat','detail-ability-dispersion-dmg',charId==='ruben'&&owned&&level>=5);
+      return result;
+    };
+    show.__fdDispersionSanitizedV1=true;window.showCharDetail=show;try{showCharDetail=show;}catch(_){}
+  }
+})();
+</script>
+
+
+<script id="fd-sandbox-spawn-sprite-consistency-v2">
+(function(){
+  'use strict';
+  if (window.__FD_SANDBOX_SPAWN_SPRITE_CONSISTENCY_V2) return;
+  window.__FD_SANDBOX_SPAWN_SPRITE_CONSISTENCY_V2 = true;
+  const safe = fn => { try { return fn(); } catch (_) { return null; } };
+  const pathOf = key => (typeof getEnemySpritePath === 'function' ? getEnemySpritePath(String(key || '').toLowerCase()) : '');
+  const isRemovedDancerType = type => ['dancer','velocista_dancarino'].includes(String(type || '').toLowerCase());
+  const hasPrototypeMarker = value => !!(value && (value.prototype || value.sandboxPrototype || value.isPrototype || value.prototypeKey || value.variantType === 'prototype'));
+
+  // Completely remove the old special Prototype roster. The actual enemies remain
+  // available as normal entities in the validated roster below.
+  safe(() => { if (typeof SANDBOX_PROTOTYPES !== 'undefined' && Array.isArray(SANDBOX_PROTOTYPES)) SANDBOX_PROTOTYPES.length = 0; });
+  safe(() => { if (typeof SANDBOX_PROTOTYPE_MAP !== 'undefined' && SANDBOX_PROTOTYPE_MAP) Object.keys(SANDBOX_PROTOTYPE_MAP).forEach(k => delete SANDBOX_PROTOTYPE_MAP[k]); });
+  const noPrototype = function(){ return null; };
+  window.getSandboxPrototype = noPrototype;
+  try { getSandboxPrototype = noPrototype; } catch (_) {}
+  window.sandboxPrototypeCanvasMarkup = function(){ return ''; };
+  try { sandboxPrototypeCanvasMarkup = window.sandboxPrototypeCanvasMarkup; } catch (_) {}
+  window.drawSandboxPrototypePreview = function(){ return false; };
+  try { drawSandboxPrototypePreview = window.drawSandboxPrototypePreview; } catch (_) {}
+
+  const roleNames = {
+    basico:'Básico', basic:'Básico', acucarado:'Básico', cardboard_head:'Cabeça de Papelão', cardboard:'Cabeça de Papelão',
+    motorcycle_helmet:'Capacete', helmet:'Capacete', prism_head:'Cabeça Prisma', prism:'Cabeça Prisma',
+    velocista:'Velocista', velocist:'Velocista', atirador:'Atirador', shooter:'Atirador', gigante:'Gigante', giant:'Gigante',
+    boss:'Boss', megaboss:'Mega Boss', mega_boss:'Mega Boss', curandeiro:'Curandeiro', healer:'Curandeiro', kamikaze:'Kamikaze',
+    elite:'Atirador de Elite', elite_shooter:'Atirador de Elite', tanque:'Tanque', tank:'Tanque', lider:'Líder', leader:'Líder',
+    ballon:'Baloneiro', balloon:'Baloneiro', baloneiro:'Baloneiro', truck:'Caminhoneiro', caminhoneiro:'Caminhoneiro',
+    vampire:'Vampiro', skeleton:'Esqueleto', bones:'Ossos'
+  };
+  const halloweenSkinNames = {
+    hallo_basic:'Básico', witch_hat:'Cabeça de Papelão', hallo_pumpkin:'Capacete', skull_heas:'Cabeça Prisma',
+    ghost_velocist:'Velocista', monster_shooter:'Atirador', giantstein:'Gigante', hallo_boss:'Boss',
+    scary_healer:'Curandeiro', treat_kamikaze:'Kamikaze', hallo_elite_shooter:'Atirador de Elite',
+    pumpkin_tank:'Tanque', hallo_leader:'Líder', pumpkin_baloon:'Baloneiro', candy_truck:'Caminhoneiro',
+    vampire:'Vampiro', skeleton:'Esqueleto', bones:'Ossos'
+  };
+  const halloweenSkinKeys = new Set(Object.keys(halloweenSkinNames));
+  const priorName = window.fdFinalSandboxEnemyName || window.sandboxEnemyButtonLabel || (typeof sandboxEnemyButtonLabel === 'function' ? sandboxEnemyButtonLabel : null);
+  const finalEnemyName = function(type, skin, mapId){
+    const t = String(type || '').toLowerCase();
+    const sk = String(skin || '').toLowerCase();
+    if (halloweenSkinKeys.has(sk)) {
+      // Use the enemy role as the name, then explicitly mark it as a Halloween variant.
+      const role = roleNames[t] || halloweenSkinNames[sk] || String(type || 'Inimigo');
+      return `${role} - HALLOWEEN`;
+    }
+    const old = typeof priorName === 'function' ? safe(() => priorName.call(this, type, skin, mapId)) : '';
+    return String(old || roleNames[t] || type || skin || 'Inimigo');
+  };
+  window.fdFinalSandboxEnemyName = finalEnemyName;
+  window.sandboxEnemyButtonLabel = finalEnemyName;
+  try { fdFinalSandboxEnemyName = finalEnemyName; } catch (_) {}
+  try { sandboxEnemyButtonLabel = finalEnemyName; } catch (_) {}
+
+  const priorPool = window.sandboxEnemyPoolAll || (typeof sandboxEnemyPoolAll === 'function' ? sandboxEnemyPoolAll : null);
+  const cleanPool = function(){
+    const raw = typeof priorPool === 'function' ? safe(() => priorPool.apply(this, arguments)) : [];
+    const seen = new Set();
+    return (Array.isArray(raw) ? raw : []).map(v => String(v || '').toLowerCase().trim())
+      .filter(t => t && !isRemovedDancerType(t) && !hasPrototypeMarker(t) && !seen.has(t) && seen.add(t));
+  };
+  window.sandboxEnemyPoolAll = cleanPool;
+  try { sandboxEnemyPoolAll = cleanPool; } catch (_) {}
+
+  const priorVariants = window.fdFinalSandboxEnemyVariants || window.sandboxEnemyVariants || (typeof sandboxEnemyVariants === 'function' ? sandboxEnemyVariants : null);
+  const cleanVariants = function(type){
+    const t = String(type || '').toLowerCase();
+    if (!t || isRemovedDancerType(t)) return [];
+    const out = [], seen = new Set();
+    const add = (skin, mapId) => {
+      const key = String(skin || '').toLowerCase().trim();
+      // The dancer sprite is a removed dancer-type entry, not a Velocista skin option.
+      if (!key || key === 'dancer' || key === 'velocista_dancarino' || !pathOf(key)) return;
+      if (hasPrototypeMarker({skin:key}) || /prototype/i.test(key)) return;
+      if (Number.isInteger(mapId) && (mapId < 0 || mapId >= (Array.isArray(MAPS) ? MAPS.length : 22) || mapId === 11)) return;
+      const map = Number.isInteger(mapId) ? mapId : null;
+      const id = `${key}|${map === null ? 'base' : map}`;
+      if (seen.has(id)) return;
+      seen.add(id); out.push({ skin:key, mapId:map });
+    };
+    // Always offer a real, normal sprite first. Earlier filters accidentally removed
+    // this entry whenever its enemy type also existed in the obsolete Prototype list.
+    let canonical = '';
+    canonical = safe(() => typeof sandboxCanonicalEnemySpriteKey === 'function' ? sandboxCanonicalEnemySpriteKey(t) : '') || '';
+    if (!pathOf(canonical)) canonical = safe(() => typeof canonicalSprite === 'function' ? canonicalSprite(t) : '') || '';
+    if (!pathOf(canonical) && pathOf(t)) canonical = t;
+    if (canonical) add(canonical, null);
+    const raw = typeof priorVariants === 'function' ? safe(() => priorVariants.call(this, t)) : [];
+    if (Array.isArray(raw)) for (const v of raw) {
+      if (!v || hasPrototypeMarker(v)) continue;
+      const skin = v.skin || v.spriteKey || v.key || '';
+      // Do not leak a prototype object/marker through a wrapped older variant provider.
+      if (String(v.type || '').toLowerCase() === 'prototype' || String(v.kind || '').toLowerCase() === 'prototype') continue;
+      add(skin, Number.isInteger(v.mapId) ? v.mapId : null);
+    }
+    // Rebuild biome appearances independently of the old Sandbox filters. Those filters
+    // had an early return for several boss/elite types, which erased their real map skins.
+    if (typeof getFracturedEnemySkinType === 'function' && Array.isArray(MAPS)) {
+      for (let mapId = 0; mapId < MAPS.length; mapId++) {
+        if (mapId === 11) continue; // Fraturado chooses skins dynamically; it is not a skin source.
+        const mapSkin = safe(() => getFracturedEnemySkinType({
+          type:t, fracturedOrigin:true, fractureMapId:mapId, skinSourceMapId:mapId,
+          dropOriginMapId:mapId, spawnBiome:mapId, _skinTypeForEnemy:null
+        }));
+        const key = String(mapSkin || '').toLowerCase();
+        if (key && key !== canonical && key !== t && pathOf(key)) add(key, mapId);
+      }
+    }
+    return out;
+  };
+  window.fdFinalSandboxEnemyVariants = cleanVariants;
+  window.sandboxEnemyVariants = cleanVariants;
+  try { fdFinalSandboxEnemyVariants = cleanVariants; } catch (_) {}
+  try { sandboxEnemyVariants = cleanVariants; } catch (_) {}
+
+  // One renderer for every real enemy variant. Every card points at an existing sprite
+  // path; no Prototype card, missing canonical card, or dangling variant is emitted.
+  const renderEnemies = function(root){
+    if (!root) return;
+    const types = cleanPool();
+    const cards = [];
+    for (const type of types) {
+      const variants = cleanVariants(type);
+      for (const variant of variants) {
+        const skin = variant.skin;
+        const icon = pathOf(skin);
+        if (!icon) continue;
+        const mapId = Number.isInteger(variant.mapId) ? variant.mapId : null;
+        const label = finalEnemyName(type, skin, mapId);
+        cards.push(`<button class="sandbox-entry" type="button" data-sandbox-action="enemy" data-sandbox-enemy-type="${escapeHtmlAttr(type)}" data-sandbox-enemy-skin="${escapeHtmlAttr(skin)}" data-sandbox-map-id="${escapeHtmlAttr(mapId === null ? '' : String(mapId))}"><img src="${escapeHtmlAttr(icon)}" data-sandbox-sprite-key="${escapeHtmlAttr(skin)}" alt=""><span>${escapeHtmlText(label)}</span></button>`);
+      }
+    }
+    root.innerHTML = `<div class="sandbox-section-head"><button class="sandbox-small-btn" type="button" data-sandbox-action="tab" data-sandbox-tab="home">Voltar</button><h2>Inimigos</h2><span>${cards.length} spawns</span></div><div class="sandbox-list">${cards.join('')}</div>`;
+    root.querySelectorAll('img[data-sandbox-sprite-key]').forEach(img => {
+      img.onerror = function(){
+        const t = String(this.closest('[data-sandbox-enemy-type]')?.dataset?.sandboxEnemyType || '').toLowerCase();
+        const fallback = safe(() => typeof sandboxCanonicalEnemySpriteKey === 'function' ? sandboxCanonicalEnemySpriteKey(t) : '') || 'basic';
+        const next = pathOf(fallback) || 'enemies/basic.png';
+        if (this.dataset.fdFallbackUsed !== '1' && this.getAttribute('src') !== next) {
+          this.dataset.fdFallbackUsed = '1'; this.src = next;
+        } else this.style.visibility = 'hidden';
+      };
+    });
+  };
+  window.renderSandboxEnemies = renderEnemies;
+  try { renderSandboxEnemies = renderEnemies; } catch (_) {}
+
+  // Explicit Sandbox skin wins even for Boss, Mega Boss, Colosso and Elite roles.
+  // This corrects the previous canonical-only resolver that silently discarded skins.
+  const priorEffective = window.getEffectiveEnemySpriteType || (typeof getEffectiveEnemySpriteType === 'function' ? getEffectiveEnemySpriteType : null);
+  const genericSpriteNames = new Set([
+    'basic','basico','acucarado','velocist','velocista','dancer','shooter','atirador','giant','gigante','tank','tanque',
+    'healer','curandeiro','elite_shooter','elite','master_elite_shooter','elite_master','leader','lider','elite_leader','lider_elite',
+    'boss','mega_boss','megaboss','colossum','colosso','cardboard_head','motorcycle_helmet','prism_head','tnt_crate','ballon','truck'
+  ]);
+  const effectiveSprite = function(e){
+    if (!e) return '';
+    if (Number(e.merlinBabyTimer) > 0 && pathOf('merlin_baby')) return 'merlin_baby';
+    const override = String(e.skinOverride || '').toLowerCase();
+    if (override && pathOf(override)) return override;
+    const type = String(e.type || '').toLowerCase();
+    if (type === 'goblin' && String(e.enemySkin || '').toLowerCase() === 'hunter' && pathOf('hunter_goblin')) return 'hunter_goblin';
+    if (e._skinTypeForEnemy === type) {
+      for (const candidate of [e.fracturedSkinType, e.resolvedFracturedSkinType]) {
+        const key = String(candidate || '').toLowerCase();
+        if (key && !genericSpriteNames.has(key) && pathOf(key)) return key;
+      }
+    }
+    const resolved = typeof priorEffective === 'function' ? safe(() => priorEffective.call(this, e)) : '';
+    if (resolved && pathOf(resolved)) return String(resolved).toLowerCase();
+    // Safe fallback: an enemy must still render its normal sprite if an older wrapper
+    // returns an invalid/missing skin key.
+    const canonical = safe(() => typeof sandboxCanonicalEnemySpriteKey === 'function' ? sandboxCanonicalEnemySpriteKey(type) : '') || '';
+    if (pathOf(canonical)) return canonical;
+    if (pathOf(type)) return type;
+    return '';
+  };
+  effectiveSprite.__fdSandboxSpriteConsistencyV2 = true;
+  window.getEffectiveEnemySpriteType = effectiveSprite;
+  try { getEffectiveEnemySpriteType = effectiveSprite; } catch (_) {}
+
+  // Invoking a previously cached prototype or Dancer must no longer create one.
+  const priorSandboxSpawn = window.sandboxSpawnEnemy || (typeof sandboxSpawnEnemy === 'function' ? sandboxSpawnEnemy : null);
+  if (typeof priorSandboxSpawn === 'function') {
+    const sandboxSpawnClean = function(type, skin, direct=false, prototypeKey='', sourceMapId=null){
+      const t = String(type || '').toLowerCase();
+      if (isRemovedDancerType(t)) { safe(() => notify('Velocistas Dançarinos não fazem parte do spawn do Sandbox.')); return false; }
+      const selectedSkin = pathOf(skin) ? String(skin).toLowerCase() : '';
+      const before = new Set(Array.isArray(enemies) ? enemies : []);
+      const result = priorSandboxSpawn.call(this, t, selectedSkin, direct, '', sourceMapId);
+      if (Array.isArray(enemies)) for (const e of enemies) {
+        if (!e || before.has(e)) continue;
+        delete e.sandboxPrototype; delete e.prototype; delete e.prototypeKey; e.isPrototype = false;
+        if (selectedSkin && pathOf(selectedSkin)) e.skinOverride = selectedSkin;
+      }
+      return result;
+    };
+    sandboxSpawnClean.__fdSandboxSpawnConsistencyV2 = true;
+    window.sandboxSpawnEnemy = sandboxSpawnClean;
+    try { sandboxSpawnEnemy = sandboxSpawnClean; } catch (_) {}
+  }
+
+  // Purge stale Prototype/Dancer selections from the recent-spawn hotbar.
+  const cleanHotbar = list => (Array.isArray(list) ? list : []).filter(item => {
+    if (item?.kind !== 'enemy') return true;
+    const type = String(item?.data?.type || '').toLowerCase();
+    return !isRemovedDancerType(type) && !item?.data?.prototype && !item?.data?.sandboxPrototype && !hasPrototypeMarker(item?.data);
+  }).slice(0,9);
+  safe(() => {
+    if (typeof fdHotbar !== 'undefined' && Array.isArray(fdHotbar)) {
+      fdHotbar = cleanHotbar(fdHotbar); window.fdHotbar = fdHotbar;
+      if (typeof fdSaveHotbar === 'function') fdSaveHotbar();
+      if (typeof fdRenderHotbar === 'function') fdRenderHotbar();
+    } else if (Array.isArray(window.fdHotbar)) window.fdHotbar = cleanHotbar(window.fdHotbar);
+  });
+  safe(() => {
+    if (typeof sandboxSelectedSpawnData !== 'undefined' && sandboxSelectedSpawnData && (hasPrototypeMarker(sandboxSelectedSpawnData) || isRemovedDancerType(sandboxSelectedSpawnData.type))) {
+      sandboxSelectedSpawn = null; sandboxSelectedSpawnData = null; sandboxSelectedSpawnIcon = ''; sandboxSelectedSpawnLabel = ''; sandboxSelectedSpawnKind = '';
+    }
+  });
+
+  // Remove already-active entities that were explicitly created as Prototype variants.
+  safe(() => {
+    if (Array.isArray(enemies)) for (let i = enemies.length - 1; i >= 0; i--) if (hasPrototypeMarker(enemies[i])) enemies.splice(i,1);
+    if (Array.isArray(window.fractures)) window.fractures = window.fractures.filter(f => !hasPrototypeMarker(f));
+  });
+
+  // Survival is regenerated using the same cleaned variant provider. This also clears
+  // previously saved Dancer/Prototype entries instead of waiting for the hourly refresh.
+  const priorSurvivalVariants = window.getSurvivalEnemyVariants || (typeof getSurvivalEnemyVariants === 'function' ? getSurvivalEnemyVariants : null);
+  const survivalVariantsClean = function(){
+    const out = [], seen = new Set();
+    const types = cleanPool();
+    for (const type of types) {
+      if (!type || isRemovedDancerType(type) || ['boss','megaboss','mega_boss'].includes(type)) continue;
+      for (const v of cleanVariants(type)) {
+        const skin = String(v.skin || '').toLowerCase();
+        if (!pathOf(skin) || skin === 'dancer' || hasPrototypeMarker(v)) continue;
+        const mapId = Number.isInteger(v.mapId) ? v.mapId : null;
+        const id = `${type}|${skin}|${mapId === null ? 'base' : mapId}`;
+        if (seen.has(id)) continue; seen.add(id);
+        out.push({type, spriteKey:skin, label:finalEnemyName(type, skin, mapId), mapId});
+      }
+    }
+    return out;
+  };
+  window.getSurvivalEnemyVariants = survivalVariantsClean;
+  try { getSurvivalEnemyVariants = survivalVariantsClean; } catch (_) {}
+  safe(() => {
+    if (window.pd && pd.survival && typeof pd.survival === 'object') {
+      pd.survival.hour = -1;
+      if (typeof ensureSurvivalRotation === 'function') ensureSurvivalRotation(true);
+    }
+  });
+  for (const run of [window.survivalLaunch, window.survivalModeRun]) {
+    if (run && Array.isArray(run.enemyPool)) run.enemyPool = run.enemyPool.filter(e => e && !isRemovedDancerType(e.type) && !hasPrototypeMarker(e) && String(e.spriteKey || '').toLowerCase() !== 'dancer');
+  }
+
+  // Re-render immediately if the Sandbox was already open when the patch is evaluated.
+  safe(() => {
+    const root = document.getElementById('sandbox-content');
+    const overlay = document.getElementById('overlay-sandbox');
+    const tab = typeof sandboxTab !== 'undefined' ? sandboxTab : window.sandboxTab;
+    if (root && overlay && !overlay.classList.contains('hidden') && String(tab || '').toLowerCase() === 'enemy') renderEnemies(root);
+  });
 })();
 </script>
 
