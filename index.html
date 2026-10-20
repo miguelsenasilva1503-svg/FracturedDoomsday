@@ -429,7 +429,7 @@ html.sandbox-pc .sandbox-tool-hotkey{display:block}.sandbox-tool-state{position:
 .sandbox-section-head>span{font-size:11px;color:#aeb8c2}
 .sandbox-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:10px;padding-bottom:8px}
 .sandbox-entry{min-height:118px;padding:8px;border-radius:14px;background:linear-gradient(180deg,#20273a,#101521);border:1px solid rgba(255,255,255,.12);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#fff}
-.sandbox-entry img{width:62px;height:62px;object-fit:contain;display:block} .sandbox-entry .sandbox-prototype-preview{width:62px;height:62px;display:block;object-fit:contain}.sandbox-selected-prototype-preview{width:40px;height:40px;display:block;object-fit:contain}
+.sandbox-entry img{width:62px;height:62px;object-fit:contain;display:block;opacity:1!important;filter:none!important;mix-blend-mode:normal!important} .sandbox-entry .sandbox-prototype-preview{width:62px;height:62px;display:block;object-fit:contain;opacity:1!important;filter:none!important;mix-blend-mode:normal!important}.sandbox-selected-prototype-preview{width:40px;height:40px;display:block;object-fit:contain;opacity:1!important;filter:none!important;mix-blend-mode:normal!important}
 .sandbox-entry span{font-size:11px;font-weight:900;line-height:1.15;text-align:center;text-transform:uppercase}
 .sandbox-char-entry{min-height:130px}
 .sandbox-char-entry .char-sprite{width:100px!important;height:58px!important;margin:0!important}
@@ -14871,7 +14871,16 @@ function loop(time) {
     lastTime = time;
     try { if(!isPaused) { update(dt); draw(); } else if (sandboxMode) { draw(); } } catch (err) {
         recoverRuntimeState(err);
-        try { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; } catch (_) {}
+        try {
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.globalAlpha = 1;
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.filter = 'none';
+            ctx.setLineDash([]);
+            ctx.lineDashOffset = 0;
+            ctx.shadowBlur = 0;
+            ctx.shadowColor = 'rgba(0,0,0,0)';
+        } catch (_) {}
     }
     gameLoopId = requestAnimationFrame(loop);
 }
@@ -16195,9 +16204,40 @@ function sandboxPrototypeCanvasMarkup(key){
 function drawSandboxPrototypePreview(canvas, proto){
     if (!canvas || !proto) return;
     const c = canvas.getContext('2d'); if(!c) return;
+    // Preview canvases also keep their drawing state between renders; don't inherit a dark blend.
+    c.setTransform(1,0,0,1,0,0);
+    c.globalAlpha=1;
+    c.globalCompositeOperation='source-over';
+    c.filter='none';
+    c.shadowBlur=0;
     c.clearRect(0,0,canvas.width,canvas.height);
-    c.save(); c.translate(canvas.width/2,canvas.height/2);
-    drawShape(c, 0, 0, proto.boss ? 27 : 20, 'circle', proto.color, !!proto.boss);
+
+    const spriteKey = sandboxCanonicalEnemySpriteKey(proto.enemyType);
+    const img = spriteKey ? getEnemySpriteImage(spriteKey) : null;
+    if (img && img.complete && img.naturalWidth > 0) {
+        const pad=8;
+        const scale=Math.min((canvas.width-pad*2)/img.naturalWidth,(canvas.height-pad*2)/img.naturalHeight);
+        const w=img.naturalWidth*scale, h=img.naturalHeight*scale;
+        c.imageSmoothingEnabled=true;
+        c.drawImage(img,(canvas.width-w)/2,(canvas.height-h)/2,w,h);
+        return;
+    }
+    if (img && !img.__fdSandboxPreviewLoadHook) {
+        img.__fdSandboxPreviewLoadHook=true;
+        img.addEventListener('load',()=>drawSandboxPrototypePreview(canvas,proto),{once:true});
+    }
+    // Readable fallback while the canonical sprite is loading or missing.
+    c.save();
+    c.translate(canvas.width/2,canvas.height/2);
+    c.globalAlpha=1;
+    c.globalCompositeOperation='source-over';
+    c.fillStyle=proto.color || '#6c8ebf';
+    c.strokeStyle='#ffffff';
+    c.lineWidth=2;
+    c.beginPath();
+    if(proto.boss){for(let i=0;i<8;i++){const a=i*Math.PI/4+Math.PI/8;const r=27;if(i===0)c.moveTo(Math.cos(a)*r,Math.sin(a)*r);else c.lineTo(Math.cos(a)*r,Math.sin(a)*r);}c.closePath();}
+    else c.arc(0,0,20,0,Math.PI*2);
+    c.fill();c.stroke();
     c.restore();
 }
 
@@ -16707,7 +16747,37 @@ function drawEntryAnimation(){
     // Mesmo visual/textura/recorte luminoso das Fraturas que aparecem durante a partida.
     if(d.fracture){
         d.fracture.openProgress=progress;
-        drawFractureRay(d.fracture);
+        try {
+            drawFractureRay(d.fracture);
+        } catch (entryFractureError) {
+            // Recover to world transform and draw a simple portal bolt; the cinematic must
+            // still open even if a map-specific texture/decor renderer malfunctions.
+            console.warn('FD entry fracture fallback:', entryFractureError);
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.globalAlpha = 1;
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.filter = 'none';
+            ctx.translate(-camera.x, -camera.y);
+            ctx.save();
+            ctx.translate(d.fx, d.fy);
+            ctx.rotate(d.fracture.angle || 0);
+            const len = (Number(d.fracture.length) || 330) * (0.18 + 0.82 * progress);
+            const wid = (Number(d.fracture.width) || 115) * (0.18 + 0.82 * progress);
+            ctx.shadowColor = 'rgba(190,120,255,.95)';
+            ctx.shadowBlur = 28;
+            ctx.fillStyle = 'rgba(70,22,110,.9)';
+            ctx.strokeStyle = 'rgba(232,205,255,.98)';
+            ctx.lineWidth = Math.max(8, wid * .09);
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(-len*.5,-wid*.16); ctx.lineTo(-len*.16,-wid*.48);
+            ctx.lineTo(len*.08,-wid*.24); ctx.lineTo(len*.5,-wid*.12);
+            ctx.lineTo(len*.28,wid*.16); ctx.lineTo(len*.04,wid*.46);
+            ctx.lineTo(-len*.26,wid*.20); ctx.closePath(); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(-len*.47,0); ctx.lineTo(-len*.18,-wid*.16);
+            ctx.lineTo(len*.04,wid*.12); ctx.lineTo(len*.26,-wid*.18); ctx.lineTo(len*.47,0); ctx.stroke();
+            ctx.restore();
+        }
     }
     if(entryAnimationTime>=1.35&&entryAnimationTime<2.35){
         ctx.save();
@@ -26118,13 +26188,17 @@ function drawFractureRay(fracture) {
     ctx.lineTo(-len * 0.26, width * 0.20);
     ctx.closePath();
     ctx.clip();
-    const pattern = getFractureMapTexture(fracture.mapId);
-    if (pattern) { ctx.fillStyle = pattern; } else { ctx.fillStyle = '#27143f'; }
+    let pattern = null;
+    try { pattern = getFractureMapTexture(fracture.mapId); }
+    catch (textureError) { console.warn('FD fracture texture fallback:', textureError); }
+    // Never let a single biome pattern prevent the entry/Fracture effect from rendering.
+    ctx.fillStyle = pattern || '#27143f';
     ctx.fill();
 
     // Os elementos do bioma também ficam dentro do recorte da Fratura.
     // Isso impede árvores, cactos, pedras etc. de vazarem para fora do raio.
-    drawFractureDecorations(fracture);
+    try { drawFractureDecorations(fracture); }
+    catch (decorError) { console.warn('FD fracture decor skipped:', decorError); }
 
     ctx.restore();
 
@@ -26688,110 +26762,141 @@ function drawMajorBriggsLevelIndicator(ctx, x, y, stage) {
 
 function draw() {
     refreshRenderBounds();
+    // Canvas state is persistent between frames. Reset every compositing/visual property
+    // before clearing; otherwise a projectile/effect that leaves a blend mode or filter
+    // behind can make opaque map floors render fully transparent (black screen).
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.filter = 'none';
+    ctx.setLineDash([]);
+    ctx.lineDashOffset = 0;
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = 'rgba(0,0,0,0)';
     ctx.clearRect(0, 0, cw, ch);
     ctx.save();
     ctx.translate(-camera.x, -camera.y);
     
-    const dailyVariant = window.seasonalQuestRun?.mapVariant || window.dailyMissionRun?.mapVariant || null;
-    if (dailyVariant === 'cemetery' && typeof window.fdDrawCemeteryTextureRect === 'function') {
-        window.fdDrawCemeteryTextureRect(camera.x,camera.y,cw,ch);
-    } else if (dailyVariant === 'mines' && typeof window.fdDrawMinesTextureRect === 'function') {
-        window.fdDrawMinesTextureRect(camera.x,camera.y,cw,ch);
-    } else if (dailyVariant === 'pyramid') {
-        drawDailyPyramidTextureRect(camera.x,camera.y,cw,ch);
-    } else if (dailyVariant === 'thaw') {
-        drawDailyThawTextureRect(camera.x,camera.y,cw,ch);
-    } else if (dailyVariant === 'permafrost') {
-        drawDailyPermafrostTextureRect(camera.x,camera.y,cw,ch);
-    } else if (window.currentMap === 0 || window.currentMap === 4) {
-        // A Floresta usa a mesma textura da Planície, apenas com uma camada verde mais forte.
-        ctx.fillStyle = getPlainsGrassPattern() || '#557A46';
-        ctx.fillRect(camera.x, camera.y, cw, ch);
-        if (window.currentMap === 4) {
-            ctx.fillStyle = 'rgba(154, 255, 28, 0.34)';
+    try {
+        const dailyVariant = window.seasonalQuestRun?.mapVariant || window.dailyMissionRun?.mapVariant || null;
+        if (dailyVariant === 'cemetery' && typeof window.fdDrawCemeteryTextureRect === 'function') {
+            window.fdDrawCemeteryTextureRect(camera.x,camera.y,cw,ch);
+        } else if (dailyVariant === 'mines' && typeof window.fdDrawMinesTextureRect === 'function') {
+            window.fdDrawMinesTextureRect(camera.x,camera.y,cw,ch);
+        } else if (dailyVariant === 'pyramid') {
+            drawDailyPyramidTextureRect(camera.x,camera.y,cw,ch);
+        } else if (dailyVariant === 'thaw') {
+            drawDailyThawTextureRect(camera.x,camera.y,cw,ch);
+        } else if (dailyVariant === 'permafrost') {
+            drawDailyPermafrostTextureRect(camera.x,camera.y,cw,ch);
+        } else if (window.currentMap === 0 || window.currentMap === 4) {
+            // A Floresta usa a mesma textura da Planície, apenas com uma camada verde mais forte.
+            ctx.fillStyle = getPlainsGrassPattern() || '#557A46';
+            ctx.fillRect(camera.x, camera.y, cw, ch);
+            if (window.currentMap === 4) {
+                ctx.fillStyle = 'rgba(154, 255, 28, 0.34)';
+                ctx.fillRect(camera.x, camera.y, cw, ch);
+            }
+        } else if (window.currentMap === 1) {
+            drawSandTextureRect(camera.x, camera.y, cw, ch);
+        } else if (window.currentMap === 2) {
+            // Mesma distribuição da textura do Deserto, mas recolorizada para branco/neve.
+            drawSnowTextureRect(camera.x, camera.y, cw, ch);
+        } else if (window.currentMap === 3) {
+            drawCaveTextureRect(camera.x, camera.y, cw, ch);
+        } else if (window.currentMap === 6) {
+            drawMetroTextureRect(camera.x, camera.y, cw, ch);
+        } else if (window.currentMap === 7) {
+            drawIgneoTextureRect(camera.x, camera.y, cw, ch);
+        } else if (window.currentMap === 8) {
+            drawBambuzalTextureRect(camera.x, camera.y, cw, ch);
+        } else if (window.currentMap === 5) {
+            drawSwampTextureRect(camera.x, camera.y, cw, ch);
+        } else if (window.currentMap === 9) {
+            drawDiscoTextureRect(camera.x, camera.y, cw, ch);
+        } else if (window.currentMap === 10) {
+            drawMarineTextureRect(camera.x, camera.y, cw, ch);
+        } else if (window.currentMap === 11) {
+            drawFracturedTextureRect(camera.x, camera.y, cw, ch);
+        } else if (window.currentMap === 13) {
+            drawLunarTextureRect(camera.x, camera.y, cw, ch);
+        } else if (window.currentMap === 14) {
+            drawOutonalTextureRect(camera.x, camera.y, cw, ch);
+        } else if (window.currentMap === 16) {
+            drawDailyPyramidTextureRect(camera.x,camera.y,cw,ch);
+        } else if (window.currentMap === 17) {
+            drawDailyThawTextureRect(camera.x,camera.y,cw,ch);
+        } else if (window.currentMap === 18) {
+            drawDailyPermafrostTextureRect(camera.x,camera.y,cw,ch);
+        } else if (window.currentMap === 19) {
+            drawRadioactiveTextureRect(camera.x, camera.y, cw, ch);
+        } else if (window.currentMap === 20) {
+            drawKidsDayTextureRect(camera.x, camera.y, cw, ch);
+        } else if (window.currentMap === 21) {
+            if(typeof window.fdDrawSkyFloor === 'function') window.fdDrawSkyFloor(ctx,camera.x,camera.y,cw,ch);
+            else { const g=ctx.createLinearGradient(camera.x,camera.y,camera.x+cw,camera.y+ch); g.addColorStop(0,'#6ac4f4'); g.addColorStop(1,'#d8f3ff'); ctx.fillStyle=g; ctx.fillRect(camera.x,camera.y,cw,ch); }
+        } else if (window.currentMap === 15) {
+            // Coliseu: usa o mesmo tamanho de mundo dos demais mapas (3000x3000),
+            // com piso próprio repetível e a arena apenas como detalhe central.
+            const pattern = (typeof window.fdGetColiseumPattern === 'function') ? window.fdGetColiseumPattern() : null;
+            ctx.fillStyle = pattern || '#b48a5a';
+            ctx.fillRect(camera.x, camera.y, cw, ch);
+            ctx.save();
+            // Textura secundária para evitar que o piso pareça um quadrado plano.
+            ctx.globalAlpha = 0.18;
+            ctx.strokeStyle = '#6b4a30';
+            ctx.lineWidth = 2;
+            const tile = 128;
+            const sx = Math.floor(camera.x / tile) * tile;
+            const sy = Math.floor(camera.y / tile) * tile;
+            for(let x=sx; x<=camera.x+cw+tile; x+=tile){
+                ctx.beginPath(); ctx.moveTo(x,camera.y); ctx.lineTo(x,camera.y+ch); ctx.stroke();
+            }
+            for(let y=sy; y<=camera.y+ch+tile; y+=tile){
+                ctx.beginPath(); ctx.moveTo(camera.x,y); ctx.lineTo(camera.x+cw,y); ctx.stroke();
+            }
+            ctx.globalAlpha = 1;
+            ctx.strokeStyle = 'rgba(236,206,160,.34)';
+            ctx.lineWidth = 14;
+            ctx.beginPath(); ctx.arc(0,0,430,0,Math.PI*2); ctx.stroke();
+            ctx.strokeStyle = 'rgba(67,49,34,.42)';
+            ctx.lineWidth = 5;
+            ctx.beginPath(); ctx.arc(0,0,430,0,Math.PI*2); ctx.stroke();
+            ctx.restore();
+        } else if (window.currentMap === 12) {
+            ctx.fillStyle = '#9fe3a2';
+            ctx.fillRect(camera.x, camera.y, cw, ch);
+            ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.72)'; ctx.lineWidth=2;
+            const tile=72, sx=Math.floor(camera.x/tile)*tile, sy=Math.floor(camera.y/tile)*tile;
+            for(let x=sx;x<=camera.x+cw+tile;x+=tile){ctx.beginPath();ctx.moveTo(x,camera.y);ctx.lineTo(x,camera.y+ch);ctx.stroke();}
+            for(let y=sy;y<=camera.y+ch+tile;y+=tile){ctx.beginPath();ctx.moveTo(camera.x,y);ctx.lineTo(camera.x+cw,y);ctx.stroke();}
+            ctx.restore();
+        } else if (window.currentMap === 12) {
+            ctx.fillStyle = '#00ff00';
+            ctx.fillRect(camera.x, camera.y, cw, ch);
+        } else {
+            ctx.fillStyle = '#1d145d';
             ctx.fillRect(camera.x, camera.y, cw, ch);
         }
-    } else if (window.currentMap === 1) {
-        drawSandTextureRect(camera.x, camera.y, cw, ch);
-    } else if (window.currentMap === 2) {
-        // Mesma distribuição da textura do Deserto, mas recolorizada para branco/neve.
-        drawSnowTextureRect(camera.x, camera.y, cw, ch);
-    } else if (window.currentMap === 3) {
-        drawCaveTextureRect(camera.x, camera.y, cw, ch);
-    } else if (window.currentMap === 6) {
-        drawMetroTextureRect(camera.x, camera.y, cw, ch);
-    } else if (window.currentMap === 7) {
-        drawIgneoTextureRect(camera.x, camera.y, cw, ch);
-    } else if (window.currentMap === 8) {
-        drawBambuzalTextureRect(camera.x, camera.y, cw, ch);
-    } else if (window.currentMap === 5) {
-        drawSwampTextureRect(camera.x, camera.y, cw, ch);
-    } else if (window.currentMap === 9) {
-        drawDiscoTextureRect(camera.x, camera.y, cw, ch);
-    } else if (window.currentMap === 10) {
-        drawMarineTextureRect(camera.x, camera.y, cw, ch);
-    } else if (window.currentMap === 11) {
-        drawFracturedTextureRect(camera.x, camera.y, cw, ch);
-    } else if (window.currentMap === 13) {
-        drawLunarTextureRect(camera.x, camera.y, cw, ch);
-    } else if (window.currentMap === 14) {
-        drawOutonalTextureRect(camera.x, camera.y, cw, ch);
-    } else if (window.currentMap === 16) {
-        drawDailyPyramidTextureRect(camera.x,camera.y,cw,ch);
-    } else if (window.currentMap === 17) {
-        drawDailyThawTextureRect(camera.x,camera.y,cw,ch);
-    } else if (window.currentMap === 18) {
-        drawDailyPermafrostTextureRect(camera.x,camera.y,cw,ch);
-    } else if (window.currentMap === 19) {
-        drawRadioactiveTextureRect(camera.x, camera.y, cw, ch);
-    } else if (window.currentMap === 20) {
-        drawKidsDayTextureRect(camera.x, camera.y, cw, ch);
-    } else if (window.currentMap === 21) {
-        if(typeof window.fdDrawSkyFloor === 'function') window.fdDrawSkyFloor(ctx,camera.x,camera.y,cw,ch);
-        else { const g=ctx.createLinearGradient(camera.x,camera.y,camera.x+cw,camera.y+ch); g.addColorStop(0,'#6ac4f4'); g.addColorStop(1,'#d8f3ff'); ctx.fillStyle=g; ctx.fillRect(camera.x,camera.y,cw,ch); }
-    } else if (window.currentMap === 15) {
-        // Coliseu: usa o mesmo tamanho de mundo dos demais mapas (3000x3000),
-        // com piso próprio repetível e a arena apenas como detalhe central.
-        const pattern = (typeof window.fdGetColiseumPattern === 'function') ? window.fdGetColiseumPattern() : null;
-        ctx.fillStyle = pattern || '#b48a5a';
-        ctx.fillRect(camera.x, camera.y, cw, ch);
-        ctx.save();
-        // Textura secundária para evitar que o piso pareça um quadrado plano.
-        ctx.globalAlpha = 0.18;
-        ctx.strokeStyle = '#6b4a30';
-        ctx.lineWidth = 2;
-        const tile = 128;
-        const sx = Math.floor(camera.x / tile) * tile;
-        const sy = Math.floor(camera.y / tile) * tile;
-        for(let x=sx; x<=camera.x+cw+tile; x+=tile){
-            ctx.beginPath(); ctx.moveTo(x,camera.y); ctx.lineTo(x,camera.y+ch); ctx.stroke();
-        }
-        for(let y=sy; y<=camera.y+ch+tile; y+=tile){
-            ctx.beginPath(); ctx.moveTo(camera.x,y); ctx.lineTo(camera.x+cw,y); ctx.stroke();
-        }
+    } catch (floorError) {
+        // Texture creation must never blank the whole map. If an individual biome texture
+        // fails (mobile canvas/context limits, malformed cached pattern, etc.), draw a safe floor.
+        console.warn('FD floor renderer fallback:', floorError);
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.globalAlpha = 1;
-        ctx.strokeStyle = 'rgba(236,206,160,.34)';
-        ctx.lineWidth = 14;
-        ctx.beginPath(); ctx.arc(0,0,430,0,Math.PI*2); ctx.stroke();
-        ctx.strokeStyle = 'rgba(67,49,34,.42)';
-        ctx.lineWidth = 5;
-        ctx.beginPath(); ctx.arc(0,0,430,0,Math.PI*2); ctx.stroke();
-        ctx.restore();
-    } else if (window.currentMap === 12) {
-        ctx.fillStyle = '#9fe3a2';
-        ctx.fillRect(camera.x, camera.y, cw, ch);
-        ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.72)'; ctx.lineWidth=2;
-        const tile=72, sx=Math.floor(camera.x/tile)*tile, sy=Math.floor(camera.y/tile)*tile;
-        for(let x=sx;x<=camera.x+cw+tile;x+=tile){ctx.beginPath();ctx.moveTo(x,camera.y);ctx.lineTo(x,camera.y+ch);ctx.stroke();}
-        for(let y=sy;y<=camera.y+ch+tile;y+=tile){ctx.beginPath();ctx.moveTo(camera.x,y);ctx.lineTo(camera.x+cw,y);ctx.stroke();}
-        ctx.restore();
-    } else if (window.currentMap === 12) {
-        ctx.fillStyle = '#00ff00';
-        ctx.fillRect(camera.x, camera.y, cw, ch);
-    } else {
-        ctx.fillStyle = '#1d145d';
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.filter = 'none';
+        ctx.setLineDash([]);
+        ctx.shadowBlur = 0;
+        ctx.translate(-camera.x, -camera.y);
+        const safeFloors = {
+            0:'#557a46', 1:'#d8b16a', 2:'#edf4f7', 3:'#2a2633', 4:'#557a46',
+            5:'#26352a', 6:'#30363d', 7:'#24100d', 8:'#193d18', 9:'#17133c',
+            10:'#082f4a', 11:'#211039', 12:'#9fe3a2', 13:'#14152d', 14:'#5a3925',
+            15:'#b48a5a', 16:'#b98957', 17:'#557a46', 18:'#8fd7ef', 19:'#676b52',
+            20:'#557a46', 21:'#9cdafa'
+        };
+        ctx.fillStyle = safeFloors[Number(window.currentMap)] || '#1a1a2e';
         ctx.fillRect(camera.x, camera.y, cw, ch);
     }
     if(window.currentMap === 9) {
@@ -30832,7 +30937,7 @@ function draw() {
             if (window.currentMap === 11) {
                 // O Fraturado usa a mesma névoa base dos outros mapas em uma única camada.
                 // A camada auxiliar abaixo aplica os recortes das Fraturas; não desenhe
-                // uma segunda camada de 0.76 aqui, ou a escuridão ficaria acumulada.
+                // uma segunda camada de 0.45 aqui, ou a escuridão ficaria acumulada.
             } else if (window.currentMap === 9) {
                 if (!window.discoFogCanvas) window.discoFogCanvas = document.createElement('canvas');
                 const baseFog = window.discoFogCanvas;
@@ -30841,7 +30946,7 @@ function draw() {
                 baseCtx.setTransform(1, 0, 0, 1, 0, 0);
                 baseCtx.globalCompositeOperation = 'source-over';
                 baseCtx.clearRect(0, 0, cw, ch);
-                baseCtx.fillStyle = 'rgba(0,0,0,0.76)';
+                baseCtx.fillStyle = 'rgba(0,0,0,0.45)';
                 baseCtx.fillRect(0, 0, cw, ch);
                 baseCtx.globalCompositeOperation = 'destination-out';
                 const lights = Array.isArray(window.discoSpotlights) ? window.discoSpotlights : [];
@@ -30860,11 +30965,11 @@ function draw() {
                 }
                 ctx.drawImage(baseFog, 0, 0);
             } else {
-                ctx.fillStyle = 'rgba(0,0,0,0.76)';
+                ctx.fillStyle = 'rgba(0,0,0,0.45)';
                 ctx.fillRect(0, 0, cw, ch);
             }
             if (window.currentMap === 11 && Array.isArray(window.fractures)) {
-                // A única camada base de 0.76 é aplicada nesta camada auxiliar; as fraturas removem
+                // A única camada base de 0.45 é aplicada nesta camada auxiliar; as fraturas removem
                 // a névoa dessa camada e depois são redesenhadas para recuperar a textura
                 // do mapa do portal + o brilho. Assim elas realmente iluminam o chão.
                 if (!window.fractureFogCanvas) window.fractureFogCanvas = document.createElement('canvas');
@@ -30874,7 +30979,7 @@ function draw() {
                 fctx.setTransform(1,0,0,1,0,0);
                 fctx.globalCompositeOperation = 'source-over';
                 fctx.clearRect(0,0,cw,ch);
-                fctx.fillStyle = 'rgba(0,0,0,0.76)';
+                fctx.fillStyle = 'rgba(0,0,0,0.45)';
                 fctx.fillRect(0,0,cw,ch);
                 fctx.globalCompositeOperation = 'destination-out';
                 window.fractures.forEach(f => {
@@ -35650,6 +35755,8 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
       if(skyLastMap===21)clearSkyWalls();
       skyLastMap=window.currentMap;document.body.classList.remove('fd-sky-map-active');
       document.body.classList.remove('fd-sky-weather-wind','fd-sky-weather-rain','fd-sky-weather-storm','fd-sky-flash');
+      const canvas=document.getElementById('gameCanvas');
+      if(canvas){canvas.style.filter='none';canvas.style.opacity='1';}
       return;
     }
     if(skyLastMap!==21){
