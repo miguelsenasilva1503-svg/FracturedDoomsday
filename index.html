@@ -6296,7 +6296,7 @@ function getFracturedEnemySkinType(e) {
     biomeMaps[21] = {
         basico:'sky_basic', basic:'sky_basic', acucarado:'sky_basic', cardboard_head:'aero_hat', cardboard:'aero_hat', motorcycle_helmet:'iron_aero_hat', helmet:'iron_aero_hat',
         prism_head:'motor_head', prism:'motor_head', truck:'plane_truck', atirador:'sky_shooter', shooter:'sky_shooter', velocista:'sky_velocist', velocist:'sky_velocist', dancer:'sky_velocist',
-        gigante:'sky_giant', giant:'sky_giant', boss:'sky_boss', tanque:'sky_tank', tank:'sky_tank', kamikaze:'wingsuit_kamiaze',
+        gigante:'sky_giant', giant:'sky_giant', boss:'sky_boss', tanque:'sky_tank', tank:'sky_tank', kamikaze:'wingsuit_kamikaze',
         curandeiro:'sky_healer', healer:'sky_healer', elite:'sky_elite_shooter', elite_shooter:'sky_elite_shooter', lider:'sky_leader', leader:'sky_leader'
     };
 
@@ -35869,8 +35869,8 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
     // Mega Boss, Colosso, Atirador de Elite Master e Líder de Elite são exceções: sempre têm nuvem.
     const permanentCloud=new Set(['megaboss','mega_boss','colosso','elite_master','master_elite_shooter','lider_elite','elite_leader']);
     if(vals.some(t=>permanentCloud.has(t)))return false;
-    const skyFloatSkins=new Set(['sky_basic','aero_hat','iron_aero_hat','motor_head','plane_truck','sky_shooter','sky_velocist','sky_giant','sky_boss','sky_tank','wingsuit_kamiaze','sky_healer','sky_elite_shooter','sky_leader','helicopter','jet','enemy_drone']);
-    if(vals.some(t=>skyFloatSkins.has(t)))return true;
+    const skyFloatSkins=new Set(['sky_basic','aero_hat','iron_aero_hat','motor_head','plane_truck','sky_shooter','sky_velocist','sky_giant','sky_boss','sky_tank','wingsuit_kamikaze','sky_healer','sky_elite_shooter','sky_leader','helicopter','jet','enemy_drone','ghost_fisher']);
+    if(vals.some(t=>skyFloatSkins.has(t))||vals.includes('ghost_fisher')||!!e.ghostFisher)return true;
     return vals.some(t=>t==='fighter_plane'||t==='plane'||t==='radioactive_plane'||t==='ballon'||t==='balloon'||t==='baloneiro'||t==='pumpkin_baloon'||t.includes('baloneiro')||t.includes('balloon')||t.includes('baloon')||t.includes('bal[aã]o')) || !!(e.globalBalloon||e.gangsterBalloon);
   }
   window.fdDrawSkyWorldLayer=function(){
@@ -37032,7 +37032,7 @@ body.fd-sky-weather-storm #fd-sky-tablet{background:linear-gradient(145deg,#aeb7
     if(Number(window.currentMap)===21 && (!!window.survivalModeRun || !!window.survivalLaunch)) return true;
     return Number(window.currentMap)===21 && (
       (typeof sandboxMode!=='undefined' && sandboxMode && !!sandboxSettings?.friendlyClouds) ||
-      window.seasonalQuestRun?.id==='pelos_ares'
+      window.seasonalQuestRun?.id==='pelos_ares' || window.seasonalQuestLaunch?.id==='pelos_ares'
     );
   }
   window.fdFriendlyCloudsActive=fdFriendlyCloudsActive;
@@ -37046,7 +37046,7 @@ body.fd-sky-weather-storm #fd-sky-tablet{background:linear-gradient(145deg,#aeb7
     const normalized=values.map(v=>String(v||'').toLowerCase());
     const balloon=!!(e.globalBalloon||e.gangsterBalloon) || normalized.some(v=>['ballon','balloon','baloon','pumpkin_baloon','driver_baloon'].includes(v) || /baloneiro|balloon|baloon/.test(v));
     const plane=normalized.some(v=>v==='fighter_plane'||v==='plane'||v==='radioactive_plane');
-    const skySkin=['sky_basic','aero_hat','iron_aero_hat','motor_head','plane_truck','sky_shooter','sky_velocist','sky_giant','sky_boss','sky_tank','wingsuit_kamiaze','sky_healer','sky_elite_shooter','sky_leader','helicopter','jet','enemy_drone'];
+    const skySkin=['sky_basic','aero_hat','iron_aero_hat','motor_head','plane_truck','sky_shooter','sky_velocist','sky_giant','sky_boss','sky_tank','wingsuit_kamikaze','sky_healer','sky_elite_shooter','sky_leader','helicopter','jet','enemy_drone','ghost_fisher'];
     const skyEnemy=normalized.some(v=>skySkin.includes(v));
     const permanentCloud=['megaboss','mega_boss','colosso','elite_master','master_elite_shooter','lider_elite','elite_leader'];
     const cloudPlatformAlways=normalized.some(v=>permanentCloud.includes(v));
@@ -37109,7 +37109,18 @@ body.fd-sky-weather-storm #fd-sky-tablet{background:linear-gradient(145deg,#aeb7
   }
 
   // Falling deaths are removed directly from the enemy array, never entering the normal XP-drop path.
-  function fdShouldFallInSky(e){return Number(window.currentMap)===21&&!fdFriendlyCloudsActive()&&!fdIsSkyCloudException(e);}
+  function fdShouldFallInSky(e){
+    if(Number(window.currentMap)!==21)return false;
+    // Nuvem Amiga protege todos os inimigos, inclusive os que já estavam na animação de queda.
+    const friendlyClouds=!!safe(()=>window.fdFriendlyCloudsActive?.()) ||
+      !!safe(()=>typeof sandboxMode!=='undefined'&&sandboxMode&&!!sandboxSettings?.friendlyClouds) ||
+      !!window.survivalModeRun || !!window.survivalLaunch ||
+      window.seasonalQuestRun?.id==='pelos_ares' || window.seasonalQuestLaunch?.id==='pelos_ares';
+    if(friendlyClouds)return false;
+    const exception=typeof window.fdIsSkyCloudException==='function'
+      ? !!safe(()=>window.fdIsSkyCloudException(e)) : fdIsSkyCloudException(e);
+    return !exception;
+  }
   const oldUpdateEnemies=window.updateEnemies||updateEnemies;
   if(typeof oldUpdateEnemies==='function'&&!oldUpdateEnemies.__fdSkyFallNoXp){
     const updateEnemiesWithSkyFall=function(dt){
@@ -37189,7 +37200,7 @@ body.fd-sky-weather-storm #fd-sky-tablet{background:linear-gradient(145deg,#aeb7
     cardboard_head:'aero_hat', cardboard:'aero_hat', motorcycle_helmet:'iron_aero_hat', helmet:'iron_aero_hat', prism_head:'motor_head', prism:'motor_head',
     truck:'plane_truck', atirador:'sky_shooter', shooter:'sky_shooter', velocista:'sky_velocist', velocist:'sky_velocist', dancer:'sky_velocist',
     gigante:'sky_giant', giant:'sky_giant', boss:'sky_boss', tanque:'sky_tank', tank:'sky_tank',
-    kamikaze:'wingsuit_kamiaze', curandeiro:'sky_healer', healer:'sky_healer', elite:'sky_elite_shooter', elite_shooter:'sky_elite_shooter',
+    kamikaze:'wingsuit_kamikaze', curandeiro:'sky_healer', healer:'sky_healer', elite:'sky_elite_shooter', elite_shooter:'sky_elite_shooter',
     lider:'sky_leader', leader:'sky_leader'
   };
   const SKY_SPECIAL_SKINS=new Set(['helicopter','jet','enemy_drone']);
@@ -37198,7 +37209,7 @@ body.fd-sky-weather-storm #fd-sky-tablet{background:linear-gradient(145deg,#aeb7
     sky_basic:'enemies/sky_basic.png', aero_hat:'enemies/aero_hat.png', iron_aero_hat:'enemies/iron_aero_hat.png',
     motor_head:'enemies/motor_head.png', plane_truck:'enemies/plane_truck.png', sky_shooter:'enemies/sky_shooter.png',
     sky_velocist:'enemies/sky_velocist.png', sky_giant:'enemies/sky_giant.png', sky_boss:'enemies/sky_boss.png',
-    sky_tank:'enemies/sky_tank.png', wingsuit_kamiaze:'enemies/wingsuit_kamiaze.png', sky_healer:'enemies/sky_healer.png',
+    sky_tank:'enemies/sky_tank.png', wingsuit_kamikaze:'enemies/wingsuit_kamikaze.png', wingsuit_kamiaze:'enemies/wingsuit_kamikaze.png', sky_healer:'enemies/sky_healer.png',
     sky_elite_shooter:'enemies/sky_elite_shooter.png', sky_leader:'enemies/sky_leader.png',
     helicopter:'enemies/helicopter.png', jet:'enemies/jet.png', enemy_drone:'enemies/enemy_drone.png'
   }));
@@ -37251,7 +37262,7 @@ body.fd-sky-weather-storm #fd-sky-tablet{background:linear-gradient(145deg,#aeb7
   const SKY_VARIANTS={
     basico:['sky_basic'], cardboard_head:['aero_hat'], motorcycle_helmet:['iron_aero_hat'], prism_head:['motor_head'],
     truck:['plane_truck','helicopter','jet'], atirador:['sky_shooter','enemy_drone'], velocista:['sky_velocist'],
-    gigante:['sky_giant'], boss:['sky_boss'], tanque:['sky_tank'], kamikaze:['wingsuit_kamiaze'],
+    gigante:['sky_giant'], boss:['sky_boss'], tanque:['sky_tank'], kamikaze:['wingsuit_kamikaze'],
     curandeiro:['sky_healer'], elite:['sky_elite_shooter'], lider:['sky_leader']
   };
   if(typeof oldVariants==='function'){
@@ -37276,7 +37287,7 @@ body.fd-sky-weather-storm #fd-sky-tablet{background:linear-gradient(145deg,#aeb7
     const balloon=!!(e.globalBalloon||e.gangsterBalloon)||vals.some(v=>['ballon','balloon','baloon','pumpkin_baloon','driver_baloon'].includes(v)||/baloneiro|balloon|baloon/.test(v));
     const plane=vals.some(v=>['fighter_plane','plane','radioactive_plane'].includes(v));
     const platformTypes=new Set(['megaboss','mega_boss','colosso','elite_master','master_elite_shooter','lider_elite','elite_leader']);
-    return balloon||plane||vals.some(v=>ALL_SKY_SKINS.has(v))||vals.some(v=>platformTypes.has(v))||!!safe(()=>oldFallException?.call(this,e));
+    return balloon||plane||vals.some(v=>ALL_SKY_SKINS.has(v))||vals.includes('ghost_fisher')||vals.some(v=>platformTypes.has(v))||!!safe(()=>oldFallException?.call(this,e));
   };
   const oldFriendlyClouds=window.fdFriendlyCloudsActive;
   window.fdFriendlyCloudsActive=function(){
@@ -37487,11 +37498,11 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
   ]);
   const skySkins=new Set([
     'sky_basic','aero_hat','iron_aero_hat','motor_head','plane_truck','sky_shooter','sky_velocist','sky_giant',
-    'sky_boss','sky_tank','wingsuit_kamiaze','sky_healer','sky_elite_shooter','sky_leader','helicopter','jet','enemy_drone'
+    'sky_boss','sky_tank','wingsuit_kamikaze','sky_healer','sky_elite_shooter','sky_leader','helicopter','jet','enemy_drone'
   ]);
   const daySkins=new Set(['kid_basic','fancy_cardboard','teddy_head','cube_head','kid_velocist','kid_shooter','kid_giant','kid_healer','kid_kamikaze','fancy_baloon','confette_tank','kid_truck','kid_leader','kid_elite_shooter','jacknbox','baby_boss','pogo','kid_snake']);
   const radioactiveSkins=new Set(['war_basic','war_hat','war_helmet','nuke_head','cartographer','war_shooter','war_giant','bazooka_tank','war_healer','masked_elite_shooter','nuke_kamikaze','commander_leader','driver_baloon','tank_truck','commander_boss','plane','machine_gun_war','anti_radiation','mutant_basic','mutant_giant']);
-  const skyCanonical={basico:'sky_basic',basic:'sky_basic',cardboard_head:'aero_hat',motorcycle_helmet:'iron_aero_hat',prism_head:'motor_head',truck:'plane_truck',atirador:'sky_shooter',velocista:'sky_velocist',gigante:'sky_giant',boss:'sky_boss',tanque:'sky_tank',kamikaze:'wingsuit_kamiaze',curandeiro:'sky_healer',elite:'sky_elite_shooter',lider:'sky_leader'};
+  const skyCanonical={basico:'sky_basic',basic:'sky_basic',cardboard_head:'aero_hat',motorcycle_helmet:'iron_aero_hat',prism_head:'motor_head',truck:'plane_truck',atirador:'sky_shooter',velocista:'sky_velocist',gigante:'sky_giant',boss:'sky_boss',tanque:'sky_tank',kamikaze:'wingsuit_kamikaze',curandeiro:'sky_healer',elite:'sky_elite_shooter',lider:'sky_leader'};
   const dayCanonical={basico:'kid_basic',basic:'kid_basic',cardboard_head:'fancy_cardboard',motorcycle_helmet:'teddy_head',prism_head:'cube_head',velocista:'kid_velocist',atirador:'kid_shooter',gigante:'kid_giant',curandeiro:'kid_healer',kamikaze:'kid_kamikaze',ballon:'fancy_baloon',tanque:'confette_tank',truck:'kid_truck',lider:'kid_leader',elite:'kid_elite_shooter',tnt_crate:'jacknbox',boss:'baby_boss'};
   const radioCanonical={basico:'war_basic',cardboard_head:'war_hat',motorcycle_helmet:'war_helmet',prism_head:'nuke_head',velocista:'cartographer',dancer:'cartographer',atirador:'war_shooter',gigante:'war_giant',boss:'commander_boss',megaboss:'commander_boss',curandeiro:'war_healer',kamikaze:'nuke_kamikaze',tanque:'bazooka_tank',lider:'commander_leader',elite:'masked_elite_shooter',elite_master:'masked_elite_shooter',lider_elite:'commander_leader',ballon:'driver_baloon',truck:'tank_truck'};
 
