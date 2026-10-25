@@ -38254,7 +38254,7 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
     if(side===1)return {x:along,y:(Math.random()<.5?-1:1)*(inner+20+Math.random()*Math.max(10,edge-inner-30))};
     return {x:(Math.random()*2-1)*edge,y:(Math.random()<.5?-1:1)*(inner+20+Math.random()*Math.max(10,edge-inner-30))};
   }
-  function fdBeachInnerEdge(){return 1500-Math.max(100,Math.min(430,Number(window.fdBeachWaterDepth)||245));}
+  function fdBeachInnerEdge(){return 1500-Math.max(100,Math.min(700,Number(window.fdBeachWaterDepth)||245));}
   function fdIsBeachWater(x,y){
     if(Number(window.currentMap)!==22)return false;
     const edge=1500, ax=Math.abs(Number(x)||0),ay=Math.abs(Number(y)||0);
@@ -38332,7 +38332,7 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
     }else if(bucket!==lastBeachWaveBucket){
       lastBeachWaveBucket=bucket;
       // The coastline shifts to a new random depth every two waves, with a visible tide surge.
-      window.fdBeachTargetWaterDepth=110+Math.random()*310;
+      window.fdBeachTargetWaterDepth=120+Math.random()*560;
       window.fdBeachWaveTimer=1.25;
       window.fdBeachWaveKickTimer=1.0;
     }
@@ -38554,6 +38554,16 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
           if(e.fdKraken&&e.hp<=0&&!e.fdKrakenDropHandled){e.fdKrakenDropHandled=true;const p=window.spawnEnemy('basico',{x:e.x,y:e.y},Number(window.currentMap)===22?'beach_basic':null);if(p&&Number(window.currentMap)===22){p.fdHolidayVariant='praia';p.skinOverride='beach_basic';}}
         }
         const result=oldUpdateEnemies.apply(this,arguments);
+        // Armored Beach enemies that break into a basic must keep the Beach lineage/skin.
+        for(const e of (Array.isArray(enemies)?enemies:[])){
+          if(!e||!['basico','basic'].includes(String(e.type||'').toLowerCase()))continue;
+          const sourceIds=[e.fractureMapId,e.skinSourceMapId,e.dropOriginMapId,e.lineageMapId].map(Number);
+          const skyOrigin=sourceIds.includes(21);
+          const beachOrigin=e.fdHolidayVariant==='praia'||sourceIds.includes(22)||(Number(window.currentMap)===22&&!skyOrigin);
+          if(!beachOrigin||skyOrigin)continue;
+          e.fdHolidayVariant='praia';e.skinOverride='beach_basic';e.skinSourceMapId=22;e.dropOriginMapId=22;e.lineageMapId=22;
+          if(e.fracturedOrigin)e.fractureMapId=22;
+        }
         // Apply the open/closed invulnerability window after all enemy update logic ran.
         for(const e of before){
           if(e?.fdKraken){e.poison={timer:0,dmg:0,tickCd:0};e.poisonOnHit=0;e.slowTimer=0;e.weakenTimer=0;e.curseTimer=0;e.burnTimer=0;e.burnDmg=0;e.freezeTimer=0;e.speedBuffTimer=0;e.soak=0;e.shockTimer=0;e.shockSemiTimer=0;e.stunTimer=0;e.timeDistortionTimer=0;e.zoeElectrifiedTimer=0;e.hypnotizedTimer=0;e.sugarTimer=0;e.ivySlowTimer=0;}
@@ -38603,7 +38613,45 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
   const damageMultWrapped=function(e){if(e?.fdSnorkel&&e.fdSnorkelHidden&&fdIsBeachWater(e.x,e.y))return 0;if(e?.fdConcha&&e.fdConchaClosed)return 0;return oldDamageMult.apply(this,arguments);};
   window.getEnemyDamageTakenMultiplier=damageMultWrapped;try{getEnemyDamageTakenMultiplier=damageMultWrapped;}catch(_){}
 
-  // Render enemies partially submerged in the beach. Sky/flying/special sprites stay whole.
+  // Clip every bitmap sprite at the water line on Praia, not just enemy sprites.
+  // This affects Canvas sprites (pets, turrets, allies, effects, etc.); CSS/DOM art and
+  // the small XP orbs (drawn as circles rather than sprites) remain untouched.
+  try {
+    const drawImageProto=typeof CanvasRenderingContext2D!=='undefined'?CanvasRenderingContext2D.prototype:null;
+    if(drawImageProto&&!drawImageProto.__fdBeachAllSpriteClipV1){
+      const nativeDrawImage=drawImageProto.drawImage;
+      const beachClippedDrawImage=function(image,...args){
+        try{
+          if(this.canvas&&this.canvas.id==='gameCanvas'&&Number(window.currentMap)===22&&typeof window.fdIsBeachWater==='function'&&image){
+            const source=String(image.currentSrc||image.src||'').toLowerCase();
+            const isXpOrb=/elements\/xp\.png|xp[_-](small|large|orb|gem)/i.test(source);
+            let dx,dy,dw,dh;
+            if(args.length===2){dx=Number(args[0]);dy=Number(args[1]);dw=Number(image.naturalWidth||image.width);dh=Number(image.naturalHeight||image.height);}
+            else if(args.length===4){[dx,dy,dw,dh]=args.map(Number);}
+            else if(args.length===8){dx=Number(args[4]);dy=Number(args[5]);dw=Number(args[6]);dh=Number(args[7]);}
+            if(!isXpOrb&&Number.isFinite(dx)&&Number.isFinite(dy)&&Number.isFinite(dw)&&Number.isFinite(dh)&&dw>0&&dh>0){
+              const tr=this.getTransform?this.getTransform():null;
+              const localX=dx+dw/2,localY=dy+dh/2;
+              const px=tr?tr.a*localX+tr.c*localY+tr.e:localX;
+              const py=tr?tr.b*localX+tr.d*localY+tr.f:localY;
+              const worldX=px+(Number(window.camera?.x)||Number(typeof camera!=='undefined'?camera.x:0)||0);
+              const worldY=py+(Number(window.camera?.y)||Number(typeof camera!=='undefined'?camera.y:0)||0);
+              if(window.fdIsBeachWater(worldX,worldY)){
+                this.save();
+                this.beginPath();this.rect(dx,dy,dw,dh*0.5);this.clip();
+                try{return nativeDrawImage.apply(this,arguments);}finally{this.restore();}
+              }
+            }
+          }
+        }catch(_){}
+        return nativeDrawImage.apply(this,arguments);
+      };
+      drawImageProto.drawImage=beachClippedDrawImage;
+      Object.defineProperty(drawImageProto,'__fdBeachAllSpriteClipV1',{value:true,configurable:false});
+    }
+  }catch(err){console.warn('FD recorte de sprites na água:',err);}
+
+  // Keep enemy rendering aligned with the same 50% water crop used for every bitmap sprite.
   const skyExceptionKeys=new Set(['sky_basic','aero_hat','iron_aero_hat','motor_head','plane_truck','sky_shooter','sky_velocist','sky_giant','sky_boss','sky_tank','wingsuit_kamikaze','sky_healer','sky_elite_shooter','sky_leader','helicopter','jet','enemy_drone','drone','axel_drone','stormy','stormy_enemy','eolio','eólio','ghost_fisher','fighter_plane','machine_gun_war','anti_radiation','radioactive_plane','mutant_basic','mutant_giant','snorkel','swimmed_snorkel','swimming_snorkel','surfing','surfboard']);
   const oldDrawEnemy=window.drawEnemySprite||drawEnemySprite;
   const drawEnemyWrapped=function(cCtx,x,y,size,type,opts={}){
@@ -38615,7 +38663,7 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
         if(!exempt&&fdIsBeachWater(x,y)){
           const img=getEnemySpriteImage(type);if(!img||!img.complete||!img.naturalWidth)return false;
           const ratio=img.naturalWidth/img.naturalHeight,scale=Number.isFinite(opts.scale)?opts.scale:1,widthMult=Number.isFinite(opts.widthMult)?opts.widthMult:getEnemySpriteWidthMult(type),raw=size*widthMult*scale,w=opts.allowTiny?Math.max(1,raw):Math.max(22,raw),h=w/ratio;
-          cCtx.save();cCtx.globalAlpha=Number.isFinite(opts.opacity)?opts.opacity:1;cCtx.translate(x,y);if(opts.rotate)cCtx.rotate(opts.rotate);if(opts.flipX)cCtx.scale(-1,1);cCtx.beginPath();cCtx.rect(-w/2,-h/2,w,h*.65);cCtx.clip();cCtx.drawImage(img,-w/2,-h/2,w,h);cCtx.restore();return true;
+          cCtx.save();cCtx.globalAlpha=Number.isFinite(opts.opacity)?opts.opacity:1;cCtx.translate(x,y);if(opts.rotate)cCtx.rotate(opts.rotate);if(opts.flipX)cCtx.scale(-1,1);cCtx.beginPath();cCtx.rect(-w/2,-h/2,w,h*.5);cCtx.clip();cCtx.drawImage(img,-w/2,-h/2,w,h);cCtx.restore();return true;
         }
       }
     }catch(err){try{cCtx.restore();}catch(_){} }
@@ -38769,7 +38817,7 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
     desc:'“Poker acredita que tudo na vida é uma aposta. E ele raramente aceita sair da mesa sem ganhar alguma coisa.”\n\nUm apostador habilidoso que passa boa parte do tempo em mesas de baralho, sempre procurando uma oportunidade de virar o jogo a seu favor. Confiante, astuto e um tanto convencido, Poker adora blefar e desafiar a sorte, tratando cada partida como uma batalha de inteligência e nervos. Para ele, nunca é tarde para apostar mais uma vez — mesmo quando todas as cartas parecem estar contra ele.\n\n“Vamos aumentar a aposta?”'
   };
   CHARACTER_SPRITES.poker = 'sprites/poker.png';
-  CHARACTER_SUMMARIES.poker = 'Poker: dispara uma carta de baralho que ao colidir com um inimigo se separa em duas.\n\nESPECIAL: inimigos mortos têm 15% de chance de serem convertidos em aliados pro Poker.\n\nEspadas e Paus: atacam em 180° os inimigos com um golpe cortante.\nCopas: se Poker ficar perto delas, elas o curam.\nOurinhos: podem defletir ataques inimigos com 25% de chance.';
+  CHARACTER_SUMMARIES.poker = 'Poker: dispara uma carta de baralho que ao colidir com um inimigo se separa em duas.\n\nESPECIAL: inimigos mortos têm 8% de chance de serem convertidos em aliados pro Poker.\n\nEspadas e Paus: atacam em 180° os inimigos com um golpe cortante.\nCopas: se Poker ficar perto delas, elas o curam.\nOurinhos: podem defletir ataques inimigos com 25% de chance.';
   CHARACTER_CREDITS.poker = 'RobôGamer-000';
 
   // ---------------- Pets ----------------
@@ -38949,7 +38997,7 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
   function maybeConvertPokerKill(e){
     if(!e||e.fdPokerConversionChecked||Number(e.hp)>0)return;
     e.fdPokerConversionChecked=true;
-    if(Math.random()>=.15)return;
+    if(Math.random()>=.08)return;
     const types=Object.keys(ALLY_TYPES); const type=types[Math.floor(Math.random()*types.length)];
     addPokerAlly(type,Number(e.x)||player?.x||0,Number(e.y)||player?.y||0);
   }
@@ -38986,7 +39034,7 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
       c.hitIds.add(hit);
       const dealt=Math.max(1,(Number(c.dmg)||1)*getEnemyDmgMult(hit));
       hit.lastHitSourceChar='poker'; hit.hp=Math.max(0,Number(hit.hp)-dealt);
-      safe(()=>addFloatingText(hit.x,hit.y-12,`${Math.floor(dealt)}`,'#e74c3c',11));
+      safe(()=>addFloatingText(hit.x,hit.y,Math.floor(dealt)));
       safe(()=>createParticles(hit.x,hit.y,'#f1c40f'));
       if(hit.hp<=0)maybeConvertPokerKill(hit);
       if(c.parent){
@@ -39017,7 +39065,7 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
       if(Math.abs(delta)>Math.PI/2)continue;
       const dmg=Math.max(2,(Number(player?.baseDmg)||13)*(Number(player?.stats?.dmgMult)||1)*.58*getEnemyDmgMult(e));
       e.lastHitSourceChar='poker_ally';e.hp=Math.max(0,Number(e.hp)-dmg);
-      safe(()=>addFloatingText(e.x,e.y-12,`${Math.floor(dmg)}`,a.color,10));
+      safe(()=>addFloatingText(e.x,e.y,Math.floor(dmg)));
       safe(()=>createParticles(e.x,e.y,a.color));
     }
   }
@@ -39049,10 +39097,52 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
     }
     for(const a of pokerAllies){
       if(!a||a.hp<=0)continue;
-      if(a.slashTimer>0&&(a.type==='swords'||a.type==='sticks')){ctx.save();ctx.globalAlpha=Math.min(1,a.slashTimer/.12);ctx.strokeStyle=a.color;ctx.lineWidth=5;ctx.beginPath();ctx.arc(a.x,a.y,120,a.slashAngle-Math.PI/2,a.slashAngle+Math.PI/2);ctx.stroke();ctx.restore();}
+      if(a.slashTimer>0&&(a.type==='swords'||a.type==='sticks')){
+        // Golpe visual no estilo do Knighter: espada girando, lâmina metálica,
+        // brilho da cor do soldado e rastro acompanhando o movimento.
+        const slashDuration=.24;
+        const t=Math.max(0,Math.min(1,1-a.slashTimer/slashDuration));
+        const ease=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+        const start=-Math.PI/2,end=Math.PI/2;
+        const swing=a.slashAngle+start+(end-start)*ease;
+        const radius=112;
+        const alpha=Math.max(.08,Math.sin(Math.PI*t));
+        const h=Math.max(13,radius*.22),bladeLen=Math.max(46,radius*.76);
+        ctx.save();ctx.translate(a.x,a.y);ctx.rotate(swing);ctx.globalAlpha=alpha;ctx.lineCap='round';ctx.lineJoin='round';
+        ctx.shadowColor=a.color;ctx.shadowBlur=14;
+        // Cabo escuro e empunhadura.
+        ctx.strokeStyle='#252b30';ctx.lineWidth=Math.max(5,radius*.06);
+        ctx.beginPath();ctx.moveTo(-h*.38,0);ctx.lineTo(h,0);ctx.stroke();
+        ctx.strokeStyle=a.color;ctx.lineWidth=Math.max(3,radius*.035);
+        ctx.beginPath();ctx.moveTo(-h*.22,0);ctx.lineTo(h*.78,0);ctx.stroke();
+        // Guarda da espada.
+        ctx.strokeStyle='#b8c0c7';ctx.lineWidth=Math.max(2.5,radius*.035);
+        ctx.beginPath();ctx.moveTo(h*.78,-radius*.13);ctx.lineTo(h*.78,radius*.13);ctx.stroke();
+        // Lâmina semelhante à de Knighter, com fio claro e ponta afiada.
+        const bladeStart=h*.85,tip=bladeStart+bladeLen;
+        const bladeGrad=ctx.createLinearGradient(bladeStart,0,tip,0);
+        bladeGrad.addColorStop(0,'#f5f7fa');bladeGrad.addColorStop(.62,'#d9e0e6');bladeGrad.addColorStop(1,'#aebbc5');
+        ctx.fillStyle=bladeGrad;ctx.strokeStyle=a.type==='swords'?'#8d342e':'#277b49';ctx.lineWidth=1.8;
+        ctx.beginPath();ctx.moveTo(bladeStart,-radius*.075);ctx.lineTo(tip-radius*.08,-radius*.075);ctx.lineTo(tip,0);ctx.lineTo(tip-radius*.08,radius*.075);ctx.lineTo(bladeStart,radius*.075);ctx.closePath();ctx.fill();ctx.stroke();
+        ctx.strokeStyle='rgba(255,255,255,.92)';ctx.lineWidth=1.5;
+        ctx.beginPath();ctx.moveTo(bladeStart+bladeLen*.12,-radius*.025);ctx.lineTo(tip-bladeLen*.12,-radius*.025);ctx.stroke();
+        ctx.restore();
+        // Rastro de vento que avança junto com a lâmina (sweep de 180°).
+        ctx.save();ctx.translate(a.x,a.y);ctx.globalAlpha=Math.max(0,.58*Math.sin(Math.PI*t));
+        ctx.strokeStyle=a.color;ctx.lineWidth=4;ctx.shadowColor=a.color;ctx.shadowBlur=12;
+        ctx.beginPath();ctx.arc(0,0,radius*.88,a.slashAngle+start,a.slashAngle+start+(end-start)*ease,false);ctx.stroke();
+        ctx.strokeStyle='rgba(245,250,255,.88)';ctx.lineWidth=1.5;ctx.shadowBlur=4;
+        ctx.beginPath();ctx.arc(0,0,radius*.83,a.slashAngle+start,a.slashAngle+start+(end-start)*ease,false);ctx.stroke();
+        ctx.restore();
+      }
       let img=allyImages[a.sprite];if(!img){img=new Image();img.src=a.sprite;allyImages[a.sprite]=img;}
-      if(img.complete&&img.naturalWidth>0){ctx.drawImage(img,a.x-18,a.y-18,36,36);}else{ctx.fillStyle=a.color;ctx.beginPath();ctx.arc(a.x,a.y,15,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 16px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(({swords:'♠',sticks:'♣',hearts:'♥',goldies:'♦'})[a.type]||'?',a.x,a.y);}
-      ctx.strokeStyle='rgba(0,0,0,.75)';ctx.lineWidth=3;ctx.strokeRect(a.x-16,a.y-24,32,4);ctx.fillStyle='#2ecc71';ctx.fillRect(a.x-16,a.y-24,32*Math.max(0,a.hp/a.maxHp),4);
+      const allySize=Math.max(12,Number(a.size)||12);
+      const ratio=img&&img.naturalWidth>0?img.naturalWidth/img.naturalHeight:1;
+      const drawW=Math.max(24,allySize*9.0),drawH=drawW/(Number.isFinite(ratio)&&ratio>0?ratio:1);
+      if(img.complete&&img.naturalWidth>0){ctx.save();ctx.drawImage(img,a.x-drawW/2,a.y-drawH/2,drawW,drawH);ctx.restore();}
+      else{ctx.fillStyle=a.color;ctx.beginPath();ctx.arc(a.x,a.y,allySize,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 16px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(({swords:'♠',sticks:'♣',hearts:'♥',goldies:'♦'})[a.type]||'?',a.x,a.y);}
+      const hudAlly={...a,x:a.x,y:a.y,hp:a.hp,maxHp:a.maxHp};
+      drawEnemyStatusHud(ctx,hudAlly,drawW,drawH);
     }
     ctx.restore();
   }
