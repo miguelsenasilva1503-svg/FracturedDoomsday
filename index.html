@@ -35906,7 +35906,8 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
     for(const cl of window.fdSkyClouds){if(!isWorldVisible(cl.x,cl.y,cl.r*1.7))continue;drawCloud(ctx,cl.x,cl.y,cl.r*.72,.58,false);}
     // Shadows/cloud platforms under player and enemies, with the four requested exceptions.
     const selected=String(pd?.selectedChar||'').toLowerCase();
-    if(player){
+    // Eólio and Stormy do not use the foot-cloud/platform under their character sprites.
+    if(player&&!['eolio','stormy'].includes(selected)){
       const pr=Math.max(12,Number(player.r)||14);drawFootCloud(ctx,player.x,player.y+pr*.62,Math.max(50,pr*3.2),Math.max(22,pr*1.65),.84);
     }
     for(const e of (Array.isArray(enemies)?enemies:[])){
@@ -38228,7 +38229,7 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
     }else if(type==='snorkel'){
       e.type='snorkel';e.hp=e.maxHp=Math.max(45*mult,Number(e.hp)||0);e.speed=1.2;e.baseDmg=e.dmg=5*mult;e.size=15;e.isGlobalArmored=true;e.breakIntoBasic=true;e.fdSnorkel=true;e.fdBeachNoWaterSlow=true;e.fdSnorkelTimer=3.2;e.fdSnorkelHidden=true;e.skinOverride='swimmed_snorkel';
     }else if(type==='concha'){
-      e.type='concha';e.hp=e.maxHp=Math.max(220*mult,Number(e.hp)||0);e.speed=.62;e.baseDmg=e.dmg=8*mult;e.size=20;e.isGlobalArmored=true;e.breakIntoBasic=false;e.fdConcha=true;e.fdConchaTimer=10;e.fdConchaClosed=false;e.skinOverride='dail_open';
+      e.type='concha';e.hp=e.maxHp=Math.max(330*mult,Number(e.hp)||0);e.speed=.62;e.baseDmg=e.dmg=8*mult;e.size=20;e.isGlobalArmored=true;e.breakIntoBasic=false;e.fdConcha=true;e.fdConchaTimer=10;e.fdConchaClosed=false;e.fdConchaOpenSpeed=.62;e.fdConchaOpenStationary=false;e.skinOverride='dail_open';
     }else if(type==='surfista'){
       e.type='surfista';e.hp=e.maxHp=Math.max(85*mult,Number(e.hp)||0);e.speed=2.9;e.baseDmg=e.dmg=7*mult;e.size=16;e.isGlobalArmored=true;e.breakIntoBasic=true;e.fdSurfista=true;e.fdBeachNoWaterSlow=true;e.skinOverride='surfing';
     }else if(type==='kraken'){
@@ -38254,7 +38255,7 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
     if(side===1)return {x:along,y:(Math.random()<.5?-1:1)*(inner+20+Math.random()*Math.max(10,edge-inner-30))};
     return {x:(Math.random()*2-1)*edge,y:(Math.random()<.5?-1:1)*(inner+20+Math.random()*Math.max(10,edge-inner-30))};
   }
-  function fdBeachInnerEdge(){return 1500-Math.max(100,Math.min(700,Number(window.fdBeachWaterDepth)||245));}
+  function fdBeachInnerEdge(){return 1500-Math.max(100,Math.min(280,Number(window.fdBeachWaterDepth)||245));}
   function fdIsBeachWater(x,y){
     if(Number(window.currentMap)!==22)return false;
     const edge=1500, ax=Math.abs(Number(x)||0),ay=Math.abs(Number(y)||0);
@@ -38332,12 +38333,14 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
     }else if(bucket!==lastBeachWaveBucket){
       lastBeachWaveBucket=bucket;
       // The coastline shifts to a new random depth every two waves, with a visible tide surge.
-      window.fdBeachTargetWaterDepth=120+Math.random()*560;
+      window.fdBeachTargetWaterDepth=120+Math.random()*160;
       window.fdBeachWaveTimer=1.25;
       window.fdBeachWaveKickTimer=1.0;
     }
-    const depth=Number(window.fdBeachWaterDepth)||245,target=Number(window.fdBeachTargetWaterDepth)||245;
+    const depth=Math.max(100,Math.min(280,Number(window.fdBeachWaterDepth)||245)),target=Math.max(100,Math.min(280,Number(window.fdBeachTargetWaterDepth)||245));
     window.fdBeachWaterDepth=depth+(target-depth)*Math.min(1,delta*.82);
+    window.fdBeachWaterDepth=Math.max(100,Math.min(280,window.fdBeachWaterDepth));
+    window.fdBeachTargetWaterDepth=target;
     window.fdBeachWaveTimer=Math.max(0,(Number(window.fdBeachWaveTimer)||0)-delta);
     window.fdBeachWaveKickTimer=Math.max(0,(Number(window.fdBeachWaveKickTimer)||0)-delta);
   }
@@ -38426,11 +38429,15 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
     if(holiday==='natal'&&!result.skinOverride)result.skinOverride=skin;
     if(holiday==='praia'&&!result.skinOverride)result.skinOverride=skin;
     fdApplyCustomEnemyStats(result,logical,skin);
-    if(result.fdSnorkel && !fdIsBeachWater(result.x,result.y))fdMoveEnemyIntoBeachWater(result);
+    if(result.fdSnorkel){if(!fdIsBeachWater(result.x,result.y))fdMoveEnemyIntoBeachWater(result);const inWater=Number(window.currentMap)===22&&fdIsBeachWater(result.x,result.y);result.fdSnorkelHidden=inWater;result.undetectable=inWater;result.skinOverride=inWater?'swimming_snorkel':'snorkel';result.fracturedSkinType=result.resolvedFracturedSkinType=result.skinOverride;}
     if(result.fdSurfista){
       if(!forcedPoint&&beach&&Math.random()<.72)fdMoveEnemyIntoBeachWater(result);
-      result.fdSurfistaWater=fdIsBeachWater(result.x,result.y);result.skinOverride=result.fdSurfistaWater?'surfing':'surfboard';
-      if(!result.fdSurfistaWater){result.speed=1.15;result.hp=Math.min(result.hp,85*fdMultiplier('motorcycle_helmet'));result.maxHp=Math.max(result.hp,85*fdMultiplier('motorcycle_helmet'));}
+      result.fdSurfistaWater=Number(window.currentMap)===22&&fdIsBeachWater(result.x,result.y);
+      result.skinOverride=result.fdSurfistaWater?'surfing':'surfboard';
+      result.fracturedSkinType=result.resolvedFracturedSkinType=result.skinOverride;
+      result._skinTypeForEnemy='surfista';
+      if(!result.fdSurfistaWater){result.speed=1.15;result.hp=Math.min(Number(result.hp)||85*fdMultiplier('motorcycle_helmet'),85*fdMultiplier('motorcycle_helmet'));result.maxHp=Math.max(Number(result.hp)||1,85*fdMultiplier('motorcycle_helmet'));}
+      else {result.speed=2.9;result.fdBeachNoWaterSlow=true;}
     }else if(holiday==='praia'&&!forcedPoint&&!result.fdFlying&&!result.fdSnorkel&&Math.random()<.38){
       // Ordinary beach enemies can enter the water; Sandbox summon coordinates are never moved.
       fdMoveEnemyIntoBeachWater(result);
@@ -38526,17 +38533,35 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
             }else if(e.type==='skeleton'&&e.hp<=0&&!e.halloweenSkeletonDestroyed){e.type='bones';e.skinOverride='bones';e.hp=Math.max(12,(Number(e.maxHp)||85)*.18);e.maxHp=e.hp;e.speed=0;e.stationary=true;e.baseDmg=e.dmg=0;e.isGlobalArmored=false;e.breakIntoBasic=false;e.halloweenSkeletonCorpse=true;e.halloweenSkeletonTimer=7;e.cd=999;}
           }
           if(e.fdSnorkel){
-            e.fdSnorkelTimer=(Number(e.fdSnorkelTimer)||0)-delta;
-            if(e.fdSnorkelTimer<=0){e.fdSnorkelHidden=!e.fdSnorkelHidden;e.fdSnorkelTimer=e.fdSnorkelHidden?3.2:1.45;e.skinOverride=e.fdSnorkelHidden?(e.fdSnorkelEverSurfaced?'swimming_snorkel':'swimmed_snorkel'):'snorkel';if(!e.fdSnorkelHidden)e.fdSnorkelEverSurfaced=true;}
-            if(e.fdSnorkelHidden){e.skinOverride=e.fdSnorkelEverSurfaced?'swimming_snorkel':'swimmed_snorkel';e.undetectable=true;}else{e.skinOverride='snorkel';e.undetectable=false;}
-            if(!fdIsBeachWater(e.x,e.y)&&Number(window.currentMap)===22)fdMoveEnemyIntoBeachWater(e);
+            // The snorkel only changes state when its position crosses the shoreline.
+            // A small hysteresis prevents sprite flicker while standing right on the tide line.
+            const onBeach=Number(window.currentMap)===22;
+            const inner=1500-Math.max(100,Math.min(280,Number(window.fdBeachWaterDepth)||245));
+            const ax=Math.abs(Number(e.x)||0),ay=Math.abs(Number(e.y)||0),wasWater=!!e.fdSnorkelHidden;
+            const water=onBeach&&(wasWater?(ax>=inner-12||ay>=inner-12):(ax>=inner+12||ay>=inner+12));
+            e.fdSnorkelHidden=water;
+            e.undetectable=water;
+            e.fdSnorkelTimer=0;
+            if(!water)e.fdSnorkelEverSurfaced=true;
+            const desiredSkin=water?'swimming_snorkel':'snorkel';
+            if(e.skinOverride!==desiredSkin){e.skinOverride=desiredSkin;e.fracturedSkinType=desiredSkin;e.resolvedFracturedSkinType=desiredSkin;}
           }
           if(e.fdConcha){
             e.fdConchaTimer=(Number(e.fdConchaTimer)||0)-delta;
             if(e.fdConchaTimer<=0){
-              if(e.fdConchaClosed){e.fdConchaClosed=false;e.skinOverride='dail_open';e.fdConchaTimer=10;e.hp=Math.min(Number(e.hp)||1,Number(e.fdConchaClosedHp)||Number(e.hp)||1);e.maxHp=Math.max(Number(e.maxHp)||1,Number(e.hp)||1);}
-              else {e.fdConchaClosed=true;e.skinOverride='dail_closed';e.fdConchaClosedHp=Number(e.hp)||1;e.fdConchaTimer=10;}
+              if(e.fdConchaClosed){
+                e.fdConchaClosed=false;e.skinOverride='dail_open';e.fdConchaTimer=10;
+                e.hp=Math.max(1,Number(e.fdConchaClosedHp)||Number(e.hp)||1);
+                e.speed=Math.max(.01,Number(e.fdConchaOpenSpeed)||.62);e.stationary=!!e.fdConchaOpenStationary;
+                delete e.fdConchaClosedX;delete e.fdConchaClosedY;
+              }else{
+                e.fdConchaClosed=true;e.skinOverride='dail_closed';e.fdConchaClosedHp=Math.max(1,Number(e.hp)||Number(e.maxHp)||1);e.fdConchaTimer=10;
+                e.fdConchaClosedX=Number(e.x)||0;e.fdConchaClosedY=Number(e.y)||0;
+                e.fdConchaOpenSpeed=Math.max(.01,Number(e.speed)||.62);e.fdConchaOpenStationary=!!e.stationary;
+                e.speed=0;e.stationary=true;
+              }
             }
+            if(e.fdConchaClosed){e.speed=0;e.stationary=true;}
           }
           if(e.fdSurfista){
             const water=fdIsBeachWater(e.x,e.y);
@@ -38544,12 +38569,13 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
               e.fdSurfistaWater=water;
               if(water){e.skinOverride='surfing';e.speed=2.9;e.fdBeachNoWaterSlow=true;}
               else {e.skinOverride='surfboard';e.speed=1.15;e.fdBeachNoWaterSlow=false;e.hp=Math.min(Number(e.hp)||1,85*fdMultiplier('motorcycle_helmet'));e.maxHp=Math.max(Number(e.hp)||1,85*fdMultiplier('motorcycle_helmet'));}
+              e.fracturedSkinType=e.resolvedFracturedSkinType=e.skinOverride;e._skinTypeForEnemy='surfista';
             }
           }
           if(e.fdKraken){
             e.poison={timer:0,dmg:0,tickCd:0};e.poisonOnHit=0;e.slowTimer=0;e.weakenTimer=0;e.curseTimer=0;e.burnTimer=0;e.freezeTimer=0;e.burnDmg=0;e.speedBuffTimer=0;e.soak=0;e.shockTimer=0;e.shockSemiTimer=0;e.stunTimer=0;e.timeDistortionTimer=0;e.zoeElectrifiedTimer=0;e.hypnotizedTimer=0;e.sugarTimer=0;e.ivySlowTimer=0;
           }
-          if(e.fdConcha&&e.fdConchaClosed&&Number.isFinite(Number(e.fdConchaClosedHp))) e.fdConchaHpBefore=Number(e.hp);
+          if(e.fdConcha&&e.fdConchaClosed&&Number.isFinite(Number(e.fdConchaClosedHp))) e.fdConchaHpBefore=Number(e.fdConchaClosedHp);
           if(e.fdGiftThief&&e.hp<=0&&!e.fdPresentDropHandled){e.fdPresentDropHandled=true;if(Math.random()<.30)itemsMap.push({x:e.x,y:e.y,type:'loot_box_drop',r:20,boxType:'presente'});}
           if(e.fdKraken&&e.hp<=0&&!e.fdKrakenDropHandled){e.fdKrakenDropHandled=true;const p=window.spawnEnemy('basico',{x:e.x,y:e.y},Number(window.currentMap)===22?'beach_basic':null);if(p&&Number(window.currentMap)===22){p.fdHolidayVariant='praia';p.skinOverride='beach_basic';}}
         }
@@ -38568,9 +38594,9 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
         for(const e of before){
           if(e?.fdKraken){e.poison={timer:0,dmg:0,tickCd:0};e.poisonOnHit=0;e.slowTimer=0;e.weakenTimer=0;e.curseTimer=0;e.burnTimer=0;e.burnDmg=0;e.freezeTimer=0;e.speedBuffTimer=0;e.soak=0;e.shockTimer=0;e.shockSemiTimer=0;e.stunTimer=0;e.timeDistortionTimer=0;e.zoeElectrifiedTimer=0;e.hypnotizedTimer=0;e.sugarTimer=0;e.ivySlowTimer=0;}
           if(e?.fdGiftThief&&e.hp<=0&&!e.fdPresentDropHandled){e.fdPresentDropHandled=true;if(Math.random()<.30)itemsMap.push({x:e.x,y:e.y,type:'loot_box_drop',r:20,boxType:'presente'});}
-          if(e?.fdConcha&&e.hp<=0&&!e.fdConchaDropHandled){e.fdConchaDropHandled=true;const isBeachOrigin=Number(e.fractureMapId)===22||Number(e.skinSourceMapId)===22||e.fdHolidayVariant==='praia';const b=window.spawnEnemy('basico',{x:e.x,y:e.y},isBeachOrigin?'beach_basic':null);if(b&&isBeachOrigin){b.fdHolidayVariant='praia';b.skinOverride='beach_basic';b.skinSourceMapId=22;b.dropOriginMapId=22;if(e.fracturedOrigin){b.fracturedOrigin=true;b.fractureMapId=22;}}}
+          if(e?.fdConcha&&!e.fdConchaClosed&&e.hp<=0&&!e.fdConchaDropHandled){e.fdConchaDropHandled=true;const isBeachOrigin=Number(e.fractureMapId)===22||Number(e.skinSourceMapId)===22||e.fdHolidayVariant==='praia';const b=window.spawnEnemy('basico',{x:e.x,y:e.y},isBeachOrigin?'beach_basic':null);if(b&&isBeachOrigin){b.fdHolidayVariant='praia';b.skinOverride='beach_basic';b.skinSourceMapId=22;b.dropOriginMapId=22;if(e.fracturedOrigin){b.fracturedOrigin=true;b.fractureMapId=22;}}}
           if(e?.fdKraken&&e.hp<=0&&!e.fdKrakenDropHandled){e.fdKrakenDropHandled=true;const isBeachOrigin=Number(e.fractureMapId)===22||Number(e.skinSourceMapId)===22||e.fdHolidayVariant==='praia';const p=window.spawnEnemy('basico',{x:e.x,y:e.y},isBeachOrigin?'beach_basic':null);if(p&&isBeachOrigin){p.fdHolidayVariant='praia';p.skinOverride='beach_basic';p.skinSourceMapId=22;p.dropOriginMapId=22;if(e.fracturedOrigin){p.fracturedOrigin=true;p.fractureMapId=22;}}}
-          if(e?.fdConcha&&e.fdConchaClosed&&e.hp<Number(e.fdConchaClosedHp||1))e.hp=Number(e.fdConchaClosedHp)||1;
+          if(e?.fdConcha&&e.fdConchaClosed){e.hp=Math.max(1,Number(e.fdConchaClosedHp)||Number(e.maxHp)||1);e.speed=0;e.stationary=true;if(Number.isFinite(Number(e.fdConchaClosedX)))e.x=Number(e.fdConchaClosedX);if(Number.isFinite(Number(e.fdConchaClosedY)))e.y=Number(e.fdConchaClosedY);if(Array.isArray(enemies)&&!enemies.includes(e))enemies.push(e);}
           if(e?.fdDeerSled&&e.truckDeathPending&&Number(e.truckExplosionTimer)<=0&&!e.fdDeerSledDropHandled){
             e.fdDeerSledDropHandled=true;const type=Math.random()<.55?'big_gift':'deer_pilot';
             const skin=type==='big_gift'?'big_gift':null;const oldMap=window.currentMap;let drop=null;
@@ -38597,12 +38623,14 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
   // Closed shells deflect player shots toward another living enemy.
   const oldProjectileHit=window.projectileHitsEnemy||projectileHitsEnemy;
   const projectileHitWrapped=function(p,e){
-    if(e?.fdSnorkel&&e.fdSnorkelHidden && fdIsBeachWater(e.x,e.y))return false;
-    if(e?.fdConcha&&e.fdConchaClosed&&p?.isPlayer){
-      const target=(Array.isArray(enemies)?enemies:[]).filter(q=>q&&q!==e&&q.hp>0&&!q.fdConchaClosed).sort((a,b)=>Math.hypot(a.x-e.x,a.y-e.y)-Math.hypot(b.x-e.x,b.y-e.y))[0];
-      if(target&&p&&!p.extra?.fdConchaRedirected){
-        p.extra=p.extra||{};p.extra.fdConchaRedirected=true;p.extra.fdConchaReflectedBy=true;p.extra.hitIds=p.extra.hitIds||new Set();p.extra.hitIds.add(e);
-        const dx=target.x-e.x,dy=target.y-e.y,len=Math.hypot(dx,dy)||1,speed=Math.max(2,Math.hypot(Number(p.vx)||0,Number(p.vy)||0));p.x=e.x;p.y=e.y;p.vx=dx/len*speed;p.vy=dy/len*speed;p.extra.targetEnemy=target;p.dmg=Number(p.dmg)||1;
+    if(e?.fdSnorkel&&e.fdSnorkelHidden)return false;
+    if(e?.fdConcha&&e.fdConchaClosed){
+      if(p?.isPlayer){
+        const target=(Array.isArray(enemies)?enemies:[]).filter(q=>q&&q!==e&&q.hp>0&&!q.fdConchaClosed).sort((a,b)=>Math.hypot(a.x-e.x,a.y-e.y)-Math.hypot(b.x-e.x,b.y-e.y))[0];
+        if(target&&p&&!p.extra?.fdConchaRedirected){
+          p.extra=p.extra||{};p.extra.fdConchaRedirected=true;p.extra.fdConchaReflectedBy=true;p.extra.hitIds=p.extra.hitIds||new Set();p.extra.hitIds.add(e);
+          const dx=target.x-e.x,dy=target.y-e.y,len=Math.hypot(dx,dy)||1,speed=Math.max(2,Math.hypot(Number(p.vx)||0,Number(p.vy)||0));p.x=e.x;p.y=e.y;p.vx=dx/len*speed;p.vy=dy/len*speed;p.extra.targetEnemy=target;p.dmg=Number(p.dmg)||1;
+        }
       }
       return false;
     }
@@ -38610,7 +38638,7 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
   };
   window.projectileHitsEnemy=projectileHitWrapped;try{projectileHitsEnemy=projectileHitWrapped;}catch(_){}
   const oldDamageMult=window.getEnemyDamageTakenMultiplier||getEnemyDamageTakenMultiplier;
-  const damageMultWrapped=function(e){if(e?.fdSnorkel&&e.fdSnorkelHidden&&fdIsBeachWater(e.x,e.y))return 0;if(e?.fdConcha&&e.fdConchaClosed)return 0;return oldDamageMult.apply(this,arguments);};
+  const damageMultWrapped=function(e){if(e?.fdSnorkel&&e.fdSnorkelHidden)return 0;if(e?.fdConcha&&e.fdConchaClosed)return 0;return oldDamageMult.apply(this,arguments);};
   window.getEnemyDamageTakenMultiplier=damageMultWrapped;try{getEnemyDamageTakenMultiplier=damageMultWrapped;}catch(_){}
 
   // Clip every bitmap sprite at the water line on Praia, not just enemy sprites.
@@ -38620,16 +38648,27 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
     const drawImageProto=typeof CanvasRenderingContext2D!=='undefined'?CanvasRenderingContext2D.prototype:null;
     if(drawImageProto&&!drawImageProto.__fdBeachAllSpriteClipV1){
       const nativeDrawImage=drawImageProto.drawImage;
+      const noBeachCropSprites=new Set([
+        // Player sprites that must remain fully visible over sea.
+        'eolio','stormy','stormy_enemy',
+        // All Sky biome enemy sprites / vehicles / drones.
+        'sky_basic','aero_hat','iron_aero_hat','motor_head','plane_truck','sky_shooter','sky_velocist','sky_giant','sky_boss','sky_tank','wingsuit_kamikaze','sky_healer','sky_elite_shooter','sky_leader','helicopter','jet','enemy_drone','drone','axel_drone',
+        // These show their full sprite in water by design.
+        'swimming_snorkel','surfing','ghost_fisher',
+        // Radioactive Field hunter and its related biome sprites.
+        'plane','fighter_plane','radioactive_plane','machine_gun_war','anti_radiation','mutant_basic','mutant_giant','war_basic','war_hat','war_helmet','nuke_head','cartographer','war_shooter','war_giant','bazooka_tank','war_healer','masked_elite_shooter','nuke_kamikaze','commander_leader','driver_baloon','tank_truck','commander_boss'
+      ]);
       const beachClippedDrawImage=function(image,...args){
         try{
           if(this.canvas&&this.canvas.id==='gameCanvas'&&Number(window.currentMap)===22&&typeof window.fdIsBeachWater==='function'&&image){
-            const source=String(image.currentSrc||image.src||'').toLowerCase();
+            const source=String(image.currentSrc||image.src||'').toLowerCase().split(/[?#]/,1)[0];
             const isXpOrb=/elements\/xp\.png|xp[_-](small|large|orb|gem)/i.test(source);
-            let dx,dy,dw,dh;
+            const spriteFile=source.slice(source.lastIndexOf('/')+1).replace(/\.png$/i,'');
+            const exemptBeachSprite=noBeachCropSprites.has(spriteFile);            let dx,dy,dw,dh;
             if(args.length===2){dx=Number(args[0]);dy=Number(args[1]);dw=Number(image.naturalWidth||image.width);dh=Number(image.naturalHeight||image.height);}
             else if(args.length===4){[dx,dy,dw,dh]=args.map(Number);}
             else if(args.length===8){dx=Number(args[4]);dy=Number(args[5]);dw=Number(args[6]);dh=Number(args[7]);}
-            if(!isXpOrb&&Number.isFinite(dx)&&Number.isFinite(dy)&&Number.isFinite(dw)&&Number.isFinite(dh)&&dw>0&&dh>0){
+            if(!isXpOrb&&!exemptBeachSprite&&Number.isFinite(dx)&&Number.isFinite(dy)&&Number.isFinite(dw)&&Number.isFinite(dh)&&dw>0&&dh>0){
               const tr=this.getTransform?this.getTransform():null;
               const localX=dx+dw/2,localY=dy+dh/2;
               const px=tr?tr.a*localX+tr.c*localY+tr.e:localX;
@@ -38652,14 +38691,14 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
   }catch(err){console.warn('FD recorte de sprites na água:',err);}
 
   // Keep enemy rendering aligned with the same 50% water crop used for every bitmap sprite.
-  const skyExceptionKeys=new Set(['sky_basic','aero_hat','iron_aero_hat','motor_head','plane_truck','sky_shooter','sky_velocist','sky_giant','sky_boss','sky_tank','wingsuit_kamikaze','sky_healer','sky_elite_shooter','sky_leader','helicopter','jet','enemy_drone','drone','axel_drone','stormy','stormy_enemy','eolio','eólio','ghost_fisher','fighter_plane','machine_gun_war','anti_radiation','radioactive_plane','mutant_basic','mutant_giant','snorkel','swimmed_snorkel','swimming_snorkel','surfing','surfboard']);
+  const skyExceptionKeys=new Set(['sky_basic','aero_hat','iron_aero_hat','motor_head','plane_truck','sky_shooter','sky_velocist','sky_giant','sky_boss','sky_tank','wingsuit_kamikaze','sky_healer','sky_elite_shooter','sky_leader','helicopter','jet','enemy_drone','drone','axel_drone','stormy','stormy_enemy','eolio','eólio','ghost_fisher','fighter_plane','plane','radioactive_plane','machine_gun_war','anti_radiation','mutant_basic','mutant_giant','war_basic','war_hat','war_helmet','nuke_head','cartographer','war_shooter','war_giant','bazooka_tank','war_healer','masked_elite_shooter','nuke_kamikaze','commander_leader','driver_baloon','tank_truck','commander_boss','swimming_snorkel','surfing']);
   const oldDrawEnemy=window.drawEnemySprite||drawEnemySprite;
   const drawEnemyWrapped=function(cCtx,x,y,size,type,opts={}){
     try{
       if(Number(window.currentMap)===22){
         const key=String(type||'').toLowerCase(),e=opts?.enemy||null;
-        const skyOrigin=Number(e?.skinSourceMapId)===21||Number(e?.dropOriginMapId)===21||Number(e?.fractureMapId)===21;
-        const exempt=skyExceptionKeys.has(key)||key.startsWith('sky_')||key.includes('balloon')||key.includes('baloon')||key.includes('baloon')||!!e?.globalBalloon||!!e?.fdFlying||!!e?.fdDeerSled||skyOrigin;
+        const skyOrigin=Number(e?.skinSourceMapId)===21||Number(e?.dropOriginMapId)===21||Number(e?.fractureMapId)===21||Number(e?.lineageMapId)===21||Number(e?.originBiomeId)===21||Number(e?.spawnBiome)===21;
+        const exempt=skyExceptionKeys.has(key)||key.startsWith('sky_')||key.includes('balloon')||key.includes('baloon')||!!e?.globalBalloon||!!e?.fdFlying||!!e?.fdDeerSled||skyOrigin;
         if(!exempt&&fdIsBeachWater(x,y)){
           const img=getEnemySpriteImage(type);if(!img||!img.complete||!img.naturalWidth)return false;
           const ratio=img.naturalWidth/img.naturalHeight,scale=Number.isFinite(opts.scale)?opts.scale:1,widthMult=Number.isFinite(opts.widthMult)?opts.widthMult:getEnemySpriteWidthMult(type),raw=size*widthMult*scale,w=opts.allowTiny?Math.max(1,raw):Math.max(22,raw),h=w/ratio;
@@ -38988,6 +39027,7 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
     const mult=safe(()=>getEnemyDifficultyMultiplierFromEntry('motorcycle_helmet',Math.max(1,Number(wave)||1),Math.max(1,Number(wave)||1)))||1;
     const a={id:`poker_ally_${Date.now()}_${Math.random().toString(36).slice(2,8)}`,type,name:spec.name,sprite:spec.sprite,color:spec.color,
       x:Number(x)||player?.x||0,y:Number(y)||player?.y||0,hp:Math.max(25,85*mult),maxHp:Math.max(25,85*mult),size:15,
+      spawnWave:Math.max(1,Number(typeof wave!=='undefined'?wave:window.wave)||1),
       angle:Math.random()*Math.PI*2,attackCd:.35+Math.random()*.4,healCd:0,slashTimer:0,slashAngle:0,alive:true};
     pokerAllies.push(a);
     safe(()=>createParticles(a.x,a.y,spec.color));
@@ -39072,8 +39112,9 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
   function updatePokerAllies(dt){
     if(!isPlaying||!player||player.isDead){pokerAllies.length=0;return;}
     dt=Math.max(0,Math.min(.1,Number(dt)||0));
+    const currentWave=Math.max(1,Number(typeof wave!=='undefined'?wave:window.wave)||1);
     for(let i=pokerAllies.length-1;i>=0;i--){
-      const a=pokerAllies[i];if(!a||a.hp<=0){pokerAllies.splice(i,1);continue;}
+      const a=pokerAllies[i];if(!a||a.hp<=0||currentWave>=Math.max(1,Number(a.spawnWave)||currentWave)+3){pokerAllies.splice(i,1);continue;}
       a.angle+=dt*(1.0+(i%3)*.22);a.slashTimer=Math.max(0,a.slashTimer-dt);a.attackCd=Math.max(0,a.attackCd-dt);a.healCd=Math.max(0,a.healCd-dt);
       const orbit=player.r+48+(i%3)*13;
       const tx=player.x+Math.cos(a.angle)*orbit,ty=player.y+Math.sin(a.angle)*orbit;
