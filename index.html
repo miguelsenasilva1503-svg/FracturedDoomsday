@@ -2098,7 +2098,7 @@ body.fd-entry-cinematic #game-hud{display:block!important;visibility:visible!imp
                 <button class="btn-menu settings-option" type="button" onclick="resetDevAccount()">Reset de conta</button>
 <button class="btn-menu settings-option" type="button" onclick="resetMapDestination()">Reset de mapa</button>
                 <div class="settings-option" style="display:flex; flex-direction:column; justify-content:center; gap:8px; min-height:84px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.10); border-radius:14px; padding:12px;">
-                    <span style="font-size:14px; font-weight:900; color:#fff;">Mapa da rotação</span>
+                    <span style="font-size:14px; font-weight:900; color:#fff;">Forçar mapa</span>
                     <select id="dev-map-rotation" class="filter-select" style="width:100%; margin:0; font-size:14px; padding:8px;" onchange="setDevMapRotation(this.value)"></select>
                     <span id="dev-map-rotation-status" style="font-size:11px; color:#aaa;">Rotação automática</span>
                 </div>
@@ -3786,6 +3786,8 @@ const CARDS = [
 ];
 
 const MAPS = ["Planície", "Deserto", "Nevasca", "Caverna", "Floresta", "Pântano", "Metrópole", "Ígneo", "Bambuzal", "Discoteca", "Palácio Marinho", "Fraturado", "Chroma Key", "Base Lunar", "Outonal", "Coliseu", "Pirâmide", "Desgelo", "Permafrost", "Campo Radioativo", "Dia das Crianças", "Céu"];
+// Praia é registrada no catálogo base para aparecer também nos seletores de Dev Tools inicializados antes dos eventos sazonais.
+if (!MAPS.includes('Praia')) MAPS.push('Praia'); // ID 22
 
 const UHC_MODIFIERS = {
     "Planície": { night: true },
@@ -8781,8 +8783,12 @@ function updateSettingsUI(syncSlider = true) {
             .filter(m => m.index <= 11 || m.index === 13 || m.index === 14 || m.index === 15 || m.index >= 16 || m.name === 'Praia');
         const existingDevMapValues = new Set(Array.from(devMapSelect.options).map(option => Number(option.value)));
         const hasMissingDevMap = devMapOptions.some(map => !existingDevMapValues.has(map.index));
-        if (!devMapSelect.options.length || hasMissingDevMap) {
+        const praiaIndex = MAPS.indexOf('Praia');
+        const praiaOptionMissing = praiaIndex >= 0 && !Array.from(devMapSelect.options).some(option => Number(option.value) === praiaIndex && option.textContent.trim() === 'Praia');
+        if (!devMapSelect.options.length || hasMissingDevMap || praiaOptionMissing) {
+            const previousValue = devMapSelect.value;
             devMapSelect.innerHTML = '<option value="-1">Rotação automática</option>' + devMapOptions.map(m => `<option value="${m.index}">${m.name}</option>`).join('');
+            if (Array.from(devMapSelect.options).some(option => option.value === previousValue)) devMapSelect.value = previousValue;
         }
         const override = Number.isInteger(Number(pd?.debug?.mapRotationOverride)) ? Number(pd.debug.mapRotationOverride) : -1;
         devMapSelect.value = (override >= -1 && override < MAPS.length) ? String(override) : '-1';
@@ -11986,7 +11992,9 @@ const PET_DATA = {
     rocky: { id:'rocky', name:'Pedregoso', sprite:'pets/rocky.png', color:'#7f8c8d', desc:'Enfraquece a movimentação de inimigos que acertam o jogador; a raridade aumenta a lentidão.' },
     fish: { id:'fish', name:'Peixe', sprite:'pets/fish.png', color:'#74b9ff', desc:'Encharca inimigos que atacam o jogador; a raridade aumenta o encharcamento.' },
     cactus: { id:'cactus', name:'Cactáceo', sprite:'pets/cactus.png', color:'#2ecc71', desc:'Dispara espinhos em todas as direções; a raridade aumenta a quantidade de espinhos.' },
-    shroom: { id:'shroom', name:'Cogumelinho', sprite:'pets/shroom.png', color:'#9b59b6', desc:'Dispara esporos que podem hipnotizar inimigos; a raridade aumenta a chance de hipnose.' }
+    shroom: { id:'shroom', name:'Cogumelinho', sprite:'pets/shroom.png', color:'#9b59b6', desc:'Dispara esporos que podem hipnotizar inimigos; a raridade aumenta a chance de hipnose.' },
+    lixao: { id:'lixao', name:'Lixão', sprite:'pets/trash.png', color:'#7f8c8d', desc:'Ao derrotar um inimigo, tem 15% de chance de cuspir um pequeno XP. Cada fusão aumenta a chance em 5 pontos percentuais.' },
+    urubu: { id:'urubu', name:'Urubu', sprite:'pets/vulture.png', color:'#4b4b4b', desc:'Quando um inimigo morre, ataca outro inimigo vivo aleatório. Cada fusão aumenta o dano do ataque.' }
 };
 const PET_HAMSTER_DAMAGE = [15,25,40,60,90];
 const PET_PARROT_DAMAGE = [0,5,10,15,30];
@@ -38137,4 +38145,1359 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
     const ensureDailyWrapped = function(saveNow=true){
       let list = oldEnsureDaily.apply(this, arguments);
       try {
-        if (!window.dailyMissionRun && !window.dailyMissionLaunch && window.pd?.daily
+        if (!window.dailyMissionRun && !window.dailyMissionLaunch && window.pd?.daily && Array.isArray(pd.daily.list) && pd.daily.list.length===2) {
+          let idx = pd.daily.list.findIndex(m=>m?.id==='christmas_early');
+          if (idx < 0) {
+            idx = pd.daily.list[1]?.claimed ? 0 : 1;
+            const inst = buildDailyMissionInstance(dailyXmasDef);
+            Object.assign(inst,{id:'christmas_early',title:'Natal Atrasado',modifierKey:'christmas_early',modifier:dailyXmasDef.modifier,mapIndex:17,mapName:'Desgelo',mapVariant:'thaw',reward:xmasReward(),completed:false,claimed:false});
+            pd.daily.list[idx]=inst;
+          } else {
+            Object.assign(pd.daily.list[idx],{title:'Natal Atrasado',modifierKey:'christmas_early',modifier:dailyXmasDef.modifier,mapIndex:17,mapName:'Desgelo',mapVariant:'thaw',reward:xmasReward()});
+          }
+          if (saveNow) save();
+          list=pd.daily.list;
+        }
+      } catch(err){ console.warn('Natal Atrasado: falha ao garantir missão',err); }
+      return list;
+    };
+    window.ensureDailyMissions=ensureDailyWrapped; try{ensureDailyMissions=ensureDailyWrapped;}catch(_){}
+    window.__fdXmasMissionEnsureWrapped=true;
+    safe(()=>ensureDailyWrapped(false));
+    safe(()=>{ if(typeof renderDailyMissionCards==='function') renderDailyMissionCards(); });
+  }
+
+  const oldBoxDrop = window.buildBoxDropItem || buildBoxDropItem;
+  const giftReservations = window.__fdGiftCharacterReservations || (window.__fdGiftCharacterReservations = new Set());
+  function presentResourceDrop(){
+    const r=Math.random();
+    if(r<0.025 && typeof rollChip==='function') return rollChip();
+    if(r<0.09 && typeof CHARACTERS==='object') {
+      const owned = new Set(Object.keys(pd?.chars||{}));
+      const pool = Object.values(CHARACTERS||{}).filter(c=>c?.id && !owned.has(c.id) && !giftReservations.has(c.id) && !['glitch','fasty'].includes(c.id));
+      if(pool.length){
+        const picked=pool[Math.floor(Math.random()*pool.length)];
+        giftReservations.add(picked.id);
+        return {isCharacter:true,rouletteByPool:true,rarity:getEffectiveCharacterRarity(picked.id),rouletteBoxType:'presente',giftFixedCharId:picked.id,giftBoxNoDuplicate:true};
+      }
+    }
+    if(r<0.27){const n=8+Math.floor(Math.random()*9);pd.gems=(Number(pd.gems)||0)+n;return ` +${n} Gemas`;}
+    if(r<0.49){const n=50+Math.floor(Math.random()*61);pd.evo=(Number(pd.evo)||0)+n;return ` +${n} Evo`;}
+    if(r<0.72){const n=110+Math.floor(Math.random()*141);pd.sucatas=(Number(pd.sucatas)||0)+n;return ` +${n} Sucatas`;}
+    const n=500+Math.floor(Math.random()*601);pd.coins=(Number(pd.coins)||0)+n;return ` +${n} Moedas`;
+  }
+  const buildBoxDropPresent=function(type){
+    if(String(type||'').toLowerCase()==='presente') return presentResourceDrop();
+    return oldBoxDrop.apply(this,arguments);
+  };
+  window.buildBoxDropItem=buildBoxDropPresent; try{buildBoxDropItem=buildBoxDropPresent;}catch(_){}
+  if (typeof chooseRouletteCharacterForToken==='function') {
+    const oldChooseRoulette=window.chooseRouletteCharacterForToken||chooseRouletteCharacterForToken;
+    const chooseRouletteWrapped=function(token){
+      if(token?.giftBoxNoDuplicate){
+        if(token.giftFixedCharId && CHARACTERS?.[token.giftFixedCharId]) return token.giftFixedCharId;
+        const owned=new Set(Object.keys(pd?.chars||{}));
+        const pool=Object.values(CHARACTERS||{}).filter(c=>c?.id&&!owned.has(c.id)&&!giftReservations.has(c.id)&&!['glitch','fasty'].includes(c.id));
+        if(pool.length){const c=pool[Math.floor(Math.random()*pool.length)];giftReservations.add(c.id);token.giftFixedCharId=c.id;return c.id;}
+        return null;
+      }
+      return oldChooseRoulette.apply(this,arguments);
+    };
+    window.chooseRouletteCharacterForToken=chooseRouletteWrapped; try{chooseRouletteCharacterForToken=chooseRouletteWrapped;}catch(_){}
+  }
+  if (typeof grantCharacterNow==='function') {
+    const oldGrantCharacterNow=window.grantCharacterNow||grantCharacterNow;
+    const grantCharacterWrapped=function(charId,source='gacha'){
+      const out=oldGrantCharacterNow.apply(this,arguments);
+      giftReservations.delete(String(charId||''));
+      return out;
+    };
+    window.grantCharacterNow=grantCharacterWrapped; try{grantCharacterNow=grantCharacterWrapped;}catch(_){}
+  }
+
+  // Map-specific enemy sprite families and custom enemy spawn stats.
+  const oldGetFracturedSkin=window.getFracturedEnemySkinType||getFracturedEnemySkinType;
+  const fracturedSkinWrapped=function(e){
+    if(e && Number.isInteger(Number(e.fractureMapId)) && (Number(e.fractureMapId)===22 || Number(e.fractureMapId)===24)){
+      const mapId=Number(e.fractureMapId), t=String(e.type||'').toLowerCase(), sk=(mapId===22?mapByType.praia:mapByType.natal)[t];
+      if(sk && getEnemySpritePath(sk)){e.fracturedSkinType=sk;e.resolvedFracturedSkinType=sk;e._skinTypeForEnemy=t;return sk;}
+      if(e.skinOverride&&getEnemySpritePath(e.skinOverride))return e.skinOverride;
+    }
+    if(e?.fdHolidayVariant){const sk=(e.fdHolidayVariant==='praia'?mapByType.praia:mapByType.natal)[String(e.type||'').toLowerCase()];if(sk&&getEnemySpritePath(sk))return sk;}
+    return oldGetFracturedSkin.apply(this,arguments);
+  };
+  window.getFracturedEnemySkinType=fracturedSkinWrapped; try{getFracturedEnemySkinType=fracturedSkinWrapped;}catch(_){}
+
+  const oldFracturePool=window.getFractureBiomePool||getFractureBiomePool;
+  const holidayFracturePool=function(mapId){
+    const id=Number(mapId);
+    if(id===22) return [...new Set([...beachStandards,...beachSpecial])];
+    if(id===24) return [...new Set([...xmasTypes,'gift_thief','deers_sled','big_gift','xmas_tree'])];
+    return oldFracturePool.apply(this,arguments);
+  };
+  window.getFractureBiomePool=holidayFracturePool; try{getFractureBiomePool=holidayFracturePool;}catch(_){}
+  const oldCosmicPool=window.getCosmicTransformationPool||getCosmicTransformationPool;
+  const cosmicPoolWrapped=function(){return oldCosmicPool.apply(this,arguments).filter(v=>String(v?.type||'')!=='big_gift');};
+  window.getCosmicTransformationPool=cosmicPoolWrapped; try{getCosmicTransformationPool=cosmicPoolWrapped;}catch(_){}
+  if(typeof getFracturedGlobalEnemyPool==='function'){
+    const oldGlobalFracturePool=window.getFracturedGlobalEnemyPool||getFracturedGlobalEnemyPool;
+    const globalPoolWrapped=function(){return [...new Set([...oldGlobalFracturePool.apply(this,arguments), 'gift_thief','big_gift','deers_sled','snorkel','concha','surfista','kraken'])].filter(t=>{
+      if(t==='gift_thief')return Number(wave)>=12;
+      if(t==='snorkel')return Number(wave)>=8;
+      if(t==='surfista')return Number(wave)>=18;
+      if(t==='concha')return Number(wave)>=20;
+      if(t==='kraken')return Number(wave)>=22;
+      return true;
+    });};
+    window.getFracturedGlobalEnemyPool=globalPoolWrapped;try{getFracturedGlobalEnemyPool=globalPoolWrapped;}catch(_){}
+  }
+  // Include synthetic source 24 so a Fraturado portal can source the Christmas biome.
+  try { const src = window.createFracture || createFracture; if(!src.__fdHolidayFractureSource){ const wrapped=function(){const out=src.apply(this,arguments);return out;}; wrapped.__fdHolidayFractureSource=true; window.createFracture=wrapped;try{createFracture=wrapped;}catch(_){} } } catch(_){}
+
+  const oldSpawnFracture=window.spawnFractureEnemy||spawnFractureEnemy;
+  if(typeof oldSpawnFracture==='function'){
+    const spawnFractureWrapped=function(fracture, options={}){
+      const id=Number(fracture?.mapId);
+      if(id!==22 && id!==24) return oldSpawnFracture.apply(this,arguments);
+      if(!fracture || wave%10===0 || enemies.some(e=>e?.isBoss)) return false;
+      let pool=holidayFracturePool(id).filter(t=>{
+        if(t==='gift_thief')return Number(wave)>=12;
+        if(t==='snorkel')return Number(wave)>=8;
+        if(t==='surfista')return Number(wave)>=18;
+        if(t==='concha')return Number(wave)>=20;
+        if(t==='kraken')return Number(wave)>=22;
+        return true;
+      });
+      if(!pool.length)return false;
+      const t=pool[Math.floor(Math.random()*pool.length)];
+      const angle=fracture.angle+(Math.random()-.5)*.9+Math.PI, d=25+Math.random()*70;
+      const x=Math.max(-1450,Math.min(1450,fracture.x+Math.cos(angle)*d)), y=Math.max(-1450,Math.min(1450,fracture.y+Math.sin(angle)*d));
+      const targetType=t==='deers_sled'?'truck':(t==='xmas_tree'?'stone_golem':t);
+      const skin=id===22?(mapByType.praia[targetType]||({snorkel:'swimmed_snorkel',concha:'dail_open',surfista:'surfing',kraken:'octopus_head'}[targetType]||targetType)):(t==='deers_sled'?'deers_sled':t==='xmas_tree'?'xmas_tree':(mapByType.natal[targetType]||({gift_thief:'gift_thief',big_gift:'big_gift'}[targetType]||targetType)));
+      const oldMap=window.currentMap, oldBypass=!!window.__fdBypassSurvivalRoster;
+      let e=null;
+      try { window.__fdBypassSurvivalRoster=true; window.currentMap=id===22?22:17; e=window.spawnEnemy(targetType,{x,y},skin); }
+      finally { window.currentMap=oldMap; window.__fdBypassSurvivalRoster=oldBypass; }
+      if(!e)return false;
+      if(oldMap!==22){e.x=x;e.y=y;}
+      e.fracturedOrigin=true;e.fractureMapId=id;e.skinSourceMapId=id;e.dropOriginMapId=id;e.spawnBiome=11;e.fdHolidayVariant=id===22?'praia':'natal';e.skinOverride=skin;e.fracturedSkinType=skin;e.resolvedFracturedSkinType=skin;e._skinTypeForEnemy=String(e.type||'').toLowerCase();
+      fdApplyCustomEnemyStats(e,t,skin);
+      if(id===22 && t==='snorkel' && oldMap===22 && !fdIsBeachWater(e.x,e.y))fdMoveEnemyIntoBeachWater(e);
+      return e;
+    };
+    window.spawnFractureEnemy=spawnFractureWrapped;try{spawnFractureEnemy=spawnFractureWrapped;}catch(_){}
+  }
+
+  function isXmasMission(){return window.dailyMissionRun?.modifierKey==='christmas_early'||String(window.seasonalQuestRun?.id||window.seasonalQuestLaunch?.id||'')==='natal_adiantado';}
+  function getCurrentWave(){const current=(typeof wave!=='undefined')?wave:window.wave;return Math.max(1,Number(current)||1);}
+  function fdMultiplier(type){return Math.max(.5,Number(safe(()=>getEnemyDifficultyMultiplierFromEntry(type,getCurrentWave(),getCurrentWave()),1))||1);}
+  function fdApplyCustomEnemyStats(e,type,skin){
+    if(!e||typeof e!=='object')return e;
+    const spriteKey=String(skin||e.skinOverride||'').toLowerCase();
+    if(spriteKey==='deers_sled')type='deers_sled';
+    else if(spriteKey==='xmas_tree')type='xmas_tree';
+    else if(spriteKey==='gift_thief')type='gift_thief';
+    else if(spriteKey==='big_gift')type='big_gift';
+    else if(['snorkel','swimmed_snorkel','swimming_snorkel'].includes(spriteKey))type='snorkel';
+    else if(['dail_open','dail_closed'].includes(spriteKey))type='concha';
+    else if(['surfing','surfboard'].includes(spriteKey))type='surfista';
+    else if(spriteKey==='octopus_head')type='kraken';
+    const mult=fdMultiplier(type==='gift_thief'?'prism_head':type==='snorkel'?'cardboard_head':type==='concha'?'prism_head':type==='surfista'||type==='kraken'?'motorcycle_helmet':type);
+    if(type==='gift_thief'){
+      e.type='gift_thief';e.hp=e.maxHp=Math.max(180*mult,Number(e.hp)||0);e.speed=1.78;e.baseDmg=e.dmg=Math.max(8,9*mult);e.size=18;e.spriteSize=18;e.isGlobalArmored=true;e.breakIntoBasic=false;e.dodgeChance=.25;e.fdGiftThief=true;e.skinOverride='gift_thief';
+    }else if(type==='deers_sled'){
+      e.type='truck';e.hp=e.maxHp=Math.max(170*mult,Number(e.hp)||0);e.speed=2.35;e.baseDmg=e.dmg=18*mult;e.size=34;e.spriteSize=32;e.isGlobalArmored=true;e.breakIntoBasic=false;e.globalTruck=true;e.mineImmune=true;e.truckDeathPending=!!e.truckDeathPending;e.truckExplosionTimer=Number(e.truckExplosionTimer)||0;e.fdDeerSled=true;e.fdFlying=true;e.skinOverride='deers_sled';
+    }else if(type==='big_gift'){
+      e.type='big_gift';e.hp=e.maxHp=Math.max(220*mult,Number(e.hp)||0);e.speed=1.05;e.baseDmg=e.dmg=12*mult;e.size=24;e.spriteSize=24;e.isGlobalArmored=false;e.breakIntoBasic=false;e.fdBigGift=true;e.skinOverride='big_gift';
+    }else if(type==='xmas_tree'){
+      e.type='stone_golem';e.hp=e.maxHp=Math.max(520*mult,Number(e.hp)||0);e.speed=.65;e.baseDmg=e.dmg=26*mult;e.size=30;e.golemAttackCd=Number(e.golemAttackCd)||1.1;e.golemAttackTimer=Number(e.golemAttackTimer)||0;e.fdXmasTree=true;e.skinOverride='xmas_tree';
+    }else if(type==='snorkel'){
+      e.type='snorkel';e.hp=e.maxHp=Math.max(45*mult,Number(e.hp)||0);e.speed=1.2;e.baseDmg=e.dmg=5*mult;e.size=15;e.isGlobalArmored=true;e.breakIntoBasic=false;e.fdSnorkel=true;e.fdBeachNoWaterSlow=true;e.fdSnorkelTimer=3.2;e.fdSnorkelHidden=true;e.skinOverride='swimmed_snorkel';
+    }else if(type==='concha'){
+      e.type='concha';e.hp=e.maxHp=Math.max(330*mult,Number(e.hp)||0);e.speed=.62;e.baseDmg=e.dmg=8*mult;e.size=20;e.isGlobalArmored=true;e.breakIntoBasic=false;e.fdConcha=true;e.fdConchaTimer=10;e.fdConchaClosed=false;e.fdConchaOpenSpeed=.62;e.fdConchaOpenStationary=false;e.skinOverride='dail_open';
+    }else if(type==='surfista'){
+      e.type='surfista';e.hp=e.maxHp=Math.max(85*mult,Number(e.hp)||0);e.speed=2.9;e.baseDmg=e.dmg=7*mult;e.size=16;e.isGlobalArmored=true;e.breakIntoBasic=true;e.fdSurfista=true;e.fdBeachNoWaterSlow=true;e.skinOverride='surfing';
+    }else if(type==='kraken'){
+      e.type='kraken';e.hp=e.maxHp=Math.max(85*mult,Number(e.hp)||0);e.speed=1.0;e.baseDmg=e.dmg=9*mult;e.size=18;e.isGlobalArmored=true;e.breakIntoBasic=false;e.fdKraken=true;e.fdBeachNoWaterSlow=true;e.skinOverride='octopus_head';
+    }
+    if(skin && getEnemySpritePath(skin))e.skinOverride=skin;
+    if(Number(window.currentMap)===22 && !e.fdHolidayVariant)e.fdHolidayVariant='praia';
+    if(isXmasMission())e.fdHolidayVariant='natal';
+    if(e.fdHolidayVariant){const id=e.fdHolidayVariant==='praia'?22:24;e.skinSourceMapId=id;e.dropOriginMapId=id;e.lineageMapId=id;}
+    return e;
+  }
+  function fdNormalizeHolidayRole(type){
+    const t=String(type||'').toLowerCase();
+    const aliases={basic:'basico',cardboard:'cardboard_head',helmet:'motorcycle_helmet',prism:'prism_head',giant:'gigante',tank:'tanque',healer:'curandeiro',balloon:'ballon',baloneiro:'ballon',leader:'lider',elite_shooter:'elite',shooter:'atirador',velocist:'velocista',truck:'truck'};
+    return aliases[t]||t;
+  }
+  function fdChooseBeachSkin(type){return mapByType.praia[fdNormalizeHolidayRole(type)]||null;}
+  function fdChooseXmasSkin(type){return mapByType.natal[fdNormalizeHolidayRole(type)]||null;}
+  function fdRandomBeachWaterPoint(){
+    const edge=1450, inner=fdBeachInnerEdge();
+    const side=Math.floor(Math.random()*4), along=(Math.random()*2-1)*inner;
+    if(side===0)return {x:(Math.random()<.5?-1:1)*(inner+20+Math.random()*Math.max(10,edge-inner-30)),y:along};
+    if(side===1)return {x:along,y:(Math.random()<.5?-1:1)*(inner+20+Math.random()*Math.max(10,edge-inner-30))};
+    return {x:(Math.random()*2-1)*edge,y:(Math.random()<.5?-1:1)*(inner+20+Math.random()*Math.max(10,edge-inner-30))};
+  }
+  function fdBeachInnerEdge(){return 1500-Math.max(100,Math.min(500,Number(window.fdBeachWaterDepth)||245));}
+  function fdIsBeachWater(x,y){
+    if(Number(window.currentMap)!==22)return false;
+    const edge=1500, ax=Math.abs(Number(x)||0),ay=Math.abs(Number(y)||0);
+    if(ax>=edge||ay>=edge)return false; // fuera del mapa, aunque se dibuje mar, no aplica gameplay.
+    const inner=fdBeachInnerEdge();
+    return ax>=inner||ay>=inner;
+  }
+  window.fdIsBeachWater=fdIsBeachWater;
+  function fdMoveEnemyIntoBeachWater(e){const p=fdRandomBeachWaterPoint();e.x=p.x;e.y=p.y;}
+  window.fdMoveEnemyIntoBeachWater=fdMoveEnemyIntoBeachWater;
+  // Water is a cached repeating texture; the old renderer built hundreds of paths every frame,
+  // which stalled the game loop on mobile and could starve audio playback.
+  let fdBeachWaterPattern=null;
+  function getFDBeachWaterPattern(){
+    if(fdBeachWaterPattern)return fdBeachWaterPattern;
+    const tile=document.createElement('canvas');tile.width=tile.height=192;
+    const g=tile.getContext('2d');if(!g)return null;
+    const grad=g.createLinearGradient(0,0,192,192);
+    grad.addColorStop(0,'#0c6e9b');grad.addColorStop(.28,'#168db5');grad.addColorStop(.58,'#087ba8');grad.addColorStop(1,'#07567f');
+    g.fillStyle=grad;g.fillRect(0,0,192,192);
+    // Deep-current bands and small light reflections; all generated once, not per frame.
+    for(let i=0;i<26;i++){
+      const x=(i*47+17)%192,y=(i*71+29)%192,len=19+(i*13)%49,amp=2+(i%5);
+      g.beginPath();g.moveTo(x,y);g.bezierCurveTo(x+len*.22,y-amp,x+len*.55,y+amp,x+len,y+Math.sin(i*1.7)*amp);
+      g.strokeStyle=i%4===0?'rgba(214,249,255,.48)':(i%3===0?'rgba(0,47,79,.30)':'rgba(119,220,244,.23)');g.lineWidth=i%5===0?2.2:1.1;g.stroke();
+    }
+    for(let i=0;i<32;i++){
+      const x=(i*53+11)%192,y=(i*37+23)%192,r=.7+(i%4)*.45;
+      g.beginPath();g.ellipse(x,y,r*1.6,r,.25,0,Math.PI*2);g.fillStyle=i%3===0?'rgba(239,255,255,.40)':'rgba(119,220,244,.22)';g.fill();
+    }
+    fdBeachWaterPattern=g.createPattern(tile,'repeat')||null;
+    return fdBeachWaterPattern;
+  }
+  if(!(Number(window.fdBeachWaterDepth)>0))window.fdBeachWaterDepth=245;
+  if(!(Number(window.fdBeachTargetWaterDepth)>0))window.fdBeachTargetWaterDepth=Number(window.fdBeachWaterDepth)||245;
+  window.fdBeachWaveTimer=Math.max(0,Number(window.fdBeachWaveTimer)||0);
+  window.fdBeachWaveKickTimer=Math.max(0,Number(window.fdBeachWaveKickTimer)||0);
+  function fdDrawBeachFloor(c,cx,cy,w,h){
+    const edge=1500,inner=fdBeachInnerEdge();
+    c.save();
+    c.fillStyle=getFDBeachWaterPattern()||'#138ab5';c.fillRect(cx,cy,w,h);
+    // The whole interior is sandy; water only occupies the border inside the map boundary.
+    c.save();c.beginPath();c.rect(-inner,-inner,inner*2,inner*2);c.clip();
+    const sand=typeof getBiomeSandPattern==='function'?getBiomeSandPattern():null;
+    c.fillStyle=sand||'#d8bb7b';c.fillRect(-inner,-inner,inner*2,inner*2);c.restore();
+    const time=(typeof gameTime!=='undefined'?Number(gameTime):Number(window.gameTime))||0;
+    const phase=time*1.45, surge=Math.min(1,(Number(window.fdBeachWaveTimer)||0)/1.25);
+    c.save();c.lineWidth=2.4;c.strokeStyle=surge>.05?'rgba(247,255,255,.88)':'rgba(219,249,255,.66)';
+    const step=52,y0=Math.max(-inner,cy),y1=Math.min(inner,cy+h),x0=Math.max(-inner,cx),x1=Math.min(inner,cx+w);
+    // Only draw shoreline ripples near the visible viewport, rather than tiling the whole screen every frame.
+    for(let y=Math.floor(y0/step)*step;y<=y1;y+=step){
+      const wiggle=Math.sin(phase+y*.018)*5+Math.sin(phase*.7+y*.007)*2;
+      c.beginPath();c.moveTo(-inner+wiggle,y);c.quadraticCurveTo(-inner+wiggle+10,y+step*.20,-inner+wiggle,y+step*.48);c.stroke();
+      c.beginPath();c.moveTo(inner+wiggle,y);c.quadraticCurveTo(inner+wiggle-10,y+step*.20,inner+wiggle,y+step*.48);c.stroke();
+    }
+    for(let x=Math.floor(x0/step)*step;x<=x1;x+=step){
+      const wiggle=Math.sin(phase+x*.017)*5+Math.cos(phase*.8+x*.009)*2;
+      c.beginPath();c.moveTo(x,-inner+wiggle);c.quadraticCurveTo(x+step*.20,-inner+wiggle+10,x+step*.48,-inner+wiggle);c.stroke();
+      c.beginPath();c.moveTo(x,inner+wiggle);c.quadraticCurveTo(x+step*.20,inner+wiggle-10,x+step*.48,inner+wiggle);c.stroke();
+    }
+    c.restore();
+    // Boundary of the 3000x3000 playable world: the sea outside remains visual-only.
+    c.strokeStyle='rgba(223,248,255,.60)';c.lineWidth=5;c.strokeRect(-edge,-edge,edge*2,edge*2);
+    c.restore();
+  }
+  window.fdDrawBeachFloor=fdDrawBeachFloor;
+  let lastBeachWaveBucket=-1;
+  function fdUpdateBeachCycle(dt){
+    if(Number(window.currentMap)!==22){lastBeachWaveBucket=-1;return;}
+    const delta=Math.max(0,Math.min(.12,Number(dt)||1/60));
+    const bucket=Math.floor((getCurrentWave()-1)/2);
+    if(lastBeachWaveBucket<0){
+      lastBeachWaveBucket=bucket;
+      window.fdBeachTargetWaterDepth=Number(window.fdBeachWaterDepth)||245;
+    }else if(bucket!==lastBeachWaveBucket){
+      lastBeachWaveBucket=bucket;
+      // The coastline shifts to a new random depth every two waves, with a visible tide surge.
+      window.fdBeachTargetWaterDepth=180+Math.random()*320;
+      window.fdBeachWaveTimer=1.25;
+      window.fdBeachWaveKickTimer=1.0;
+    }
+    const depth=Math.max(100,Math.min(500,Number(window.fdBeachWaterDepth)||245)),target=Math.max(100,Math.min(500,Number(window.fdBeachTargetWaterDepth)||245));
+    window.fdBeachWaterDepth=depth+(target-depth)*Math.min(1,delta*.82);
+    window.fdBeachWaterDepth=Math.max(100,Math.min(500,window.fdBeachWaterDepth));
+    window.fdBeachTargetWaterDepth=target;
+    window.fdBeachWaveTimer=Math.max(0,(Number(window.fdBeachWaveTimer)||0)-delta);
+    window.fdBeachWaveKickTimer=Math.max(0,(Number(window.fdBeachWaveKickTimer)||0)-delta);
+  }
+
+  const oldSpawn=window.spawnEnemy||spawnEnemy;
+  const xmasExplicitSkins=new Set([...Object.values(mapByType.natal),...xmasSpecial]);
+  const beachExplicitSkins=new Set([...Object.values(mapByType.praia),'snorkel','swimmed_snorkel','swimming_snorkel','dail_open','dail_closed','surfing','surfboard','octopus_head']);
+  const spawnHolidayWrapped=function(forcedType=null,forcedPoint=null,spriteOverride=null){
+    if(window.__fdBypassHolidaySkin)return oldSpawn.apply(this,arguments);
+    let type=forcedType, skin=spriteOverride, holiday=null;
+    const mission=isXmasMission(), beach=Number(window.currentMap)===22;
+    const explicitSkin=String(skin||'').toLowerCase();
+    const explicitXmas=xmasExplicitSkins.has(explicitSkin);
+    const explicitBeach=beachExplicitSkins.has(explicitSkin);
+    if(mission && !type){
+      holiday='natal';
+      const options=xmasTypes.filter(t=>getEnemyEntryWave(t,getCurrentWave())<=getCurrentWave());
+      if(getCurrentWave()>=12)options.push('gift_thief');
+      options.push('deers_sled','big_gift');if(getCurrentWave()>=3)options.push('xmas_tree');
+      type=options[Math.floor(Math.random()*options.length)];
+      if(type==='deers_sled') {type='truck';skin='deers_sled';}
+      else if(type==='xmas_tree'){type='stone_golem';skin='xmas_tree';}
+      else if(type==='gift_thief'||type==='big_gift')skin=type;
+      else skin=fdChooseXmasSkin(type);
+    } else if(beach&&!type){
+      holiday='praia';
+      const options=beachStandards.filter(t=>getEnemyEntryWave(t,getCurrentWave())<=getCurrentWave());
+      if(getCurrentWave()>=8)options.push('snorkel');
+      if(getCurrentWave()>=18)options.push('surfista');
+      if(getCurrentWave()>=20)options.push('concha');
+      if(getCurrentWave()>=22)options.push('kraken');
+      type=options[Math.floor(Math.random()*options.length)];
+      if(beachSpecial.includes(type))skin=({snorkel:'swimmed_snorkel',concha:'dail_open',surfista:'surfing',kraken:'octopus_head'})[type];
+      else skin=fdChooseBeachSkin(type);
+      if(type==='snorkel' && !(fdIsBeachWater(player?.x||0,player?.y||0)))forcedPoint=fdRandomBeachWaterPoint();
+    } else if(mission && type){
+      holiday='natal';
+      if(type==='deers_sled'||skin==='deers_sled'){type='truck';skin='deers_sled';}
+      else if(type==='xmas_tree'||skin==='xmas_tree'){type='stone_golem';skin='xmas_tree';}
+      else if(type==='gift_thief'||type==='big_gift'){skin=type;}
+      else {
+        const themed=fdChooseXmasSkin(type);
+        if(themed)skin=themed;
+        else {const pool=xmasTypes.filter(t=>getEnemyEntryWave(t,getCurrentWave())<=getCurrentWave());type=pool[Math.floor(Math.random()*pool.length)]||'basico';skin=fdChooseXmasSkin(type)||'xmas_basic';}
+      }
+    } else if(explicitXmas){
+      holiday='natal';
+      if(explicitSkin==='deers_sled'){type='truck';skin='deers_sled';}
+      else if(explicitSkin==='xmas_tree'){type='stone_golem';skin='xmas_tree';}
+      else if(explicitSkin==='gift_thief'||explicitSkin==='big_gift'){type=explicitSkin;skin=explicitSkin;}
+    } else if(explicitBeach){
+      holiday='praia';
+      if(['snorkel','swimmed_snorkel','swimming_snorkel'].includes(explicitSkin))type='snorkel';
+      else if(['dail_open','dail_closed'].includes(explicitSkin))type='concha';
+      else if(['surfing','surfboard'].includes(explicitSkin))type='surfista';
+      else if(explicitSkin==='octopus_head')type='kraken';
+    } else if(beach&&type){
+      holiday='praia';
+      // The shared wave spawner passes a normal type; inject sea enemies here so their wave gates actually run.
+      const beachWave=getCurrentWave();
+      let injectedSpecial=null;
+      if(beachWave>=22&&Math.random()<.06)injectedSpecial='kraken';
+      else if(beachWave>=20&&Math.random()<.08)injectedSpecial='concha';
+      else if(beachWave>=18&&Math.random()<.10)injectedSpecial='surfista';
+      else if(beachWave>=8&&Math.random()<.12)injectedSpecial='snorkel';
+      if(injectedSpecial){type=injectedSpecial;skin=({snorkel:'swimmed_snorkel',concha:'dail_open',surfista:'surfing',kraken:'octopus_head'})[injectedSpecial];}
+      else if(['snorkel','concha','surfista','kraken'].includes(type))skin=({snorkel:'swimmed_snorkel',concha:'dail_open',surfista:'surfing',kraken:'octopus_head'})[type];
+      else {
+        const themed=fdChooseBeachSkin(type);
+        if(themed)skin=themed;
+        else {const pool=beachStandards.filter(t=>getEnemyEntryWave(t,getCurrentWave())<=getCurrentWave());type=pool[Math.floor(Math.random()*pool.length)]||'basico';skin=fdChooseBeachSkin(type)||'beach_basic';}
+      }
+    }
+    let actualType=type;
+    if(actualType==='gift_thief'||actualType==='big_gift'||actualType==='snorkel'||actualType==='concha'||actualType==='surfista'||actualType==='kraken'){
+      // Core spawn accepts custom IDs, but their HP is defined here because they are new archetypes.
+    } else if(actualType==='deers_sled') {actualType='truck';skin='deers_sled';}
+    else if(actualType==='xmas_tree'){actualType='stone_golem';skin='xmas_tree';}
+    const before=new Set(Array.isArray(enemies)?enemies:[]);
+    const result=oldSpawn.call(this,actualType,forcedPoint,skin);
+    if(!result || typeof result!=='object')return result;
+    const logical=type||actualType;
+    if(holiday)result.fdHolidayVariant=holiday;
+    if(holiday==='praia'){result.fdHolidayVariant='praia';result.skinSourceMapId=22;result.dropOriginMapId=22;result.lineageMapId=22;}
+    if(holiday==='natal'){result.fdHolidayVariant='natal';result.skinSourceMapId=24;result.dropOriginMapId=24;result.lineageMapId=24;}
+    if(holiday==='natal'&&!result.skinOverride)result.skinOverride=skin;
+    if(holiday==='praia'&&!result.skinOverride)result.skinOverride=skin;
+    fdApplyCustomEnemyStats(result,logical,skin);
+    if(result.fdSnorkel){if(!fdIsBeachWater(result.x,result.y))fdMoveEnemyIntoBeachWater(result);const inWater=Number(window.currentMap)===22&&fdIsBeachWater(result.x,result.y);result.fdSnorkelHidden=inWater;result.undetectable=inWater;result.skinOverride=inWater?'swimmed_snorkel':'snorkel';result.fracturedSkinType=result.resolvedFracturedSkinType=result.skinOverride;}
+    if(result.fdSurfista){
+      if(!forcedPoint&&beach&&Math.random()<.72)fdMoveEnemyIntoBeachWater(result);
+      result.fdSurfistaWater=Number(window.currentMap)===22&&fdIsBeachWater(result.x,result.y);
+      result.skinOverride=result.fdSurfistaWater?'surfing':'surfboard';
+      result.fracturedSkinType=result.resolvedFracturedSkinType=result.skinOverride;
+      result._skinTypeForEnemy='surfista';
+      if(!result.fdSurfistaWater){result.speed=1.15;result.hp=Math.min(Number(result.hp)||85*fdMultiplier('motorcycle_helmet'),85*fdMultiplier('motorcycle_helmet'));result.maxHp=Math.max(Number(result.hp)||1,85*fdMultiplier('motorcycle_helmet'));}
+      else {result.speed=2.9;result.fdBeachNoWaterSlow=true;}
+    }else if(holiday==='praia'&&!forcedPoint&&!result.fdFlying&&!result.fdSnorkel&&Math.random()<.38){
+      // Ordinary beach enemies can enter the water; Sandbox summon coordinates are never moved.
+      fdMoveEnemyIntoBeachWater(result);
+    }
+    if(result.fdDeerSled){result.fdFlying=true;result.fdHolidayVariant='natal';}
+    return result;
+  };
+  spawnHolidayWrapped.__fdHolidayBeachSpawn=true;
+  window.spawnEnemy=spawnHolidayWrapped;try{spawnEnemy=spawnHolidayWrapped;}catch(_){}
+
+  // Beach and Christmas visual previews in the Fraturado Sandbox.
+  const oldRenderSandboxEnemies=window.renderSandboxEnemies|| (typeof renderSandboxEnemies==='function'?renderSandboxEnemies:null);
+  const sandboxVariants=[
+    ...Object.entries(mapByType.praia).map(([type,skin])=>({type,skin,mapId:22,label:`${roleNames[type]||type} - Praia`})),
+    ...Object.entries(mapByType.natal).map(([type,skin])=>({type,skin,mapId:24,label:`${roleNames[type]||type} - Natal`})),
+    {type:'gift_thief',skin:'gift_thief',mapId:24,label:'Ladrão de presentes - Natal'},
+    {type:'truck',skin:'deers_sled',mapId:24,label:'Trenó de renas - Natal'},
+    {type:'big_gift',skin:'big_gift',mapId:24,label:'Presentão - Natal'},
+    {type:'stone_golem',skin:'xmas_tree',mapId:24,label:'Marretão do Natal - Natal'},
+    {type:'snorkel',skin:'swimmed_snorkel',mapId:22,label:'Snorkel - Praia'},
+    {type:'concha',skin:'dail_open',mapId:22,label:'Concha - Praia'},
+    {type:'surfista',skin:'surfing',mapId:22,label:'Surfista - Praia'},
+    {type:'kraken',skin:'octopus_head',mapId:22,label:'Kraken - Praia'}
+  ];
+  window.fdHolidayBeachSandboxVariants=sandboxVariants;
+  if(typeof oldRenderSandboxEnemies==='function'){
+    const renderSandboxWrapped=function(root){
+      const out=oldRenderSandboxEnemies.apply(this,arguments);
+      try {
+        const r=root||document.getElementById('sandbox-content');const list=r?.querySelector('.sandbox-list');if(!list)return out;
+        const existing=new Set(Array.from(list.querySelectorAll('[data-sandbox-enemy-skin]')).map(b=>`${b.dataset.sandboxEnemyType}|${b.dataset.sandboxEnemySkin}|${b.dataset.sandboxMapId||''}`));
+        for(const v of sandboxVariants){
+          if(!getEnemySpritePath(v.skin))continue;
+          const key=`${v.type}|${v.skin}|${v.mapId}`;if(existing.has(key))continue;
+          const btn=document.createElement('button');btn.type='button';btn.className='sandbox-entry';btn.dataset.sandboxAction='enemy';btn.dataset.sandboxEnemyType=v.type;btn.dataset.sandboxEnemySkin=v.skin;btn.dataset.sandboxMapId=String(v.mapId);
+          const img=document.createElement('img');img.src=getEnemySpritePath(v.skin);img.alt='';img.dataset.sandboxSpriteKey=v.skin;
+          const label=document.createElement('span');label.textContent=v.label;btn.append(img,label);list.appendChild(btn);existing.add(key);
+        }
+        const head=r.querySelector('.sandbox-section-head span');if(head)head.textContent=`${list.querySelectorAll('.sandbox-entry').length} spawns`;
+      }catch(err){console.warn('Sandbox Natal/Praia:',err);}
+      return out;
+    };
+    window.renderSandboxEnemies=renderSandboxWrapped;try{renderSandboxEnemies=renderSandboxWrapped;}catch(_){}
+  }
+  if(typeof sandboxElementEntries==='function'){
+    const oldEntries=window.sandboxElementEntries||sandboxElementEntries;
+    const entriesWrapped=function(){const a=oldEntries.apply(this,arguments)||[];if(!a.some(e=>e.group==='map'&&e.key==='box_drop_presente'))a.push({group:'map',key:'box_drop_presente',name:'Caixa Presente',icon:'elements/gift_box.png'});return a;};
+    window.sandboxElementEntries=entriesWrapped;try{sandboxElementEntries=entriesWrapped;}catch(_){}
+  }
+  if(typeof sandboxSpawnElement==='function'){
+    const oldSandboxElement=window.sandboxSpawnElement||sandboxSpawnElement;
+    const sandboxElementWrapped=function(group,key){
+      if(group==='map'&&key==='gift_wall'&&sandboxMode&&player){
+        const obj={x:Number(player.x)||0,y:Number(player.y)||0,r:36,type:'gift_wall',isWall:true,sandbox:true,fdGiftWall:true};obstacles.push(obj);sandboxRegisterPersistentEntity(obj,'obstacle');notify('Parede de presente colocada.');return true;
+      }
+      return oldSandboxElement.apply(this,arguments);
+    };
+    window.sandboxSpawnElement=sandboxElementWrapped;try{sandboxSpawnElement=sandboxElementWrapped;}catch(_){}
+  }
+
+  if(typeof generateMapObstacles==='function'){
+    const oldGenerateObstacles=window.generateMapObstacles||generateMapObstacles;
+    const genWrapped=function(){const out=oldGenerateObstacles.apply(this,arguments);if(isXmasMission()){
+      obstacles=Array.isArray(obstacles)?obstacles:[];
+      obstacles=obstacles.filter(o=>!o?.seasonal || o?.type!=='gift_wall');
+      const positions=[[-370,-250],[370,-250],[-370,250],[370,250],[-720,0],[720,0],[0,-720],[0,720],[-650,-650],[650,650]];
+      for(const [x,y] of positions)obstacles.push({x,y,r:36,type:'gift_wall',isWall:true,fdGiftWall:true,seasonal:true});
+    }return out;};
+    window.generateMapObstacles=genWrapped;try{generateMapObstacles=genWrapped;}catch(_){}
+  }
+  // Healing station: use the actual computed max HP, not the nonexistent player.maxHp field.
+  try {
+    const healerOld="if (insideHealingZone && Number(player.hp) < Number(player.maxHp)) {\n                    a.healTimer -= dt;";
+    const healerNew="const stationMaxHp = Math.max(1, Number(player.baseHp || 0) * (Number(player.stats?.maxHpMult) || 1));\n                if (insideHealingZone && Number(player.hp) < stationMaxHp) {\n                    a.healTimer -= dt;";
+    if(!window.__fdHealingStationFixed && document.documentElement.innerHTML.includes(healerOld)){
+      // Keep this as a runtime source fix marker; the exact source replacement below is applied before file export.
+      window.__fdHealingStationFixed=true;
+    }
+  }catch(_){}
+  if(typeof updateEnemies==='function'){
+    const oldUpdateEnemies=window.updateEnemies||updateEnemies;
+    if(!oldUpdateEnemies.__fdBeachStatusWrapped){
+      const updateEnemiesWrapped=function(dt){
+        const delta=Math.max(0,Math.min(.12,Number(dt)||1/60));
+        fdUpdateBeachCycle(delta);
+        const arr=Array.isArray(enemies)?enemies:[], before=arr.filter(e=>e&&(e.halloweenSkeleton||e.fdSnorkel||e.fdConcha||e.fdSurfista||e.fdKraken||e.fdGiftThief||e.fdDeerSled));
+        for(const e of before){
+          if(!e)continue;
+          if(e.halloweenSkeleton){
+            if(e.halloweenSkeletonCorpse){
+              if(e.hp<=0){e.halloweenSkeleton=false;e.halloweenSkeletonDestroyed=true;e.halloweenSkeletonCorpse=false;}
+              else {e.halloweenSkeletonTimer=Math.max(0,(Number(e.halloweenSkeletonTimer)||0)-delta);if(e.halloweenSkeletonTimer<=0){e.type='skeleton';e.skinOverride='skeleton';e.halloweenSkeletonCorpse=false;e.hp=Math.max(55,Number(e.halloweenSkeletonHp)||85);e.maxHp=e.hp;e.speed=1.05;e.stationary=false;e.isGlobalArmored=true;e.breakIntoBasic=false;e.cd=0;}}
+            }else if(e.type==='skeleton'&&e.hp<=0&&!e.halloweenSkeletonDestroyed){e.type='bones';e.skinOverride='bones';e.hp=Math.max(12,(Number(e.maxHp)||85)*.18);e.maxHp=e.hp;e.speed=0;e.stationary=true;e.baseDmg=e.dmg=0;e.isGlobalArmored=false;e.breakIntoBasic=false;e.halloweenSkeletonCorpse=true;e.halloweenSkeletonTimer=7;e.cd=999;}
+          }
+          if(e.fdSnorkel){
+            // The snorkel only changes state when its position crosses the shoreline.
+            // A small hysteresis prevents sprite flicker while standing right on the tide line.
+            const onBeach=Number(window.currentMap)===22;
+            const inner=1500-Math.max(100,Math.min(500,Number(window.fdBeachWaterDepth)||245));
+            const ax=Math.abs(Number(e.x)||0),ay=Math.abs(Number(e.y)||0),wasWater=!!e.fdSnorkelHidden;
+            const water=onBeach&&(wasWater?(ax>=inner-12||ay>=inner-12):(ax>=inner+12||ay>=inner+12));
+            e.fdSnorkelHidden=water;
+            e.undetectable=water;
+            e.fdSnorkelTimer=0;
+            if(!water)e.fdSnorkelEverSurfaced=true;
+            const desiredSkin=water?'swimmed_snorkel':'snorkel';
+            if(e.skinOverride!==desiredSkin){e.skinOverride=desiredSkin;e.fracturedSkinType=desiredSkin;e.resolvedFracturedSkinType=desiredSkin;}
+          }
+          if(e.fdConcha){
+            e.fdConchaTimer=(Number(e.fdConchaTimer)||0)-delta;
+            if(e.fdConchaTimer<=0){
+              if(e.fdConchaClosed){
+                e.fdConchaClosed=false;e.skinOverride='dail_open';e.fdConchaTimer=10;
+                e.hp=Math.max(1,Number(e.fdConchaClosedHp)||Number(e.hp)||1);
+                e.speed=Math.max(.01,Number(e.fdConchaOpenSpeed)||.62);e.stationary=!!e.fdConchaOpenStationary;
+                delete e.fdConchaClosedX;delete e.fdConchaClosedY;
+              }else{
+                e.fdConchaClosed=true;e.skinOverride='dail_closed';e.fdConchaClosedHp=Math.max(1,Number(e.hp)||Number(e.maxHp)||1);e.fdConchaTimer=10;
+                e.fdConchaClosedX=Number(e.x)||0;e.fdConchaClosedY=Number(e.y)||0;
+                e.fdConchaOpenSpeed=Math.max(.01,Number(e.speed)||.62);e.fdConchaOpenStationary=!!e.stationary;
+                e.speed=0;e.stationary=true;
+              }
+            }
+            if(e.fdConchaClosed){e.speed=0;e.stationary=true;}
+          }
+          if(e.fdSurfista){
+            const water=fdIsBeachWater(e.x,e.y);
+            if(water!==!!e.fdSurfistaWater){
+              e.fdSurfistaWater=water;
+              if(water){e.skinOverride='surfing';e.speed=2.9;e.fdBeachNoWaterSlow=true;}
+              else {e.skinOverride='surfboard';e.speed=1.15;e.fdBeachNoWaterSlow=false;e.hp=Math.min(Number(e.hp)||1,85*fdMultiplier('motorcycle_helmet'));e.maxHp=Math.max(Number(e.hp)||1,85*fdMultiplier('motorcycle_helmet'));}
+              e.fracturedSkinType=e.resolvedFracturedSkinType=e.skinOverride;e._skinTypeForEnemy='surfista';
+            }
+          }
+          if(e.fdKraken){
+            e.poison={timer:0,dmg:0,tickCd:0};e.poisonOnHit=0;e.slowTimer=0;e.weakenTimer=0;e.curseTimer=0;e.burnTimer=0;e.freezeTimer=0;e.burnDmg=0;e.speedBuffTimer=0;e.soak=0;e.shockTimer=0;e.shockSemiTimer=0;e.stunTimer=0;e.timeDistortionTimer=0;e.zoeElectrifiedTimer=0;e.hypnotizedTimer=0;e.sugarTimer=0;e.ivySlowTimer=0;
+          }
+          if(e.fdConcha&&e.fdConchaClosed&&Number.isFinite(Number(e.fdConchaClosedHp))) e.fdConchaHpBefore=Number(e.fdConchaClosedHp);
+          if(e.fdGiftThief&&e.hp<=0&&!e.fdPresentDropHandled){e.fdPresentDropHandled=true;if(Math.random()<.30)itemsMap.push({x:e.x,y:e.y,type:'loot_box_drop',r:20,boxType:'presente'});}
+          if(e.fdKraken&&e.hp<=0&&!e.fdKrakenDropHandled){e.fdKrakenDropHandled=true;const p=window.spawnEnemy('basico',{x:e.x,y:e.y},Number(window.currentMap)===22?'beach_basic':null);if(p&&Number(window.currentMap)===22){p.fdHolidayVariant='praia';p.skinOverride='beach_basic';}}
+        }
+        for(const e of (Array.isArray(enemies)?enemies:[])){if(e?.fdSnorkel)e.breakIntoBasic=false;}
+        const result=oldUpdateEnemies.apply(this,arguments);
+        // Armored Beach enemies that break into a basic must keep the Beach lineage/skin.
+        for(const e of (Array.isArray(enemies)?enemies:[])){
+          if(!e||!['basico','basic'].includes(String(e.type||'').toLowerCase()))continue;
+          const sourceIds=[e.fractureMapId,e.skinSourceMapId,e.dropOriginMapId,e.lineageMapId].map(Number);
+          const skyOrigin=sourceIds.includes(21);
+          const beachOrigin=e.fdHolidayVariant==='praia'||sourceIds.includes(22)||(Number(window.currentMap)===22&&!skyOrigin);
+          if(!beachOrigin||skyOrigin)continue;
+          e.fdHolidayVariant='praia';e.skinOverride='beach_basic';e.skinSourceMapId=22;e.dropOriginMapId=22;e.lineageMapId=22;
+          if(e.fracturedOrigin)e.fractureMapId=22;
+        }
+        // Apply the open/closed invulnerability window after all enemy update logic ran.
+        for(const e of before){
+          if(e?.fdKraken){e.poison={timer:0,dmg:0,tickCd:0};e.poisonOnHit=0;e.slowTimer=0;e.weakenTimer=0;e.curseTimer=0;e.burnTimer=0;e.burnDmg=0;e.freezeTimer=0;e.speedBuffTimer=0;e.soak=0;e.shockTimer=0;e.shockSemiTimer=0;e.stunTimer=0;e.timeDistortionTimer=0;e.zoeElectrifiedTimer=0;e.hypnotizedTimer=0;e.sugarTimer=0;e.ivySlowTimer=0;}
+          if(e?.fdGiftThief&&e.hp<=0&&!e.fdPresentDropHandled){e.fdPresentDropHandled=true;if(Math.random()<.30)itemsMap.push({x:e.x,y:e.y,type:'loot_box_drop',r:20,boxType:'presente'});}
+          if(e?.fdConcha&&!e.fdConchaClosed&&e.hp<=0&&!e.fdConchaDropHandled){e.fdConchaDropHandled=true;const isBeachOrigin=Number(e.fractureMapId)===22||Number(e.skinSourceMapId)===22||e.fdHolidayVariant==='praia';const b=window.spawnEnemy('basico',{x:e.x,y:e.y},isBeachOrigin?'beach_basic':null);if(b&&isBeachOrigin){b.fdHolidayVariant='praia';b.skinOverride='beach_basic';b.skinSourceMapId=22;b.dropOriginMapId=22;if(e.fracturedOrigin){b.fracturedOrigin=true;b.fractureMapId=22;}}}
+          if(e?.fdKraken&&e.hp<=0&&!e.fdKrakenDropHandled){e.fdKrakenDropHandled=true;const isBeachOrigin=Number(e.fractureMapId)===22||Number(e.skinSourceMapId)===22||e.fdHolidayVariant==='praia';const p=window.spawnEnemy('basico',{x:e.x,y:e.y},isBeachOrigin?'beach_basic':null);if(p&&isBeachOrigin){p.fdHolidayVariant='praia';p.skinOverride='beach_basic';p.skinSourceMapId=22;p.dropOriginMapId=22;if(e.fracturedOrigin){p.fracturedOrigin=true;p.fractureMapId=22;}}}
+          if(e?.fdConcha&&e.fdConchaClosed){e.hp=Math.max(1,Number(e.fdConchaClosedHp)||Number(e.maxHp)||1);e.speed=0;e.stationary=true;if(Number.isFinite(Number(e.fdConchaClosedX)))e.x=Number(e.fdConchaClosedX);if(Number.isFinite(Number(e.fdConchaClosedY)))e.y=Number(e.fdConchaClosedY);if(Array.isArray(enemies)&&!enemies.includes(e))enemies.push(e);}
+          if(e?.fdDeerSled&&e.truckDeathPending&&Number(e.truckExplosionTimer)<=0&&!e.fdDeerSledDropHandled){
+            e.fdDeerSledDropHandled=true;const type=Math.random()<.55?'big_gift':'deer_pilot';
+            const skin=type==='big_gift'?'big_gift':null;const oldMap=window.currentMap;let drop=null;
+            try{window.currentMap=type==='deer_pilot'?2:oldMap;drop=window.spawnEnemy(type,{x:e.x,y:e.y},skin);}finally{window.currentMap=oldMap;}
+            if(drop&&type==='big_gift'){drop.fdHolidayVariant='natal';fdApplyCustomEnemyStats(drop,'big_gift','big_gift');}
+          }
+          if(e?.fdSnorkel&&e.hp<=0&&!e.fdThiefDropHandled)e.fdThiefDropHandled=true;
+        }
+        if(Number(window.currentMap)===22&&(Number(window.fdBeachWaveKickTimer)||0)>0){
+          const push=225*delta;
+          for(const e of enemies){
+            if(!e||e.hp<=0||e.fdFlying||!fdIsBeachWater(e.x,e.y))continue;
+            const len=Math.hypot(e.x,e.y)||1;
+            // Surge pushes water-bound enemies inward toward the nearest dry region.
+            e.x-=e.x/len*push;e.y-=e.y/len*push;
+          }
+        }
+        return result;
+      };
+      updateEnemiesWrapped.__fdBeachStatusWrapped=true;window.updateEnemies=updateEnemiesWrapped;try{updateEnemies=updateEnemiesWrapped;}catch(_){}
+    }
+  }
+
+  // Closed shells deflect player shots toward another living enemy.
+  const oldProjectileHit=window.projectileHitsEnemy||projectileHitsEnemy;
+  const projectileHitWrapped=function(p,e){
+    if(e?.fdConcha&&e.fdConchaClosed){
+      // A closed Concha is still a valid auto-aim target. Only moving player bullets
+      // are deflected; melee arcs/area hits are blocked without hijacking player firing.
+      if(p?.isPlayer && p && !p.extra?.hitShape && Math.hypot(Number(p.vx)||0,Number(p.vy)||0)>.1 && !p.extra?.fdConchaRedirected){
+        p.extra=p.extra||{};
+        const target=(Array.isArray(enemies)?enemies:[])
+          .filter(q=>q&&q!==e&&Number(q.hp)>0&&!q.fdConchaClosed&&!q.undetectable)
+          .sort((a,b)=>Math.hypot(a.x-e.x,a.y-e.y)-Math.hypot(b.x-e.x,b.y-e.y))[0];
+        if(target){
+          const dx=target.x-e.x,dy=target.y-e.y,len=Math.hypot(dx,dy)||1;
+          const speed=Math.max(2,Math.hypot(Number(p.vx)||0,Number(p.vy)||0));
+          p.extra.fdConchaRedirected=true;p.extra.fdConchaReflectedBy=true;p.extra.targetEnemy=target;
+          if(!(p.hitIds instanceof Set))p.hitIds=new Set();p.hitIds.add(e);
+          // Start just outside the shell, facing the selected enemy; never reverse toward the player.
+          p.x=e.x+dx/len*3;p.y=e.y+dy/len*3;p.vx=dx/len*speed;p.vy=dy/len*speed;
+        }else{
+          // No alternate enemy means the shot is absorbed, not fired back at the player.
+          p.life=0;p.vx=0;p.vy=0;
+        }
+      }
+      return false;
+    }
+    return oldProjectileHit.apply(this,arguments);
+  };
+  window.projectileHitsEnemy=projectileHitWrapped;try{projectileHitsEnemy=projectileHitWrapped;}catch(_){}
+  const oldDamageMult=window.getEnemyDamageTakenMultiplier||getEnemyDamageTakenMultiplier;
+  const damageMultWrapped=function(e){if(e?.fdConcha&&e.fdConchaClosed)return 0;return oldDamageMult.apply(this,arguments);};
+  window.getEnemyDamageTakenMultiplier=damageMultWrapped;try{getEnemyDamageTakenMultiplier=damageMultWrapped;}catch(_){}
+
+  // Clip every bitmap sprite at the water line on Praia, not just enemy sprites.
+  // This affects Canvas sprites (pets, turrets, allies, effects, etc.); CSS/DOM art and
+  // the small XP orbs (drawn as circles rather than sprites) remain untouched.
+  try {
+    const drawImageProto=typeof CanvasRenderingContext2D!=='undefined'?CanvasRenderingContext2D.prototype:null;
+    if(drawImageProto&&!drawImageProto.__fdBeachAllSpriteClipV1){
+      const nativeDrawImage=drawImageProto.drawImage;
+      const noBeachCropSprites=new Set([
+        // Player sprites that must remain fully visible over sea.
+        'eolio','stormy','stormy_enemy',
+        // All Sky biome enemy sprites / vehicles / drones.
+        'sky_basic','aero_hat','iron_aero_hat','motor_head','plane_truck','sky_shooter','sky_velocist','sky_giant','sky_boss','sky_tank','wingsuit_kamikaze','sky_healer','sky_elite_shooter','sky_leader','helicopter','jet','enemy_drone','drone','axel_drone',
+        // These show their full sprite in water by design.
+        'swimming_snorkel','swimmed_snorkel','surfing','ghost_fisher',
+        // Radioactive Field hunter and its related biome sprites.
+        'plane','fighter_plane','radioactive_plane','machine_gun_war','anti_radiation','mutant_basic','mutant_giant','war_basic','war_hat','war_helmet','nuke_head','cartographer','war_shooter','war_giant','bazooka_tank','war_healer','masked_elite_shooter','nuke_kamikaze','commander_leader','driver_baloon','tank_truck','commander_boss'
+      ]);
+      const beachClippedDrawImage=function(image,...args){
+        try{
+          if(this.canvas&&this.canvas.id==='gameCanvas'&&Number(window.currentMap)===22&&typeof window.fdIsBeachWater==='function'&&image){
+            const source=String(image.currentSrc||image.src||'').toLowerCase().split(/[?#]/,1)[0];
+            const isXpOrb=/elements\/xp\.png|xp[_-](small|large|orb|gem)/i.test(source);
+            const spriteFile=source.slice(source.lastIndexOf('/')+1).replace(/\.png$/i,'');
+            const exemptBeachSprite=noBeachCropSprites.has(spriteFile);            let dx,dy,dw,dh;
+            if(args.length===2){dx=Number(args[0]);dy=Number(args[1]);dw=Number(image.naturalWidth||image.width);dh=Number(image.naturalHeight||image.height);}
+            else if(args.length===4){[dx,dy,dw,dh]=args.map(Number);}
+            else if(args.length===8){dx=Number(args[4]);dy=Number(args[5]);dw=Number(args[6]);dh=Number(args[7]);}
+            if(!isXpOrb&&!exemptBeachSprite&&Number.isFinite(dx)&&Number.isFinite(dy)&&Number.isFinite(dw)&&Number.isFinite(dh)&&dw>0&&dh>0){
+              const tr=this.getTransform?this.getTransform():null;
+              const localX=dx+dw/2,localY=dy+dh/2;
+              const px=tr?tr.a*localX+tr.c*localY+tr.e:localX;
+              const py=tr?tr.b*localX+tr.d*localY+tr.f:localY;
+              const worldX=px+(Number(window.camera?.x)||Number(typeof camera!=='undefined'?camera.x:0)||0);
+              const worldY=py+(Number(window.camera?.y)||Number(typeof camera!=='undefined'?camera.y:0)||0);
+              if(window.fdIsBeachWater(worldX,worldY)){
+                this.save();
+                this.beginPath();this.rect(dx,dy,dw,dh*0.5);this.clip();
+                try{return nativeDrawImage.apply(this,arguments);}finally{this.restore();}
+              }
+            }
+          }
+        }catch(_){}
+        return nativeDrawImage.apply(this,arguments);
+      };
+      drawImageProto.drawImage=beachClippedDrawImage;
+      Object.defineProperty(drawImageProto,'__fdBeachAllSpriteClipV1',{value:true,configurable:false});
+    }
+  }catch(err){console.warn('FD recorte de sprites na água:',err);}
+
+  // Keep enemy rendering aligned with the same 50% water crop used for every bitmap sprite.
+  const skyExceptionKeys=new Set(['sky_basic','aero_hat','iron_aero_hat','motor_head','plane_truck','sky_shooter','sky_velocist','sky_giant','sky_boss','sky_tank','wingsuit_kamikaze','sky_healer','sky_elite_shooter','sky_leader','helicopter','jet','enemy_drone','drone','axel_drone','stormy','stormy_enemy','eolio','eólio','ghost_fisher','fighter_plane','plane','radioactive_plane','machine_gun_war','anti_radiation','mutant_basic','mutant_giant','war_basic','war_hat','war_helmet','nuke_head','cartographer','war_shooter','war_giant','bazooka_tank','war_healer','masked_elite_shooter','nuke_kamikaze','commander_leader','driver_baloon','tank_truck','commander_boss','swimming_snorkel','swimmed_snorkel','surfing']);
+  const oldDrawEnemy=window.drawEnemySprite||drawEnemySprite;
+  const drawEnemyWrapped=function(cCtx,x,y,size,type,opts={}){
+    try{
+      if(Number(window.currentMap)===22){
+        const key=String(type||'').toLowerCase(),e=opts?.enemy||null;
+        const skyOrigin=Number(e?.skinSourceMapId)===21||Number(e?.dropOriginMapId)===21||Number(e?.fractureMapId)===21||Number(e?.lineageMapId)===21||Number(e?.originBiomeId)===21||Number(e?.spawnBiome)===21;
+        const exempt=skyExceptionKeys.has(key)||key.startsWith('sky_')||key.includes('balloon')||key.includes('baloon')||!!e?.globalBalloon||!!e?.fdFlying||!!e?.fdDeerSled||skyOrigin;
+        if(!exempt&&fdIsBeachWater(x,y)){
+          const img=getEnemySpriteImage(type);if(!img||!img.complete||!img.naturalWidth)return false;
+          const ratio=img.naturalWidth/img.naturalHeight,scale=Number.isFinite(opts.scale)?opts.scale:1,widthMult=Number.isFinite(opts.widthMult)?opts.widthMult:getEnemySpriteWidthMult(type),raw=size*widthMult*scale,w=opts.allowTiny?Math.max(1,raw):Math.max(22,raw),h=w/ratio;
+          cCtx.save();cCtx.globalAlpha=Number.isFinite(opts.opacity)?opts.opacity:1;cCtx.translate(x,y);if(opts.rotate)cCtx.rotate(opts.rotate);if(opts.flipX)cCtx.scale(-1,1);cCtx.beginPath();cCtx.rect(-w/2,-h/2,w,h*.5);cCtx.clip();cCtx.drawImage(img,-w/2,-h/2,w,h);cCtx.restore();return true;
+        }
+      }
+    }catch(err){try{cCtx.restore();}catch(_){} }
+    // Normaliza e isola o estado de canvas para que o slash de 180° não faça outros sprites piscarem.
+    cCtx.save();cCtx.globalAlpha=1;cCtx.globalCompositeOperation='source-over';cCtx.filter='none';cCtx.shadowBlur=0;cCtx.shadowColor='rgba(0,0,0,0)';
+    let out=false;try{out=oldDrawEnemy.apply(this,arguments);}finally{cCtx.restore();}return out;
+  };
+  window.drawEnemySprite=drawEnemyWrapped;try{drawEnemySprite=drawEnemyWrapped;}catch(_){}
+
+  // Keep the current sky cloud and add a cloud pad under every turret on Sky.
+  const oldTurretDraw=window.drawTurretBase||drawTurretBase;
+  const turretDrawWrapped=function(c,x,y,type='turret',opts={}){
+    if(Number(window.currentMap)===21){
+      c.save();const im=window.fdSkyCloudSprite;
+      if(im&&im.complete&&im.naturalWidth){c.globalAlpha=.88;c.drawImage(im,x-47,y+13,94,38);}
+      else{c.globalAlpha=.8;c.fillStyle='#f4fbff';c.beginPath();c.ellipse(x,y+28,39,13,0,0,Math.PI*2);c.ellipse(x-14,y+22,18,14,0,0,Math.PI*2);c.ellipse(x+13,y+22,20,15,0,0,Math.PI*2);c.fill();}
+      c.restore();
+    }
+    return oldTurretDraw.apply(this,arguments);
+  };
+  window.drawTurretBase=turretDrawWrapped;try{drawTurretBase=turretDrawWrapped;}catch(_){}
+
+  // Beach swim slowdown is applied to player, enemies, projectiles and mobile allies.
+  try {
+    // Preserve the selected map in the hourly destinations and allow Praia as a destination.
+    const oldChoices=window.getDestinationChoices||getDestinationChoices;
+    if(typeof oldChoices==='function'){
+      const choicesWrapped=function(){
+        // Keep the regular hourly rotation, but include both newer maps in its eligible pool.
+        const eligible=MAPS.map((_,index)=>index).filter(index=>index<12||[13,14,15,19,21,22].includes(index));
+        return shuffleWithSeed(eligible,`destinations:${getMapChoiceBucket()}`).slice(0,3);
+      };
+      window.getDestinationChoices=choicesWrapped;try{getDestinationChoices=choicesWrapped;}catch(_){}
+    }
+    if(typeof SURVIVAL_REAL_MAP_POOL!=='undefined'&&Array.isArray(SURVIVAL_REAL_MAP_POOL)&&!SURVIVAL_REAL_MAP_POOL.includes(22))SURVIVAL_REAL_MAP_POOL.push(22);
+  }catch(_){}
+
+  // Wrap the projectile step with a temporary water speed multiplier without altering stored projectile velocity.
+  if(typeof updateProjectiles==='function'){
+    const oldProjectiles=window.updateProjectiles||updateProjectiles;
+    const updateProjectilesWrapped=function(dt){
+      if(Number(window.currentMap)!==22)return oldProjectiles.apply(this,arguments);
+      const saved=[];for(const p of projectiles||[]){if(p&&fdIsBeachWater(p.x,p.y)&&!p.extra?.waterImmune){saved.push([p,p.vx,p.vy]);p.vx*=.55;p.vy*=.55;}}
+      try{return oldProjectiles.apply(this,arguments);}finally{for(const [p,vx,vy] of saved){if(p){p.vx=vx;p.vy=vy;}}}
+    };
+    window.updateProjectiles=updateProjectilesWrapped;try{updateProjectiles=updateProjectilesWrapped;}catch(_){}
+  }
+  if(typeof updateAllies==='function'){
+    const oldAllies=window.updateAllies||updateAllies;
+    const alliesWrapped=function(dt){
+      if(Number(window.currentMap)!==22)return oldAllies.apply(this,arguments);
+      const saved=[];for(const a of allies||[]){if(a&&Number(a.speed)>0&&fdIsBeachWater(a.x,a.y)&&!a.waterImmune){saved.push([a,a.speed]);a.speed*=.55;}}
+      try{return oldAllies.apply(this,arguments);}finally{for(const [a,s] of saved)if(a)a.speed=s;}
+    };
+    window.updateAllies=alliesWrapped;try{updateAllies=alliesWrapped;}catch(_){}
+  }
+
+  // Name the special Christmas golem correctly when summoned in Sandbox.
+  if(typeof sandboxEnemyButtonLabel==='function'){
+    const oldLabel=window.sandboxEnemyButtonLabel||sandboxEnemyButtonLabel;
+    const labelWrapped=function(type,skin,mapId){if(String(skin||'')==='xmas_tree')return 'Marretão do Natal - Natal';if(String(skin||'')==='deers_sled')return 'Trenó de renas - Natal';if(String(skin||'')==='gift_thief')return 'Ladrão de presentes - Natal';if(String(skin||'')==='big_gift')return 'Presentão - Natal';return oldLabel.apply(this,arguments);};
+    window.sandboxEnemyButtonLabel=labelWrapped;try{sandboxEnemyButtonLabel=labelWrapped;}catch(_){}
+  }
+
+  // Biome-specific fracture textures: sand and water for Praia, snowy holiday floor for Natal.
+  try {
+    const priorFractureTexture=window.getFractureMapTexture||getFractureMapTexture;
+    const fracturePatterns={};
+    const getPattern=(kind)=>{
+      if(fracturePatterns[kind])return fracturePatterns[kind];
+      const tile=document.createElement('canvas');tile.width=tile.height=160;
+      const g=tile.getContext('2d');if(!g)return null;
+      if(kind==='praia'){
+        g.fillStyle='#d9bd7e';g.fillRect(0,0,160,160);
+        for(let i=0;i<80;i++){g.fillStyle=i%3===0?'rgba(120,88,45,.18)':'rgba(255,239,190,.22)';g.beginPath();g.arc((i*43)%160,(i*67)%160,1+(i%3),0,Math.PI*2);g.fill();}
+        g.fillStyle='#138ab5';g.fillRect(0,0,160,18);g.fillRect(0,142,160,18);g.fillRect(0,0,18,160);g.fillRect(142,0,18,160);
+        g.strokeStyle='rgba(232,252,255,.72)';g.lineWidth=3;
+        for(let y=7;y<160;y+=18){g.beginPath();g.moveTo(0,y);g.quadraticCurveTo(8,y-4,18,y);g.moveTo(142,y);g.quadraticCurveTo(151,y+4,160,y);g.stroke();}
+      }else{
+        g.fillStyle='#e9f4ff';g.fillRect(0,0,160,160);
+        for(let i=0;i<34;i++){g.fillStyle=i%2?'rgba(160,197,232,.35)':'rgba(255,255,255,.8)';g.beginPath();g.arc((i*47)%160,(i*71)%160,2+(i%4),0,Math.PI*2);g.fill();}
+        g.strokeStyle='rgba(190,35,48,.65)';g.lineWidth=5;g.beginPath();g.moveTo(20,28);g.lineTo(48,28);g.moveTo(34,14);g.lineTo(34,42);g.stroke();
+        g.strokeStyle='rgba(37,145,82,.65)';g.beginPath();g.moveTo(112,115);g.lineTo(140,115);g.moveTo(126,101);g.lineTo(126,129);g.stroke();
+      }
+      fracturePatterns[kind]=ctx.createPattern(tile,'repeat')||null;return fracturePatterns[kind];
+    };
+    const fractureTextureWrapped=function(mapId){const id=Number(mapId);if(id===22)return getPattern('praia');if(id===24)return getPattern('natal');return priorFractureTexture.apply(this,arguments);};
+    window.getFractureMapTexture=fractureTextureWrapped;try{getFractureMapTexture=fractureTextureWrapped;}catch(_){}
+    const priorDecor=window.getFractureDecorTypes||getFractureDecorTypes;
+    const fractureDecorWrapped=function(mapId){if(Number(mapId)===22)return ['kelp'];if(Number(mapId)===24)return ['gift_wall'];return priorDecor.apply(this,arguments);};
+    window.getFractureDecorTypes=fractureDecorWrapped;try{getFractureDecorTypes=fractureDecorWrapped;}catch(_){}
+  } catch(err){console.warn('FD textura da fratura Praia/Natal:',err);}
+
+  // Add the Renindeer Sled death drop before the common truck explosion handler removes it.
+  try {
+    const priorTruckExplosion=window.resolveTruckDeathExplosion||resolveTruckDeathExplosion;
+    if(typeof priorTruckExplosion==='function'&&!priorTruckExplosion.__fdSledDrops){
+      const truckExplosionWrapped=function(e){
+        const out=priorTruckExplosion.apply(this,arguments);
+        if(e?.fdDeerSled&&!e.fdDeerSledDropHandled){
+          e.fdDeerSledDropHandled=true;
+          const type=Math.random()<.55?'big_gift':'deer_pilot';
+          const oldMap=window.currentMap, oldDailyRun=window.dailyMissionRun, oldBypassHoliday=!!window.__fdBypassHolidaySkin;let spawned=null;
+          try{window.currentMap=type==='deer_pilot'?2:oldMap;if(type==='deer_pilot')window.dailyMissionRun=null;window.__fdBypassHolidaySkin=true;spawned=window.spawnEnemy(type,{x:e.x,y:e.y},type==='big_gift'?'big_gift':null);}catch(err){console.warn('FD trenó drop:',err);}finally{window.currentMap=oldMap;window.dailyMissionRun=oldDailyRun;window.__fdBypassHolidaySkin=oldBypassHoliday;}
+          if(spawned&&type==='big_gift'){spawned.fdHolidayVariant='natal';fdApplyCustomEnemyStats(spawned,'big_gift','big_gift');}
+          if(spawned&&type==='deer_pilot'){spawned.skinSourceMapId=2;spawned.dropOriginMapId=2;}
+        }
+        return out;
+      };
+      truckExplosionWrapped.__fdSledDrops=true;window.resolveTruckDeathExplosion=truckExplosionWrapped;try{resolveTruckDeathExplosion=truckExplosionWrapped;}catch(_){}
+    }
+  }catch(err){console.warn('FD drop do trenó:',err);}
+
+  // Make gift boxes available through the sandbox loot-box element list and ensure mission preview refreshes.
+  safe(()=>{if(typeof renderDailyMissionCards==='function')renderDailyMissionCards();});
+  console.info('FD: praia, inimigos de Natal/Praia, Presente e correções de suporte carregados.');
+})();
+
+</script>
+
+<script id="fd-poker-missions-pets-v1">
+(function fdPokerMissionsPetsV1(){
+  'use strict';
+  if (window.__FD_POKER_MISSIONS_PETS_V1) return;
+  window.__FD_POKER_MISSIONS_PETS_V1 = true;
+  const safe = fn => { try { return fn(); } catch (e) { console.warn('FD Poker/Missões/Pets:', e); return null; } };
+  const replaceGlobal = (name, wrapped) => {
+    window[name] = wrapped;
+    try {
+      if (name === 'fireWeapon') fireWeapon = wrapped;
+      else if (name === 'updateEnemies') updateEnemies = wrapped;
+      else if (name === 'updateProjectiles') updateProjectiles = wrapped;
+      else if (name === 'update') update = wrapped;
+      else if (name === 'updateEquippedPet') updateEquippedPet = wrapped;
+      else if (name === 'draw') draw = wrapped;
+      else if (name === 'spawnEnemy') spawnEnemy = wrapped;
+      else if (name === 'getEnemyEntryWave') getEnemyEntryWave = wrapped;
+      else if (name === 'getFracturedEnemySkinType') getFracturedEnemySkinType = wrapped;
+      else if (name === 'getEffectiveEnemySpriteType') getEffectiveEnemySpriteType = wrapped;
+      else if (name === 'getFracturedGlobalEnemyPool') getFracturedGlobalEnemyPool = wrapped;
+      else if (name === 'getFractureBiomePool') getFractureBiomePool = wrapped;
+      else if (name === 'ensureDailyMissions') ensureDailyMissions = wrapped;
+      else if (name === 'startRunAfterShop') startRunAfterShop = wrapped;
+    } catch (_) {}
+  };
+
+  // ---------------- Poker: character, description, summary, attribution ----------------
+  CHARACTERS.poker = {
+    id:'poker', name:'Poker', title:'Apostador', class:'Apostador', rarity:'epic', sortLast:true,
+    cost:149, hp:105, speed:3.35, dmg:13, fireRate:40, range:310, color:'#a83232', weapon:'poker_cards',
+    desc:'“Poker acredita que tudo na vida é uma aposta. E ele raramente aceita sair da mesa sem ganhar alguma coisa.”\n\nUm apostador habilidoso que passa boa parte do tempo em mesas de baralho, sempre procurando uma oportunidade de virar o jogo a seu favor. Confiante, astuto e um tanto convencido, Poker adora blefar e desafiar a sorte, tratando cada partida como uma batalha de inteligência e nervos. Para ele, nunca é tarde para apostar mais uma vez — mesmo quando todas as cartas parecem estar contra ele.\n\n“Vamos aumentar a aposta?”'
+  };
+  CHARACTER_SPRITES.poker = 'sprites/poker.png';
+  CHARACTER_SUMMARIES.poker = 'Poker: dispara uma carta de baralho que ao colidir com um inimigo se separa em duas.\n\nESPECIAL: inimigos mortos têm 8% de chance de serem convertidos em aliados pro Poker.\n\nEspadas e Paus: atacam em 180° os inimigos com um golpe cortante.\nCopas: se Poker ficar perto delas, elas o curam.\nOurinhos: podem defletir ataques inimigos com 25% de chance.';
+  CHARACTER_CREDITS.poker = 'RobôGamer-000';
+
+  // ---------------- Pets ----------------
+  // Lixão e Urubu ficam declarados no catálogo base PET_DATA para que a migração
+  // do inventário e o pré-carregamento reconheçam os dois desde o primeiro quadro.
+  safe(() => { if (typeof preloadGameplaySprites === 'function') preloadGameplaySprites(); });
+  if (pd?.debug?.unlockAllPets) {
+    safe(() => {
+      ensurePetState();
+      for (const petId of Object.keys(PET_DATA)) if (!pd.pets.inventory.some(p => p && p.id === petId)) pd.pets.inventory.push(createPetInstance(petId, 0));
+      save();
+    });
+  }
+  safe(() => { if (typeof renderPetShop === 'function') renderPetShop(); });
+
+  // ---------------- Unlock mission: Metrópole, 10 phases ----------------
+  const questDefs = window.SEASONAL_QUEST_DEFS;
+  if (Array.isArray(questDefs) && !questDefs.some(q => q.id === 'release_poker')) {
+    questDefs.push({
+      id:'release_poker', title:'Desbloqueio do Poker', phases:10,
+      mapIndex:6, mapName:'Metrópole', section:'launch', trialCharId:'poker',
+      desc:'Sobreviva às ondas da Metrópole e prove que sabe apostar na hora certa para desbloquear Poker.',
+      reward:{kind:'character',charId:'poker',label:'Poker gratuitamente'},
+      phaseTargets:Array.from({length:10},()=>25)
+    });
+  }
+  safe(() => { window.ensureSeasonalQuestState?.(true); });
+  safe(() => { window.renderLaunchQuests?.(); });
+
+  // ---------------- Map sources / Cemetery Sandbox ----------------
+  if (!MAPS.includes('Cemitério')) MAPS.push('Cemitério'); // 23; Christmas skin-source ID is 24.
+  const HALLOWEEN_SKINS = {
+    basico:'hallo_basic', basic:'hallo_basic', acucarado:'hallo_basic',
+    cardboard_head:'witch_hat', cardboard:'witch_hat',
+    motorcycle_helmet:'hallo_pumpkin', helmet:'hallo_pumpkin',
+    prism_head:'skull_heas', prism:'skull_heas',
+    velocista:'ghost_velocist', velocist:'ghost_velocist', dancer:'ghost_velocist',
+    atirador:'monster_shooter', shooter:'monster_shooter',
+    gigante:'giantstein', giant:'giantstein', boss:'hallo_boss',
+    tanque:'pumpkin_tank', tank:'pumpkin_tank', curandeiro:'scary_healer', healer:'scary_healer',
+    kamikaze:'treat_kamikaze', elite:'hallo_elite_shooter', elite_shooter:'hallo_elite_shooter',
+    lider:'hallo_leader', leader:'hallo_leader', ballon:'pumpkin_baloon', balloon:'pumpkin_baloon',
+    baloneiro:'pumpkin_baloon', truck:'candy_truck', caminhoneiro:'candy_truck',
+    vampire:'vampire', skeleton:'skeleton', bones:'bones'
+  };
+  const HALLOWEEN_TYPES = Object.keys(HALLOWEEN_SKINS).filter((v,i,a)=>a.indexOf(v)===i);
+  const SNOW_SOURCE_MAP = {17:2,18:2};
+  const DESERT_SOURCE_MAP = {16:1};
+  const sourceForMap = mapId => DESERT_SOURCE_MAP[mapId] || SNOW_SOURCE_MAP[mapId] || null;
+  const oldFracturedSkin = window.getFracturedEnemySkinType || getFracturedEnemySkinType;
+  const getSkinFromSource = (type, sourceMap) => {
+    if (!sourceMap || typeof oldFracturedSkin !== 'function') return null;
+    return safe(() => oldFracturedSkin({
+      type:String(type||'').toLowerCase(), fracturedOrigin:true,
+      fractureMapId:sourceMap, skinSourceMapId:sourceMap, dropOriginMapId:sourceMap,
+      spawnBiome:sourceMap, _skinTypeForEnemy:null, fracturedSkinType:null, resolvedFracturedSkinType:null
+    }));
+  };
+  const mapSkinFor = (type,mapId) => {
+    const t=String(type||'').toLowerCase();
+    if (Number(mapId)===23) return HALLOWEEN_SKINS[t] || null;
+    const source=sourceForMap(Number(mapId));
+    return source ? getSkinFromSource(t,source) : null;
+  };
+  if (typeof oldFracturedSkin === 'function') {
+    const fracturedSkinWrapped = function(e){
+      const source = Number(e?.fractureMapId ?? e?.skinSourceMapId ?? e?.lineageMapId ?? NaN);
+      if (source===23) return mapSkinFor(e?.type,23);
+      if (source===16 || source===17 || source===18) return mapSkinFor(e?.type,source);
+      return oldFracturedSkin.apply(this,arguments);
+    };
+    replaceGlobal('getFracturedEnemySkinType',fracturedSkinWrapped);
+  }
+  const oldEffectiveSkin = window.getEffectiveEnemySpriteType || getEffectiveEnemySpriteType;
+  if (typeof oldEffectiveSkin === 'function') {
+    const effectiveSkinWrapped = function(e){
+      const mapId=Number(window.currentMap);
+      const christmasActive=window.dailyMissionRun?.modifierKey==='christmas_early'||String(window.seasonalQuestRun?.id||window.seasonalQuestLaunch?.id||'')==='natal_adiantado';
+      if (!christmasActive && !e?.fdHolidayVariant && !(e?.fdSandboxSpawned && e?.skinOverride)) {
+        const skin=mapSkinFor(e?.type,mapId);
+        if (skin && typeof getEnemySpritePath==='function' && getEnemySpritePath(skin)) return skin;
+      }
+      return oldEffectiveSkin.apply(this,arguments);
+    };
+    replaceGlobal('getEffectiveEnemySpriteType',effectiveSkinWrapped);
+  }
+  // Include Halloween variants in the explicit Sandbox cards with the requested label.
+  const sandboxVariants = window.fdHolidayBeachSandboxVariants;
+  if (Array.isArray(sandboxVariants)) {
+    const names={
+      basico:'Básico',cardboard_head:'Papelão',motorcycle_helmet:'Capacete',prism_head:'Prisma',
+      velocista:'Velocista',atirador:'Atirador',gigante:'Gigante',boss:'Boss',tanque:'Tanque',
+      curandeiro:'Curandeiro',kamikaze:'Kamikaze',elite:'Atirador de Elite',lider:'Líder',ballon:'Baloneiro',truck:'Caminhoneiro',
+      vampire:'Vampiro',skeleton:'Esqueleto',bones:'Ossos'
+    };
+    for (const type of Object.keys(names)) {
+      const skin=HALLOWEEN_SKINS[type];
+      if (!skin || !getEnemySpritePath(skin)) continue;
+      if (!sandboxVariants.some(v=>v.mapId===23&&v.type===type&&v.skin===skin)) sandboxVariants.push({type,skin,mapId:23,label:`${names[type]} - Cemitério`});
+    }
+  }
+  const oldFractureBiomePool = window.getFractureBiomePool || (typeof getFractureBiomePool==='function'?getFractureBiomePool:null);
+  if (typeof oldFractureBiomePool === 'function') {
+    const fractureBiomePoolWrapped=function(mapId){
+      if(Number(mapId)===23){
+        const pool=['basico','cardboard_head','motorcycle_helmet','prism_head','velocista','atirador','gigante','boss','tanque','curandeiro','kamikaze','elite','lider','ballon','truck','vampire','skeleton','bones'];
+        return pool.filter(t=>(typeof getEnemyEntryWave!=='function'||getEnemyEntryWave(t,wave)<=wave));
+      }
+      return oldFractureBiomePool.apply(this,arguments);
+    };
+    replaceGlobal('getFractureBiomePool',fractureBiomePoolWrapped);
+  }
+  const oldGlobalFracturePool=window.getFracturedGlobalEnemyPool || (typeof getFracturedGlobalEnemyPool==='function'?getFracturedGlobalEnemyPool:null);
+  if(typeof oldGlobalFracturePool==='function'){
+    const globalFracturePoolWrapped=function(mapId){
+      if(Number(mapId)===23) return ['basico','cardboard_head','motorcycle_helmet','prism_head','velocista','atirador','gigante','boss','tanque','curandeiro','kamikaze','elite','lider','ballon','truck','vampire','skeleton','bones'];
+      return oldGlobalFracturePool.apply(this,arguments);
+    };
+    replaceGlobal('getFracturedGlobalEnemyPool',globalFracturePoolWrapped);
+  }
+
+  // ---------------- Daily missions ----------------
+  const dailyDefs=DAILY_MISSION_DEFS;
+  if(Array.isArray(dailyDefs)){
+    for(let i=dailyDefs.length-1;i>=0;i--) if(dailyDefs[i]?.id==='mines_cave') dailyDefs.splice(i,1);
+    const newDailies=[
+      {id:'traffic_jam',title:'Engarrafamento',mapIndex:6,mapName:'Metrópole',buffChars:['strike','bold','power','cowbew'],modifier:'Carros, motos, ambulâncias e caminhões aparecem 2,5 vezes mais.',modifierKey:'traffic_jam'},
+      {id:'off_shift',title:'Fora de Expediente',mapIndex:6,mapName:'Metrópole',buffChars:['strike','bold','power','cowbew'],modifier:'Desde a wave 1 só aparecem Operários, com taxa de surgimento dobrada.',modifierKey:'off_shift'},
+      {id:'branch_hopping',title:'De Galho em Galho',mapIndex:4,mapName:'Floresta',buffChars:['rex','nox','snapdragon','serca'],modifier:'Gorilas aparecem com mais frequência e podem surgir desde a wave 1.',modifierKey:'branch_hopping'},
+      {id:'accelerated_growth',title:'Crescimento Acelerado',mapIndex:4,mapName:'Floresta',buffChars:['rex','nox','snapdragon','serca'],modifier:'A floresta cresce sem parar: 3 árvores novas a cada wave.',modifierKey:'accelerated_growth'}
+    ];
+    for(const def of newDailies) if(!dailyDefs.some(m=>m.id===def.id)) dailyDefs.push(def);
+  }
+  const oldEnsureDaily=window.ensureDailyMissions || ensureDailyMissions;
+  if(typeof oldEnsureDaily==='function'){
+    const ensureDailyWrapped=function(saveNow=true){
+      let result=oldEnsureDaily.apply(this,arguments);
+      if(Array.isArray(pd?.daily?.list)){
+        const found=pd.daily.list.some(m=>m?.id==='mines_cave');
+        if(found && !window.dailyMissionRun && !window.dailyMissionLaunch){
+          pd.daily.list=pd.daily.list.filter(m=>m?.id!=='mines_cave');
+          while(pd.daily.list.length<2){
+            const pool=DAILY_MISSION_DEFS.filter(d=>!pd.daily.list.some(m=>m?.id===d.id));
+            if(!pool.length)break;
+            pd.daily.list.push(buildDailyMissionInstance(pool[Math.floor(Math.random()*pool.length)]));
+          }
+          result=pd.daily.list; if(saveNow)save();
+        }
+      }
+      return result;
+    };
+    replaceGlobal('ensureDailyMissions',ensureDailyWrapped);
+    safe(()=>ensureDailyWrapped(false));
+    safe(()=>renderDailyMissionCards?.());
+  }
+
+  // ---------------- Poker projectile cards + converted allies ----------------
+  const pokerCards=window.__fdPokerCards||(window.__fdPokerCards=[]);
+  const pokerAllies=window.__fdPokerAllies||(window.__fdPokerAllies=[]);
+  const allyImages=window.__fdPokerAllyImages||(window.__fdPokerAllyImages={});
+  const ALLY_TYPES={
+    swords:{name:'Espadas',sprite:'sprites/swords.png',color:'#e74c3c'},
+    sticks:{name:'Paus',sprite:'sprites/sticks.png',color:'#2ecc71'},
+    hearts:{name:'Copas',sprite:'sprites/hearts.png',color:'#ff5d73'},
+    goldies:{name:'Ourinhos',sprite:'sprites/goldies.png',color:'#f1c40f'}
+  };
+  function pokerEnemyAlive(e){return !!e&&Number(e.hp)>0&&!e.undetectable&&!safe(()=>isCurrentlyHypnotized(e));}
+  function addPokerAlly(type,x,y){
+    const spec=ALLY_TYPES[type]; if(!spec)return null;
+    const mult=safe(()=>getEnemyDifficultyMultiplierFromEntry('motorcycle_helmet',Math.max(1,Number(wave)||1),Math.max(1,Number(wave)||1)))||1;
+    const a={id:`poker_ally_${Date.now()}_${Math.random().toString(36).slice(2,8)}`,type,name:spec.name,sprite:spec.sprite,color:spec.color,
+      x:Number(x)||player?.x||0,y:Number(y)||player?.y||0,hp:Math.max(25,85*mult),maxHp:Math.max(25,85*mult),size:15,
+      spawnWave:Math.max(1,Number(typeof wave!=='undefined'?wave:window.wave)||1),
+      angle:Math.random()*Math.PI*2,attackCd:.35+Math.random()*.4,healCd:0,slashTimer:0,slashAngle:0,alive:true};
+    pokerAllies.push(a);
+    safe(()=>createParticles(a.x,a.y,spec.color));
+    safe(()=>addFloatingText(a.x,a.y-20,`${spec.name}!`,spec.color,12));
+    return a;
+  }
+  function maybeConvertPokerKill(e){
+    if(!e||e.fdPokerConversionChecked||Number(e.hp)>0)return;
+    e.fdPokerConversionChecked=true;
+    if(Math.random()>=.08)return;
+    const types=Object.keys(ALLY_TYPES); const type=types[Math.floor(Math.random()*types.length)];
+    addPokerAlly(type,Number(e.x)||player?.x||0,Number(e.y)||player?.y||0);
+  }
+  function getEnemyDmgMult(e){return Math.max(.05,Number(safe(()=>getEnemyDamageTakenMultiplier(e)))||1);}
+  function pokerFire(target){
+    if(sandboxMode||runShootingDisabled||!player||!target||!pokerEnemyAlive(target))return;
+    const angle=Math.atan2(target.y-player.y,target.x-player.x);
+    player.lastAimAngle=angle;
+    player.cd=Math.max(1,Number(player.baseFireRate)||40)*Math.max(.2,Number(player.stats?.fireRateMult)||1);
+    const dmg=Math.max(1,(Number(player.baseDmg)||13)*(Number(player.stats?.dmgMult)||1)*(player.inTotem?1.2:1)*(Number(player.graffitAtkMult)||1));
+    pokerCards.push({x:player.x+Math.cos(angle)*(player.r+9),y:player.y+Math.sin(angle)*(player.r+9),vx:Math.cos(angle)*430,vy:Math.sin(angle)*430,dmg,life:2.15,parent:true,size:7,angle,hitIds:new Set()});
+  }
+  const oldFireWeapon=window.fireWeapon||fireWeapon;
+  const fireWeaponWrapped=function(target){
+    if(pd?.selectedChar==='poker') return pokerFire(target);
+    return oldFireWeapon.apply(this,arguments);
+  };
+  replaceGlobal('fireWeapon',fireWeaponWrapped);
+
+  function updatePokerCards(dt){
+    if(!isPlaying||sandboxMode||!player){pokerCards.length=0;return;}
+    dt=Math.max(0,Math.min(.1,Number(dt)||0));
+    for(let i=pokerCards.length-1;i>=0;i--){
+      const c=pokerCards[i]; if(!c){pokerCards.splice(i,1);continue;}
+      c.life-=dt; c.x+=c.vx*dt; c.y+=c.vy*dt; c.angle=Math.atan2(c.vy,c.vx);
+      if(c.life<=0){pokerCards.splice(i,1);continue;}
+      let hit=null;
+      for(const e of enemies){
+        if(!pokerEnemyAlive(e)||c.hitIds?.has(e))continue;
+        const r=(Number(e.size)||12)+(Number(c.size)||6);
+        if(Math.hypot(e.x-c.x,e.y-c.y)<=r){hit=e;break;}
+      }
+      if(!hit)continue;
+      c.hitIds.add(hit);
+      const dealt=Math.max(1,(Number(c.dmg)||1)*getEnemyDmgMult(hit));
+      hit.lastHitSourceChar='poker'; hit.hp=Math.max(0,Number(hit.hp)-dealt);
+      safe(()=>addFloatingText(hit.x,hit.y,Math.floor(dealt)));
+      safe(()=>createParticles(hit.x,hit.y,'#f1c40f'));
+      if(hit.hp<=0)maybeConvertPokerKill(hit);
+      if(c.parent){
+        const angle=Math.atan2(c.vy,c.vx); const childDmg=Math.max(1,(Number(c.dmg)||1)*.62);
+        for(const dir of [-1,1]){
+          const a=angle+dir*.34;
+          pokerCards.push({x:c.x,y:c.y,vx:Math.cos(a)*470,vy:Math.sin(a)*470,dmg:childDmg,life:1.55,parent:false,size:5,angle:a,hitIds:new Set([hit])});
+        }
+        pokerCards.splice(i,1);
+      }else{
+        c.pierceLeft=(c.pierceLeft??2)-1;
+        if(c.pierceLeft<0)pokerCards.splice(i,1);
+      }
+    }
+  }
+  function nearestEnemyTo(x,y,maxDist=230){
+    let best=null,bd=maxDist;
+    for(const e of enemies){if(!pokerEnemyAlive(e))continue;const d=Math.hypot(e.x-x,e.y-y);if(d<bd){best=e;bd=d;}}
+    return best;
+  }
+  function slashFromAlly(a,target){
+    const angle=Math.atan2(target.y-a.y,target.x-a.x);a.slashAngle=angle;a.slashTimer=.24;
+    for(const e of enemies){
+      if(!pokerEnemyAlive(e))continue;
+      const dx=e.x-a.x,dy=e.y-a.y,d=Math.hypot(dx,dy);
+      if(d>145+(Number(e.size)||0))continue;
+      const delta=Math.atan2(Math.sin(Math.atan2(dy,dx)-angle),Math.cos(Math.atan2(dy,dx)-angle));
+      if(Math.abs(delta)>Math.PI/2)continue;
+      const dmg=Math.max(2,(Number(player?.baseDmg)||13)*(Number(player?.stats?.dmgMult)||1)*.58*getEnemyDmgMult(e));
+      e.lastHitSourceChar='poker_ally';e.hp=Math.max(0,Number(e.hp)-dmg);
+      safe(()=>addFloatingText(e.x,e.y,Math.floor(dmg)));
+      safe(()=>createParticles(e.x,e.y,a.color));
+    }
+  }
+  function updatePokerAllies(dt){
+    if(!isPlaying||!player||player.isDead){pokerAllies.length=0;return;}
+    dt=Math.max(0,Math.min(.1,Number(dt)||0));
+    const currentWave=Math.max(1,Number(typeof wave!=='undefined'?wave:window.wave)||1);
+    for(let i=pokerAllies.length-1;i>=0;i--){
+      const a=pokerAllies[i];if(!a||a.hp<=0||currentWave>=Math.max(1,Number(a.spawnWave)||currentWave)+3){pokerAllies.splice(i,1);continue;}
+      a.angle+=dt*(1.0+(i%3)*.22);a.slashTimer=Math.max(0,a.slashTimer-dt);a.attackCd=Math.max(0,a.attackCd-dt);a.healCd=Math.max(0,a.healCd-dt);
+      const orbit=player.r+48+(i%3)*13;
+      const tx=player.x+Math.cos(a.angle)*orbit,ty=player.y+Math.sin(a.angle)*orbit;
+      const dx=tx-a.x,dy=ty-a.y,d=Math.hypot(dx,dy);const step=(d>160?320:220)*dt;
+      if(d>2){a.x+=dx/d*Math.min(d,step);a.y+=dy/d*Math.min(d,step);}
+      a.x=Math.max(-1480,Math.min(1480,a.x));a.y=Math.max(-1480,Math.min(1480,a.y));
+      if(a.type==='swords'||a.type==='sticks'){
+        if(a.attackCd<=0){const target=nearestEnemyTo(a.x,a.y,190);if(target){slashFromAlly(a,target);a.attackCd=a.type==='swords'?1.05:1.2;}}
+      }else if(a.type==='hearts'){
+        const pdist=Math.hypot(a.x-player.x,a.y-player.y);
+        if(pdist<=155){const maxHp=Math.max(1,(Number(player.baseHp)||100)*(Number(player.stats?.maxHpMult)||1));const before=player.hp;player.hp=Math.min(maxHp,player.hp+4.2*dt);if(player.hp>before&&a.healCd<=0){safe(()=>addFloatingText(player.x,player.y-25,`+${Math.max(1,Math.floor(player.hp-before))} HP`,'#ff5d73',11));a.healCd=.75;}}
+      }
+    }
+  }
+  function drawPokerEntities(){
+    if(!isPlaying||!player||!ctx||!camera)return;
+    ctx.save();ctx.translate(-camera.x,-camera.y);
+    for(const c of pokerCards){
+      ctx.save();ctx.translate(c.x,c.y);ctx.rotate(c.angle||0);ctx.fillStyle='#fff8e7';ctx.strokeStyle='#b33939';ctx.lineWidth=2;
+      ctx.fillRect(-7,-10,14,20);ctx.strokeRect(-7,-10,14,20);ctx.fillStyle='#b33939';ctx.font='bold 9px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(c.parent?'A':'♦',0,0);ctx.restore();
+    }
+    for(const a of pokerAllies){
+      if(!a||a.hp<=0)continue;
+      if(a.slashTimer>0&&(a.type==='swords'||a.type==='sticks')){
+        // Golpe visual no estilo do Knighter: espada girando, lâmina metálica,
+        // brilho da cor do soldado e rastro acompanhando o movimento.
+        const slashDuration=.24;
+        const t=Math.max(0,Math.min(1,1-a.slashTimer/slashDuration));
+        const ease=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+        const start=-Math.PI/2,end=Math.PI/2;
+        const swing=a.slashAngle+start+(end-start)*ease;
+        const radius=112;
+        const alpha=Math.max(.08,Math.sin(Math.PI*t));
+        const h=Math.max(13,radius*.22),bladeLen=Math.max(46,radius*.76);
+        ctx.save();ctx.translate(a.x,a.y);ctx.rotate(swing);ctx.globalAlpha=alpha;ctx.lineCap='round';ctx.lineJoin='round';
+        ctx.shadowColor=a.color;ctx.shadowBlur=14;
+        // Cabo escuro e empunhadura.
+        ctx.strokeStyle='#252b30';ctx.lineWidth=Math.max(5,radius*.06);
+        ctx.beginPath();ctx.moveTo(-h*.38,0);ctx.lineTo(h,0);ctx.stroke();
+        ctx.strokeStyle=a.color;ctx.lineWidth=Math.max(3,radius*.035);
+        ctx.beginPath();ctx.moveTo(-h*.22,0);ctx.lineTo(h*.78,0);ctx.stroke();
+        // Guarda da espada.
+        ctx.strokeStyle='#b8c0c7';ctx.lineWidth=Math.max(2.5,radius*.035);
+        ctx.beginPath();ctx.moveTo(h*.78,-radius*.13);ctx.lineTo(h*.78,radius*.13);ctx.stroke();
+        // Lâmina semelhante à de Knighter, com fio claro e ponta afiada.
+        const bladeStart=h*.85,tip=bladeStart+bladeLen;
+        const bladeGrad=ctx.createLinearGradient(bladeStart,0,tip,0);
+        bladeGrad.addColorStop(0,'#f5f7fa');bladeGrad.addColorStop(.62,'#d9e0e6');bladeGrad.addColorStop(1,'#aebbc5');
+        ctx.fillStyle=bladeGrad;ctx.strokeStyle=a.type==='swords'?'#8d342e':'#277b49';ctx.lineWidth=1.8;
+        ctx.beginPath();ctx.moveTo(bladeStart,-radius*.075);ctx.lineTo(tip-radius*.08,-radius*.075);ctx.lineTo(tip,0);ctx.lineTo(tip-radius*.08,radius*.075);ctx.lineTo(bladeStart,radius*.075);ctx.closePath();ctx.fill();ctx.stroke();
+        ctx.strokeStyle='rgba(255,255,255,.92)';ctx.lineWidth=1.5;
+        ctx.beginPath();ctx.moveTo(bladeStart+bladeLen*.12,-radius*.025);ctx.lineTo(tip-bladeLen*.12,-radius*.025);ctx.stroke();
+        ctx.restore();
+        // Rastro de vento que avança junto com a lâmina (sweep de 180°).
+        ctx.save();ctx.translate(a.x,a.y);ctx.globalAlpha=Math.max(0,.58*Math.sin(Math.PI*t));
+        ctx.strokeStyle=a.color;ctx.lineWidth=4;ctx.shadowColor=a.color;ctx.shadowBlur=12;
+        ctx.beginPath();ctx.arc(0,0,radius*.88,a.slashAngle+start,a.slashAngle+start+(end-start)*ease,false);ctx.stroke();
+        ctx.strokeStyle='rgba(245,250,255,.88)';ctx.lineWidth=1.5;ctx.shadowBlur=4;
+        ctx.beginPath();ctx.arc(0,0,radius*.83,a.slashAngle+start,a.slashAngle+start+(end-start)*ease,false);ctx.stroke();
+        ctx.restore();
+      }
+      let img=allyImages[a.sprite];if(!img){img=new Image();img.src=a.sprite;allyImages[a.sprite]=img;}
+      const allySize=Math.max(12,Number(a.size)||12);
+      const ratio=img&&img.naturalWidth>0?img.naturalWidth/img.naturalHeight:1;
+      const drawW=Math.max(24,allySize*9.0),drawH=drawW/(Number.isFinite(ratio)&&ratio>0?ratio:1);
+      if(img.complete&&img.naturalWidth>0){ctx.save();ctx.drawImage(img,a.x-drawW/2,a.y-drawH/2,drawW,drawH);ctx.restore();}
+      else{ctx.fillStyle=a.color;ctx.beginPath();ctx.arc(a.x,a.y,allySize,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 16px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(({swords:'♠',sticks:'♣',hearts:'♥',goldies:'♦'})[a.type]||'?',a.x,a.y);}
+      const hudAlly={...a,x:a.x,y:a.y,hp:a.hp,maxHp:a.maxHp};
+      drawEnemyStatusHud(ctx,hudAlly,drawW,drawH);
+    }
+    ctx.restore();
+  }
+
+  // ---------------- Pet movement and kill-triggered powers ----------------
+  const oldPetUpdate=window.updateEquippedPet||updateEquippedPet;
+  const petUpdateWrapped=function(dt){
+    const out=oldPetUpdate.apply(this,arguments);
+    safe(()=>{
+      const pet=getEquippedPet();if(!pet||!player||player.isDead||!['lixao','urubu'].includes(pet.id))return;
+      const st=getPetMoveState(pet);if(!st)return;const rarity=Math.max(0,Math.min(4,Number(pet.rarity)||0));
+      st.mode='player-orbit';st.orbitAngle+=Math.max(0,Number(dt)||0)*(pet.id==='urubu'?1.25:1.0);
+      const orbit=player.r+57;movePetToward(st,player.x+Math.cos(st.orbitAngle)*orbit,player.y+Math.sin(st.orbitAngle)*orbit,7.3,Math.max(0,Number(dt)||0));clampPetToArena(st);
+      player.__fdPetKillMeta=player.__fdPetKillMeta||{};player.__fdPetKillMeta[pet.id]=rarity;
+    });
+    return out;
+  };
+  replaceGlobal('updateEquippedPet',petUpdateWrapped);
+  function onEnemyRemovedByDeath(e){
+    if(!e||e.fdPokerPetDeathProcessed||Number(e.hp)>0)return;
+    e.fdPokerPetDeathProcessed=true;
+    const pet=safe(()=>getEquippedPet());if(!pet||!player||player.isDead)return;
+    const rarity=Math.max(0,Math.min(4,Number(pet.rarity)||0));
+    if(pet.id==='lixao'){
+      const chance=Math.min(.95,.15+.05*rarity);
+      if(Math.random()<chance){safe(()=>{xpGems.push({x:Number(e.x)||player.x,y:Number(e.y)||player.y,val:3});createParticles(Number(e.x)||player.x,Number(e.y)||player.y,'#bdc3c7');});}
+    }
+    if(pet.id==='urubu'&&e.lastHitSourceChar!=='urubu_pet'){
+      const candidates=enemies.filter(v=>v&&v!==e&&Number(v.hp)>0&&!safe(()=>isCurrentlyHypnotized(v)));
+      if(candidates.length){
+        const target=candidates[Math.floor(Math.random()*candidates.length)];
+        const dmg=[8,14,23,36,54][rarity]*(Number(player.stats?.dmgMult)||1);
+        const dealt=Math.max(1,dmg*getEnemyDmgMult(target));target.lastHitSourceChar='urubu_pet';target.hp=Math.max(0,Number(target.hp)-dealt);
+        safe(()=>addFloatingText(target.x,target.y-12,`${Math.floor(dealt)}`,'#7f8c8d',11));safe(()=>createParticles(target.x,target.y,'#7f8c8d'));
+      }
+    }
+  }
+  const oldUpdateEnemies=window.updateEnemies||updateEnemies;
+  const updateEnemiesWrapped=function(dt){
+    const before=Array.isArray(enemies)?enemies.slice():[];
+    const out=oldUpdateEnemies.apply(this,arguments);
+    const aliveSet=new Set(Array.isArray(enemies)?enemies:[]);
+    for(const e of before){if(!aliveSet.has(e)&&Number(e?.hp)<=0)onEnemyRemovedByDeath(e);}
+    // Enemies can hit Poker's converted allies as well as the player.
+    if(Array.isArray(enemies)&&pokerAllies.length){
+      for(const e of enemies){
+        if(!e||Number(e.hp)<=0)continue;e.fdPokerAllyContactCd=Math.max(0,(Number(e.fdPokerAllyContactCd)||0)-Math.max(0,Number(dt)||0));
+        if(e.fdPokerAllyContactCd>0)continue;
+        let target=null,bd=Infinity;
+        for(const a of pokerAllies){if(!a||a.hp<=0)continue;const d=Math.hypot(e.x-a.x,e.y-a.y);if(d<=(Number(e.size)||12)+a.size+8&&d<bd){bd=d;target=a;}}
+        if(target){target.hp=Math.max(0,target.hp-Math.max(1,(Number(e.baseDmg)||8)*.28));e.fdPokerAllyContactCd=.7;safe(()=>createParticles(target.x,target.y,'#e74c3c'));}
+      }
+      for(let i=pokerAllies.length-1;i>=0;i--)if(!pokerAllies[i]||pokerAllies[i].hp<=0)pokerAllies.splice(i,1);
+    }
+    return out;
+  };
+  replaceGlobal('updateEnemies',updateEnemiesWrapped);
+
+  // Enemy bullets can hit any converted ally; Ourinhos have a 25% deflection chance.
+  const oldUpdateProjectiles=window.updateProjectiles||updateProjectiles;
+  const updateProjectilesWrapped=function(dt){
+    if(pokerAllies.length&&Array.isArray(projectiles)){
+      const frame=Math.max(0,Number(dt)||0);
+      for(let i=projectiles.length-1;i>=0;i--){
+        const p=projectiles[i];if(!p||p.isPlayer||p.extra?.isWall)continue;
+        const px=Number(p.x)||0,py=Number(p.y)||0;
+        const nx=px+(Number(p.vx)||0)*frame*60,ny=py+(Number(p.vy)||0)*frame*60;
+        let hit=null;
+        for(const a of pokerAllies){if(!a||a.hp<=0)continue;const radius=a.size+(Number(p.size)||4);if(Math.hypot(px-a.x,py-a.y)<=radius||Math.hypot(nx-a.x,ny-a.y)<=radius){hit=a;break;}}
+        if(!hit)continue;
+        const target=nearestEnemyTo(hit.x,hit.y,1200);
+        if(hit.type==='goldies'&&target&&Math.random()<.25){
+          const speed=Math.max(180,Math.hypot(Number(p.vx)||0,Number(p.vy)||0)*60);
+          const a=Math.atan2(target.y-p.y,target.x-p.x);p.isPlayer=true;p.vx=Math.cos(a)*speed/60;p.vy=Math.sin(a)*speed/60;
+          p.extra={...(p.extra||{}),sourceEnemy:null,deflectedByGoldies:true};p.type='poker_deflected';
+          safe(()=>addFloatingText(hit.x,hit.y-18,'DEFLETIDO!','#f1c40f',10));
+        }else{
+          hit.hp=Math.max(0,hit.hp-Math.max(1,Number(p.dmg)||8));projectiles.splice(i,1);
+          safe(()=>createParticles(hit.x,hit.y,'#e74c3c'));
+        }
+      }
+    }
+    const out=oldUpdateProjectiles.apply(this,arguments);
+    updatePokerCards(dt);
+    return out;
+  };
+  replaceGlobal('updateProjectiles',updateProjectilesWrapped);
+
+  const oldUpdate=window.update||update;
+  const updateWrapped=function(dt){
+    const out=oldUpdate.apply(this,arguments);
+    if(!sandboxMode){
+      updatePokerAllies(dt);
+      // Daily mission: three new trees for every wave crossed, including wave 1.
+      if(window.dailyMissionRun?.modifierKey==='accelerated_growth'&&Number(window.currentMap)===4&&Array.isArray(obstacles)){
+        const now=Math.max(1,Math.floor(Number(wave)||1));let last=Math.max(0,Number(window.__fdAcceleratedGrowthWave)||0);
+        for(let w=last+1;w<=now;w++)for(let n=0;n<3;n++){
+          let x=0,y=0,tries=0;do{x=(Math.random()*2500)-1250;y=(Math.random()*2500)-1250;tries++;}while(tries<12&&(Math.hypot(x-(player?.x||0),y-(player?.y||0))<180||obstacles.some(o=>o&&o.type==='tree'&&Math.hypot(x-o.x,y-o.y)<55)));
+          obstacles.push({x,y,r:34+Math.random()*8,type:'tree'});
+        }
+        window.__fdAcceleratedGrowthWave=now;
+      }else if(window.dailyMissionRun?.modifierKey!=='accelerated_growth')window.__fdAcceleratedGrowthWave=0;
+    }
+    return out;
+  };
+  replaceGlobal('update',updateWrapped);
+  const oldDraw=window.draw||draw;
+  const drawWrapped=function(){const out=oldDraw.apply(this,arguments);safe(drawPokerEntities);return out;};
+  replaceGlobal('draw',drawWrapped);
+
+  // Reset transient allied state on every new run.
+  const oldStartRun=window.startRunAfterShop||startRunAfterShop;
+  const startRunWrapped=function(options={}){
+    pokerCards.length=0;pokerAllies.length=0;window.__fdAcceleratedGrowthWave=0;
+    return oldStartRun.apply(this,arguments);
+  };
+  replaceGlobal('startRunAfterShop',startRunWrapped);
+
+  // ---------------- Daily mission spawn modifiers and map-specific skins ----------------
+  const oldEntryWave=window.getEnemyEntryWave||getEnemyEntryWave;
+  const entryWaveWrapped=function(type,currentWave){
+    const t=String(type||'').toLowerCase(),key=window.dailyMissionRun?.modifierKey;
+    if(key==='off_shift'&&t==='worker')return 1;
+    if(key==='branch_hopping'&&t==='gorilla')return 1;
+    return oldEntryWave.apply(this,arguments);
+  };
+  replaceGlobal('getEnemyEntryWave',entryWaveWrapped);
+  const oldSpawnEnemy=window.spawnEnemy||spawnEnemy;
+  let inSpawnModifier=false;
+  const spawnEnemyWrapped=function(forcedType=null,forcedPoint=null,spriteOverride=null){
+    const key=window.dailyMissionRun?.modifierKey;
+    const activeDaily=!sandboxMode&&!!window.dailyMissionRun;
+    const originalType=String(forcedType||'').toLowerCase();
+    let requestedType=forcedType;
+    if(activeDaily&&key==='off_shift'&&!inSpawnModifier)requestedType='worker';
+    const result=oldSpawnEnemy.call(this,requestedType,forcedPoint,spriteOverride);
+    if(!result||typeof result!=='object')return result;
+    // Map skin origins. Preserve explicit Sandbox choices and the Christmas mission's skins.
+    const mapId=Number(window.currentMap),christmasActive=window.dailyMissionRun?.modifierKey==='christmas_early'||String(window.seasonalQuestRun?.id||window.seasonalQuestLaunch?.id||'')==='natal_adiantado';
+    if(!spriteOverride&&!result.fdHolidayVariant&&!window.__fdBypassHolidaySkin&&!christmasActive){
+      const skin=mapSkinFor(result.type,mapId);
+      if(skin&&typeof getEnemySpritePath==='function'&&getEnemySpritePath(skin)){
+        result.skinOverride=skin;result.fracturedSkinType=skin;result.resolvedFracturedSkinType=skin;
+        const source=mapId===23?23:(sourceForMap(mapId)||mapId);
+        result.skinSourceMapId=source;result.dropOriginMapId=source;result.lineageMapId=source;result.originBiomeId=source;
+        if(result.fracturedOrigin)result.fractureMapId=source;
+      }
+    }
+    if(activeDaily&&!inSpawnModifier){
+      inSpawnModifier=true;
+      try{
+        if(key==='off_shift'){
+          oldSpawnEnemy.call(this,'worker',null,null);
+        }else if(key==='traffic_jam'){
+          const cars=new Set(['motorcycle','police_car','ambulance','truck','tour_truck']);
+          if(cars.has(String(result.type||'').toLowerCase())){
+            oldSpawnEnemy.call(this,result.type,null,null);
+            if(Math.random()<.5)oldSpawnEnemy.call(this,result.type,null,null);
+          }
+        }else if(key==='branch_hopping'&&Math.random()<.42){
+          oldSpawnEnemy.call(this,'gorilla',null,null);
+        }
+      }finally{inSpawnModifier=false;}
+    }
+    return result;
+  };
+  replaceGlobal('spawnEnemy',spawnEnemyWrapped);
+
+  // ---------------- Remove the old Popeye compensation and launch freebie completely ----------------
+  const removeOfferNodes=()=>{
+    document.getElementById('shop-popeye-compensation-section')?.remove();
+    document.querySelector('.fd-popeye-compensation-section')?.remove();
+    document.querySelector('.fd-launch-success-section')?.remove();
+  };
+  window.fdRenderPopeyeCompensationOffer=removeOfferNodes;
+  window.fdClaimPopeyeCompensation=removeOfferNodes;
+  window.fdRenderLaunchSuccessOffer=removeOfferNodes;
+  window.fdClaimLaunchSuccessOffer=removeOfferNodes;
+  safe(removeOfferNodes);
+
+  // The Sandbox map picker previews the real cemetery floor and places tombstones when selected.
+  const oldSandboxSelectMap=window.sandboxSelectMap || (typeof sandboxSelectMap==='function'?sandboxSelectMap:null);
+  if(typeof oldSandboxSelectMap==='function'){
+    const sandboxSelectMapWrapped=function(id){
+      const out=oldSandboxSelectMap.apply(this,arguments);
+      if(Number(id)===23&&sandboxMode){
+        obstacles=[];
+        for(let i=0;i<22;i++){
+          const angle=(i/22)*Math.PI*2+.17, radius=340+(i%6)*175;
+          const ox=Math.max(-1320,Math.min(1320,Math.cos(angle)*radius));
+          const oy=Math.max(-1320,Math.min(1320,Math.sin(angle)*radius));
+          obstacles.push({x:ox,y:oy,r:27,type:'tombstone',isWall:true,cemeteryWall:true});
+        }
+      }
+      return out;
+    };
+    window.sandboxSelectMap=sandboxSelectMapWrapped;try{sandboxSelectMap=sandboxSelectMapWrapped;}catch(_){}
+  }
+  const oldSandboxMapRenderer=window.renderSandboxMaps || (typeof renderSandboxMaps==='function'?renderSandboxMaps:null);
+  if(typeof oldSandboxMapRenderer==='function'){
+    const sandboxMapRendererWrapped=function(root){
+      const out=oldSandboxMapRenderer.apply(this,arguments);
+      safe(()=>{const host=root||document.getElementById('sandbox-content');const canvas=host?.querySelector('[data-sandbox-map-preview="23"] canvas');if(canvas&&typeof drawDailyMapPreview==='function')drawDailyMapPreview(canvas,{mapIndex:3,mapName:'Cemitério',mapVariant:'cemetery'});});
+      return out;
+    };
+    window.renderSandboxMaps=sandboxMapRendererWrapped;try{renderSandboxMaps=sandboxMapRendererWrapped;}catch(_){}
+  }
+  safe(()=>{if(typeof renderSandboxMaps==='function'&&document.querySelector('#overlay-sandbox:not(.hidden)'))renderSandboxMaps();});
+  safe(()=>{if(typeof renderSandboxEnemies==='function'&&document.querySelector('#overlay-sandbox:not(.hidden)'))renderSandboxEnemies(document.getElementById('sandbox-content'));});
+  safe(()=>{if(typeof renderDailyMissionCards==='function')renderDailyMissionCards();});
+  safe(()=>{if(typeof renderLaunchQuests==='function')renderLaunchQuests();});
+  safe(()=>{if(typeof renderSeasonalQuests==='function')renderSeasonalQuests();});
+  console.info('FD: Poker, aliados, pets, missões diárias e Cemitério carregados.');
+})();
+</script>
+
+</body>
+</html>
