@@ -3810,8 +3810,8 @@ const UHC_MODIFIERS = {
 const ENEMY_TYPES = ["Básico", "Gigante", "Tanque", "Boss", "Ninja", "Kamikaze", "Líder", "Colosso", "Elite Master", "Líder Elite", "Caixa de papelão", "Capacete", "Cabeça de prisma"];
 
 const FIXED_COINS = [300, 600, 900, 1200, 2400, 5000]; const FIXED_EVO = [40, 80, 120, 240, 500]; const FIXED_SCRAPS = [100, 250, 500, 750, 1000]; const FIXED_XP = [150, 300, 650, 1000];
-const BOX_DEFS = { pacote:{name:'Pacote',sprite:'elements/pack.png',pulls:1}, normal:{name:'Caixa Normal',sprite:'elements/cardboard_box.png',pulls:3}, metal:{name:'Caixa de Metal',sprite:'elements/steel_box.png',pulls:6}, gold:{name:'Caixa de Ouro',sprite:'elements/gold_box.png',pulls:10}, chromium:{name:'Caixa Cromada',sprite:'elements/chromium_box.png',pulls:15}, pet_egg:{name:'Ovo de Pet',sprite:'elements/egg.png',pulls:1}, mega:{name:'Caixa de Metal',sprite:'elements/steel_box.png',pulls:6, legacy:true} };
-function normalizeBoxType(type){ const key = String(type || '').toLowerCase(); if (key === 'mega') return 'metal'; return BOX_DEFS[key] && !BOX_DEFS[key].legacy ? key : 'normal'; }
+const BOX_DEFS = { pacote:{name:'Pacote',sprite:'elements/pack.png',pulls:1}, normal:{name:'Caixa Normal',sprite:'elements/cardboard_box.png',pulls:3}, presente:{name:'Presente',sprite:'elements/gift_box.png',pulls:5}, metal:{name:'Caixa de Metal',sprite:'elements/steel_box.png',pulls:6}, gold:{name:'Caixa de Ouro',sprite:'elements/gold_box.png',pulls:10}, chromium:{name:'Caixa Cromada',sprite:'elements/chromium_box.png',pulls:15}, pet_egg:{name:'Ovo de Pet',sprite:'elements/egg.png',pulls:1}, mega:{name:'Caixa de Metal',sprite:'elements/steel_box.png',pulls:6, legacy:true} };
+function normalizeBoxType(type){ const key = String(type || '').toLowerCase(); if (key === 'mega') return 'metal'; if (['present','gift','caixa_presente','presente'].includes(key)) return 'presente'; return BOX_DEFS[key] && !BOX_DEFS[key].legacy ? key : 'normal'; }
 function boxName(type){ return BOX_DEFS[normalizeBoxType(type)].name; }
 function boxSprite(type){ return BOX_DEFS[normalizeBoxType(type)].sprite; }
 function boxPulls(type){ return BOX_DEFS[normalizeBoxType(type)].pulls; }
@@ -6697,6 +6697,8 @@ function getMapElementSpriteKey(type, obj = {}) {
             return 'soundbox';
         case 'kelp':
             return 'kelp';
+        case 'gift_wall':
+            return 'gift_wall';
         case 'fall':
             return 'fall';
         case 'child_wall':
@@ -14485,7 +14487,21 @@ function generateMapObstacles() {
         }
         return;
     }
-    if (dailyVariant === 'pyramid' || dailyVariant === 'thaw') return;
+    if (dailyVariant === 'thaw') {
+        const xmasMissionActive = window.seasonalQuestRun?.id === 'natal_adiantado' || window.dailyMissionRun?.modifierKey === 'christmas_early';
+        if (xmasMissionActive) {
+            obstacles = Array.isArray(obstacles) ? obstacles : [];
+            obstacles = obstacles.filter(o => !(o?.fdGiftWall && o?.seasonal));
+            const giftWallPositions = [[-370,-250],[370,-250],[-370,250],[370,250],[-720,0],[720,0],[0,-720],[0,720],[-650,-650],[650,650]];
+            for (const [gx,gy] of giftWallPositions) {
+                if (!obstacles.some(o => o?.fdGiftWall && Math.abs((Number(o.x)||0)-gx)<2 && Math.abs((Number(o.y)||0)-gy)<2)) {
+                    obstacles.push({x:gx,y:gy,r:36,type:'gift_wall',isWall:true,fdGiftWall:true,seasonal:true});
+                }
+            }
+        }
+        return;
+    }
+    if (dailyVariant === 'pyramid') return;
     if(!dailyVariant && window.currentMap===16){
         return;
     }
@@ -27056,7 +27072,7 @@ function draw() {
         if (!isWorldVisible(o.x, o.y, o.r || 20)) return;
         const elementKey = getMapElementSpriteKey(o.type, o);
         const spriteDrawn = elementKey
-            ? drawMapElementSprite(ctx, elementKey, o.x, o.y, (o.type === 'car' ? o.r * 2.8 : o.r * 2.2), {
+            ? drawMapElementSprite(ctx, elementKey, o.x, o.y, (o.type === 'car' ? o.r * 2.8 : (o.type === 'gift_wall' ? Math.max(46,(o.r||30)*2.4) : o.r * 2.2)), {
                 flipX: o.type === 'car' && !o.mineCart && (o.vx || 0) < 0,
                 rotate: o.type === 'car' && o.mineCart && Math.abs(o.vy || 0) > Math.abs(o.vx || 0) ? Math.PI / 2 : 0
             })
@@ -34210,7 +34226,8 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
             st.rewardClaimed=true;
             save();
             const amount=Math.max(1,Math.min(99,Math.floor(Number(q.reward.amount)||1)));
-            const queues=Array.from({length:amount},()=>buildBoxQueue(q.reward.boxType));
+            const rewardBoxType=q.id==='natal_adiantado'?'presente':q.reward.boxType;
+            const queues=Array.from({length:amount},()=>buildBoxQueue(rewardBoxType));
             startGachaQueue(queues);
         }
     }
@@ -38127,6 +38144,7 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
   };
   Object.assign(ENEMY_SPRITES, addEnemySprites);
   Object.assign(MAP_ELEMENT_SPRITES, { gift_wall:'elements/gift_wall.png' });
+  try { getMapElementSpriteImage('gift_wall'); } catch (_) {} // Start loading the real seasonal wall sprite before the first mission frame.
   if (!MAPS.includes('Praia')) MAPS.push('Praia'); // ID 22. Natal uses synthetic fracture source ID 24.
   Object.assign(BOX_DEFS, { presente:{name:'Presente',sprite:'elements/gift_box.png',pulls:5} });
   if (typeof BOSS_BOX_DROP_TYPES !== 'undefined' && Array.isArray(BOSS_BOX_DROP_TYPES)) {
@@ -38402,6 +38420,39 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
       c.beginPath();c.moveTo(x,inner+wiggle);c.quadraticCurveTo(x+step*.20,inner+wiggle-10,x+step*.48,inner+wiggle);c.stroke();
     }
     c.restore();
+    // Small shells scattered over dry sand. Deterministic positions avoid per-frame RNG/flicker.
+    if(!window.__fdBeachShellDecorV1){
+      let seed=0x51e11;
+      const rand=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
+      window.__fdBeachShellDecorV1=Array.from({length:58},()=>({x:(rand()*2-1)*1420,y:(rand()*2-1)*1420,size:7+rand()*6,rot:rand()*Math.PI*2,tint:Math.floor(rand()*4)}));
+    }
+    const shellTints=['#f4dfb0','#f3c9aa','#f7e9d4','#dcb8a0'];
+    for(const sh of window.__fdBeachShellDecorV1){
+      if(Math.abs(sh.x)>=inner-28||Math.abs(sh.y)>=inner-28)continue;
+      if(sh.x<cx-32||sh.x>cx+w+32||sh.y<cy-32||sh.y>cy+h+32)continue;
+      const sz=sh.size;
+      c.save();c.translate(sh.x,sh.y);c.rotate(sh.rot);c.globalAlpha=.88;
+      c.fillStyle='rgba(80,58,35,.22)';c.beginPath();c.ellipse(1,sz*.34,sz*.9,sz*.38,0,0,Math.PI*2);c.fill();
+      c.fillStyle=shellTints[sh.tint];c.strokeStyle='rgba(114,82,51,.70)';c.lineWidth=1.05;
+      c.beginPath();c.moveTo(-sz*.9,sz*.28);c.quadraticCurveTo(-sz*1.12,-sz*.55,-sz*.40,-sz*.78);c.quadraticCurveTo(0,-sz*1.02,sz*.40,-sz*.78);c.quadraticCurveTo(sz*1.12,-sz*.55,sz*.9,sz*.28);c.quadraticCurveTo(0,sz*.63,-sz*.9,sz*.28);c.closePath();c.fill();c.stroke();
+      c.strokeStyle='rgba(146,105,69,.72)';c.lineWidth=.8;
+      for(let ridge=-2;ridge<=2;ridge++){c.beginPath();c.moveTo(0,sz*.33);c.quadraticCurveTo(ridge*sz*.2,-sz*.18,ridge*sz*.31,-sz*.64);c.stroke();}
+      c.restore();
+    }
+    // Translucent, dark bird shadows glide over the dry sand; they are paint-only, with no collision/entity.
+    const birdTime=time*.19, birdSpan=Math.max(140,inner-125);
+    for(let i=0;i<4;i++){
+      const t=birdTime+i*1.72;
+      const bx=Math.sin(t*.72+i*.41)*birdSpan*.82;
+      const by=Math.cos(t*.49+i*1.13)*birdSpan*.58;
+      if(Math.abs(bx)>=inner-55||Math.abs(by)>=inner-55||bx<cx-65||bx>cx+w+65||by<cy-35||by>cy+h+35)continue;
+      const size=20+(i%3)*5;
+      c.save();c.translate(bx,by);c.rotate(Math.sin(t*.38+i)*.34);c.scale(1,.60+Math.sin(t*1.8+i)*.07);
+      c.globalAlpha=.19;c.fillStyle='#111820';
+      c.beginPath();c.moveTo(0,0);c.quadraticCurveTo(-size*.20,-size*.28,-size*.62,-size*.67);c.quadraticCurveTo(-size*.48,-size*.05,-size*.12,size*.10);c.quadraticCurveTo(-size*.05,size*.20,0,size*.15);c.quadraticCurveTo(size*.10,size*.08,size*.12,size*.10);c.quadraticCurveTo(size*.48,-size*.05,size*.62,-size*.67);c.quadraticCurveTo(size*.20,-size*.28,0,0);c.closePath();c.fill();
+      c.beginPath();c.ellipse(0,size*.075,size*.075,size*.16,0,0,Math.PI*2);c.fill();
+      c.restore();
+    }
     // Boundary of the 3000x3000 playable world: the sea outside remains visual-only.
     c.strokeStyle='rgba(223,248,255,.60)';c.lineWidth=5;c.strokeRect(-edge,-edge,edge*2,edge*2);
     c.restore();
@@ -38463,13 +38514,28 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
       if(type==='snorkel' && !(fdIsBeachWater(player?.x||0,player?.y||0)))forcedPoint=fdRandomBeachWaterPoint();
     } else if(mission && type){
       holiday='natal';
-      if(type==='deers_sled'||skin==='deers_sled'){type='truck';skin='deers_sled';}
-      else if(type==='xmas_tree'||skin==='xmas_tree'){type='stone_golem';skin='xmas_tree';}
-      else if(type==='gift_thief'||type==='big_gift'){skin=type;}
+      const incomingType=String(type||'').toLowerCase();
+      const incomingSkin=String(skin||'').toLowerCase();
+      const alreadySpecial=['gift_thief','deers_sled','big_gift','xmas_tree'].includes(incomingType)||['gift_thief','deers_sled','big_gift','xmas_tree'].includes(incomingSkin);
+      const specialPool=[];
+      if(getCurrentWave()>=1)specialPool.push('deers_sled','big_gift');
+      if(getCurrentWave()>=3)specialPool.push('xmas_tree');
+      if(getCurrentWave()>=12)specialPool.push('gift_thief');
+      // Normal wave spawners normally pass a forced vanilla type, so inject seasonal
+      // specials here as well; otherwise the special-enemy branch would almost never run.
+      if(!alreadySpecial&&specialPool.length&&Math.random()<.12){
+        const special=specialPool[Math.floor(Math.random()*specialPool.length)];
+        if(special==='deers_sled'){type='truck';skin='deers_sled';}
+        else if(special==='xmas_tree'){type='stone_golem';skin='xmas_tree';}
+        else {type=special;skin=special;}
+      }else if(incomingType==='deers_sled'||incomingSkin==='deers_sled'){type='truck';skin='deers_sled';}
+      else if(incomingType==='xmas_tree'||incomingSkin==='xmas_tree'){type='stone_golem';skin='xmas_tree';}
+      else if(incomingType==='gift_thief'||incomingType==='big_gift'||incomingSkin==='gift_thief'||incomingSkin==='big_gift'){type=incomingType==='gift_thief'||incomingType==='big_gift'?incomingType:incomingSkin;skin=type;}
       else {
+        type=incomingType;
         const themed=fdChooseXmasSkin(type);
         if(themed)skin=themed;
-        else {const pool=xmasTypes.filter(t=>getEnemyEntryWave(t,getCurrentWave())<=getCurrentWave());type=pool[Math.floor(Math.random()*pool.length)]||'basico';skin=fdChooseXmasSkin(type)||'xmas_basic';}
+        else {const pool=xmasTypes.filter(t=>t!=='stone_golem'&&getEnemyEntryWave(t,getCurrentWave())<=getCurrentWave());type=pool[Math.floor(Math.random()*pool.length)]||'basico';skin=fdChooseXmasSkin(type)||'xmas_basic';}
       }
     } else if(explicitXmas){
       holiday='natal';
