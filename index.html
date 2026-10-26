@@ -13185,7 +13185,7 @@ function getCommonAbilityTarget(maxRange = 1100) {
     if (!player || !Array.isArray(enemies)) return null;
     let best = null, bestDist = maxRange;
     for (const e of enemies) {
-        if (!e || e.hp <= 0 || isCurrentlyHypnotized(e)) continue;
+        if (!e || e.hp <= 0 || isCurrentlyHypnotized(e) || e.undetectable) continue;
         const d = dist(player, e);
         if (d < bestDist) {
             bestDist = d;
@@ -14652,7 +14652,7 @@ function getSterlingAimAngle() {
     let target = null;
     let minDist = player.baseRange * player.stats.rangeMult;
     for (const e of enemies) {
-        if (isCurrentlyHypnotized(e)) continue;
+        if (isCurrentlyHypnotized(e) || e.undetectable) continue;
         const d = dist(player, e);
         if (d < minDist) {
             minDist = d;
@@ -14999,7 +14999,7 @@ function findNearestShellTarget(origin = player) {
     if (!origin) return null;
     let best = null, bestD = Infinity;
     for (const e of enemies) {
-        if (!e || e.hp <= 0 || isCurrentlyHypnotized(e)) continue;
+        if (!e || e.hp <= 0 || isCurrentlyHypnotized(e) || e.undetectable) continue;
         const d = dist(origin, e);
         if (d < bestD) { bestD = d; best = e; }
     }
@@ -17426,7 +17426,7 @@ if (!isBossAlive) {
             player.flameTickCd = Math.max(0, (player.flameTickCd || 0) - dt);
             let target = null; let minDist = player.baseRange * player.stats.rangeMult;
             for(let e of enemies) {
-                if (isCurrentlyHypnotized(e) || e.pogo) continue;
+                if (isCurrentlyHypnotized(e) || e.pogo || e.undetectable) continue;
                 let d = dist(player, e);
                 if(d < minDist) { minDist = d; target = e; }
             }
@@ -17468,7 +17468,7 @@ if (!isBossAlive) {
             player.cd -= 60 * dt;
             if (player.cd <= 0) {
                 let target = null; let minDist = player.baseRange * player.stats.rangeMult;
-                for(let e of enemies) { if (isCurrentlyHypnotized(e) || e.pogo) continue; let d = dist(player, e); if(d < minDist) { minDist = d; target = e; } }
+                for(let e of enemies) { if (isCurrentlyHypnotized(e) || e.pogo || e.undetectable) continue; let d = dist(player, e); if(d < minDist) { minDist = d; target = e; } }
                 if (target) {
                     fireWeapon(target);
                     player.cd = Math.max(2, Math.round(player.baseFireRate * player.stats.fireRateMult * 0.25));
@@ -17481,7 +17481,7 @@ if (!isBossAlive) {
             player.cd -= 60 * dt;
             if(player.cd <= 0) {
                 let target = null; let minDist = player.baseRange * player.stats.rangeMult;
-                for(let e of enemies) { if (isCurrentlyHypnotized(e) || e.pogo) continue; let d = dist(player, e); if(d < minDist) { minDist = d; target = e; } }
+                for(let e of enemies) { if (isCurrentlyHypnotized(e) || e.pogo || e.undetectable) continue; let d = dist(player, e); if(d < minDist) { minDist = d; target = e; } }
                 if(target) { fireWeapon(target); player.boldShots++; if(player.boldShots >= 6) { player.boldShots = 0; player.boldReload = 1; } }
             }
         }
@@ -17490,7 +17490,7 @@ if (!isBossAlive) {
         if (player.yoyoReady) {
             let target = null; let minDist = player.baseRange * player.stats.rangeMult;
             for (let e of enemies) {
-                if (isCurrentlyHypnotized(e) || e.pogo) continue;
+                if (isCurrentlyHypnotized(e) || e.pogo || e.undetectable) continue;
                 let d = dist(player, e);
                 if (d < minDist) { minDist = d; target = e; }
             }
@@ -17526,7 +17526,7 @@ if (!isBossAlive) {
             player.cd -= 60 * dt;
             if(player.cd <= 0) {
                 let target = null; let minDist = player.baseRange * player.stats.rangeMult;
-                for(let e of enemies) { if (isCurrentlyHypnotized(e) || e.pogo) continue; let d = dist(player, e); if(d < minDist) { minDist = d; target = e; } }
+                for(let e of enemies) { if (isCurrentlyHypnotized(e) || e.pogo || e.undetectable) continue; let d = dist(player, e); if(d < minDist) { minDist = d; target = e; } }
                 if(target) { fireWeapon(target); player.boobooReturn = false; }
             }
         }
@@ -17544,7 +17544,7 @@ if (!isBossAlive) {
                     minDist = Math.min(minDist, shotReach);
                 }
             }
-            for(let e of enemies) { if (isCurrentlyHypnotized(e) || e.pogo) continue; let d = dist(player, e); if(d < minDist) { minDist = d; target = e; } }
+            for(let e of enemies) { if (isCurrentlyHypnotized(e) || e.pogo || e.undetectable) continue; let d = dist(player, e); if(d < minDist) { minDist = d; target = e; } }
             if(target) fireWeapon(target);
         }
     }
@@ -19789,7 +19789,7 @@ function getYuutoAimAngle(baseAngle) {
     let best = null;
     let bestScore = Infinity;
     for (const other of enemies) {
-        if (!isHypnotizableEnemy(other) || isCurrentlyHypnotized(other)) continue;
+        if (!isHypnotizableEnemy(other) || isCurrentlyHypnotized(other) || other.undetectable) continue;
         const ang = Math.atan2(other.y - player.y, other.x - player.x);
         const diff = Math.abs(Math.atan2(Math.sin(ang - baseAngle), Math.cos(ang - baseAngle)));
         if (diff > 0.9) continue;
@@ -21989,7 +21989,7 @@ function updateAllies(dt) {
             continue;
         }
         let target = null; let minD = 500;
-        for(let e of enemies) { if (isCurrentlyHypnotized(e) || (e.pogo && a.type !== 'drone')) continue; let d = dist(a, e); if(d < minD) { minD = d; target = e; } }
+        for(let e of enemies) { if (isCurrentlyHypnotized(e) || e.undetectable || (e.pogo && a.type !== 'drone')) continue; let d = dist(a, e); if(d < minD) { minD = d; target = e; } }
 
         if(a.type === 'necro_tombstone') {
             // A lápide se desgasta sozinha: exatamente 1 HP por segundo.
@@ -23120,7 +23120,7 @@ function updateProjectiles(dt) {
             }
         }
         else if (p.type === 'magic') {
-            let target = null; let minD = 200; for(let e of enemies) { if (isCurrentlyHypnotized(e)) continue; let d = dist(p, e); if(d < minD) { minD = d; target = e; } }
+            let target = null; let minD = 200; for(let e of enemies) { if (isCurrentlyHypnotized(e) || e.undetectable) continue; let d = dist(p, e); if(d < minD) { minD = d; target = e; } }
             if(target) { let a = Math.atan2(target.y - p.y, target.x - p.x); let spd = Math.sqrt(p.vx*p.vx + p.vy*p.vy); p.vx += Math.cos(a)*spd*0.05; p.vy += Math.sin(a)*spd*0.05; let nSpd = Math.sqrt(p.vx*p.vx + p.vy*p.vy); p.vx = (p.vx/nSpd)*spd; p.vy = (p.vy/nSpd)*spd; }
             p.x += p.vx * 60 * dt; p.y += p.vy * 60 * dt;
         }
@@ -23611,7 +23611,7 @@ function updateProjectiles(dt) {
         if (p.type === 'tenent_ability') {
             let target = null, targetDist = 1400;
             for (const e of enemies) {
-                if (!e || e.hp <= 0 || isCurrentlyHypnotized(e)) continue;
+                if (!e || e.hp <= 0 || isCurrentlyHypnotized(e) || e.undetectable) continue;
                 const d = dist(p, e);
                 if (d < targetDist) { targetDist = d; target = e; }
             }
@@ -27480,7 +27480,7 @@ function draw() {
             ctx.restore();
         } else if (player.flameTimer && player.flameTimer > 0) {
             let target = null; let minDist = player.baseRange * player.stats.rangeMult;
-            for(let e of enemies) { if (isCurrentlyHypnotized(e)) continue; let d = dist(player, e); if(d < minDist) { minDist = d; target = e; } }
+            for(let e of enemies) { if (isCurrentlyHypnotized(e) || e.undetectable) continue; let d = dist(player, e); if(d < minDist) { minDist = d; target = e; } }
             if(target) angle = Math.atan2(target.y - player.y, target.x - player.x);
             const flameRange = player.baseRange * player.stats.rangeMult * 1.5;
             const flameTime = Number(gameTime)||0;
@@ -27895,7 +27895,14 @@ function draw() {
                 drawEnemySprite(ctx, e.x, drawY, visualSize, enemySpriteType, { enemy:e, flipX: Boolean(e.facingLeft), rotate: e.fdSkyFalling ? (Number(e.fdSkyFallAngle) || 0) : 0, allowTiny: Boolean(e.fdSkyFalling) });
             }
         } else {
-            ctx.save();ctx.translate(e.x,e.y);if(e.fdSkyFalling)ctx.rotate(Number(e.fdSkyFallAngle)||0);ctx.scale(fallScale,fallScale);drawShape(ctx,0,0,e.size,'circle',e.color,e.isBoss);ctx.restore();
+            // Stable sprite-loading placeholders for the two Beach specials. A missing
+            // image must not inherit glow/alpha/filter state from a previous effect.
+            const placeholderColor = e.fdSnorkel ? '#20a6ad' : (e.fdConcha ? (e.fdConchaClosed ? '#bfc7cc' : '#d8b58e') : e.color);
+            ctx.save();
+            ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';ctx.filter='none';ctx.shadowBlur=0;ctx.shadowColor='rgba(0,0,0,0)';
+            ctx.translate(e.x,e.y);if(e.fdSkyFalling)ctx.rotate(Number(e.fdSkyFallAngle)||0);ctx.scale(fallScale,fallScale);
+            drawShape(ctx,0,0,e.size,'circle',placeholderColor,e.isBoss);
+            ctx.restore();
         }
 
         if (e.hp > 0 && e.type === 'piano') {
@@ -38227,7 +38234,7 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
     }else if(type==='xmas_tree'){
       e.type='stone_golem';e.hp=e.maxHp=Math.max(520*mult,Number(e.hp)||0);e.speed=.65;e.baseDmg=e.dmg=26*mult;e.size=30;e.golemAttackCd=Number(e.golemAttackCd)||1.1;e.golemAttackTimer=Number(e.golemAttackTimer)||0;e.fdXmasTree=true;e.skinOverride='xmas_tree';
     }else if(type==='snorkel'){
-      e.type='snorkel';e.hp=e.maxHp=Math.max(45*mult,Number(e.hp)||0);e.speed=1.2;e.baseDmg=e.dmg=5*mult;e.size=15;e.isGlobalArmored=true;e.breakIntoBasic=true;e.fdSnorkel=true;e.fdBeachNoWaterSlow=true;e.fdSnorkelTimer=3.2;e.fdSnorkelHidden=true;e.skinOverride='swimmed_snorkel';
+      e.type='snorkel';e.hp=e.maxHp=Math.max(45*mult,Number(e.hp)||0);e.speed=1.2;e.baseDmg=e.dmg=5*mult;e.size=15;e.isGlobalArmored=true;e.breakIntoBasic=false;e.fdSnorkel=true;e.fdBeachNoWaterSlow=true;e.fdSnorkelTimer=3.2;e.fdSnorkelHidden=true;e.skinOverride='swimmed_snorkel';
     }else if(type==='concha'){
       e.type='concha';e.hp=e.maxHp=Math.max(330*mult,Number(e.hp)||0);e.speed=.62;e.baseDmg=e.dmg=8*mult;e.size=20;e.isGlobalArmored=true;e.breakIntoBasic=false;e.fdConcha=true;e.fdConchaTimer=10;e.fdConchaClosed=false;e.fdConchaOpenSpeed=.62;e.fdConchaOpenStationary=false;e.skinOverride='dail_open';
     }else if(type==='surfista'){
@@ -38429,7 +38436,7 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
     if(holiday==='natal'&&!result.skinOverride)result.skinOverride=skin;
     if(holiday==='praia'&&!result.skinOverride)result.skinOverride=skin;
     fdApplyCustomEnemyStats(result,logical,skin);
-    if(result.fdSnorkel){if(!fdIsBeachWater(result.x,result.y))fdMoveEnemyIntoBeachWater(result);const inWater=Number(window.currentMap)===22&&fdIsBeachWater(result.x,result.y);result.fdSnorkelHidden=inWater;result.undetectable=inWater;result.skinOverride=inWater?'swimming_snorkel':'snorkel';result.fracturedSkinType=result.resolvedFracturedSkinType=result.skinOverride;}
+    if(result.fdSnorkel){if(!fdIsBeachWater(result.x,result.y))fdMoveEnemyIntoBeachWater(result);const inWater=Number(window.currentMap)===22&&fdIsBeachWater(result.x,result.y);result.fdSnorkelHidden=inWater;result.undetectable=inWater;result.skinOverride=inWater?'swimmed_snorkel':'snorkel';result.fracturedSkinType=result.resolvedFracturedSkinType=result.skinOverride;}
     if(result.fdSurfista){
       if(!forcedPoint&&beach&&Math.random()<.72)fdMoveEnemyIntoBeachWater(result);
       result.fdSurfistaWater=Number(window.currentMap)===22&&fdIsBeachWater(result.x,result.y);
@@ -38543,7 +38550,7 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
             e.undetectable=water;
             e.fdSnorkelTimer=0;
             if(!water)e.fdSnorkelEverSurfaced=true;
-            const desiredSkin=water?'swimming_snorkel':'snorkel';
+            const desiredSkin=water?'swimmed_snorkel':'snorkel';
             if(e.skinOverride!==desiredSkin){e.skinOverride=desiredSkin;e.fracturedSkinType=desiredSkin;e.resolvedFracturedSkinType=desiredSkin;}
           }
           if(e.fdConcha){
@@ -38579,6 +38586,7 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
           if(e.fdGiftThief&&e.hp<=0&&!e.fdPresentDropHandled){e.fdPresentDropHandled=true;if(Math.random()<.30)itemsMap.push({x:e.x,y:e.y,type:'loot_box_drop',r:20,boxType:'presente'});}
           if(e.fdKraken&&e.hp<=0&&!e.fdKrakenDropHandled){e.fdKrakenDropHandled=true;const p=window.spawnEnemy('basico',{x:e.x,y:e.y},Number(window.currentMap)===22?'beach_basic':null);if(p&&Number(window.currentMap)===22){p.fdHolidayVariant='praia';p.skinOverride='beach_basic';}}
         }
+        for(const e of (Array.isArray(enemies)?enemies:[])){if(e?.fdSnorkel)e.breakIntoBasic=false;}
         const result=oldUpdateEnemies.apply(this,arguments);
         // Armored Beach enemies that break into a basic must keep the Beach lineage/skin.
         for(const e of (Array.isArray(enemies)?enemies:[])){
@@ -38623,13 +38631,24 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
   // Closed shells deflect player shots toward another living enemy.
   const oldProjectileHit=window.projectileHitsEnemy||projectileHitsEnemy;
   const projectileHitWrapped=function(p,e){
-    if(e?.fdSnorkel&&e.fdSnorkelHidden)return false;
     if(e?.fdConcha&&e.fdConchaClosed){
-      if(p?.isPlayer){
-        const target=(Array.isArray(enemies)?enemies:[]).filter(q=>q&&q!==e&&q.hp>0&&!q.fdConchaClosed).sort((a,b)=>Math.hypot(a.x-e.x,a.y-e.y)-Math.hypot(b.x-e.x,b.y-e.y))[0];
-        if(target&&p&&!p.extra?.fdConchaRedirected){
-          p.extra=p.extra||{};p.extra.fdConchaRedirected=true;p.extra.fdConchaReflectedBy=true;p.extra.hitIds=p.extra.hitIds||new Set();p.extra.hitIds.add(e);
-          const dx=target.x-e.x,dy=target.y-e.y,len=Math.hypot(dx,dy)||1,speed=Math.max(2,Math.hypot(Number(p.vx)||0,Number(p.vy)||0));p.x=e.x;p.y=e.y;p.vx=dx/len*speed;p.vy=dy/len*speed;p.extra.targetEnemy=target;p.dmg=Number(p.dmg)||1;
+      // A closed Concha is still a valid auto-aim target. Only moving player bullets
+      // are deflected; melee arcs/area hits are blocked without hijacking player firing.
+      if(p?.isPlayer && p && !p.extra?.hitShape && Math.hypot(Number(p.vx)||0,Number(p.vy)||0)>.1 && !p.extra?.fdConchaRedirected){
+        p.extra=p.extra||{};
+        const target=(Array.isArray(enemies)?enemies:[])
+          .filter(q=>q&&q!==e&&Number(q.hp)>0&&!q.fdConchaClosed&&!q.undetectable)
+          .sort((a,b)=>Math.hypot(a.x-e.x,a.y-e.y)-Math.hypot(b.x-e.x,b.y-e.y))[0];
+        if(target){
+          const dx=target.x-e.x,dy=target.y-e.y,len=Math.hypot(dx,dy)||1;
+          const speed=Math.max(2,Math.hypot(Number(p.vx)||0,Number(p.vy)||0));
+          p.extra.fdConchaRedirected=true;p.extra.fdConchaReflectedBy=true;p.extra.targetEnemy=target;
+          if(!(p.hitIds instanceof Set))p.hitIds=new Set();p.hitIds.add(e);
+          // Start just outside the shell, facing the selected enemy; never reverse toward the player.
+          p.x=e.x+dx/len*3;p.y=e.y+dy/len*3;p.vx=dx/len*speed;p.vy=dy/len*speed;
+        }else{
+          // No alternate enemy means the shot is absorbed, not fired back at the player.
+          p.life=0;p.vx=0;p.vy=0;
         }
       }
       return false;
@@ -38638,7 +38657,7 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
   };
   window.projectileHitsEnemy=projectileHitWrapped;try{projectileHitsEnemy=projectileHitWrapped;}catch(_){}
   const oldDamageMult=window.getEnemyDamageTakenMultiplier||getEnemyDamageTakenMultiplier;
-  const damageMultWrapped=function(e){if(e?.fdSnorkel&&e.fdSnorkelHidden)return 0;if(e?.fdConcha&&e.fdConchaClosed)return 0;return oldDamageMult.apply(this,arguments);};
+  const damageMultWrapped=function(e){if(e?.fdConcha&&e.fdConchaClosed)return 0;return oldDamageMult.apply(this,arguments);};
   window.getEnemyDamageTakenMultiplier=damageMultWrapped;try{getEnemyDamageTakenMultiplier=damageMultWrapped;}catch(_){}
 
   // Clip every bitmap sprite at the water line on Praia, not just enemy sprites.
@@ -38654,7 +38673,7 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
         // All Sky biome enemy sprites / vehicles / drones.
         'sky_basic','aero_hat','iron_aero_hat','motor_head','plane_truck','sky_shooter','sky_velocist','sky_giant','sky_boss','sky_tank','wingsuit_kamikaze','sky_healer','sky_elite_shooter','sky_leader','helicopter','jet','enemy_drone','drone','axel_drone',
         // These show their full sprite in water by design.
-        'swimming_snorkel','surfing','ghost_fisher',
+        'swimming_snorkel','swimmed_snorkel','surfing','ghost_fisher',
         // Radioactive Field hunter and its related biome sprites.
         'plane','fighter_plane','radioactive_plane','machine_gun_war','anti_radiation','mutant_basic','mutant_giant','war_basic','war_hat','war_helmet','nuke_head','cartographer','war_shooter','war_giant','bazooka_tank','war_healer','masked_elite_shooter','nuke_kamikaze','commander_leader','driver_baloon','tank_truck','commander_boss'
       ]);
@@ -38691,7 +38710,7 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
   }catch(err){console.warn('FD recorte de sprites na água:',err);}
 
   // Keep enemy rendering aligned with the same 50% water crop used for every bitmap sprite.
-  const skyExceptionKeys=new Set(['sky_basic','aero_hat','iron_aero_hat','motor_head','plane_truck','sky_shooter','sky_velocist','sky_giant','sky_boss','sky_tank','wingsuit_kamikaze','sky_healer','sky_elite_shooter','sky_leader','helicopter','jet','enemy_drone','drone','axel_drone','stormy','stormy_enemy','eolio','eólio','ghost_fisher','fighter_plane','plane','radioactive_plane','machine_gun_war','anti_radiation','mutant_basic','mutant_giant','war_basic','war_hat','war_helmet','nuke_head','cartographer','war_shooter','war_giant','bazooka_tank','war_healer','masked_elite_shooter','nuke_kamikaze','commander_leader','driver_baloon','tank_truck','commander_boss','swimming_snorkel','surfing']);
+  const skyExceptionKeys=new Set(['sky_basic','aero_hat','iron_aero_hat','motor_head','plane_truck','sky_shooter','sky_velocist','sky_giant','sky_boss','sky_tank','wingsuit_kamikaze','sky_healer','sky_elite_shooter','sky_leader','helicopter','jet','enemy_drone','drone','axel_drone','stormy','stormy_enemy','eolio','eólio','ghost_fisher','fighter_plane','plane','radioactive_plane','machine_gun_war','anti_radiation','mutant_basic','mutant_giant','war_basic','war_hat','war_helmet','nuke_head','cartographer','war_shooter','war_giant','bazooka_tank','war_healer','masked_elite_shooter','nuke_kamikaze','commander_leader','driver_baloon','tank_truck','commander_boss','swimming_snorkel','swimmed_snorkel','surfing']);
   const oldDrawEnemy=window.drawEnemySprite||drawEnemySprite;
   const drawEnemyWrapped=function(cCtx,x,y,size,type,opts={}){
     try{
@@ -39021,7 +39040,7 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
     hearts:{name:'Copas',sprite:'sprites/hearts.png',color:'#ff5d73'},
     goldies:{name:'Ourinhos',sprite:'sprites/goldies.png',color:'#f1c40f'}
   };
-  function pokerEnemyAlive(e){return !!e&&Number(e.hp)>0&&!safe(()=>isCurrentlyHypnotized(e));}
+  function pokerEnemyAlive(e){return !!e&&Number(e.hp)>0&&!e.undetectable&&!safe(()=>isCurrentlyHypnotized(e));}
   function addPokerAlly(type,x,y){
     const spec=ALLY_TYPES[type]; if(!spec)return null;
     const mult=safe(()=>getEnemyDifficultyMultiplierFromEntry('motorcycle_helmet',Math.max(1,Number(wave)||1),Math.max(1,Number(wave)||1)))||1;
