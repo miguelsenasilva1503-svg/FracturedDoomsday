@@ -10528,7 +10528,7 @@ function buildBoxDropItem(type) {
     if(boxType === 'normal' || boxType === 'pacote') {
         if(Math.random() < 0.01) return rollChip();
         if(Math.random() < 0.10) { let gemDrop = 1 + Math.floor(Math.random()*2); pd.gems += gemDrop; return ` +${gemDrop} Gemas`; }
-        if(Math.random() < 0.15) { let evoDrop = 10 + Math.floor(Math.random()*15); pd.evo += evoDrop; return ` +${evoDrop} Evo`; }
+        if(Math.random() < 0.30) { let evoDrop = 15 + Math.floor(Math.random()*15); pd.evo += evoDrop; return ` +${evoDrop} Evo`; }
         if(Math.random() < 0.30) { let s = 10 + Math.floor(Math.random()*16); pd.sucatas += s; return ` +${s} Sucatas`; }
         if(r < 0.85) { let amt = 50 + Math.random()*50; pd.coins += amt; return ` +${Math.floor(amt)} Moedas`; }
         const reward = rollMixedLootBoxCharacterReward(boxType, { excludeIds: ['fasty'] });
@@ -10537,7 +10537,7 @@ function buildBoxDropItem(type) {
 
     if(Math.random() < 0.03) return rollChip();
     if(Math.random() < 0.15) { let gemDrop = 3 + Math.floor(Math.random()*4); pd.gems += gemDrop; return ` +${gemDrop} Gemas`; }
-    if(Math.random() < 0.20) { let evoDrop = 20 + Math.floor(Math.random()*30); pd.evo += evoDrop; return ` +${evoDrop} Evo`; }
+    if(Math.random() < 0.35) { let evoDrop = 30 + Math.floor(Math.random()*30); pd.evo += evoDrop; return ` +${evoDrop} Evo`; }
     if(Math.random() < 0.40) { let s = 40 + Math.floor(Math.random()*31); pd.sucatas += s; return ` +${s} Sucatas`; }
     if(r < 0.70) { let amt = 200 + Math.random()*200; pd.coins += amt; return ` +${Math.floor(amt)} Moedas`; }
     const reward = rollMixedLootBoxCharacterReward(boxType, { excludeIds: ['fasty'] });
@@ -20271,9 +20271,91 @@ function updateEnemies(dt) {
         }
 
         if (!e.globalBalloon && !e.ignoreObstacleCollision) {
-            for (const o of FDPerf.blockingObstacles) {
-                if (e.type === 'lumberjack' && o.type === 'tree') continue;
-                if (distXY(nx, ny, o.x, o.y) < o.r + e.size) { nx = e.x; ny = e.y; break; }
+            const solids = FDPerf.blockingObstacles;
+            const enemyRadius = Math.max(0, Number(e.size) || 0);
+            const canOccupy = (px, py) => {
+                for (const o of solids) {
+                    if (!o || (e.type === 'lumberjack' && o.type === 'tree')) continue;
+                    const minD = Math.max(0, Number(o.r) || 0) + enemyRadius + 0.5;
+                    if (distXY(px, py, Number(o.x) || 0, Number(o.y) || 0) < minD) return false;
+                }
+                for (const wall of FDPerf.xiloWalls) {
+                    if (!wall) continue;
+                    const wallRadius=Number.isFinite(wall.extra?.wallRadius)?wall.extra.wallRadius:21;
+                    if(distXY(px,py,wall.x,wall.y)<wallRadius+enemyRadius+1.5)return false;
+                }
+                return true;
+            };
+            // Desencaixa o inimigo caso ele já esteja sobreposto a uma parede.
+            let baseX=e.x, baseY=e.y;
+            for(let pass=0;pass<3;pass++){
+                let pushed=false;
+                for(const o of solids){
+                    if(!o||(e.type==='lumberjack'&&o.type==='tree'))continue;
+                    const ox=Number(o.x)||0,oy=Number(o.y)||0;
+                    const minD=Math.max(0,Number(o.r)||0)+enemyRadius+1;
+                    const dx=baseX-ox,dy=baseY-oy,d=Math.hypot(dx,dy);
+                    if(d<minD){
+                        const angle=d>.001?Math.atan2(dy,dx):Math.atan2((Number.isFinite(Number(targetY))?Number(targetY):baseY)-oy,(Number.isFinite(Number(targetX))?Number(targetX):baseX)-ox);
+                        baseX=ox+Math.cos(angle)*minD;baseY=oy+Math.sin(angle)*minD;pushed=true;
+                    }
+                }
+                for(const wall of FDPerf.xiloWalls){
+                    if(!wall)continue;
+                    const ox=Number(wall.x)||0,oy=Number(wall.y)||0;
+                    const wallRadius=Number.isFinite(wall.extra?.wallRadius)?wall.extra.wallRadius:21;
+                    const minD=wallRadius+enemyRadius+1;
+                    const dx=baseX-ox,dy=baseY-oy,d=Math.hypot(dx,dy);
+                    if(d<minD){
+                        const angle=d>.001?Math.atan2(dy,dx):Math.atan2((Number.isFinite(Number(targetY))?Number(targetY):baseY)-oy,(Number.isFinite(Number(targetX))?Number(targetX):baseX)-ox);
+                        baseX=ox+Math.cos(angle)*minD;baseY=oy+Math.sin(angle)*minD;pushed=true;
+                    }
+                }
+                if(!pushed)break;
+            }
+            nx+=baseX-e.x;ny+=baseY-e.y;
+            if(!canOccupy(nx,ny)){
+                const xSlide=Math.abs(nx-baseX)>.05&&canOccupy(nx,baseY),ySlide=Math.abs(ny-baseY)>.05&&canOccupy(baseX,ny);
+                if(xSlide&&ySlide){
+                    const tx=Number.isFinite(Number(targetX))?Number(targetX):nx;
+                    const ty=Number.isFinite(Number(targetY))?Number(targetY):ny;
+                    const xProgress=Math.hypot(tx-nx,ty-baseY),yProgress=Math.hypot(tx-baseX,ty-ny);
+                    if(xProgress<=yProgress)ny=baseY;else nx=baseX;
+                }else if(xSlide)ny=baseY;
+                else if(ySlide)nx=baseX;
+                else{
+                    // Se o alvo estiver exatamente atrás da parede, X/Y sozinhos não bastam.
+                    // Tenta os dois sentidos tangenciais e escolhe o que mais aproxima do alvo.
+                    const aimX=Number.isFinite(Number(targetX))?Number(targetX):baseX;
+                    const aimY=Number.isFinite(Number(targetY))?Number(targetY):baseY;
+                    const step=Math.max(2,Math.hypot(nx-baseX,ny-baseY));
+                    let best=null,bestScore=Infinity;
+                    const considerTangent=(ox,oy,minD)=>{
+                        if(distXY(nx,ny,ox,oy)>=minD)return;
+                        const dx=baseX-ox,dy=baseY-oy,d=Math.hypot(dx,dy);
+                        const radial=d>.001?Math.atan2(dy,dx):Math.atan2(baseY-oy,baseX-ox);
+                        for(const side of [-1,1]){
+                            const angle=radial+side*Math.PI*.5;
+                            for(const scale of [1,1.6,2.3,3]){
+                                const sx=baseX+Math.cos(angle)*step*scale;
+                                const sy=baseY+Math.sin(angle)*step*scale;
+                                if(!canOccupy(sx,sy))continue;
+                                const score=Math.hypot(aimX-sx,aimY-sy);
+                                if(score<bestScore-.001){bestScore=score;best={x:sx,y:sy};}
+                            }
+                        }
+                    };
+                    for(const o of solids){
+                        if(!o||(e.type==='lumberjack'&&o.type==='tree'))continue;
+                        considerTangent(Number(o.x)||0,Number(o.y)||0,Math.max(0,Number(o.r)||0)+enemyRadius+1);
+                    }
+                    for(const wall of FDPerf.xiloWalls){
+                        if(!wall)continue;
+                        const wallRadius=Number.isFinite(wall.extra?.wallRadius)?wall.extra.wallRadius:21;
+                        considerTangent(Number(wall.x)||0,Number(wall.y)||0,wallRadius+enemyRadius+1);
+                    }
+                    if(best){nx=best.x;ny=best.y;}else{nx=baseX;ny=baseY;}
+                }
             }
         }
         e.x = Math.max(-1480, Math.min(1480, nx)); e.y = Math.max(-1480, Math.min(1480, ny));
@@ -25557,7 +25639,8 @@ function drawDailyModifierOverlay(){
 }
 function drawDailyWorldEntities(){
     const sandboxEnv=!sandboxMode && typeof sandboxSettings!=='undefined' ? sandboxSettings : null;
-    if(!window.dailyMissionRun && !(sandboxEnv?.lightning || sandboxEnv?.sandWhirls))return;
+    const skyStormActive=Number(window.currentMap)===21&&String(window.fdSkyWeatherState?.type||'')==='storm';
+    if(!window.dailyMissionRun && !(sandboxEnv?.lightning || sandboxEnv?.sandWhirls) && !skyStormActive)return;
     const key=window.dailyMissionRun?.modifierKey || (sandboxEnv?.sandWhirls?'sandstorm':sandboxEnv?.lightning?'rain':'');
     if(key==='arrows'&&Array.isArray(window.dailyArrows)){
         for(const a of window.dailyArrows){if(!isWorldVisible(a.x,a.y,20))continue;ctx.save();ctx.translate(a.x,a.y);ctx.rotate(a.rot);ctx.fillStyle='#e8d7aa';ctx.strokeStyle='#5d432b';ctx.lineWidth=2;ctx.fillRect(-18,-3,28,6);ctx.beginPath();ctx.moveTo(10,-10);ctx.lineTo(28,0);ctx.lineTo(10,10);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();}
@@ -33004,6 +33087,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
             if(typeof st.rewardClaimed!=='boolean'){st.rewardClaimed=false;changed=true;}
             if(typeof st.introShown!=='boolean'){st.introShown=false;changed=true;}
             if(!Array.isArray(st.phaseRewardsClaimed)){st.phaseRewardsClaimed=[];changed=true;}
+            if(!Array.isArray(st.phaseRewardsPending)){st.phaseRewardsPending=[];changed=true;}
         }
         if(saveNow && changed) save();
     }
@@ -33120,7 +33204,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
 
     const SEASONAL_PHASE_REWARD_POOL = [
         {kind:'coins',amount:100,label:'100 Moedas'},
-        {kind:'evo',amount:12,label:'12 Pontos Evo'},
+        {kind:'evo',amount:20,label:'20 Pontos Evo'},
         {kind:'scrap',amount:25,label:'25 Sucatas'},
         {kind:'gems',amount:3,label:'3 Gemas'},
         {kind:'coins',amount:250,label:'250 Moedas'}
@@ -33128,16 +33212,16 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
     function grantSeasonalPhaseMilestoneReward(st, phase){
         if(!st || phase%2!==0) return null;
         if(!Array.isArray(st.phaseRewardsClaimed)) st.phaseRewardsClaimed=[];
+        if(!Array.isArray(st.phaseRewardsPending)) st.phaseRewardsPending=[];
         if(st.phaseRewardsClaimed.includes(phase)) return null;
         const rewardIndex=(Math.floor(phase/2)-1)%SEASONAL_PHASE_REWARD_POOL.length;
         const reward=SEASONAL_PHASE_REWARD_POOL[rewardIndex];
         const amount=Math.max(0,Math.floor(Number(reward.amount)||0));
-        if(reward.kind==='coins') pd.coins=(Number(pd.coins)||0)+amount;
-        else if(reward.kind==='evo') pd.evo=(Number(pd.evo)||0)+amount;
-        else if(reward.kind==='scrap') pd.sucatas=(Number(pd.sucatas)||0)+amount;
-        else if(reward.kind==='gems') pd.gems=(Number(pd.gems)||0)+amount;
+        const earned={...reward,amount,phase};
+        // A recompensa é desbloqueada na fase par e fica pendente até o resgate ao sair.
+        st.phaseRewardsPending.push(earned);
         st.phaseRewardsClaimed.push(phase);
-        return {...reward,phase};
+        return earned;
     }
 
     function finishSeasonalQuestPhase(){
@@ -33162,7 +33246,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
         document.getElementById('seasonal-victory-phase').textContent=`FASE ${completedPhase}/${q.phases} CONCLUÍDA`;
         document.getElementById('seasonal-victory-waves').textContent=`Waves Sobrevividas: ${completedWave}`;
         const finalRewardText=st.completed ? `Recompensa: ${seasonalRewardLabel(q)}` : `Recompensa final: ${seasonalRewardLabel(q)}`;
-        document.getElementById('seasonal-victory-reward').textContent=miniReward ? `${finalRewardText} • Mini recompensa da fase ${completedPhase}: ${miniReward.label}.` : finalRewardText;
+        document.getElementById('seasonal-victory-reward').textContent=miniReward ? `${finalRewardText} • Mini recompensa da fase ${completedPhase}: ${miniReward.label} (resgate ao sair da missão).` : finalRewardText;
         if(miniReward) updateUI?.();
         const nextBtn=document.getElementById('seasonal-next-btn');
         if(st.completed){
@@ -34732,7 +34816,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
   window.fdSkyClouds=window.fdSkyClouds||[];
   window.fdSkyBolts=window.fdSkyBolts||[];
   window.fdSkyWeatherState=window.fdSkyWeatherState||{type:'sun',wind:windDirs[0],cycle:-1};
-  let skyLastMap=null, skyLastWeather='', skyLightningTimer=3.5, skyFlashTimer=0, skyCloudSeeded=false, skyWallsActive=false, skyWallsObstacleRef=null;
+  let skyLastMap=null, skyLastWeather='', skyLightningTimer=1.1, skyFlashTimer=0, skyCloudSeeded=false, skyWallsActive=false, skyWallsObstacleRef=null;
   function seedSkyClouds(){
     if(skyCloudSeeded)return;skyCloudSeeded=true;window.fdSkyClouds.length=0;
     // Poucas nuvens de fundo, com posição fixa no mundo (nunca relativas ao jogador).
@@ -34743,17 +34827,20 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
       window.fdSkyClouds.push({id:i,x,y,r,vx:7+(i%4)*2,vy:(i%3-1)*1.15,phase:i*1.37,wall:false});
     }
   }
-  function clearSkyWalls(){if(!skyWallsActive){skyWallsObstacleRef=null;return;}if(Array.isArray(obstacles))obstacles=obstacles.filter(o=>!o?.fdSkyCloudWall);for(const cl of window.fdSkyClouds)cl.wall=false;skyWallsActive=false;skyWallsObstacleRef=null;}
+  function clearSkyWalls(){
+    if(Array.isArray(obstacles))obstacles=obstacles.filter(o=>!o?.fdSkyCloudWall);
+    for(const cl of window.fdSkyClouds)cl.wall=false;
+    skyWallsActive=false;skyWallsObstacleRef=null;
+  }
   function syncSkyWalls(wantWalls){
     if(!Array.isArray(obstacles))return;
-    if(!wantWalls){clearSkyWalls();for(const cl of window.fdSkyClouds)cl.wall=false;return;}
-    if(skyWallsActive&&skyWallsObstacleRef===obstacles){for(const cl of window.fdSkyClouds)cl.wall=true;return;}
-    skyWallsActive=false;
-    const current=new Set(obstacles.filter(o=>o?.fdSkyCloudWall).map(o=>o.fdSkyCloudId));
+    if(!wantWalls){if(skyWallsActive||obstacles.some(o=>o?.fdSkyCloudWall))clearSkyWalls();else for(const cl of window.fdSkyClouds)cl.wall=false;return;}
+    const current=new Map(obstacles.filter(o=>o?.fdSkyCloudWall).map(o=>[o.fdSkyCloudId,o]));
     for(const cl of window.fdSkyClouds){
       cl.wall=true;
-      if(current.has(cl.id))continue;
-      obstacles.push({x:cl.x,y:cl.y,r:Math.max(28,cl.r*.58),type:'sky_cloud_wall',isWall:true,fdSkyCloudWall:true,fdSkyCloudId:cl.id});
+      let wall=current.get(cl.id);
+      if(!wall){wall={type:'sky_cloud_wall',isWall:true,fdSkyCloudWall:true,fdSkyCloudId:cl.id};obstacles.push(wall);}
+      wall.x=cl.x;wall.y=cl.y;wall.r=Math.max(30,cl.r*.68);
     }
     skyWallsActive=true;skyWallsObstacleRef=obstacles;
   }
@@ -34774,8 +34861,9 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
   }
   window.fdResetSkyWeatherForRun=function(){
     cachedSkyWaveGroup=-1;cachedSkyWeather=null;skyLastMap=null;skyLastWeather='';
-    skyLightningTimer=3.5;skyFlashTimer=0;
+    skyLightningTimer=1.1;skyFlashTimer=0;
     if(Array.isArray(window.fdSkyBolts))window.fdSkyBolts.length=0;
+    if(Array.isArray(window.dailyLightningStrikes))window.dailyLightningStrikes.length=0;
     clearSkyWalls();
     document.body.classList.remove('fd-sky-weather-wind','fd-sky-weather-rain','fd-sky-weather-storm','fd-sky-flash');
     document.body.dataset.fdSkyWeatherType='';
@@ -34813,7 +34901,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
   function syncSkyMap(){
     const isSky=Number(window.currentMap)===21;
     if(!isSky){
-      if(skyLastMap===21)clearSkyWalls();
+      if(skyLastMap===21){clearSkyWalls();if(Array.isArray(window.dailyLightningStrikes))window.dailyLightningStrikes.length=0;}
       skyLastMap=window.currentMap;document.body.classList.remove('fd-sky-map-active');
       document.body.classList.remove('fd-sky-weather-wind','fd-sky-weather-rain','fd-sky-weather-storm','fd-sky-flash');
       const canvas=document.getElementById('gameCanvas');
@@ -34822,7 +34910,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
     }
     if(skyLastMap!==21){
       cachedSkyWaveGroup=-1;cachedSkyWeather=null;skyLastWeather='';
-      skyLightningTimer=3.5;skyFlashTimer=0;
+      skyLightningTimer=1.1;skyFlashTimer=0;
       if(Array.isArray(window.fdSkyBolts))window.fdSkyBolts.length=0;
       clearSkyWalls();
     }
@@ -34831,8 +34919,8 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
     const changed=state.type!==skyLastWeather||state.cycle!==window.fdSkyWeatherState.cycle;
     window.fdSkyWeatherState=state;
     if(changed){clearSkyWalls();skyLastWeather=state.type;}
-    // Clima algum não congela nem transforma as nuvens decorativas em paredes.
-    for(const cl of window.fdSkyClouds)cl.wall=false;
+    // Chuva e tempestade transformam as nuvens em plataformas sólidas.
+    syncSkyWalls(state.type==='rain'||state.type==='storm');
     updateSkyTablet(state);
     skyLastMap=21;
   }
@@ -34842,29 +34930,32 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
     const st=window.fdSkyWeatherState;
     {
       const windy=st.type==='wind';
+      const cloudsAreWalls=st.type==='rain'||st.type==='storm';
       for(const cl of window.fdSkyClouds){
-        cl.wall=false;
+        cl.wall=cloudsAreWalls;
         const vx=windy ? st.wind.x*25+(Number(cl.vx)||8)*.25 : (Number(cl.vx)||8);
         const vy=windy ? st.wind.y*25+(Number(cl.vy)||0)*.25 : (Number(cl.vy)||0);
         cl.x+=vx*delta;cl.y+=vy*delta;
         if(cl.x>1510)cl.x=-1510;if(cl.x< -1510)cl.x=1510;
         if(cl.y>1510)cl.y=-1510;if(cl.y< -1510)cl.y=1510;
       }
+      if(cloudsAreWalls)syncSkyWalls(true);else if(skyWallsActive)syncSkyWalls(false);
     }
     if(st.type==='storm'){
       skyLightningTimer-=delta;
+      const dailyRainAlreadyActive=!!(window.dailyMissionRun&&window.dailyMissionRun.modifierKey==='rain');
       if(skyLightningTimer<=0){
-        skyLightningTimer=3.0+Math.random()*3.3;
-        const px=Number(player?.x)||0,py=Number(player?.y)||0;
-        const angle=Math.random()*Math.PI*2,dist=70+Math.random()*260,x=px+Math.cos(angle)*dist,y=py+Math.sin(angle)*dist;
-        window.fdSkyBolts.push({x,y,life:.28,maxLife:.28,seed:Math.random()*1000});
-        if(window.fdSkyBolts.length>12)window.fdSkyBolts.splice(0,window.fdSkyBolts.length-12);
-        for(const e of (Array.isArray(enemies)?enemies:[]))if(e&&e.hp>0&&Math.hypot(e.x-x,e.y-y)<42){const dmg=Math.max(8,(Number(e.maxHp)||e.hp)*.09);e.hp-=dmg;safeCall(()=>addFloatingText(e.x,e.y,Math.floor(dmg),'#9fe8ff'));}
-        if(player&&Math.hypot(player.x-x,player.y-y)<34&&!player.isDead&&!(player.shieldTimer>0)){safeCall(()=>dealPlayerDamage(8));}
+        skyLightningTimer=1.05+Math.random()*.55;
+        if(!dailyRainAlreadyActive&&typeof spawnDailyLightning==='function')spawnDailyLightning();
         skyFlashTimer=.12;
       }
-    }else skyLightningTimer=3.5;
-    skyFlashTimer=Math.max(0,skyFlashTimer-delta);
+    }else skyLightningTimer=1.1;
+    if(!window.dailyMissionRun&&Array.isArray(window.dailyLightningStrikes)){
+      for(let i=window.dailyLightningStrikes.length-1;i>=0;i--){
+        const strike=window.dailyLightningStrikes[i];strike.life-=delta;
+        if(strike.life<=0)window.dailyLightningStrikes.splice(i,1);
+      }
+    }
     for(let i=window.fdSkyBolts.length-1;i>=0;i--){window.fdSkyBolts[i].life-=delta;if(window.fdSkyBolts[i].life<=0)window.fdSkyBolts.splice(i,1);}
     const flash=skyFlashTimer>0;if(flash!==document.body.classList.contains('fd-sky-flash'))document.body.classList.toggle('fd-sky-flash',flash);
   };
@@ -34912,7 +35003,7 @@ body > .overlay{left:0 !important;top:0 !important;right:auto !important;bottom:
     if(Number(window.currentMap)!==21||!ctx)return;
     seedSkyClouds();const state=window.fdSkyWeatherState||{type:'sun',wind:windDirs[0]};
     // Poucas nuvens decorativas no mundo: pequenas, contínuas e sem seguir o jogador.
-    for(const cl of window.fdSkyClouds){if(!isWorldVisible(cl.x,cl.y,cl.r*1.7))continue;drawCloud(ctx,cl.x,cl.y,cl.r*.72,.58,false);}
+    for(const cl of window.fdSkyClouds){if(!isWorldVisible(cl.x,cl.y,cl.r*1.7))continue;drawCloud(ctx,cl.x,cl.y,cl.r*.72,.58,!!cl.wall);}
     // Shadows/cloud platforms under player and enemies, with the four requested exceptions.
     const selected=String(pd?.selectedChar||'').toLowerCase();
     // Eólio and Stormy do not use the foot-cloud/platform under their character sprites.
@@ -38693,7 +38784,8 @@ body.fd-sky-map-active.fd-sky-flash #fd-sky-atmosphere{opacity:1!important;backg
               takenMultiplier = Number(safe(function(){ return getEnemyDamageTakenMultiplier(target); }, 1));
               if (!Number.isFinite(takenMultiplier) || takenMultiplier < 0) takenMultiplier = 1;
             }
-            const alienTickDamage = Math.max(0, 2 * takenMultiplier);
+            const alienBaseDamage = Math.max(0, Number(player.baseDmg) || 2) * Math.max(0, Number(player.stats?.dmgMult ?? 1) || 0) * (player.inTotem ? 1.2 : 1) * Math.max(0, Number(player.graffitAtkMult) || 1);
+            const alienTickDamage = alienBaseDamage * takenMultiplier;
             if (alienTickDamage > 0) {
               target.hp -= alienTickDamage;
               target.lastHitSourceChar = 'alien';
@@ -41381,6 +41473,138 @@ window.fdUpdateChipCraftingCountdown=function(){
   if(main && !main.classList.contains('hidden') && !main.dataset.fdMenuBackground && typeof fdApplyRandomMainMenuBackground==='function') fdApplyRandomMainMenuBackground();
 })();
 </script>
+
+<style id="fd-six-fixes-layout">
+/* Title Rush ocupa toda a viewport, sem a moldura estreita do Secret Realm. */
+#overlay-secret-realm.fd-title-rush-fullscreen{padding:0!important;align-items:stretch!important;justify-content:stretch!important;background:rgba(4,8,16,.98)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}
+#overlay-secret-realm.fd-title-rush-fullscreen .secret-realm-shell{width:100vw!important;max-width:none!important;height:100dvh!important;max-height:100dvh!important;min-height:100dvh!important;border:0!important;border-radius:0!important;box-shadow:none!important;}
+#overlay-secret-realm.fd-title-rush-fullscreen .secret-realm-content{width:100%;height:100%;padding:clamp(16px,3vw,40px) clamp(14px,4vw,64px) 36px!important;}
+#overlay-secret-realm.fd-title-rush-fullscreen .title-rush-hero,#overlay-secret-realm.fd-title-rush-fullscreen .title-rush-panel{max-width:min(100%,1240px)!important;}
+#overlay-secret-realm.fd-title-rush-fullscreen .title-rush-milestones,#overlay-secret-realm.fd-title-rush-fullscreen .title-rush-final{max-width:min(100%,1240px)!important;margin-left:auto!important;margin-right:auto!important;}
+/* Tela de resgate das recompensas das missões de lançamento e sazonais. */
+#overlay-seasonal-phase-rewards{position:fixed!important;inset:0!important;z-index:42000!important;padding:16px!important;background:rgba(3,7,16,.94)!important;backdrop-filter:blur(5px)!important;}
+#overlay-seasonal-phase-rewards .fd-phase-rewards-panel{width:min(94vw,760px);max-height:90dvh;overflow:auto;padding:clamp(18px,3vw,32px);border:2px solid rgba(241,196,15,.7);border-radius:24px;background:linear-gradient(160deg,#202b43,#0c1220 76%);box-shadow:0 24px 70px rgba(0,0,0,.65);color:#fff;}
+#overlay-seasonal-phase-rewards h1{margin:0 0 8px!important;font-size:clamp(26px,5vw,40px)!important;color:#f1c40f!important;}
+#overlay-seasonal-phase-rewards .fd-phase-rewards-intro{margin:0 0 18px;color:#dbe4ec;text-align:center;line-height:1.45;}
+#overlay-seasonal-phase-rewards .fd-phase-rewards-list{display:flex;flex-direction:column;gap:9px;max-height:52dvh;overflow:auto;margin:0 0 18px;padding:2px;}
+#overlay-seasonal-phase-rewards .fd-phase-reward-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 14px;border:1px solid rgba(255,255,255,.12);border-radius:14px;background:rgba(255,255,255,.055);}
+#overlay-seasonal-phase-rewards .fd-phase-reward-title{font-weight:900;color:#fff;line-height:1.25;}
+#overlay-seasonal-phase-rewards .fd-phase-reward-meta{margin-top:3px;color:#aebdce;font-size:12px;font-weight:700;}
+#overlay-seasonal-phase-rewards .fd-phase-reward-amount{color:#f1c40f;font-weight:900;font-size:18px;text-align:right;white-space:nowrap;}
+#overlay-seasonal-phase-rewards .fd-phase-rewards-claim{display:flex;width:min(100%,380px);min-height:54px;margin:0 auto;background:#2ecc71;border:3px solid #27ae60!important;color:#102015;}
+@media(max-width:520px){#overlay-seasonal-phase-rewards{padding:10px!important;}#overlay-seasonal-phase-rewards .fd-phase-rewards-panel{width:100%;max-height:94dvh;border-radius:18px;padding:16px 12px;}#overlay-seasonal-phase-rewards .fd-phase-reward-row{padding:10px;gap:8px;}#overlay-seasonal-phase-rewards .fd-phase-reward-amount{font-size:16px;}}
+</style>
+
+<script id="fd-six-fixes-exit-rewards-and-title-rush">
+(function fdSixFixesExitRewardsAndTitleRush(){
+  'use strict';
+  if(window.__FD_SIX_FIXES_EXIT_REWARDS_V1)return;
+  window.__FD_SIX_FIXES_EXIT_REWARDS_V1=true;
+  const getData=()=>window.pd||(typeof pd!=='undefined'?pd:null);
+  const escapeText=value=>typeof window.escapeHtmlText==='function'?window.escapeHtmlText(String(value??'')):String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  const resourceFields={coins:'coins',evo:'evo',scrap:'sucatas',gems:'gems'};
+  const resourceLabels={coins:'Moedas',evo:'Pontos Evo',scrap:'Sucatas',gems:'Gemas'};
+  let exitIntent=null,rewardOverlay=null;
+
+  function getPendingRewards(){
+    const data=getData();
+    if(!data||!data.seasonalQuests||typeof data.seasonalQuests!=='object')return [];
+    const quests=Array.isArray(window.SEASONAL_QUEST_DEFS)?window.SEASONAL_QUEST_DEFS:[];
+    const rows=[];
+    for(const [questId,state] of Object.entries(data.seasonalQuests)){
+      if(!state||!Array.isArray(state.phaseRewardsPending))continue;
+      const quest=quests.find(q=>q&&String(q.id)===String(questId));
+      for(const reward of state.phaseRewardsPending){
+        if(!reward||!resourceFields[reward.kind])continue;
+        const amount=Math.max(0,Math.floor(Number(reward.amount)||0));
+        if(!amount)continue;
+        rows.push({questTitle:quest?.title||'Missão',phase:Math.max(0,Math.floor(Number(reward.phase)||0)),kind:reward.kind,amount,label:reward.label||`${amount} ${resourceLabels[reward.kind]}`});
+      }
+    }
+    return rows;
+  }
+
+  function ensureOverlay(){
+    if(rewardOverlay&&rewardOverlay.isConnected)return rewardOverlay;
+    rewardOverlay=document.getElementById('overlay-seasonal-phase-rewards');
+    if(!rewardOverlay){
+      rewardOverlay=document.createElement('div');
+      rewardOverlay.id='overlay-seasonal-phase-rewards';
+      rewardOverlay.className='overlay hidden';
+      rewardOverlay.innerHTML='<section class="fd-phase-rewards-panel" role="dialog" aria-modal="true" aria-labelledby="fd-phase-rewards-title"><h1 id="fd-phase-rewards-title">RECOMPENSAS PARA RESGATAR</h1><p class="fd-phase-rewards-intro" id="fd-phase-rewards-intro"></p><div class="fd-phase-rewards-list" id="fd-phase-rewards-list"></div><button type="button" class="fd-phase-rewards-claim" onclick="fdClaimSeasonalPhaseRewards()">OBTER RECOMPENSAS</button></section>';
+      document.body.appendChild(rewardOverlay);
+    }
+    return rewardOverlay;
+  }
+
+  function showPendingRewards(destination,callback,args){
+    const rows=getPendingRewards();
+    if(!rows.length)return false;
+    exitIntent={destination,callback,args:Array.isArray(args)?args:[]};
+    const overlay=ensureOverlay();
+    document.getElementById('overlay-gameover')?.classList.add('hidden');
+    document.getElementById('overlay-seasonal-victory')?.classList.add('hidden');
+    const list=overlay.querySelector('#fd-phase-rewards-list');
+    const intro=overlay.querySelector('#fd-phase-rewards-intro');
+    if(intro)intro.textContent=`Você liberou ${rows.length} ${rows.length===1?'recompensa':'recompensas'} por concluir fases pares. Resgate tudo abaixo para receber os recursos.`;
+    if(list)list.innerHTML=rows.map(row=>`<div class="fd-phase-reward-row"><div><div class="fd-phase-reward-title">${escapeText(row.label)}</div><div class="fd-phase-reward-meta">${escapeText(row.questTitle)} · Fase ${row.phase}</div></div><div class="fd-phase-reward-amount">+${row.amount}</div></div>`).join('');
+    overlay.classList.remove('hidden');
+    try{window.fitOverlayToViewport?.(overlay);}catch(_){ }
+    return true;
+  }
+
+  window.fdClaimSeasonalPhaseRewards=function(){
+    const data=getData();
+    if(!data)return;
+    const rows=getPendingRewards();
+    if(!rows.length){rewardOverlay?.classList.add('hidden');return;}
+    const totals={coins:0,evo:0,scrap:0,gems:0};
+    for(const row of rows)totals[row.kind]+=row.amount;
+    for(const [kind,field] of Object.entries(resourceFields))if(totals[kind]>0)data[field]=(Number(data[field])||0)+totals[kind];
+    for(const state of Object.values(data.seasonalQuests||{}))if(state&&Array.isArray(state.phaseRewardsPending))state.phaseRewardsPending=[];
+    try{window.save?.();}catch(_){ }
+    try{window.updateUI?.();}catch(_){ }
+    rewardOverlay?.classList.add('hidden');
+    const intent=exitIntent;exitIntent=null;
+    if(intent?.callback)intent.callback.apply(window,intent.args||[]);
+  };
+
+  const baseReturnToMenu=window.returnToMenu||(typeof returnToMenu==='function'?returnToMenu:null);
+  if(typeof baseReturnToMenu==='function'){
+    const wrappedReturnToMenu=function(){
+      if(showPendingRewards('menu',baseReturnToMenu,Array.from(arguments)))return false;
+      return baseReturnToMenu.apply(this,arguments);
+    };
+    window.returnToMenu=wrappedReturnToMenu;
+    try{returnToMenu=wrappedReturnToMenu;}catch(_){ }
+  }
+
+  const baseSeasonalReturn=window.seasonalReturnToEvents;
+  if(typeof baseSeasonalReturn==='function'){
+    window.seasonalReturnToEvents=function(){
+      if(showPendingRewards('events',baseSeasonalReturn,Array.from(arguments)))return false;
+      return baseSeasonalReturn.apply(this,arguments);
+    };
+  }
+
+  const titleOverlay=document.getElementById('overlay-secret-realm');
+  if(typeof window.renderTitleRushRealm==='function'){
+    const baseRender=window.renderTitleRushRealm;
+    window.renderTitleRushRealm=function(){
+      titleOverlay?.classList.add('fd-title-rush-fullscreen');
+      return baseRender.apply(this,arguments);
+    };
+  }
+  if(typeof window.closeSecretRealm==='function'){
+    const baseClose=window.closeSecretRealm;
+    window.closeSecretRealm=function(){
+      titleOverlay?.classList.remove('fd-title-rush-fullscreen');
+      return baseClose.apply(this,arguments);
+    };
+  }
+})();
+</script>
+
 </body>
 </html>
 
