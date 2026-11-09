@@ -4455,6 +4455,14 @@ function getRandomGlitchMorphId(excludeIds = []) {
     return pool[Math.floor(Math.random() * pool.length)];
 }
 
+function getFDCharacterDamageByLevel(charId, charDef, level) {
+    const safeLevel = Math.max(1, Math.floor(Number(level) || 1));
+    const baseDamage = Math.max(1, Number(charDef?.dmg) || 1);
+    // Alien ganha exatamente +1 de dano por nível, como a progressão do Bold.
+    if (String(charId || '').toLowerCase() === 'alien') return baseDamage + (safeLevel - 1);
+    return baseDamage * (1 + Math.max(0, safeLevel - 1) * 0.15);
+}
+
 function getCharacterLoadout(charId, levelOverride = null) {
     const charDef = CHARACTERS?.[charId];
     if (!charDef) return null;
@@ -4466,7 +4474,7 @@ function getCharacterLoadout(charId, levelOverride = null) {
         charDef,
         level,
         baseHp: Math.max(1, Math.round(charDef.hp * levelMult)),
-        baseDmg: Math.max(1, Math.round(charDef.dmg * levelMult)),
+        baseDmg: Math.max(1, Math.round(getFDCharacterDamageByLevel(charId, charDef, level))),
         baseSpeed: Math.max(0.6, +(charDef.speed * speedMult).toFixed(2)),
         baseFireRate: Math.max(1, Math.round(charDef.fireRate * fireRateMult)),
         baseRange: Math.max(80, Math.round(charDef.range)),
@@ -9682,6 +9690,9 @@ function showCharDetail(id) {
             displayHp = 145 / statMult; 
             displayDmg = c.dmg * 1.2; 
         }
+        // Mantém o multiplicador geral dos demais atributos, mas mostra para Alien
+        // o ganho linear real: dano base +1 a cada nível (sem multiplicar novamente).
+        if(id === 'alien' && owned) displayDmg = getFDCharacterDamageByLevel(id, c, lvl) / statMult;
 
         let bonusHp = 0, bonusDmg = 0;
         if(owned && pd.chars[id].chips) {
@@ -12882,7 +12893,7 @@ function startRunAfterShop(options = {}) {
     const lvl = savedLevel + dailyBuffLevel;
     const statMult = 1 + (lvl - 1) * 0.15; 
     let initialBaseHp = charDef.hp * statMult;
-    let initialBaseDmg = charDef.dmg * statMult;
+    let initialBaseDmg = getFDCharacterDamageByLevel(pd.selectedChar, charDef, lvl);
     
     player = {
         x: 0, y: 0, r: (pd.selectedChar === 'hank' || pd.selectedChar === 'vingathron' || pd.selectedChar === 'snapdragon' || pd.selectedChar === 'yeti' || pd.selectedChar === 'glace') ? 20 : ((pd.selectedChar === 'shiv' || pd.selectedChar === 'zippi') ? 10 : ((pd.selectedChar === 'kaisen' || pd.selectedChar === 'booboo' || pd.selectedChar === 'yoyo') ? 13 : (pd.selectedChar === 'eel' ? 15 : 15))), baseHp: initialBaseHp, hp: initialBaseHp, baseSpeed: charDef.speed, baseDmg: initialBaseDmg,
@@ -13785,6 +13796,29 @@ let sandboxOriginalMap = 0;
 let sandboxOriginalHardcore = false;
 let sandboxOriginalUHC = false;
 let sandboxSettings = { difficulty: 'classic', o2: false, fractures: false, meteors: false, radioactiveClouds: false, lightning: false, sandWhirls: false, limitedVision: false, blizzards: false, skating: false, friendlyClouds: false, shooting: true };
+const SANDBOX_PREFS_STORAGE_KEY = 'fdSandboxPreferencesV1';
+function sandboxLoadPersistentPreferences() {
+    try {
+        const raw = safeStorageGet(SANDBOX_PREFS_STORAGE_KEY);
+        if (!raw) return null;
+        const data = JSON.parse(raw);
+        if (!data || typeof data !== 'object') return null;
+        return {
+            difficulty: ['classic','hardcore','uhc'].includes(data.difficulty) ? data.difficulty : null,
+            character: typeof data.character === 'string' && CHARACTERS?.[data.character] ? data.character : null
+        };
+    } catch (err) {
+        console.warn('Preferências do Sandbox inválidas:', err);
+        return null;
+    }
+}
+function sandboxPersistPreferences() {
+    const data = {
+        difficulty: ['classic','hardcore','uhc'].includes(sandboxSettings?.difficulty) ? sandboxSettings.difficulty : 'classic',
+        character: CHARACTERS?.[pd?.selectedChar] ? pd.selectedChar : 'strike'
+    };
+    return safeStorageSet(SANDBOX_PREFS_STORAGE_KEY, JSON.stringify(data));
+}
 let sandboxPetDisabled = false;
 let sandboxHasSavedWorld = false;
 let sandboxSavedWorld = null;
@@ -14140,7 +14174,7 @@ function sandboxBuildBaselinePlayer(id) {
     player.x = oldX; player.y = oldY;
     player.r = getCharacterRadiusById(id);
     player.baseHp = Math.max(1, def.hp * mult);
-    player.baseDmg = Math.max(1, def.dmg * mult);
+    player.baseDmg = Math.max(1, getFDCharacterDamageByLevel(id, def, lvl));
     player.baseSpeed = Number(def.speed) || 3;
     player.baseFireRate = Number(def.fireRate) || 60;
     player.baseRange = Number(def.range) || 250;
@@ -14317,6 +14351,15 @@ function activateSandbox() {
     sandboxOriginalUHC = !!pd?.settings?.ultraHardcore;
     sandboxMeteorTimer = 0;
     sandboxSettings.difficulty = pd.settings?.ultraHardcore ? 'uhc' : (window.isHardcoreMode ? 'hardcore' : 'classic');
+    // Preferências do Sandbox são independentes do save da conta. Assim, personagem
+    // e dificuldade continuam selecionados mesmo após sair do jogo ou recarregar a página.
+    const savedSandboxPreferences = sandboxLoadPersistentPreferences();
+    if (savedSandboxPreferences?.difficulty) sandboxSettings.difficulty = savedSandboxPreferences.difficulty;
+    if (savedSandboxPreferences?.character && CHARACTERS?.[savedSandboxPreferences.character]) {
+        pd.selectedChar = savedSandboxPreferences.character;
+    }
+    window.isHardcoreMode = sandboxSettings.difficulty !== 'classic';
+    if (pd?.settings) pd.settings.ultraHardcore = sandboxSettings.difficulty === 'uhc';
     if (!sandboxSavePosition) { sandboxHasSavedWorld = false; sandboxSavedWorld = null; sandboxPersistentEntities = []; sandboxPlacedElements = []; }
     const restoringSavedWorld = sandboxHasSavedWorld && sandboxSavePosition && !!sandboxSavedWorld;
     if (!restoringSavedWorld) {
@@ -14356,6 +14399,7 @@ function activateSandbox() {
     player.hp = player.baseHp;
     player.isDead = false;
     player.o2 = 100; player.o2Max = 100;
+    sandboxPersistPreferences();
     isPaused = true;
     lastTime = performance.now();
     sandboxSetHud(true);
@@ -14368,6 +14412,8 @@ function deactivateSandbox() {
     if (!sandboxMode) { closeSandboxMenu(); return; }
     const restoreMap = Number.isInteger(sandboxOriginalMap) ? sandboxOriginalMap : 0;
     const restoreId = sandboxOriginalSelection || pd?.selectedChar;
+    // Grava as escolhas antes de restaurar o personagem/dificuldade originais da conta.
+    sandboxPersistPreferences();
     sandboxSaveCurrentWorld();
     const liveSandboxFractures = Array.isArray(window.fractures) ? window.fractures.filter(f => f?.sandbox) : [];
     window.fdPendingRunFractures = liveSandboxFractures.map(f => {
@@ -14743,6 +14789,7 @@ function setSandboxDifficulty(mode) {
     sandboxSettings.difficulty = mode;
     window.isHardcoreMode = mode !== 'classic';
     pd.settings.ultraHardcore = mode === 'uhc';
+    sandboxPersistPreferences();
     updateSandboxControlsUI();
 }
 function adjustSandboxMapBorder(delta){ if(!sandboxMode) return; const n=Math.max(300,Math.min(3000,sandboxMapHalfSize + (Number(delta)||0))); sandboxMapHalfSize=n; if(player){ player.x=Math.max(-n,Math.min(n,player.x)); player.y=Math.max(-n,Math.min(n,player.y)); } updateSandboxControlsUI(); notify(`Borda do mapa: ${n}`); }
@@ -15060,6 +15107,7 @@ function sandboxSelectCharacter(id) {
     // Nenhuma entrada é criada em pd.chars para não transformar o teste em posse real.
     const level = 10;
     pd.selectedChar = id;
+    sandboxPersistPreferences();
     let loadout = null;
     try { loadout = applyCharacterLoadout(id, level, { keepHpRatio: false }); } catch (_) { loadout = null; }
     if (!loadout) sandboxBuildBaselinePlayer(id);
